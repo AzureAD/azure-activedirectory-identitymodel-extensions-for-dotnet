@@ -119,9 +119,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Determines if the span is a well formed JSON Web Token (JWT). See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/>.
+        /// Determines if the <see cref="ReadOnlyMemory{T}"/> is a well formed JSON Web Token (JWT). See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/>.
         /// </summary>
-        /// <param name="token">Span that should represent a valid JWT.</param>
+        /// <param name="token"><see cref="ReadOnlyMemory{T}"/> that should represent a valid JWT.</param>
         /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching:
         /// <para>JWS: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
         /// <para>JWE: (dir): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             // Count the number of segments, which is the number of periods + 1. We can stop when we've encountered
             // more segments than the maximum we know how to handle.
-            int segmentCount = CountJwtTokenPart(token.Span, JwtConstants.MaxJwtSegmentCount + 1);
+            int segmentCount = JwtTokenUtilities.CountJwtTokenPart(token.Span, JwtConstants.MaxJwtSegmentCount + 1);
 
             switch (segmentCount)
             {
@@ -168,32 +168,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 default:
                     LogHelper.LogInformation(LogMessages.IDX14107);
                     return false;
-            }
-
-            static int CountJwtTokenPart(in ReadOnlySpan<char> token, int maxCount)
-            {
-                int count = 1;
-                int index = 0;
-                ReadOnlySpan<char> localToken = token;
-                while (index < localToken.Length)
-                {
-                    int dotIndex = localToken.IndexOf('.');
-                    if (dotIndex < 0)
-                    {
-                        break;
-                    }
-
-                    count++;
-                    index = dotIndex + 1;
-                    if (count == maxCount)
-                    {
-                        break;
-                    }
-
-                    localToken = localToken[index..];
-                }
-
-                return count;
             }
         }
 

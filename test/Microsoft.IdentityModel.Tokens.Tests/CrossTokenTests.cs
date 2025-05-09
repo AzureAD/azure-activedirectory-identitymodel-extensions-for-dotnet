@@ -89,14 +89,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var tokenHandler = theoryData.TokenHandler;
 
-                if (tokenHandler is SecurityTokenHandler securityTokenHandler)
+                if (tokenHandler is JwtSecurityTokenHandler jwtSecurityTokenHandler)
+                {
+                    bool canReadToken = theoryData.UseMemoryOverload
+                        ? jwtSecurityTokenHandler.CanReadToken(theoryData.Token.AsMemory())
+                        : jwtSecurityTokenHandler.CanReadToken(theoryData.Token);
+                    if (canReadToken != theoryData.CanReadToken)
+                        context.AddDiff("jwtSecurityTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken");
+                }
+                else if (tokenHandler is SecurityTokenHandler securityTokenHandler)
                 {
                     if (securityTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken)
                         context.AddDiff("securityTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken");
                 }
                 else if (tokenHandler is JsonWebTokenHandler jsonWebTokenHandler)
                 {
-                    if (jsonWebTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken)
+                    bool canReadToken = theoryData.UseMemoryOverload
+                        ? jsonWebTokenHandler.CanReadToken(theoryData.Token.AsMemory())
+                        : jsonWebTokenHandler.CanReadToken(theoryData.Token);
+                    if (canReadToken != theoryData.CanReadToken)
                         context.AddDiff("jsonWebTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken");
                 }
                 else
@@ -129,7 +140,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Token = Default.AsymmetricJwt,
                         CanReadToken = true,
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        TestId = "ValidJwt"
+                        TestId = "ValidJwt",
+                        UseMemoryOverload = false
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        First = true,
+                        TokenHandler = new JwtSecurityTokenHandler(),
+                        Token = Default.AsymmetricJwt,
+                        CanReadToken = true,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "ValidJwt",
+                        UseMemoryOverload = true
                     },
                     new TokenHandlerTheoryData
                     {
@@ -137,7 +159,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Token = largeToken,
                         CanReadToken = false,
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        TestId = "TokenTooLargeJwt"
+                        TestId = "TokenTooLargeJwt",
+                        UseMemoryOverload = false
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new JwtSecurityTokenHandler(),
+                        Token = largeToken,
+                        CanReadToken = false,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "TokenTooLargeJwt",
+                        UseMemoryOverload = true
                     },
                     new TokenHandlerTheoryData
                     {
@@ -145,7 +177,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Token = Default.AsymmetricJwt,
                         CanReadToken = true,
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        TestId = "ValidJsonWebToken"
+                        TestId = "ValidJsonWebToken",
+                        UseMemoryOverload = false
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new JsonWebTokenHandler(),
+                        Token = Default.AsymmetricJwt,
+                        CanReadToken = true,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "ValidJsonWebToken",
+                        UseMemoryOverload = true
                     },
                     new TokenHandlerTheoryData
                     {
@@ -153,7 +195,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Token = largeToken,
                         CanReadToken = false,
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        TestId = "TokenTooLargeJsonWebToken"
+                        TestId = "TokenTooLargeJsonWebToken",
+                        UseMemoryOverload = false
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new JsonWebTokenHandler(),
+                        Token = largeToken,
+                        CanReadToken = false,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "TokenTooLargeJsonWebToken",
+                        UseMemoryOverload = true
                     },
                     new TokenHandlerTheoryData
                     {
@@ -161,7 +213,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Token = ReferenceTokens.SamlToken_Valid,
                         CanReadToken = true,
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        TestId = "ValidSaml1"
+                        TestId = "ValidSaml1",
+                        UseMemoryOverload = false
                     },
                     new TokenHandlerTheoryData
                     {
@@ -169,7 +222,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Token = largeToken,
                         CanReadToken = false,
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        TestId = "TokenTooLargeSaml1"
+                        TestId = "TokenTooLargeSaml1",
+                        UseMemoryOverload = false
                     },
                     new TokenHandlerTheoryData
                     {
@@ -177,7 +231,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Token = ReferenceTokens.Saml2Token_Valid,
                         CanReadToken = true,
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        TestId = "ValidSaml2"
+                        TestId = "ValidSaml2",
+                        UseMemoryOverload = false
                     },
                     new TokenHandlerTheoryData
                     {
@@ -185,7 +240,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Token = largeToken,
                         CanReadToken = false,
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        TestId = "TokenTooLargeSaml2"
+                        TestId = "TokenTooLargeSaml2",
+                        UseMemoryOverload = false
                     },
                 };
             }
@@ -216,6 +272,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public TokenHandler TokenHandler { get; set; }
 
         public string Token { get; set; }
+        public bool UseMemoryOverload { get; set; }
     }
 }
 

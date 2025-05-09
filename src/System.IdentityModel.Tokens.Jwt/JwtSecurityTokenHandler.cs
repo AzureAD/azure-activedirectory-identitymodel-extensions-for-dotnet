@@ -264,6 +264,59 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Determines if the <see cref="ReadOnlyMemory{T}"/> is a well formed Json Web Token (JWT).
+        /// <para>See: https://datatracker.ietf.org/doc/html/rfc7519 </para>
+        /// </summary>
+        /// <param name="token"><see cref="ReadOnlyMemory{T}"/> that should represent a valid JWT.</param>
+        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching one of:
+        /// <para>JWS: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE: (dir): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE: (wrappedkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
+        /// </remarks>
+        /// <returns>
+        /// <para>'false' if the token is null or whitespace.</para>
+        /// <para>'false' if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
+        /// <para>'true' if the token is in JSON compact serialization format.</para>
+        /// </returns>
+        public virtual bool CanReadToken(in ReadOnlyMemory<char> token)
+        {
+            if (token.IsEmpty || token.Span.IsWhiteSpace())
+                return false;
+
+            if (token.Length > MaximumTokenSizeInBytes)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes));
+
+                return false;
+            }
+
+            // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
+            // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
+            // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
+            int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token.Span, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenPartCount == JwtConstants.JwsSegmentCount)
+            {
+#if NET8_0_OR_GREATER
+                return JwtTokenUtilities.RegexJws.IsMatch(token.Span);
+#else
+                return JwtTokenUtilities.RegexJws.IsMatch(token.ToString());
+#endif
+            }
+            else if (tokenPartCount == JwtConstants.JweSegmentCount)
+            {
+#if NET8_0_OR_GREATER
+                return JwtTokenUtilities.RegexJwe.IsMatch(token);
+#else
+                return JwtTokenUtilities.RegexJwe.IsMatch(token.ToString());
+#endif
+            }
+
+            LogHelper.LogInformation(LogMessages.IDX12720);
+            return false;
+        }
+
+        /// <summary>
         /// Determines if the string is a well formed Json Web Token (JWT).
         /// <para>See: https://datatracker.ietf.org/doc/html/rfc7519 </para>
         /// </summary>
@@ -283,6 +336,9 @@ namespace System.IdentityModel.Tokens.Jwt
             if (string.IsNullOrWhiteSpace(token))
                 return false;
 
+#if NET8_0_OR_GREATER
+            return CanReadToken(token.AsMemory());
+#else
             if (token.Length > MaximumTokenSizeInBytes)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -294,7 +350,7 @@ namespace System.IdentityModel.Tokens.Jwt
             // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
             // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
             // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
-            int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token, JwtConstants.MaxJwtSegmentCount + 1);
+            int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token.AsSpan(), JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenPartCount == JwtConstants.JwsSegmentCount)
             {
                 return JwtTokenUtilities.RegexJws.IsMatch(token);
@@ -306,6 +362,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             LogHelper.LogInformation(LogMessages.IDX12720);
             return false;
+#endif
         }
 
         /// <summary>
@@ -823,7 +880,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
-            int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token, JwtConstants.MaxJwtSegmentCount + 1);
+            int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token.AsSpan(), JwtConstants.MaxJwtSegmentCount + 1);
 
             if (tokenPartCount != JwtConstants.JwsSegmentCount && tokenPartCount != JwtConstants.JweSegmentCount)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX12741));

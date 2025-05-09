@@ -585,24 +585,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">The JWT token.</param>
         /// <param name="maxCount">The maximum number of segments to count up to.</param>
         /// <returns>The number of segments up to <paramref name="maxCount"/>.</returns>
-        internal static int CountJwtTokenPart(string token, int maxCount)
+        internal static int CountJwtTokenPart(in ReadOnlySpan<char> token, int maxCount)
         {
-            var count = 1;
-            var index = 0;
-            while (index < token.Length)
+            int count = 1;
+            int index = 0;
+            ReadOnlySpan<char> localToken = token;
+            while (index < localToken.Length)
             {
-                var dotIndex = token.IndexOf('.', index);
+                int dotIndex = localToken.IndexOf('.');
                 if (dotIndex < 0)
                 {
                     break;
                 }
+
                 count++;
                 index = dotIndex + 1;
                 if (count == maxCount)
                 {
                     break;
                 }
+
+                localToken = localToken[index..];
             }
+
             return count;
         }
 
