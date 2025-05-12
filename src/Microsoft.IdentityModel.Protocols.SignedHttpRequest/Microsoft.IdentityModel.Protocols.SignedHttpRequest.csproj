@@ -32,8 +32,12 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework) == 'net6.0' or $(TargetFramework) == 'net8.0'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp' And '$(TargetFramework)' != 'net9.0' ">
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJson)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
