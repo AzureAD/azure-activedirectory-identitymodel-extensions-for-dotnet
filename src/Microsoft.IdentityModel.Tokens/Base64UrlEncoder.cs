@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(inArray.Length))));
 #pragma warning restore CA2208 // Instantiate argument exceptions correctly
 
-#if NET9_0
+#if NET9_0_OR_GREATER
             return Base64Url.EncodeToString(inArray.AsSpan().Slice(offset, length));
 #else
             char[] destination = new char[(inArray.Length + 2) / 3 * 4];
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
         }
 
-#if NET9_0
+#if NET9_0_OR_GREATER
         /// <summary>
         /// Populates a <see cref="Span{T}"/> with the base64url encoded representation of a <see cref="ReadOnlySpan{T}"/> of bytes.
         /// </summary>
@@ -197,7 +197,7 @@ namespace Microsoft.IdentityModel.Tokens
         [SkipLocalsInit]
 #endif
 
-#if NET9_0
+#if NET9_0_OR_GREATER
         internal static byte[] Decode(ReadOnlySpan<char> strSpan)
         {
             int upperBound = Base64Url.GetMaxDecodedLength(strSpan.Length);
@@ -242,7 +242,7 @@ namespace Microsoft.IdentityModel.Tokens
         [SkipLocalsInit]
 #endif
 
-#if NET9_0
+#if NET9_0_OR_GREATER
         internal static int Decode(ReadOnlySpan<char> strSpan, Span<byte> output)
         {
             OperationStatus status = Base64Url.DecodeFromChars(strSpan, output, out _, out int bytesWritten);
@@ -276,7 +276,7 @@ namespace Microsoft.IdentityModel.Tokens
 
 #endif
 
-#if NET9_0
+#if NET9_0_OR_GREATER
         [SkipLocalsInit]
         private static int Decode(ReadOnlySpan<char> strSpan, Span<byte> output, int decodedLength)
         {
