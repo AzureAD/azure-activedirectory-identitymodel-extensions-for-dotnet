@@ -22,9 +22,9 @@ See [Long Term Support policy](./supportPolicy.md) for details.
 
 | Major Version | Currently Supported Version | Status |
 | --------------|--------------|--------|
-| 8.x           | 8.0.1 <= [![Nuget](https://img.shields.io/nuget/v/Microsoft.IdentityModel.JsonWebTokens?label=Latest%20release)](https://www.nuget.org/packages/Microsoft.IdentityModel.JsonWebTokens/)        | Active (Current) - Tied to .NET 9 (STS) & 10 (LTS) ~ Nov, 2028|
-| 7.x           | 7.7.1        | Supported (LTS) through .NET 8 LTS lifetime Nov 10, 2026. ⚠️Versions `< 7.7.1` not supported.|
-| 5.x           | 5.7.0        | Supported (LTS), tied to the Microsoft.Owin.Security.JWT 4.2.2 lifetime. ⚠️Versions `< 5.7.0` not supported. |
+| 8.x           | from 8.0.1 to [![Nuget](https://img.shields.io/nuget/v/Microsoft.IdentityModel.JsonWebTokens?label=Latest%20release)](https://www.nuget.org/packages/Microsoft.IdentityModel.JsonWebTokens/)        | Active (Current) - Tied to .NET 9 (STS) & 10 (LTS) ~ Nov, 2028|
+| 7.x           | 7.7.1        | Supported (LTS) through .NET 8 LTS lifetime Nov 10, 2026.<br/>⚠️Versions `< 7.7.1` not supported.|
+| 5.x           | 5.7.0        | Supported (LTS), tied to the Microsoft.Owin.Security.JWT 4.2.2 lifetime.<br/>⚠️Versions `< 5.7.0` not supported. |
 
 ## IdentityModel 8.x
 
