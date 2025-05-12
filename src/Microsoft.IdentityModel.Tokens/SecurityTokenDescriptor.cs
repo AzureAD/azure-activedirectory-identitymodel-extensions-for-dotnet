@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private static string s_actoryClaimTypeName = "act";
+        private static string s_actoryClaimTypeName = "actort";
         /// <summary>
         /// Gets or sets the claim type name for the actor claim.
         /// Permissible values are 'act' or 'actort'.
