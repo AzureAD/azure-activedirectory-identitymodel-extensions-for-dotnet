@@ -280,40 +280,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </returns>
         public virtual bool CanReadToken(in ReadOnlyMemory<char> token)
         {
-            if (token.IsEmpty || token.Span.IsWhiteSpace())
-                return false;
-
-            if (token.Length > MaximumTokenSizeInBytes)
-            {
-                if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes));
-
-                return false;
-            }
-
-            // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
-            // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
-            // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
-            int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token.Span, JwtConstants.MaxJwtSegmentCount + 1);
-            if (tokenPartCount == JwtConstants.JwsSegmentCount)
-            {
-#if NET8_0_OR_GREATER
-                return JwtTokenUtilities.RegexJws.IsMatch(token.Span);
-#else
-                return JwtTokenUtilities.RegexJws.IsMatch(token.ToString());
-#endif
-            }
-            else if (tokenPartCount == JwtConstants.JweSegmentCount)
-            {
-#if NET8_0_OR_GREATER
-                return JwtTokenUtilities.RegexJwe.IsMatch(token);
-#else
-                return JwtTokenUtilities.RegexJwe.IsMatch(token.ToString());
-#endif
-            }
-
-            LogHelper.LogInformation(LogMessages.IDX12720);
-            return false;
+            return JwtTokenUtilities.CanReadToken(token, MaximumTokenSizeInBytes);
         }
 
         /// <summary>

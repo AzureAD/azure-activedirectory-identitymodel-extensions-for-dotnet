@@ -134,41 +134,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </returns>
         public virtual bool CanReadToken(in ReadOnlyMemory<char> token)
         {
-            if (token.IsEmpty || token.Span.IsWhiteSpace())
-                return false;
-
-            if (token.Length > MaximumTokenSizeInBytes)
-            {
-                if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes));
-
-                return false;
-            }
-
-            // Count the number of segments, which is the number of periods + 1. We can stop when we've encountered
-            // more segments than the maximum we know how to handle.
-            int segmentCount = JwtTokenUtilities.CountJwtTokenPart(token.Span, JwtConstants.MaxJwtSegmentCount + 1);
-
-            switch (segmentCount)
-            {
-                case JwtConstants.JwsSegmentCount:
-#if NET8_0_OR_GREATER
-                    return JwtTokenUtilities.RegexJws.IsMatch(token.Span);
-#else
-                    return JwtTokenUtilities.RegexJws.IsMatch(token.ToString());
-#endif
-
-                case JwtConstants.JweSegmentCount:
-#if NET8_0_OR_GREATER
-                    return JwtTokenUtilities.RegexJwe.IsMatch(token.Span);
-#else
-                    return JwtTokenUtilities.RegexJwe.IsMatch(token.ToString());
-#endif
-
-                default:
-                    LogHelper.LogInformation(LogMessages.IDX14107);
-                    return false;
-            }
+            return JwtTokenUtilities.CanReadToken(token, MaximumTokenSizeInBytes);
         }
 
         /// <summary>

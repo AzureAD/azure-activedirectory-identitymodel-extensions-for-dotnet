@@ -580,12 +580,57 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Determines if the token can be read.
+        /// </summary>
+        /// <param name="token">The token to check.</param>
+        /// <param name="maximumTokenSizeInBytes">Maximum allowed size of the token, method will return false if exceeded.</param>
+        internal static bool CanReadToken(in ReadOnlyMemory<char> token, in int maximumTokenSizeInBytes)
+        {
+            if (token.IsEmpty || token.Span.IsWhiteSpace())
+                return false;
+
+            if (token.Length > maximumTokenSizeInBytes)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(maximumTokenSizeInBytes));
+
+                return false;
+            }
+
+            // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
+            // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
+            // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
+            int segmentCount = CountJwtTokenPart(token.Span, JwtConstants.MaxJwtSegmentCount + 1);
+
+            switch (segmentCount)
+            {
+                case JwtConstants.JwsSegmentCount:
+#if NET8_0_OR_GREATER
+                    return JwtTokenUtilities.RegexJws.IsMatch(token.Span);
+#else
+                    return JwtTokenUtilities.RegexJws.IsMatch(token.ToString());
+#endif
+
+                case JwtConstants.JweSegmentCount:
+#if NET8_0_OR_GREATER
+                    return JwtTokenUtilities.RegexJwe.IsMatch(token.Span);
+#else
+                    return JwtTokenUtilities.RegexJwe.IsMatch(token.ToString());
+#endif
+
+                default:
+                    LogHelper.LogInformation(LogMessages.IDX14107);
+                    return false;
+            }
+        }
+
+        /// <summary>
         /// Counts the number of JWT token segments.
         /// </summary>
         /// <param name="token">The JWT token.</param>
         /// <param name="maxCount">The maximum number of segments to count up to.</param>
         /// <returns>The number of segments up to <paramref name="maxCount"/>.</returns>
-        internal static int CountJwtTokenPart(in ReadOnlySpan<char> token, int maxCount)
+        private static int CountJwtTokenPart(in ReadOnlySpan<char> token, int maxCount)
         {
             int count = 1;
             int index = 0;
