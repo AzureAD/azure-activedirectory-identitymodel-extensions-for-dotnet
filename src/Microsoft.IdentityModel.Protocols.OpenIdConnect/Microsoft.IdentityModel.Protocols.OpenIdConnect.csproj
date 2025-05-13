@@ -28,12 +28,8 @@
     <ProjectReference Include="..\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp' And '$(TargetFramework)' != 'net9.0' ">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJson)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
