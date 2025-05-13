@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -15,6 +16,8 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenDescriptor
     {
         private List<string> _audiences;
+        private string _actorClaimType = "act";
+        private int _maxActorChainLength = 1;
 
         /// <summary>
         /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
@@ -71,8 +74,36 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="Claims"/> and <see cref="Subject"/> are set, the claim values in Subject will be combined with the values
         /// in Claims. The values found in Claims take precedence over those found in Subject, so any duplicate
         /// values will be overridden.
+        /// If both Claims and Subject.Actor contain actor claims, the claim values in Claims take precedence over those in Subject.Actor.
         /// </summary>
         public IDictionary<string, object> Claims { get; set; }
+
+        /// <summary>
+        /// Gets or sets the claim type used to identify the actor token.
+        /// If not set or whitespace, defaults to "act".
+        /// </summary>
+        public string ActorClaimType
+        {
+            get => _actorClaimType;
+            set => _actorClaimType = string.IsNullOrWhiteSpace(value) ? "act" : value;
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum depth of nested actor tokens allowed.
+        /// Valid values are between 1 and 5 inclusive.
+        /// The default is 1.
+        /// </summary>
+        public int MaxActorChainLength
+        {
+            get => _maxActorChainLength;
+            set
+            {
+                if (value < 1 || value > 5)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), "MaxActorChainLength must be between 1 and 5."));
+
+                _maxActorChainLength = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which contains any custom header claims that need to be added to the JWT token header.

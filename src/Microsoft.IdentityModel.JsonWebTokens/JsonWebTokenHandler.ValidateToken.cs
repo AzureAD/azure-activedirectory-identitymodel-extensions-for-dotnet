@@ -589,11 +589,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // and (since issuer validation occurs first) came from a trusted authority.
                 // NOTE: More than one nested actor token should not be considered a valid token, but if we somehow encounter one,
                 // this code will still work properly.
-                TokenValidationResult tokenValidationResult =
-                    await ValidateTokenAsync(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters).ConfigureAwait(false);
+                int currentChainLength = 1;
+                var currentToken = jsonWebToken;
+                while (currentToken != null && !string.IsNullOrWhiteSpace(currentToken.Actor))
+                {
+                    //if (currentChainLength >= validationParameters.MaxActorChainLength)
+                    //    throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(LogMessages.IDX14110, validationParameters.MaxActorChainLength)));
 
-                if (!tokenValidationResult.IsValid)
-                    return tokenValidationResult;
+                    TokenValidationResult tokenValidationResult =
+                        await ValidateTokenAsync(currentToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters).ConfigureAwait(false);
+
+                    if (!tokenValidationResult.IsValid)
+                        return tokenValidationResult;
+
+                    currentToken = tokenValidationResult.SecurityToken as JsonWebToken;
+                    currentChainLength++;
+                }
             }
 
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);

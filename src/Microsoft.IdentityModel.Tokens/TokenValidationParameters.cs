@@ -135,9 +135,27 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets <see cref="TokenValidationParameters"/>.
+        /// Gets or sets the validation parameters to use when validating actor tokens.
         /// </summary>
+        /// <remarks>
+        /// If not set, the current TokenValidationParameters will be used to validate actor tokens.
+        /// Only used when ValidateActor is true.
+        /// </remarks>
         public TokenValidationParameters ActorValidationParameters { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to retrieve actor claims.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to retrieve actor claims from the token.
+        /// Only used when ValidateActor is true.
+        /// </remarks>
+        public ActorClaimRetriever ActorClaimRetriever { get; set; }
+
+        /// <summary>
+        /// Gets or sets the claim type used to identify the actor of the token.
+        /// </summary>
+        public string ActorClaimType { get; set; } = "act";
 
         /// <summary>
         /// Gets or sets a delegate used to validate the cryptographic algorithm used.

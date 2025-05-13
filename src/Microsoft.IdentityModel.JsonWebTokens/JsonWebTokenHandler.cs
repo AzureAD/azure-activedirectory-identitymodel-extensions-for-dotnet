@@ -220,7 +220,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
 
-                if (claimType == ClaimTypes.Actor)
+                if (claimType == ClaimTypes.Actor
+                    || claimType == validationParameters.ActorClaimType)
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
@@ -231,7 +232,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (CanReadToken(jwtClaim.Value))
                     {
                         JsonWebToken actor = ReadToken(jwtClaim.Value) as JsonWebToken;
-                        identity.Actor = CreateClaimsIdentity(actor, validationParameters);
+
+                        if (validationParameters.ActorClaimRetriever != null)
+                        {
+                            var actorIdentity = validationParameters.ActorClaimRetriever(actor, validationParameters.ActorClaimType, validationParameters, issuer);
+                            if (actorIdentity != null)
+                                identity.Actor = actorIdentity;
+                        }
+                        else
+                        {
+                            identity.Actor = CreateClaimsIdentity(actor, validationParameters);
+                        }
                     }
                 }
 
@@ -285,15 +296,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
-                if (claimType == ClaimTypes.Actor)
+                if (claimType == jwtToken.ActorClaimType || claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
 
-                    if (CanReadToken(jwtClaim.Value))
+                    if (validationParameters.ValidateActor && CanReadToken(jwtClaim.Value))
                     {
-                        JsonWebToken actor = ReadToken(jwtClaim.Value) as JsonWebToken;
-                        identity.Actor = CreateClaimsIdentity(actor, validationParameters, issuer);
+                        var validationResult = ReadToken(jwtClaim.Value, validationParameters);
+
+                        if (validationResult != null)
+                        {
+                            JsonWebToken actor = validationResult.SecurityToken as JsonWebToken;
+
+                            if (validationParameters.ActorClaimRetriever != null)
+                            {
+                                var actorIdentity = validationParameters.ActorClaimRetriever(
+                                    actor,
+                                    jwtToken.ActorClaimType,
+                                    validationParameters.ActorValidationParameters ?? validationParameters,
+                                    issuer);
+
+                                if (actorIdentity != null)
+                                    identity.Actor = actorIdentity;
+                            }
+                            else
+                            {
+                                identity.Actor = CreateClaimsIdentity(
+                                    actor,
+                                    validationParameters.ActorValidationParameters ?? validationParameters,
+                                    issuer);
+                            }
+
+                        }
                     }
                 }
 

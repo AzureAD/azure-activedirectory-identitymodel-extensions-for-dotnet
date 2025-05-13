@@ -99,6 +99,13 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
+        /// When enabled, supports RFC8693 actor token functionality.
+        /// </summary>
+        internal const string EnableActorClaimTypeSupportSwitch = "Switch.Microsoft.IdentityModel.EnableActorClaimTypeSupport";
+        private static bool? _enableActorClaimTypeSupport;
+        internal static bool EnableActorClaimTypeSupport => _enableActorClaimTypeSupport ??= (AppContext.TryGetSwitch(EnableActorClaimTypeSupportSwitch, out bool enableActorClaimTypeSupport) && enableActorClaimTypeSupport);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -123,6 +130,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
+
+            _enableActorClaimTypeSupport = null;
+            AppContext.SetSwitch(EnableActorClaimTypeSupportSwitch, false);
         }
     }
 }

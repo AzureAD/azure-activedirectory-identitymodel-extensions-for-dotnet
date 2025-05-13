@@ -20,6 +20,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string ClassName = "Microsoft.IdentityModel.JsonWebTokens.JsonWebToken";
 
         private string _act;
+        private string _actorClaimType = "act";
         private string _authenticationTag;
         private string _ciphertext;
         private string _encodedHeader;
@@ -1011,17 +1012,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         #region Payload Properties
         /// <summary>
-        /// Gets the 'value' of the 'actort' claim the payload.
+        /// Gets or sets the claim type used to identify the actor token.
+        /// If not set or whitespace, defaults to "act".
+        /// </summary>
+        public string ActorClaimType
+        {
+            get => _actorClaimType;
+            set => _actorClaimType = string.IsNullOrWhiteSpace(value) ? "act" : value;
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the actor claim from the payload.
         /// </summary>
         /// <remarks>
-        /// If the 'actort' claim is not found, an empty string is returned.
+        /// If the actor claim is not found, an empty string is returned.
         /// </remarks>
         public string Actor
         {
             get
             {
-                _act ??= Payload.GetStringValue(JwtRegisteredClaimNames.Actort);
-                return _act;
+                if ()
+                return Payload.GetStringValue(ActorClaimType);
             }
         }
 

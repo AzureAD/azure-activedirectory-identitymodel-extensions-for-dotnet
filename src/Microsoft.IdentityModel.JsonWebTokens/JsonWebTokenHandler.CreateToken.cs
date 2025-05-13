@@ -757,6 +757,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
+            // Handle actor token if it exists in Claims or Subject
+            if (tokenDescriptor.Claims != null
+                && tokenDescriptor.Claims.TryGetValue(tokenDescriptor.ActorClaimType, out var actorClaim)
+                && actorClaim != null)
+            {
+                writer.WritePropertyName(tokenDescriptor.ActorClaimType);
+                JsonPrimitives.WriteObject(ref writer, tokenDescriptor.ActorClaimType, actorClaim);
+            }
+            else if (tokenDescriptor.Subject?.Actor != null)
+            {
+                var actorTokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = tokenDescriptor.Subject.Actor,
+                    MaxActorChainLength = tokenDescriptor.MaxActorChainLength - 1
+                };
+                var actorToken = CreateToken(actorTokenDescriptor, false, 0);
+
+                writer.WritePropertyName(tokenDescriptor.ActorClaimType);
+                writer.WriteStringValue(actorToken);
+            }
+
             // By default we set these three properties only if they haven't been detected before.
             if (setDefaultTimesOnTokenCreation && !(expSet && iatSet && nbfSet))
             {

@@ -3,11 +3,25 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
+    /// </summary>
+    /// <summary>
+    /// Delegate that will be called to retrieve actor claims from a JWT token.
+    /// </summary>
+    /// <param name="actorJWT">The actor JWT token.</param>
+    /// <param name="actorClaimType">The claim type used for the actor.</param>
+    /// <param name="validationParameters">Parameters used for token validation.</param>
+    /// <param name="issuer">The issuer of the token.</param>
+    /// <returns>A ClaimsIdentity containing the actor claims.</returns>
+    public delegate ClaimsIdentity ActorClaimRetriever(SecurityToken actorJWT, string actorClaimType, TokenValidationParameters validationParameters, string issuer);
+
     /// <summary>
     /// Validates the cryptographic algorithm used.
     /// </summary>

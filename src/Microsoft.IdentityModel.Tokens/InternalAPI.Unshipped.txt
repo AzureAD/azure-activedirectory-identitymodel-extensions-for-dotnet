@@ -1,2 +1,4 @@
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.EnableActorClaimTypeSupportSwitch = "Switch.Microsoft.IdentityModel.EnableActorClaimTypeSupport" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr" -> string
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.EnableActorClaimTypeSupport.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttr.get -> bool
