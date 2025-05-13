@@ -143,8 +143,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal static string CreateToken(
             SecurityTokenDescriptor tokenDescriptor,
             bool setdefaultTimesOnTokenCreation,
-            int tokenLifetimeInMinutes,
-            int actorChainDepth = 0)
+            int tokenLifetimeInMinutes)
         {
             // The form of a JWS is: Base64UrlEncoding(UTF8(Header)) | . | Base64UrlEncoding(Payload) | . | Base64UrlEncoding(Signature)
             // Where the Header is specifically the UTF8 bytes of the JSON, whereas the Payload encoding is not specified, but UTF8 is used by everyone.
@@ -176,8 +175,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         ref writer,
                         tokenDescriptor,
                         setdefaultTimesOnTokenCreation,
-                        tokenLifetimeInMinutes,
-                        actorChainDepth);
+                        tokenLifetimeInMinutes);
 
                     // mark end of payload
                     int payloadEnd = (int)utf8ByteMemoryStream.Length;
@@ -603,14 +601,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
         /// <param name="setDefaultTimesOnTokenCreation">A boolean that controls if expiration, notbefore, issuedat should be added if missing.</param>
         /// <param name="tokenLifetimeInMinutes">The default value for the token lifetime in minutes.</param>
-        /// <param name="actorChainDepth">Controls the recursion length while parsing nested actor tokens</param>
         /// <returns>A dictionary of claims.</returns>
         internal static void WriteJwsPayload(
             ref Utf8JsonWriter writer,
             SecurityTokenDescriptor tokenDescriptor,
             bool setDefaultTimesOnTokenCreation,
-            int tokenLifetimeInMinutes,
-            int actorChainDepth)
+            int tokenLifetimeInMinutes)
         {
             bool descriptorClaimsAudienceChecked = false;
             bool audienceSet = false;
@@ -763,7 +759,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
             if (AppContextSwitches.SerializeDeserializeActorClaim)
-                WriteActorToken(writer, tokenDescriptor, actorChainDepth);
+                WriteActorToken(writer, tokenDescriptor);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
@@ -1083,8 +1079,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
         private static void WriteActorToken(
             Utf8JsonWriter writer,
-            SecurityTokenDescriptor tokenDescriptor,
-            int actorChainDepth = 0)
+            SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
             {
@@ -1094,7 +1089,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.ContainsKey(tokenDescriptor.ActorClaimName))
             {
                 // Check for maximum actor chain depth
-                if (actorChainDepth >= tokenDescriptor.MaxActorChainLength)
+                if (tokenDescriptor.ActorChainDepth >= tokenDescriptor.MaxActorChainLength)
                 {
                     throw LogHelper.LogExceptionMessage(
                         new SecurityTokenException(
@@ -1112,7 +1107,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (tokenDescriptor.Subject != null && tokenDescriptor.Subject.Actor != null)
                 {
-                    if (actorChainDepth >= tokenDescriptor.MaxActorChainLength)
+                    if (tokenDescriptor.ActorChainDepth >= tokenDescriptor.MaxActorChainLength)
                     {
                         throw LogHelper.LogExceptionMessage(
                             new SecurityTokenException(
@@ -1131,7 +1126,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 actorTokenDescriptor.MaxActorChainLength = tokenDescriptor.MaxActorChainLength;
                 actorTokenDescriptor.ActorClaimName = tokenDescriptor.ActorClaimName;
-                string actorToken = CreateToken(actorTokenDescriptor, false, 0, actorChainDepth + 1);
+                actorTokenDescriptor.ActorChainDepth = actorTokenDescriptor.ActorChainDepth + 1;
+                string actorToken = CreateToken(actorTokenDescriptor, false, 0);
                 writer.WritePropertyName(tokenDescriptor.ActorClaimName);
                 writer.WriteStringValue(actorToken);
             }

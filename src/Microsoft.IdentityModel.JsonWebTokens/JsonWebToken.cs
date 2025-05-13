@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal DateTime? _validFrom;
         internal DateTime? _validTo;
 
-        private static string s_actorClaimName = "act";
+        private string actorClaimName = "act";
         /// <summary>
         /// Gets or sets the claim type name for the actor claim.
         /// Permissible values are 'act' or 'actort'.
@@ -69,9 +69,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="SecurityTokenException">
         /// Thrown if the value is not 'act' or 'actort'.
         /// </exception>
-        internal static string ActorClaimName
+        internal string ActorClaimName
         {
-            get => AppContextSwitches.SerializeDeserializeActorClaim ? s_actorClaimName : "actort";
+            get => AppContextSwitches.SerializeDeserializeActorClaim ? actorClaimName : "actort";
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     LogHelper.MarkAsNonPII("ActorClaimName"))
                     + ". ActorClaimName cannot be empty."));
 
-                s_actorClaimName = value;
+                actorClaimName = value;
             }
         }
         #endregion
