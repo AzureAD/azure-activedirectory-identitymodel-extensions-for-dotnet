@@ -17,7 +17,9 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenInClaimsDictionaryShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.ActorTokenInClaimsDictionaryShouldBeProperlySerialized");
-
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
             try
             {
                 // Create a ClaimsIdentity for the actor
@@ -42,15 +44,14 @@ namespace Microsoft.IdentityModel.Tests
                     SigningCredentials = Default.AsymmetricSigningCredentials,
                     Claims = new Dictionary<string, object>
                     {
-                        { SecurityTokenDescriptor.ActorClaimTypeName, actorIdentity }
+                        { "act", actorIdentity }
                     }
                 };
-
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim(SecurityTokenDescriptor.ActorClaimTypeName), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim(tokenDescriptor.ActorClaimName), "JWT token should contain 'actort' claim");
                 // Get the actor token and verify it contains the expected claims
                 var actorTokenString = decodedToken.Actor;
                 Assert.NotNull(actorTokenString);
@@ -64,6 +65,10 @@ namespace Microsoft.IdentityModel.Tests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -72,8 +77,9 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenAsSubjectShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.ActorTokenAsSubjectShouldBeProperlySerialized");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
-
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
             try
             {
                 // Create actor identity
@@ -98,12 +104,11 @@ namespace Microsoft.IdentityModel.Tests
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials
                 };
-
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'act' claim");
 
                 // Get the actor token and verify it contains the expected claims
                 var actorTokenString = decodedToken.Actor;
@@ -118,6 +123,10 @@ namespace Microsoft.IdentityModel.Tests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -126,8 +135,9 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue()
         {
             var context = new CompareContext($"{this}.ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
-
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
             try
             {
                 // Create actor identity for Subject.Actor (should be ignored)
@@ -158,15 +168,16 @@ namespace Microsoft.IdentityModel.Tests
                     // Add Claims actor that should take precedence
                     Claims = new Dictionary<string, object>
                     {
-                        { JwtRegisteredClaimNames.Actort, claimsActorIdentity }
+                        { "act", claimsActorIdentity }
                     }
                 };
+                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
 
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists
-                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'actort' claim");
 
                 // Get the actor token and verify it contains the expected claims
                 var actorTokenString = decodedToken.Actor;
@@ -183,6 +194,10 @@ namespace Microsoft.IdentityModel.Tests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -191,8 +206,9 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
-
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
             try
             {
                 // Create nested actor identity
@@ -222,15 +238,14 @@ namespace Microsoft.IdentityModel.Tests
                     SigningCredentials = Default.AsymmetricSigningCredentials,
                     Claims = new Dictionary<string, object>
                     {
-                        { JwtRegisteredClaimNames.Actort, actorIdentity }
+                        { "act", actorIdentity }
                     }
                 };
-
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists
-                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'actort' claim");
 
                 // Read the main actor token
                 var actorTokenString = decodedToken.Actor;
@@ -242,7 +257,7 @@ namespace Microsoft.IdentityModel.Tests
                 Assert.Equal("Actor Name", actorJwt.Payload.GetValue<string>("name"));
 
                 // Verify nested actor exists
-                Assert.True(actorJwt.Payload.HasClaim("actort"), "Actor token should contain nested 'actort' claim");
+                Assert.True(actorJwt.Payload.HasClaim("act"), "Actor token should contain nested 'actort' claim");
 
                 // Read the nested actor token
                 var nestedActorTokenString = actorJwt.Actor;
@@ -257,6 +272,10 @@ namespace Microsoft.IdentityModel.Tests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -265,8 +284,8 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedActorTokenAsSubjectShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorTokenAsSubjectShouldBeProperlySerialized");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
-
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
             try
             {
                 // Create nested actor
@@ -296,12 +315,13 @@ namespace Microsoft.IdentityModel.Tests
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials
                 };
-
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
+                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists
-                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'actort' claim");
 
                 // Read the main actor token
                 var actorTokenString = decodedToken.Actor;
@@ -313,7 +333,7 @@ namespace Microsoft.IdentityModel.Tests
                 Assert.Equal("Actor Name", actorJwt.Payload.GetValue<string>("name"));
 
                 // Verify nested actor exists
-                Assert.True(actorJwt.Payload.HasClaim("actort"), "Actor token should contain nested 'actort' claim");
+                Assert.True(actorJwt.Payload.HasClaim("act"), "Actor token should contain nested 'actort' claim");
 
                 // Read the nested actor token
                 var nestedActorTokenString = actorJwt.Actor;
@@ -328,40 +348,55 @@ namespace Microsoft.IdentityModel.Tests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
-
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+            }
             TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
         public void MaxActorChainLength_RejectsNegativeValues()
         {
-            // Arrange
-            int originalValue = SecurityTokenDescriptor.MaxActorChainLength;
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
 
+            // Arrange
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = null,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            };
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
+            tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
+            int originalValue = tokenDescriptor.MaxActorChainLength;
             try
             {
+                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
                 // Act & Assert - Valid value 0 should not throw
-                SecurityTokenDescriptor.MaxActorChainLength = 0;
-                Assert.Equal(0, SecurityTokenDescriptor.MaxActorChainLength);
+                tokenDescriptor.MaxActorChainLength = 0;
+                Assert.Equal(0, tokenDescriptor.MaxActorChainLength);
 
                 // Act & Assert - Negative value
                 var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
-                    SecurityTokenDescriptor.MaxActorChainLength = -5);
+                    tokenDescriptor.MaxActorChainLength = -5);
                 Assert.Contains("IDX11027", ex.Message);
 
                 // Act & Assert - Valid value 1 should not throw
-                SecurityTokenDescriptor.MaxActorChainLength = 1;
-                Assert.Equal(1, SecurityTokenDescriptor.MaxActorChainLength);
+                tokenDescriptor.MaxActorChainLength = 1;
+                Assert.Equal(1, tokenDescriptor.MaxActorChainLength);
 
                 // Act & Assert - Valid larger value
-                SecurityTokenDescriptor.MaxActorChainLength = 10;
-                Assert.Equal(10, SecurityTokenDescriptor.MaxActorChainLength);
+                tokenDescriptor.MaxActorChainLength = 10;
+                Assert.Equal(10, tokenDescriptor.MaxActorChainLength);
             }
             finally
             {
                 // Restore to original value
-                SecurityTokenDescriptor.MaxActorChainLength = originalValue;
+                tokenDescriptor.MaxActorChainLength = originalValue;
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
             }
         }
 
@@ -369,13 +404,13 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedSubjectActorTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
 
             try
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                SecurityTokenDescriptor.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Create nested actor identities (3 levels, but we'll set MaxActorChainLength to 2)
                 var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
@@ -406,6 +441,9 @@ namespace Microsoft.IdentityModel.Tests
                     Audience = "https://api.example.com",
                     SigningCredentials = Default.AsymmetricSigningCredentials
                 };
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
+                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
+                tokenDescriptor.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Act - This should throw a SecurityTokenException
                 var token = handler.CreateToken(tokenDescriptor);
@@ -424,6 +462,10 @@ namespace Microsoft.IdentityModel.Tests
                 // Unexpected exception type
                 context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
             }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -432,14 +474,14 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
 
             try
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                SecurityTokenDescriptor.MaxActorChainLength = 1; // Allow only 1 level of nesting
-
+                string actorname = "act";
                 // Create nested actor identities
                 var nestedActorIdentity = new CaseSensitiveClaimsIdentity("NestedActorAuth");
                 nestedActorIdentity.AddClaim(new Claim("sub", "nested-actor-id"));
@@ -465,14 +507,15 @@ namespace Microsoft.IdentityModel.Tests
                     SigningCredentials = Default.AsymmetricSigningCredentials,
                     Claims = new Dictionary<string, object>
                     {
-                        { JwtRegisteredClaimNames.Actort, actorIdentity }
+                        { actorname, actorIdentity }
                     }
                 };
-
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
+                tokenDescriptor.ActorClaimName = actorname; // Set the actor claim name to "act" for testing
+                tokenDescriptor.MaxActorChainLength = 1; // Allow only 1 level of nesting
                 // Act
                 var token = handler.CreateToken(tokenDescriptor);
                 context.Diffs.Add("Expected exception was not thrown.");
-
             }
             catch (SecurityTokenException ex)
             {
@@ -487,82 +530,91 @@ namespace Microsoft.IdentityModel.Tests
                 // Unexpected exception type
                 context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
             }
-
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+            }
             TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
         public void ActorTokens_MixedSourceRespectMaxActorChainLength()
         {
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
-
-            // Arrange
-            var handler = new JsonWebTokenHandler();
-            SecurityTokenDescriptor.MaxActorChainLength = 1; // Allow 1 levels of nesting
-
-            // Create level 2 actor (will be in claims dictionary)
-            var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
-            level2Actor.AddClaim(new Claim("sub", "level2-actor"));
-            level2Actor.AddClaim(new Claim("name", "Level 2 Actor"));
-
-            // Create nested actors that should be truncated
-            var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
-            level3Actor.AddClaim(new Claim("sub", "level3-actor"));
-            level3Actor.AddClaim(new Claim("name", "Level 3 Actor"));
-
-            // Create level 1 actor with nested actor
-            var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
-            level1Actor.AddClaim(new Claim("sub", "level1-actor"));
-            level1Actor.AddClaim(new Claim("name", "Level 1 Actor"));
-            level1Actor.Actor = level3Actor; // This should be ignored due to MaxActorChainLength
-
-            // Create the main identity
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-            mainIdentity.AddClaim(new Claim("name", "Main User"));
-            mainIdentity.Actor = level1Actor;
-
-            // Create a token with additional actor in Claims dictionary
-            var tokenDescriptor = new SecurityTokenDescriptor
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
+            try
             {
-                Subject = mainIdentity,
-                Issuer = "https://example.com",
-                Audience = "https://api.example.com",
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-                // Add level 2 actor in claims dictionary to replace level 1's actor
-                Claims = new Dictionary<string, object>
+                // Arrange
+                var handler = new JsonWebTokenHandler();
+                string actorname = "act";
+                // Create level 2 actor (will be in claims dictionary)
+                var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
+                level2Actor.AddClaim(new Claim("sub", "level2-actor"));
+                level2Actor.AddClaim(new Claim("name", "Level 2 Actor"));
+
+                // Create nested actors that should be truncated
+                var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
+                level3Actor.AddClaim(new Claim("sub", "level3-actor"));
+                level3Actor.AddClaim(new Claim("name", "Level 3 Actor"));
+
+                // Create level 1 actor with nested actor
+                var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
+                level1Actor.AddClaim(new Claim("sub", "level1-actor"));
+                level1Actor.AddClaim(new Claim("name", "Level 1 Actor"));
+                level1Actor.Actor = level3Actor; // This should be ignored due to MaxActorChainLength
+
+                // Create the main identity
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+                mainIdentity.AddClaim(new Claim("name", "Main User"));
+                mainIdentity.Actor = level1Actor;
+
+                // Create a token with additional actor in Claims dictionary
+                var tokenDescriptor = new SecurityTokenDescriptor
                 {
-                    { JwtRegisteredClaimNames.Actort, level2Actor }
-                }
-            };
+                    Subject = mainIdentity,
+                    Issuer = "https://example.com",
+                    Audience = "https://api.example.com",
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                    // Add level 2 actor in claims dictionary to replace level 1's actor
+                    Claims = new Dictionary<string, object>
+                    {
+                        { actorname, level2Actor }
+                    }
+                };
+                tokenDescriptor.ActorClaimName = actorname;
+                tokenDescriptor.MaxActorChainLength = 1;
+                var token = handler.CreateToken(tokenDescriptor);
+                var jwtToken = handler.ReadJsonWebToken(token);
 
-            // Act
-            var token = handler.CreateToken(tokenDescriptor);
-            var jwtToken = handler.ReadJsonWebToken(token);
+                // Assert
+                Assert.True(jwtToken.Payload.HasClaim(actorname), "JWT token should contain 'actort' claim");
 
-            // Assert
-            Assert.True(jwtToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+                // Verify we get the actor from Claims dictionary (should be level2Actor)
+                var actorToken = handler.ReadJsonWebToken(jwtToken.Actor);
+                Assert.Equal("level2-actor", actorToken.Payload.GetValue<string>("sub"));
+                Assert.Equal("Level 2 Actor", actorToken.Payload.GetValue<string>("name"));
 
-            // Verify we get the actor from Claims dictionary (should be level2Actor)
-            var actorToken = handler.ReadJsonWebToken(jwtToken.Actor);
-            Assert.Equal("level2-actor", actorToken.Payload.GetValue<string>("sub"));
-            Assert.Equal("Level 2 Actor", actorToken.Payload.GetValue<string>("name"));
-
-            // There should be no nested actor because we're already at max depth
-            Assert.False(actorToken.Payload.HasClaim("actort"), "There should be no nested actor claim due to MaxActorChainLength");
+                // There should be no nested actor because we're already at max depth
+                Assert.False(actorToken.Payload.HasClaim("actort"), "There should be no nested actor claim due to MaxActorChainLength");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+            }
         }
-
         [Fact]
         public void NestedClaimTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
 
             try
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                SecurityTokenDescriptor.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Create nested actor identities (3 levels, but we'll set MaxActorChainLength to 2)
                 var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
@@ -592,9 +644,12 @@ namespace Microsoft.IdentityModel.Tests
                     SigningCredentials = Default.AsymmetricSigningCredentials,
                     Claims = new Dictionary<string, object>
                     {
-                        { JwtRegisteredClaimNames.Actort, level1Actor }
+                        { "act", level1Actor }
                     }
                 };
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
+                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
+                tokenDescriptor.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Act - This should throw a SecurityTokenException
                 var token = handler.CreateToken(tokenDescriptor);
@@ -613,7 +668,10 @@ namespace Microsoft.IdentityModel.Tests
                 // Unexpected exception type
                 context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
             }
-
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue); 
+            }
             TestUtilities.AssertFailIfErrors(context);
         }
 

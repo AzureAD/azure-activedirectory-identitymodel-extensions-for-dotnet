@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
         [DefaultValue(true)]
         public bool IncludeKeyIdInHeader { get; set; } = true;
 
-        private static int s_maxActorChainLength = 5;
+        private int s_maxActorChainLength = 5;
         /// <summary>
         /// Gets or sets the maximum depth allowed when processing nested actor tokens.
         /// This prevents excessive recursion when handling deeply nested actor tokens.
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Default value is 5. Max value is also 5
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0.</exception>
-        public static int MaxActorChainLength
+        public int MaxActorChainLength
         {
             get => s_maxActorChainLength;
             set
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private static string s_actoryClaimTypeName = "actort";
+        private string s_actorClaimName = "act";
         /// <summary>
         /// Gets or sets the claim type name for the actor claim.
         /// Permissible values are 'act' or 'actort'.
@@ -154,9 +154,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenException">
         /// Thrown if the value is not 'act' or 'actort'.
         /// </exception>
-        public static string ActorClaimTypeName
+        public string ActorClaimName
         {
-            get => s_actoryClaimTypeName;
+            get => AppContextSwitches.SerializeDeserializeActorClaim ? s_actorClaimName : "actort";
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -164,10 +164,9 @@ namespace Microsoft.IdentityModel.Tokens
                     new ArgumentOutOfRangeException(
                     LogHelper.FormatInvariant(
                     LogMessages.IDX11027,
-                    LogHelper.MarkAsNonPII("ActorClaimTypeName"))
-                    + ". ActorClaimTypeName cannot be empty."));
-
-                s_actoryClaimTypeName = value;
+                    LogHelper.MarkAsNonPII("ActorClaimName"))
+                    + ". ActorClaimName cannot be empty."));
+                s_actorClaimName = value;
             }
         }
     }

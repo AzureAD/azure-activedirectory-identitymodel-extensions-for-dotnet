@@ -677,8 +677,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (kvp.Key.Equals(SecurityTokenDescriptor.ActorClaimTypeName, StringComparison.Ordinal))
+                    Console.WriteLine(kvp.Key);
+                    AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out bool isnebaled);
+                    Console.WriteLine($"Equal?{tokenDescriptor.ActorClaimName}, {isnebaled}");
+                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimName, StringComparison.Ordinal))
                     {
+                        Console.WriteLine(kvp.Value);
                         continue;
                     }
                     if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
@@ -758,11 +762,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                         nbfSet = true;
                     }
-
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
-            ProcessActorToken(writer, tokenDescriptor, actorChainDepth);
+            if (AppContextSwitches.SerializeDeserializeActorClaim)
+                WriteActorToken(writer, tokenDescriptor, actorChainDepth);
+
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
             // By default we set these three properties only if they haven't been detected before.
@@ -1079,7 +1084,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
         }
-        private static void ProcessActorToken(
+        private static void WriteActorToken(
             Utf8JsonWriter writer,
             SecurityTokenDescriptor tokenDescriptor,
             int actorChainDepth = 0)
@@ -1089,46 +1094,49 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw new ArgumentNullException(nameof(tokenDescriptor));
             }
             SecurityTokenDescriptor actorTokenDescriptor = null;
-            if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.ContainsKey(SecurityTokenDescriptor.ActorClaimTypeName))
+            if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.ContainsKey(tokenDescriptor.ActorClaimName))
             {
                 // Check for maximum actor chain depth
-                if (actorChainDepth >= SecurityTokenDescriptor.MaxActorChainLength)
+                if (actorChainDepth >= tokenDescriptor.MaxActorChainLength)
                 {
                     throw LogHelper.LogExceptionMessage(
                         new SecurityTokenException(
                             LogHelper.FormatInvariant(
                             LogMessages.IDX14313,
-                             LogHelper.MarkAsNonPII(SecurityTokenDescriptor.MaxActorChainLength))));
+                             LogHelper.MarkAsNonPII(tokenDescriptor.MaxActorChainLength))));
                 }
-                ClaimsIdentity actor = tokenDescriptor.Claims[SecurityTokenDescriptor.ActorClaimTypeName] as ClaimsIdentity;
+                ClaimsIdentity actor = tokenDescriptor.Claims[tokenDescriptor.ActorClaimName] as ClaimsIdentity;
                 actorTokenDescriptor = new SecurityTokenDescriptor
                 {
-                    Subject = actor
+                    Subject = actor,
                 };
-                actorChainDepth = actorChainDepth + 1;
-                string actorToken = CreateToken(actorTokenDescriptor, false, 0, actorChainDepth);
-                JsonPrimitives.WriteObject(ref writer, SecurityTokenDescriptor.ActorClaimTypeName, actorToken);
             }
             else
             {
                 if (tokenDescriptor.Subject != null && tokenDescriptor.Subject.Actor != null)
                 {
-                    if (actorChainDepth >= SecurityTokenDescriptor.MaxActorChainLength)
+                    if (actorChainDepth >= tokenDescriptor.MaxActorChainLength)
                     {
                         throw LogHelper.LogExceptionMessage(
                             new SecurityTokenException(
                                 LogHelper.FormatInvariant(
                                 LogMessages.IDX14313,
-                                 LogHelper.MarkAsNonPII(SecurityTokenDescriptor.MaxActorChainLength))));
+                                 LogHelper.MarkAsNonPII(tokenDescriptor.MaxActorChainLength))));
                     }
                     actorTokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = tokenDescriptor.Subject.Actor,
                     };
-                    string actorToken = CreateToken(actorTokenDescriptor, false, 0, actorChainDepth + 1);
-                    writer.WritePropertyName(SecurityTokenDescriptor.ActorClaimTypeName);
-                    writer.WriteStringValue(actorToken);
                 }
+            }
+
+            if (actorTokenDescriptor != null)
+            {
+                actorTokenDescriptor.MaxActorChainLength = tokenDescriptor.MaxActorChainLength;
+                actorTokenDescriptor.ActorClaimName = tokenDescriptor.ActorClaimName;
+                string actorToken = CreateToken(actorTokenDescriptor, false, 0, actorChainDepth + 1);
+                writer.WritePropertyName(tokenDescriptor.ActorClaimName);
+                writer.WriteStringValue(actorToken);
             }
         }
         internal static byte[] CompressToken(byte[] utf8Bytes, string compressionAlgorithm)
