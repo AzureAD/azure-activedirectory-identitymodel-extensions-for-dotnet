@@ -24,6 +24,12 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
         private static void DebugThroughTests()
         {
+            ClaimsIdentityHasClaim claimsIdentityHasClaim = new ClaimsIdentityHasClaim();
+            claimsIdentityHasClaim.Setup();
+            bool jwtHasClaim = claimsIdentityHasClaim.JsonWebToken_HasClaim_TokenSpecific().Result;
+            bool samlHasClaim = claimsIdentityHasClaim.Saml2Token_HasClaim_TokenSpecific().Result;
+            jwtHasClaim = claimsIdentityHasClaim.JsonWebToken_HasClaim().Result;
+
             ReadJWETokenTests readTokenTests = new ReadJWETokenTests();
             readTokenTests.Setup();
             readTokenTests.ReadJWE_FromMemory();

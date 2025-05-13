@@ -185,6 +185,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
+            if (UseTokenSpecificClaimsIdentity)
+                return new JwtClaimsIdentity(jwtToken);
+
             return CreateClaimsIdentityPrivate(jwtToken, validationParameters, GetActualIssuer(jwtToken));
         }
 
@@ -198,6 +201,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
             _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (UseTokenSpecificClaimsIdentity)
+                return new JwtClaimsIdentity(jwtToken);
 
             if (string.IsNullOrWhiteSpace(issuer))
                 issuer = GetActualIssuer(jwtToken);

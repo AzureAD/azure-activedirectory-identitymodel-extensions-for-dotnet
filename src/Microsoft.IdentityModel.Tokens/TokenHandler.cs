@@ -18,6 +18,13 @@ namespace Microsoft.IdentityModel.Tokens
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
         /// <summary>
+        /// 
+        /// </summary>
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public bool UseTokenSpecificClaimsIdentity { get; set; }
+#pragma warning restore RS0016 // Add public types and members to the declared API
+
+        /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires', 'notbefore' or 'issuedat' are null, 
         /// then a default will be set to: issuedat = DateTime.UtcNow, notbefore = DateTime.UtcNow, expires = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
         /// </summary>
