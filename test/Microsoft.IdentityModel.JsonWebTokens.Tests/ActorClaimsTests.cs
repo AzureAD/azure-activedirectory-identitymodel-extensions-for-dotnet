@@ -60,6 +60,7 @@ namespace Microsoft.IdentityModel.Tests
                 Assert.Equal("actor-subject-id", actorJwt.Payload.GetValue<string>("sub"));
                 Assert.Equal("Actor Name", actorJwt.Payload.GetValue<string>("name"));
                 Assert.Equal("admin", actorJwt.Payload.GetValue<string>("role"));
+                TestUtilities.AssertFailIfErrors(context);
             }
             catch (Exception ex)
             {
@@ -67,10 +68,8 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
@@ -118,6 +117,7 @@ namespace Microsoft.IdentityModel.Tests
                 Assert.Equal("actor-subject-id", actorJwt.Payload.GetValue<string>("sub"));
                 Assert.Equal("Actor Name", actorJwt.Payload.GetValue<string>("name"));
                 Assert.Equal("admin", actorJwt.Payload.GetValue<string>("role"));
+                TestUtilities.AssertFailIfErrors(context);
             }
             catch (Exception ex)
             {
@@ -125,10 +125,8 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
@@ -171,8 +169,6 @@ namespace Microsoft.IdentityModel.Tests
                         { "act", claimsActorIdentity }
                     }
                 };
-                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
-
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
@@ -189,6 +185,7 @@ namespace Microsoft.IdentityModel.Tests
                 Assert.Equal("claims-actor-id", actorJwt.Payload.GetValue<string>("sub"));
                 Assert.Equal("Claims Actor", actorJwt.Payload.GetValue<string>("name"));
                 Assert.NotEqual("subject-actor-id", actorJwt.Payload.GetValue<string>("sub"));
+                TestUtilities.AssertFailIfErrors(context);
             }
             catch (Exception ex)
             {
@@ -196,10 +193,8 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
@@ -267,6 +262,7 @@ namespace Microsoft.IdentityModel.Tests
                 // Verify nested actor claims
                 Assert.Equal("nested-actor-id", nestedActorJwt.Payload.GetValue<string>("sub"));
                 Assert.Equal("Nested Actor", nestedActorJwt.Payload.GetValue<string>("name"));
+                TestUtilities.AssertFailIfErrors(context);
             }
             catch (Exception ex)
             {
@@ -274,10 +270,8 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
@@ -313,10 +307,9 @@ namespace Microsoft.IdentityModel.Tests
                     Issuer = "https://example.com",
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
                 };
                 AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
-                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
@@ -343,6 +336,7 @@ namespace Microsoft.IdentityModel.Tests
                 // Verify nested actor claims
                 Assert.Equal("nested-actor-id", nestedActorJwt.Payload.GetValue<string>("sub"));
                 Assert.Equal("Nested Actor", nestedActorJwt.Payload.GetValue<string>("name"));
+                TestUtilities.AssertFailIfErrors(context);
             }
             catch (Exception ex)
             {
@@ -350,11 +344,10 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
-            TestUtilities.AssertFailIfErrors(context);
         }
-
+        [ResetAppContextSwitches]
         [Fact]
         public void MaxActorChainLength_RejectsNegativeValues()
         {
@@ -388,15 +381,15 @@ namespace Microsoft.IdentityModel.Tests
                 tokenDescriptor.MaxActorChainLength = 1;
                 Assert.Equal(1, tokenDescriptor.MaxActorChainLength);
 
-                // Act & Assert - Valid larger value
-                tokenDescriptor.MaxActorChainLength = 10;
-                Assert.Equal(10, tokenDescriptor.MaxActorChainLength);
+                ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+                    tokenDescriptor.MaxActorChainLength = 10);
+                Assert.Contains("IDX11027", ex.Message);
             }
             finally
             {
                 // Restore to original value
                 tokenDescriptor.MaxActorChainLength = originalValue;
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
         }
 
@@ -406,7 +399,7 @@ namespace Microsoft.IdentityModel.Tests
             var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
             bool switchValue = false;
             AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
-
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
             try
             {
                 // Arrange
@@ -439,15 +432,16 @@ namespace Microsoft.IdentityModel.Tests
                     Subject = mainIdentity,
                     Issuer = "https://example.com",
                     Audience = "https://api.example.com",
-                    SigningCredentials = Default.AsymmetricSigningCredentials
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = "act",
+                    MaxActorChainLength = 2
                 };
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
-                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
-                tokenDescriptor.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Act - This should throw a SecurityTokenException
                 var token = handler.CreateToken(tokenDescriptor);
                 context.Diffs.Add("Expected exception was not thrown.");
+
+                TestUtilities.AssertFailIfErrors(context);
             }
             catch (SecurityTokenException ex)
             {
@@ -464,10 +458,9 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
 
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
@@ -476,7 +469,7 @@ namespace Microsoft.IdentityModel.Tests
             var context = new CompareContext($"{this}.NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException");
             bool switchValue = false;
             AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
-
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
             try
             {
                 // Arrange
@@ -508,14 +501,15 @@ namespace Microsoft.IdentityModel.Tests
                     Claims = new Dictionary<string, object>
                     {
                         { actorname, actorIdentity }
-                    }
+                    },
+                    ActorClaimName = actorname,
+                    MaxActorChainLength = 1
                 };
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
-                tokenDescriptor.ActorClaimName = actorname; // Set the actor claim name to "act" for testing
-                tokenDescriptor.MaxActorChainLength = 1; // Allow only 1 level of nesting
+
                 // Act
                 var token = handler.CreateToken(tokenDescriptor);
                 context.Diffs.Add("Expected exception was not thrown.");
+                TestUtilities.AssertFailIfErrors(context);
             }
             catch (SecurityTokenException ex)
             {
@@ -532,16 +526,13 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
-            TestUtilities.AssertFailIfErrors(context);
         }
-
+        [ResetAppContextSwitches]
         [Fact]
         public void ActorTokens_MixedSourceRespectMaxActorChainLength()
         {
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
             AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
             try
             {
@@ -581,15 +572,16 @@ namespace Microsoft.IdentityModel.Tests
                     Claims = new Dictionary<string, object>
                     {
                         { actorname, level2Actor }
-                    }
+                    },
+                    ActorClaimName = actorname,
+                    MaxActorChainLength = 1
                 };
-                tokenDescriptor.ActorClaimName = actorname;
-                tokenDescriptor.MaxActorChainLength = 1;
+
                 var token = handler.CreateToken(tokenDescriptor);
                 var jwtToken = handler.ReadJsonWebToken(token);
 
                 // Assert
-                Assert.True(jwtToken.Payload.HasClaim(actorname), "JWT token should contain 'actort' claim");
+                Assert.True(jwtToken.Payload.HasClaim(actorname), "JWT token should contain 'act' claim");
 
                 // Verify we get the actor from Claims dictionary (should be level2Actor)
                 var actorToken = handler.ReadJsonWebToken(jwtToken.Actor);
@@ -601,7 +593,7 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue);
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
         }
         [Fact]
@@ -610,7 +602,7 @@ namespace Microsoft.IdentityModel.Tests
             var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
             bool switchValue = false;
             AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
-
+            var actorname = "act";
             try
             {
                 // Arrange
@@ -645,15 +637,16 @@ namespace Microsoft.IdentityModel.Tests
                     Claims = new Dictionary<string, object>
                     {
                         { "act", level1Actor }
-                    }
+                    },
+                    ActorClaimName = actorname,
+                    MaxActorChainLength = 1
                 };
                 AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
-                tokenDescriptor.ActorClaimName = "act"; // Set the actor claim name to "act" for testing
-                tokenDescriptor.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Act - This should throw a SecurityTokenException
                 var token = handler.CreateToken(tokenDescriptor);
                 context.Diffs.Add("Expected exception was not thrown.");
+                TestUtilities.AssertFailIfErrors(context);
             }
             catch (SecurityTokenException ex)
             {
@@ -670,9 +663,8 @@ namespace Microsoft.IdentityModel.Tests
             }
             finally
             {
-                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, switchValue); 
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
             }
-            TestUtilities.AssertFailIfErrors(context);
         }
 
     }

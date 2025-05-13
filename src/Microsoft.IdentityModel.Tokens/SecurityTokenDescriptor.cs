@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens
             get => s_maxActorChainLength;
             set
             {
-                if (value < 0)
+                if (value < 0 || value > 5)
                     throw LogHelper.LogExceptionMessage(
                     new ArgumentOutOfRangeException(
                     LogHelper.FormatInvariant(

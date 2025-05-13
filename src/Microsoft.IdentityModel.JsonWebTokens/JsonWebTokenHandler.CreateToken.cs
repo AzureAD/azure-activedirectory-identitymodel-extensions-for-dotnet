@@ -677,12 +677,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    Console.WriteLine(kvp.Key);
                     AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out bool isnebaled);
-                    Console.WriteLine($"Equal?{tokenDescriptor.ActorClaimName}, {isnebaled}");
                     if (kvp.Key.Equals(tokenDescriptor.ActorClaimName, StringComparison.Ordinal))
                     {
-                        Console.WriteLine(kvp.Value);
                         continue;
                     }
                     if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
