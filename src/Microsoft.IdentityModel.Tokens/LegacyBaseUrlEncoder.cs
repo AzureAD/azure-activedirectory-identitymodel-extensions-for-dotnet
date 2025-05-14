@@ -3,12 +3,10 @@
 
 using System;
 using System.Buffers;
+#if NET6_0_OR_GREATER
 using System.Text;
-using Microsoft.IdentityModel.Logging;
-
-#if NETCOREAPP
-using System.Runtime.CompilerServices;
 #endif
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
