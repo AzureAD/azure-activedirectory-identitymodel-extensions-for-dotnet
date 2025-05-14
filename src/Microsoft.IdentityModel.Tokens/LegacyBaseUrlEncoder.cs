@@ -125,6 +125,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 #if NET6_0_OR_GREATER
+        /// <summary>
+        /// Decodes a base64url encoded string into bytes, handling padding and character replacement.
+        /// </summary>
+        /// <param name="strSpan">The base64url encoded string to decode.</param>
+        /// <param name="output">The span to write the decoded bytes to.</param>
+        /// <param name="needReplace">Indicates whether the input contains base64url-specific characters that need replacement.</param>
+        /// <param name="decodedLength">The expected length of the decoded string after padding.</param>
+        /// <returns>The number of bytes written to the output span.</returns>
         internal static int Decode(ReadOnlySpan<char> strSpan, Span<byte> output, bool needReplace, int decodedLength)
         {
             // If the incoming chars don't contain any of the base64url characters that need to be replaced,
@@ -181,6 +189,14 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 #else
+        /// <summary>
+        /// Wrapper method for unsafeDecode.
+        /// </summary>
+        /// <param name="strSpan">The base64url encoded string to decode.</param>
+        /// <param name="output">The span to write the decoded bytes to.</param>
+        /// <param name="needReplace">Indicates whether the input contains base64url-specific characters that need replacement.</param>
+        /// <param name="decodedLength">The expected length of the decoded string after padding.</param>
+        /// <returns>The number of bytes written to the output span.</returns>
         private static void Decode(ReadOnlySpan<char> strSpan, Span<byte> output, bool needReplace, int decodedLength)
         {
             byte[] result = UnsafeDecode(strSpan, needReplace, decodedLength);
@@ -189,6 +205,15 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
+        /// <summary>
+        /// Prepares a base64url encoded string for standard base64 decoding by adding any missing padding
+        /// characters and replacing base64url-specific characters ('-' and '_') with standard base64 
+        /// characters ('+' and '/').
+        /// </summary>
+        /// <param name="source">The original base64url encoded string.</param>
+        /// <param name="charsSpan">The destination span where the prepared string will be stored.</param>
+        /// <param name="needReplace">Indicates whether the input contains base64url-specific characters that need replacement.</param>
+        /// <returns>A read-only span containing the prepared string ready for standard base64 decoding.</returns>
         private static ReadOnlySpan<char> HandlePaddingAndReplace(ReadOnlySpan<char> source, Span<char> charsSpan, bool needReplace)
         {
             source.CopyTo(charsSpan);
@@ -215,6 +240,14 @@ namespace Microsoft.IdentityModel.Tokens
             return charsSpan;
         }
 
+
+        /// <summary>
+        /// Decodes a base64url encoded string into a byte array using unsafe code for pre-.NET 6 platforms.
+        /// </summary>
+        /// <param name="strSpan">The base64url encoded string to decode.</param>
+        /// <param name="needReplace">Indicates whether the input contains base64url-specific characters that need replacement.</param>
+        /// <param name="decodedLength">The expected length of the string after padding is applied.</param>
+        /// <returns>The decoded byte array.</returns>
         internal static unsafe byte[] UnsafeDecode(ReadOnlySpan<char> strSpan, bool needReplace, int decodedLength)
         {
             if (needReplace)

@@ -196,6 +196,13 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
 
 #if NET9_0_OR_GREATER
+        /// <summary>
+        /// Decodes a base64url encoded string into bytes for .NET 9 or greater platforms.
+        /// </summary>
+        /// <param name="strSpan">The base64url encoded string to decode.</param>
+        /// <param name="output">The span to write the decoded bytes to.</param>
+        /// <param name="decodedLength">The expected length of the decoded string after padding.</param>
+        /// <returns>The number of bytes written to the output span.</returns>
         [SkipLocalsInit]
         private static int Decode(ReadOnlySpan<char> strSpan, Span<byte> output, int decodedLength)
         {
@@ -254,6 +261,14 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Adds padding characters to a base64url encoded string to prepare it for standard base64 decoding.
+        /// This method copies the source data to the destination span and appends the appropriate number
+        /// of padding ('=') characters to ensure the string length is a multiple of 4.
+        /// </summary>
+        /// <param name="source">The original base64url encoded string without padding.</param>
+        /// <param name="charsSpan">The destination span where the padded string will be stored.</param>
+        /// <returns>A read-only span containing the padded string ready for standard base64 decoding.</returns>
         private static ReadOnlySpan<char> HandlePadding(ReadOnlySpan<char> source, Span<char> charsSpan)
         {
             source.CopyTo(charsSpan);
