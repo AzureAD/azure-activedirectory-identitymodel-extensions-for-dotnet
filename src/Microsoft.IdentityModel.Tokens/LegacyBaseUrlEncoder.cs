@@ -82,7 +82,11 @@ namespace Microsoft.IdentityModel.Tokens
             return j;
         }
 
-        //for net6 or greater
+        /// <summary>
+        /// Decodes a base64url encoded string into a byte array.
+        /// </summary>
+        /// <param name="strSpan">The base64url encoded string.</param>
+        /// <returns>The UTF-8 byte array.</returns>
         internal static byte[] Decode(ReadOnlySpan<char> strSpan)
         {
             int mod = strSpan.Length % 4;
@@ -100,6 +104,12 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
         }
 
+        /// <summary>
+        /// Entry point for base64url decoding.
+        /// </summary>
+        /// <param name="strSpan">The base64url encoded string.</param>
+        /// <param name="output">The preallocated buffer for the decoded bytes</param>
+        /// <returns>The UTF-8 byte array.</returns>
         internal static void Decode(ReadOnlySpan<char> strSpan, Span<byte> output)
         {
             int mod = strSpan.Length % 4;
