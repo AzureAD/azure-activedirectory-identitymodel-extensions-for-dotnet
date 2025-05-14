@@ -1,0 +1,5 @@
+Microsoft.IdentityModel.Tokens.LegacyBase64UrlEncoder
+static Microsoft.IdentityModel.Tokens.LegacyBase64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan) -> byte[]
+static Microsoft.IdentityModel.Tokens.LegacyBase64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan, System.Span<byte> output) -> void
+static Microsoft.IdentityModel.Tokens.LegacyBase64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan, System.Span<byte> output, bool needReplace, int decodedLength) -> int
+static Microsoft.IdentityModel.Tokens.LegacyBase64UrlEncoder.UnsafeDecode(System.ReadOnlySpan<char> strSpan, bool needReplace, int decodedLength) -> byte[]

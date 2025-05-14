@@ -1,0 +1,2 @@
+Microsoft.IdentityModel.Tokens.LegacyBase64UrlEncoder
+static Microsoft.IdentityModel.Tokens.LegacyBase64UrlEncoder.Encode(System.ReadOnlySpan<byte> inArray, System.Span<char> output) -> int
