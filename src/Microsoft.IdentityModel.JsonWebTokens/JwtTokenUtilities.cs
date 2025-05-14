@@ -630,7 +630,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">The JWT token.</param>
         /// <param name="maxCount">The maximum number of segments to count up to.</param>
         /// <returns>The number of segments up to <paramref name="maxCount"/>.</returns>
-        private static int CountJwtTokenPart(in ReadOnlySpan<char> token, int maxCount)
+        internal static int CountJwtTokenPart(in ReadOnlySpan<char> token, int maxCount)
         {
             int count = 1;
             int index = 0;
