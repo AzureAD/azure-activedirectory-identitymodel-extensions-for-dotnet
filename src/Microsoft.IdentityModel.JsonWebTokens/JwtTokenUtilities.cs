@@ -633,24 +633,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal static int CountJwtTokenPart(ReadOnlySpan<char> token, int maxCount)
         {
             int count = 1;
-            int index = 0;
             ReadOnlySpan<char> localToken = token;
-            while (index < localToken.Length)
+            while (localToken.Length > 0)
             {
                 int dotIndex = localToken.IndexOf('.');
                 if (dotIndex < 0)
-                {
                     break;
-                }
-
                 count++;
-                index = dotIndex + 1;
                 if (count == maxCount)
-                {
                     break;
-                }
-
-                localToken = localToken.Slice(index);
+                localToken = localToken.Slice(dotIndex + 1);
             }
 
             return count;
