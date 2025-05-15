@@ -1,1 +1,1 @@
-virtual System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.CanReadToken(in System.ReadOnlyMemory<char> token) -> bool
+virtual System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.CanReadToken(System.ReadOnlyMemory<char> token) -> bool

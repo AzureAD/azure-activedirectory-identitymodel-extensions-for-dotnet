@@ -278,7 +278,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>'false' if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
         /// <para>'true' if the token is in JSON compact serialization format.</para>
         /// </returns>
-        public virtual bool CanReadToken(in ReadOnlyMemory<char> token)
+        public virtual bool CanReadToken(ReadOnlyMemory<char> token)
         {
             return JwtTokenUtilities.CanReadToken(token, MaximumTokenSizeInBytes);
         }

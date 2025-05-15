@@ -584,7 +584,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="token">The token to check.</param>
         /// <param name="maximumTokenSizeInBytes">Maximum allowed size of the token, method will return false if exceeded.</param>
-        internal static bool CanReadToken(in ReadOnlyMemory<char> token, in int maximumTokenSizeInBytes)
+        internal static bool CanReadToken(ReadOnlyMemory<char> token, int maximumTokenSizeInBytes)
         {
             if (token.IsEmpty || token.Span.IsWhiteSpace())
                 return false;
@@ -630,7 +630,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">The JWT token.</param>
         /// <param name="maxCount">The maximum number of segments to count up to.</param>
         /// <returns>The number of segments up to <paramref name="maxCount"/>.</returns>
-        internal static int CountJwtTokenPart(in ReadOnlySpan<char> token, int maxCount)
+        internal static int CountJwtTokenPart(ReadOnlySpan<char> token, int maxCount)
         {
             int count = 1;
             int index = 0;
@@ -650,7 +650,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     break;
                 }
 
-                localToken = localToken[index..];
+                localToken = localToken.Slice(index);
             }
 
             return count;

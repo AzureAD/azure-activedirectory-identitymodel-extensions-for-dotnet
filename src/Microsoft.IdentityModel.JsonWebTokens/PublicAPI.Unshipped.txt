@@ -1,1 +1,1 @@
-virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CanReadToken(in System.ReadOnlyMemory<char> token) -> bool
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CanReadToken(System.ReadOnlyMemory<char> token) -> bool
