@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Xunit;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -667,6 +668,122 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        [Fact]
+        public async Task ValidateActorToken_WithMaxChainLength_ValidatesSuccessfully()
+        {
+            var context = new CompareContext($"{this}.ValidateActorToken_WithMaxChainLength_ValidatesSuccessfully");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
+            try
+            {
+                // Create a token with nested actors
+                var handler = new JsonWebTokenHandler();
+                string actorname = "actortoken";
+                // Create level 3 actor (innermost)
+                var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
+                level3Actor.AddClaim(new Claim("sub", "level3-actor"));
+                level3Actor.AddClaim(new Claim("name", "Level 3 Actor"));
+                level3Actor.AddClaim(new Claim("exp", EpochTime.GetIntDate(DateTime.UtcNow.AddHours(1)).ToString()));
+
+
+                // Create level 2 actor with level 3 as its actor
+                var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
+                level2Actor.AddClaim(new Claim("sub", "level2-actor"));
+                level2Actor.AddClaim(new Claim("name", "Level 2 Actor"));
+                level2Actor.Actor = level3Actor;
+                level2Actor.AddClaim(new Claim("exp", EpochTime.GetIntDate(DateTime.UtcNow.AddHours(1)).ToString()));
+
+                // Create level 1 actor with level 2 as its actor
+                var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
+                level1Actor.AddClaim(new Claim("sub", "level1-actor"));
+                level1Actor.AddClaim(new Claim("name", "Level 1 Actor"));
+                level1Actor.Actor = level2Actor;
+                level1Actor.AddClaim(new Claim("exp", EpochTime.GetIntDate(DateTime.UtcNow.AddHours(1)).ToString()));
+
+                // Create main identity with level 1 as its actor
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+                mainIdentity.AddClaim(new Claim("name", "Main User"));
+                mainIdentity.Actor = level1Actor;
+
+                // Define audience
+                string audience = "https://api.example.com";
+                string issuer = "https://example.com";
+
+                // Create token with actor chain
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = mainIdentity,
+                    Issuer = issuer,
+                    Audience = audience,
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = actorname,
+                    MaxActorChainLength = 3
+                };
+                var token = handler.CreateToken(tokenDescriptor);
+
+                // Configure validation parameters
+                var validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.ValidIssuer = issuer;
+                validationParameters.ValidAudience = audience;
+                validationParameters.ValidateActor = true;
+                validationParameters.MaxActorChainLength = 3;
+                validationParameters.ActorClaimName = actorname;
+                validationParameters.ActorValidationParameters = validationParameters.Clone();
+
+                // Create actor validation parameters
+                var actorValidationParameters = validationParameters.Clone();
+                actorValidationParameters.RequireSignedTokens = false;
+                actorValidationParameters.ValidateLifetime = false;
+                actorValidationParameters.ValidateAudience = false;
+                actorValidationParameters.ValidateIssuer = false;
+
+                validationParameters.ActorValidationParameters = actorValidationParameters;
+                // Validate token
+                var result = await handler.ValidateTokenAsync(token, validationParameters);
+                if (!result.IsValid)
+                {
+                    Console.WriteLine($"Validation failed: {result.Exception?.Message}");
+                }
+                Assert.True(result.IsValid, "Token should be valid");
+
+                // Get the main JsonWebToken from the result
+                var mainToken = result.SecurityToken as JsonWebToken;
+                Assert.NotNull(mainToken);
+                Assert.Equal("main-subject-id", mainToken.Subject);
+                Console.WriteLine($"Main User Subject: {mainToken.Subject}");
+
+                // Follow and verify actor chain using JsonWebToken.Actor and ReadJsonWebToken
+                var currentToken = mainToken;
+                var actorLevels = new[] { "level1-actor", "level2-actor", "level3-actor" };
+
+                for (int i = 0; i < actorLevels.Length; i++)
+                {
+                    // Get actor JWT string and convert it to JsonWebToken
+                    var actorTokenString = currentToken.Actor;
+                    Assert.False(string.IsNullOrEmpty(actorTokenString), $"Actor token at level {i} should not be null or empty");
+                    Console.WriteLine($"Here is the token for {i} iteration : {actorTokenString}");
+                    // Parse the actor token string into a JsonWebToken
+                    var actorToken = handler.ReadJsonWebToken(actorTokenString);
+                    Assert.NotNull(actorToken);
+                    actorToken.ActorClaimName = actorname;
+                    // Verify actor token claims
+                    Assert.Equal(actorLevels[i], actorToken.Subject);
+                    Assert.NotNull(actorToken.GetPayloadValue<string>("name"));
+                    Console.WriteLine($"Actor {i + 1}: Subject={actorToken.Subject}, Name={actorToken.GetPayloadValue<string>("name")}");
+
+                    // Move to next actor in the chain
+                    currentToken = actorToken;
+                }
+                // Verify no more actors beyond max depth
+                Assert.True(string.IsNullOrEmpty(currentToken.Actor), "There should be no more actors beyond the specified depth");
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
+            }
+        }
     }
 }
-

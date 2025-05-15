@@ -1,0 +1,6 @@
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.get -> int
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.set -> void
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorClaimName.get -> string
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorClaimName.set -> void
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.MaxActorChainLength.get -> int
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.MaxActorChainLength.set -> void

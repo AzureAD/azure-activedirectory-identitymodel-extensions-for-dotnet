@@ -452,7 +452,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var jwt = token as JsonWebToken;
             if (jwt == null)
                 return new TokenValidationResult { Exception = LogHelper.LogArgumentException<ArgumentException>(nameof(token), $"{nameof(token)} must be a {nameof(JsonWebToken)}."), IsValid = false };
-
             try
             {
                 return await ValidateTokenAsync(jwt, validationParameters).ConfigureAwait(false);
@@ -496,7 +495,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
                 }
             }
-
             TokenValidationResult tokenValidationResult = jsonWebToken.IsEncrypted ?
                 await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false) :
                 await ValidateJWSAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false);
@@ -583,6 +581,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
+                if (AppContextSwitches.SerializeDeserializeActorClaim)
+                {
+                    if (validationParameters.ActorChainDepth >= validationParameters.MaxActorChainLength)
+                    {
+                        throw LogHelper.LogExceptionMessage(
+                        new SecurityTokenException(
+                            LogHelper.FormatInvariant(
+                            LogMessages.IDX14313,
+                             LogHelper.MarkAsNonPII(validationParameters.MaxActorChainLength))));
+                    }
+                    else
+                    {
+                        validationParameters.ActorChainDepth++;
+                    }
+                }
                 // Infinite recursion should not occur here, as the JsonWebToken passed into this method is (1) constructed from a string
                 // AND (2) the signature is successfully validated on it. (1) implies that even if there are nested actor tokens,
                 // they must end at some point since they cannot reference one another. (2) means that the token has a valid signature
