@@ -538,7 +538,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return Base64UrlEncoding.Decode<JsonDocument>(rawString, startIndex, length, ParseDocument);
         }
 #endif
-
     }
 }
 

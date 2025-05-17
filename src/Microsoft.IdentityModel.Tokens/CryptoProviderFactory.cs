@@ -19,9 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         private static object _cacheLock = new object();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
         private int _signatureProviderObjectPoolCacheSize = _defaultSignatureProviderObjectPoolCacheSize;
-#if !NET45
-        internal const string _skipValidationOfHmacKeySizes = "Switch.Microsoft.IdentityModel.UnsafeRelaxHmacKeySizeValidation";
-#endif
+
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
         /// </summary>
@@ -492,7 +490,7 @@ namespace Microsoft.IdentityModel.Tokens
         private static void ValidateKeySize(byte[] keyBytes, string algorithm, int expectedNumberOfBytes)
         {
 #if !NET45
-            if (AppContext.TryGetSwitch(_skipValidationOfHmacKeySizes, out bool skipValidationOfHmacKeySize) && skipValidationOfHmacKeySize)
+            if (AppContextSwitches.SkipValidationOfHmacKeySizes)
                 return;
 #endif
             if (keyBytes.Length < expectedNumberOfBytes)

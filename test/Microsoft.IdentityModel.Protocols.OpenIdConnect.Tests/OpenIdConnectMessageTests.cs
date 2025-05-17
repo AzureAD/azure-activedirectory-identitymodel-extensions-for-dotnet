@@ -218,7 +218,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader(testId, "OidcCreateAuthenticationRequestUrl", true);
             var context = new CompareContext();
 // there is no net452 target, we bind to net45
-#if NET452
+#if NET45
             if(!message.SkuTelemetryValue.Equals("ID_NET45"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET45");
 #elif NET461
@@ -494,7 +494,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var context = new CompareContext();
 // there is no net452 target, we bind to net45
-#if NET452
+#if NET45
             if (!message.SkuTelemetryValue.Equals("ID_NET45"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET45");
 #elif NET461
@@ -505,7 +505,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET472");
 #elif NET6_0
             if (!message.SkuTelemetryValue.Equals("ID_NET6_0"))
-                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETCOREAPP3_1");
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET6_0");
 #elif NET_CORE
             if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");
