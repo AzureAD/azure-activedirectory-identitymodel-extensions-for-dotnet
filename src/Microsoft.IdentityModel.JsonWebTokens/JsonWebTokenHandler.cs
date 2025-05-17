@@ -553,7 +553,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 try
                 {
                     jsonWebToken = new JsonWebToken(token, validationParameters.TryReadJwtClaim);
-                    jsonWebToken.ActorClaimName = validationParameters.ActorClaimName;
                 }
                 catch (Exception ex)
                 {

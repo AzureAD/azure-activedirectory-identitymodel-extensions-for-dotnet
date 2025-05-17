@@ -759,7 +759,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
             if (AppContextSwitches.SerializeDeserializeActorClaim)
-                WriteActorToken(writer, tokenDescriptor);
+                WriteActorToken(writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
@@ -1077,61 +1077,67 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
         }
-        private static void WriteActorToken(
+        internal static void WriteActorToken(
             Utf8JsonWriter writer,
-            SecurityTokenDescriptor tokenDescriptor)
+            SecurityTokenDescriptor tokenDescriptor,
+            bool setDefaultTimesOnTokenCreation,
+            int tokenLifetimeInMinutes)
         {
             if (tokenDescriptor == null)
-            {
                 throw new ArgumentNullException(nameof(tokenDescriptor));
-            }
-            SecurityTokenDescriptor actorTokenDescriptor = null;
-            if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.ContainsKey(tokenDescriptor.ActorClaimName))
+
+            var actorTokenDescriptor = CreateActorTokenDescriptor(tokenDescriptor);
+            if (actorTokenDescriptor == null || actorTokenDescriptor.Subject == null)
+                return;
+            writer.WritePropertyName(tokenDescriptor.ActorClaimName);
+            WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+        }
+
+        private static void ValidateActorChainDepth(SecurityTokenDescriptor tokenDescriptor)
+        {
+            if (tokenDescriptor.ActorChainDepth >= tokenDescriptor.MaxActorChainLength)
             {
-                // Check for maximum actor chain depth
-                if (tokenDescriptor.ActorChainDepth >= tokenDescriptor.MaxActorChainLength)
-                {
-                    throw LogHelper.LogExceptionMessage(
-                        new SecurityTokenException(
-                            LogHelper.FormatInvariant(
-                            LogMessages.IDX14313,
-                             LogHelper.MarkAsNonPII(tokenDescriptor.MaxActorChainLength))));
-                }
+                throw LogHelper.LogExceptionMessage(
+                new SecurityTokenException(LogHelper.FormatInvariant(
+                    LogMessages.IDX14313,
+                    LogHelper.MarkAsNonPII(tokenDescriptor.ActorChainDepth),
+                    LogHelper.MarkAsNonPII(tokenDescriptor.MaxActorChainLength))));
+            }
+        }
+
+        private static SecurityTokenDescriptor CreateActorTokenDescriptor(SecurityTokenDescriptor tokenDescriptor)
+        {
+            SecurityTokenDescriptor actorTokenDescriptor = null;
+
+            // Check for actor in claims first
+            if (tokenDescriptor.Claims?.ContainsKey(tokenDescriptor.ActorClaimName) == true)
+            {
                 ClaimsIdentity actor = tokenDescriptor.Claims[tokenDescriptor.ActorClaimName] as ClaimsIdentity;
                 actorTokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = actor,
                 };
             }
-            else
+            // Then check for actor in subject
+            else if (tokenDescriptor.Subject?.Actor != null)
             {
-                if (tokenDescriptor.Subject != null && tokenDescriptor.Subject.Actor != null)
+                actorTokenDescriptor = new SecurityTokenDescriptor
                 {
-                    if (tokenDescriptor.ActorChainDepth >= tokenDescriptor.MaxActorChainLength)
-                    {
-                        throw LogHelper.LogExceptionMessage(
-                            new SecurityTokenException(
-                                LogHelper.FormatInvariant(
-                                LogMessages.IDX14313,
-                                 LogHelper.MarkAsNonPII(tokenDescriptor.MaxActorChainLength))));
-                    }
-                    actorTokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Subject = tokenDescriptor.Subject.Actor,
-                    };
-                }
+                    Subject = tokenDescriptor.Subject.Actor,
+                };
             }
-
             if (actorTokenDescriptor != null)
             {
+                ValidateActorChainDepth(tokenDescriptor);
+
                 actorTokenDescriptor.MaxActorChainLength = tokenDescriptor.MaxActorChainLength;
                 actorTokenDescriptor.ActorClaimName = tokenDescriptor.ActorClaimName;
-                actorTokenDescriptor.ActorChainDepth = actorTokenDescriptor.ActorChainDepth + 1;
-                string actorToken = CreateToken(actorTokenDescriptor, false, 0);
-                writer.WritePropertyName(tokenDescriptor.ActorClaimName);
-                writer.WriteStringValue(actorToken);
+                actorTokenDescriptor.ActorChainDepth = tokenDescriptor.ActorChainDepth + 1;
             }
+
+            return actorTokenDescriptor;
         }
+
         internal static byte[] CompressToken(byte[] utf8Bytes, string compressionAlgorithm)
         {
             if (string.IsNullOrEmpty(compressionAlgorithm))

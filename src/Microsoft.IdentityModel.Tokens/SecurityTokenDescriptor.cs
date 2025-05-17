@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
         [DefaultValue(true)]
         public bool IncludeKeyIdInHeader { get; set; } = true;
 
-        private int maxActorChainLength = 5;
+        private int _maxActorChainLength = 5;
         /// <summary>
         /// Gets or sets the maximum depth allowed when processing nested actor tokens.
         /// This prevents excessive recursion when handling deeply nested actor tokens.
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0.</exception>
         public int MaxActorChainLength
         {
-            get => maxActorChainLength;
+            get => _maxActorChainLength;
             set
             {
                 if (value < 0 || value > 5)
@@ -139,11 +139,11 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.MarkAsNonPII("MaxActorChainLength"))
                     + ". Permissible values are integers in range 0 to 5"));
 
-                maxActorChainLength = value;
+                _maxActorChainLength = value;
             }
         }
 
-        private string actorClaimName = "act";
+        private string _actorClaimName = "act";
         /// <summary>
         /// Gets or sets the claim type name for the actor claim.
         /// Permissible values are 'act' or 'actort'.
@@ -156,7 +156,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </exception>
         public string ActorClaimName
         {
-            get => AppContextSwitches.SerializeDeserializeActorClaim ? actorClaimName : "actort";
+            get => _actorClaimName;
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -166,7 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogMessages.IDX11027,
                     LogHelper.MarkAsNonPII("ActorClaimName"))
                     + ". ActorClaimName cannot be empty."));
-                actorClaimName = value;
+                _actorClaimName = value;
             }
         }
         private int _actorClainDepth;

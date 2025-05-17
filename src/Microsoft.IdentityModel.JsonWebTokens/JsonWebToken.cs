@@ -57,34 +57,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal DateTime? _nbfDateTime;
         internal DateTime? _validFrom;
         internal DateTime? _validTo;
-
-        private string actorClaimName = "act";
-        /// <summary>
-        /// Gets or sets the claim type name for the actor claim.
-        /// Permissible values are 'act' or 'actort'.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if the value is null.
-        /// </exception>
-        /// <exception cref="SecurityTokenException">
-        /// Thrown if the value is not 'act' or 'actort'.
-        /// </exception>
-        internal string ActorClaimName
-        {
-            get => AppContextSwitches.SerializeDeserializeActorClaim ? actorClaimName : "actort";
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogExceptionMessage(
-                    new ArgumentNullException(
-                    LogHelper.FormatInvariant(
-                    LogMessages.IDX14313,
-                    LogHelper.MarkAsNonPII("ActorClaimName"))
-                    + ". ActorClaimName cannot be empty."));
-
-                actorClaimName = value;
-            }
-        }
         #endregion
 
         /// <summary>
@@ -1048,7 +1020,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                _act ??= Payload.GetStringValue(ActorClaimName);
+                _act ??= Payload.GetStringValue(JwtRegisteredClaimNames.Actort);
                 return _act;
             }
         }
