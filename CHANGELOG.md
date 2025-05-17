@@ -1,5 +1,15 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.10.0
+=====
+## Bug Fixes
+- Corrected casing of the Type attribute in SubjectConfirmationData. See [#3206](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3206).
+- Removed Microsoft.Bcl.Memory dependency for pre-.NET 9.0 targets. See [#3220](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/33784b8ec0ff4300efad788535f90b3adc5bdfd1) to avoid build warnings with the other target frameworks
+- Aligned Microsoft.Extensions.Logging.Abstractions version to 8.0.0 for .NET 9 to match other targets. See [#3226](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/793bd34e945eb8ba7528cf87c4a29a29c4704a65).
+
+## Fundamentals
+- Introduced Long-Term Support (LTS) policy. See [#3228](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/946bec18cdeb26b8133a04e8c056dd5f17588f89) and [#3232](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/14842aedb3d57c32b9ce784061cd9beccbdd1eb1).
+
 8.9.0
 =====
 ## Bug Fixes
