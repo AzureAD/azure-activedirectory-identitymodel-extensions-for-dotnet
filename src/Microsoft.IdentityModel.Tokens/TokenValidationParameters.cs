@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -828,5 +829,24 @@ namespace Microsoft.IdentityModel.Tokens
                 _actorClainDepth = value;
             }
         }
+        /// <summary>
+        /// Delegate to validate the 'act' claim and create actor's ClaimsIdentity.
+        /// </summary>
+        /// <param name="actClaim">The JSON element representing the 'act' claim.</param>
+        /// <param name="actorToken">The actor token string.</param>
+        /// <param name="validationParameters">The token validation parameters.</param>
+        /// <returns>A ClaimsIdentity representing the actor.</returns>
+        public delegate ClaimsIdentity ActClaimValidationDelegate(JsonElement actClaim, string actorToken, TokenValidationParameters validationParameters);
+
+        // Add these properties to the TokenValidationParameters class
+        /// <summary>
+        /// Gets or sets the delegate that will be used to validate the 'act' claim and create actor's ClaimsIdentity.
+        /// </summary>
+        public ActClaimValidationDelegate ActorTokenValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets a boolean to determine if actor token ('actort') validation is enabled.
+        /// </summary>
+        public bool ValidateActorToken { get; set; }
     }
 }
