@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14112 = "IDX14112: Only a single 'Actor' is supported. Found second claim of type: '{0}'";
         internal const string IDX14113 = "IDX14113: A duplicate value for 'SecurityTokenDescriptor.{0}' exists in 'SecurityTokenDescriptor.Claims'. \nThe value of 'SecurityTokenDescriptor.{0}' is used.";
         internal const string IDX14114 = "IDX14114: Both '{0}.{1}' and '{0}.{2}' are null or empty.";
-        // internal const string IDX14115 = "IDX14115:";
+        internal const string IDX14115 = "IDX14115: Unable to validate Actor token as act claim. Act claim validation is enabled but ActorTokenValidationDelegate was not provided";
         internal const string IDX14116 = "IDX14116: '{0}' cannot contain the following claims: '{1}'. These values are added by default (if necessary) during security token creation.";
         // number of sections 'dots' is not correct
         internal const string IDX14120 = "IDX14120: JWT is not well formed, there is only one dot (.).\nThe token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EncodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.";

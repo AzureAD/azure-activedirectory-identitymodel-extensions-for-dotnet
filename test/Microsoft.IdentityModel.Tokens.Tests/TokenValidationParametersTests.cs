@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 65;
+        int ExpectedPropertyCount = 67;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
@@ -198,9 +198,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
-                    new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                     new KeyValuePair<string, List<object>>("ActorClaimName", new List<object>{"actort"}),
                     new KeyValuePair<string, List<object>>("ActorChainDepth", new List<object>{0,1}),
+                    new KeyValuePair<string, List<object>>("ActorTokenValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
+                    new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                     new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
                     new KeyValuePair<string, List<object>>("ConfigurationManager", new List<object>{(BaseConfigurationManager)null, new ConfigurationManager<OpenIdConnectConfiguration>("http://127.0.0.1", new OpenIdConnectConfigurationRetriever()), new ConfigurationManager<WsFederationConfiguration>("http://127.0.0.1", new WsFederationConfigurationRetriever()) }),
@@ -287,7 +288,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             if (validationParametersClone.InstancePropertyBag.Count != 0)
                 compareContext.AddDiff("validationParametersClone.InstancePropertyBag.Count != 0), should be empty.");
-
             TestUtilities.AssertFailIfErrors(compareContext);
         }
 
@@ -315,6 +315,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.TransformBeforeSignatureValidation = ValidationDelegates.TransformBeforeSignatureValidation;
             validationParameters.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParameters.TypeValidator = ValidationDelegates.TypeValidator;
+            validationParameters.ActorTokenValidationDelegate = ValidationDelegates.ActorTokenValidationDelegate;
 
             validationParameters.ActorValidationParameters = new TokenValidationParameters();
             validationParameters.ClockSkew = TimeSpan.FromSeconds(42);
@@ -355,7 +356,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.ValidateSignatureLast = !validationParametersDefault.ValidateSignatureLast;
             validationParameters.ValidateWithLKG = !validationParametersDefault.ValidateWithLKG;
             validationParameters.ValidateTokenReplay = !validationParametersDefault.ValidateTokenReplay;
-
             return validationParameters;
         }
 

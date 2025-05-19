@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Xunit;
+using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Tests
 {
     public class ActorClaimsTests
@@ -661,6 +662,154 @@ namespace Microsoft.IdentityModel.Tests
             {
                 // Unexpected exception type
                 context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public async Task ActorValidatorShouldBeInvokedAndRespected()
+        {
+            var context = new CompareContext($"{this}.ActorValidatorShouldBeInvokedAndRespected");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, true);
+            try
+            {
+                // Create actor identity
+                var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+                actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+                actorIdentity.AddClaim(new Claim("name", "Actor Name"));
+                actorIdentity.AddClaim(new Claim("role", "admin"));
+
+                // Create the main identity with Actor set
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+                mainIdentity.AddClaim(new Claim("name", "Main User"));
+                mainIdentity.Actor = actorIdentity;
+
+                // Create and sign a token
+                var tokenHandler = new JsonWebTokenHandler();
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = mainIdentity,
+                    Issuer = "https://example.com",
+                    Audience = "https://api.example.com",
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = Default.AsymmetricSigningCredentials
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                // Test Case 1: Successful actor validation
+                {
+                    bool validatorCalled = false;
+
+                    // Create validation parameters with a custom actor validator
+                    var validationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = "https://example.com",
+                        ValidateAudience = true,
+                        ValidAudience = "https://api.example.com",
+                        ValidateLifetime = true,
+                        IssuerSigningKey = Default.AsymmetricSigningCredentials.Key,
+                        ValidateIssuerSigningKey = true,
+                        ActorValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = false,
+                            ValidateAudience = false
+                        },
+                        ActorTokenValidationDelegate = (actorElement, actorValidationParams) =>
+                        {
+                            validatorCalled = true;
+
+                            // Verify the actor element structure
+                            Assert.Equal("actor-subject-id", actorElement.GetProperty("sub").GetString());
+                            Assert.Equal("Actor Name", actorElement.GetProperty("name").GetString());
+                            Assert.Equal("admin", actorElement.GetProperty("role").GetString());
+
+                            return new TokenValidationResult { IsValid = true };
+                        }
+                    };
+
+                    // Validate the token - should succeed
+                    var result = await tokenHandler.ValidateTokenAsync(token, validationParameters);
+
+                    // Assert that validation succeeded and our validator was called
+                    Assert.True(result.IsValid, "Token validation should succeed");
+                    Assert.True(validatorCalled, "Actor validator should be called");
+                }
+
+                // Test Case 2: Failing actor validation
+                {
+                    bool validatorCalled = false;
+                    string expectedErrorMessage = "IDX14115";
+
+                    var validationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = "https://example.com",
+                        ValidateAudience = true,
+                        ValidAudience = "https://api.example.com",
+                        ValidateLifetime = true,
+                        IssuerSigningKey = Default.AsymmetricSigningCredentials.Key,
+                        ValidateIssuerSigningKey = true,
+                        ActorTokenValidationDelegate = (actorElement, actorValidationParams) =>
+                        {
+                            validatorCalled = true;
+
+                            // Return failed validation
+                            return new TokenValidationResult
+                            {
+                                IsValid = false,
+                                Exception = new SecurityTokenValidationException(expectedErrorMessage)
+                            };
+                        }
+                    };
+
+                    // Validate the token - should fail
+                    var result = await tokenHandler.ValidateTokenAsync(token, validationParameters);
+
+                    // Assert that validation failed and our validator was called
+                    Assert.False(result.IsValid, "Token validation should fail");
+                    Assert.True(validatorCalled, "Actor validator should be called");
+                    Assert.NotNull(result.Exception);
+                    Assert.Contains(expectedErrorMessage, result.Exception.Message);
+                }
+
+                // Test Case 3: Missing actor validator throws exception
+                {
+                    var validationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = "https://example.com",
+                        ValidateAudience = true,
+                        ValidAudience = "https://api.example.com",
+                        ValidateLifetime = true,
+                        IssuerSigningKey = Default.AsymmetricSigningCredentials.Key,
+                        ValidateIssuerSigningKey = true,
+                        ActorTokenValidationDelegate = null
+                    };
+
+                    // Validate the token - should throw exception
+                    var result = await tokenHandler.ValidateTokenAsync(token, validationParameters);
+
+                    Assert.False(result.IsValid);
+                    Assert.NotNull(result.Exception);
+                    Assert.True(result.Exception is SecurityTokenInvalidSignatureException,
+                        $"Expected SecurityTokenInvalidSignatureException but got {result.Exception.GetType().Name}");
+                    Assert.Contains("IDX14115", result.Exception.Message);
+                }
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+                TestUtilities.AssertFailIfErrors(context);
             }
             finally
             {
