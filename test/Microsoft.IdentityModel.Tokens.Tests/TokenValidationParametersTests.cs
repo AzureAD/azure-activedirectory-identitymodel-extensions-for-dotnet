@@ -288,6 +288,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             if (validationParametersClone.InstancePropertyBag.Count != 0)
                 compareContext.AddDiff("validationParametersClone.InstancePropertyBag.Count != 0), should be empty.");
+
             TestUtilities.AssertFailIfErrors(compareContext);
         }
 
@@ -356,6 +357,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.ValidateSignatureLast = !validationParametersDefault.ValidateSignatureLast;
             validationParameters.ValidateWithLKG = !validationParametersDefault.ValidateWithLKG;
             validationParameters.ValidateTokenReplay = !validationParametersDefault.ValidateTokenReplay;
+
             return validationParameters;
         }
 

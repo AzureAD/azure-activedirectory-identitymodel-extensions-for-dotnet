@@ -453,6 +453,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var jwt = token as JsonWebToken;
             if (jwt == null)
                 return new TokenValidationResult { Exception = LogHelper.LogArgumentException<ArgumentException>(nameof(token), $"{nameof(token)} must be a {nameof(JsonWebToken)}."), IsValid = false };
+
             try
             {
                 return await ValidateTokenAsync(jwt, validationParameters).ConfigureAwait(false);
@@ -496,6 +497,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
                 }
             }
+
             TokenValidationResult tokenValidationResult = jsonWebToken.IsEncrypted ?
                 await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false) :
                 await ValidateJWSAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false);

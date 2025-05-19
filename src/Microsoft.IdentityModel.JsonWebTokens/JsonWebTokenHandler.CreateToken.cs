@@ -755,6 +755,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                         nbfSet = true;
                     }
+
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
