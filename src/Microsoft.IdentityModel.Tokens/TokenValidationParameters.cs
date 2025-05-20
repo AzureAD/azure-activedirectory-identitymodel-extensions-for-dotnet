@@ -211,7 +211,6 @@ namespace Microsoft.IdentityModel.Tokens
             return new(this)
             {
                 IsClone = true,
-                ActorTokenValidationDelegate = this.ActorTokenValidationDelegate
             };
         }
 
@@ -764,83 +763,5 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
 
-
-        private int maxActorChainLength = 5;
-        /// <summary>
-        /// Gets or sets the maximum depth allowed when processing nested actor tokens.
-        /// This prevents excessive recursion when handling deeply nested actor tokens.
-        /// The value must be at least 0. Value 0 would mean that the actor token is not allowed to be nested.
-        /// Default value is 5. Max value is also 5
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0.</exception>
-        public int MaxActorChainLength
-        {
-            get => maxActorChainLength;
-            set
-            {
-                if (value < 0 || value > 5)
-                    throw LogHelper.LogExceptionMessage(
-                    new ArgumentOutOfRangeException(
-                    LogHelper.FormatInvariant(
-                    LogMessages.IDX11027,
-                    LogHelper.MarkAsNonPII("MaxActorChainLength"))
-                    + ". Permissible values are integers in range 0 to 5"));
-
-                maxActorChainLength = value;
-            }
-        }
-
-        private string actorClaimName = "act";
-        /// <summary>
-        /// Gets or sets the claim type name for the actor claim.
-        /// Permissible values are 'act' or 'actort'.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if the value is null.
-        /// </exception>
-        /// <exception cref="SecurityTokenException">
-        /// Thrown if the value is not 'act' or 'actort'.
-        /// </exception>
-        public string ActorClaimName
-        {
-            get => AppContextSwitches.SerializeDeserializeActorClaim ? actorClaimName : "actort";
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogExceptionMessage(
-                    new ArgumentOutOfRangeException(
-                    LogHelper.FormatInvariant(
-                    LogMessages.IDX11027,
-                    LogHelper.MarkAsNonPII("ActorClaimName"))
-                    + ". ValidationParameters.ActorClaimName cannot be set to empty."));
-                actorClaimName = value;
-            }
-        }
-        private int _actorClainDepth;
-        /// <summary>
-        /// Gets or sets the depth of the actor chain.
-        /// This value determines the maximum depth of nested actor tokens that can be processed.
-        /// </summary>
-        public int ActorChainDepth
-        {
-            get => _actorClainDepth;
-            set
-            {
-                _actorClainDepth = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the delegate that will be used to validate the 'act' claim and create actor's ClaimsIdentity.
-        /// </summary>
-        public ActorTokenValidationDelegate ActorTokenValidationDelegate { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="TokenValidationParameters"/> used to validate the actor claim.
-        /// </summary>
-        /// <remarks>
-        /// This property allows specifying custom validation parameters for the actor claim.
-        /// </remarks>
-        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
     }
 }

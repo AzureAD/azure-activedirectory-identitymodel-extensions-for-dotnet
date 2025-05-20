@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 67;
+        int ExpectedPropertyCount = 62;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
@@ -198,9 +198,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
-                    new KeyValuePair<string, List<object>>("ActorClaimName", new List<object>{"actort"}),
-                    new KeyValuePair<string, List<object>>("ActorChainDepth", new List<object>{0,1}),
-                    new KeyValuePair<string, List<object>>("ActorTokenValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                     new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                     new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
@@ -215,7 +212,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
                     new KeyValuePair<string, List<object>>("LogTokenId", new List<object>{true, false, true}),
                     new KeyValuePair<string, List<object>>("LogValidationExceptions", new List<object>{true, false, true}),
-                    new KeyValuePair<string, List<object>>("MaxActorChainLength", new List<object>{5,2}),
                     new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("PropertyBag", new List<object>{(IDictionary<string, Object>)null, new Dictionary<string, Object> {{"CustomKey", "CustomValue"}}, new Dictionary<string, Object>()}),
                     new KeyValuePair<string, List<object>>("RefreshBeforeValidation", new List<object>{false, true, false}),
@@ -316,8 +312,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.TransformBeforeSignatureValidation = ValidationDelegates.TransformBeforeSignatureValidation;
             validationParameters.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParameters.TypeValidator = ValidationDelegates.TypeValidator;
-            validationParameters.ActorTokenValidationDelegate = ValidationDelegates.ActorTokenValidationDelegate;
-
             validationParameters.ActorValidationParameters = new TokenValidationParameters();
             validationParameters.ClockSkew = TimeSpan.FromSeconds(42);
             validationParameters.DebugId = Guid.NewGuid().ToString();
