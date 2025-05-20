@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -313,6 +315,46 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             return identity;
+        }
+
+        /// <summary>
+        /// Decrypts a JWE and returns the clear text.
+        /// </summary>
+        /// <param name="jwtToken">The JWE that contains the cypher text.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <returns>The decoded (clear text) contents of the JWE.</returns>
+        public async Task<string> DecryptTokenWithConfiguration(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+        {
+            if (jwtToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            if (string.IsNullOrEmpty(jwtToken.Enc))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
+
+            BaseConfiguration currentConfiguration = null;
+            if (validationParameters.ConfigurationManager != null)
+            {
+                try
+                {
+                    currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
+                    // directly on them, allowing the library to continue with token validation.
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                }
+            }
+
+            var keys = GetContentEncryptionKeys(jwtToken, validationParameters, null);
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, keys);
+            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters);
         }
 
         /// <summary>
