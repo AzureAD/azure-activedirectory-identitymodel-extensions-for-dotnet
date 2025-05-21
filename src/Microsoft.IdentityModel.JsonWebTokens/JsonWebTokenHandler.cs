@@ -352,7 +352,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            var keys = GetContentEncryptionKeys(jwtToken, validationParameters, null);
+            var keys = GetContentEncryptionKeys(jwtToken, validationParameters, currentConfiguration);
             var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, keys);
             return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters);
         }
