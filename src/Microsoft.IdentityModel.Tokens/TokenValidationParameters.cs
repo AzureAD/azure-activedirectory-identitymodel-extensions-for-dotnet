@@ -803,7 +803,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </exception>
         public string ActorClaimName
         {
-            get => AppContextSwitches.SerializeDeserializeActorClaim ? actorClaimName : "actort";
+            get => AppContextSwitches.EnableActClaimSupport ? actorClaimName : "actort";
             set
             {
                 if (string.IsNullOrEmpty(value))

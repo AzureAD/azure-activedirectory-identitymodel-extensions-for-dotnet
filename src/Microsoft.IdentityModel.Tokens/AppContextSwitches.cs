@@ -99,11 +99,11 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
-        /// Enable the legacy behavior of actor claims. The legacy behavior is to use "actort" as claim name and also not serialize actor claim.
+        /// This switch enables the support for act claim. When enabled the actor claim will be serialized and deserialized into JsonWebToken.
         /// </summary>
-        internal const string SerializeDeserializeActorClaimSwitch = "Switch.Microsoft.IdentityModel.SerializeDeserializeActorClaim";
-        private static bool? _serializeDeserializeActorClaim;
-        internal static bool SerializeDeserializeActorClaim => _serializeDeserializeActorClaim ??= (AppContext.TryGetSwitch(SerializeDeserializeActorClaimSwitch, out bool SerializeDeserializeActorClaim) && SerializeDeserializeActorClaim);
+        internal const string EnableActClaimSupportSwitch = "Switch.Microsoft.IdentityModel.EnableActClaimSupportSwitch";
+        private static bool? _enableActClaimSupport;
+        internal static bool EnableActClaimSupport => _enableActClaimSupport ??= (AppContext.TryGetSwitch(EnableActClaimSupportSwitch, out bool EnableActClaimSupport) && EnableActClaimSupport);
         /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
@@ -130,8 +130,8 @@ namespace Microsoft.IdentityModel.Tokens
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
 
-            _serializeDeserializeActorClaim = null;
-            AppContext.SetSwitch(SerializeDeserializeActorClaimSwitch, false);
+            _enableActClaimSupport = null;
+            AppContext.SetSwitch(EnableActClaimSupportSwitch, false);
         }
     }
 }

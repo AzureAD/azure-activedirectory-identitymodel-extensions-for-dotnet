@@ -673,8 +673,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    AppContext.TryGetSwitch(AppContextSwitches.SerializeDeserializeActorClaimSwitch, out bool isnebaled);
-                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimName, StringComparison.Ordinal))
+                    if (AppContextSwitches.EnableActClaimSupport && kvp.Key.Equals(tokenDescriptor.ActorClaimName, StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -759,7 +758,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
-            if (AppContextSwitches.SerializeDeserializeActorClaim)
+            if (AppContextSwitches.EnableActClaimSupport)
                 WriteActorToken(writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
