@@ -251,5 +251,9 @@ namespace Microsoft.IdentityModel.TestUtils
             return type;
         }
 
+        public static readonly ActorTokenValidationDelegate ActorTokenValidationDelegate = (actorClaim, validationParameters) =>
+        {
+            return new TokenValidationResult { IsValid = true };
+        };
     }
 }

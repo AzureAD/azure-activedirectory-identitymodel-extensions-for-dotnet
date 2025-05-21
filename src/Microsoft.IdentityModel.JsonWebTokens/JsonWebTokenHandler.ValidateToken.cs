@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Telemetry;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+using System.Text.Json;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -595,7 +596,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!tokenValidationResult.IsValid)
                     return tokenValidationResult;
             }
+            if (AppContextSwitches.SerializeDeserializeActorClaim && jsonWebToken.TryGetPayloadValue<JsonElement>(validationParameters.ActorClaimName, out var actClaim))
+            {
+                if (validationParameters.ActorTokenValidationDelegate != null)
+                {
+                    // Fix for CS1929: The issue occurs because `ConfigureAwait` is being called on a `TokenValidationResult` object, which is not a `Task` or `ValueTask`. 
+                    // The `ConfigureAwait` method is only valid for `Task` or `ValueTask` types. 
+                    // To fix this, remove the `ConfigureAwait(false)` call from the `ActorTokenValidator` invocation.
+                    var actorTokenValidationResult = validationParameters.ActorTokenValidationDelegate(actClaim, validationParameters.ActorValidationParameters);
+                    if (!actorTokenValidationResult.IsValid)
+                        return actorTokenValidationResult;
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX14115)));
+                }
 
+            }
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
             return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer, null)
             {

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -241,6 +240,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Delegate to validate the 'act' claim and create actor's ClaimsIdentity.
     /// </summary>
     /// <param name="actClaim">The JSON element representing the 'act' claim.</param>
+    /// <param name="validationParameters">The token validation parameters.</param>
     /// <returns>A ClaimsIdentity representing the actor.</returns>
-    public delegate ClaimsIdentity ActClaimRetrieverDelegate(JsonElement actClaim);
+    public delegate TokenValidationResult ActorTokenValidationDelegate(JsonElement actClaim, TokenValidationParameters validationParameters = null);
 }
