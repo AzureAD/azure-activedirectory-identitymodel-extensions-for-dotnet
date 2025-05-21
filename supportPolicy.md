@@ -5,7 +5,7 @@ _Last updated May 8, 2025_
 ## Supported versions
 The following table lists IdentityModel versions currently supported and receiving security fixes.
 
-| Major Version | Last Release | Patch release date  | Support phase|End of support |
+| Major Version | Last Release | Patch Release Date  | Support Phase|End of Support |
 | --------------|--------------|--------|------------|--------|
 | 8.x           | [![Nuget](https://img.shields.io/nuget/v/Microsoft.IdentityModel.JsonWebTokens?label=Latest%20release)](https://www.nuget.org/packages/Microsoft.IdentityModel.JsonWebTokens/)   |Monthly| Active | Tied to .NET 9 (STS) & 10 (LTS) ~ Nov, 2028.<br/>✅Supported versions: from 8.0.1 to [![Nuget](https://img.shields.io/nuget/v/Microsoft.IdentityModel.JsonWebTokens?label=Latest%20release)](https://www.nuget.org/packages/Microsoft.IdentityModel.JsonWebTokens/).<br/>⚠️Unsupported versions `< 8.0.1`.|
 | 7.x           | 7.7.1        | July 19, 2024 |Active, security fixes only |Supported (LTS) through .NET 8 LTS lifetime Nov 10, 2026.<br/>✅Supported version: `7.7.1`<br/>⚠️Unsupported versions `< 7.7.1`.|
@@ -16,10 +16,10 @@ The following table lists IdentityModel versions no longer supported and no long
 
 | Major Version | Latest Patch Version| Patch Release Date | End of Support Date|
 | --------------|--------------|--------|--------|
-| 7.x           | <= 7.7.0      |  July 18, 2024      | July 18, 2024 |
-| 6.x           | <= 6.36.0       | July 18, 2024       | May 2024|
-| 5.x           | <= 5.6.0      | October 18, 2019    | October 18, 2019|
-| 1.x           | <= 1.1.5        | November 17, 2017   | November 18, 2017|
+| 7.x           |    7.7.0      |  July 18, 2024      | July 18, 2024 |
+| 6.x           |    6.36.0     | July 18, 2024       | May 2024|
+| 5.x           |    5.6.0      | October 18, 2019    | October 18, 2019|
+| 1.x           |    1.1.5      | November 17, 2017   | November 18, 2017|
 
 ## Overview
 
