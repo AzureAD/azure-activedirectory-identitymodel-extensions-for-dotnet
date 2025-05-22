@@ -263,7 +263,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
                                     LogMessages.IDX14112,
-                                    LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
+                                    LogHelper.MarkAsNonPII(validationParameters.ActorClaimName),
                                     actClaim.ToString())));
                     if (validationParameters.ActClaimRetrieverDelegate != null)
                     {

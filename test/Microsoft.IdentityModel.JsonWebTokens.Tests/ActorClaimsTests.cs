@@ -1346,7 +1346,95 @@ namespace Microsoft.IdentityModel.Tests
                 AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
             }
         }
+        [ResetAppContextSwitches]
+        [Fact]
+        public async Task ValidateTokenAsync_WithActorInToken_ProvidesActorClaimsIdentity()
+        {
+            var context = new CompareContext($"{this}.ValidateTokenAsync_WithActorInToken_ProvidesActorClaimsIdentity");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create a token with an actor claim
+                var handler = new JsonWebTokenHandler();
 
+                var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+                actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+                actorIdentity.AddClaim(new Claim("name", "Actor Name"));
+                actorIdentity.AddClaim(new Claim("role", "admin"));
+
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+                mainIdentity.AddClaim(new Claim("name", "Main User"));
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = mainIdentity,
+                    Issuer = "https://example.com",
+                    Audience = "https://api.example.com",
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                    Claims = new Dictionary<string, object>
+                    {
+                        { "act", actorIdentity}
+                    },
+                    ActorClaimName = "act",
+                    MaxActorChainLength = 5
+                };
+                string token = handler.CreateToken(tokenDescriptor);
+                handler.MapInboundClaims = true;
+
+                // Validate token
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
+                    ValidateIssuerSigningKey = true,
+                    ActorClaimName = "act",
+                };
+
+                var result = await handler.ValidateTokenAsync(token, validationParameters);
+
+                // Verify validation succeeded
+                Assert.True(result.IsValid);
+                Assert.NotNull(result.SecurityToken);
+                Assert.NotNull(result.ClaimsIdentity);
+
+                // Verify main claims
+                var mainClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "name");
+                Assert.NotNull(mainClaim);
+                Assert.Equal("Main User", mainClaim.Value);
+                Console.WriteLine($"Verified main claims");
+
+                // Verify actor claims identity
+                Assert.NotNull(result.ClaimsIdentity.Actor);
+                var actorSubClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "sub");
+                var actorNameClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "name");
+                var actorRoleClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "role");
+                Assert.NotNull(actorSubClaim);
+                Assert.NotNull(actorNameClaim);
+                Assert.NotNull(actorRoleClaim);
+                Console.WriteLine($"Verified actor claim");
+
+                Assert.Equal("actor-subject-id", actorSubClaim.Value);
+                Assert.Equal("Actor Name", actorNameClaim.Value);
+                Assert.Equal("admin", actorRoleClaim.Value);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
 
     }
 }
