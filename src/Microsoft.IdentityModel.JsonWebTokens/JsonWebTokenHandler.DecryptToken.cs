@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -14,6 +15,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 {
     public partial class JsonWebTokenHandler : TokenHandler
     {
+        internal async Task<ValidationResult<string>> DecryptTokenWithConfigurationAsync(
+            JsonWebToken jwtToken,
+            ValidationParameters validationParameters,
+            CallContext? callContext)
+        {
+            if (jwtToken == null)
+            {
+                return ValidationError.NullParameter(
+                    nameof(jwtToken),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            if (validationParameters == null)
+            {
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            if (string.IsNullOrEmpty(jwtToken.Enc))
+            {
+                return new ValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10612),
+                    ValidationFailureType.TokenDecryptionFailed,
+                    typeof(SecurityTokenException),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            BaseConfiguration? currentConfiguration = await GetCurrentConfigurationAsync(validationParameters).ConfigureAwait(false);
+
+            return DecryptToken(jwtToken, validationParameters, currentConfiguration, callContext);
+        }
+
         /// <summary>
         /// Decrypts a JWE and returns the clear text.
         /// </summary>
