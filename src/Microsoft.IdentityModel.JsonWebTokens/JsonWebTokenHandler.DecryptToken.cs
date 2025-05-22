@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -15,10 +16,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 {
     public partial class JsonWebTokenHandler : TokenHandler
     {
+        /// <summary>
+        /// Decrypts a JWE and returns the clear text. Decrypts using the keys from configuration
+        /// if no keys are specified in <paramref name="validationParameters"/>.
+        /// </summary>
+        /// <param name="jwtToken">The JWE that contains the cypher text.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for decrypting the token.</param>
+        /// <param name="callContext"></param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
+        /// <returns>The decoded / cleartext contents of the JWE.</returns>
         internal async Task<ValidationResult<string>> DecryptTokenWithConfigurationAsync(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
-            CallContext? callContext)
+            CallContext? callContext,
+            CancellationToken cancellationToken)
         {
             if (jwtToken == null)
             {
@@ -43,13 +54,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
-            BaseConfiguration? currentConfiguration = await GetCurrentConfigurationAsync(validationParameters).ConfigureAwait(false);
+            BaseConfiguration? currentConfiguration = await GetCurrentConfigurationAsync(validationParameters, cancellationToken).ConfigureAwait(false);
 
             return DecryptToken(jwtToken, validationParameters, currentConfiguration, callContext);
         }
 
         /// <summary>
-        /// Decrypts a JWE and returns the clear text.
+        /// Decrypts a JWE using the keys from <paramref name="validationParameters"/> and returns the clear text.
         /// </summary>
         /// <param name="jwtToken">The JWE that contains the cypher text.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>

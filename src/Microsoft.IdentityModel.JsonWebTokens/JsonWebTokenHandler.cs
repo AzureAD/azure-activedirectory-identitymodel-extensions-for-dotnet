@@ -322,6 +322,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="jwtToken">The JWE that contains the cypher text.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>The decoded (clear text) contents of the JWE.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="validationParameters"/> is null.</exception>
@@ -329,7 +330,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="SecurityTokenDecompressionFailedException">Thrown if the decompression failed.</exception>
         /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">Thrown if <see cref="JsonWebToken.Kid"/> is not null AND the decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the JWE was not able to be decrypted.</exception>
-        public async Task<string> DecryptTokenWithConfigurationAsync(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+        public async Task<string> DecryptTokenWithConfigurationAsync(
+            JsonWebToken jwtToken,
+            TokenValidationParameters validationParameters,
+            CancellationToken cancellationToken)
         {
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
@@ -345,7 +349,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 try
                 {
-                    currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                    currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
