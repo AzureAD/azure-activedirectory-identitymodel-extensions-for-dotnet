@@ -316,7 +316,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.TransformBeforeSignatureValidation = ValidationDelegates.TransformBeforeSignatureValidation;
             validationParameters.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParameters.TypeValidator = ValidationDelegates.TypeValidator;
-            validationParameters.ActorTokenValidationDelegate = ValidationDelegates.ActorTokenValidationDelegate;
+            validationParameters.ActClaimRetrieverDelegate = ValidationDelegates.ActClaimRetrieverDelegate;
 
             validationParameters.ActorValidationParameters = new TokenValidationParameters();
             validationParameters.ClockSkew = TimeSpan.FromSeconds(42);

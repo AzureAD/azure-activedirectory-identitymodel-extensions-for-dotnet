@@ -41,6 +41,24 @@ namespace Microsoft.IdentityModel.Tokens
         public const int DefaultMaximumTokenSizeInBytes = 1024 * 250;
 
         /// <summary>
+        /// Default for permissible max actor chain length.
+        /// </summary>
+        /// <remarks>5 as max level of nesting</remarks>
+        private int maxActorChainLength = 5;
+
+        /// <summary>
+        /// Default for actor claim name.
+        /// </summary>
+        /// <remarks>If not explicitly set the default name for actor claim is 'act'. Only needed when EnableActClaimSupportSwitch is turned on</remarks>
+        private string actorClaimName = "act";
+
+        /// <summary>
+        /// This variable is used during recursion calls that are needed for deserializing act claim.
+        /// </summary>
+        /// <remarks>Default value is 0</remarks>
+        private int _actorClainDepth;
+
+        /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
         /// </summary>
         protected TokenValidationParameters(TokenValidationParameters other)
@@ -111,6 +129,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers;
             ValidTypes = other.ValidTypes;
+            ActClaimRetrieverDelegate = other.ActClaimRetrieverDelegate;
         }
 
         /// <summary>
@@ -211,7 +230,6 @@ namespace Microsoft.IdentityModel.Tokens
             return new(this)
             {
                 IsClone = true,
-                ActorTokenValidationDelegate = this.ActorTokenValidationDelegate
             };
         }
 
@@ -764,8 +782,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
 
-
-        private int maxActorChainLength = 5;
         /// <summary>
         /// Gets or sets the maximum depth allowed when processing nested actor tokens.
         /// This prevents excessive recursion when handling deeply nested actor tokens.
@@ -790,7 +806,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private string actorClaimName = "act";
         /// <summary>
         /// Gets or sets the claim type name for the actor claim.
         /// Permissible values are 'act' or 'actort'.
@@ -816,7 +831,7 @@ namespace Microsoft.IdentityModel.Tokens
                 actorClaimName = value;
             }
         }
-        private int _actorClainDepth;
+
         /// <summary>
         /// Gets or sets the depth of the actor chain.
         /// This value determines the maximum depth of nested actor tokens that can be processed.
@@ -833,7 +848,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the delegate that will be used to validate the 'act' claim and create actor's ClaimsIdentity.
         /// </summary>
-        public ActorTokenValidationDelegate ActorTokenValidationDelegate { get; set; }
+        public ActClaimRetrieverDelegate ActClaimRetrieverDelegate { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="TokenValidationParameters"/> used to validate the actor claim.

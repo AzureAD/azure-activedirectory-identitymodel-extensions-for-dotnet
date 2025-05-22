@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Xunit;
 using System.Threading.Tasks;
+using System.Linq;
 namespace Microsoft.IdentityModel.Tests
 {
     public class ActorClaimsTests
@@ -668,5 +669,684 @@ namespace Microsoft.IdentityModel.Tests
                 AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
             }
         }
+
+        // Tests for creating ClaimsIdentity from JsonElement
+        [ResetAppContextSwitches]
+        [Fact]
+        public void BasicJsonElementShouldCreateClaimsIdentityCorrectly()
+        {
+            var context = new CompareContext($"{this}.BasicJsonElementShouldCreateClaimsIdentityCorrectly");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create a simple JSON Element that represents an actor token
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name"",
+                    ""role"": ""admin""
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var validationParameters = new TokenValidationParameters()
+                {
+                    ActorClaimName = "act"
+                };
+
+                // Create ClaimsIdentity from JsonElement
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    validationParameters);
+
+                // Assert
+                Assert.NotNull(identity);
+                Assert.Equal("Actor", identity.AuthenticationType);
+                Assert.IsType<CaseSensitiveClaimsIdentity>(identity);
+
+                // Verify claims values
+                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+                Assert.Equal("admin", identity.Claims.First(c => c.Type == "role").Value);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void NestedActorInJsonElementShouldCreateNestedClaimsIdentity()
+        {
+            var context = new CompareContext($"{this}.NestedActorInJsonElementShouldCreateNestedClaimsIdentity");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create nested actor JSON structure
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name"",
+                    ""act"": {
+                        ""sub"": ""nested-actor-id"",
+                        ""name"": ""Nested Actor""
+                    }
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act"
+                };
+
+                // Create ClaimsIdentity from JsonElement
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                // Verify main identity
+                Assert.NotNull(identity);
+                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+
+                // Verify nested actor identity
+                Assert.NotNull(identity.Actor);
+                Assert.Equal("nested-actor-id", identity.Actor.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Nested Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void MultiLevelNestedActorJsonShouldHandleProperDepth()
+        {
+            var context = new CompareContext($"{this}.MultiLevelNestedActorJsonShouldHandleProperDepth");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create a three-level nested actor JSON structure
+                string actorJson = @"{
+                    ""sub"": ""level1-subject"",
+                    ""name"": ""Level 1 Actor"",
+                    ""act"": {
+                        ""sub"": ""level2-subject"",
+                        ""name"": ""Level 2 Actor"",
+                        ""act"": {
+                            ""sub"": ""level3-subject"",
+                            ""name"": ""Level 3 Actor""
+                        }
+                    }
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act",
+                    MaxActorChainLength = 3  // Allow up to 3 levels
+                };
+
+                // Create ClaimsIdentity from JsonElement
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                // Verify level 1
+                Assert.NotNull(identity);
+                Assert.Equal("level1-subject", identity.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Level 1 Actor", identity.Claims.First(c => c.Type == "name").Value);
+
+                // Verify level 2
+                Assert.NotNull(identity.Actor);
+                Assert.Equal("level2-subject", identity.Actor.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Level 2 Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
+
+                // Verify level 3
+                Assert.NotNull(identity.Actor.Actor);
+                Assert.Equal("level3-subject", identity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Level 3 Actor", identity.Actor.Actor.Claims.First(c => c.Type == "name").Value);
+
+                // No level 4
+                Assert.Null(identity.Actor.Actor.Actor);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void NestedActorExceedingMaxDepth_ThrowsException()
+        {
+            var context = new CompareContext($"{this}.NestedActorExceedingMaxDepth_ThrowsException");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create a three-level nested actor but set max depth to 2
+                string actorJson = @"{
+                    ""sub"": ""level1-subject"",
+                    ""name"": ""Level 1 Actor"",
+                    ""act"": {
+                        ""sub"": ""level2-subject"",
+                        ""name"": ""Level 2 Actor"",
+                        ""act"": {
+                            ""sub"": ""level3-subject"",
+                            ""name"": ""Level 3 Actor""
+                        }
+                    }
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act",
+                    MaxActorChainLength = 2,  // Only allow 2 levels, but JSON has 3
+                    ActorChainDepth = 1      // Start at depth 1 to simulate being in an ongoing chain
+                };
+
+                // Act - This should throw a SecurityTokenException
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                context.Diffs.Add("Expected exception was not thrown.");
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (SecurityTokenException ex)
+            {
+                // Assert - Verify the exception message contains the expected content
+                if (!ex.Message.Contains("IDX14313"))
+                {
+                    context.Diffs.Add($"Exception message does not contain expected content. Message: {ex.Message}");
+                }
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                // Unexpected exception type
+                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void JsonElementWithArrayValuesShouldProcessCorrectly()
+        {
+            var context = new CompareContext($"{this}.JsonElementWithArrayValuesShouldProcessCorrectly");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create JSON with array value
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name"",
+                    ""roles"": [""admin"", ""user"", ""manager""]
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act"
+                };
+
+                // Create ClaimsIdentity from JsonElement
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                // Verify identity and simple claims
+                Assert.NotNull(identity);
+                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+
+                // Verify array values were processed into multiple claims
+                var roleClaims = identity.Claims.Where(c => c.Type == "roles").ToList();
+                Assert.Equal(3, roleClaims.Count);
+                Assert.Contains(roleClaims, c => c.Value == "admin");
+                Assert.Contains(roleClaims, c => c.Value == "user");
+                Assert.Contains(roleClaims, c => c.Value == "manager");
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void JsonElementWithComplexTypesShouldHandleCorrectly()
+        {
+            var context = new CompareContext($"{this}.JsonElementWithComplexTypesShouldHandleCorrectly");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create JSON with complex types (objects)
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name"",
+                    ""metadata"": {
+                        ""created"": ""2023-10-15"",
+                        ""system"": ""test-system""
+                    },
+                    ""numbers"": [1, 2, 3]
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act"
+                };
+
+                // Create ClaimsIdentity from JsonElement
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                // Verify identity and simple claims
+                Assert.NotNull(identity);
+                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+
+                // Verify the JSON object was serialized to a claim
+                var metadataClaim = identity.Claims.First(c => c.Type == "metadata");
+                Assert.NotNull(metadataClaim);
+                Assert.Contains("created", metadataClaim.Value);
+                Assert.Contains("test-system", metadataClaim.Value);
+
+                // Verify number array was handled
+                var numberClaims = identity.Claims.Where(c => c.Type == "numbers").ToList();
+                Assert.Equal(3, numberClaims.Count);
+                Assert.Contains(numberClaims, c => c.Value == "1");
+                Assert.Contains(numberClaims, c => c.Value == "2");
+                Assert.Contains(numberClaims, c => c.Value == "3");
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void NonObjectJsonElement_ThrowsException()
+        {
+            var context = new CompareContext($"{this}.NonObjectJsonElement_ThrowsException");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create a non-object JSON Element (string)
+                string actorJson = @"""This is just a string, not an object""";
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act"
+                };
+
+                // Act - This should throw an ArgumentException
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                context.Diffs.Add("Expected exception was not thrown.");
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (ArgumentException ex)
+            {
+                // Expected exception type
+                Assert.Contains("Actor token must be a JSON object", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Unexpected exception type
+                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void NullValidationParameters_ThrowsException()
+        {
+            var context = new CompareContext($"{this}.NullValidationParameters_ThrowsException");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create a simple JSON Element
+                string actorJson = @"{ ""sub"": ""actor-subject-id"" }";
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+
+                // Act - This should throw an ArgumentNullException
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    null);  // Null validation parameters
+
+                context.Diffs.Add("Expected exception was not thrown.");
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (ArgumentNullException ex)
+            {
+                // Expected exception type
+                Assert.Equal("tokenValidationParameters", ex.ParamName);
+            }
+            catch (Exception ex)
+            {
+                // Unexpected exception type
+                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void CustomActorClaimNameShouldBeRespected()
+        {
+            var context = new CompareContext($"{this}.CustomActorClaimNameShouldBeRespected");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create JSON with custom actor claim name
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name"",
+                    ""actort"": {
+                        ""sub"": ""nested-actor-id"",
+                        ""name"": ""Nested Actor""
+                    }
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "actort"  // Custom actor claim name
+                };
+
+                // Create ClaimsIdentity from JsonElement
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                // Verify main identity
+                Assert.NotNull(identity);
+                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+
+                // Verify nested actor was found using custom claim name
+                Assert.NotNull(identity.Actor);
+                Assert.Equal("nested-actor-id", identity.Actor.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Nested Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void DifferentIssuerShouldBeAppliedToAllClaims()
+        {
+            var context = new CompareContext($"{this}.DifferentIssuerShouldBeAppliedToAllClaims");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create simple actor JSON
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name""
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act"
+                };
+
+                string customIssuer = "https://custom-issuer.example.com";
+
+                // Create ClaimsIdentity with custom issuer
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters,
+                    customIssuer);
+
+                // Verify all claims have custom issuer
+                foreach (var claim in identity.Claims)
+                {
+                    Assert.Equal(customIssuer, claim.Issuer);
+                    Assert.Equal(customIssuer, claim.OriginalIssuer);
+                }
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void CustomAuthenticationTypeShouldBeRespected()
+        {
+            var context = new CompareContext($"{this}.CustomAuthenticationTypeShouldBeRespected");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create simple actor JSON
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name""
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act"
+                };
+
+                string customAuthType = "CustomActorAuth";
+
+                // Create ClaimsIdentity with custom auth type
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters,
+                    null,  // Default issuer
+                    customAuthType);
+
+                // Verify custom auth type was applied
+                Assert.Equal(customAuthType, identity.AuthenticationType);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void ActorChainDepthShouldBeIncremented()
+        {
+            var context = new CompareContext($"{this}.ActorChainDepthShouldBeIncremented");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create actor JSON with nested actor
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name"",
+                    ""act"": {
+                        ""sub"": ""nested-actor-id"",
+                        ""name"": ""Nested Actor""
+                    }
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act",
+                    MaxActorChainLength = 5,
+                    ActorChainDepth = 2  // Start at depth 2
+                };
+
+                // Create ClaimsIdentity from JsonElement
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                // Verify depth was incremented (2 + 1 = 3)
+                Assert.Equal(3, tokenValidationParameters.ActorChainDepth);
+
+                // Verify both levels of actors exist
+                Assert.NotNull(identity);
+                Assert.NotNull(identity.Actor);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+        [ResetAppContextSwitches]
+        [Fact]
+        public void WhenActClaimIsNotAnObject_ShouldBeAddedAsRegularClaim()
+        {
+            var context = new CompareContext($"{this}.WhenActClaimIsNotAnObject_ShouldBeAddedAsRegularClaim");
+            bool switchValue = false;
+            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
+            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            try
+            {
+                // Create JSON with "act" claim that is a string, not an object
+                string actorJson = @"{
+                    ""sub"": ""actor-subject-id"",
+                    ""name"": ""Actor Name"",
+                    ""act"": ""some-actor-reference-string""
+                }";
+
+                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ActorClaimName = "act"
+                };
+
+                // Create ClaimsIdentity from JsonElement
+                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters);
+
+                // Verify identity claims
+                Assert.NotNull(identity);
+                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+
+                // Verify "act" is a regular claim, not a nested actor
+                Assert.Null(identity.Actor);
+                Assert.Equal("some-actor-reference-string", identity.Claims.First(c => c.Type == "act").Value);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
+            }
+        }
+
+
     }
 }

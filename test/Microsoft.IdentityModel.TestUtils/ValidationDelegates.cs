@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -251,9 +252,9 @@ namespace Microsoft.IdentityModel.TestUtils
             return type;
         }
 
-        public static readonly ActorTokenValidationDelegate ActorTokenValidationDelegate = (actorClaim, validationParameters) =>
+        public static readonly ActClaimRetrieverDelegate ActClaimRetrieverDelegate = (actorClaim, validationParameters) =>
         {
-            return new TokenValidationResult { IsValid = true };
+            return null;
         };
     }
 }
