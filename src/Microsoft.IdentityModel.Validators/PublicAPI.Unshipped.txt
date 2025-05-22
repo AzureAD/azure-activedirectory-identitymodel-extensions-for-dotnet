@@ -1,0 +1,1 @@
+static Microsoft.IdentityModel.Validators.AadIssuerValidator.GetAadIssuerValidator(string aadAuthority, System.Net.Http.HttpClient httpClient, System.Func<string, Microsoft.IdentityModel.Tokens.BaseConfigurationManager> configurationManagerProvider) -> Microsoft.IdentityModel.Validators.AadIssuerValidator
