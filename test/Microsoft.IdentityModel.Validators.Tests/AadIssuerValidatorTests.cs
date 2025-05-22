@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             Assert.NotNull(validator1);
 
             // With provider
-            Func<string, BaseConfigurationManager> provider = (auth) => null;
+            Func<string, BaseConfigurationManager> provider = (auth) => new MockBaseConfigurationManager();
             var validator2 = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient, provider);
             Assert.NotNull(validator2);
 
