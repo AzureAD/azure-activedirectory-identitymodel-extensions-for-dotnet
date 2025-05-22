@@ -323,7 +323,8 @@ namespace Microsoft.IdentityModel.Validators
         /// </summary>
         /// <param name="aadAuthority">The authority to create the validator for, e.g. https://login.microsoftonline.com/. </param>
         /// <param name="httpClient">Optional HttpClient to use to retrieve the endpoint metadata (can be null).</param>
-        /// <param name="configurationManagerProvider">Configuration manager provider. Injection point for metadata managed outside of the class.</param>
+        /// <param name="configurationManagerProvider">Configuration manager provider. Injection point for metadata managed outside
+        /// of the class. The delegate needs to return a configuration manager for a given authority.</param>
         /// <example><code>
         /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, configurationManagerProvider);
         /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;

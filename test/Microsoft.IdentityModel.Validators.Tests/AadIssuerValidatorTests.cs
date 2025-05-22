@@ -141,6 +141,11 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             return theoryData;
         }
+
+        private class MockBaseConfigurationManager : BaseConfigurationManager
+        {
+            public override void RequestRefresh() { }
+        }
     }
 
     public class AadIssuerValidatorTheoryData : TheoryDataBase
