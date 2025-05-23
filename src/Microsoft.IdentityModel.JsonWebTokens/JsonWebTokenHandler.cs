@@ -212,7 +212,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
+            Console.WriteLine("We are inside writing actor");
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
@@ -221,19 +221,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
 
-                if (claimType == validationParameters.ActorClaimName && !AppContextSwitches.EnableActClaimSupport)
+                if (claimType == validationParameters.ActorClaimName)
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
                                     LogMessages.IDX14112,
                                     LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
                                     jwtClaim.Value)));
-
-                    if (CanReadToken(jwtClaim.Value))
-                    {
-                        JsonWebToken actor = ReadToken(jwtClaim.Value) as JsonWebToken;
-                        identity.Actor = CreateClaimsIdentity(actor, validationParameters);
-                    }
+                    Console.WriteLine("CreateClaimsIdentityWithMapping");
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters);
                 }
 
                 if (wasMapped)
@@ -253,49 +249,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 else
                 {
                     identity.AddClaim(jwtClaim);
-                }
-            }
-            if (AppContextSwitches.EnableActClaimSupport)
-            {
-
-                if (jwtToken.TryGetPayloadValue<JsonElement>(validationParameters.ActorClaimName, out JsonElement actClaim))
-                {
-                    if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
-                                    LogMessages.IDX14112,
-                                    LogHelper.MarkAsNonPII(validationParameters.ActorClaimName),
-                                    actClaim.ToString())));
-                    if (validationParameters.ActClaimRetrieverDelegate != null)
-                    {
-                        try
-                        {
-                            identity.Actor = validationParameters.ActClaimRetrieverDelegate(actClaim);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(
-                                LogMessages.IDX14313,
-                                LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
-                                actClaim.ToString(),
-                                ex)));
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            identity.Actor = CreateActorClaimsIdentityFromJsonElement(actClaim, validationParameters);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(
-                                LogMessages.IDX14313,
-                                LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
-                                actClaim.ToString(),
-                                ex)));
-                        }
-
-                    }
                 }
             }
             return identity;
@@ -328,16 +281,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
-                if (claimType == ClaimTypes.Actor)
+                if (claimType == validationParameters.ActorClaimName)
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
-
-                    if (CanReadToken(jwtClaim.Value))
-                    {
-                        JsonWebToken actor = ReadToken(jwtClaim.Value) as JsonWebToken;
-                        identity.Actor = CreateClaimsIdentity(actor, validationParameters, issuer);
-                    }
+                    Console.WriteLine("CreateClaimsIdentityPrivate");
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters);
                 }
 
                 if (jwtClaim.Properties.Count == 0)
@@ -616,18 +565,85 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Creates a ClaimsIdentity from an actor claim string.
+        /// </summary>
+        /// <param name="jwtToken"></param>
+        /// <param name="actorString">The actor claim string.</param>
+        /// <param name="tokenValidationParameters">The token validation parameters.</param>
+        /// <returns>A ClaimsIdentity representing the actor.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="actorString"/> or <paramref name="tokenValidationParameters"/> is null.</exception>
+        private ClaimsIdentity CreateClaimsIdentityActor(
+        JsonWebToken jwtToken,
+        string actorString,
+        TokenValidationParameters tokenValidationParameters)
+        {
+            if (string.IsNullOrEmpty(actorString))
+                throw LogHelper.LogArgumentNullException(nameof(actorString));
+
+            if (tokenValidationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
+
+            if (AppContextSwitches.EnableActClaimSupport)
+            {
+                if (jwtToken.TryGetPayloadValue<JsonElement>(tokenValidationParameters.ActorClaimName, out JsonElement actClaim))
+                {
+                    if (tokenValidationParameters.ActClaimRetrieverDelegate != null)
+                    {
+                        try
+                        {
+                            return tokenValidationParameters.ActClaimRetrieverDelegate(actClaim);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(
+                                LogMessages.IDX14313,
+                                LogHelper.MarkAsNonPII(tokenValidationParameters.ActorClaimName),
+                                actClaim.ToString(),
+                                ex)));
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(
+                                LogMessages.IDX14313,
+                                LogHelper.MarkAsNonPII(tokenValidationParameters.ActorClaimName),
+                                actClaim.ToString(),
+                                ex)));
+                        }
+
+                    }
+                }
+
+            }
+            else
+            {
+                if (CanReadToken(actorString))
+                {
+                    JsonWebToken actor = ReadToken(actorString) as JsonWebToken;
+                    return CreateClaimsIdentity(actor, tokenValidationParameters);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Creates a ClaimsIdentity from a JsonElement that represents an actor token.
         /// </summary>
         /// <param name="jsonElement">The JsonElement containing actor claims.</param>
         /// <param name="tokenValidationParameters">These parameters have details like nested actor chain length and max permissible actor length</param>
         /// <param name="issuer">The issuer for the claims.</param>
-        /// <param name="authenticationType">The authentication type for the identity.</param>
         /// <returns>A ClaimsIdentity containing claims from the JsonElement.</returns>
         public static ClaimsIdentity CreateActorClaimsIdentityFromJsonElement(
             JsonElement jsonElement,
             TokenValidationParameters tokenValidationParameters,
-            string issuer = null,
-            string authenticationType = "Actor")
+            string issuer = null)
         {
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
@@ -645,7 +661,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException("Actor token must be a JSON object"));
 
             // Use CaseSensitiveClaimsIdentity for consistent behavior with the rest of the library
-            var identity = new CaseSensitiveClaimsIdentity(authenticationType);
+            var identity = new CaseSensitiveClaimsIdentity();
 
             issuer = issuer ?? ClaimsIdentity.DefaultIssuer;
 
@@ -662,7 +678,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         tokenValidationParameters.ActorChainDepth++;
                         // Recursively create nested actor identity
                         identity.Actor = CreateActorClaimsIdentityFromJsonElement(
-                            value, tokenValidationParameters, issuer, authenticationType);
+                            value, tokenValidationParameters, issuer);
                     }
                     continue;
                 }
@@ -687,6 +703,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return identity;
         }
-
     }
 }
