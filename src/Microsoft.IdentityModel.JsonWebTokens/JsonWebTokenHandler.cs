@@ -212,7 +212,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-            Console.WriteLine("We are inside writing actor");
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
@@ -228,7 +227,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                                     LogMessages.IDX14112,
                                     LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
                                     jwtClaim.Value)));
-                    Console.WriteLine("CreateClaimsIdentityWithMapping");
                     identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters);
                 }
 
@@ -285,7 +283,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
-                    Console.WriteLine("CreateClaimsIdentityPrivate");
                     identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters);
                 }
 
@@ -596,27 +593,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         catch (Exception ex)
                         {
                             throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(
-                                LogMessages.IDX14313,
-                                LogHelper.MarkAsNonPII(tokenValidationParameters.ActorClaimName),
-                                actClaim.ToString(),
-                                ex)));
+                                LogMessages.IDX14314,
+                                LogHelper.MarkAsNonPII(ex.ToString()))));
                         }
                     }
                     else
                     {
-                        try
-                        {
-                            return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(
-                                LogMessages.IDX14313,
-                                LogHelper.MarkAsNonPII(tokenValidationParameters.ActorClaimName),
-                                actClaim.ToString(),
-                                ex)));
-                        }
-
+                        return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters);
                     }
                 }
 

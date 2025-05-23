@@ -130,6 +130,9 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuers = other.ValidIssuers;
             ValidTypes = other.ValidTypes;
             ActClaimRetrieverDelegate = other.ActClaimRetrieverDelegate;
+            MaxActorChainLength = other.MaxActorChainLength;
+            ActorChainDepth = other.ActorChainDepth;
+            ActorClaimName = other.ActorClaimName;
         }
 
         /// <summary>
