@@ -19,6 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _actorClaimType = "act";
         private int _actorClainDepth;
         private int _maxActorChainLength = 4;
+
         /// <summary>
         /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
         /// <see cref="Claims"/> or <see cref="Subject"/> when creating a token.

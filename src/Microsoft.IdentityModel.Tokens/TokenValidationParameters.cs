@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             return new(this)
             {
-                IsClone = true,
+                IsClone = true
             };
         }
 
