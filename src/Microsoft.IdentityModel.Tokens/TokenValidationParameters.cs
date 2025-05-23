@@ -44,13 +44,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// Default for permissible max actor chain length.
         /// </summary>
         /// <remarks>5 as max level of nesting</remarks>
-        private int maxActorChainLength = 5;
+        private int maxActorChainLength = 4;
 
         /// <summary>
         /// Default for actor claim name.
         /// </summary>
         /// <remarks>If not explicitly set the default name for actor claim is 'act'. Only needed when EnableActClaimSupportSwitch is turned on</remarks>
-        private string actorClaimName = "act";
+        private string actorClaimType = "act";
 
         /// <summary>
         /// This variable is used during recursion calls that are needed for deserializing act claim.
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens
             ActClaimRetrieverDelegate = other.ActClaimRetrieverDelegate;
             MaxActorChainLength = other.MaxActorChainLength;
             ActorChainDepth = other.ActorChainDepth;
-            ActorClaimName = other.ActorClaimName;
+            ActorClaimType = other.ActorClaimType;
         }
 
         /// <summary>
@@ -786,42 +786,24 @@ namespace Microsoft.IdentityModel.Tokens
         public IEnumerable<string> ValidTypes { get; set; }
 
         /// <summary>
-        /// Gets or sets the maximum depth allowed when processing nested actor tokens.
-        /// This prevents excessive recursion when handling deeply nested actor tokens.
-        /// The value must be at least 0. Value 0 would mean that the actor token is not allowed to be nested.
-        /// Default value is 5. Max value is also 5
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0.</exception>
-        public int MaxActorChainLength
-        {
-            get => maxActorChainLength;
-            set
-            {
-                if (value < 0 || value > 5)
-                    throw LogHelper.LogExceptionMessage(
-                    new ArgumentOutOfRangeException(
-                    LogHelper.FormatInvariant(
-                    LogMessages.IDX11027,
-                    LogHelper.MarkAsNonPII("MaxActorChainLength"))
-                    + ". Permissible values are integers in range 0 to 5"));
-
-                maxActorChainLength = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the claim type name for the actor claim.
-        /// Permissible values are 'act' or 'actort'.
+        /// Gets or sets the claim type that identifies the actor claim in tokens.
+        /// <para>The default value is "actort" when <see cref="AppContextSwitches.EnableActClaimSupportSwitch"/> is off 
+        /// and "act" when the switch is on.</para>
+        /// <para>This property determines which claim in a token contains the actor information during token 
+        /// validation and creation.</para>
+        /// <para>For JWT tokens, this is the claim name in the payload that holds the actor object.</para>
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// Thrown if the value is null.
+        /// Thrown if the value is null or empty.
         /// </exception>
-        /// <exception cref="SecurityTokenException">
-        /// Thrown if the value is not 'act' or 'actort'.
-        /// </exception>
-        public string ActorClaimName
+        /// <remarks>
+        /// <para>To use the newer JSON object-based actor format, set <c>AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true)</c> 
+        /// and use "act" as the claim type.</para>
+        /// <para>To use the legacy string-based actor token format, leave the switch off and use "actort".</para>
+        /// </remarks>
+        public string ActorClaimType
         {
-            get => AppContextSwitches.EnableActClaimSupport ? actorClaimName : "actort";
+            get => AppContextSwitches.EnableActClaimSupport ? actorClaimType : "actort";
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -829,16 +811,24 @@ namespace Microsoft.IdentityModel.Tokens
                     new ArgumentOutOfRangeException(
                     LogHelper.FormatInvariant(
                     LogMessages.IDX11027,
-                    LogHelper.MarkAsNonPII("ActorClaimName"))
-                    + ". ValidationParameters.ActorClaimName cannot be set to empty."));
-                actorClaimName = value;
+                    LogHelper.MarkAsNonPII("ActorClaimType"))
+                    + ". ActorClaimType cannot be set to empty."));
+                actorClaimType = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the depth of the actor chain.
-        /// This value determines the maximum depth of nested actor tokens that can be processed.
+        /// Gets or sets the current depth in the actor chain being processed.
+        /// <para>This is used internally to track the nesting level during recursive processing 
+        /// of nested actor tokens.</para>
+        /// <para>The value starts at 0 and is incremented for each level of actor nesting.</para>
         /// </summary>
+        /// <remarks>
+        /// <para>This value is compared against <see cref="MaxActorChainLength"/> to prevent excessive 
+        /// recursion or deeply nested actor tokens.</para>
+        /// <para>In most scenarios, users don't need to set this property as it's managed internally 
+        /// by the token validation and creation process.</para>
+        /// </remarks>
         public int ActorChainDepth
         {
             get => _actorClainDepth;
@@ -849,16 +839,54 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the delegate that will be used to validate the 'act' claim and create actor's ClaimsIdentity.
+        /// Gets or sets the delegate that will be used to convert the 'act' claim JSON into a ClaimsIdentity.
+        /// <para>This delegate is invoked during token validation when an actor claim is encountered in a token.</para>
+        /// <para>The delegate receives a <see cref="System.Text.Json.JsonElement"/> representing the actor claim
+        /// and should return a <see cref="ClaimsIdentity"/> that represents the actor.</para>
         /// </summary>
+        /// <remarks>
+        /// <para>When this delegate is provided, it replaces the default actor claim processing logic.</para>
+        /// <para>This is useful for custom actor claim formats or when special processing is needed for the actor claims.</para>
+        /// <para>The delegate can also handle nested actors by recursively creating actor identities and setting the Actor property.</para>
+        /// <code>
+        /// validationParameters.ActClaimRetrieverDelegate = (JsonElement element,TokenValidationParameters tokenValidationParameters) => {
+        ///     var identity = new ClaimsIdentity("CustomActor");
+        ///     // Extract claims from the JsonElement
+        ///     if (element.TryGetProperty("sub", out var sub))
+        ///         identity.AddClaim(new Claim("sub", sub.GetString()));
+        ///     return identity;
+        /// };
+        /// </code>
+        /// </remarks>
         public ActClaimRetrieverDelegate ActClaimRetrieverDelegate { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="TokenValidationParameters"/> used to validate the actor claim.
+        /// Gets or sets the maximum depth allowed when processing nested actor tokens.
+        /// <para>This prevents excessive recursion when handling deeply nested actor tokens.</para>
+        /// <para>The value must be at least 0. Value 0 would mean that no actor token nesting is allowed.</para>
+        /// <para>The maximum allowed value is 4 to prevent security issues with excessively deep actor chains.</para>
         /// </summary>
         /// <remarks>
-        /// This property allows specifying custom validation parameters for the actor claim.
+        /// <para>Default value is 4.</para>
+        /// <para>During token validation and creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
+        /// <para>This limit applies to both token creation and validation processes.</para>
         /// </remarks>
-        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0 or greater than 4.</exception>
+        public int MaxActorChainLength
+        {
+            get => maxActorChainLength;
+            set
+            {
+                if (value < 0 || value > 4)
+                    throw LogHelper.LogExceptionMessage(
+                    new ArgumentOutOfRangeException(
+                    LogHelper.FormatInvariant(
+                    LogMessages.IDX11027,
+                    LogHelper.MarkAsNonPII("MaxActorChainLength"))
+                    + ". Permissible values are integers in range 0 to 4"));
+
+                maxActorChainLength = value;
+            }
+        }
     }
 }

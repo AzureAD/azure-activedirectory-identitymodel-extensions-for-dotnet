@@ -16,7 +16,9 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenDescriptor
     {
         private List<string> _audiences;
-
+        private string _actorClaimType = "act";
+        private int _actorClainDepth;
+        private int _maxActorChainLength = 4;
         /// <summary>
         /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
         /// <see cref="Claims"/> or <see cref="Subject"/> when creating a token.
@@ -118,45 +120,54 @@ namespace Microsoft.IdentityModel.Tokens
         [DefaultValue(true)]
         public bool IncludeKeyIdInHeader { get; set; } = true;
 
-        private int _maxActorChainLength = 5;
         /// <summary>
         /// Gets or sets the maximum depth allowed when processing nested actor tokens.
-        /// This prevents excessive recursion when handling deeply nested actor tokens.
-        /// The value must be at least 0. Value 0 would mean that the actor token is not allowed to be nested.
-        /// Default value is 5. Max value is also 5
+        /// <para>This prevents excessive recursion when handling deeply nested actor tokens.</para>
+        /// <para>The value must be at least 0. Value 0 would mean that no actor token nesting is allowed.</para>
+        /// <para>The maximum allowed value is 4 to prevent security issues with excessively deep actor chains.</para>
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0.</exception>
+        /// <remarks>
+        /// <para>Default value is 4.</para>
+        /// <para>During token validation and creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
+        /// <para>This limit applies to both token creation and validation processes.</para>
+        /// </remarks>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0 or greater than 4.</exception>
         public int MaxActorChainLength
         {
             get => _maxActorChainLength;
             set
             {
-                if (value < 0 || value > 5)
+                if (value < 0 || value > 4)
                     throw LogHelper.LogExceptionMessage(
                     new ArgumentOutOfRangeException(
                     LogHelper.FormatInvariant(
                     LogMessages.IDX11027,
                     LogHelper.MarkAsNonPII("MaxActorChainLength"))
-                    + ". Permissible values are integers in range 0 to 5"));
+                    + ". Permissible values are integers in range 0 to 4"));
 
                 _maxActorChainLength = value;
             }
         }
 
-        private string _actorClaimName = "act";
         /// <summary>
-        /// Gets or sets the claim type name for the actor claim.
-        /// Permissible values are 'act' or 'actort'.
+        /// Gets or sets the claim type that identifies the actor claim in tokens.
+        /// <para>The default value is "actort" when <see cref="AppContextSwitches.EnableActClaimSupportSwitch"/> is off 
+        /// and "act" when the switch is on.</para>
+        /// <para>This property determines which claim in a token contains the actor information during token 
+        /// validation and creation.</para>
+        /// <para>For JWT tokens, this is the claim name in the payload that holds the actor object.</para>
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// Thrown if the value is null.
+        /// Thrown if the value is null or empty.
         /// </exception>
-        /// <exception cref="SecurityTokenException">
-        /// Thrown if the value is not 'act' or 'actort'.
-        /// </exception>
-        public string ActorClaimName
+        /// <remarks>
+        /// <para>To use the newer JSON object-based actor format, set <c>AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true)</c> 
+        /// and use "act" as the claim type.</para>
+        /// <para>To use the legacy string-based actor token format, leave the switch off and use "actort".</para>
+        /// </remarks>
+        public string ActorClaimType
         {
-            get => _actorClaimName;
+            get => _actorClaimType;
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -164,16 +175,24 @@ namespace Microsoft.IdentityModel.Tokens
                     new ArgumentOutOfRangeException(
                     LogHelper.FormatInvariant(
                     LogMessages.IDX11027,
-                    LogHelper.MarkAsNonPII("ActorClaimName"))
-                    + ". ActorClaimName cannot be empty."));
-                _actorClaimName = value;
+                    LogHelper.MarkAsNonPII("ActorClaimType"))
+                    + ". ActorClaimType cannot be empty."));
+                _actorClaimType = value;
             }
         }
-        private int _actorClainDepth;
+
         /// <summary>
-        /// Gets or sets the depth of the actor chain.
-        /// This value determines the maximum depth of nested actor tokens that can be processed.
+        /// Gets or sets the current depth in the actor chain being processed.
+        /// <para>This is used internally to track the nesting level during recursive processing 
+        /// of nested actor tokens.</para>
+        /// <para>The value starts at 0 and is incremented for each level of actor nesting.</para>
         /// </summary>
+        /// <remarks>
+        /// <para>This value is compared against <see cref="MaxActorChainLength"/> to prevent excessive 
+        /// recursion or deeply nested actor tokens.</para>
+        /// <para>In most scenarios, users don't need to set this property as it's managed internally 
+        /// by the token validation and creation process.</para>
+        /// </remarks>
         public int ActorChainDepth
         {
             get => _actorClainDepth;

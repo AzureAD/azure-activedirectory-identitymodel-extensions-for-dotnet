@@ -211,6 +211,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
+
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
@@ -220,13 +221,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
 
-                if (claimType == validationParameters.ActorClaimName)
+                if (claimType == validationParameters.ActorClaimType)
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
                                     LogMessages.IDX14112,
                                     LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
                                     jwtClaim.Value)));
+
                     identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters);
                 }
 
@@ -249,6 +251,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     identity.AddClaim(jwtClaim);
                 }
             }
+
             return identity;
         }
 
@@ -279,7 +282,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
-                if (claimType == validationParameters.ActorClaimName)
+                if (claimType == validationParameters.ActorClaimType)
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
@@ -582,7 +585,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (AppContextSwitches.EnableActClaimSupport)
             {
-                if (jwtToken.TryGetPayloadValue<JsonElement>(tokenValidationParameters.ActorClaimName, out JsonElement actClaim))
+                if (jwtToken.TryGetPayloadValue<JsonElement>(tokenValidationParameters.ActorClaimType, out JsonElement actClaim))
                 {
                     if (tokenValidationParameters.ActClaimRetrieverDelegate != null)
                     {
@@ -654,7 +657,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 JsonElement value = property.Value;
 
                 // Special handling for nested actor claim
-                if (claimType == tokenValidationParameters.ActorClaimName)
+                if (claimType == tokenValidationParameters.ActorClaimType)
                 {
                     if (value.ValueKind == JsonValueKind.Object)
                     {

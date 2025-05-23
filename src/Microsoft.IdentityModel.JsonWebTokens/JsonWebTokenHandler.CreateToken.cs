@@ -673,7 +673,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (AppContextSwitches.EnableActClaimSupport && kvp.Key.Equals(tokenDescriptor.ActorClaimName, StringComparison.Ordinal))
+                    if (AppContextSwitches.EnableActClaimSupport && kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -1089,7 +1089,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var actorTokenDescriptor = CreateActorTokenDescriptor(tokenDescriptor);
             if (actorTokenDescriptor == null || actorTokenDescriptor.Subject == null)
                 return;
-            writer.WritePropertyName(tokenDescriptor.ActorClaimName);
+            writer.WritePropertyName(tokenDescriptor.ActorClaimType);
             WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
         }
 
@@ -1110,9 +1110,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             SecurityTokenDescriptor actorTokenDescriptor = null;
 
             // Check for actor in claims first
-            if (tokenDescriptor.Claims?.ContainsKey(tokenDescriptor.ActorClaimName) == true)
+            if (tokenDescriptor.Claims?.ContainsKey(tokenDescriptor.ActorClaimType) == true)
             {
-                ClaimsIdentity actor = tokenDescriptor.Claims[tokenDescriptor.ActorClaimName] as ClaimsIdentity;
+                ClaimsIdentity actor = tokenDescriptor.Claims[tokenDescriptor.ActorClaimType] as ClaimsIdentity;
                 actorTokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = actor,
@@ -1131,7 +1131,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidateActorChainDepth(tokenDescriptor);
 
                 actorTokenDescriptor.MaxActorChainLength = tokenDescriptor.MaxActorChainLength;
-                actorTokenDescriptor.ActorClaimName = tokenDescriptor.ActorClaimName;
+                actorTokenDescriptor.ActorClaimType = tokenDescriptor.ActorClaimType;
                 actorTokenDescriptor.ActorChainDepth = tokenDescriptor.ActorChainDepth + 1;
             }
 

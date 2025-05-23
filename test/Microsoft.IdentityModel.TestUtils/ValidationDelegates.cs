@@ -251,7 +251,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return type;
         }
 
-        public static readonly ActClaimRetrieverDelegate ActClaimRetrieverDelegate = (actorClaim) =>
+        public static readonly ActClaimRetrieverDelegate ActClaimRetrieverDelegate = (actorClaim, tokenValidationParameters) =>
         {
             return null;
         };
