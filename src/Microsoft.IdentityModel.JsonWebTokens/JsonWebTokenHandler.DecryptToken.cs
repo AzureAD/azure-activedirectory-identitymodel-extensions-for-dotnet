@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="jwtToken">The JWE that contains the cypher text.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for decrypting the token.</param>
-        /// <param name="callContext"></param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
         internal async Task<ValidationResult<string>> DecryptTokenWithConfigurationAsync(
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="jwtToken">The JWE that contains the cypher text.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
         internal ValidationResult<string> DecryptToken(
             JsonWebToken jwtToken,

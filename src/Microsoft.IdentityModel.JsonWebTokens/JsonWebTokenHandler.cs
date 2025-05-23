@@ -355,10 +355,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
-                    // directly on them, allowing the library to continue with token validation.
+                    // The exception is not re-thrown as the decryption key may be set
+                    // on TokenValidationParameters, allowing the library to continue with token decryption.
                     if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10278, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
                 }
             }
 
