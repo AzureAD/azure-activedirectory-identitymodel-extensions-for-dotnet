@@ -1,5 +1,11 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.11.0
+=====
+## New Features:
+- Microsoft.IdentityModel now exposes the AadIssuerValidator factory method publicly to enable caching functionality for AadIssuerValidator instances. See issue [#3245](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3245) for details.
+- Added a new public async API: `JsonWebTokenHandler.DecryptTokenWithConfigurationAsync`, which decrypts a JWE token using keys from either `TokenValidationParameters` or, if not present, from configuration (such as via a ConfigurationManager). This enhancement improves developer experience by enabling asynchronous, cancellation-aware JWE decryption scenarios, aligning with modern .NET async patterns and making integration with external key/configuration sources more robust and observable. See PR [#3243](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3243) for details.
+
 8.10.0
 =====
 ## Bug Fixes

@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -15,12 +17,55 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public partial class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
-        /// Decrypts a JWE and returns the clear text.
+        /// Decrypts a JWE and returns the clear text. Decrypts using the keys from configuration
+        /// if no keys are specified in <paramref name="validationParameters"/>.
+        /// </summary>
+        /// <param name="jwtToken">The JWE that contains the cypher text.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for decrypting the token.</param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
+        /// <returns>The decoded / cleartext contents of the JWE.</returns>
+        internal async Task<ValidationResult<string>> DecryptTokenWithConfigurationAsync(
+            JsonWebToken jwtToken,
+            ValidationParameters validationParameters,
+            CallContext? callContext,
+            CancellationToken cancellationToken)
+        {
+            if (jwtToken == null)
+            {
+                return ValidationError.NullParameter(
+                    nameof(jwtToken),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            if (validationParameters == null)
+            {
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            if (string.IsNullOrEmpty(jwtToken.Enc))
+            {
+                return new ValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10612),
+                    ValidationFailureType.TokenDecryptionFailed,
+                    typeof(SecurityTokenException),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            BaseConfiguration? currentConfiguration = await GetCurrentConfigurationAsync(validationParameters, cancellationToken).ConfigureAwait(false);
+
+            return DecryptToken(jwtToken, validationParameters, currentConfiguration, callContext);
+        }
+
+        /// <summary>
+        /// Decrypts a JWE using the keys from <paramref name="validationParameters"/> and returns the clear text.
         /// </summary>
         /// <param name="jwtToken">The JWE that contains the cypher text.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
         internal ValidationResult<string> DecryptToken(
             JsonWebToken jwtToken,
