@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Telemetry;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -16,8 +17,10 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    public class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
+    public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
+        internal Action _onBackgroundTaskFinish;
+
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
         private DateTimeOffset _lastRequestRefresh = DateTimeOffset.MinValue;
         private bool _isFirstRefreshRequest = true;
@@ -34,6 +37,9 @@ namespace Microsoft.IdentityModel.Protocols
         // metadata is being retrieved
         private const int ConfigurationRetrieverRunning = 1;
         private int _configurationRetrieverState = ConfigurationRetrieverIdle;
+
+        internal TimeProvider TimeProvider = TimeProvider.System;
+        internal ITelemetryClient TelemetryClient = new TelemetryClient();
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -132,7 +138,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Obtains an updated version of Configuration.
         /// </summary>
-        /// <returns>Configuration of type T.</returns>
+        /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync()
         {
@@ -143,13 +149,40 @@ namespace Microsoft.IdentityModel.Protocols
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <param name="cancel">CancellationToken</param>
-        /// <returns>Configuration of type T.</returns>
-        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
+        /// <remarks>
+        /// <para>
+        /// If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/>
+        /// then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.
+        /// By default, this method blocks until the configuration is retrieved the first time. After the configuration was retrieved once,
+        /// updates will happen in the background. Failures to retrieve the configuration on the background thread will be logged.
+        /// </para>
+        /// <para>
+        /// If this operation is configured to be blocking through the switch 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking'
+        /// then this method will block each time the configuration needs to be updated or hasn't been retrieved. If the configuration
+        /// cannot be initially retrieved an exception will be thrown. If the configuration has been retrieved, but cannot be updated,
+        /// then the exception will be logged and the current configuration will be returned.
+        /// </para>
+        /// <para>
+        /// By using the app context switch you choose what works best for you when there is a signing key update:
+        /// either block requests from being validated until the new key is retrieved, or allow requests to be validated
+        /// with the current key until the new key is retrieved. If blocking, a service receiving high concurrent request
+        /// may experience thread starvation.
+        /// </para>
+        /// </remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && _syncAfter > DateTimeOffset.UtcNow)
+            if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
                 return _currentConfiguration;
 
+            if (AppContextSwitches.UpdateConfigAsBlocking)
+                return await GetConfigurationWithBlockingAsync(cancel).ConfigureAwait(false);
+            else
+                return await GetConfigurationNonBlockingAsync(cancel).ConfigureAwait(false);
+        }
+
+        private async Task<T> GetConfigurationNonBlockingAsync(CancellationToken cancel)
+        {
             Exception fetchMetadataFailure = null;
 
             // LOGIC
@@ -168,11 +201,10 @@ namespace Microsoft.IdentityModel.Protocols
                     return _currentConfiguration;
                 }
 
-#pragma warning disable CA1031 // Do not catch general exception types
                 try
                 {
                     // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
-                    // The transport should have it's own timeouts, etc.
+                    // The transport should have its own timeouts, etc.
                     T configuration = await _configRetriever.GetConfigurationAsync(
                         MetadataAddress,
                         _docRetriever,
@@ -183,18 +215,30 @@ namespace Microsoft.IdentityModel.Protocols
                         ConfigurationValidationResult result = _configValidator.Validate(configuration);
                         // in this case we have never had a valid configuration, so we will throw an exception if the validation fails
                         if (!result.Succeeded)
-                            throw LogHelper.LogExceptionMessage(
-                                new InvalidConfigurationException(
-                                    LogHelper.FormatInvariant(
-                                        LogMessages.IDX20810,
-                                        result.ErrorMessage)));
+                        {
+                            var ex = new InvalidConfigurationException(
+                                LogHelper.FormatInvariant(
+                                    LogMessages.IDX20810,
+                                    result.ErrorMessage));
+
+                            throw LogHelper.LogExceptionMessage(ex);
+                        }
                     }
+
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.FirstRefresh);
 
                     UpdateConfiguration(configuration);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
                 {
                     fetchMetadataFailure = ex;
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.FirstRefresh,
+                        ex);
 
                     LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
@@ -204,16 +248,20 @@ namespace Microsoft.IdentityModel.Protocols
                                 LogHelper.MarkAsNonPII(ex)),
                             ex));
                 }
+#pragma warning restore CA1031 // Do not catch general exception types
                 finally
                 {
                     _configurationNullLock.Release();
                 }
-#pragma warning restore CA1031 // Do not catch general exception types
             }
             else
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.Automatic);
+
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
             }
@@ -235,17 +283,23 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// This should be called when the configuration needs to be updated either from RequestRefresh or AutomaticRefresh
         /// The Caller should first check the state checking state using:
-        ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle, ConfigurationRetrieverRunning) != ConfigurationRetrieverRunning).
+        ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle).
         /// </summary>
         private void UpdateCurrentConfiguration()
         {
-#pragma warning disable CA1031 // Do not catch general exception types
+            long startTimestamp = TimeProvider.GetTimestamp();
+
             try
             {
                 T configuration = _configRetriever.GetConfigurationAsync(
                     MetadataAddress,
                     _docRetriever,
                     CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    elapsedTime);
 
                 if (_configValidator == null)
                 {
@@ -265,8 +319,15 @@ namespace Microsoft.IdentityModel.Protocols
                         UpdateConfiguration(configuration);
                 }
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
             {
+                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    elapsedTime,
+                    ex);
+
                 LogHelper.LogExceptionMessage(
                     new InvalidOperationException(
                         LogHelper.FormatInvariant(
@@ -275,17 +336,19 @@ namespace Microsoft.IdentityModel.Protocols
                             ex),
                         ex));
             }
+#pragma warning restore CA1031 // Do not catch general exception types
             finally
             {
                 Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
             }
-#pragma warning restore CA1031 // Do not catch general exception types
+
+            _onBackgroundTaskFinish?.Invoke();
         }
 
         private void UpdateConfiguration(T configuration)
         {
             _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+            _syncAfter = DateTimeUtil.Add(TimeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
         }
 
@@ -293,7 +356,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <param name="cancel">CancellationToken</param>
-        /// <returns>Configuration of type BaseConfiguration    .</returns>
+        /// <returns>Configuration of type BaseConfiguration.</returns>
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public override async Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
         {
@@ -307,12 +370,29 @@ namespace Microsoft.IdentityModel.Protocols
         /// <para>2. The time between when this method was called and DateTimeOffset.Now is greater than <see cref="BaseConfigurationManager.RefreshInterval"/>.</para>
         /// <para>If <see cref="BaseConfigurationManager.RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
         /// </summary>
+        /// <remarks>
+        /// If the strategy is configured to be blocking through the switch 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking',
+        /// then this method will not update the configuration, instead it will request the next call to <see cref="GetConfigurationAsync()"/>
+        /// should request new configuration.
+        /// </remarks>
         public override void RequestRefresh()
         {
-            DateTimeOffset now = DateTimeOffset.UtcNow;
+            if (AppContextSwitches.UpdateConfigAsBlocking)
+                RequestRefreshBlocking();
+            else
+                RequestRefreshBackgroundThread();
+        }
+
+        private void RequestRefreshBackgroundThread()
+        {
+            DateTimeOffset now = TimeProvider.GetUtcNow();
 
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.Manual);
+
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {

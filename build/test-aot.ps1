@@ -2,7 +2,7 @@ param([string]$targetNetFramework)
 
 $projectName='Microsoft.IdentityModel.AotCompatibility.TestApp'
 $rootDirectory = Split-Path $PSScriptRoot -Parent
-$publishOutput = dotnet publish $rootDirectory/test/$projectName/$projectName.csproj --self-contained -nodeReuse:false /p:UseSharedCompilation=false
+$publishOutput = dotnet publish $rootDirectory/test/$projectName/$projectName.csproj --self-contained --framework $targetNetFramework -nodeReuse:false /p:UseSharedCompilation=false
 
 $actualWarningCount = 0
 

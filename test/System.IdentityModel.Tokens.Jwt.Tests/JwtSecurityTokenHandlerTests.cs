@@ -1795,6 +1795,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Theory, MemberData(nameof(ValidateAudienceTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateAudience(JwtTheoryData theoryData)
         {
+            AppContext.SetSwitch(AppContextSwitches.DoNotScrubExceptionsSwitch, theoryData.DoNotScrubErrorMessages);
+
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
 
             try
@@ -1806,6 +1808,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
+            }
+            finally
+            {
+                AppContextSwitches.ResetAllSwitches();
             }
         }
 
@@ -1846,10 +1852,18 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10214", propertiesExpected: new Dictionary<string, object>{ { "InvalidAudience", null } }),
+                        TestId = "'Audience == NotDefault.Audience' ScrubbedMessage",
+                        SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
+                        ValidationParameters = ValidateAudienceValidationParameters(NotDefault.Audience, null, null, true),
+                    },
+                    new JwtTheoryData
+                    {
                         ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10214", propertiesExpected: new Dictionary<string, object>{ { "InvalidAudience", Default.Audience } }),
                         TestId = "'Audience == NotDefault.Audience'",
                         SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
                         ValidationParameters = ValidateAudienceValidationParameters(NotDefault.Audience, null, null, true),
+                        DoNotScrubErrorMessages = true,
                     },
                     new JwtTheoryData
                     {

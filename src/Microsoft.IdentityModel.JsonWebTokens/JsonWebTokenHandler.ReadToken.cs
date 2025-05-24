@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 
 #nullable enable
@@ -28,10 +27,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             if (string.IsNullOrEmpty(token))
             {
-                StackFrame nullTokenStackFrame = StackFrames.ReadTokenNullOrEmpty ?? new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(token),
-                    nullTokenStackFrame);
+                    ValidationError.GetCurrentStackFrame());
             }
 
             try
@@ -43,12 +41,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                StackFrame malformedTokenStackFrame = StackFrames.ReadTokenMalformed ?? new StackFrame(true);
                 return new ValidationError(
                     new MessageDetail(LogMessages.IDX14107),
                     ValidationFailureType.TokenReadingFailed,
                     typeof(SecurityTokenMalformedException),
-                    malformedTokenStackFrame,
+                    ValidationError.GetCurrentStackFrame(),
                     ex);
             }
         }

@@ -27,10 +27,9 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFrameworks>$(SrcTargets)</TargetFrameworks>
     <NetStandardImplicitPackageVersion>$(NetStandardVersion)</NetStandardImplicitPackageVersion>
-    <LangVersion>12</LangVersion>
+    <LangVersion>13</LangVersion>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
-
 
   <PropertyGroup>
     <EnablePackageValidation>false</EnablePackageValidation>
@@ -48,7 +47,7 @@
 
   <ItemGroup>
      <!-- Protects against sync-over-async: https://github.com/microsoft/vs-threading/blob/main/doc/analyzers/index.md. -->
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.9.28" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.11.20" PrivateAssets="all" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="$(MicrosoftSourceLinkGitHubVersion)" PrivateAssets="All"/>
   </ItemGroup>
 

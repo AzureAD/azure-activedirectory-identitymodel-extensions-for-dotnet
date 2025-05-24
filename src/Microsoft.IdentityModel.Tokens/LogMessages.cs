@@ -41,7 +41,9 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace.";
         public const string IDX10212 = "IDX10212: Issuer validation failed. Issuer: '{0}'. Did not match any: validationParameters.ValidIssuers: '{1}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{2}'. For more details, see https://aka.ms/IdentityModel/issuer-validation. ";
         public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'.";
+        public const string IDX10214S = "IDX10214: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches";
         public const string IDX10215 = "IDX10215: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudiences: '{1}'.";
+        public const string IDX10215S = "IDX10215: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches";
         public const string IDX10222 = "IDX10222: Lifetime validation failed. The token is not yet valid. ValidFrom (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10223 = "IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10224 = "IDX10224: Lifetime validation failed. The NotBefore (UTC): '{0}' is after Expires (UTC): '{1}'.";
@@ -87,7 +89,16 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10266 = "IDX10266: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace, validationParameters.ValidIssuers is null or empty and ConfigurationManager is null.";
         public const string IDX10267 = "IDX10267: '{0}' has been called by a derived class '{1}' which has not implemented this method. For this call graph to succeed, '{1}' will need to implement '{0}'.";
         public const string IDX10268 = "IDX10268: Unable to validate audience, validationParameters.ValidAudiences.Count == 0.";
-
+        public const string IDX10269 = "IDX10269: IssuerValidationDelegate threw an exception, see inner exception.";
+        public const string IDX10270 = "IDX10270: AudienceValidationDelegate threw an exception, see inner exception.";
+        public const string IDX10271 = "IDX10271: LifetimeValidationDelegate threw an exception, see inner exception.";
+        public const string IDX10272 = "IDX10272: SignatureValidationDelegate threw an exception, see inner exception.";
+        public const string IDX10273 = "IDX10273: AlgorithmValidationDelegate threw an exception, see inner exception.";
+        public const string IDX10274 = "IDX10274: IssuerSigningKeyValidationDelegate threw an exception, see inner exception.";
+        public const string IDX10275 = "IDX10275: TokenTypeValidationDelegate threw an exception, see inner exception.";
+        public const string IDX10276 = "IDX10276: TokenReplayValidationDelegate threw an exception, see inner exception.";
+        public const string IDX10277 = "IDX10277: RequireAudience property on ValidationParameters is set to false. Exiting without validating the audience.";
+        public const string IDX10278 = "IDX10278: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token decryption in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}. See https://aka.ms/validate-using-configuration-manager for additional information.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
@@ -110,6 +121,9 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10516 = "IDX10516: Signature validation failed. Unable to match key: \nkid: '{0}'. \nNumber of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'. \ntoken: '{4}'. Valid Lifetime: '{5}'. Valid Issuer: '{6}'";
         public const string IDX10517 = "IDX10517: Signature validation failed. The token's kid is missing. Keys tried: '{0}'. Number of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details.";
         public const string IDX10518 = "IDX10518: Signature validation failed. Algorithm validation failed with error: '{0}'.";
+        public const string IDX10519 = "IDX10519: Signature validation failed. The token's kid is missing and ValidationParameters.TryAllIssuerSigningKeys is set to false.";
+        public const string IDX10520 = "IDX10520: Signature validation failed. The key provided could not validate the signature. Key tried: '{0}'.";
+        public const string IDX10521 = "IDX10521: Signature validation failed. An exception was thrown when trying to validate the signature. Key tried: '{0}'. Exception: '{1}'.";
 
         // encryption / decryption
         // public const string IDX10600 = "IDX10600:";
@@ -131,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10617 = "IDX10617: Encryption failed. Keywrap is only supported for: '{0}', '{1}' and '{2}'. The content encryption specified is: '{3}'.";
         public const string IDX10618 = "IDX10618: Key unwrap failed using decryption Keys: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
         public const string IDX10619 = "IDX10619: Decryption failed. Algorithm: '{0}'. Either the Encryption Algorithm: '{1}' or none of the Security Keys are supported by the CryptoProviderFactory.";
-        public const string IDX10620 = "IDX10620: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CrypoProviderFactory are null.";
+        public const string IDX10620 = "IDX10620: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CryptoProviderFactory are null.";
         //public const string IDX10903 = "IDX10903: Token decryption succeeded. With thumbprint: '{0}'.";
         public const string IDX10904 = "IDX10904: Token decryption key : '{0}' found in TokenValidationParameters.";
         public const string IDX10905 = "IDX10905: Token decryption key : '{0}' found in Configuration/Metadata.";
@@ -255,15 +269,16 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10815 = "IDX10815: Depth of JSON: '{0}' exceeds max depth of '{1}'.";
         public const string IDX10816 = "IDX10816: Decompressing would result in a token with a size greater than allowed. Maximum size allowed: '{0}'.";
 
-        // Base64UrlEncoding
-        public const string IDX10820 = "IDX10820: Invalid character found in Base64UrlEncoding. Character: '{0}', Encoding: '{1}'.";
-        public const string IDX10821 = "IDX10821: Incorrect padding detected in Base64UrlEncoding. Encoding: '{0}'.";
-
         //EventBasedLRUCache errors
         public const string IDX10900 = "IDX10900: EventBasedLRUCache._eventQueue encountered an error while processing a cache operation. Exception '{0}'.";
         public const string IDX10901 = "IDX10901: CryptoProviderCacheOptions.SizeLimit must be greater than 10. Value: '{0}'";
         public const string IDX10902 = "IDX10902: Exception caught while removing expired items: '{0}', Exception: '{1}'";
         public const string IDX10906 = "IDX10906: Exception caught while compacting items: '{0}', Exception: '{1}'";
+
+
+        // Base64UrlEncoding
+        public const string IDX10820 = "IDX10820: Invalid character found in Base64UrlEncoding. Character: '{0}', Encoding: '{1}'.";
+        public const string IDX10821 = "IDX10821: Incorrect padding detected in Base64UrlEncoding. Encoding: '{0}'.";
 
         // Crypto Errors
         public const string IDX11000 = "IDX11000: Cannot create EcdhKeyExchangeProvider. '{0}'\'s Curve '{1}' does not match with '{2}'\'s curve '{3}'.";

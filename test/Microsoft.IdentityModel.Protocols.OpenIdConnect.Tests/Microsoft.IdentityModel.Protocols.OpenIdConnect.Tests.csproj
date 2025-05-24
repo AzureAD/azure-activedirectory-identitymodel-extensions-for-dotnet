@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.OpenIdConnect\Microsoft.IdentityModel.Protocols.OpenIdConnect.csproj" />
+    <ProjectReference Include="..\Microsoft.IdentityModel.Logging.Tests\Microsoft.IdentityModel.Logging.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Protocols.Tests\Microsoft.IdentityModel.Protocols.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Tests\Microsoft.IdentityModel.Tokens.Tests.csproj" />
@@ -27,7 +28,6 @@
   <ItemGroup>
     <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)"/>
     <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
-    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntime)"/>
   </ItemGroup>
 
   <ItemGroup>

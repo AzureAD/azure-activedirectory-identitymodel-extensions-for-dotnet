@@ -14,13 +14,18 @@ on:
 jobs:
   analyze:
     runs-on: windows-latest
-    name: Wilson GitHub AOT check
+    name: "AOT check"
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
+
+    - name: Setup .NET SDK from global.json
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: ./global.json
 
     - name: Runs powershell script
       id: aot-powershell

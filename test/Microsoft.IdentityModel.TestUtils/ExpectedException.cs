@@ -9,6 +9,8 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -72,6 +74,16 @@ namespace Microsoft.IdentityModel.TestUtils
         public static ExpectedException XmlException(string substringExpected = null, Type inner = null, string contains = null)
         {
             return new ExpectedException(typeof(XmlException), substringExpected, inner);
+        }
+
+        public static ExpectedException SamlSecurityTokenReadException(string substringExpected = null, Type inner = null, string contains = null)
+        {
+            return new ExpectedException(typeof(SamlSecurityTokenReadException), substringExpected, inner);
+        }
+
+        public static ExpectedException Saml2SecurityTokenReadException(string substringExpected = null, Type inner = null, string contains = null)
+        {
+            return new ExpectedException(typeof(Saml2SecurityTokenReadException), substringExpected, inner);
         }
 
         public static ExpectedException NoExceptionExpected

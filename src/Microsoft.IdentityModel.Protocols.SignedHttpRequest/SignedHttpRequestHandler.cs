@@ -656,7 +656,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     {
                         signatureProvider = popKey.CryptoProviderFactory.CreateForVerifying(popKey, signedHttpRequest.Alg, false);
                         if (signatureProvider == null)
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
+                            throw LogHelper.LogExceptionMessage(
+                                new InvalidOperationException(
+                                    LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, LogHelper.MarkAsNonPII(popKey.KeyId), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
 
                         if (EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                             signedHttpRequest.EncodedToken,
@@ -1099,7 +1101,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23015, LogHelper.MarkAsNonPII(key.GetType().ToString()))));
             }
             else
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23016, jsonWebKey.ToString())));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23016, LogHelper.MarkAsNonPII(jsonWebKey.KeyId))));
         }
 
         /// <summary>
@@ -1164,7 +1166,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     new SignedHttpRequestInvalidPopKeyException(
                         LogHelper.FormatInvariant(
                             LogMessages.IDX23021,
-                            LogHelper.MarkAsNonPII(cnf.Kid), string.Join(", ", popKeys.Select(x => x.KeyId ?? "Null")))));
+                            LogHelper.MarkAsNonPII(cnf.Kid),
+                            LogHelper.MarkAsNonPII(string.Join(", ", popKeys.Select(x => x.KeyId ?? "Null"))))));
             }
             else
             {

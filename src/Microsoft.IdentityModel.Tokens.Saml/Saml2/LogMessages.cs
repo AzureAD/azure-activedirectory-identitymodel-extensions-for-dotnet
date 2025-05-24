@@ -16,6 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13400 = "IDX13400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX13001 = "IDX13001: A SAML2 assertion that specifies an AuthenticationContext DeclarationReference is not supported.To handle DeclarationReference, extend the Saml2SecurityTokenHandler and override ProcessAuthenticationStatement.";
         internal const string IDX13002 = "IDX13002: Unable to validate token. TokenValidationParameters.RequireAudience is true but no AudienceRestrictions were found in the inbound token.";
+        internal const string IDX13003 = "IDX13003: Unable to read Saml2SecurityToken. Exception thrown: '{0}'.";
 
         // signature creation / validation
         internal const string IDX13509 = "IDX13509: Unable to validate token, Subject is null.";
@@ -23,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13511 = "IDX13511: The Saml2SecurityToken cannot be validated because the Assertion specifies a ProxyRestriction condition.Enforcement of the ProxyRestriction condition is not supported by default. To customize the enforcement of Saml2Conditions, extend Saml2SecurityTokenHandler and override ValidateConditions.";
         internal const string IDX13512 = "IDX13512: Unable to validate token. A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
         internal const string IDX13513 = "IDX13513: NotBefore '{0}', is after NotOnOrAfter '{1}'.";
-        internal const string IDX13514 = "IDX13514: NotOnOrAfter '{0}', is before NotBefore '{1}'.";
+        //internal const string IDX13514 = "IDX13514: NotOnOrAfter '{0}', is before NotBefore '{1}'.";
         internal const string IDX13515 = "IDX13515: SamlId value threw on XmlConvert.VerifyNCName. value: '{0}'";
         internal const string IDX13516 = "IDX13516: A Saml2Statement of type: '{0}' was found when ProcessingStatements and creating the ClaimsIdentity. These claims have been skipped. If you need to process this Statement, you will need to derive a custom Saml2SecurityTokenHandler and override ProcessStatements.";
 

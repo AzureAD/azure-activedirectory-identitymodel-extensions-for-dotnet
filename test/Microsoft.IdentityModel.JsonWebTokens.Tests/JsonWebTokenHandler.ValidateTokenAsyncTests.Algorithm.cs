@@ -73,9 +73,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             validAlgorithms: [SecurityAlgorithms.Sha256]),
                     ExpectedIsValid = false,
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
-                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAlgorithmException(
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException(
                         "IDX10518:",
-                        propertiesExpected: new() { { "InvalidAlgorithm", SecurityAlgorithms.HmacSha256Signature } }),
+                        typeof(SecurityTokenInvalidAlgorithmException)),
                 });
 
                 return theoryData;
@@ -103,12 +103,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 static ValidationParameters CreateValidationParameters(
                     SecurityKey? signingKey = null, List<string>? validAlgorithms = null)
                 {
-                    ValidationParameters validationParameters = new ValidationParameters();
+                    ValidationParameters validationParameters = new ValidationParameters
+                    {
+                        ValidAlgorithms = validAlgorithms ?? []
+                    };
 
                     if (signingKey is not null)
                         validationParameters.IssuerSigningKeys.Add(signingKey);
-
-                    validationParameters.ValidAlgorithms = validAlgorithms;
 
                     // Skip all validations except signature and algorithm
                     validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;

@@ -73,8 +73,10 @@ namespace Microsoft.IdentityModel.Tokens
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
+            TryReadJwtClaim = other.TryReadJwtClaim;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
+            // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             RequireExpirationTime = other.RequireExpirationTime;
             RequireSignedTokens = other.RequireSignedTokens;
             RoleClaimType = other.RoleClaimType;
@@ -89,12 +91,16 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
             TransformBeforeSignatureValidation = other.TransformBeforeSignatureValidation;
+            TryAllDecryptionKeys = other.TryAllDecryptionKeys;
             TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
+            // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             ValidateAudience = other.ValidateAudience;
+            // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             ValidateIssuer = other.ValidateIssuer;
             ValidateIssuerSigningKey = other.ValidateIssuerSigningKey;
+            // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             ValidateLifetime = other.ValidateLifetime;
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateTokenReplay = other.ValidateTokenReplay;
@@ -118,6 +124,7 @@ namespace Microsoft.IdentityModel.Tokens
             RequireSignedTokens = true;
             RequireAudience = true;
             SaveSigninToken = false;
+            TryAllDecryptionKeys = true;
             TryAllIssuerSigningKeys = true;
             ValidateActor = false;
             ValidateAudience = true;
@@ -450,6 +457,11 @@ namespace Microsoft.IdentityModel.Tokens
         public IDictionary<string, object> PropertyBag { get; set; }
 
         /// <summary>
+        /// Gets or sets the delegate that will be called when reading JSON Web Token header and payload claims.
+        /// </summary>
+        public TryReadJwtClaim TryReadJwtClaim { get; set; }
+
+        /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
         /// </summary>
         /// <remarks>
@@ -459,9 +471,13 @@ namespace Microsoft.IdentityModel.Tokens
         public bool RefreshBeforeValidation { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether SAML tokens must have at least one AudienceRestriction.
+        /// Gets or sets a value indicating whether SAML or JWT tokens must have at least one AudienceRestriction.
         /// The default is <c>true</c>.
         /// </summary>
+        /// <remarks>
+        /// If set to false and the Audience is null, Audience validation will be skipped.
+        /// If set to false and the Audience is not null, the Audience will still be validated.
+        /// </remarks>
         [DefaultValue(true)]
         public bool RequireAudience { get; set; }
 
@@ -548,10 +564,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for decryption.
         /// </summary>
+        /// <remarks>
+        /// This <see cref="TokenDecryptionKey"/> will only be used if its <see cref="SecurityKey.KeyId"/> matches the 'kid' parameter in the token.
+        /// </remarks>
         public SecurityKey TokenDecryptionKey { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
+        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
@@ -561,6 +580,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{SecurityKey}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
+        /// <remarks>
+        /// The decryption keys in this <see cref="TokenDecryptionKeys"/> collection will only be used if their <see cref="SecurityKey.KeyId"/> matches the 'kid' parameter in the token.
+        /// </remarks>
         public IEnumerable<SecurityKey> TokenDecryptionKeys { get; set; }
 
         /// <summary>
@@ -588,7 +610,14 @@ namespace Microsoft.IdentityModel.Tokens
         public TokenReplayValidator TokenReplayValidator { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether all <see cref="IssuerSigningKeys"/> should be tried during signature validation when a key is not matched to token kid or if token kid is empty.
+        /// Gets or sets a value indicating whether all <see cref="TokenDecryptionKeys"/> should be tried during token decryption when a key is not matched to token 'kid' or if token 'kid' is empty.
+        /// The default is <c>true</c>.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool TryAllDecryptionKeys { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether all <see cref="IssuerSigningKeys"/> should be tried during signature validation when a key is not matched to token 'kid' or if token 'kid' is empty.
         /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]

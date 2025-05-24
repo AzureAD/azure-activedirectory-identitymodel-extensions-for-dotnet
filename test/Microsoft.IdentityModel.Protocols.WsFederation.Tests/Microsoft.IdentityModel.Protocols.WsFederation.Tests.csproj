@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)"/>
-    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntime)"/>
   </ItemGroup>
 
 </Project>

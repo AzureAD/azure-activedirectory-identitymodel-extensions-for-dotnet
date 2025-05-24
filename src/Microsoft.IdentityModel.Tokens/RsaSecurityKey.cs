@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal RsaSecurityKey(JsonWebKey webKey)
             : base(webKey)
         {
-            IntializeWithRsaParameters(webKey.CreateRsaParameters());
+            InitializeWithRsaParameters(webKey.CreateRsaParameters());
             webKey.ConvertedSecurityKey = this;
         }
 
@@ -33,10 +33,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="rsaParameters"><see cref="RSAParameters"/></param>
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
-            IntializeWithRsaParameters(rsaParameters);
+            InitializeWithRsaParameters(rsaParameters);
         }
 
-        internal void IntializeWithRsaParameters(RSAParameters rsaParameters)
+        internal void InitializeWithRsaParameters(RSAParameters rsaParameters)
         {
             // must have modulus and exponent otherwise the crypto operations fail later
             if (rsaParameters.Modulus == null)

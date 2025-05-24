@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Telemetry;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -17,6 +18,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <remarks>This partial class contains methods and logic related to the validation of tokens.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
+        internal Telemetry.ITelemetryClient _telemetryClient = new TelemetryClient();
+
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
         /// </summary>
@@ -317,7 +320,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Alg, key))
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), key);
+                    LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), LogHelper.MarkAsNonPII(key.KeyId));
 
                 return false;
             }
@@ -327,7 +330,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             try
             {
                 if (signatureProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, key == null ? "Null" : key.ToString(), LogHelper.MarkAsNonPII(jsonWebToken.Alg))));
+                    throw LogHelper.LogExceptionMessage
+                        (new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                                TokenLogMessages.IDX10636,
+                                LogHelper.MarkAsNonPII(key == null ? "Null" : key.KeyId),
+                                LogHelper.MarkAsNonPII(jsonWebToken.Alg))));
 
                 return EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                     jsonWebToken.EncodedToken,
@@ -503,7 +511,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     return tokenValidationResult;
                 }
-                else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception))
+                else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception, (currentConfiguration != null && currentConfiguration.TokenDecryptionKeys.Count > 0)))
                 {
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
                     // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
@@ -511,6 +519,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // where a new valid configuration was somehow published during validation time.
                     if (currentConfiguration != null)
                     {
+                        _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                            validationParameters.ConfigurationManager.MetadataAddress,
+                            TelemetryConstants.Protocols.Lkg);
+
                         validationParameters.ConfigurationManager.RequestRefresh();
                         validationParameters.RefreshBeforeValidation = true;
                         var lastConfig = currentConfiguration;

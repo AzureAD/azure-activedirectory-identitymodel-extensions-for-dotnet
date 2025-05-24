@@ -7,30 +7,31 @@ steps:
 - script: echo $(MicrosoftIdentityModelVersion)
   displayName: 'display MicrosoftIdentityModelVersion'
 
+# Primary SDK from global.json
 - task: UseDotNet@2
-  displayName: 'Use .NET Core sdk 2.x'
+  displayName: 'Use .NET SDK from global.json'
+  inputs:
+    useGlobalJson: true
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+# Additional .NET SDKs needed for targeting older frameworks
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 2.x'
   inputs:
     version: 2.x
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
 - task: UseDotNet@2
-  displayName: 'Use .NET Core sdk 6.x'
+  displayName: 'Use .Net Core SDK 6.x'
   inputs:
     version: 6.x
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
 - task: UseDotNet@2
-  displayName: 'Use .NET Core sdk 8.x'
+  displayName: 'Use .Net Core SDK 8.x'
   inputs:
     version: 8.x
     installationPath: $(Agent.ToolsDirectory)/dotnet
-
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 9.x'
-  inputs:
-    version: 9.0.100-rc.2.24474.11
-    includePreviewVersions: true
-  condition: eq(variables['TargetNet9'], 'True')
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet --list-sdks'
@@ -54,7 +55,10 @@ steps:
         dotnet nuget add source https://identitydivision.pkgs.visualstudio.com/_packaging/IDDP/nuget/v3/index.json -n IDDP
         dotnet nuget list source
     }
+  workingDirectory: '$(Build.SourcesDirectory)\$(WilsonSourceDirectory)'
   displayName: 'Remove external "NuGet" Source and add "IDDP artifacts" as a NuGet Source, if needed.'
+  env:
+    DOTNET_NOLOGO: 1
 
 - task: DotNetCoreCLI@2
   displayName: Build
@@ -209,6 +213,13 @@ steps:
   inputs:
     PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
     ArtifactName: '$(Build.BuildNumber)-nuget-package'
+
+- task: BuildQualityChecks@9
+  displayName: 'Check Warnings'
+  inputs:
+    checkWarnings: true
+    warningFailOption: 'build'
+    showStatistics: true
 
 - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
   displayName: 'Clean Agent Directories'

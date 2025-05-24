@@ -26,6 +26,11 @@ namespace Microsoft.IdentityModel.Tokens
             Parameters = parameters;
         }
 
+        /// <summary>
+        /// Creates a message detail for a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <returns>A new <see cref="MessageDetail"/>.</returns>
         public static MessageDetail NullParameter(string parameterName)
             => new MessageDetail(LogMessages.IDX10000, LogHelper.MarkAsNonPII(parameterName));
 

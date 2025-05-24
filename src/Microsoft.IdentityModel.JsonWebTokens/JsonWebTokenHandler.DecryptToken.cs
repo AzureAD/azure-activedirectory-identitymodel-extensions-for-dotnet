@@ -3,9 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -16,12 +17,55 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public partial class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
-        /// Decrypts a JWE and returns the clear text.
+        /// Decrypts a JWE and returns the clear text. Decrypts using the keys from configuration
+        /// if no keys are specified in <paramref name="validationParameters"/>.
+        /// </summary>
+        /// <param name="jwtToken">The JWE that contains the cypher text.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for decrypting the token.</param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
+        /// <returns>The decoded / cleartext contents of the JWE.</returns>
+        internal async Task<ValidationResult<string>> DecryptTokenWithConfigurationAsync(
+            JsonWebToken jwtToken,
+            ValidationParameters validationParameters,
+            CallContext? callContext,
+            CancellationToken cancellationToken)
+        {
+            if (jwtToken == null)
+            {
+                return ValidationError.NullParameter(
+                    nameof(jwtToken),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            if (validationParameters == null)
+            {
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            if (string.IsNullOrEmpty(jwtToken.Enc))
+            {
+                return new ValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10612),
+                    ValidationFailureType.TokenDecryptionFailed,
+                    typeof(SecurityTokenException),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
+            BaseConfiguration? currentConfiguration = await GetCurrentConfigurationAsync(validationParameters, cancellationToken).ConfigureAwait(false);
+
+            return DecryptToken(jwtToken, validationParameters, currentConfiguration, callContext);
+        }
+
+        /// <summary>
+        /// Decrypts a JWE using the keys from <paramref name="validationParameters"/> and returns the clear text.
         /// </summary>
         /// <param name="jwtToken">The JWE that contains the cypher text.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
         internal ValidationResult<string> DecryptToken(
             JsonWebToken jwtToken,
@@ -31,60 +75,50 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             if (jwtToken == null)
             {
-                StackFrame tokenNullStackFrame = StackFrames.DecryptionTokenNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(jwtToken),
-                    tokenNullStackFrame);
+                    ValidationError.GetCurrentStackFrame());
             }
 
             if (validationParameters == null)
             {
-                StackFrame validationParametersNullStackFrame = StackFrames.DecryptionValidationParametersNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(validationParameters),
-                    validationParametersNullStackFrame);
+                    ValidationError.GetCurrentStackFrame());
             }
 
             if (string.IsNullOrEmpty(jwtToken.Enc))
             {
-                StackFrame headerMissingStackFrame = StackFrames.DecryptionHeaderMissing ??= new StackFrame(true);
                 return new ValidationError(
                     new MessageDetail(TokenLogMessages.IDX10612),
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenException),
-                    headerMissingStackFrame);
+                    ValidationError.GetCurrentStackFrame());
             }
 
-            (IList<SecurityKey>? contentEncryptionKeys, ValidationError? validationError) result =
+            (IList<SecurityKey>? ContentEncryptionKeys, ValidationError? ValidationError) result =
                 GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
 
-            if (result.validationError != null)
-            {
-                StackFrame decryptionGetKeysStackFrame = StackFrames.DecryptionGetEncryptionKeys ??= new StackFrame(true);
-                return result.validationError.AddStackFrame(decryptionGetKeysStackFrame);
-            }
+            if (result.ValidationError != null)
+                return result.ValidationError.AddCurrentStackFrame();
 
-            if (result.contentEncryptionKeys == null || result.contentEncryptionKeys.Count == 0)
+            if (result.ContentEncryptionKeys == null || result.ContentEncryptionKeys.Count == 0)
             {
-                StackFrame noKeysTriedStackFrame = StackFrames.DecryptionNoKeysTried ??= new StackFrame(true);
                 return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenDecryptionFailedException),
-                    noKeysTriedStackFrame);
+                    ValidationError.GetCurrentStackFrame());
             }
+
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, result.ContentEncryptionKeys);
 
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
                 validationParameters,
-                new JwtTokenDecryptionParameters
-                {
-                    DecompressionFunction = JwtTokenUtilities.DecompressToken,
-                    Keys = result.contentEncryptionKeys,
-                    MaximumDeflateSize = MaximumTokenSizeInBytes
-                },
+                decryptionParameters,
                 callContext);
         }
 
@@ -129,7 +163,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // 2. ResolveTokenDecryptionKey returned null
             // 3. ResolveTokenDecryptionKeyFromConfig returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
-            if (keys == null)
+            if (validationParameters.TryAllDecryptionKeys && keys.IsNullOrEmpty())
             {
                 keys = validationParameters.TokenDecryptionKeys;
                 if (configuration != null)
@@ -204,23 +238,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
                 }
 
-                (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
+                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
             if (unwrappedKeys.Count > 0 || exceptionStrings is null)
                 return (unwrappedKeys, null);
             else
             {
-                StackFrame decryptionKeyUnwrapFailedStackFrame = StackFrames.DecryptionKeyUnwrapFailed ??= new StackFrame(true);
                 ValidationError validationError = new(
                     new MessageDetail(
                         TokenLogMessages.IDX10618,
-                        keysAttempted?.ToString() ?? "",
+                        LogHelper.MarkAsNonPII(keysAttempted?.ToString() ?? ""),
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenKeyWrapException),
-                    decryptionKeyUnwrapFailedStackFrame);
+                    ValidationError.GetCurrentStackFrame());
 
                 return (null, validationError);
             }

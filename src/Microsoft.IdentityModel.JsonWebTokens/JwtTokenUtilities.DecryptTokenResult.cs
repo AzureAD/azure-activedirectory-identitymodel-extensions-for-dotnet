@@ -2,10 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -28,12 +26,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (validationParameters == null)
                 return ValidationError.NullParameter(
                     nameof(validationParameters),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame());
 
             if (decryptionParameters == null)
                 return ValidationError.NullParameter(
                     nameof(decryptionParameters),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame());
 
             bool decryptionSucceeded = false;
             bool algorithmNotSupportedByCryptoProvider = false;
@@ -95,7 +93,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
 
                 if (key != null)
-                    (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
+                    (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
             if (!decryptionSucceeded)
@@ -121,10 +119,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 return new ValidationError(
-                    new MessageDetail(TokenLogMessages.IDX10679, zipAlgorithm),
+                    new MessageDetail(GetIDX10679LogMessage(zipAlgorithm)),
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenDecompressionFailedException),
-                    new StackFrame(true),
+                    ValidationError.GetCurrentStackFrame(),
                     ex);
             }
         }
