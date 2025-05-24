@@ -98,6 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10275 = "IDX10275: TokenTypeValidationDelegate threw an exception, see inner exception.";
         public const string IDX10276 = "IDX10276: TokenReplayValidationDelegate threw an exception, see inner exception.";
         public const string IDX10277 = "IDX10277: RequireAudience property on ValidationParameters is set to false. Exiting without validating the audience.";
+        public const string IDX10278 = "IDX10278: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token decryption in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}. See https://aka.ms/validate-using-configuration-manager for additional information.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";

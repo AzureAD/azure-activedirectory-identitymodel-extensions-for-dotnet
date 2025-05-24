@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -336,6 +338,54 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             return identity;
+        }
+
+        /// <summary>
+        /// Decrypts a JWE and returns the clear text.
+        /// </summary>
+        /// <param name="jwtToken">The JWE that contains the cypher text.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
+        /// <returns>The decoded (clear text) contents of the JWE.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="SecurityTokenException">Thrown if <see cref="JsonWebToken.Enc"/> is null or empty.</exception>
+        /// <exception cref="SecurityTokenDecompressionFailedException">Thrown if the decompression failed.</exception>
+        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">Thrown if <see cref="JsonWebToken.Kid"/> is not null AND the decryption fails.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the JWE was not able to be decrypted.</exception>
+        public async Task<string> DecryptTokenWithConfigurationAsync(
+            JsonWebToken jwtToken,
+            TokenValidationParameters validationParameters,
+            CancellationToken cancellationToken)
+        {
+            if (jwtToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            if (string.IsNullOrEmpty(jwtToken.Enc))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
+
+            BaseConfiguration currentConfiguration = null;
+            if (validationParameters.ConfigurationManager != null)
+            {
+                try
+                {
+                    currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    // The exception is not re-thrown as the decryption key may be set
+                    // on TokenValidationParameters, allowing the library to continue with token decryption.
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10278, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                }
+            }
+
+            return DecryptToken(jwtToken, validationParameters, currentConfiguration);
         }
 
         /// <summary>

@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             BaseConfiguration? currentConfiguration =
-                await GetCurrentConfigurationAsync(validationParameters).ConfigureAwait(false);
+                await GetCurrentConfigurationAsync(validationParameters, cancellationToken).ConfigureAwait(false);
 
             ValidationResult<ValidatedToken> result = jsonWebToken.IsEncrypted ?
                 await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
@@ -422,14 +422,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             };
         }
 
-        private static async Task<BaseConfiguration?> GetCurrentConfigurationAsync(ValidationParameters validationParameters)
+        private static async Task<BaseConfiguration?> GetCurrentConfigurationAsync(ValidationParameters validationParameters, CancellationToken cancellationToken)
         {
             BaseConfiguration? currentConfiguration = null;
             if (validationParameters.ConfigurationManager is not null)
             {
                 try
                 {
-                    currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                    currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch

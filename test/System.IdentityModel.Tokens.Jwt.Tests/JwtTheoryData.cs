@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 
@@ -22,6 +23,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public SecurityToken SecurityToken { get; set; }
 
         public string Token { get; set; }
+
+        public JsonWebToken JsonWebToken { get; set; }
 
         public SecurityTokenDescriptor TokenDescriptor { get; set; }
 
