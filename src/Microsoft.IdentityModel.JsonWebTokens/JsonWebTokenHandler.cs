@@ -641,7 +641,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         try
                         {
-                            return tokenValidationParameters.ActClaimRetrieverDelegate(actClaim);
+                            return tokenValidationParameters.ActClaimRetrieverDelegate(actClaim, tokenValidationParameters);
                         }
                         catch (Exception ex)
                         {
