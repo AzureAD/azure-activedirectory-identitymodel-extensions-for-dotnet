@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Telemetry;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -40,6 +40,11 @@ namespace Microsoft.IdentityModel.Protocols
 
         internal TimeProvider TimeProvider = TimeProvider.System;
         internal ITelemetryClient TelemetryClient = new TelemetryClient();
+
+        /// <summary>
+        /// Gets or sets the optional configuration event handler.
+        /// </summary>
+        public IConfigurationEventHandler<T> ConfigurationEventHandler { get; set; }
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -136,6 +141,25 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
+        /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/></param>
+        /// <param name="configurationEventHandler"> The <see cref="IConfigurationEventHandler{T}"/> that handles configuration events.</param>
+        /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator, LastKnownGoodConfigurationCacheOptions lkgCacheOptions, IConfigurationEventHandler<T> configurationEventHandler)
+            : this(metadataAddress, configRetriever, docRetriever, configValidator, lkgCacheOptions)
+        {
+            if (configurationEventHandler == null)
+                throw LogHelper.LogArgumentNullException(nameof(configurationEventHandler));
+
+            ConfigurationEventHandler = configurationEventHandler;
+        }
+
+        /// <summary>
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
@@ -203,6 +227,14 @@ namespace Microsoft.IdentityModel.Protocols
 
                 try
                 {
+                    // Check if event handler can provide configuration
+                    if (ConfigurationEventHandler != null)
+                    {
+                        var configurationRetrieved = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
+                        if (configurationRetrieved)
+                            return _currentConfiguration; // TODO check if everything has been done
+                    }
+
                     // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                     // The transport should have its own timeouts, etc.
                     T configuration = await _configRetriever.GetConfigurationAsync(
@@ -291,6 +323,15 @@ namespace Microsoft.IdentityModel.Protocols
 
             try
             {
+                // Check if event handler can provide configuration
+                if (ConfigurationEventHandler != null)
+                {
+                    var configurationRetrieved = HandleBeforeRetrieveAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                    if (configurationRetrieved)
+                        return; // TODO check if everything has been done
+                }
+
+
                 T configuration = _configRetriever.GetConfigurationAsync(
                     MetadataAddress,
                     _docRetriever,
@@ -350,6 +391,34 @@ namespace Microsoft.IdentityModel.Protocols
             _currentConfiguration = configuration;
             _syncAfter = DateTimeUtil.Add(TimeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
+
+            // Check if event handler can provide configuration
+            if (ConfigurationEventHandler != null)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await ConfigurationEventHandler.AfterUpdateAsync(MetadataAddress, configuration).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                            MetadataAddress,
+                            TelemetryConstants.Protocols.FirstRefresh,
+                            ex); // TODO new dimension
+
+                        // todo new logs
+                        LogHelper.LogExceptionMessage(
+                            new InvalidOperationException(
+                                LogHelper.FormatInvariant(
+                                    "IDX20817: Exception occurred while notifying configuration update handler. MetadataAddress: '{0}', Exception: '{1}'.",
+                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                    ex),
+                                ex));
+                    }
+                });
+            }
         }
 
         /// <summary>

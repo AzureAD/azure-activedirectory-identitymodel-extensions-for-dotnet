@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    partial class ConfigurationManager<T> where T : class
+    public partial class ConfigurationManager<T> where T : class
     {
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
@@ -34,6 +34,14 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     try
                     {
+                        // Check if event handler can provide configuration
+                        if (ConfigurationEventHandler != null)
+                        {
+                            var configurationRetrieved = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
+                            if (configurationRetrieved)
+                                return _currentConfiguration;
+                        }
+
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
                         var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
@@ -113,18 +121,79 @@ namespace Microsoft.IdentityModel.Protocols
                     return _currentConfiguration;
                 else
                     throw LogHelper.LogExceptionMessage(
-                        new InvalidOperationException(
-                            LogHelper.FormatInvariant(
-                                LogMessages.IDX20803,
-                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                LogHelper.MarkAsNonPII(_syncAfter),
-                                LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
-                            _fetchMetadataFailure));
+                              new InvalidOperationException(
+                                LogHelper.FormatInvariant(
+                                    LogMessages.IDX20803,
+                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                    LogHelper.MarkAsNonPII(_syncAfter),
+                                    LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
+                                _fetchMetadataFailure));
             }
             finally
             {
                 _refreshLock.Release();
             }
+        }
+
+        private async Task<bool> HandleBeforeRetrieveAsync(CancellationToken cancel = default)
+        {
+            long beforeHandlerTimestamp = TimeProvider.GetTimestamp();
+            try
+            {
+                var cachedResult = await ConfigurationEventHandler.BeforeRetrieveAsync(MetadataAddress).ConfigureAwait(false);
+                if (cachedResult != null && cachedResult.Configuration != null)
+                {
+                    var handlerElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
+                    TelemetryClient.LogConfigurationRetrievalDuration(
+                        MetadataAddress,
+                        handlerElapsedTime);// TODO new dimension for source
+
+                    // Validate configuration from handler
+                    if (_configValidator != null)
+                    {
+                        ConfigurationValidationResult result = _configValidator.Validate(cachedResult.Configuration);
+                        if (!result.Succeeded)
+                        {
+                            // Just log the error and proceed to fetch from endpoint
+                            LogHelper.LogExceptionMessage(
+                                new InvalidConfigurationException(
+                                    LogHelper.FormatInvariant(
+                                        LogMessages.IDX20810, // TODO new log message
+                                        result.ErrorMessage)));
+
+                            return false;
+                        }
+                    }
+
+                    // No validator configured, use configuration
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.FirstRefresh); // TODO new dimension for source
+
+                    UpdateConfiguration(cachedResult.Configuration);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                var handlerErrorElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    handlerErrorElapsedTime,
+                    ex); // TODO new dimension for source
+
+                // Log but don't fail - proceed to fetch from endpoint
+                // TODO check error
+                LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            "Failed to retrieve configuration from event handler. MetadataAddress: '{0}', Exception: '{1}'.",
+                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                            ex),
+                        ex));
+            }
+
+            return false;
         }
 
         private void RequestRefreshBlocking()
