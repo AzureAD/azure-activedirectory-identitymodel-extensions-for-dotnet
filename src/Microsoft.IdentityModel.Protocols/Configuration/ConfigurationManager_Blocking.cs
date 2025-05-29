@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Protocols
                         if (_refreshRequested)
                             _refreshRequested = false;
 
-                        UpdateConfiguration(configuration);
+                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
                     }
                     catch (Exception ex)
                     {
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Protocols
                         MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh); // TODO new dimension for source
 
-                    UpdateConfiguration(cachedResult.Configuration);
+                    UpdateConfiguration(cachedResult.Configuration, cachedResult.RetrievalTime);
                     return true;
                 }
             }

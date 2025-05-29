@@ -261,7 +261,7 @@ namespace Microsoft.IdentityModel.Protocols
                         MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh);
 
-                    UpdateConfiguration(configuration);
+                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -331,7 +331,6 @@ namespace Microsoft.IdentityModel.Protocols
                         return; // TODO check if everything has been done
                 }
 
-
                 T configuration = _configRetriever.GetConfigurationAsync(
                     MetadataAddress,
                     _docRetriever,
@@ -344,7 +343,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 if (_configValidator == null)
                 {
-                    UpdateConfiguration(configuration);
+                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
                 }
                 else
                 {
@@ -357,7 +356,7 @@ namespace Microsoft.IdentityModel.Protocols
                                     LogMessages.IDX20810,
                                     result.ErrorMessage)));
                     else
-                        UpdateConfiguration(configuration);
+                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -386,13 +385,12 @@ namespace Microsoft.IdentityModel.Protocols
             _onBackgroundTaskFinish?.Invoke();
         }
 
-        private void UpdateConfiguration(T configuration)
+        private void UpdateConfiguration(T configuration, DateTimeOffset retrievalTime)
         {
             _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(TimeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
+            _syncAfter = DateTimeUtil.Add(retrievalTime.UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
 
-            // Check if event handler can provide configuration
             if (ConfigurationEventHandler != null)
             {
                 _ = Task.Run(async () =>
@@ -405,7 +403,7 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                             MetadataAddress,
-                            TelemetryConstants.Protocols.FirstRefresh,
+                            TelemetryConstants.Protocols.FirstRefresh, // todo is this true
                             ex); // TODO new dimension
 
                         // todo new logs
