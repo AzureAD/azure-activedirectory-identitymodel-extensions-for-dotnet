@@ -135,67 +135,6 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        private async Task<bool> HandleBeforeRetrieveAsync(CancellationToken cancel = default)
-        {
-            long beforeHandlerTimestamp = TimeProvider.GetTimestamp();
-            try
-            {
-                var cachedResult = await ConfigurationEventHandler.BeforeRetrieveAsync(MetadataAddress).ConfigureAwait(false);
-                if (cachedResult != null && cachedResult.Configuration != null)
-                {
-                    var handlerElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
-                    TelemetryClient.LogConfigurationRetrievalDuration(
-                        MetadataAddress,
-                        handlerElapsedTime);// TODO new dimension for source
-
-                    // Validate configuration from handler
-                    if (_configValidator != null)
-                    {
-                        ConfigurationValidationResult result = _configValidator.Validate(cachedResult.Configuration);
-                        if (!result.Succeeded)
-                        {
-                            // Just log the error and proceed to fetch from endpoint
-                            LogHelper.LogExceptionMessage(
-                                new InvalidConfigurationException(
-                                    LogHelper.FormatInvariant(
-                                        LogMessages.IDX20810, // TODO new log message
-                                        result.ErrorMessage)));
-
-                            return false;
-                        }
-                    }
-
-                    // No validator configured, use configuration
-                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                        MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh); // TODO new dimension for source
-
-                    UpdateConfiguration(cachedResult.Configuration, cachedResult.RetrievalTime);
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                var handlerErrorElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
-                TelemetryClient.LogConfigurationRetrievalDuration(
-                    MetadataAddress,
-                    handlerErrorElapsedTime,
-                    ex); // TODO new dimension for source
-
-                // Log but don't fail - proceed to fetch from endpoint
-                // TODO check error
-                LogHelper.LogExceptionMessage(
-                    new InvalidOperationException(
-                        LogHelper.FormatInvariant(
-                            "Failed to retrieve configuration from event handler. MetadataAddress: '{0}', Exception: '{1}'.",
-                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                            ex),
-                        ex));
-            }
-
-            return false;
-        }
-
         private void RequestRefreshBlocking()
         {
             DateTime now = TimeProvider.GetUtcNow().UtcDateTime;
