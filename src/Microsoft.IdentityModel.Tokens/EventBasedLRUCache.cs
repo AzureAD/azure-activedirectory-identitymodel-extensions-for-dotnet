@@ -61,8 +61,10 @@ namespace Microsoft.IdentityModel.Tokens
         private int _processCompactedValuesState = ActionNotQueued;
         private readonly Task _eventQTask;
         private int _eventQueuePollingInterval = 50; // in milliseconds
-        // for testing purpose only to verify the task count
-        private int _taskCount;
+
+        // In moving the creation of the task to the constructor, there will only be one Task.
+        // We kept the internal TaskCount and need to reference an instance variable to keep the method the same.
+        private int _taskCount = 1;
 
         // set to true when the AppDomain is to be unloaded or the default AppDomain process is ready to exit
         private bool _stopEventQueueTask;
@@ -157,7 +159,8 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                // Keep running until the queue is empty or the AppDomain is about to be unloaded or the application is ready to exit.
+                // Keep running until instructed to stop.
+                // When the event queue is empty, the thread will sleep for a specified number of milliseconds before checking again.
                 while (!_stopEventQueueTask)
                 {
                     try
@@ -174,12 +177,11 @@ namespace Microsoft.IdentityModel.Tokens
                             }
                         }
 
-                        // process all events in the queue and exit
                         if (_eventQueue.TryDequeue(out var action))
                         {
                             action?.Invoke();
                         }
-                        else // if empty, let the thread sleep for a specified number of milliseconds before attempting to retrieve another value from the queue
+                        else
                         {
                             Thread.Sleep(_eventQueuePollingInterval);
                         }
@@ -565,6 +567,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING PURPOSES ONLY.
         /// This is for tests to verify all tasks exit at the end of tests if the queue is empty.
+        /// In moving the creation of the task to the constructor, there will only be one Task.
+        /// We kept the internal TaskCount and need to reference an instance variable to keep the method the same.
         /// </summary>
         internal int TaskCount => _taskCount;
 
