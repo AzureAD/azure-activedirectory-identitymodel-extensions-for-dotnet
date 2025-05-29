@@ -343,5 +343,41 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
             Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode<object, object>("abc", 0, 0, null, null));
             Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode<object, object, object, object>(null, 0, 0, null, null, null, null));
         }
+
+        [Fact]
+        public void Base64UrlEncoder_PublicApis()
+        {
+            // Public APIs
+            string encoded1 = Base64UrlEncoder.Encode("test");
+            string encoded2 = Base64UrlEncoder.Encode(new byte[] { 1, 2, 3 });
+            string encoded3 = Base64UrlEncoder.Encode(new byte[] { 1, 2, 3 }, 0, 3);
+            char[] charBuffer = new char[10];
+            int charsWritten = Base64UrlEncoder.Encode(new ReadOnlySpan<byte>(new byte[] { 1, 2, 3 }), new Span<char>(charBuffer));
+            byte[] decodedBytes = Base64UrlEncoder.DecodeBytes("dGVzdA");
+            string decodedString = Base64UrlEncoder.Decode("dGVzdA");
+
+            // Internal APIs
+            byte[] decodedBytesFromSpan = Base64UrlEncoder.Decode("test".AsSpan());
+            Span<byte> output = stackalloc byte[10];
+            int bytesWritten = Base64UrlEncoder.Decode("test".AsSpan(), output);
+        }
+
+        [Fact]
+        public void Base64UrlEncoding_PublicApis()
+        {
+            // Public APIs
+            byte[] decoded1 = Base64UrlEncoding.Decode("test");
+            byte[] decoded2 = Base64UrlEncoding.Decode("test", 0, 4);
+            string genericDecoded1 = Base64UrlEncoding.Decode<string>("test", 0, 4, (bytes, len) => "test");
+            string genericDecoded2 = Base64UrlEncoding.Decode<string, int>("test", 0, 4, 1, (bytes, len, x) => "test");
+            string genericDecoded3 = Base64UrlEncoding.Decode<string, int, int, int>("test", 0, 4, 1, 2, 3, (bytes, len, x, y, z) => "test");
+            string encoded1 = Base64UrlEncoding.Encode(new byte[] { 1, 2, 3 });
+            string encoded2 = Base64UrlEncoding.Encode(new byte[] { 1, 2, 3 }, 0, 3);
+
+            // Internal APIs
+            int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize("test".AsSpan(), 0, 4);
+            byte[] output = new byte[10];
+            Base64UrlEncoding.Decode("test".AsSpan(), 0, 4, output);
+        }
     }
 }
