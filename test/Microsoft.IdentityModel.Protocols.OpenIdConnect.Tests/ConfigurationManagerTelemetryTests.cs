@@ -68,12 +68,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Manual },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
             };
 
             var expectedHistogramTagList = new Dictionary<string, object>
             {
                 { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
-                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
             };
 
             await ConfigurationManagerTests.PollForConditionAsync(
@@ -162,6 +164,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
+                        { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
                     }
                 },
                 new ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>("Failure-invalid metadata address")
@@ -173,6 +176,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.HttpsBadUri },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
+                        { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
                         { TelemetryConstants.ExceptionTypeTag, new IOException().GetType().ToString() },
                     }
                 },
@@ -187,6 +191,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.JsonFile },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
+                        { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
                         { TelemetryConstants.ExceptionTypeTag, new InvalidConfigurationException().GetType().ToString() },
                     }
                 },
@@ -200,6 +205,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AADCommonUrl },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Automatic },
+                        { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
                     }
                 },
             };
