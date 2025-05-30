@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Reflection;
 using System.Text;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -365,7 +366,10 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
             Base64UrlEncoder.Decode("test".AsSpan(), output);
             var method = typeof(Base64UrlEncoder).GetMethod(
                 "Decode",
-                new[] { typeof(ReadOnlySpan<char>), typeof(Span<byte>) }
+                BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public,
+                null,
+                new[] { typeof(ReadOnlySpan<char>), typeof(Span<byte>), },
+                null
             );
             Assert.Equal(typeof(void), method.ReturnType);
 #endif
@@ -389,7 +393,10 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
             Base64UrlEncoding.Decode("test".AsSpan(), 0, 4, output);
             var method = typeof(Base64UrlEncoding).GetMethod(
                 "Decode",
-                new[] { typeof(ReadOnlySpan<char>), typeof(int), typeof(int), typeof(byte[]) }
+                BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public,
+                null,
+                new[] { typeof(ReadOnlySpan<char>), typeof(int), typeof(int), typeof(byte[]) },
+                null
             );
             Assert.Equal(typeof(void), method.ReturnType);
         }
