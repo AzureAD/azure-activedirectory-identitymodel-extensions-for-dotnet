@@ -18,14 +18,14 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// </summary>
         /// <param name="metadataAddress">The metadata endpoint address.</param>
         /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
-        /// <returns>A configuration result if available, or null to proceed with normal retrieval.</returns>
+        /// <returns>A <see cref="ConfigurationEventHandlerResult{T}"/> if available, or <see cref="ConfigurationEventHandlerResult{T}.NoResult"/> to proceed with normal retrieval.</returns>
         Task<ConfigurationEventHandlerResult<T>> BeforeRetrieveAsync(string metadataAddress, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Called after a configuration has been successfully retrieved and updated.
+        /// Called after a configuration has been successfully retrieved.
         /// </summary>
         /// <param name="metadataAddress">The metadata endpoint address.</param>
-        /// <param name="configuration">The updated configuration.</param>
+        /// <param name="configuration">The retrieved configuration.</param>
         /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
         Task AfterUpdateAsync(string metadataAddress, T configuration, CancellationToken cancellationToken = default);
     }
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         public T Configuration { get; }
 
         /// <summary>
-        /// Gets or sets the time when the configuration was originally retrieved.
+        /// Gets or sets the time when the configuration was originally retrieved in UTC.
         /// </summary>
         public DateTimeOffset RetrievalTime { get; }
     }

@@ -345,6 +345,8 @@ namespace Microsoft.IdentityModel.Protocols
                     if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
                     {
                         UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
+
+                        _onBackgroundTaskFinish?.Invoke();
                         return;
                     }
                 }
@@ -487,7 +489,7 @@ namespace Microsoft.IdentityModel.Protocols
         private async Task<ConfigurationEventHandlerResult<T>> HandleBeforeRetrieveAsync(CancellationToken cancel = default)
         {
             long beforeHandlerTimestamp = TimeProvider.GetTimestamp();
-#pragma warning disable CA1031 // Do not catch general exception types
+
             try
             {
                 var handlerResult = await ConfigurationEventHandler.BeforeRetrieveAsync(MetadataAddress, cancel).ConfigureAwait(false);
@@ -537,7 +539,6 @@ namespace Microsoft.IdentityModel.Protocols
                             ex),
                         ex));
             }
-#pragma warning restore CA1031 // Do not catch general exception types
 
             return ConfigurationEventHandlerResult<T>.NoResult;
         }
