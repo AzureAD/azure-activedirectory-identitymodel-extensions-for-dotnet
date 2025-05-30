@@ -1,5 +1,3 @@
-Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.get -> string
-Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.set -> void
 #nullable enable
 const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultAuthenticationType = "AuthenticationTypes.Federation" -> string!
 const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultMaximumTokenSizeInBytes = 256000 -> int
@@ -271,3 +269,5 @@ virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CreateC
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.Message.get -> string
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.MessageDetail(string formatString, params object[] parameters) -> void
 ~static Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.NullParameter(string parameterName) -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail
+Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.get -> string
+Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.set -> void

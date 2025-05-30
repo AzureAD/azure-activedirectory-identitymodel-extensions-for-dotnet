@@ -19,6 +19,8 @@ Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementConfigurationRefreshR
 Microsoft.IdentityModel.Telemetry.TelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration, System.Exception exception) -> void
+Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, System.Exception exception) -> void
+Microsoft.IdentityModel.Telemetry.TelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, System.Exception exception) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.ValidatedSigningKeyLifetime(System.DateTime? validFrom, System.DateTime? validTo, System.DateTime? validationTime) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ActorValidationResult.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ClaimsIdentityNoLocking.get -> System.Security.Claims.ClaimsIdentity
