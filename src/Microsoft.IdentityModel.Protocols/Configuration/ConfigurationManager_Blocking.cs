@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Protocols
                         if (_refreshRequested)
                             _refreshRequested = false;
 
-                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
+                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow());
                     }
                     catch (Exception ex)
                     {

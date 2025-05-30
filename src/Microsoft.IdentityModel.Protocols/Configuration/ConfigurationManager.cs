@@ -144,11 +144,11 @@ namespace Microsoft.IdentityModel.Protocols
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
         /// </summary>
         /// <param name="metadataAddress">The address to obtain configuration.</param>
-        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/>.</param>
         /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
-        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
-        /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/></param>
-        /// <param name="configurationEventHandler"> The <see cref="IConfigurationEventHandler{T}"/> that handles configuration events.</param>
+        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/>.</param>
+        /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/>.</param>
+        /// <param name="configurationEventHandler">The <see cref="IConfigurationEventHandler{T}"/> that handles configuration events.</param>
         /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator, LastKnownGoodConfigurationCacheOptions lkgCacheOptions, IConfigurationEventHandler<T> configurationEventHandler)
             : this(metadataAddress, configRetriever, docRetriever, configValidator, lkgCacheOptions)
@@ -238,8 +238,7 @@ namespace Microsoft.IdentityModel.Protocols
                             TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                                 MetadataAddress,
                                 TelemetryConstants.Protocols.FirstRefresh,
-                                TelemetryConstants.Protocols.ConfigurationSourceHandler
-                                );
+                                TelemetryConstants.Protocols.ConfigurationSourceHandler);
 
                             UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
                             return _currentConfiguration;
@@ -271,10 +270,9 @@ namespace Microsoft.IdentityModel.Protocols
                     TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh,
-                        TelemetryConstants.Protocols.ConfigurationSourceRetriever
-                        );
+                        TelemetryConstants.Protocols.ConfigurationSourceRetriever);
 
-                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
+                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow());
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -309,7 +307,7 @@ namespace Microsoft.IdentityModel.Protocols
                         TelemetryConstants.Protocols.Automatic,
                         TelemetryConstants.Protocols.ConfigurationSourceUnknown);
 
-                    _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                    _ = Task.Run(UpdateCurrentConfigurationAsync, CancellationToken.None);
                 }
             }
 
@@ -332,7 +330,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// The Caller should first check the state checking state using:
         ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle).
         /// </summary>
-        private void UpdateCurrentConfiguration()
+        private async Task UpdateCurrentConfigurationAsync()
         {
             long startTimestamp = TimeProvider.GetTimestamp();
 
@@ -341,7 +339,7 @@ namespace Microsoft.IdentityModel.Protocols
                 // Check if event handler can provide configuration
                 if (ConfigurationEventHandler != null)
                 {
-                    var configurationRetrieved = HandleBeforeRetrieveAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                    var configurationRetrieved = await HandleBeforeRetrieveAsync().ConfigureAwait(false);
                     if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
                     {
                         UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
@@ -351,10 +349,10 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                T configuration = _configRetriever.GetConfigurationAsync(
+                T configuration = await _configRetriever.GetConfigurationAsync(
                     MetadataAddress,
                     _docRetriever,
-                    CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                    CancellationToken.None).ConfigureAwait(false);
 
                 var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
@@ -364,7 +362,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 if (_configValidator == null)
                 {
-                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
+                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow());
                 }
                 else
                 {
@@ -377,7 +375,7 @@ namespace Microsoft.IdentityModel.Protocols
                                     LogMessages.IDX20810,
                                     result.ErrorMessage)));
                     else
-                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
+                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow());
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -480,7 +478,7 @@ namespace Microsoft.IdentityModel.Protocols
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                    _ = Task.Run(UpdateCurrentConfigurationAsync, CancellationToken.None);
                     _lastRequestRefresh = now;
                 }
             }

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,48 +27,5 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <param name="configuration">The retrieved configuration.</param>
         /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
         Task AfterUpdateAsync(string metadataAddress, T configuration, CancellationToken cancellationToken = default);
-    }
-
-    /// <summary>
-    /// Represents a configuration retrieval result.
-    /// </summary>
-    /// <typeparam name="T">The type of configuration.</typeparam>
-    public class ConfigurationEventHandlerResult<T> where T : class
-    {
-        /// <summary>
-        /// Instantiates a new instance of the <see cref="ConfigurationEventHandlerResult{T}"/> class with no result.
-        /// </summary>
-        public static readonly ConfigurationEventHandlerResult<T> NoResult = new ConfigurationEventHandlerResult<T>();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationEventHandlerResult{T}"/> class with no result.
-        /// </summary>
-        private ConfigurationEventHandlerResult()
-        {
-            Configuration = null;
-            RetrievalTime = DateTimeOffset.MinValue;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationEventHandlerResult{T}"/> class.
-        /// </summary>
-        /// <param name="configuration">The configuration retrieved.</param>
-        /// <param name="retrievalTime"> The time when the configuration was originally retrieved (UTC).</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public ConfigurationEventHandlerResult(T configuration, DateTimeOffset retrievalTime)
-        {
-            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            RetrievalTime = retrievalTime;
-        }
-
-        /// <summary>
-        /// Gets or sets the configuration.
-        /// </summary>
-        public T Configuration { get; }
-
-        /// <summary>
-        /// Gets or sets the time when the configuration was originally retrieved in UTC.
-        /// </summary>
-        public DateTimeOffset RetrievalTime { get; }
     }
 }
