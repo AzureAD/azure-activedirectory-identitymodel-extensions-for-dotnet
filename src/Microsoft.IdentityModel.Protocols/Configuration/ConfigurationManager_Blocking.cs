@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols
                             // replicate the behavior of successful retrieval from endpoint
                             if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
                             {
-                                TelemetryForUpdateBlocking(TelemetryConstants.Protocols.HandlerAsConfigurationSource);
+                                TelemetryForUpdateBlocking(TelemetryConstants.Protocols.ConfigurationSourceHandler);
 
                                 if (_refreshRequested)
                                     _refreshRequested = false;
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols
                         var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                         TelemetryClient.LogConfigurationRetrievalDuration(
                             MetadataAddress,
-                            TelemetryConstants.Protocols.EndpointAsConfigurationSource,
+                            TelemetryConstants.Protocols.ConfigurationSourceRetriever,
                             elapsedTime);
 
                         if (_configValidator != null)
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                         _lastRequestRefresh = TimeProvider.GetUtcNow().UtcDateTime;
 
-                        TelemetryForUpdateBlocking(TelemetryConstants.Protocols.EndpointAsConfigurationSource);
+                        TelemetryForUpdateBlocking(TelemetryConstants.Protocols.ConfigurationSourceRetriever);
 
                         if (_refreshRequested)
                             _refreshRequested = false;
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Protocols
                             TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                                 MetadataAddress,
                                 TelemetryConstants.Protocols.FirstRefresh,
-                                TelemetryConstants.Protocols.EndpointAsConfigurationSource,
+                                TelemetryConstants.Protocols.ConfigurationSourceRetriever,
                                 ex);
 
                             throw LogHelper.LogExceptionMessage(
@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                             TelemetryClient.LogConfigurationRetrievalDuration(
                                 MetadataAddress,
-                                TelemetryConstants.Protocols.EndpointAsConfigurationSource,
+                                TelemetryConstants.Protocols.ConfigurationSourceRetriever,
                                 elapsedTime,
                                 ex);
 

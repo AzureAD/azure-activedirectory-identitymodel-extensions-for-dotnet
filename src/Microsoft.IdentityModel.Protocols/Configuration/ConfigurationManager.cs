@@ -238,7 +238,7 @@ namespace Microsoft.IdentityModel.Protocols
                             TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                                 MetadataAddress,
                                 TelemetryConstants.Protocols.FirstRefresh,
-                                TelemetryConstants.Protocols.HandlerAsConfigurationSource
+                                TelemetryConstants.Protocols.ConfigurationSourceHandler
                                 );
 
                             UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.Protocols
                     TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh,
-                        TelemetryConstants.Protocols.EndpointAsConfigurationSource
+                        TelemetryConstants.Protocols.ConfigurationSourceRetriever
                         );
 
                     UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
@@ -283,7 +283,7 @@ namespace Microsoft.IdentityModel.Protocols
                     TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh,
-                        TelemetryConstants.Protocols.EndpointAsConfigurationSource,
+                        TelemetryConstants.Protocols.ConfigurationSourceRetriever,
                         ex);
 
                     LogHelper.LogExceptionMessage(
@@ -307,7 +307,7 @@ namespace Microsoft.IdentityModel.Protocols
                     TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
                         TelemetryConstants.Protocols.Automatic,
-                        TelemetryConstants.Protocols.IrrelevantConfigurationSource);
+                        TelemetryConstants.Protocols.ConfigurationSourceUnknown);
 
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
@@ -357,7 +357,7 @@ namespace Microsoft.IdentityModel.Protocols
                 var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
-                    TelemetryConstants.Protocols.EndpointAsConfigurationSource,
+                    TelemetryConstants.Protocols.ConfigurationSourceRetriever,
                     elapsedTime);
 
                 if (_configValidator == null)
@@ -384,7 +384,7 @@ namespace Microsoft.IdentityModel.Protocols
                 var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
-                    TelemetryConstants.Protocols.EndpointAsConfigurationSource,
+                    TelemetryConstants.Protocols.ConfigurationSourceRetriever,
                     elapsedTime,
                     ex);
 
@@ -473,7 +473,7 @@ namespace Microsoft.IdentityModel.Protocols
                 TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                     MetadataAddress,
                     TelemetryConstants.Protocols.Manual,
-                    TelemetryConstants.Protocols.IrrelevantConfigurationSource);
+                    TelemetryConstants.Protocols.ConfigurationSourceUnknown);
 
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
@@ -496,7 +496,7 @@ namespace Microsoft.IdentityModel.Protocols
                     var handlerElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
                     TelemetryClient.LogConfigurationRetrievalDuration(
                         MetadataAddress,
-                        TelemetryConstants.Protocols.HandlerAsConfigurationSource,
+                        TelemetryConstants.Protocols.ConfigurationSourceHandler,
                         handlerElapsedTime);
 
                     // Validate configuration from handler
@@ -525,7 +525,7 @@ namespace Microsoft.IdentityModel.Protocols
                 var handlerErrorElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
-                    TelemetryConstants.Protocols.HandlerAsConfigurationSource,
+                    TelemetryConstants.Protocols.ConfigurationSourceHandler,
                     handlerErrorElapsedTime,
                     ex);
 

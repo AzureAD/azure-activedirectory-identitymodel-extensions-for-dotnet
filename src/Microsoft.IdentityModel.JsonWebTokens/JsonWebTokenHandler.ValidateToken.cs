@@ -522,7 +522,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         _telemetryClient.IncrementConfigurationRefreshRequestCounter(
                             validationParameters.ConfigurationManager.MetadataAddress,
                             TelemetryConstants.Protocols.Lkg,
-                            TelemetryConstants.Protocols.IrrelevantConfigurationSource);
+                            TelemetryConstants.Protocols.ConfigurationSourceUnknown);
 
                         validationParameters.ConfigurationManager.RequestRefresh();
                         validationParameters.RefreshBeforeValidation = true;

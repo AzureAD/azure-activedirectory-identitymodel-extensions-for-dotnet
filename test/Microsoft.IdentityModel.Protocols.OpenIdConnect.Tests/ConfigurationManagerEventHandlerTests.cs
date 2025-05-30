@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
-                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceRetriever },
             };
 
             await ConfigurationManagerTests.PollForConditionAsync(
@@ -210,7 +210,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
-                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.HandlerAsConfigurationSource },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceHandler },
             };
 
             await ConfigurationManagerTests.PollForConditionAsync(
@@ -263,7 +263,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
-                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceRetriever },
             };
 
             await ConfigurationManagerTests.PollForConditionAsync(
@@ -313,7 +313,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
-                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceRetriever },
             };
 
             await ConfigurationManagerTests.PollForConditionAsync(
@@ -377,7 +377,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
-                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceRetriever },
             };
 
             await ConfigurationManagerTests.PollForConditionAsync(

@@ -76,17 +76,17 @@ namespace Microsoft.IdentityModel.Telemetry
             /// <summary>
             /// Telemetry tag indicating that metadata endpoint is the source of the configuration.
             /// </summary>
-            public const string EndpointAsConfigurationSource = "MetadataEndpoint";
+            public const string ConfigurationSourceRetriever = "Retriever";
 
             /// <summary>
             /// Telemetry tag indicating that a configuration handler is the source of the configuration.
             /// </summary>
-            public const string HandlerAsConfigurationSource = "Handler";
+            public const string ConfigurationSourceHandler = "Handler";
 
             /// <summary>
             /// Telemetry tag indicating that the configuration source is irrelevant for the scenario.
             /// </summary>
-            public const string IrrelevantConfigurationSource = "IrrelevantForScenario";
+            public const string ConfigurationSourceUnknown = "Unknown";
         }
     }
 }
