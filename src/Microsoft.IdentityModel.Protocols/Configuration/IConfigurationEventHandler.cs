@@ -39,7 +39,16 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <summary>
         /// Instantiates a new instance of the <see cref="ConfigurationEventHandlerResult{T}"/> class with no result.
         /// </summary>
-        public static readonly ConfigurationEventHandlerResult<T> NoResult = new(null, DateTimeOffset.MinValue);
+        public static readonly ConfigurationEventHandlerResult<T> NoResult = new ConfigurationEventHandlerResult<T>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationEventHandlerResult{T}"/> class with no result.
+        /// </summary>
+        private ConfigurationEventHandlerResult()
+        {
+            Configuration = null;
+            RetrievalTime = DateTimeOffset.MinValue;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationEventHandlerResult{T}"/> class.
@@ -52,6 +61,7 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             RetrievalTime = retrievalTime;
         }
+
         /// <summary>
         /// Gets or sets the configuration.
         /// </summary>
