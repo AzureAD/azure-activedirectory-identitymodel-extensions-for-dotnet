@@ -9,6 +9,8 @@ using System.Runtime.Serialization;
 using Microsoft.IdentityModel.Logging;
 #endif
 
+using Microsoft.IdentityModel.Tokens.Experimental;
+
 #if !NET8_0_OR_GREATER
 using System.Text;
 #endif

@@ -4,6 +4,7 @@
 using System;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -17,7 +18,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="decryptionParameters">The decryption parameters container.</param>
         /// <param name="callContext">The call context used for logging.</param>
         /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
-        internal static ValidationResult<string> DecryptJwtToken(
+        internal static ValidationResult<string, ValidationError> DecryptJwtToken(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters,
@@ -65,7 +66,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         continue;
                     }
 
-                    ValidationResult<string> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
+                    ValidationResult<string, AlgorithmValidationError> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
                     if (!result.IsValid)
                     {
                         (exceptionStrings ??= new StringBuilder()).AppendLine(result.UnwrapError().MessageDetail.Message);

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 
 namespace Microsoft.IdentityModel.TestUtils

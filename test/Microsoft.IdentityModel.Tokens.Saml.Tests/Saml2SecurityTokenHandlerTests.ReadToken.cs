@@ -6,6 +6,7 @@ using Xunit;
 using Microsoft.IdentityModel.TestUtils;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 {
@@ -16,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ReadToken_ResultType", theoryData);
             Saml2SecurityTokenHandler handler = new Saml2SecurityTokenHandler();
-            ValidationResult<Saml2SecurityToken> result = handler.ReadSaml2Token(
+            ValidationResult<Saml2SecurityToken, ValidationError> result = handler.ReadSaml2Token(
                 theoryData.Token,
                 new CallContext());
 
@@ -106,6 +107,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 
         public string Token { get; set; }
 
-        internal ValidationResult<SecurityToken> Result { get; set; }
+        internal ValidationResult<SecurityToken, ValidationError> Result { get; set; }
     }
 }

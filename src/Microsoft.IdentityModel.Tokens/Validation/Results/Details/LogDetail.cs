@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.IdentityModel.Abstractions;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Tokens
 {

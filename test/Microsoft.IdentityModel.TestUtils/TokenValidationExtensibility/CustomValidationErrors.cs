@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
@@ -221,6 +222,7 @@ namespace Microsoft.IdentityModel.TestUtils
             : base(messageDetail, validationFailureType, exceptionType, stackFrame, invalidTokenType, innerException)
         {
         }
+
         protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidTypeException))
@@ -266,6 +268,7 @@ namespace Microsoft.IdentityModel.TestUtils
             base(messageDetail, validationFailureType, exceptionType, stackFrame, innerValidationError, innerException)
         {
         }
+
         protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidSignatureException))
@@ -312,6 +315,7 @@ namespace Microsoft.IdentityModel.TestUtils
             : base(messageDetail, validationFailureType, exceptionType, stackFrame, algorithm, innerException)
         {
         }
+
         protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidAlgorithmException))

@@ -4,12 +4,12 @@
 using System;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validated lifetime, including the NotBefore and Expires values.
     /// </summary>
-    internal readonly struct ValidatedLifetime : IEquatable<ValidatedLifetime>
+    public readonly struct ValidatedLifetime : IEquatable<ValidatedLifetime>
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ValidatedLifetime"/>.

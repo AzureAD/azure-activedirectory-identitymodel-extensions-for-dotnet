@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -13,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract partial class TokenHandler
     {
-        internal virtual Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -23,12 +24,12 @@ namespace Microsoft.IdentityModel.Tokens
                 new NotImplementedException(
                     FormatInvariant(
                         LogMessages.IDX10267,
-                        MarkAsNonPII("internal virtual Task<ValidationResult<ValidatedToken>> " +
+                        MarkAsNonPII("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
                         "ValidateTokenAsync(string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)"),
                         MarkAsNonPII(GetType().FullName))));
         }
 
-        internal virtual Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -38,7 +39,7 @@ namespace Microsoft.IdentityModel.Tokens
                 new NotImplementedException(
                     FormatInvariant(
                         LogMessages.IDX10267,
-                        MarkAsNonPII("internal virtual Task<ValidationResult<ValidatedToken>> " +
+                        MarkAsNonPII("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
                         "ValidateTokenAsync(SecurityToken token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)"),
                         MarkAsNonPII(GetType().FullName))));
         }
