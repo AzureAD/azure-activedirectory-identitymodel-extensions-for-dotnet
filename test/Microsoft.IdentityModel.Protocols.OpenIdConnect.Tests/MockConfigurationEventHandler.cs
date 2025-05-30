@@ -18,7 +18,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public bool AfterUpdateAsyncCalled { get; private set; }
         public string AfterUpdateMetadataAddress { get; private set; }
         public OpenIdConnectConfiguration AfterUpdateConfiguration { get; private set; }
-
         public OpenIdConnectConfiguration ConfigurationToReturn { get; set; }
         public DateTimeOffset RetrievalTimeToReturn { get; set; }
         public bool ThrowExceptionInBeforeRetrieve { get; set; }

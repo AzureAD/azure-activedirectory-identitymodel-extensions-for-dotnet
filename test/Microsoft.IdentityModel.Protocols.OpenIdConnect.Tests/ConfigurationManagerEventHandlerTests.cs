@@ -2,10 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
+using Microsoft.IdentityModel.Telemetry;
+using Microsoft.IdentityModel.Telemetry.Tests;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -18,7 +22,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     public class ConfigurationManagerEventHandlerTests
     {
         [Fact]
-        public void Constructor_WithConfigurationEventHandler_SetsPropertyCorrectly()
+        public void Constructor_WithConfigurationEventHandler_SetsPropertyCorrectlyAsync()
         {
             // Arrange
             var testContext = new CompareContext($"{this}.Constructor_WithConfigurationEventHandler_SetsPropertyCorrectly");
@@ -80,6 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var testContext = new CompareContext($"{this}.ConfigurationEventHandler_Property_GetSet");
             var documentRetriever = new FileDocumentRetriever();
             var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
@@ -118,13 +123,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var documentRetriever = new FileDocumentRetriever();
             var configurationRetriever = new OpenIdConnectConfigurationRetriever();
             var mockEventHandler = new MockConfigurationEventHandler();
+            var testTelemetryClient = new MockTelemetryClient();
 
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever)
             {
-                ConfigurationEventHandler = mockEventHandler
+                ConfigurationEventHandler = mockEventHandler,
+                TelemetryClient = testTelemetryClient
             };
 
             // Act
@@ -137,6 +144,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (mockEventHandler.BeforeRetrieveMetadataAddress != "OpenIdConnectMetadata.json")
                 testContext.AddDiff($"BeforeRetrieveAsync should have been called with correct metadata address. Expected: 'OpenIdConnectMetadata.json', Actual: '{mockEventHandler.BeforeRetrieveMetadataAddress}'");
 
+            var expectedTagList = new Dictionary<string, object>
+            {
+                { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+            };
+
+            await ConfigurationManagerTests.PollForConditionAsync(
+                () => expectedTagList.Count == testTelemetryClient.ExportedItems.Count,
+                TimeSpan.FromMilliseconds(250),
+                TimeSpan.FromSeconds(20));
+
+            Assert.Equal(expectedTagList, testTelemetryClient.ExportedItems);
+
             TestUtilities.AssertFailIfErrors(testContext);
         }
 
@@ -147,6 +169,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var testContext = new CompareContext($"{this}.BeforeRetrieveAsync_ReturnsConfiguration_SkipsEndpointRetrieval");
             var documentRetriever = new MockDocumentRetriever(); // This will track if it's called
             var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var testTelemetryClient = new MockTelemetryClient();
 
             var preloadedConfig = new OpenIdConnectConfiguration
             {
@@ -165,7 +188,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 configurationRetriever,
                 documentRetriever)
             {
-                ConfigurationEventHandler = mockEventHandler
+                ConfigurationEventHandler = mockEventHandler,
+                TelemetryClient = testTelemetryClient
             };
 
             // Act
@@ -181,6 +205,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (documentRetriever.GetDocumentAsyncCalled)
                 testContext.AddDiff("Document retriever should not have been called when event handler returns configuration.");
 
+            var expectedTagList = new Dictionary<string, object>
+            {
+                { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.HandlerAsConfigurationSource },
+            };
+
+            await ConfigurationManagerTests.PollForConditionAsync(
+                () => expectedTagList.Count == testTelemetryClient.ExportedItems.Count,
+                TimeSpan.FromMilliseconds(250),
+                TimeSpan.FromSeconds(20));
+
+            Assert.Equal(expectedTagList, testTelemetryClient.ExportedItems);
+
             TestUtilities.AssertFailIfErrors(testContext);
         }
 
@@ -192,13 +231,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var documentRetriever = new FileDocumentRetriever();
             var configurationRetriever = new OpenIdConnectConfigurationRetriever();
             var mockEventHandler = new MockConfigurationEventHandler();
+            var testTelemetryClient = new MockTelemetryClient();
 
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever)
             {
-                ConfigurationEventHandler = mockEventHandler
+                ConfigurationEventHandler = mockEventHandler,
+                TelemetryClient = testTelemetryClient
             };
 
             // Act
@@ -217,6 +258,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (mockEventHandler.AfterUpdateConfiguration == null)
                 testContext.AddDiff("AfterUpdateAsync should have been called with non-null configuration.");
 
+            var expectedTagList = new Dictionary<string, object>
+            {
+                { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+            };
+
+            await ConfigurationManagerTests.PollForConditionAsync(
+                () => expectedTagList.Count == testTelemetryClient.ExportedItems.Count,
+                TimeSpan.FromMilliseconds(250),
+                TimeSpan.FromSeconds(20));
+
+            Assert.Equal(expectedTagList, testTelemetryClient.ExportedItems);
+
             TestUtilities.AssertFailIfErrors(testContext);
         }
 
@@ -231,13 +287,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 ThrowExceptionInBeforeRetrieve = true
             };
+            var testTelemetryClient = new MockTelemetryClient();
 
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever)
             {
-                ConfigurationEventHandler = mockEventHandler
+                ConfigurationEventHandler = mockEventHandler,
+                TelemetryClient = testTelemetryClient
             };
 
             // Act
@@ -250,6 +308,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (!mockEventHandler.BeforeRetrieveAsyncCalled)
                 testContext.AddDiff("BeforeRetrieveAsync should have been called even if it throws.");
 
+            var expectedTagList = new Dictionary<string, object>
+            {
+                { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+            };
+
+            await ConfigurationManagerTests.PollForConditionAsync(
+                () => expectedTagList.Count == testTelemetryClient.ExportedItems.Count,
+                TimeSpan.FromMilliseconds(250),
+                TimeSpan.FromSeconds(20));
+
+            Assert.Equal(expectedTagList, testTelemetryClient.ExportedItems);
+
             TestUtilities.AssertFailIfErrors(testContext);
         }
 
@@ -261,6 +334,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var documentRetriever = new FileDocumentRetriever();
             var configurationRetriever = new OpenIdConnectConfigurationRetriever();
             var configurationValidator = new OpenIdConnectConfigurationValidator { MinimumNumberOfKeys = 2 };
+            var testTelemetryClient = new MockTelemetryClient();
 
             // Create config with only 1 key (invalid per validator)
             var invalidConfig = new OpenIdConnectConfiguration
@@ -282,7 +356,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 documentRetriever,
                 configurationValidator)
             {
-                ConfigurationEventHandler = mockEventHandler
+                ConfigurationEventHandler = mockEventHandler,
+                TelemetryClient = testTelemetryClient
             };
 
             // Act
@@ -296,6 +371,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // The configuration should be from the file (endpoint), not from the handler
             if (configuration.Issuer == "https://test.issuer.com")
                 testContext.AddDiff("Configuration should be from endpoint when handler returns invalid config.");
+
+            var expectedTagList = new Dictionary<string, object>
+            {
+                { TelemetryConstants.MetadataAddressTag, "OpenIdConnectMetadata.json" },
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+            };
+
+            await ConfigurationManagerTests.PollForConditionAsync(
+                () => expectedTagList.Count == testTelemetryClient.ExportedItems.Count,
+                TimeSpan.FromMilliseconds(250),
+                TimeSpan.FromSeconds(20));
+
+            Assert.Equal(expectedTagList, testTelemetryClient.ExportedItems);
 
             TestUtilities.AssertFailIfErrors(testContext);
         }
