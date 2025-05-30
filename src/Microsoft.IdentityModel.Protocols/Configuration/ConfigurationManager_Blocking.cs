@@ -135,13 +135,13 @@ namespace Microsoft.IdentityModel.Protocols
                     return _currentConfiguration;
                 else
                     throw LogHelper.LogExceptionMessage(
-                              new InvalidOperationException(
-                                LogHelper.FormatInvariant(
-                                    LogMessages.IDX20803,
-                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                    LogHelper.MarkAsNonPII(_syncAfter),
-                                    LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
-                                _fetchMetadataFailure));
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                            LogMessages.IDX20803,
+                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                            LogHelper.MarkAsNonPII(_syncAfter),
+                            LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
+                            _fetchMetadataFailure));
             }
             finally
             {
