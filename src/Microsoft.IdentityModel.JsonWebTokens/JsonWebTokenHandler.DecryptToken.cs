@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 #nullable enable
@@ -25,7 +26,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
-        internal async Task<ValidationResult<string>> DecryptTokenWithConfigurationAsync(
+        internal async Task<ValidationResult<string, ValidationError>> DecryptTokenWithConfigurationAsync(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             CallContext? callContext,
@@ -67,7 +68,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
-        internal ValidationResult<string> DecryptToken(
+        internal ValidationResult<string, ValidationError> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,

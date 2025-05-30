@@ -3,6 +3,7 @@
 
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens.Saml2

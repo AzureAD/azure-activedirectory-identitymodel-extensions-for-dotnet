@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Json;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;

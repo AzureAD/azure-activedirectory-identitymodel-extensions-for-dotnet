@@ -2,25 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
-    /// <summary>
-    /// Definition for delegate that will validate that a <see cref="SecurityToken"/> has not been replayed.
-    /// </summary>
-    /// <param name="expirationTime">When does the <see cref="SecurityToken"/> expire..</param>
-    /// <param name="securityToken">The security token that is being validated.</param>
-    /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate ValidationResult<DateTime?> TokenReplayValidationDelegate(
-        DateTime? expirationTime,
-        string securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext);
-
     /// <summary>
     /// Partial class for Token Replay validation.
     /// </summary>
@@ -34,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static ValidationResult<DateTime?> ValidateTokenReplay(
+        public static ValidationResult<DateTime?, TokenReplayValidationError> ValidateTokenReplay(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,

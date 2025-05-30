@@ -5,6 +5,8 @@ using System;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens.Saml.Experimental;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
@@ -19,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>A <see cref="SamlSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">If <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">If 'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        internal virtual ValidationResult<SamlSecurityToken> ReadSamlToken(string token, CallContext callContext)
+        internal virtual ValidationResult<SamlSecurityToken, ValidationError> ReadSamlToken(string token, CallContext callContext)
         {
             if (string.IsNullOrEmpty(token))
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());

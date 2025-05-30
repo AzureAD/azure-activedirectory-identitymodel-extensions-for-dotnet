@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents the source from which the token issuer was validated.
     /// i.e. whether the issuer was matched with the configuration provided or the validation parameters provided.
     /// If a custom issuer validation delegate is used, a custom validation source can be instantiated and used.
     /// </summary>
-    internal class IssuerValidationSource
+    public class IssuerValidationSource
     {
         /// <summary>
         /// Initializes a new instance of <see cref="IssuerValidationSource"/>.
