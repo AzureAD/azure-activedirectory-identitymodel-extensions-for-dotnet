@@ -23,6 +23,11 @@ namespace Microsoft.IdentityModel.Telemetry
         public const string OperationStatusTag = "OperationStatus";
 
         /// <summary>
+        /// Telemetry tag indicating the source of the configuration.
+        /// </summary>
+        public const string ConfigurationSourceTag = "ConfigurationSource";
+
+        /// <summary>
         /// Telemetry tag indicating the type of exception that occurred.
         /// </summary>
         public const string ExceptionTypeTag = "ExceptionType";
@@ -67,6 +72,21 @@ namespace Microsoft.IdentityModel.Telemetry
             /// Telemetry tag indicating that configuration could not be retrieved successfully.
             /// </summary>
             public const string ConfigurationRetrievalFailed = "ConfigurationRetrievalFailed";
+
+            /// <summary>
+            /// Telemetry tag indicating that metadata endpoint is the source of the configuration.
+            /// </summary>
+            public const string EndpointAsConfigurationSource = "MetadataEndpoint";
+
+            /// <summary>
+            /// Telemetry tag indicating that a configuration handler is the source of the configuration.
+            /// </summary>
+            public const string HandlerAsConfigurationSource = "Handler";
+
+            /// <summary>
+            /// Telemetry tag indicating that the configuration source is irrelevant for the scenario.
+            /// </summary>
+            public const string IrrelevantConfigurationSource = "IrrelevantForScenario";
         }
     }
 }

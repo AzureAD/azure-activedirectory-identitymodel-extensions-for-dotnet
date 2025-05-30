@@ -38,8 +38,19 @@ namespace Microsoft.IdentityModel.Protocols
                         if (ConfigurationEventHandler != null)
                         {
                             var configurationRetrieved = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
-                            if (configurationRetrieved)
+
+                            // replicate the behavior of successful retrieval from endpoint
+                            if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
+                            {
+                                TelemetryForUpdateBlocking(TelemetryConstants.Protocols.HandlerAsConfigurationSource);
+
+                                if (_refreshRequested)
+                                    _refreshRequested = false;
+
+                                UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
+
                                 return _currentConfiguration;
+                            }
                         }
 
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
@@ -49,6 +60,7 @@ namespace Microsoft.IdentityModel.Protocols
                         var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                         TelemetryClient.LogConfigurationRetrievalDuration(
                             MetadataAddress,
+                            TelemetryConstants.Protocols.EndpointAsConfigurationSource,
                             elapsedTime);
 
                         if (_configValidator != null)
@@ -60,7 +72,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                         _lastRequestRefresh = TimeProvider.GetUtcNow().UtcDateTime;
 
-                        TelemetryForUpdateBlocking();
+                        TelemetryForUpdateBlocking(TelemetryConstants.Protocols.EndpointAsConfigurationSource);
 
                         if (_refreshRequested)
                             _refreshRequested = false;
@@ -90,6 +102,7 @@ namespace Microsoft.IdentityModel.Protocols
                             TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                                 MetadataAddress,
                                 TelemetryConstants.Protocols.FirstRefresh,
+                                TelemetryConstants.Protocols.EndpointAsConfigurationSource,
                                 ex);
 
                             throw LogHelper.LogExceptionMessage(
@@ -106,6 +119,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                             TelemetryClient.LogConfigurationRetrievalDuration(
                                 MetadataAddress,
+                                TelemetryConstants.Protocols.EndpointAsConfigurationSource,
                                 elapsedTime,
                                 ex);
 
@@ -147,7 +161,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        private void TelemetryForUpdateBlocking()
+        private void TelemetryForUpdateBlocking(string configurationSource)
         {
             string updateMode;
 
@@ -160,6 +174,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                     MetadataAddress,
+                    configurationSource,
                     updateMode);
             }
 #pragma warning disable CA1031 // Do not catch general exception types

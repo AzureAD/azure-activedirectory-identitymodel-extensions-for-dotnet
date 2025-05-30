@@ -21,26 +21,28 @@ namespace Microsoft.IdentityModel.Telemetry
             AppContextSwitches.UpdateConfigAsBlocking.ToString()
         );
 
-        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus)
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
+                { TelemetryConstants.ConfigurationSourceTag, configurationSource },
                 _blockingTagValue
             };
 
             TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
-        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception)
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource, Exception exception)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
+                { TelemetryConstants.ConfigurationSourceTag, configurationSource },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
                 _blockingTagValue
             };
@@ -48,24 +50,26 @@ namespace Microsoft.IdentityModel.Telemetry
             TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
-        public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration)
+        public void LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, TimeSpan operationDuration)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.ConfigurationSourceTag, configurationSource },
             };
 
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
             TelemetryDataRecorder.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
         }
 
-        public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration, Exception exception)
+        public void LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, TimeSpan operationDuration, Exception exception)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.ConfigurationSourceTag, configurationSource },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
                 _blockingTagValue
             };
@@ -76,12 +80,14 @@ namespace Microsoft.IdentityModel.Telemetry
 
         public void LogBackgroundConfigurationRefreshFailure(
             string metadataAddress,
+            string configurationSource,
             Exception exception)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.ConfigurationSourceTag, configurationSource },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
                 _blockingTagValue
             };

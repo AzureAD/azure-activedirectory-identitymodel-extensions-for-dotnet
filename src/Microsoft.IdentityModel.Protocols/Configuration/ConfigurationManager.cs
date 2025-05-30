@@ -231,8 +231,19 @@ namespace Microsoft.IdentityModel.Protocols
                     if (ConfigurationEventHandler != null)
                     {
                         var configurationRetrieved = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
-                        if (configurationRetrieved)
-                            return _currentConfiguration; // TODO check if everything has been done
+
+                        // replicate the behavior of successful retrieval from endpoint
+                        if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
+                        {
+                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.FirstRefresh,
+                                TelemetryConstants.Protocols.HandlerAsConfigurationSource
+                                );
+
+                            UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
+                            return _currentConfiguration;
+                        }
                     }
 
                     // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
@@ -259,7 +270,9 @@ namespace Microsoft.IdentityModel.Protocols
 
                     TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh);
+                        TelemetryConstants.Protocols.FirstRefresh,
+                        TelemetryConstants.Protocols.EndpointAsConfigurationSource
+                        );
 
                     UpdateConfiguration(configuration, TimeProvider.GetUtcNow().UtcDateTime);
                 }
@@ -270,6 +283,7 @@ namespace Microsoft.IdentityModel.Protocols
                     TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh,
+                        TelemetryConstants.Protocols.EndpointAsConfigurationSource,
                         ex);
 
                     LogHelper.LogExceptionMessage(
@@ -292,7 +306,8 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
-                        TelemetryConstants.Protocols.Automatic);
+                        TelemetryConstants.Protocols.Automatic,
+                        TelemetryConstants.Protocols.IrrelevantConfigurationSource);
 
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
@@ -327,8 +342,11 @@ namespace Microsoft.IdentityModel.Protocols
                 if (ConfigurationEventHandler != null)
                 {
                     var configurationRetrieved = HandleBeforeRetrieveAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                    if (configurationRetrieved)
-                        return; // TODO check if everything has been done
+                    if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
+                    {
+                        UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
+                        return;
+                    }
                 }
 
                 T configuration = _configRetriever.GetConfigurationAsync(
@@ -339,6 +357,7 @@ namespace Microsoft.IdentityModel.Protocols
                 var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
+                    TelemetryConstants.Protocols.EndpointAsConfigurationSource,
                     elapsedTime);
 
                 if (_configValidator == null)
@@ -365,6 +384,7 @@ namespace Microsoft.IdentityModel.Protocols
                 var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
+                    TelemetryConstants.Protocols.EndpointAsConfigurationSource,
                     elapsedTime,
                     ex);
 
@@ -401,16 +421,10 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                     catch (Exception ex)
                     {
-                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                            MetadataAddress,
-                            TelemetryConstants.Protocols.FirstRefresh, // todo is this true
-                            ex); // TODO new dimension
-
-                        // todo new logs
                         LogHelper.LogExceptionMessage(
                             new InvalidOperationException(
                                 LogHelper.FormatInvariant(
-                                    "IDX20817: Exception occurred while notifying configuration update handler. MetadataAddress: '{0}', Exception: '{1}'.",
+                                   LogMessages.IDX20812,
                                     LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
                                     ex),
                                 ex));
@@ -458,7 +472,8 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                     MetadataAddress,
-                    TelemetryConstants.Protocols.Manual);
+                    TelemetryConstants.Protocols.Manual,
+                    TelemetryConstants.Protocols.IrrelevantConfigurationSource);
 
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
@@ -469,43 +484,40 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        private async Task<bool> HandleBeforeRetrieveAsync(CancellationToken cancel = default)
+        private async Task<ConfigurationEventHandlerResult<T>> HandleBeforeRetrieveAsync(CancellationToken cancel = default)
         {
             long beforeHandlerTimestamp = TimeProvider.GetTimestamp();
+#pragma warning disable CA1031 // Do not catch general exception types
             try
             {
-                var cachedResult = await ConfigurationEventHandler.BeforeRetrieveAsync(MetadataAddress, cancel).ConfigureAwait(false);
-                if (cachedResult != null && cachedResult.Configuration != null)
+                var handlerResult = await ConfigurationEventHandler.BeforeRetrieveAsync(MetadataAddress, cancel).ConfigureAwait(false);
+                if (handlerResult != null && handlerResult.Configuration != null)
                 {
                     var handlerElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
                     TelemetryClient.LogConfigurationRetrievalDuration(
                         MetadataAddress,
-                        handlerElapsedTime);// TODO new dimension for source
+                        TelemetryConstants.Protocols.HandlerAsConfigurationSource,
+                        handlerElapsedTime);
 
                     // Validate configuration from handler
                     if (_configValidator != null)
                     {
-                        ConfigurationValidationResult result = _configValidator.Validate(cachedResult.Configuration);
+                        ConfigurationValidationResult result = _configValidator.Validate(handlerResult.Configuration);
                         if (!result.Succeeded)
                         {
                             // Just log the error and proceed to fetch from endpoint
                             LogHelper.LogExceptionMessage(
                                 new InvalidConfigurationException(
                                     LogHelper.FormatInvariant(
-                                        LogMessages.IDX20810, // TODO new log message
+                                        LogMessages.IDX20812,
                                         result.ErrorMessage)));
 
-                            return false;
+                            return ConfigurationEventHandlerResult<T>.NoResult;
                         }
                     }
 
-                    // No validator configured, use configuration
-                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                        MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh); // TODO new dimension for source
-
-                    UpdateConfiguration(cachedResult.Configuration, cachedResult.RetrievalTime);
-                    return true;
+                    // No validator configured, return configuration
+                    return handlerResult;
                 }
             }
             catch (Exception ex)
@@ -513,21 +525,21 @@ namespace Microsoft.IdentityModel.Protocols
                 var handlerErrorElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
+                    TelemetryConstants.Protocols.HandlerAsConfigurationSource,
                     handlerErrorElapsedTime,
-                    ex); // TODO new dimension for source
+                    ex);
 
-                // Log but don't fail - proceed to fetch from endpoint
-                // TODO check error
                 LogHelper.LogExceptionMessage(
                     new InvalidOperationException(
                         LogHelper.FormatInvariant(
-                            "Failed to retrieve configuration from event handler. MetadataAddress: '{0}', Exception: '{1}'.",
+                            LogMessages.IDX20811,
                             LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
                             ex),
                         ex));
             }
+#pragma warning restore CA1031 // Do not catch general exception types
 
-            return false;
+            return ConfigurationEventHandlerResult<T>.NoResult;
         }
 
         /// <summary>
