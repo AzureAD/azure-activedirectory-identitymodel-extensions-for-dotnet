@@ -68,14 +68,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Manual },
-                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+                { TelemetryConstants.ConfigurationSourceTag, blocking == true ? TelemetryConstants.Protocols.EndpointAsConfigurationSource :TelemetryConstants.Protocols.IrrelevantConfigurationSource },
             };
 
             var expectedHistogramTagList = new Dictionary<string, object>
             {
                 { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource  },
             };
 
             await ConfigurationManagerTests.PollForConditionAsync(
@@ -88,16 +88,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.Equal(expectedHistogramTagList, testTelemetryClient.ExportedHistogramItems);
         }
 
-        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), false, DisableDiscoveryEnumeration = true)]
         public async Task GetConfigurationAsync_ExpectedTagsExist(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
         {
             await GetConfigurationAsync_ExpectedTagList_Body(theoryData);
         }
 
-        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), true, DisableDiscoveryEnumeration = true)]
         public async Task GetConfigurationAsync_ExpectedTagsExist_Blocking(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
         {
             AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            theoryData.ExpectedTagList[TelemetryConstants.ConfigurationSourceTag] = TelemetryConstants.Protocols.EndpointAsConfigurationSource;
             await GetConfigurationAsync_ExpectedTagList_Body(theoryData, true);
         }
 
@@ -151,7 +152,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
         }
 
-        public static TheoryData<ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>> GetConfiguration_ExpectedTagList_TheoryData()
+        public static TheoryData<ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>> GetConfiguration_ExpectedTagList_TheoryData(bool blocking)
         {
             return new TheoryData<ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>>
             {
@@ -205,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AADCommonUrl },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Automatic },
-                        { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.EndpointAsConfigurationSource },
+                        { TelemetryConstants.ConfigurationSourceTag, blocking ? TelemetryConstants.Protocols.EndpointAsConfigurationSource : TelemetryConstants.Protocols.IrrelevantConfigurationSource }
                     }
                 },
             };

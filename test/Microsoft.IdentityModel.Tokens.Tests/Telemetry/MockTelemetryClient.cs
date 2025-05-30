@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedHistogramItems.Clear();
         }
 
-        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string configurationSource, string operationStatus)
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource)
         {
             Interlocked.Increment(ref _requestRefreshCounter);
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedItems.Add(TelemetryConstants.ConfigurationSourceTag, configurationSource);
         }
 
-        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string configurationSource, string operationStatus, Exception exception)
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource, Exception exception)
         {
             Interlocked.Increment(ref _requestRefreshCounter);
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
