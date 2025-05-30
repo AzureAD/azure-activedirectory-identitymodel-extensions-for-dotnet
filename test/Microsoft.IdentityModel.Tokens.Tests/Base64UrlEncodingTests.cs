@@ -345,7 +345,7 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
         }
 
         [Fact]
-        public void Base64UrlEncoder_PublicApis()
+        public void Base64UrlEncoder_PublicApiIsNotChanged()
         {
             // Public APIs
             string encoded1 = Base64UrlEncoder.Encode("test");
@@ -359,11 +359,20 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
             // Internal APIs
             byte[] decodedBytesFromSpan = Base64UrlEncoder.Decode("test".AsSpan());
             Span<byte> output = stackalloc byte[10];
+#if NET6_0_OR_GREATER
             int bytesWritten = Base64UrlEncoder.Decode("test".AsSpan(), output);
+#else
+            Base64UrlEncoder.Decode("test".AsSpan(), output);
+            var method = typeof(Base64UrlEncoder).GetMethod(
+                "Decode",
+                new[] { typeof(ReadOnlySpan<char>), typeof(Span<byte>) }
+            );
+            Assert.Equal(typeof(void), method.ReturnType);
+#endif
         }
 
         [Fact]
-        public void Base64UrlEncoding_PublicApis()
+        public void Base64UrlEncoding_PublicApiIsNotChanged()
         {
             // Public APIs
             byte[] decoded1 = Base64UrlEncoding.Decode("test");
@@ -378,6 +387,11 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
             int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize("test".AsSpan(), 0, 4);
             byte[] output = new byte[10];
             Base64UrlEncoding.Decode("test".AsSpan(), 0, 4, output);
+            var method = typeof(Base64UrlEncoding).GetMethod(
+                "Decode",
+                new[] { typeof(ReadOnlySpan<char>), typeof(int), typeof(int), typeof(byte[]) }
+            );
+            Assert.Equal(typeof(void), method.ReturnType);
         }
     }
 }
