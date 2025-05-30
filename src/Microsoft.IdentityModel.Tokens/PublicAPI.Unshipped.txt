@@ -1,0 +1,2 @@
+Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.get -> string
+Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.set -> void
