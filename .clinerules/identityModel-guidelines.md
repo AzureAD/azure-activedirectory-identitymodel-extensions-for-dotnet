@@ -7,7 +7,7 @@ IdentityModel Extensions for .NET is a foundational authentication and authoriza
 - JSON Web Token (JWT) creation, validation, and management
 - OpenID Connect (OIDC) and OAuth 2.0 protocol implementations
 - Token validation and security key management
-- High-performance token handling (5+ trillion requests daily)
+- High-performance token handling
 - SAML token support
 - WS-Federation protocol support
 
@@ -40,8 +40,6 @@ Through its robust architecture and battle-tested components, IdentityModel prov
 - Microsoft.IdentityModel.Protocols.SignedHttpRequest - Signed HTTP request handling
 
 ### Security and Integration
-- Microsoft.IdentityModel.KeyVaultExtensions - Azure Key Vault integration
-- Microsoft.IdentityModel.ManagedKeyVaultSecurityKey - Managed Key Vault security features
 - Microsoft.IdentityModel.Tokens.Saml - SAML token support
 - Microsoft.IdentityModel.Xml - XML security functionality
 - Microsoft.IdentityModel.Validators - Token validation utilities
