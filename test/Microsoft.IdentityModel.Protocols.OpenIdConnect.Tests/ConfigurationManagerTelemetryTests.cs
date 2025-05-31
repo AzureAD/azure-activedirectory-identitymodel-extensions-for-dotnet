@@ -68,8 +68,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Manual },
-                // This tag is set to ConfigurationSourceRetriever for blocking, and ConfigurationSourceUnknown for non-blocking due to the difference in implementation.
-                // On manual refreshes, we don't know the source of the configuration upfront , so we set it to Unknown.
                 { TelemetryConstants.ConfigurationSourceTag, blocking == true ? TelemetryConstants.Protocols.ConfigurationSourceRetriever :TelemetryConstants.Protocols.ConfigurationSourceUnknown },
             };
 
@@ -90,13 +88,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.Equal(expectedHistogramTagList, testTelemetryClient.ExportedHistogramItems);
         }
 
-        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), false, DisableDiscoveryEnumeration = true)]
         public async Task GetConfigurationAsync_ExpectedTagsExist(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
         {
             await GetConfigurationAsync_ExpectedTagList_Body(theoryData);
         }
 
-        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), true, DisableDiscoveryEnumeration = true)]
         public async Task GetConfigurationAsync_ExpectedTagsExist_Blocking(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
         {
             AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
@@ -154,7 +152,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
         }
 
-        public static TheoryData<ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>> GetConfiguration_ExpectedTagList_TheoryData()
+        public static TheoryData<ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>> GetConfiguration_ExpectedTagList_TheoryData(bool blocking)
         {
             return new TheoryData<ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>>
             {
@@ -208,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AADCommonUrl },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Automatic },
-                        { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceRetriever }
+                        { TelemetryConstants.ConfigurationSourceTag, blocking ? TelemetryConstants.Protocols.ConfigurationSourceRetriever : TelemetryConstants.Protocols.ConfigurationSourceUnknown }
                     }
                 },
             };

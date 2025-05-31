@@ -84,12 +84,8 @@ namespace Microsoft.IdentityModel.Telemetry
             public const string ConfigurationSourceHandler = "Handler";
 
             /// <summary>
-            /// Telemetry tag indicating that the configuration source is unknown for the scenario.
+            /// Telemetry tag indicating that the configuration source is irrelevant for the scenario.
             /// </summary>
-            /// <remarks>
-            /// This is used when the configuration source cannot be determined upfront, such in cases where LKG calls or
-            /// request refresh calls on background thread are counted. Configuration source is irrelevant in these cases.
-            /// </remarks>
             public const string ConfigurationSourceUnknown = "Unknown";
         }
     }

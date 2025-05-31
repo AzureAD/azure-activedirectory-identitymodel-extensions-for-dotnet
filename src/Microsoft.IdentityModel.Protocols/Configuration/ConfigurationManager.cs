@@ -302,6 +302,11 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.Automatic,
+                        TelemetryConstants.Protocols.ConfigurationSourceUnknown);
+
                     _ = Task.Run(UpdateCurrentConfigurationAsync, CancellationToken.None);
                 }
             }
@@ -339,11 +344,6 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
 
-                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                            MetadataAddress,
-                            TelemetryConstants.Protocols.Automatic,
-                            TelemetryConstants.Protocols.ConfigurationSourceHandler);
-
                         _onBackgroundTaskFinish?.Invoke();
                         return;
                     }
@@ -377,11 +377,6 @@ namespace Microsoft.IdentityModel.Protocols
                     else
                         UpdateConfiguration(configuration, TimeProvider.GetUtcNow());
                 }
-
-                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                    MetadataAddress,
-                    TelemetryConstants.Protocols.Automatic,
-                    TelemetryConstants.Protocols.ConfigurationSourceRetriever);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -392,12 +387,6 @@ namespace Microsoft.IdentityModel.Protocols
                     TelemetryConstants.Protocols.ConfigurationSourceRetriever,
                     elapsedTime,
                     ex);
-
-                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                   MetadataAddress,
-                   TelemetryConstants.Protocols.Automatic,
-                   TelemetryConstants.Protocols.ConfigurationSourceRetriever,
-                   ex);
 
                 LogHelper.LogExceptionMessage(
                     new InvalidOperationException(
