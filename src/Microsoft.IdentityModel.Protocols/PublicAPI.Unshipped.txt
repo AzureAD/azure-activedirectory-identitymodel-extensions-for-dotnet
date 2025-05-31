@@ -1,0 +1,1 @@
+Microsoft.IdentityModel.Protocols.HttpRequestData.SetLazyClientCertificates(System.Action<System.Security.Cryptography.X509Certificates.X509Certificate2Collection> lazyClientCertificates) -> void
