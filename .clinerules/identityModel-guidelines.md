@@ -75,7 +75,7 @@ Through its robust architecture and battle-tested components, IdentityModel prov
 - Verify protocol compliance
 
 ### Public API Changes
-- The project uses Microsoft.CodeAnalysis.PublicApiAnalyzers (version 3.3.4)
+- The project uses Microsoft.CodeAnalysis.PublicApiAnalyzers
 - For any public API changes:
   1. Update PublicAPI.Unshipped.txt in the relevant package directory
   2. Include complete API signatures
