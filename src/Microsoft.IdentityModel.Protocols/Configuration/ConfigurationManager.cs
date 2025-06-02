@@ -227,7 +227,8 @@ namespace Microsoft.IdentityModel.Protocols
 
                 try
                 {
-                    // Check if event handler can provide configuration
+                    // Check if event handler can provide configuration.
+                    // If provided configuration is valid, skip regular retriaval process and update current configuration.
                     if (ConfigurationEventHandler != null)
                     {
                         var configurationRetrieved = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
@@ -337,6 +338,7 @@ namespace Microsoft.IdentityModel.Protocols
             try
             {
                 // Check if event handler can provide configuration
+                // If provided configuration is valid, skip regular retriaval process and update current configuration.
                 if (ConfigurationEventHandler != null)
                 {
                     var configurationRetrieved = await HandleBeforeRetrieveAsync().ConfigureAwait(false);
@@ -413,6 +415,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             if (ConfigurationEventHandler != null)
             {
+                // fire-and-forget an after update task
                 _ = Task.Run(async () =>
                 {
                     try
@@ -484,13 +487,13 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        private async Task<ConfigurationEventHandlerResult<T>> HandleBeforeRetrieveAsync(CancellationToken cancel = default)
+        private async Task<ConfigurationEventHandlerResult<T>> HandleBeforeRetrieveAsync(CancellationToken cancellationToken = default)
         {
             long beforeHandlerTimestamp = TimeProvider.GetTimestamp();
 
             try
             {
-                var handlerResult = await ConfigurationEventHandler.BeforeRetrieveAsync(MetadataAddress, cancel).ConfigureAwait(false);
+                var handlerResult = await ConfigurationEventHandler.BeforeRetrieveAsync(MetadataAddress, cancellationToken).ConfigureAwait(false);
                 if (handlerResult != null && handlerResult.Configuration != null)
                 {
                     var handlerElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);

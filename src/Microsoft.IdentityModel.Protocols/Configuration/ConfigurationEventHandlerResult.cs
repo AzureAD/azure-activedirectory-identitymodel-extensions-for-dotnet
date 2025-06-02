@@ -30,7 +30,10 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// </summary>
         /// <param name="configuration">The configuration retrieved.</param>
         /// <param name="retrievalTime"> The time when the configuration was originally retrieved (UTC).</param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <remarks>
+        /// Setting a <paramref name="configuration"/> on the <see cref="ConfigurationEventHandlerResult{T}"/> skips the existing
+        /// configuration retrieval process and sets <paramref name="configuration"/> as a current valid configuration.
+        /// </remarks>
         public ConfigurationEventHandlerResult(T configuration, DateTimeOffset retrievalTime)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -45,6 +48,9 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <summary>
         /// Gets or sets the time when the configuration was originally retrieved in UTC.
         /// </summary>
+        /// <remarks>
+        /// This property will be set to <see cref="DateTimeOffset.MinValue"/> for <see cref="NoResult"/>.
+        /// </remarks>
         public DateTimeOffset RetrievalTime { get; }
     }
 }

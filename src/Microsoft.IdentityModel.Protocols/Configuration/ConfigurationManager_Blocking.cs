@@ -35,6 +35,7 @@ namespace Microsoft.IdentityModel.Protocols
                     try
                     {
                         // Check if event handler can provide configuration
+                        // If provided configuration is valid, skip regular retriaval process and update current configuration.
                         if (ConfigurationEventHandler != null)
                         {
                             var configurationRetrieved = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
