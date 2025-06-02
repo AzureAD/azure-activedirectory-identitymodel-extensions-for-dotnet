@@ -4,27 +4,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
-    /// <summary>
-    /// Definition for delegate that will validate the issuer value in a token.
-    /// </summary>
-    /// <param name="issuer">The issuer to validate.</param>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>An <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Task<ValidationResult<ValidatedIssuer>> IssuerValidationDelegateAsync(
-        string issuer,
-        SecurityToken securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext,
-        CancellationToken cancellationToken);
-
     /// <summary>
     /// Partial class for Issuer Validation.
     /// </summary>
@@ -38,9 +22,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>An <see cref="ValidationResult{TResult}"/> that contains either the issuer that was validated or an error.</returns>
+        /// <returns>An <see cref="ValidationResult{TResult, TError}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static async Task<ValidationResult<ValidatedIssuer>> ValidateIssuerAsync(
+        public static async Task<ValidationResult<ValidatedIssuer, IssuerValidationError>> ValidateIssuerAsync(
             string? issuer,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -60,12 +44,12 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return IssuerValidationError.NullParameter(
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 
             if (securityToken == null)
-                return ValidationError.NullParameter(
+                return IssuerValidationError.NullParameter(
                     nameof(securityToken),
                     ValidationError.GetCurrentStackFrame());
 

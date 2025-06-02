@@ -9,12 +9,15 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Contains the results of successfully validating a <see cref="SecurityToken"/>.
     /// </summary>
-    internal class ValidatedToken
+    /// <remarks>
+    /// Creates an instance of <see cref="ValidatedToken"/>
+    /// </remarks>
+    public class ValidatedToken
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ValidatedToken"/>.
@@ -36,7 +39,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Logs the validation result.
         /// </summary>
-        public void Log(ILogger logger) => Logger.TokenValidationSucceeded(
+        [CLSCompliant(false)]
+        public void Log(ILogger logger)
+        {
+            if (logger is null)
+                throw new ArgumentNullException(nameof(logger));
+
+            Logger.TokenValidationSucceeded(
                 logger,
                 ValidatedAudience ?? "none",
                 ValidatedLifetime,
@@ -45,6 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
                 ValidatedSigningKey?.KeyId ?? "none",
                 ActorValidationResult is not null
             );
+        }
 
         /// <summary>
         /// The <see cref="SecurityToken"/> that was validated.

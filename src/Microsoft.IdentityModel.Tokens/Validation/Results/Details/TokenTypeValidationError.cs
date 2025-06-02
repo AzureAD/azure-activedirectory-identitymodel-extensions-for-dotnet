@@ -5,13 +5,13 @@ using System;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurs when a token type cannot be validated.
     /// If available, the invalid token type is stored in <see cref="InvalidTokenType"/>.
     /// </summary>
-    internal class TokenTypeValidationError : ValidationError
+    public class TokenTypeValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenTypeValidationError"/> class.

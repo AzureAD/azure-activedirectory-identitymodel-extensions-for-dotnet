@@ -1,0 +1,271 @@
+#nullable enable
+const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultAuthenticationType = "AuthenticationTypes.Federation" -> string!
+const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultMaximumTokenSizeInBytes = 256000 -> int
+Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationDelegate
+Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError
+Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError.AlgorithmValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, string? invalidAlgorithm, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError.InvalidAlgorithm.get -> string?
+Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationDelegate
+Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError
+Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError.AudienceValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, System.Collections.Generic.IList<string!>? tokenAudiences, System.Collections.Generic.IList<string!>? validAudiences, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError.TokenAudiences.get -> System.Collections.Generic.IList<string!>?
+Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError.ValidAudiences.get -> System.Collections.Generic.IList<string!>?
+Microsoft.IdentityModel.Tokens.Experimental.DecryptionKeyResolverDelegate
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken!, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>>!
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken!, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>>!
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation.ValidateTokenAsync(string! token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken!, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>>!
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation.ValidateTokenAsync(string! token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken!, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>>!
+Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyResolverDelegate
+Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationDelegate
+Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationError
+Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationError.InvalidSigningKey.get -> Microsoft.IdentityModel.Tokens.SecurityKey?
+Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationError.IssuerSigningKeyValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, Microsoft.IdentityModel.Tokens.SecurityKey? invalidSigningKey, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationDelegateAsync
+Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError
+Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError.InvalidIssuer.get -> string?
+Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError.IssuerValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, string? invalidIssuer, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource
+Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource.IssuerValidationSource(string! name) -> void
+Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource.Name.get -> string!
+Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationDelegate
+Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError
+Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError.Expires.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError.LifetimeValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, System.DateTime? notBefore, System.DateTime? expires, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError.NotBefore.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.MessageDetail
+Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationDelegate
+Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationError
+Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationError.InnerValidationError.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError?
+Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationError.SignatureValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, Microsoft.IdentityModel.Tokens.Experimental.ValidationError? innerValidationError = null, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationDelegate
+Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationError
+Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationError.ExpirationTime.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationError.TokenReplayValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, System.DateTime? expirationTime, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationDelegate
+Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationError
+Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationError.InvalidTokenType.get -> string?
+Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationError.TokenTypeValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, string? invalidTokenType, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.Equals(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer other) -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.Issuer.get -> string!
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.ValidatedIssuer() -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.ValidatedIssuer(string! issuer, Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource! validationSource) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.ValidationSource.get -> Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource!
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.Equals(Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime other) -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.Expires.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.NotBefore.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.ValidatedLifetime() -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.ValidatedLifetime(System.DateTime? notBefore, System.DateTime? expires) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.Equals(Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime other) -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.ValidatedSigningKeyLifetime() -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.ValidationTime.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.ValidFrom.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.ValidTo.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ActorValidationResult.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.Claims.get -> System.Collections.Generic.IDictionary<string!, object!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ClaimsIdentity.get -> System.Security.Claims.ClaimsIdentity!
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ClaimsIdentity.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.Log(Microsoft.Extensions.Logging.ILogger! logger) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.SecurityToken.get -> Microsoft.IdentityModel.Tokens.SecurityToken!
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.TokenHandler.get -> Microsoft.IdentityModel.Tokens.TokenHandler!
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedAudience.get -> string?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedIssuer.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedLifetime.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedSigningKey.get -> Microsoft.IdentityModel.Tokens.SecurityKey?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedSigningKeyLifetime.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedToken(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.TokenHandler! tokenHandler, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenReplayExpirationTime.get -> System.DateTime?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenType.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType?
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidationParameters.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters!
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.Equals(Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType other) -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.Type.get -> string!
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ValidatedTokenType() -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ValidatedTokenType(string! type, int validTypeCount) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ValidTypeCount.get -> int
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.AddCurrentStackFrame(string! filePath = "", int lineNumber = 0, int skipFrames = 1) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.AddStackFrame(System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.ExceptionType.get -> System.Type!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.FailureType.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.GetException() -> System.Exception!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.InnerException.get -> System.Exception?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.Log(Microsoft.Extensions.Logging.ILogger! logger) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.Message.get -> string!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.StackFrames.get -> System.Collections.Generic.IList<System.Diagnostics.StackFrame!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.ValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType
+Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.Name.get -> string!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.ValidationFailureType(string! name) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ActorValidationParameters.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ActorValidationParameters.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.AlgorithmValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationDelegate!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.AlgorithmValidator.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.AudienceValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationDelegate!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.AudienceValidator.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.AuthenticationType.get -> string?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.AuthenticationType.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ClockSkew.get -> System.TimeSpan
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ClockSkew.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ConfigurationManager.get -> Microsoft.IdentityModel.Tokens.BaseConfigurationManager?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ConfigurationManager.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CryptoProviderFactory.get -> Microsoft.IdentityModel.Tokens.CryptoProviderFactory?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CryptoProviderFactory.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DebugId.get -> string?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DebugId.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreTrailingSlashWhenValidatingAudience.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreTrailingSlashWhenValidatingAudience.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IncludeTokenOnFailedValidation.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IncludeTokenOnFailedValidation.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.InstancePropertyBag.get -> System.Collections.Generic.IDictionary<string!, object!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IsClone.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IsClone.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerSigningKeyResolver.get -> Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyResolverDelegate?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerSigningKeyResolver.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerSigningKeys.get -> System.Collections.Generic.IList<Microsoft.IdentityModel.Tokens.SecurityKey!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerSigningKeyValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationDelegate!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerSigningKeyValidator.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerValidatorAsync.get -> Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationDelegateAsync!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerValidatorAsync.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.LifetimeValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationDelegate!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.LifetimeValidator.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.LogTokenId.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.LogTokenId.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.NameClaimType.get -> string!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.NameClaimType.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.NameClaimTypeRetriever.get -> System.Func<Microsoft.IdentityModel.Tokens.SecurityToken!, string!, string!>?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.NameClaimTypeRetriever.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.PropertyBag.get -> System.Collections.Generic.IDictionary<string!, object!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.RefreshBeforeValidation.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.RefreshBeforeValidation.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.RoleClaimType.get -> string!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.RoleClaimType.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.RoleClaimTypeRetriever.get -> System.Func<Microsoft.IdentityModel.Tokens.SecurityToken!, string!, string!>?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.RoleClaimTypeRetriever.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SaveSigninToken.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SaveSigninToken.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationDelegate?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureValidator.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TokenDecryptionKeys.get -> System.Collections.Generic.IList<Microsoft.IdentityModel.Tokens.SecurityKey!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TokenReplayCache.get -> Microsoft.IdentityModel.Tokens.ITokenReplayCache?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TokenReplayCache.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TokenReplayValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationDelegate!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TokenReplayValidator.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TokenTypeValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationDelegate!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TokenTypeValidator.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TryAllDecryptionKeys.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TryAllDecryptionKeys.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TryAllIssuerSigningKeys.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TryAllIssuerSigningKeys.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidAlgorithms.get -> System.Collections.Generic.IList<string!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidateActor.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidateActor.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidateWithLKG.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidateWithLKG.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidationParameters() -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidationParameters(Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! other) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidAudiences.get -> System.Collections.Generic.IList<string!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidIssuers.get -> System.Collections.Generic.IList<string!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidTypes.get -> System.Collections.Generic.IList<string!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.Equals(Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError> other) -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.Error.get -> TError?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.IsValid.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.Result.get -> TResult?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.ToValidationResult() -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.ValidationResult() -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.ValidationResult(TError error) -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.ValidationResult(TResult result) -> void
+override Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource.ToString() -> string!
+override Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.Equals(object? obj) -> bool
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.GetHashCode() -> int
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.ToString() -> string!
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.Equals(object? obj) -> bool
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.GetHashCode() -> int
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.ToString() -> string!
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.Equals(object? obj) -> bool
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.GetHashCode() -> int
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.ToString() -> string!
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.Equals(object? obj) -> bool
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.GetHashCode() -> int
+override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ToString() -> string!
+override Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.Equals(object? obj) -> bool
+override Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.GetHashCode() -> int
+static Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidationError.GetCurrentStackFrame(string! filePath = "", int lineNumber = 0, int skipFrames = 1) -> System.Diagnostics.StackFrame!
+static Microsoft.IdentityModel.Tokens.Experimental.ValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError!
+static Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.implicit operator Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>(TError error) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>
+static Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.implicit operator Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>(TResult result) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>
+static Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError> left, Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError> right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError> left, Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError> right) -> bool
+static Microsoft.IdentityModel.Tokens.Validators.ValidateAlgorithm(string! algorithm, Microsoft.IdentityModel.Tokens.SecurityKey! securityKey, Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<string!, Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError!>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateAudience(System.Collections.Generic.IList<string!>! tokenAudiences, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<string!, Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError!>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerAsync(string? issuer, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext? callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer, Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError!>>!
+static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerSigningKey(Microsoft.IdentityModel.Tokens.SecurityKey! securityKey, Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime, Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationError!>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateLifetime(System.DateTime? notBefore, System.DateTime? expires, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime, Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError!>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateTokenReplay(System.DateTime? expirationTime, string! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<System.DateTime?, Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationError!>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateTokenType(string? type, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType, Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationError!>
+static readonly Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource.IssuerMatchedConfiguration -> Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource.IssuerMatchedValidationParameters -> Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource.NotValidated -> Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationSource!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.AlgorithmValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.AlgorithmValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.AudienceValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.AudienceValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.InvalidSecurityToken -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.IssuerSigningKeyValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.IssuerValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.IssuerValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.LifetimeValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.LifetimeValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.NoTokenAudiencesProvided -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.NoValidationParameterAudiencesProvided -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.NullArgument -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.SignatureAlgorithmValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.SignatureValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.SignatureValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.SigningKeyValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.TokenDecryptionFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.TokenExceedsMaximumSize -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.TokenIsNotSigned -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.TokenReadingFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.TokenReplayValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.TokenReplayValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.TokenTypeValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.TokenTypeValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.XmlValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultClockSkew -> System.TimeSpan
+virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationError.CreateException() -> System.Exception!
+virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.Clone() -> Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters!
+virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, string! issuer) -> System.Security.Claims.ClaimsIdentity!
+~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.Message.get -> string
+~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.MessageDetail(string formatString, params object[] parameters) -> void
+~static Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.NullParameter(string parameterName) -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail

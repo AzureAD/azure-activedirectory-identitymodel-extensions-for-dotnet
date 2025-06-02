@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Extensibility.Tests
     {
         [Theory, MemberData(
             nameof(GenerateSignatureExtensibilityTestCases),
-            parameters: ["SAML2", 2],
+            parameters: ["SAML2", 1],
             DisableDiscoveryEnumeration = true)]
         public async Task ValidateTokenAsync_SignatureValidator_Extensibility(
             SignatureExtensibilityTheoryData theoryData)

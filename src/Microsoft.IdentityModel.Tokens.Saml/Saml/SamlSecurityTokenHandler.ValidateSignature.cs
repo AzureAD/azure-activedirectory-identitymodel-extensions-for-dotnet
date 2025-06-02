@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 #nullable enable
@@ -12,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 {
     public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
-        internal static ValidationResult<SecurityKey> ValidateSignature(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> ValidateSignature(
             SamlSecurityToken samlToken,
             ValidationParameters validationParameters,
 #pragma warning disable CA1801 // Review unused parameters
@@ -38,14 +39,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 try
                 {
-                    ValidationResult<SecurityKey> signatureValidationResult = validationParameters.SignatureValidator(
+                    ValidationResult<SecurityKey, SignatureValidationError> signatureValidationResult = validationParameters.SignatureValidator(
                         samlToken,
                         validationParameters,
                         null, // configuration
                         callContext);
-
-                    if (!signatureValidationResult.IsValid)
-                        return signatureValidationResult.UnwrapError().AddCurrentStackFrame();
 
                     return signatureValidationResult;
                 }
@@ -93,12 +91,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (resolvedKey is not null)
             {
                 keyMatched = true;
-                var result = ValidateSignatureUsingKey(resolvedKey, samlToken, validationParameters, callContext);
-
-                if (!result.IsValid)
-                    return result.UnwrapError().AddCurrentStackFrame();
-
-                return result;
+                return ValidateSignatureUsingKey(resolvedKey, samlToken, validationParameters, callContext);
             }
 
             bool canMatchKey = samlToken.Assertion.Signature.KeyInfo != null;
@@ -163,11 +156,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static ValidationResult<SecurityKey> ValidateSignatureUsingKey(SecurityKey key, SamlSecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
+        private static ValidationResult<SecurityKey, SignatureValidationError> ValidateSignatureUsingKey(SecurityKey key, SamlSecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
         {
             try
             {
-                ValidationResult<string> algorithmValidationResult = validationParameters.AlgorithmValidator(
+                ValidationResult<string, AlgorithmValidationError> algorithmValidationResult = validationParameters.AlgorithmValidator(
                     samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
                     key,
                     samlToken,
@@ -213,7 +206,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
             else
             {
-                return validationError.AddCurrentStackFrame();
+                return validationError;
             }
         }
 
