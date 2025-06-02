@@ -57,6 +57,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
+
         void ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, Exception exception)
         {
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
@@ -64,5 +65,11 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedItems.Add(TelemetryConstants.ConfigurationSourceTag, configurationSource);
             ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
+
+        void ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");
+        void ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, Exception exception) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");
+        void ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");
+        void ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration, Exception exception) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");
+        void ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");
     }
 }

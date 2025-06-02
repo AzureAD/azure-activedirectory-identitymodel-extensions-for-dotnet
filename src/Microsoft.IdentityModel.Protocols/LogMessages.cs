@@ -31,6 +31,7 @@ namespace Microsoft.IdentityModel.Protocols
         internal const string IDX20810 = "IDX20810: Configuration validation failed, see inner exception for more details. Exception: '{0}'.";
         internal const string IDX20811 = "IDX20811: Failed to retrieve configuration from event handler. MetadataAddress: '{0}', Exception: '{1}'.";
         internal const string IDX20812 = "IDX20812: Failed to validate configuration retrieved via event handler. Exception: '{0}'.";
+        internal const string IDX20813 = "IDX20813: ConfigurationEventHandler implementation thrown an exception on AfterUpdateAsync call for metadata address '{0}'. Exception: '{1}'.";
 
 #pragma warning restore 1591
     }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -93,6 +94,41 @@ namespace Microsoft.IdentityModel.Telemetry
             };
 
             TelemetryDataRecorder.IncrementBackgroundConfigurationRefreshFailureCounter(tagList);
+        }
+
+        [Obsolete("Use LogConfigurationRetrievalDuration(metadataAddress, operationStatus, configurationSource) instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus)
+        {
+            IncrementConfigurationRefreshRequestCounter(metadataAddress, operationStatus, TelemetryConstants.Protocols.ConfigurationSourceUnknown);
+        }
+
+        [Obsolete("Use IncrementConfigurationRefreshRequestCounter(metadataAddress, operationStatus, configurationSource, exception) instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception)
+        {
+            IncrementConfigurationRefreshRequestCounter(metadataAddress, operationStatus, TelemetryConstants.Protocols.ConfigurationSourceUnknown, exception);
+        }
+
+        [Obsolete("Use LogConfigurationRetrievalDuration(metadataAddress, configurationSource, operationDuration) instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration)
+        {
+            LogConfigurationRetrievalDuration(metadataAddress, TelemetryConstants.Protocols.ConfigurationSourceUnknown, operationDuration);
+        }
+
+        [Obsolete("Use LogConfigurationRetrievalDuration(metadataAddress, configurationSource, operationStatus, exception) instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration, Exception exception)
+        {
+            LogConfigurationRetrievalDuration(metadataAddress, TelemetryConstants.Protocols.ConfigurationSourceUnknown, operationDuration, exception);
+        }
+
+        [Obsolete("Use LogBackgroundConfigurationRefreshFailure(metadataAddress, configurationSource, exception) instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void LogBackgroundConfigurationRefreshFailure(string metadataAddress, Exception exception)
+        {
+            LogBackgroundConfigurationRefreshFailure(metadataAddress, TelemetryConstants.Protocols.ConfigurationSourceUnknown, exception);
         }
     }
 }

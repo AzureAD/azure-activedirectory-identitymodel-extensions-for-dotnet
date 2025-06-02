@@ -424,7 +424,7 @@ namespace Microsoft.IdentityModel.Protocols
                         LogHelper.LogExceptionMessage(
                             new InvalidOperationException(
                                 LogHelper.FormatInvariant(
-                                   LogMessages.IDX20812,
+                                   LogMessages.IDX20813,
                                     LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
                                     ex),
                                 ex));
