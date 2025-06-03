@@ -15,7 +15,7 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating JSON Web Tokens.
+    /// A <see cref="TokenHandler"/> designed for creating and validating JSON Web Tokens.
     /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> and <see href="https://www.rfc-editor.org/info/rfc7515"/>.
     /// </summary>
     public partial class JsonWebTokenHandler : TokenHandler

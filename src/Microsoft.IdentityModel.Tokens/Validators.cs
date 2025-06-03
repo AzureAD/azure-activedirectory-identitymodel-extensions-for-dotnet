@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -61,10 +62,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidAudienceException">If <see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidAudienceException">If none of the 'audiences' matched either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
-        public static void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        public static void ValidateAudience(
+            IEnumerable<string> audiences,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            CallContext callContext = validationParameters.GetCallContext();
 
             if (validationParameters.AudienceValidator != null)
             {
@@ -76,33 +82,47 @@ namespace Microsoft.IdentityModel.Tokens
                                 LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())))
                         {
                             InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences)
-                        });
+                        },
+                        callContext);
 
                 return;
             }
 
             if (!validationParameters.ValidateAudience)
             {
-                LogHelper.LogWarning(LogMessages.IDX10233);
+                LogHelper.LogWarning(LogMessages.IDX10233, callContext);
                 return;
             }
 
             if (!validationParameters.RequireAudience && !audiences.Any())
             {
-                LogHelper.LogWarning(LogMessages.IDX10277);
+                LogHelper.LogWarning(LogMessages.IDX10277, callContext);
                 return;
             }
 
             if (audiences == null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10207) { InvalidAudience = null });
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenInvalidAudienceException(LogMessages.IDX10207)
+                    {
+                        InvalidAudience = null
+                    },
+                    callContext);
 
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10208) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenInvalidAudienceException(LogMessages.IDX10208)
+                    {
+                        InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences)
+                    },
+                    callContext);
 
             if (!audiences.Any())
                 throw LogHelper.LogExceptionMessage(
                     new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10206))
-                    { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
+                    {
+                        InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences)
+                    },
+                    callContext);
 
             // create enumeration of all valid audiences from validationParameters
             IEnumerable<string> validationParametersAudiences;
@@ -133,7 +153,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (!validationParameters.LogValidationExceptions)
                 throw ex;
 
-            throw LogHelper.LogExceptionMessage(ex);
+            throw LogHelper.LogExceptionMessage(
+                ex,
+                callContext);
         }
 
         private static bool AudienceIsValid(IEnumerable<string> audiences, TokenValidationParameters validationParameters, IEnumerable<string> validationParametersAudiences)
@@ -279,38 +301,61 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (validationParameters.IssuerValidatorAsync != null)
-                return await validationParameters.IssuerValidatorAsync(issuer, securityToken, validationParameters).ConfigureAwait(false);
+            CallContext callContext = validationParameters.GetCallContext();
 
-            if (validationParameters.IssuerValidatorUsingConfiguration != null)
-                return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration);
+            try
+            {
+                if (validationParameters.IssuerValidatorAsync != null)
+                    return await validationParameters.IssuerValidatorAsync(issuer, securityToken, validationParameters).ConfigureAwait(false);
 
-            if (validationParameters.IssuerValidator != null)
-                return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
+                if (validationParameters.IssuerValidatorUsingConfiguration != null)
+                    return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration);
+
+                if (validationParameters.IssuerValidator != null)
+                    return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
+            }
+            catch (Exception exception)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Error) || (callContext?.Logger?.IsEnabled(LogLevel.Error) ?? false))
+                    LogHelper.LogExceptionMessage(exception, callContext);
+
+                throw;
+            }
 
             if (!validationParameters.ValidateIssuer)
             {
-                LogHelper.LogWarning(LogMessages.IDX10235);
+                LogHelper.LogWarning(LogMessages.IDX10235, callContext);
                 return issuer;
             }
 
             if (string.IsNullOrWhiteSpace(issuer))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX10211)
-                { InvalidIssuer = issuer });
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenInvalidIssuerException(LogMessages.IDX10211)
+                    {
+                        InvalidIssuer = issuer
+                    },
+                    callContext);
 
             // Throw if all possible places to validate against are null or empty
             if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer)
                 && validationParameters.ValidIssuers.IsNullOrEmpty()
                 && string.IsNullOrWhiteSpace(configuration?.Issuer))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX10204)
-                { InvalidIssuer = issuer });
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenInvalidIssuerException(LogMessages.IDX10204)
+                    {
+                        InvalidIssuer = issuer
+                    },
+                    callContext);
 
             if (configuration != null)
             {
                 if (string.Equals(configuration.Issuer, issuer))
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+                        LogHelper.LogInformation(
+                            LogMessages.IDX10236,
+                            callContext,
+                            LogHelper.MarkAsNonPII(issuer));
 
                     return issuer;
                 }
@@ -319,7 +364,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.Equals(validationParameters.ValidIssuer, issuer))
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+                    LogHelper.LogInformation(
+                        LogMessages.IDX10236,
+                        callContext,
+                        LogHelper.MarkAsNonPII(issuer));
 
                 return issuer;
             }
@@ -330,14 +378,20 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (string.IsNullOrEmpty(str))
                     {
-                        LogHelper.LogInformation(LogMessages.IDX10262);
+                        LogHelper.LogInformation(
+                            LogMessages.IDX10262,
+                            callContext,
+                            null);
                         continue;
                     }
 
                     if (string.Equals(str, issuer))
                     {
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                            LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+                            LogHelper.LogInformation(
+                                LogMessages.IDX10236,
+                                callContext,
+                                LogHelper.MarkAsNonPII(issuer));
 
                         return issuer;
                     }
@@ -355,7 +409,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (!validationParameters.LogValidationExceptions)
                 throw ex;
 
-            throw LogHelper.LogExceptionMessage(ex);
+            throw LogHelper.LogExceptionMessage(ex, callContext);
         }
 
         /// <summary>
@@ -466,18 +520,25 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
+            CallContext callContext = validationParameters.GetCallContext();
+
             if (validationParameters.LifetimeValidator != null)
             {
                 if (!validationParameters.LifetimeValidator(notBefore, expires, securityToken, validationParameters))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10230, securityToken))
-                    { NotBefore = notBefore, Expires = expires });
+                    throw LogHelper.LogExceptionMessage(
+                        new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10230, securityToken))
+                        {
+                            NotBefore = notBefore,
+                            Expires = expires
+                        },
+                        callContext);
 
                 return;
             }
 
             if (!validationParameters.ValidateLifetime)
             {
-                LogHelper.LogInformation(LogMessages.IDX10238);
+                LogHelper.LogWarning(LogMessages.IDX10238, callContext);
                 return;
             }
 

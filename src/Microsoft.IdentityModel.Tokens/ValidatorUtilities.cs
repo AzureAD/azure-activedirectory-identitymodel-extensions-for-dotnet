@@ -26,32 +26,57 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>All time comparisons apply <see cref="TokenValidationParameters.ClockSkew"/>.</remarks>
         internal static void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
+            CallContext callContext = validationParameters.GetCallContext();
             if (!expires.HasValue && validationParameters.RequireExpirationTime)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenNoExpirationException(LogHelper.FormatInvariant(LogMessages.IDX10225, LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString()))));
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenNoExpirationException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10225,
+                            LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString()))),
+                    callContext);
 
             if (notBefore.HasValue && expires.HasValue && (notBefore.Value > expires.Value))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10224, LogHelper.MarkAsNonPII(notBefore.Value), LogHelper.MarkAsNonPII(expires.Value)))
-                {
-                    NotBefore = notBefore,
-                    Expires = expires
-                });
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenInvalidLifetimeException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10224,
+                            LogHelper.MarkAsNonPII(notBefore.Value),
+                            LogHelper.MarkAsNonPII(expires.Value)))
+                    {
+                        NotBefore = notBefore,
+                        Expires = expires
+                    },
+                    callContext);
 
             DateTime utcNow = validationParameters.TimeProvider.GetUtcNow().UtcDateTime;
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenNotYetValidException(LogHelper.FormatInvariant(LogMessages.IDX10222, LogHelper.MarkAsNonPII(notBefore.Value), LogHelper.MarkAsNonPII(utcNow)))
-                {
-                    NotBefore = notBefore.Value
-                });
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenNotYetValidException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10222,
+                            LogHelper.MarkAsNonPII(notBefore.Value),
+                            LogHelper.MarkAsNonPII(utcNow)))
+                    {
+                        NotBefore = notBefore.Value
+                    },
+                    callContext);
 
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenExpiredException(LogHelper.FormatInvariant(LogMessages.IDX10223, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(utcNow)))
-                {
-                    Expires = expires.Value
-                });
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenExpiredException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10223,
+                            LogHelper.MarkAsNonPII(expires.Value),
+                            LogHelper.MarkAsNonPII(utcNow)))
+                    {
+                        Expires = expires.Value
+                    },
+                    callContext);
 
             // if it reaches here, that means lifetime of the token is valid
+            // TODO need to consider if ILogger is available and if so is it enabled for informational messages
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                LogHelper.LogInformation(LogMessages.IDX10239);
+                LogHelper.LogInformation(LogMessages.IDX10239, callContext);
         }
     }
 }

@@ -1,0 +1,2 @@
+static Microsoft.IdentityModel.Logging.LogHelper.IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.IdentityModel.Logging.LoggerContext loggerContext) -> bool
+static Microsoft.IdentityModel.Logging.LogHelper.IsEnabled(Microsoft.IdentityModel.Abstractions.EventLogLevel level, Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.IdentityModel.Logging.LoggerContext loggerContext) -> bool

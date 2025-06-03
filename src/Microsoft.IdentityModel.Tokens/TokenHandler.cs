@@ -53,6 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         #region methods
+
         /// <summary>
         /// Validates a token.
         /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
@@ -79,7 +80,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="token">The <see cref="SecurityToken"/> to be validated.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
-        public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)
+        public virtual Task<TokenValidationResult> ValidateTokenAsync(
+            SecurityToken token,
+            TokenValidationParameters validationParameters)
         {
             throw LogExceptionMessage(
                 new NotImplementedException(

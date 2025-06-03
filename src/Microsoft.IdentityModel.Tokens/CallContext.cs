@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -24,5 +25,37 @@ namespace Microsoft.IdentityModel.Tokens
         public CallContext(Guid activityId) : base(activityId)
         {
         }
+#pragma warning disable CS3001 // ILogger is not CLSCompliant
+#pragma warning disable CS3003 // ILogger is not CLSCompliant
+        /// <summary>
+        /// Instantiates a new <see cref="CallContext"/> with an activity identifier.
+        /// </summary>
+        /// <param name="logger"><see cref="ILogger"/> to record logs.</param>
+        /// <param name="activityId">Activity Id to include in logs.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="logger"/> is null.</exception>
+        public CallContext(ILogger logger, Guid activityId) : base(logger, activityId)
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="CallContext"/> with a Correlation Id.
+        /// </summary>
+        /// <param name="logger"><see cref="ILogger"/> to record logs.</param>
+        /// <param name="correlationId">Correlation Id to include in logs.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="logger"/> is null.</exception>
+        public CallContext(ILogger logger, string correlationId) : base(logger, correlationId)
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="CallContext"/> with a logger.
+        /// </summary>
+        /// <param name="logger"><see cref="ILogger"/> to record logs.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="logger"/> is null.</exception>
+        public CallContext(ILogger logger) : base(logger)
+        {
+        }
+#pragma warning restore CS3001 // ILogger is not CLSCompliant
+#pragma warning restore CS3003 // ILogger is not CLSCompliant
     }
 }

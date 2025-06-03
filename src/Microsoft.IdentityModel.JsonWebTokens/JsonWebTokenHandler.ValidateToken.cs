@@ -9,8 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Telemetry;
+using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -444,14 +444,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public override async Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)
         {
             if (token == null)
-                throw LogHelper.LogArgumentNullException(nameof(token));
+            {
+                return new TokenValidationResult
+                {
+                    Exception = LogHelper.LogArgumentNullException(nameof(token)),
+                    IsValid = false
+                };
+            }
 
             if (validationParameters == null)
-                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)), IsValid = false };
+                return new TokenValidationResult
+                {
+                    Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)),
+                    IsValid = false
+                };
 
             var jwt = token as JsonWebToken;
             if (jwt == null)
-                return new TokenValidationResult { Exception = LogHelper.LogArgumentException<ArgumentException>(nameof(token), $"{nameof(token)} must be a {nameof(JsonWebToken)}."), IsValid = false };
+            {
+                return new TokenValidationResult
+                {
+                    Exception = LogHelper.LogExceptionMessage(
+                        new ArgumentException(
+                           $"{nameof(token)} must be a {nameof(JsonWebToken)}.",
+                            nameof(token)
+                        ),
+                        TokenValidationParametersExtensions.GetCallContext(validationParameters)
+                    ),
+                    IsValid = false
+                };
+            }
 
             try
             {
@@ -480,6 +502,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             TokenValidationParameters validationParameters)
         {
             BaseConfiguration currentConfiguration = null;
+
             if (validationParameters.ConfigurationManager != null)
             {
                 try
@@ -493,7 +516,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
                     // directly on them, allowing the library to continue with token validation.
                     if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                        LogHelper.LogWarning(
+                            LogHelper.FormatInvariant(
+                                TokenLogMessages.IDX10261,
+                                validationParameters.ConfigurationManager.MetadataAddress,
+                                ex.ToString()));
                 }
             }
 
