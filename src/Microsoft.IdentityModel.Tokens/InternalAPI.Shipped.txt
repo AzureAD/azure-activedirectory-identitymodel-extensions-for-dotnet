@@ -740,8 +740,6 @@ static Microsoft.IdentityModel.Tokens.AsymmetricAdapter.DecryptFunctionNotFound(
 static Microsoft.IdentityModel.Tokens.AsymmetricAdapter.EncryptFunctionNotFound(byte[] _) -> byte[]
 static Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.Transform(System.Security.Cryptography.ICryptoTransform transform, byte[] input, int inputOffset, int inputLength) -> byte[]
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan) -> byte[]
-static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan, System.Span<byte> output) -> int
-static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan, System.Span<byte> output) -> void
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode(string input, int offset, int length) -> byte[]
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode(string inputString) -> byte[]
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode(System.ReadOnlySpan<char> input, int offset, int length, byte[] output) -> void

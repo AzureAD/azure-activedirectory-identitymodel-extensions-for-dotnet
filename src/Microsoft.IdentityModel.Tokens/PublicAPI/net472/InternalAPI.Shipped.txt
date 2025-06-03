@@ -146,3 +146,4 @@ System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target.get
 System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target.set -> void
 System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.UnconditionalSuppressMessageAttribute(string category, string checkId) -> void
 virtual Microsoft.IdentityModel.Tokens.ValidationError.AddAdditionalInformation(System.Exception exception) -> void
+static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan, System.Span<byte> output) -> void
