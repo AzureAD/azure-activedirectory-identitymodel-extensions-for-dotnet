@@ -3,13 +3,14 @@
 
 using System;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomSignatureValidationDelegates
     {
-        internal static ValidationResult<SecurityKey> CustomSignatureValidatorDelegate(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> CustomSignatureValidatorDelegate(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -23,7 +24,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationError.GetCurrentStackFrame());
         }
 
-        internal static ValidationResult<SecurityKey> CustomSignatureValidatorCustomExceptionDelegate(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> CustomSignatureValidatorCustomExceptionDelegate(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -36,7 +37,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationError.GetCurrentStackFrame());
         }
 
-        internal static ValidationResult<SecurityKey> CustomSignatureValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> CustomSignatureValidatorCustomExceptionCustomFailureTypeDelegate(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -49,7 +50,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationError.GetCurrentStackFrame());
         }
 
-        internal static ValidationResult<SecurityKey> CustomSignatureValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> CustomSignatureValidatorUnknownExceptionDelegate(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -62,7 +63,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationError.GetCurrentStackFrame());
         }
 
-        internal static ValidationResult<SecurityKey> CustomSignatureValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> CustomSignatureValidatorWithoutGetExceptionOverrideDelegate(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -75,7 +76,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationError.GetCurrentStackFrame());
         }
 
-        internal static ValidationResult<SecurityKey> SignatureValidatorDelegate(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> SignatureValidatorDelegate(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -88,7 +89,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationError.GetCurrentStackFrame());
         }
 
-        internal static ValidationResult<SecurityKey> SignatureValidatorThrows(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> SignatureValidatorThrows(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -97,7 +98,7 @@ namespace Microsoft.IdentityModel.TestUtils
             throw new CustomSecurityTokenInvalidSignatureException(nameof(SignatureValidatorThrows), null);
         }
 
-        internal static ValidationResult<SecurityKey> SignatureValidatorCustomSignatureExceptionTypeDelegate(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> SignatureValidatorCustomSignatureExceptionTypeDelegate(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -110,7 +111,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationError.GetCurrentStackFrame());
         }
 
-        internal static ValidationResult<SecurityKey> SignatureValidatorCustomExceptionTypeDelegate(
+        internal static ValidationResult<SecurityKey, SignatureValidationError> SignatureValidatorCustomExceptionTypeDelegate(
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,

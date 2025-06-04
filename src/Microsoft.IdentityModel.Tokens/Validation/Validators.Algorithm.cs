@@ -4,27 +4,11 @@
 using System;
 using System.Linq;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
-    /// <summary>
-    /// Definition for delegate that will validate a given algorithm for a <see cref="SecurityKey"/>.
-    /// </summary>
-    /// <param name="algorithm">The algorithm to be validated.</param>
-    /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-    /// <param name="callContext"></param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the algorithm.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate ValidationResult<string> AlgorithmValidationDelegate(
-        string algorithm,
-        SecurityKey securityKey,
-        SecurityToken securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext);
-
     /// <summary>
     /// Partial class for Algorithm Validation.
     /// </summary>
@@ -38,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        internal static ValidationResult<string> ValidateAlgorithm(
+        public static ValidationResult<string, AlgorithmValidationError> ValidateAlgorithm(
             string algorithm,
 #pragma warning disable CA1801
             SecurityKey securityKey,
@@ -48,7 +32,7 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return AlgorithmValidationError.NullParameter(
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 

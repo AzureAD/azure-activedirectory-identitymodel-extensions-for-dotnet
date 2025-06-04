@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -11,15 +12,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public partial class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
-        /// Converts a string into an instance of <see cref="JsonWebToken"/>, returned inside of a <see cref="ValidationResult{TResult}"/>.
+        /// Converts a string into an instance of <see cref="JsonWebToken"/>, returned inside of a <see cref="ValidationResult{TResult, TError}"/>.
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <param name="callContext"></param>
-        /// <returns>A <see cref="ValidationResult{TResult}"/> with the <see cref="JsonWebToken"/> if valid, or an error.</returns>
+        /// <returns>A <see cref="ValidationResult{SecurityToken, ValidationError}"/> with the <see cref="JsonWebToken"/> if valid, or an error.</returns>
         /// <exception cref="ArgumentNullException">returned if <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="SecurityTokenMalformedException">returned if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
         /// <exception cref="SecurityTokenMalformedException">returned if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
-        internal static ValidationResult<SecurityToken> ReadToken(
+        internal static ValidationResult<SecurityToken, ValidationError> ReadToken(
             string token,
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
             CallContext? callContext)

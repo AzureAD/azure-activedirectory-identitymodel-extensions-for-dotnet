@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
@@ -61,7 +62,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.TokenValidationParameters.EnableEntraIdSigningKeyCloudInstanceValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.TokenValidationParameters);
-                ValidationResult<ValidatedToken> validatedToken = await handler.ValidateTokenAsync(theoryData.Token, validationParameters, new CallContext(), CancellationToken.None);
+                ValidationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(theoryData.Token, validationParameters, new CallContext(), CancellationToken.None);
 
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);
@@ -220,7 +221,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.TokenValidationParameters.EnableAadSigningKeyIssuerValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.TokenValidationParameters);
-                ValidationResult<ValidatedToken> validatedToken = await handler.ValidateTokenAsync(jwt, validationParameters, new CallContext(), CancellationToken.None);
+                ValidationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(jwt, validationParameters, new CallContext(), CancellationToken.None);
                 theoryData.ExpectedException.ProcessNoException(context);
 
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);

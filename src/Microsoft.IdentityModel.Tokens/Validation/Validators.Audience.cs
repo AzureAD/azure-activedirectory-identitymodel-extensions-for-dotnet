@@ -5,25 +5,11 @@ using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
-    /// <summary>
-    /// Definition for delegate that will validate the audiences value in a token.
-    /// </summary>
-    /// <param name="tokenAudiences">The audiences found in the <see cref="SecurityToken"/>.</param>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext"></param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate ValidationResult<string> AudienceValidationDelegate(
-        IList<string> tokenAudiences,
-        SecurityToken? securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext);
-
     /// <summary>
     /// Partial class for Audience Validation.
     /// </summary>
@@ -37,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static ValidationResult<string> ValidateAudience(
+        public static ValidationResult<string, AudienceValidationError> ValidateAudience(
             IList<string> tokenAudiences,
 #pragma warning disable CA1801
             SecurityToken? securityToken,
@@ -167,7 +153,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             return false;
         }
-
     }
 }
 #nullable disable
