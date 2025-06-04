@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _actorClaimType = "act";
         private int _actorClainDepth;
         private int _maxActorChainLength = 4;
-
+        private bool _actClaimSupportEnabled;
         /// <summary>
         /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
         /// <see cref="Claims"/> or <see cref="Subject"/> when creating a token.
@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets the claim type that identifies the actor claim in tokens.
-        /// <para>The default value is "actort" when <see cref="AppContextSwitches.EnableActClaimSupportSwitch"/> is off 
+        /// <para>The default value is "actort" when <see cref="ActClaimSupportEnabled"/> is off 
         /// and "act" when the switch is on.</para>
         /// <para>This property determines which claim in a token contains the actor information during token 
         /// validation and creation.</para>
@@ -200,6 +200,32 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 _actorClainDepth = value;
+            }
+        }
+
+
+        /// <summary>
+        /// Controls how JWT actor claims are handled in the Microsoft.IdentityModel libraries.
+        /// 
+        /// When enabled (set to true):
+        /// - Actor claims use the "act" claim name by default
+        /// - Actor claims are serialized as JSON objects
+        /// - Nested actor claims (actor-within-actor) are supported
+        /// - Claims from actor tokens appear in the ClaimsIdentity.Actor property
+        /// - MaxActorChainLength and ActorChainDepth properties control nesting depth validation
+        /// - Custom ActClaimRetrieverDelegate can be used for custom actor claim handling
+        /// 
+        /// When disabled (default setting):
+        /// - Actor claims use the legacy "actort" claim name
+        /// - Actor claims are expected to be string-encoded JWT tokens
+        /// - Only simple actor relationships are supported (no deep nesting)
+        /// </summary>
+        public bool ActClaimSupportEnabled
+        {
+            get => _actClaimSupportEnabled;
+            set
+            {
+                _actClaimSupportEnabled = value;
             }
         }
     }

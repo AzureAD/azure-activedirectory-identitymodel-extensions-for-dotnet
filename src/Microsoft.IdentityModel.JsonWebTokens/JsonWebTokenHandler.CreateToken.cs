@@ -668,12 +668,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Duplicates are resolved according to the following priority:
             // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
-
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (AppContextSwitches.EnableActClaimSupport && kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal))
+                    if (tokenDescriptor.ActClaimSupportEnabled && kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -758,7 +757,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
-            if (AppContextSwitches.EnableActClaimSupport)
+            if (tokenDescriptor.ActClaimSupportEnabled)
                 WriteActorToken(writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
@@ -1129,7 +1128,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (actorTokenDescriptor != null)
             {
                 ValidateActorChainDepth(tokenDescriptor);
-
+                actorTokenDescriptor.ActClaimSupportEnabled = tokenDescriptor.ActClaimSupportEnabled;
                 actorTokenDescriptor.MaxActorChainLength = tokenDescriptor.MaxActorChainLength;
                 actorTokenDescriptor.ActorClaimType = tokenDescriptor.ActorClaimType;
                 actorTokenDescriptor.ActorChainDepth = tokenDescriptor.ActorChainDepth + 1;

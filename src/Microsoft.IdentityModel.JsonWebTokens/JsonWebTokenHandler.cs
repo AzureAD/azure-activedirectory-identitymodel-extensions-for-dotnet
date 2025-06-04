@@ -216,6 +216,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+            Console.WriteLine($"*********************************Here in this --- {validationParameters.ActorClaimType}?");
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 bool wasMapped = _inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out string claimType);
@@ -230,7 +231,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                                     LogMessages.IDX14112,
                                     LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
                                     jwtClaim.Value)));
-
                     identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters);
                 }
 
@@ -633,7 +633,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            if (AppContextSwitches.EnableActClaimSupport)
+            if (tokenValidationParameters.ActClaimSupportEnabled)
             {
                 if (jwtToken.TryGetPayloadValue<JsonElement>(tokenValidationParameters.ActorClaimType, out JsonElement actClaim))
                 {

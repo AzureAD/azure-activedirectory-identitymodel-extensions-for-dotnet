@@ -14,15 +14,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 {
     public class ActClaimDeserializationTests
     {
-        // Tests for creating ClaimsIdentity from JsonElement
-        [ResetAppContextSwitches]
         [Fact]
         public void BasicJsonElementShouldCreateClaimsIdentityCorrectly()
         {
             var context = new CompareContext($"{this}.BasicJsonElementShouldCreateClaimsIdentityCorrectly");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create a simple JSON Element that represents an actor token
@@ -35,7 +30,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 var jsonElement = JsonDocument.Parse(actorJson).RootElement;
                 var validationParameters = new TokenValidationParameters()
                 {
-                    ActorClaimType = "act"
+                    ActorClaimType = "act",
+                    ActClaimSupportEnabled = true,
                 };
 
                 // Create ClaimsIdentity from JsonElement
@@ -59,20 +55,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void NestedActorInJsonElementShouldCreateNestedClaimsIdentity()
         {
             var context = new CompareContext($"{this}.NestedActorInJsonElementShouldCreateNestedClaimsIdentity");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create nested actor JSON structure
@@ -88,7 +76,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 var jsonElement = JsonDocument.Parse(actorJson).RootElement;
                 var tokenValidationParameters = new TokenValidationParameters
                 {
-                    ActorClaimType = "act"
+                    ActorClaimType = "act",
+                    ActClaimSupportEnabled = true,
                 };
 
                 // Create ClaimsIdentity from JsonElement
@@ -112,20 +101,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void MultiLevelNestedActorJsonShouldHandleProperDepth()
         {
             var context = new CompareContext($"{this}.MultiLevelNestedActorJsonShouldHandleProperDepth");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create a three-level nested actor JSON structure
@@ -146,7 +127,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 var tokenValidationParameters = new TokenValidationParameters
                 {
                     ActorClaimType = "act",
-                    MaxActorChainLength = 3  // Allow up to 3 levels
+                    MaxActorChainLength = 3,
+                    ActClaimSupportEnabled = true
                 };
 
                 // Create ClaimsIdentity from JsonElement
@@ -178,20 +160,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void NestedActorExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedActorExceedingMaxDepth_ThrowsException");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create a three-level nested actor but set max depth to 2
@@ -212,8 +186,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 var tokenValidationParameters = new TokenValidationParameters
                 {
                     ActorClaimType = "act",
-                    MaxActorChainLength = 2,  // Only allow 2 levels, but JSON has 3
-                    ActorChainDepth = 1      // Start at depth 1 to simulate being in an ongoing chain
+                    MaxActorChainLength = 2,
+                    ActorChainDepth = 1,
+                    ActClaimSupportEnabled = true
                 };
 
                 // Act - This should throw a SecurityTokenException
@@ -239,20 +214,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
                 TestUtilities.AssertFailIfErrors(context);
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void JsonElementWithArrayValuesShouldProcessCorrectly()
         {
             var context = new CompareContext($"{this}.JsonElementWithArrayValuesShouldProcessCorrectly");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create JSON with array value
@@ -265,7 +232,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 var jsonElement = JsonDocument.Parse(actorJson).RootElement;
                 var tokenValidationParameters = new TokenValidationParameters
                 {
-                    ActorClaimType = "act"
+                    ActorClaimType = "act",
+                    ActClaimSupportEnabled = true
                 };
 
                 // Create ClaimsIdentity from JsonElement
@@ -291,20 +259,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void JsonElementWithComplexTypesShouldHandleCorrectly()
         {
             var context = new CompareContext($"{this}.JsonElementWithComplexTypesShouldHandleCorrectly");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create JSON with complex types (objects)
@@ -321,7 +281,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 var jsonElement = JsonDocument.Parse(actorJson).RootElement;
                 var tokenValidationParameters = new TokenValidationParameters
                 {
-                    ActorClaimType = "act"
+                    ActorClaimType = "act",
+                    ActClaimSupportEnabled = true,
                 };
 
                 // Create ClaimsIdentity from JsonElement
@@ -353,20 +314,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void NonObjectJsonElement_ThrowsException()
         {
             var context = new CompareContext($"{this}.NonObjectJsonElement_ThrowsException");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create a non-object JSON Element (string)
@@ -375,7 +328,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
                 var tokenValidationParameters = new TokenValidationParameters
                 {
-                    ActorClaimType = "act"
+                    ActorClaimType = "act",
+                    ActClaimSupportEnabled = true,
                 };
 
                 // Act - This should throw an ArgumentException
@@ -397,20 +351,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
                 TestUtilities.AssertFailIfErrors(context);
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void NullValidationParameters_ThrowsException()
         {
             var context = new CompareContext($"{this}.NullValidationParameters_ThrowsException");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create a simple JSON Element
@@ -436,20 +382,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
                 TestUtilities.AssertFailIfErrors(context);
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void CustomActorClaimNameShouldBeRespected()
         {
             var context = new CompareContext($"{this}.CustomActorClaimNameShouldBeRespected");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create JSON with custom actor claim name
@@ -465,7 +403,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 var jsonElement = JsonDocument.Parse(actorJson).RootElement;
                 var tokenValidationParameters = new TokenValidationParameters
                 {
-                    ActorClaimType = "actort"  // Custom actor claim name
+                    ActorClaimType = "actort",
+                    ActClaimSupportEnabled = true,
                 };
 
                 // Create ClaimsIdentity from JsonElement
@@ -489,20 +428,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public void ActorChainDepthShouldBeIncremented()
         {
             var context = new CompareContext($"{this}.ActorChainDepthShouldBeIncremented");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create actor JSON with nested actor
@@ -520,7 +451,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 {
                     ActorClaimType = "act",
                     MaxActorChainLength = 4,
-                    ActorChainDepth = 2  // Start at depth 2
+                    ActorChainDepth = 2,
+                    ActClaimSupportEnabled = true,
                 };
 
                 // Create ClaimsIdentity from JsonElement
@@ -541,20 +473,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 context.Diffs.Add($"Exception: {ex}");
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public async Task ValidateTokenAsync_WithActorInToken_ProvidesActorClaimsIdentity()
         {
             var context = new CompareContext($"{this}.ValidateTokenAsync_WithActorInToken_ProvidesActorClaimsIdentity");
-            bool switchValue = false;
-            AppContext.TryGetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, out switchValue);
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
             try
             {
                 // Create a token with an actor claim
@@ -581,7 +505,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                         { "act", actorIdentity}
                     },
                     ActorClaimType = "act",
-                    MaxActorChainLength = 4
+                    MaxActorChainLength = 4,
+                    ActClaimSupportEnabled = true,
                 };
                 string token = handler.CreateToken(tokenDescriptor);
                 handler.MapInboundClaims = true;
@@ -589,6 +514,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 // Validate token
                 var validationParameters = new TokenValidationParameters
                 {
+                    ActClaimSupportEnabled = true,
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = false,
@@ -631,17 +557,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 context.Diffs.Add($"Exception: {ex}");
                 TestUtilities.AssertFailIfErrors(context);
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
-        [ResetAppContextSwitches]
+
         [Fact]
         public async Task ValidateTokenAsync_CustomDelegate_WorksWithSimpleAndNestedActors()
         {
             var context = new CompareContext($"{this}.ValidateTokenAsync_CustomDelegate_WorksWithSimpleAndNestedActors");
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
 
             int delegateCallCount = 0;
             ClaimsIdentity CustomDelegate(JsonElement element, TokenValidationParameters tokenValidationParameters = null)
@@ -657,128 +578,112 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 return id;
             }
 
-            try
+            var nestedActor = new CaseSensitiveClaimsIdentity("NestedActorAuth");
+            nestedActor.AddClaim(new Claim("sub", "nested-actor-id"));
+            nestedActor.AddClaim(new Claim("name", "Nested Actor"));
+
+            var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actor.AddClaim(new Claim("sub", "actor-subject-id"));
+            actor.AddClaim(new Claim("name", "Actor Name"));
+            actor.Actor = nestedActor;
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.AddClaim(new Claim("name", "Main User"));
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // Nested actor
-                var nestedActor = new CaseSensitiveClaimsIdentity("NestedActorAuth");
-                nestedActor.AddClaim(new Claim("sub", "nested-actor-id"));
-                nestedActor.AddClaim(new Claim("name", "Nested Actor"));
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actor } },
+                ActClaimSupportEnabled = true,
+            };
+            var token = handler.CreateToken(tokenDescriptor);
 
-                var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
-                actor.AddClaim(new Claim("sub", "actor-subject-id"));
-                actor.AddClaim(new Claim("name", "Actor Name"));
-                actor.Actor = nestedActor;
-
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity.AddClaim(new Claim("name", "Main User"));
-
-                var handler = new JsonWebTokenHandler();
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object> { { "act", actor } }
-                };
-                var token = handler.CreateToken(tokenDescriptor);
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = Default.AsymmetricSigningKey,
-                    ValidateIssuerSigningKey = true,
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 3,
-                    ActClaimRetrieverDelegate = CustomDelegate
-                };
-
-                var result = await handler.ValidateTokenAsync(token, validationParameters);
-                Assert.True(result.IsValid);
-                Assert.NotNull(result.ClaimsIdentity.Actor);
-                Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
-                Assert.NotNull(result.ClaimsIdentity.Actor.Actor);
-                Assert.Equal("nested-actor-id", result.ClaimsIdentity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
-                Assert.True(delegateCallCount >= 2);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            finally
+            var validationParameters = new TokenValidationParameters
             {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+                ActorClaimType = "act",
+                MaxActorChainLength = 3,
+                ActClaimRetrieverDelegate = CustomDelegate,
+                ActClaimSupportEnabled = true,
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParameters);
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+            Assert.NotNull(result.ClaimsIdentity.Actor.Actor);
+            Assert.Equal("nested-actor-id", result.ClaimsIdentity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
+            Assert.True(delegateCallCount >= 2);
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public async Task ValidateTokenAsync_NestedActors_DefaultDelegate_CreatesProperClaimsIdentity()
         {
             var context = new CompareContext($"{this}.ValidateTokenAsync_NestedActors_DefaultDelegate_CreatesProperClaimsIdentity");
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
+            var nestedActor = new CaseSensitiveClaimsIdentity("NestedActorAuth");
+            nestedActor.AddClaim(new Claim("sub", "nested-actor-id"));
+            nestedActor.AddClaim(new Claim("name", "Nested Actor"));
 
-            try
+            var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actor.AddClaim(new Claim("sub", "actor-subject-id"));
+            actor.AddClaim(new Claim("name", "Actor Name"));
+            actor.Actor = nestedActor;
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.AddClaim(new Claim("name", "Main User"));
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                var nestedActor = new CaseSensitiveClaimsIdentity("NestedActorAuth");
-                nestedActor.AddClaim(new Claim("sub", "nested-actor-id"));
-                nestedActor.AddClaim(new Claim("name", "Nested Actor"));
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actor } },
+                ActClaimSupportEnabled = true,
+            };
+            var token = handler.CreateToken(tokenDescriptor);
 
-                var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
-                actor.AddClaim(new Claim("sub", "actor-subject-id"));
-                actor.AddClaim(new Claim("name", "Actor Name"));
-                actor.Actor = nestedActor;
-
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity.AddClaim(new Claim("name", "Main User"));
-
-                var handler = new JsonWebTokenHandler();
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object> { { "act", actor } }
-                };
-                var token = handler.CreateToken(tokenDescriptor);
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = Default.AsymmetricSigningKey,
-                    ValidateIssuerSigningKey = true,
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 2
-                };
-
-                var result = await handler.ValidateTokenAsync(token, validationParameters);
-                Assert.True(result.IsValid);
-                Assert.NotNull(result.ClaimsIdentity.Actor);
-                Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
-                Assert.NotNull(result.ClaimsIdentity.Actor.Actor);
-                Assert.Equal("nested-actor-id", result.ClaimsIdentity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            finally
+            var validationParameters = new TokenValidationParameters
             {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+                ActorClaimType = "act",
+                MaxActorChainLength = 2,
+                ActClaimSupportEnabled = true,
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParameters);
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+            Assert.NotNull(result.ClaimsIdentity.Actor.Actor);
+            Assert.Equal("nested-actor-id", result.ClaimsIdentity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public async Task ValidateTokenAsync_NestingBeyondMaxActorChain_ThrowsException()
         {
             var context = new CompareContext($"{this}.ValidateTokenAsync_NestingBeyondMaxActorChain_ThrowsException");
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
 
             try
             {
@@ -804,7 +709,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object> { { "act", level1Actor } }
+                    Claims = new Dictionary<string, object> { { "act", level1Actor } },
+                    ActClaimSupportEnabled = true,
                 };
                 var token = handler.CreateToken(tokenDescriptor);
 
@@ -816,7 +722,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     IssuerSigningKey = Default.AsymmetricSigningKey,
                     ValidateIssuerSigningKey = true,
                     ActorClaimType = "act",
-                    MaxActorChainLength = 2
+                    MaxActorChainLength = 2,
+                    ActClaimSupportEnabled = true,
                 };
                 handler.MapInboundClaims = true;
                 var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -827,18 +734,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 Assert.Contains("IDX14313", ex.ToString());
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public async Task ValidateTokenAsync_CustomDelegate_ThrowsExceptionIfDelegateFails()
         {
             var context = new CompareContext($"{this}.ValidateTokenAsync_CustomDelegate_ThrowsIfDelegateFails");
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
 
             ClaimsIdentity CustomDelegate(JsonElement element, TokenValidationParameters tokenValidationParameters = null)
             {
@@ -861,7 +762,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object> { { "act", actor } }
+                    Claims = new Dictionary<string, object> { { "act", actor } },
+                    ActClaimSupportEnabled = true,
                 };
                 var token = handler.CreateToken(tokenDescriptor);
 
@@ -874,7 +776,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     ValidateIssuerSigningKey = true,
                     ActorClaimType = "act",
                     MaxActorChainLength = 2,
-                    ActClaimRetrieverDelegate = CustomDelegate
+                    ActClaimRetrieverDelegate = CustomDelegate,
+                    ActClaimSupportEnabled = true,
                 };
 
                 var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -885,18 +788,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             {
                 Assert.Contains("IDX14314", ex.ToString());
             }
-            finally
-            {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
         }
 
-        [ResetAppContextSwitches]
         [Fact]
         public async Task ValidateTokenAsync_ActorAsSubjectAndClaimsDictionary_DefaultAndCustomDelegate()
         {
             var context = new CompareContext($"{this}.ValidateTokenAsync_ActorAsSubjectAndClaimsDictionary_DefaultAndCustomDelegate");
-            AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true);
 
             ClaimsIdentity CustomDelegate(JsonElement element, TokenValidationParameters tokenValidationParameters = null)
             {
@@ -906,84 +803,79 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 return id;
             }
 
-            try
+            // Actor as Subject
+            var actorAsSubject = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actorAsSubject.AddClaim(new Claim("sub", "actor-subject-id"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.Actor = actorAsSubject;
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // Actor as Subject
-                var actorAsSubject = new CaseSensitiveClaimsIdentity("ActorAuth");
-                actorAsSubject.AddClaim(new Claim("sub", "actor-subject-id"));
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                ActClaimSupportEnabled = true,
+            };
+            var token = handler.CreateToken(tokenDescriptor);
 
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity.Actor = actorAsSubject;
-
-                var handler = new JsonWebTokenHandler();
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials
-                };
-                var token = handler.CreateToken(tokenDescriptor);
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = Default.AsymmetricSigningKey,
-                    ValidateIssuerSigningKey = true,
-                    ActorClaimType = "act"
-                };
-
-                // Default delegate
-                var result = await handler.ValidateTokenAsync(token, validationParameters);
-                Assert.True(result.IsValid);
-                Assert.NotNull(result.ClaimsIdentity.Actor);
-                Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
-
-                // Custom delegate
-                validationParameters.ActClaimRetrieverDelegate = CustomDelegate;
-                var result2 = await handler.ValidateTokenAsync(token, validationParameters);
-                Assert.True(result2.IsValid);
-                Assert.NotNull(result2.ClaimsIdentity.Actor);
-                Assert.Equal("actor-subject-id", result2.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
-
-                // Actor in both Subject and Claims dictionary, Claims dictionary should take precedence
-                var subjectActor = new CaseSensitiveClaimsIdentity("SubjectActorAuth");
-                subjectActor.AddClaim(new Claim("sub", "subject-actor-id"));
-
-                var claimsActor = new CaseSensitiveClaimsIdentity("ClaimsActorAuth");
-                claimsActor.AddClaim(new Claim("sub", "claims-actor-id"));
-
-                var mainIdentity2 = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity2.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity2.Actor = subjectActor;
-
-                var tokenDescriptor2 = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity2,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object> { { "act", claimsActor } }
-                };
-                var token2 = handler.CreateToken(tokenDescriptor2);
-
-                var result3 = await handler.ValidateTokenAsync(token2, validationParameters);
-                Assert.True(result3.IsValid);
-                Assert.NotNull(result3.ClaimsIdentity.Actor);
-                Assert.Equal("claims-actor-id", result3.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            finally
+            var validationParameters = new TokenValidationParameters
             {
-                AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, false);
-            }
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+                ActorClaimType = "act",
+                ActClaimSupportEnabled = true,
+            };
+
+            // Default delegate
+            var result = await handler.ValidateTokenAsync(token, validationParameters);
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+
+            // Custom delegate
+            validationParameters.ActClaimRetrieverDelegate = CustomDelegate;
+            var result2 = await handler.ValidateTokenAsync(token, validationParameters);
+            Assert.True(result2.IsValid);
+            Assert.NotNull(result2.ClaimsIdentity.Actor);
+            Assert.Equal("actor-subject-id", result2.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+
+            // Actor in both Subject and Claims dictionary, Claims dictionary should take precedence
+            var subjectActor = new CaseSensitiveClaimsIdentity("SubjectActorAuth");
+            subjectActor.AddClaim(new Claim("sub", "subject-actor-id"));
+
+            var claimsActor = new CaseSensitiveClaimsIdentity("ClaimsActorAuth");
+            claimsActor.AddClaim(new Claim("sub", "claims-actor-id"));
+
+            var mainIdentity2 = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity2.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity2.Actor = subjectActor;
+
+            var tokenDescriptor2 = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity2,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", claimsActor } },
+                ActClaimSupportEnabled = true,
+            };
+            var token2 = handler.CreateToken(tokenDescriptor2);
+
+            var result3 = await handler.ValidateTokenAsync(token2, validationParameters);
+            Assert.True(result3.IsValid);
+            Assert.NotNull(result3.ClaimsIdentity.Actor);
+            Assert.Equal("claims-actor-id", result3.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+
+            TestUtilities.AssertFailIfErrors(context);
         }
-
     }
 }

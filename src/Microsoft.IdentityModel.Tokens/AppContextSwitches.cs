@@ -99,29 +99,6 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
-        /// Controls how JWT actor claims are handled in the Microsoft.IdentityModel libraries.
-        /// 
-        /// When enabled (set to true):
-        /// - Actor claims use the "act" claim name by default
-        /// - Actor claims are serialized as JSON objects
-        /// - Nested actor claims (actor-within-actor) are supported
-        /// - Claims from actor tokens appear in the ClaimsIdentity.Actor property
-        /// - MaxActorChainLength and ActorChainDepth properties control nesting depth validation
-        /// - Custom ActClaimRetrieverDelegate can be used for custom actor claim handling
-        /// 
-        /// When disabled (default setting):
-        /// - Actor claims use the legacy "actort" claim name
-        /// - Actor claims are expected to be string-encoded JWT tokens
-        /// - Only simple actor relationships are supported (no deep nesting)
-        /// 
-        /// Usage:
-        /// AppContext.SetSwitch("Switch.Microsoft.IdentityModel.EnableActClaimSupportSwitch", true);
-        /// New functionality is only available when enabled.
-        /// </summary>
-        internal const string EnableActClaimSupportSwitch = "Switch.Microsoft.IdentityModel.EnableActClaimSupportSwitch";
-        private static bool? _enableActClaimSupport;
-        internal static bool EnableActClaimSupport => _enableActClaimSupport ??= (AppContext.TryGetSwitch(EnableActClaimSupportSwitch, out bool EnableActClaimSupport) && EnableActClaimSupport);
-        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -147,8 +124,6 @@ namespace Microsoft.IdentityModel.Tokens
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
 
-            _enableActClaimSupport = null;
-            AppContext.SetSwitch(EnableActClaimSupportSwitch, false);
         }
     }
 }

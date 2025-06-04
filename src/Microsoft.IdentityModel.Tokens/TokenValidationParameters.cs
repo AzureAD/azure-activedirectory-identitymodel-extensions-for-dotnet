@@ -20,6 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
+        private bool _actClaimSupportEnabled;
 
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
@@ -133,6 +134,7 @@ namespace Microsoft.IdentityModel.Tokens
             MaxActorChainLength = other.MaxActorChainLength;
             ActorChainDepth = other.ActorChainDepth;
             ActorClaimType = other.ActorClaimType;
+            ActClaimSupportEnabled = other.ActClaimSupportEnabled;
         }
 
         /// <summary>
@@ -787,7 +789,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets the claim type that identifies the actor claim in tokens.
-        /// <para>The default value is "actort" when <see cref="AppContextSwitches.EnableActClaimSupportSwitch"/> is off 
+        /// <para>The default value is "actort" when <see cref="ActClaimSupportEnabled"/> is off 
         /// and "act" when the switch is on.</para>
         /// <para>This property determines which claim in a token contains the actor information during token 
         /// validation and creation.</para>
@@ -803,7 +805,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         public string ActorClaimType
         {
-            get => AppContextSwitches.EnableActClaimSupport ? actorClaimType : "actort";
+            get => _actClaimSupportEnabled ? actorClaimType : "actort";
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -886,6 +888,31 @@ namespace Microsoft.IdentityModel.Tokens
                     + ". Permissible values are integers in range 0 to 4"));
 
                 maxActorChainLength = value;
+            }
+        }
+
+        /// <summary>
+        /// Controls how JWT actor claims are handled in the Microsoft.IdentityModel libraries.
+        /// 
+        /// When enabled (set to true):
+        /// - Actor claims use the "act" claim name by default
+        /// - Actor claims are serialized as JSON objects
+        /// - Nested actor claims (actor-within-actor) are supported
+        /// - Claims from actor tokens appear in the ClaimsIdentity.Actor property
+        /// - MaxActorChainLength and ActorChainDepth properties control nesting depth validation
+        /// - Custom ActClaimRetrieverDelegate can be used for custom actor claim handling
+        /// 
+        /// When disabled (default setting):
+        /// - Actor claims use the legacy "actort" claim name
+        /// - Actor claims are expected to be string-encoded JWT tokens
+        /// - Only simple actor relationships are supported (no deep nesting)
+        /// </summary>
+        public bool ActClaimSupportEnabled
+        {
+            get => _actClaimSupportEnabled;
+            set
+            {
+                _actClaimSupportEnabled = value;
             }
         }
     }
