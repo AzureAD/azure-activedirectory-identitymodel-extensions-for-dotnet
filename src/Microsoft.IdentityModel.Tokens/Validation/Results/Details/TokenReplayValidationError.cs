@@ -5,13 +5,13 @@ using System;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurs when a token cannot be validated against being re-used or replay is detected.
     /// If available, the expiration time of the token that failed the validation is included.
     /// </summary>
-    internal class TokenReplayValidationError : ValidationError
+    public class TokenReplayValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="IssuerSigningKeyValidationError"/> class.

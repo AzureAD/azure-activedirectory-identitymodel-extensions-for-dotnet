@@ -1,0 +1,7 @@
+#nullable enable
+Microsoft.IdentityModel.Tokens.Saml.Experimental.SamlValidationError
+Microsoft.IdentityModel.Tokens.Saml.Experimental.SamlValidationError.SamlValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, System.Exception? innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Experimental.Saml2ValidationError
+Microsoft.IdentityModel.Tokens.Saml2.Experimental.Saml2ValidationError.Saml2ValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailureType, System.Type! exceptionType, System.Diagnostics.StackFrame! stackFrame, System.Exception? innerException = null) -> void
+override Microsoft.IdentityModel.Tokens.Saml.Experimental.SamlValidationError.CreateException() -> System.Exception!
+override Microsoft.IdentityModel.Tokens.Saml2.Experimental.Saml2ValidationError.CreateException() -> System.Exception!

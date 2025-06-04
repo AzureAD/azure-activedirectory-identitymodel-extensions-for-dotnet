@@ -259,6 +259,17 @@ namespace Microsoft.IdentityModel.Tokens
 
             return Decode(strSpan, output, decodedLength);
         }
+#elif NET6_0_OR_GREATER
+        internal static int Decode(ReadOnlySpan<char> strSpan, Span<byte> output)
+        {
+            int mod = strSpan.Length % 4;
+            if (mod == 1)
+                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
+            bool needReplace = strSpan.IndexOfAny(Base64UrlCharacter62, Base64UrlCharacter63) >= 0;
+            int decodedLength = strSpan.Length + (4 - mod) % 4;
+
+            return Decode(strSpan, output, needReplace, decodedLength);
+        }
 #else
         internal static void Decode(ReadOnlySpan<char> strSpan, Span<byte> output)
         {
@@ -267,13 +278,9 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
             bool needReplace = strSpan.IndexOfAny(Base64UrlCharacter62, Base64UrlCharacter63) >= 0;
             int decodedLength = strSpan.Length + (4 - mod) % 4;
-#if NET6_0_OR_GREATER
-            Decode(strSpan, output, needReplace, decodedLength);
-#else
-            Decode(strSpan, output, needReplace, decodedLength);
-#endif
-        }
 
+            Decode(strSpan, output, needReplace, decodedLength);
+        }
 #endif
 
 #if NET9_0_OR_GREATER

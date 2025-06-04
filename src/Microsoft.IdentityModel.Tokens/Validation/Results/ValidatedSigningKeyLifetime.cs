@@ -4,12 +4,12 @@
 using System;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validated signing key lifetime.
     /// </summary>
-    internal readonly struct ValidatedSigningKeyLifetime : IEquatable<ValidatedSigningKeyLifetime>
+    public readonly struct ValidatedSigningKeyLifetime : IEquatable<ValidatedSigningKeyLifetime>
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ValidatedSigningKeyLifetime"/>.

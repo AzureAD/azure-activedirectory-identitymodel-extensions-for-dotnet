@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
@@ -23,7 +24,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
 
             try
             {
-                ValidationResult<ValidatedToken> validationResult = await theoryData.TokenHandler.ValidateTokenAsync(
+                ValidationResult<ValidatedToken, ValidationError> validationResult = await theoryData.TokenHandler.ValidateTokenAsync(
                     securityToken,
                     theoryData.ValidationParameters!,
                     theoryData.CallContext,

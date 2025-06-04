@@ -10,13 +10,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurred during token validation.
     /// If necessary, it can be used to create an instance of <see cref="Exception"/>.
     /// </summary>
-    internal class ValidationError
+    public class ValidationError
     {
         private Type _exceptionType;
 
@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
         /// <param name="innerException"/> if present, represents the exception that occurred during validation.
-        internal protected ValidationError(
+        protected internal ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
             Type exceptionType,
@@ -47,6 +47,10 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
+        /// <summary>
+        /// Creates and returns instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// </summary>
+        /// <returns>An instance of an Exception.</returns>
         public Exception GetException()
         {
             if (_exception is null)
@@ -199,8 +203,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Logs the validation error.
         /// </summary>
         /// <param name="logger">The <see cref="ILogger"/> to be used for logging.</param>
+        [CLSCompliant(false)]
         public void Log(ILogger logger)
         {
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
+
             Logger.TokenValidationFailed(logger, FailureType.Name, MessageDetail.Message);
         }
 
@@ -220,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the type of validation failure that occurred.
         /// </summary>
-        internal ValidationFailureType FailureType { get; }
+        public ValidationFailureType FailureType { get; }
 
         /// <summary>
         /// Gets the type of exception that occurred.

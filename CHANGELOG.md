@@ -1,5 +1,28 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.12.0
+====
+
+## New Features
+- **Enhance ConfigurationManager with event handling**  
+  Added event handling capabilities to the `ConfigurationManager`, enabling consumers to subscribe to configuration change events. This enhancement improves extensibility and allows more responsive applications. For details see [#3253](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3253)  
+
+## Bug Fixes
+- **Add expected Base64UrlEncoder.Decode overload for NET6 and 8**  
+  Introduced the expected overload of `Base64UrlEncoder.Decode` for .NET 6 and 8, ensuring compatibility and preventing missing method issues on these frameworks.  
+  For details see [#3249](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3249)  
+
+## Fundamentals
+- **Add AI assist rules**  
+  Incorporated AI assist rules to enhance AI agents effectiveness.  
+  For details see [#3255](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3255)  
+- **Update PublicApiAnalyzers and BannedApiAnalyzers to 4.14.0**  
+  Upgraded analyzer packages for improved diagnostics and code consistency (in particular delegates are added).  
+  For details see [#3256](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3256)  
+- **Move suppression of RS006 to csproj**  
+  Centralized suppression of RS006 warnings in project files for easier management.  
+  For details see [#3230](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3230)  
+
 8.11.0
 =====
 ## New Features:

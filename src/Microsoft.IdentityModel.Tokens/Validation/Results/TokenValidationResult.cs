@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Tokens
 {

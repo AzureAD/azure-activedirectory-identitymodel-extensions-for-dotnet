@@ -3,14 +3,15 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens.Saml
+namespace Microsoft.IdentityModel.Tokens.Saml.Experimental
 {
     /// <summary>
     /// Represents a SAML validation error.
     /// </summary>
-    internal class SamlValidationError : ValidationError
+    public class SamlValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SamlValidationError"/> class.

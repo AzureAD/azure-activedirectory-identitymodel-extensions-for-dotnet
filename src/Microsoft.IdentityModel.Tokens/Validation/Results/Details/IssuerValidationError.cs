@@ -5,13 +5,13 @@ using System;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurs when the issuer of a token cannot be validated.
     /// If available, the invalid issuer is stored in <see cref="InvalidIssuer"/>.
     /// </summary>
-    internal class IssuerValidationError : ValidationError
+    public class IssuerValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="IssuerValidationError"/> class.
@@ -58,6 +58,19 @@ namespace Microsoft.IdentityModel.Tokens
 
             return base.CreateException();
         }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="IssuerValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="IssuerValidationError"/>.</returns>
+        public static new IssuerValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null); // InvalidIssuer
     }
 }
 #nullable restore

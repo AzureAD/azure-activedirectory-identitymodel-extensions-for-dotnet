@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -38,7 +39,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (theoryData.ValidationParameters is not null && theoryData.KeyToAddToValidationParameters is not null)
                 theoryData.ValidationParameters.IssuerSigningKeys.Add(theoryData.KeyToAddToValidationParameters);
 
-            ValidationResult<SecurityKey> result = JsonWebTokenHandler.ValidateSignature(
+            ValidationResult<SecurityKey, SignatureValidationError> result = JsonWebTokenHandler.ValidateSignature(
                 jsonWebToken,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
@@ -111,13 +112,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = new ValidationParameters
                         {
-                            SignatureValidator = (token, parameters, configuration, callContext) => ValidationError.NullParameter("fakeParameter", null)
+                            SignatureValidator = (token, parameters, configuration, callContext) => new SignatureValidationError(
+                                new MessageDetail("IDX10000: NullArgument", null),
+                                ValidationFailureType.NullArgument,
+                                typeof(SecurityTokenArgumentNullException),
+                                ValidationError.GetCurrentStackFrame())
                         },
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
-                                "fakeParameter"),
+                                "NullArgument"),
                             ValidationFailureType.NullArgument,
                             typeof(SecurityTokenArgumentNullException),
                             null)
@@ -229,7 +234,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public SigningCredentials SigningCredentials { get; internal set; }
         public SecurityKey KeyToAddToConfiguration { get; internal set; }
         public SecurityKey KeyToAddToValidationParameters { get; internal set; }
-        internal ValidationResult<SecurityKey> Result { get; set; }
+        internal ValidationResult<SecurityKey, ValidationError> Result { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
     }
 }
