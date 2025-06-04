@@ -291,8 +291,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
             // Verify the actor object structure
             var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
-            Console.WriteLine("actor token created: " + actorObject.ToString());
-
             Assert.Equal(JsonValueKind.Object, actorObject.ValueKind);
 
             // Verify main actor claims directly from JSON object
@@ -302,7 +300,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             // Verify nested actor exists and is a JSON object
             Assert.True(actorObject.TryGetProperty(tokenDescriptor.ActorClaimType, out var nestedActorElement));
             Assert.Equal(JsonValueKind.Object, nestedActorElement.ValueKind);
-            Console.WriteLine("nested token created: " + nestedActorElement.ToString());
 
             // Verify nested actor claims directly from JSON object
             Assert.Equal("nested-actor-id", nestedActorElement.GetProperty("sub").GetString());

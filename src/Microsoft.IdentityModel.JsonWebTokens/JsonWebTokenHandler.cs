@@ -216,7 +216,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
-            Console.WriteLine($"*********************************Here in this --- {validationParameters.ActorClaimType}?");
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 bool wasMapped = _inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out string claimType);
