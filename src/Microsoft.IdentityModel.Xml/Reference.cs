@@ -7,7 +7,6 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using static Microsoft.IdentityModel.Xml.XmlUtil;
 
@@ -16,7 +15,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// Represents a XmlDsig Reference element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Reference
     /// </summary>
-    public class Reference : DSigElement
+    public partial class Reference : DSigElement
     {
         private CanonicalizingTransfrom _canonicalizingTransfrom;
         private string _digestMethod;
@@ -126,38 +125,6 @@ namespace Microsoft.IdentityModel.Xml
             if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory), Convert.FromBase64String(DigestValue)))
                 throw LogValidationException(LogMessages.IDX30201, Uri ?? Id);
         }
-
-#nullable enable
-        /// <summary>
-        /// Verifies that the <see cref="DigestValue" /> equals the hashed value of the <see cref="TokenStream"/> after
-        /// <see cref="Transforms"/> have been applied.
-        /// </summary>
-        /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
-        /// <param name="callContext"> contextual information for diagnostics.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
-        internal SignatureValidationError? Verify(
-            CryptoProviderFactory cryptoProviderFactory,
-#pragma warning disable CA1801 // Review unused parameters
-            CallContext callContext)
-#pragma warning restore CA1801
-        {
-            if (cryptoProviderFactory == null)
-                return SignatureValidationError.NullParameter(
-                    nameof(cryptoProviderFactory),
-                    ValidationError.GetCurrentStackFrame());
-
-            if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory), Convert.FromBase64String(DigestValue)))
-                return new SignatureValidationError(
-                    new MessageDetail(
-                        LogMessages.IDX30201,
-                        Uri ?? Id),
-                    ValidationFailureType.XmlValidationFailed,
-                    typeof(SecurityTokenInvalidSignatureException),
-                    ValidationError.GetCurrentStackFrame());
-
-            return null;
-        }
-#nullable restore
 
         /// <summary>
         /// Writes into a stream and then hashes the bytes.

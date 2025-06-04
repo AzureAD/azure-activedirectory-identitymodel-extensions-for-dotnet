@@ -3,8 +3,10 @@
 
 using System;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -127,5 +129,44 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ex);
             }
         }
+
+        private static ValidationError GetDecryptionError(
+            JwtTokenDecryptionParameters decryptionParameters,
+            bool algorithmNotSupportedByCryptoProvider,
+            StringBuilder exceptionStrings,
+            StringBuilder keysAttempted,
+#pragma warning disable CA1801 // Review unused parameters
+            CallContext callContext)
+#pragma warning restore CA1801 // Review unused parameters
+        {
+            if (keysAttempted is not null)
+                return new ValidationError(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10603,
+                        LogHelper.MarkAsNonPII(keysAttempted.ToString()),
+                        exceptionStrings?.ToString() ?? string.Empty,
+                        LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                    ValidationFailureType.TokenDecryptionFailed,
+                    typeof(SecurityTokenDecryptionFailedException),
+                    ValidationError.GetCurrentStackFrame());
+            else if (algorithmNotSupportedByCryptoProvider)
+                return new ValidationError(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10619,
+                        LogHelper.MarkAsNonPII(decryptionParameters.Alg),
+                        LogHelper.MarkAsNonPII(decryptionParameters.Enc)),
+                    ValidationFailureType.TokenDecryptionFailed,
+                    typeof(SecurityTokenDecryptionFailedException),
+                    ValidationError.GetCurrentStackFrame());
+            else
+                return new ValidationError(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10609,
+                        LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                    ValidationFailureType.TokenDecryptionFailed,
+                    typeof(SecurityTokenDecryptionFailedException),
+                    ValidationError.GetCurrentStackFrame());
+        }
+
     }
 }
