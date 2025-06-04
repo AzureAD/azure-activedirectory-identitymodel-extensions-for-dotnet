@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Security.Claims;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -18,7 +17,6 @@ namespace Microsoft.IdentityModel.Tokens
     public class TokenValidationResult
     {
         private readonly TokenValidationParameters _tokenValidationParameters;
-        private readonly ValidationParameters _validationParameters;
         private readonly TokenHandler _tokenHandler;
 
         // Fields lazily initialized in a thread-safe manner. _claimsIdentity is protected by the _claimsIdentitySyncObj
@@ -39,10 +37,6 @@ namespace Microsoft.IdentityModel.Tokens
         private ClaimsIdentity _claimsIdentity;
         private Dictionary<string, object> _claims;
         private Dictionary<string, object> _propertyBag;
-        // TODO - lazy creation of _validationResults
-        private List<ValidatedToken> _validationResults;
-
-        private ValidationError _validationError;
         private Exception _exception;
         private bool _isValid;
 
@@ -60,63 +54,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="tokenHandler"></param>
         /// <param name="tokenValidationParameters"></param>
         /// <param name="issuer"></param>
-        /// <param name="validationResults"></param>
         /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
         internal TokenValidationResult(
             SecurityToken securityToken,
             TokenHandler tokenHandler,
             TokenValidationParameters tokenValidationParameters,
-            string issuer,
-            List<ValidatedToken> validationResults)
+            string issuer)
         {
             _tokenValidationParameters = tokenValidationParameters;
             _tokenHandler = tokenHandler;
-            _validationResults = validationResults;
             Issuer = issuer;
             SecurityToken = securityToken;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="TokenValidationResult"/> using <see cref="ValidationParameters"/>.
-        /// </summary>
-        /// <param name="securityToken">The</param>
-        /// <param name="tokenHandler"></param>
-        /// <param name="validationParameters"></param>
-        /// <param name="issuer"></param>
-        /// <param name="validationResults"></param>
-        /// <param name="validationError"></param>
-        /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
-        internal TokenValidationResult(
-            SecurityToken securityToken,
-            TokenHandler tokenHandler,
-            ValidationParameters validationParameters,
-            string issuer,
-            List<ValidatedToken> validationResults,
-            ValidationError validationError)
-        {
-            _validationParameters = validationParameters;
-            _tokenHandler = tokenHandler;
-            _validationResults = validationResults;
-            Issuer = issuer;
-            SecurityToken = securityToken;
-            _validationError = validationError;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="TokenValidationResult"/> using <see cref="ValidationParameters"/>.
-        /// </summary>
-        /// <param name="tokenHandler"></param>
-        /// <param name="validationError"></param>
-        /// <param name="validationParameters"></param>
-        /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
-        internal TokenValidationResult(
-            TokenHandler tokenHandler,
-            ValidationParameters validationParameters,
-            ValidationError validationError)
-        {
-            _tokenHandler = tokenHandler;
-            _validationError = validationError;
-            _validationParameters = validationParameters;
         }
 
         /// <summary>
@@ -183,8 +131,6 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (_tokenValidationParameters != null)
                             _claimsIdentity = _tokenHandler.CreateClaimsIdentityInternal(SecurityToken, _tokenValidationParameters, Issuer);
-                        else if (_validationParameters != null)
-                            _claimsIdentity = _tokenHandler.CreateClaimsIdentityInternal(SecurityToken, _validationParameters, Issuer);
                     }
 
                     _claimsIdentityInitialized = true;
@@ -242,9 +188,6 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 HasValidOrExceptionWasRead = true;
-                if (_exception is null && _validationError is not null)
-                    return _validationError.GetException();
-
                 return _exception;
             }
             set
