@@ -93,6 +93,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             _signatureValidator = other.SignatureValidator;
             TimeProvider = other.TimeProvider;
             TryAllDecryptionKeys = other.TryAllDecryptionKeys;
+            TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             _tokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
@@ -114,6 +115,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             LogTokenId = true;
             SaveSigninToken = false;
             TryAllDecryptionKeys = true;
+            TryAllIssuerSigningKeys = true;
             ValidateActor = false;
         }
 
@@ -529,7 +531,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// If the IssuerSigningKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,
         /// all available keys will be tried.
         /// </summary>
-        /// <remarks>Default is false.</remarks>
+        /// <remarks>Default is true.</remarks>
+        [DefaultValue(true)]
         public bool TryAllIssuerSigningKeys { get; set; }
 
         /// <summary>
@@ -642,6 +645,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Gets or sets a boolean that controls if the actor claim should be validated.
         /// </summary>
         /// <remarks>Default value is false.</remarks>
+        [DefaultValue(false)]
         public bool ValidateActor { get; set; }
     }
 }
