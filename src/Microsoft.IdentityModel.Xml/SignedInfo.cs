@@ -7,7 +7,6 @@ using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-//using Microsoft.IdentityModel.Tokens.Experimental;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml

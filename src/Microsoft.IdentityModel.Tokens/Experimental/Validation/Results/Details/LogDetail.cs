@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 using Microsoft.IdentityModel.Abstractions;
-using Microsoft.IdentityModel.Tokens.Experimental;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Contains information so that logs can be written when needed.
