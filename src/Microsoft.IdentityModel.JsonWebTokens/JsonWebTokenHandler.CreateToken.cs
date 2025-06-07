@@ -668,13 +668,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Duplicates are resolved according to the following priority:
             // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
-
+            bool isActorFound = false;
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (tokenDescriptor.ActClaimSupportEnabled && kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal))
+                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal))
                     {
+                        isActorFound = true;
                         continue;
                     }
                     if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
@@ -758,7 +759,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
-            if (tokenDescriptor.ActClaimSupportEnabled)
+            if (isActorFound || tokenDescriptor.Subject?.Actor != null)
                 WriteActorToken(writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
@@ -1129,7 +1130,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (actorTokenDescriptor != null)
             {
                 ValidateActorChainDepth(tokenDescriptor);
-                actorTokenDescriptor.ActClaimSupportEnabled = tokenDescriptor.ActClaimSupportEnabled;
                 actorTokenDescriptor.MaxActorChainLength = tokenDescriptor.MaxActorChainLength;
                 actorTokenDescriptor.ActorClaimType = tokenDescriptor.ActorClaimType;
                 actorTokenDescriptor.ActorChainDepth = tokenDescriptor.ActorChainDepth + 1;

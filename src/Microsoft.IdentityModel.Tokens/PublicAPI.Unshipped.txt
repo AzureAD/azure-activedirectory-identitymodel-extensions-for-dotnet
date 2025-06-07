@@ -290,3 +290,4 @@ Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorClaimType.get -> str
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorClaimType.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.MaxActorChainLength.get -> int
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.MaxActorChainLength.set -> void
+~virtual Microsoft.IdentityModel.Tokens.ActClaimRetrieverDelegate.Invoke(System.Text.Json.JsonElement actClaim, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters = null) -> System.Security.Claims.ClaimsIdentity
