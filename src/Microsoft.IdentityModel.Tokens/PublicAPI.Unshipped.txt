@@ -271,8 +271,6 @@ virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CreateC
 ~static Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.NullParameter(string parameterName) -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail
 Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.get -> string
 Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.set -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActClaimSupportEnabled.get -> bool
-Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActClaimSupportEnabled.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimSupportEnabled.get -> bool
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimSupportEnabled.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.get -> int

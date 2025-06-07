@@ -506,7 +506,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     },
                     ActorClaimType = "act",
                     MaxActorChainLength = 4,
-                    ActClaimSupportEnabled = true,
                 };
                 string token = handler.CreateToken(tokenDescriptor);
                 handler.MapInboundClaims = true;
@@ -600,7 +599,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = Default.AsymmetricSigningCredentials,
                 Claims = new Dictionary<string, object> { { "act", actor } },
-                ActClaimSupportEnabled = true,
             };
             var token = handler.CreateToken(tokenDescriptor);
 
@@ -654,7 +652,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = Default.AsymmetricSigningCredentials,
                 Claims = new Dictionary<string, object> { { "act", actor } },
-                ActClaimSupportEnabled = true,
             };
             var token = handler.CreateToken(tokenDescriptor);
 
@@ -710,7 +707,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials,
                     Claims = new Dictionary<string, object> { { "act", level1Actor } },
-                    ActClaimSupportEnabled = true,
                 };
                 var token = handler.CreateToken(tokenDescriptor);
 
@@ -763,7 +759,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials,
                     Claims = new Dictionary<string, object> { { "act", actor } },
-                    ActClaimSupportEnabled = true,
                 };
                 var token = handler.CreateToken(tokenDescriptor);
 
@@ -777,7 +772,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     ActorClaimType = "act",
                     MaxActorChainLength = 2,
                     ActClaimRetrieverDelegate = CustomDelegate,
-                    ActClaimSupportEnabled = true,
                 };
 
                 var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -819,7 +813,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Audience = "https://api.example.com",
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                ActClaimSupportEnabled = true,
             };
             var token = handler.CreateToken(tokenDescriptor);
 
@@ -866,7 +859,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = Default.AsymmetricSigningCredentials,
                 Claims = new Dictionary<string, object> { { "act", claimsActor } },
-                ActClaimSupportEnabled = true,
             };
             var token2 = handler.CreateToken(tokenDescriptor2);
 
