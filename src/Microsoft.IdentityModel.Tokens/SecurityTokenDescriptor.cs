@@ -170,13 +170,13 @@ namespace Microsoft.IdentityModel.Tokens
             get => _actorClaimType;
             set
             {
-                if (string.IsNullOrEmpty(value) || string.Equals(value.Trim(), ClaimTypes.Actor, StringComparison.OrdinalIgnoreCase))
+                if (string.IsNullOrEmpty(value) || string.Equals(value.Trim(), "actort", StringComparison.OrdinalIgnoreCase))
                     throw LogHelper.LogExceptionMessage(
                     new ArgumentOutOfRangeException(
                     LogHelper.FormatInvariant(
                     LogMessages.IDX11027,
                     LogHelper.MarkAsNonPII("ActorClaimType"))
-                    + $". ActorClaimType cannot be empty or equal to {ClaimTypes.Actor}."));
+                    + ". ActorClaimType cannot be empty or equal to actort"));
                 _actorClaimType = value;
             }
         }

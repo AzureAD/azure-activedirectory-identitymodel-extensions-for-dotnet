@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 67;
+        int ExpectedPropertyCount = 66;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
@@ -198,8 +198,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
-                    new KeyValuePair<string, List<object>>("ActClaimSupportEnabled", new List<object>{false}),
-                    new KeyValuePair<string, List<object>>("ActorClaimType", new List<object>{"actort"}),
+                    new KeyValuePair<string, List<object>>("ActorClaimType", new List<object>{"act"}),
                     new KeyValuePair<string, List<object>>("ActorChainDepth", new List<object>{0,1}),
                     new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                     new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
