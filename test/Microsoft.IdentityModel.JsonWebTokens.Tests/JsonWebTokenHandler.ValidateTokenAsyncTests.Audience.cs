@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
@@ -17,7 +18,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_Audience", theoryData);
 
-            string jwtString = CreateToken(theoryData.Audience);
+            string jwtString = CreateTokenWithAudience(theoryData.Audience);
 
             await ValidateAndCompareResults(jwtString, theoryData, context);
 
@@ -155,7 +156,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public string? Audience { get; internal set; } = Default.Audience;
         }
 
-        private static string CreateToken(string? audience)
+        private static string CreateTokenWithAudience(string? audience)
         {
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
 

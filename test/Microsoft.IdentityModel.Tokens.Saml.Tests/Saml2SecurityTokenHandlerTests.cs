@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 {
-    public class Saml2SecurityTokenHandlerTests
+    public partial class Saml2SecurityTokenHandlerTests
     {
         [Fact]
         public void Constructors()

@@ -93,8 +93,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             {
                 TokenDecryptionKeys = decryptionKeys,
                 RequireSignedTokens = false,
+                // CodeQL [SM03926] intentional: Validation disabled as it is not applicable during pop key decryption.
                 ValidateIssuer = false,
+                // CodeQL [SM03926] intentional: Validation disabled as it is not applicable during pop key decryption.
                 ValidateAudience = false,
+                // CodeQL [SM03926] intentional: Validation disabled as it is not applicable during pop key decryption.
                 ValidateLifetime = false,
                 ValidateIssuerSigningKey = false,
             };
@@ -106,7 +109,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23018, string.Join(", ", decryptionKeys.Select(x => x?.KeyId ?? "Null")), e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX23018,
+                        LogHelper.MarkAsNonPII(string.Join(", ", decryptionKeys.Select(x => x?.KeyId ?? "Null"))),
+                        e),
+                    e));
             }
         }
     }

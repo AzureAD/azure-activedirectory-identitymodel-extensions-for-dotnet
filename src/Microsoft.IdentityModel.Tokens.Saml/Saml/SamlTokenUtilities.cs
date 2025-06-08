@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// <summary>
     /// A class which contains useful methods for processing saml tokens.
     /// </summary>
-    internal class SamlTokenUtilities
+    internal partial class SamlTokenUtilities
     {
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
@@ -152,7 +152,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             validationParametersCloned.ValidIssuers = (validationParametersCloned.ValidIssuers == null ? issuers : validationParametersCloned.ValidIssuers.Concat(issuers));
             validationParametersCloned.IssuerSigningKeys = (validationParametersCloned.IssuerSigningKeys == null ? currentConfiguration.SigningKeys : validationParametersCloned.IssuerSigningKeys.Concat(currentConfiguration.SigningKeys));
             return validationParametersCloned;
-
         }
     }
 }

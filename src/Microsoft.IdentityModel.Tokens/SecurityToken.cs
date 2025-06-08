@@ -11,7 +11,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Base class for security token.
     /// </summary>
-    [Serializable]
     public abstract class SecurityToken : ISafeLogSecurityArtifact
     {
         internal virtual IEnumerable<Claim> CreateClaims(string issuer)

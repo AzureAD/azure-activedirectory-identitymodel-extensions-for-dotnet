@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
@@ -39,7 +40,7 @@ namespace Microsoft.IdentityModel.TestUtils
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult(new ValidationResult<ValidatedIssuer>(
+            return Task.FromResult(new ValidationResult<ValidatedIssuer, IssuerValidationError>(
                 new ValidatedIssuer(issuer, IssuerValidationSource.NotValidated)));
         };
 
@@ -47,8 +48,7 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
-            CallContext? callContext)
+            CallContext callContext)
         {
             return new ValidatedSigningKeyLifetime(
                 null, // ValidFrom
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
-            CallContext? callContext)
+            CallContext callContext)
         {
             // This key is not used during the validation process. It is only used to satisfy the delegate signature.
             // Follow up PR will change this to remove the SecurityKey return value.

@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// Represents a XmlDsig Reference element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Reference
     /// </summary>
-    public class Reference : DSigElement
+    public partial class Reference : DSigElement
     {
         private CanonicalizingTransfrom _canonicalizingTransfrom;
         private string _digestMethod;

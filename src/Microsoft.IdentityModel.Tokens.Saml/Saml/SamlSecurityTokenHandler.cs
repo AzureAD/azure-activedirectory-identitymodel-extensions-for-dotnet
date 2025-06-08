@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
     ///
-    public class SamlSecurityTokenHandler : SecurityTokenHandler
+    public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
         internal const string Actor = "Actor";
         private const string _className = "Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler";
@@ -1105,7 +1105,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                     if (key != null)
                     {
-                        keysAttempted.Append(key.ToString()).Append(" , KeyId: ").AppendLine(key.KeyId);
+                        keysAttempted.Append("KeyId: ").AppendLine(key.KeyId);
                         if (canMatchKey && !keyMatched && key.KeyId != null)
                             keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
                     }
@@ -1115,14 +1115,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (canMatchKey)
             {
                 if (keyMatched)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10514, keysAttempted, samlToken.Assertion.Signature.KeyInfo, exceptionStrings, samlToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(
+                        LogHelper.FormatInvariant(TokenLogMessages.IDX10514, LogHelper.MarkAsNonPII(keysAttempted), samlToken.Assertion.Signature.KeyInfo, exceptionStrings, samlToken)));
 
                 ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
                 ValidateConditions(samlToken, validationParameters);
             }
 
             if (keysAttempted.Length > 0)
-                throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10512, keysAttempted, exceptionStrings, samlToken)));
+                throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10512, LogHelper.MarkAsNonPII(keysAttempted), exceptionStrings, samlToken)));
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
         }

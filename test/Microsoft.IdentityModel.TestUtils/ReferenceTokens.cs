@@ -373,28 +373,11 @@ namespace Microsoft.IdentityModel.TestUtils
         // { "int", 123 }.
         public static string JWSWithSingleAdditionalHeaderClaim = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ikpzb25XZWJLZXlSc2FfMjA0OCIsInR5cCI6IkpXVCIsImludCI6MTIzfQ.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.DhPiCtD9HWTjG5LDCW8YxSaBXffmPosGnnKINuey6ec50Yf72SzBnMDVZ4Cw9S_SyqSRIxVs0x87g0ZUP8fytUxr_D7ksf0cBI9tqh2MgoAZ2lY8T8oflfIBaTLraZHRmjRCMZGdOLmGj__xqM7mmD0Y1grwAkQgMCLlze2qgCXmym_8jAWfSLQcNc-XNUaDZBlbgebic7TZ0INa93QcJvm_ov6t_rg90Y0l4xCxL_VOdXctdbc5D87bEaaAdqThfVMA1325JZdS_CBWVelLf5zZYPldVDxnD9l93Fy0gqWTWJ0QxMP-BDMgXbQQdUDoSC5HrxXU2JRXnF8V_V4G2g";
 
-
         // This token is unsigned and includes one additional header claim:
         // { "int", 123 }.
         public static string UnsignedJWSWithSingleAdditionalHeaderClaim = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIiwiaW50IjoxMjN9.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.";
 
-        // the following values are separate from the one in Default.cs, so we can change the Defaults
-        // Do not change any of these values either adding new values or order or the tests will break.
-        public static Dictionary<string, object> PayloadDictionary
-        {
-            get => new Dictionary<string, object>()
-            {
-                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
-                { JwtRegisteredClaimNames.GivenName, "Bob" },
-                { JwtRegisteredClaimNames.Iss, Issuer },
-                { JwtRegisteredClaimNames.Aud, Audience },
-                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
-                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
-                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() }
-            };
-        }
-
-        public static string PayloadString
+        public static JObject PayloadAsJObject
         {
             get => new JObject()
             {
@@ -405,7 +388,17 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
-            }.ToString(Formatting.None);
+            };
+        }
+
+        public static string PayloadString
+        {
+            get => PayloadAsJObject.ToString(Formatting.None);
+        }
+
+        public static Dictionary<string, object> PayloadDictionary
+        {
+            get => PayloadAsJObject.ToObject<Dictionary<string, object>>();
         }
 
         public static string Audience

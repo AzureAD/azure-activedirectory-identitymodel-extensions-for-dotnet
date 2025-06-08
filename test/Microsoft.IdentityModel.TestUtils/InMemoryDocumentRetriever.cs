@@ -14,14 +14,23 @@ namespace Microsoft.IdentityModel.TestUtils
     /// </summary>
     public class InMemoryDocumentRetriever : IDocumentRetriever
     {
-        private readonly IDictionary<string, string> _configurations;
+        private readonly Dictionary<string, string> _configurations;
+        private ManualResetEvent _waitEvent;
+        private ManualResetEvent _signalEvent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileDocumentRetriever"/> class.
         /// </summary>
-        public InMemoryDocumentRetriever(IDictionary<string, string> configuration)
+        public InMemoryDocumentRetriever(Dictionary<string, string> configuration)
         {
             _configurations = configuration;
+        }
+
+        public InMemoryDocumentRetriever(Dictionary<string, string> configuration, ManualResetEvent waitEvent, ManualResetEvent signalEvent)
+        {
+            _configurations = configuration;
+            _waitEvent = waitEvent;
+            _signalEvent = signalEvent;
         }
 
         /// <summary>
@@ -32,6 +41,16 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <returns>UTF8 decoding of bytes in the file.</returns>
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
+            // Some tests change the Metadata address on ConfigurationManger to test different scenarios.
+            // This event is used to let the test know that the GetDocumentAsync method has been called, and the test can now change the Metadata address.
+            if (_signalEvent != null)
+                _signalEvent.Set();
+
+            // This event lets the caller control when metadata can be returned.
+            // Useful when testing delays.
+            if (_waitEvent != null)
+                _waitEvent.WaitOne();
+
             return await Task.FromResult(_configurations[address]).ConfigureAwait(false);
         }
     }

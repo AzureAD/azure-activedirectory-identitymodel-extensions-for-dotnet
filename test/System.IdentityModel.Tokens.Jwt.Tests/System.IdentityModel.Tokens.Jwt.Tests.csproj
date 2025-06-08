@@ -13,8 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.IdentityModel.Logging.Tests\Microsoft.IdentityModel.Logging.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Tests\Microsoft.IdentityModel.Tokens.Tests.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Validators\Microsoft.IdentityModel.Validators.csproj" />
   </ItemGroup>
@@ -22,7 +24,7 @@
   <ItemGroup>
     <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)"/>
     <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
-    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntime)"/>
+    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntimeVersion)"/>
   </ItemGroup>
 
   <ItemGroup>

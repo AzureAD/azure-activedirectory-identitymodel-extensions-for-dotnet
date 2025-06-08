@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -26,6 +28,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch (Exception ex)
             {
                 Assert.Contains("IDX10267: 'public virtual Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)'", ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
         #endregion
@@ -43,6 +47,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch (Exception ex)
             {
                 Assert.Contains("IDX10267: 'public virtual byte[] Sign(byte[] input, int offset, int count)'", ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
 
@@ -59,6 +65,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch (Exception ex)
             {
                 Assert.Contains("IDX10267: 'public virtual bool Sign(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)'", ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
 #endif
@@ -74,7 +82,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             catch (Exception ex)
             {
-                Assert.Contains("IDX10267: 'public virtual bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)'", ex.Message);
+                Assert.Contains("IDX10267: 'public virtual bool " +
+                    "Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)'",
+                    ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
         #endregion
@@ -92,6 +104,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch (Exception ex)
             {
                 Assert.Contains("IDX10267: 'public virtual SecurityToken ReadToken(string token)'", ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
 
@@ -106,7 +120,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             catch (Exception ex)
             {
-                Assert.Contains("IDX10267: 'internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, TokenValidationParameters tokenValidationParameters, string issuer)'", ex.Message);
+                Assert.Contains("IDX10267: 'internal virtual ClaimsIdentity " +
+                    "CreateClaimsIdentityInternal(SecurityToken securityToken, TokenValidationParameters tokenValidationParameters, string issuer)'",
+                    ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
         [Fact]
@@ -120,7 +138,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             catch (Exception ex)
             {
-                Assert.Contains("IDX10267: 'public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)'", ex.Message);
+                Assert.Contains("IDX10267: 'public virtual Task<TokenValidationResult> " +
+                    "ValidateTokenAsync(string token, TokenValidationParameters validationParameters)'",
+                    ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
 
@@ -135,7 +157,57 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             catch (Exception ex)
             {
-                Assert.Contains("IDX10267: 'public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)'", ex.Message);
+                Assert.Contains("IDX10267: 'public virtual Task<TokenValidationResult> " +
+                    "ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)'",
+                    ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
+            }
+        }
+
+        [Fact]
+        public async Task TokenHandler_ValidationParameters_ValidateTokenAsyncString()
+        {
+            TestUtilities.WriteHeader($"{this}.TokenHandler_ValidationParameters_ValidateTokenAsyncString");
+
+            try
+            {
+                await new DerivedTokenHandler().ValidateTokenAsync(
+                    "token",
+                    new ValidationParameters(),
+                    new CallContext(),
+                    CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Assert.Contains("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
+                        "ValidateTokenAsync(string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)",
+                        ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
+            }
+        }
+
+        [Fact]
+        public async Task TokenHandler_ValidationParameters_ValidateTokenAsyncToken()
+        {
+            TestUtilities.WriteHeader($"{this}.TokenHandler_ValidationParameters_ValidateTokenAsyncToken");
+
+            try
+            {
+                await new DerivedTokenHandler().ValidateTokenAsync(
+                    new DerivedSecurityToken(),
+                    new ValidationParameters(),
+                    new CallContext(),
+                    CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Assert.Contains("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
+                        "ValidateTokenAsync(SecurityToken token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)",
+                        ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
         #endregion

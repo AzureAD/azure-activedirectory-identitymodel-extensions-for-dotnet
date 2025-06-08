@@ -4,6 +4,7 @@
 using System;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
@@ -15,13 +16,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.TokenReplayValidationResultTests", theoryData);
 
-            ValidationResult<DateTime?> result = Validators.ValidateTokenReplay(
+            ValidationResult<DateTime?, TokenReplayValidationError> result = Validators.ValidateTokenReplay(
                 theoryData.ExpirationTime,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
                 new CallContext());
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreDateTimesEqualWithEpsilon(
                     result.UnwrapResult(),
@@ -85,12 +86,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpirationTime = now,
                         SecurityToken = null,
                         ValidationParameters = new ValidationParameters(),
-                        Result = new ValidationError(
+                        Result = new TokenReplayValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
                             ValidationFailureType.NullArgument,
                             typeof(SecurityTokenArgumentNullException),
+                            null,
                             null),
                     },
                     new TokenReplayTheoryData
@@ -100,12 +102,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpirationTime = now,
                         SecurityToken = string.Empty,
                         ValidationParameters = new ValidationParameters(),
-                        Result = new ValidationError(
+                        Result = new TokenReplayValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
                             ValidationFailureType.NullArgument,
                             typeof(SecurityTokenArgumentNullException),
+                            null,
                             null),
                     },
                     new TokenReplayTheoryData
@@ -115,18 +118,19 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpirationTime = now,
                         SecurityToken = "token",
                         ValidationParameters = null,
-                        Result = new ValidationError(
+                        Result = new TokenReplayValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
                             typeof(SecurityTokenArgumentNullException),
+                            null,
                             null),
                     },
                     new TokenReplayTheoryData
                     {
                         TestId = "Invalid_ReplayCacheIsPresent_ExpirationTimeIsNull",
-                        ExpectedException = ExpectedException.SecurityTokenReplayDetected("IDX10227:"),
+                        ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10227:"),
                         ExpirationTime = null,
                         SecurityToken = "token",
                         ValidationParameters = new ValidationParameters
@@ -137,12 +141,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 OnFindReturnValue = false
                             }
                         },
-                        Result = new ValidationError(
+                        Result = new TokenReplayValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10227,
                                 LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString())),
                             ValidationFailureType.TokenReplayValidationFailed,
                             typeof(SecurityTokenReplayDetectedException),
+                            null,
                             null),
                     },
                     new TokenReplayTheoryData
@@ -159,12 +164,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 OnFindReturnValue = true
                             },
                         },
-                        Result = new ValidationError(
+                        Result = new TokenReplayValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10228,
                                 LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString())),
                             ValidationFailureType.TokenReplayValidationFailed,
                             typeof(SecurityTokenReplayDetectedException),
+                            null,
                             null),
                     },
                     new TokenReplayTheoryData
@@ -181,12 +187,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             }
                         },
                         ExpectedException = ExpectedException.SecurityTokenReplayAddFailed("IDX10229:"),
-                        Result = new ValidationError(
+                        Result = new TokenReplayValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10229,
                                 LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString())),
                             ValidationFailureType.TokenReplayValidationFailed,
                             typeof(SecurityTokenReplayDetectedException),
+                            null,
                             null),
                     }
                 };
@@ -202,6 +209,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         internal ValidationParameters ValidationParameters { get; set; }
 
-        internal ValidationResult<DateTime?> Result { get; set; }
+        internal ValidationResult<DateTime?, TokenReplayValidationError> Result { get; set; }
     }
 }

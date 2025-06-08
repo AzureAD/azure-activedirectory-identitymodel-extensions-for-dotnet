@@ -1,0 +1,86 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+#nullable enable
+namespace Microsoft.IdentityModel.Tokens.Experimental
+{
+    /// <summary>
+    /// Represents an error that occurs when the token's audience cannot be validated.
+    /// If available, the invalid audiences from the token are stored in <see cref="TokenAudiences"/>
+    /// and the allowed audiences are stored in <see cref="ValidAudiences"/>.
+    /// </summary>
+    public class AudienceValidationError : ValidationError
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IssuerSigningKeyValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
+        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        /// <param name="tokenAudiences"/> are the audiences that were in the token. Can be null if no audiences were found in the token.
+        /// <param name="validAudiences"/> are the audiences that were expected. Can be null if no valid audiences were provided in the validation parameters.
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        public AudienceValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
+            Type exceptionType,
+            StackFrame stackFrame,
+            IList<string>? tokenAudiences,
+            IList<string>? validAudiences,
+            Exception? innerException = null)
+            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
+        {
+            TokenAudiences = tokenAudiences;
+            ValidAudiences = validAudiences;
+        }
+
+        /// <summary>
+        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// </summary>
+        /// <returns>An instance of an Exception.</returns>
+        protected override Exception CreateException()
+        {
+            if (ExceptionType == typeof(SecurityTokenInvalidAudienceException))
+            {
+                var exception = TokenAudiences != null ?
+                    new SecurityTokenInvalidAudienceException(MessageDetail.Message, InnerException) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(TokenAudiences) } :
+                    new SecurityTokenInvalidAudienceException(MessageDetail.Message, InnerException);
+                exception.SetValidationError(this);
+
+                return exception;
+            }
+
+            return CreateException(ExceptionType, null);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="AudienceValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="AudienceValidationError"/>.</returns>
+        public static new AudienceValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null, // TokenAudiences
+            null); // ValidAudiences
+
+        /// <summary>
+        /// The audiences that were in the token.
+        /// </summary>
+        public IList<string>? TokenAudiences { get; }
+
+        /// <summary>
+        /// The audiences that were expected.
+        /// </summary>
+        public IList<string>? ValidAudiences { get; }
+    }
+}
+#nullable restore

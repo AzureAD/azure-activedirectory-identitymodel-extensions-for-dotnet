@@ -7,7 +7,13 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class MockTimeProvider : TimeProvider
     {
-        // always return 09/16/2024 00:00:00:00
-        public override DateTimeOffset GetUtcNow() => new DateTimeOffset(2024, 9, 16, 0, 0, 0, new(0));
+        DateTimeOffset _mockUtcNow;
+        public MockTimeProvider(DateTimeOffset? mockUtcNow = null)
+        {
+            // if left unspecified, it will return 09/16/2024 00:00:00:00
+            _mockUtcNow = mockUtcNow ?? new DateTimeOffset(2024, 9, 16, 0, 0, 0, new(0));
+        }
+
+        public override DateTimeOffset GetUtcNow() => _mockUtcNow;
     }
 }

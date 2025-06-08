@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// Represents a XmlDsig SignedInfo element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-SignedInfo
     /// </summary>
-    public class SignedInfo : DSigElement
+    public partial class SignedInfo : DSigElement
     {
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private string _canonicalizationMethod = SecurityAlgorithms.ExclusiveC14n;

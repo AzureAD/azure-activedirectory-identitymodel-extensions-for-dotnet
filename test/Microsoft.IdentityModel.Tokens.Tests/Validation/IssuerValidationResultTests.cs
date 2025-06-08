@@ -10,10 +10,11 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
-namespace Microsoft.IdentityModel.Tokens.Validation.Tests
+namespace Microsoft.IdentityModel.Tokens.IssuerValidation.Tests
 {
-    public class IssuerValidationResultTests
+    public partial class IssuerValidationResultTests
     {
         [Theory, MemberData(nameof(IssuerValdationResultsTestCases), DisableDiscoveryEnumeration = true)]
         public async Task IssuerValidatorAsyncTests(IssuerValidationResultsTheoryData theoryData)
@@ -23,14 +24,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             if (theoryData.ValidIssuerToAdd != null)
                 theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
 
-            ValidationResult<ValidatedIssuer> result = await Validators.ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> result = await Validators.ValidateIssuerAsync(
                 theoryData.Issuer,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
                 new CallContext(),
                 CancellationToken.None);
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreValidatedIssuersEqual(
                     theoryData.Result.UnwrapResult(),
@@ -68,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.Add(new IssuerValidationResultsTheoryData("NULL_Issuer")
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"),
-                    Result = new ValidationError(
+                    Result = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10211,
                             LogHelper.MarkAsNonPII(null),
@@ -77,6 +78,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             LogHelper.MarkAsNonPII(null)),
                         ValidationFailureType.IssuerValidationFailed,
                         typeof(SecurityTokenInvalidIssuerException),
+                        null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters()
@@ -86,12 +88,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 {
                     ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                     Issuer = issClaim,
-                    Result = new ValidationError(
+                    Result = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("validationParameters")),
                         ValidationFailureType.NullArgument,
                         typeof(SecurityTokenArgumentNullException),
+                        null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = null
@@ -101,12 +104,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 {
                     ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                     Issuer = issClaim,
-                    Result = new ValidationError(
+                    Result = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("securityToken")),
                         ValidationFailureType.NullArgument,
                         typeof(SecurityTokenArgumentNullException),
+                        null,
                         null),
                     SecurityToken = null,
                     ValidationParameters = new ValidationParameters()
@@ -115,7 +119,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromConfig")
                 {
                     Issuer = issClaim,
-                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerIsConfigurationIssuer),
+                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedConfiguration),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters()
                     {
@@ -126,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromValidationParametersValidIssuers")
                 {
                     Issuer = issClaim,
-                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerIsAmongValidIssuers),
+                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedValidationParameters),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters(),
                     ValidIssuerToAdd = issClaim
@@ -136,7 +140,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
                     Issuer = issClaim,
-                    Result = new ValidationError(
+                    Result = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10212,
                             LogHelper.MarkAsNonPII(issClaim),
@@ -144,7 +148,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             LogHelper.MarkAsNonPII(null)),
                         ValidationFailureType.IssuerValidationFailed,
                         typeof(SecurityTokenInvalidIssuerException),
-                        null),
+                        null,
+                        issClaim),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters(),
                     ValidIssuerToAdd = validIssuer
@@ -165,7 +170,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         public string Issuer { get; set; }
 
-        internal ValidationResult<ValidatedIssuer> Result { get; set; }
+        internal ValidationResult<ValidatedIssuer, IssuerValidationError> Result { get; set; }
 
         public SecurityToken SecurityToken { get; set; }
 

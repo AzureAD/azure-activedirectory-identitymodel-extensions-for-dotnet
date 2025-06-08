@@ -139,6 +139,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(validationParameters.RoleClaimType, claimsIdentity.RoleClaimType);
         }
 
+        [Fact]
+        public void Clone_ReturnsCaseSensitiveClaimsIdentity()
+        {
+            var claimsIdentity = new CaseSensitiveClaimsIdentity();
+            var clone = claimsIdentity.Clone();
+
+            Assert.True(clone is CaseSensitiveClaimsIdentity);
+        }
+
         public static TheoryData<CaseSensitiveClaimsIdentityTheoryData> GetCaseSensitiveClaimsIdentityTheoryData
         {
             get

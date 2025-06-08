@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    // Internal API analyzers are not able to analyze this class, so we need to suppress the warning.
+#pragma warning disable RS0051 // Add internal types and members to the declared API
     internal partial class Interop
     {
         internal static class BCrypt
@@ -203,4 +205,5 @@ namespace Microsoft.IdentityModel.Tokens
             internal const string Kernel32 = "kernel32.dll";
         }
     }
+#pragma warning restore RS0051 // Add internal types and members to the declared API
 }

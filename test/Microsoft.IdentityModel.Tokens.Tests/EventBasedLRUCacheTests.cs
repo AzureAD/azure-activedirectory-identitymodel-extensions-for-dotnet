@@ -359,7 +359,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return true;
         }
 
-        [Fact(Skip = "Large test meant to be run manually.")]
+        [Fact]
         public async Task CacheOverflowTestMultithreaded()
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestMultithreaded");
@@ -386,7 +386,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact(Skip = "Large test meant to be run manually.")]
+        [Fact]
         public void CacheOverflowTestSequential()
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestSequential");

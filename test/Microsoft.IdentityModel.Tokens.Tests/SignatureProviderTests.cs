@@ -1307,7 +1307,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 Bytes = bytes,
                 Count = -1,
-                ExpectedException = ExpectedException.ArgumentException(),
+                ExpectedException = prefix == "RSA" ? ExpectedException.ArgumentOutOfRangeException() : ExpectedException.ArgumentException(),
                 Offset = 0,
                 SignatureProvider = CreateProvider(securityKey, algorithm)
             });
@@ -1316,7 +1316,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 Bytes = bytes,
                 Count = bytes.Length + 1,
-                ExpectedException = ExpectedException.ArgumentException(),
+                ExpectedException = prefix == "RSA" ? ExpectedException.ArgumentOutOfRangeException() : ExpectedException.ArgumentException(),
                 Offset = 0,
                 SignatureProvider = CreateProvider(securityKey, algorithm)
             });
@@ -1325,7 +1325,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 Bytes = bytes,
                 Count = 10,
-                ExpectedException = ExpectedException.ArgumentException(),
+                ExpectedException = prefix == "RSA" ? ExpectedException.ArgumentOutOfRangeException() : ExpectedException.ArgumentException(),
                 Offset = bytes.Length - 1,
                 SignatureProvider = CreateProvider(securityKey, algorithm)
             });

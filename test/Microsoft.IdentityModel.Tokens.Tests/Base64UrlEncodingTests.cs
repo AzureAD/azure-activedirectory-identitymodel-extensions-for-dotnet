@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Reflection;
 using System.Text;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -33,6 +34,9 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
 
                 string encodingString = Base64UrlEncoding.Encode(theoryData.Bytes);
                 string encodingBytesUsingOffset = Base64UrlEncoding.Encode(theoryData.OffsetBytes, theoryData.Offset, theoryData.Length);
+                byte[] decodedBytes = theoryData.Bytes?.Length == 0 ? Array.Empty<byte>() : Base64UrlEncoding.Decode(encodingString);
+                const string extraPadding = "EXTRAPADDING";
+                byte[] decodedBytes2 = theoryData.Bytes?.Length == 0 ? Array.Empty<byte>() : Base64UrlEncoding.Decode(extraPadding + encodingString + extraPadding, extraPadding.Length, encodingString.Length);
 
                 theoryData.ExpectedException.ProcessNoException(context);
 
@@ -46,7 +50,8 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
 
                 IdentityComparer.AreStringsEqual(encodingBytesUsingOffset, encodingString, "encodingBytesUsingOffset", "encodingString", context);
                 IdentityComparer.AreStringsEqual(theoryData.ExpectedValue, encodingString, "theoryData.ExpectedValue", "encodingString", context);
-
+                IdentityComparer.AreEqual(theoryData.Bytes, decodedBytes, context);
+                IdentityComparer.AreEqual(theoryData.Bytes, decodedBytes2, context);
             }
             catch (Exception ex)
             {
@@ -326,6 +331,74 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
 
             actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abc=".AsSpan(), 0, 4);
             Assert.Equal(2, actualOutputSize);
+        }
+
+        [Fact]
+        public void EncodeDecode_InvalidParameters_ThrowsExceptionTests()
+        {
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode(null));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Encode(null));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Encode(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode<object>("abc", 0, 0, null));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode<object, object>("abc", 0, 0, null, null));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode<object, object, object, object>(null, 0, 0, null, null, null, null));
+        }
+
+        [Fact]
+        public void Base64UrlEncoder_PublicApiIsNotChanged()
+        {
+            // Public APIs
+            string encoded1 = Base64UrlEncoder.Encode("test");
+            string encoded2 = Base64UrlEncoder.Encode(new byte[] { 1, 2, 3 });
+            string encoded3 = Base64UrlEncoder.Encode(new byte[] { 1, 2, 3 }, 0, 3);
+            char[] charBuffer = new char[10];
+            int charsWritten = Base64UrlEncoder.Encode(new ReadOnlySpan<byte>(new byte[] { 1, 2, 3 }), new Span<char>(charBuffer));
+            byte[] decodedBytes = Base64UrlEncoder.DecodeBytes("dGVzdA");
+            string decodedString = Base64UrlEncoder.Decode("dGVzdA");
+
+            // Internal APIs
+            byte[] decodedBytesFromSpan = Base64UrlEncoder.Decode("test".AsSpan());
+            Span<byte> output = stackalloc byte[10];
+#if NET6_0_OR_GREATER
+            int bytesWritten = Base64UrlEncoder.Decode("test".AsSpan(), output);
+#else
+            Base64UrlEncoder.Decode("test".AsSpan(), output);
+            var method = typeof(Base64UrlEncoder).GetMethod(
+                "Decode",
+                BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public,
+                null,
+                new[] { typeof(ReadOnlySpan<char>), typeof(Span<byte>), },
+                null
+            );
+            Assert.Equal(typeof(void), method.ReturnType);
+#endif
+        }
+
+        [Fact]
+        public void Base64UrlEncoding_PublicApiIsNotChanged()
+        {
+            // Public APIs
+            byte[] decoded1 = Base64UrlEncoding.Decode("test");
+            byte[] decoded2 = Base64UrlEncoding.Decode("test", 0, 4);
+            string genericDecoded1 = Base64UrlEncoding.Decode<string>("test", 0, 4, (bytes, len) => "test");
+            string genericDecoded2 = Base64UrlEncoding.Decode<string, int>("test", 0, 4, 1, (bytes, len, x) => "test");
+            string genericDecoded3 = Base64UrlEncoding.Decode<string, int, int, int>("test", 0, 4, 1, 2, 3, (bytes, len, x, y, z) => "test");
+            string encoded1 = Base64UrlEncoding.Encode(new byte[] { 1, 2, 3 });
+            string encoded2 = Base64UrlEncoding.Encode(new byte[] { 1, 2, 3 }, 0, 3);
+
+            // Internal APIs
+            int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize("test".AsSpan(), 0, 4);
+            byte[] output = new byte[10];
+            Base64UrlEncoding.Decode("test".AsSpan(), 0, 4, output);
+            var method = typeof(Base64UrlEncoding).GetMethod(
+                "Decode",
+                BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public,
+                null,
+                new[] { typeof(ReadOnlySpan<char>), typeof(int), typeof(int), typeof(byte[]) },
+                null
+            );
+            Assert.Equal(typeof(void), method.ReturnType);
         }
     }
 }

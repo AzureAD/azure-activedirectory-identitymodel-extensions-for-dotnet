@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -23,7 +24,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
 
             // Validate the token using ValidationParameters
-            ValidationResult<ValidatedToken> validationParametersResult =
+            ValidationResult<ValidatedToken, ValidationError> validationParametersResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     jwtString, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
 
@@ -31,12 +32,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (legacyTokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
-            if (validationParametersResult.IsSuccess != theoryData.ExpectedIsValid)
-                context.AddDiff($"validationParametersResult.IsSuccess != theoryData.ExpectedIsValid");
+            if (validationParametersResult.IsValid != theoryData.ExpectedIsValid)
+                context.AddDiff($"validationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
             if (theoryData.ExpectedIsValid &&
                 legacyTokenValidationParametersResult.IsValid &&
-                validationParametersResult.IsSuccess)
+                validationParametersResult.IsValid)
             {
                 // Compare the ClaimsPrincipal and ClaimsIdentity from one result against the other
                 IdentityComparer.AreEqual(
@@ -53,7 +54,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 // Verify the exception provided by the TokenValidationParameters path
                 theoryData.ExpectedException.ProcessException(legacyTokenValidationParametersResult.Exception, context);
 
-                if (!validationParametersResult.IsSuccess)
+                if (!validationParametersResult.IsValid)
                 {
                     // Verify the exception provided by the ValidationParameters path
                     if (theoryData.ExpectedExceptionValidationParameters is not null)
