@@ -43,7 +43,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     {
                         { actorname, actorIdentity }
                     },
-                    ActClaimSupportEnabled = true,
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
@@ -93,7 +92,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials,
-                    ActClaimSupportEnabled = true,
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
@@ -158,7 +156,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     {
                         { actorname, claimsActorIdentity }
                     },
-                    ActClaimSupportEnabled = true,
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
@@ -218,7 +215,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     {
                         { "act", actorIdentity }
                     },
-                    ActClaimSupportEnabled = true,
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
@@ -281,7 +277,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = Default.AsymmetricSigningCredentials,
                 ActorClaimType = "act",
-                ActClaimSupportEnabled = true,
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
@@ -317,7 +312,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Issuer = "https://example.com",
                 Audience = "https://api.example.com",
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                ActClaimSupportEnabled = true,
             };
 
             tokenDescriptor.ActorClaimType = "act"; // Set the actor claim name to "act" for testing
@@ -381,7 +375,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     SigningCredentials = Default.AsymmetricSigningCredentials,
                     ActorClaimType = "act",
                     MaxActorChainLength = 2,
-                    ActClaimSupportEnabled = true,
                 };
 
                 // Act - This should throw a SecurityTokenException
@@ -508,7 +501,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 },
                 ActorClaimType = actorname,
                 MaxActorChainLength = 1,
-                ActClaimSupportEnabled = true,
             };
 
             var token = handler.CreateToken(tokenDescriptor);
@@ -570,7 +562,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     },
                     ActorClaimType = actorname,
                     MaxActorChainLength = 1,
-                    ActClaimSupportEnabled = true,
                 };
 
                 // Act - This should throw a SecurityTokenException

@@ -223,14 +223,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
 
-                if (claimType == validationParameters.ActorClaimType)
+                if (claimType.Equals(validationParameters.ActorClaimType) || claimType.Equals("actort"))
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
                                     LogMessages.IDX14112,
-                                    LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
+                                    LogHelper.MarkAsNonPII(claimType),
                                     jwtClaim.Value)));
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters);
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, claimType.Equals(validationParameters.ActorClaimType));
                 }
 
                 if (wasMapped)
@@ -283,11 +283,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
-                if (claimType == validationParameters.ActorClaimType)
+                if (claimType == validationParameters.ActorClaimType || claimType.Equals("actort"))
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters);
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(claimType), jwtClaim.Value)));
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, claimType.Equals(validationParameters.ActorClaimType));
                 }
 
                 if (jwtClaim.Properties.Count == 0)
@@ -619,12 +619,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="jwtToken"></param>
         /// <param name="actorString">The actor claim string.</param>
         /// <param name="tokenValidationParameters">The token validation parameters.</param>
+        /// <param name="isStandardAct">This tells us if we want to deserialize it as a JWT or Json Object. If this is set to true then we deserialize as JsonObject else as JWT </param>
         /// <returns>A ClaimsIdentity representing the actor.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="actorString"/> or <paramref name="tokenValidationParameters"/> is null.</exception>
         private ClaimsIdentity CreateClaimsIdentityActor(
-        JsonWebToken jwtToken,
-        string actorString,
-        TokenValidationParameters tokenValidationParameters)
+            JsonWebToken jwtToken,
+            string actorString,
+            TokenValidationParameters tokenValidationParameters,
+            bool isStandardAct = false)
         {
             if (string.IsNullOrEmpty(actorString))
                 throw LogHelper.LogArgumentNullException(nameof(actorString));
@@ -632,7 +634,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            if (tokenValidationParameters.ActClaimSupportEnabled)
+            if (isStandardAct)
             {
                 if (jwtToken.TryGetPayloadValue<JsonElement>(tokenValidationParameters.ActorClaimType, out JsonElement actClaim))
                 {
