@@ -3,13 +3,12 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.IdentityModel.Tokens.Experimental;
 #if !NET8_0_OR_GREATER
 using System.Text;
 #endif
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     internal class SecurityTokenArgumentNullException : ArgumentNullException
     {
