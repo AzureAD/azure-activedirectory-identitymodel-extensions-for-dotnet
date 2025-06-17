@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -21,9 +22,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns> A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
+        /// <returns> A <see cref="OperationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-        public static ValidationResult<ValidatedTokenType, TokenTypeValidationError> ValidateTokenType(
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public static OperationResult<ValidatedTokenType, ValidationError> ValidateTokenType(
+#pragma warning restore RS0016 // Add public types and members to the declared API
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -52,7 +55,6 @@ namespace Microsoft.IdentityModel.Tokens
                 return new TokenTypeValidationError(
                     new MessageDetail(LogMessages.IDX10256),
                     ValidationFailureType.TokenTypeValidationFailed,
-                    typeof(SecurityTokenInvalidTypeException),
                     ValidationError.GetCurrentStackFrame(),
                     null); // even if it is empty, we report null to match the original behaviour.
 
@@ -64,7 +66,6 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(type),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
                     ValidationFailureType.TokenTypeValidationFailed,
-                    typeof(SecurityTokenInvalidTypeException),
                     ValidationError.GetCurrentStackFrame(),
                     type);
             }

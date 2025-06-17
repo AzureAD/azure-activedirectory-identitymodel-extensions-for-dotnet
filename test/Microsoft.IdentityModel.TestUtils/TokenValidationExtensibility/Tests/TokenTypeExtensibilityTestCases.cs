@@ -125,7 +125,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorDelegate), null),
                     ValidationFailureType.TokenTypeValidationFailed,
-                    typeof(SecurityTokenInvalidTypeException),
                     new StackFrame("CustomTokenTypeValidationDelegates.cs", 0),
                     tokenType)
             });
@@ -148,7 +147,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorCustomTokenTypeExceptionTypeDelegate), null),
                     ValidationFailureType.TokenTypeValidationFailed,
-                    typeof(CustomSecurityTokenInvalidTypeException),
                     new StackFrame("CustomTokenTypeValidationDelegates.cs", 0),
                     tokenType)
             });
@@ -171,7 +169,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorCustomExceptionTypeDelegate), null),
                     ValidationFailureType.TokenTypeValidationFailed,
-                    typeof(CustomSecurityTokenException),
                     new StackFrame("CustomTokenTypeValidationDelegates.cs", 0),
                     tokenType)
             });
@@ -192,7 +189,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         string.Format(Tokens.LogMessages.IDX10275), null),
                     ValidationFailureType.TokenTypeValidatorThrew,
-                    typeof(SecurityTokenInvalidTypeException),
                     new StackFrame("JsonWebTokenHandler.ValidateToken.Internal.cs", 0),
                     tokenType,
                     new SecurityTokenInvalidTypeException(nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorThrows))

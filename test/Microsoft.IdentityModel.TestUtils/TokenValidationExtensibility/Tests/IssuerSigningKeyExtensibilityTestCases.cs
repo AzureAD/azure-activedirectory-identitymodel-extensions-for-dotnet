@@ -120,7 +120,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidatorDelegate), null),
                     ValidationFailureType.SigningKeyValidationFailed,
-                    typeof(SecurityTokenInvalidSigningKeyException),
                     new StackFrame("CustomIssuerSigningKeyValidationDelegates.cs", 0),
                     null)
             });
@@ -142,7 +141,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidatorCustomIssuerSigningKeyExceptionTypeDelegate), null),
                     ValidationFailureType.SigningKeyValidationFailed,
-                    typeof(CustomSecurityTokenInvalidSigningKeyException),
                     new StackFrame("CustomIssuerSigningKeyValidationDelegates.cs", 0),
                     null)
             });
@@ -164,7 +162,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidatorCustomExceptionTypeDelegate), null),
                     ValidationFailureType.SigningKeyValidationFailed,
-                    typeof(CustomSecurityTokenException),
                     new StackFrame("CustomIssuerSigningKeyValidationDelegates.cs", 0),
                     null)
             });
@@ -184,7 +181,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         string.Format(Tokens.LogMessages.IDX10274), null),
                     ValidationFailureType.IssuerSigningKeyValidatorThrew,
-                    typeof(SecurityTokenInvalidSigningKeyException),
                     new StackFrame(stackFrameFileName, 0),
                     null,
                     new SecurityTokenInvalidSigningKeyException(nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidatorThrows))

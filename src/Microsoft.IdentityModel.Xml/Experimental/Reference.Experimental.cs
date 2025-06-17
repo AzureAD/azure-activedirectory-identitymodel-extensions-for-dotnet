@@ -38,7 +38,6 @@ namespace Microsoft.IdentityModel.Xml
                         LogMessages.IDX30201,
                         Uri ?? Id),
                     ValidationFailureType.XmlValidationFailed,
-                    typeof(SecurityTokenInvalidSignatureException),
                     ValidationError.GetCurrentStackFrame());
 
             return null;

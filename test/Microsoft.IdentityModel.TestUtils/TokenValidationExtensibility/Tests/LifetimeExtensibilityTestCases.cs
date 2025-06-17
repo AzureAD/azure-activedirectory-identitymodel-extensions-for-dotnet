@@ -130,7 +130,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomLifetimeValidationDelegates.LifetimeValidatorDelegate), null),
                     ValidationFailureType.LifetimeValidationFailed,
-                    typeof(SecurityTokenInvalidLifetimeException),
                     new StackFrame("CustomLifetimeValidationDelegates.cs", 0),
                     utcNow,
                     utcPlusOneHour)
@@ -154,7 +153,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomLifetimeValidationDelegates.LifetimeValidatorCustomLifetimeExceptionTypeDelegate), null),
                     ValidationFailureType.LifetimeValidationFailed,
-                    typeof(CustomSecurityTokenInvalidLifetimeException),
                     new StackFrame("CustomLifetimeValidationDelegates.cs", 0),
                     utcNow,
                     utcPlusOneHour)
@@ -178,7 +176,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomLifetimeValidationDelegates.LifetimeValidatorCustomExceptionTypeDelegate), null),
                     ValidationFailureType.LifetimeValidationFailed,
-                    typeof(CustomSecurityTokenException),
                     new StackFrame("CustomLifetimeValidationDelegates.cs", 0),
                     utcNow,
                     utcPlusOneHour)
@@ -200,7 +197,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         string.Format(Tokens.LogMessages.IDX10271), null),
                     ValidationFailureType.LifetimeValidatorThrew,
-                    typeof(SecurityTokenInvalidLifetimeException),
                     new StackFrame(stackFrameFileName, 0),
                     utcNow,
                     utcPlusOneHour,

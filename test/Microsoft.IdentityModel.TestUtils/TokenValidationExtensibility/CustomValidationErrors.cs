@@ -26,21 +26,16 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             string? invalidIssuer,
             Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, invalidIssuer, innerException)
+            : base(messageDetail, validationFailureType, stackFrame, invalidIssuer, innerException)
         {
         }
 
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(CustomSecurityTokenInvalidIssuerException))
+            return new CustomSecurityTokenInvalidIssuerException(MessageDetail.Message, this, InnerException)
             {
-                var exception = new CustomSecurityTokenInvalidIssuerException(MessageDetail.Message, InnerException) { InvalidIssuer = InvalidIssuer };
-                exception.SetValidationError(this);
-
-                return exception;
-            }
-
-            return base.CreateException();
+                InvalidIssuer = InvalidIssuer
+            };
         }
     }
 
@@ -50,7 +45,7 @@ namespace Microsoft.IdentityModel.TestUtils
             Type exceptionType,
             StackFrame stackFrame,
             string? invalidIssuer) :
-            base(messageDetail, ValidationFailureType.IssuerValidationFailed, exceptionType, stackFrame, invalidIssuer)
+            base(messageDetail, ValidationFailureType.IssuerValidationFailed, stackFrame, invalidIssuer)
         {
         }
     }
@@ -63,6 +58,7 @@ namespace Microsoft.IdentityModel.TestUtils
         /// A custom validation failure type.
         /// </summary>
         public static readonly ValidationFailureType CustomAudienceValidationFailureType = new AudienceValidatorFailure("CustomAudienceValidationFailureType");
+
         private class AudienceValidatorFailure : ValidationFailureType { internal AudienceValidatorFailure(string name) : base(name) { } }
 
         public CustomAudienceValidationError(
@@ -73,21 +69,16 @@ namespace Microsoft.IdentityModel.TestUtils
             IList<string>? tokenAudiences,
             IList<string>? validAudiences,
             Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, tokenAudiences, validAudiences, innerException)
+            : base(messageDetail, validationFailureType, stackFrame, tokenAudiences, validAudiences, innerException)
         {
         }
 
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(CustomSecurityTokenInvalidAudienceException))
+            return new CustomSecurityTokenInvalidAudienceException(MessageDetail.Message, this, InnerException)
             {
-                var exception = new CustomSecurityTokenInvalidAudienceException(MessageDetail.Message, InnerException) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(TokenAudiences) };
-                exception.SetValidationError(this);
-
-                return exception;
-            }
-
-            return base.CreateException();
+                InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(TokenAudiences)
+            };
         }
     }
 
@@ -100,7 +91,7 @@ namespace Microsoft.IdentityModel.TestUtils
             IList<string>? tokenAudiences,
             IList<string>? validAudiences,
             Exception? innerException = null) :
-            base(messageDetail, ValidationFailureType.AudienceValidationFailed, exceptionType, stackFrame, tokenAudiences, validAudiences, innerException)
+            base(messageDetail, ValidationFailureType.AudienceValidationFailed, stackFrame, tokenAudiences, validAudiences, innerException)
         {
         }
     }
@@ -113,6 +104,7 @@ namespace Microsoft.IdentityModel.TestUtils
         /// A custom validation failure type.
         /// </summary>
         public static readonly ValidationFailureType CustomLifetimeValidationFailureType = new LifetimeValidationFailure("CustomLifetimeValidationFailureType");
+
         private class LifetimeValidationFailure : ValidationFailureType { internal LifetimeValidationFailure(string name) : base(name) { } }
 
         public CustomLifetimeValidationError(
@@ -123,21 +115,17 @@ namespace Microsoft.IdentityModel.TestUtils
             DateTime? notBefore,
             DateTime? expires,
             Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, notBefore, expires)
+            : base(messageDetail, validationFailureType, stackFrame, notBefore, expires)
         {
         }
 
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(CustomSecurityTokenInvalidLifetimeException))
+            return new CustomSecurityTokenInvalidLifetimeException(MessageDetail.Message, this, InnerException)
             {
-                var exception = new CustomSecurityTokenInvalidLifetimeException(MessageDetail.Message, InnerException) { NotBefore = NotBefore, Expires = Expires };
-                exception.SetValidationError(this);
-
-                return exception;
-            }
-
-            return base.CreateException();
+                NotBefore = NotBefore,
+                Expires = Expires
+            };
         }
     }
 
@@ -151,7 +139,7 @@ namespace Microsoft.IdentityModel.TestUtils
             DateTime? notBefore,
             DateTime? expires,
             Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, notBefore, expires, innerException)
+            : base(messageDetail, validationFailureType, stackFrame, notBefore, expires, innerException)
         {
         }
     }
@@ -164,6 +152,7 @@ namespace Microsoft.IdentityModel.TestUtils
         /// A custom validation failure type.
         /// </summary>
         public static readonly ValidationFailureType CustomIssuerSigningKeyValidationFailureType = new IssuerSigningKeyValidationFailure("CustomIssuerSigningKeyValidationFailureType");
+
         private class IssuerSigningKeyValidationFailure : ValidationFailureType { internal IssuerSigningKeyValidationFailure(string name) : base(name) { } }
 
         public CustomIssuerSigningKeyValidationError(
@@ -173,19 +162,13 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             SecurityKey? securityKey,
             Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, securityKey, innerException)
+            : base(messageDetail, validationFailureType, stackFrame, securityKey, innerException)
         {
         }
 
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(CustomSecurityTokenInvalidSigningKeyException))
-            {
-                var exception = new CustomSecurityTokenInvalidSigningKeyException(MessageDetail.Message, InnerException) { SigningKey = InvalidSigningKey };
-                exception.SetValidationError(this);
-                return exception;
-            }
-            return base.CreateException();
+            return new CustomSecurityTokenInvalidSigningKeyException(MessageDetail.Message, this, InnerException) { SigningKey = InvalidSigningKey };
         }
     }
 
@@ -197,7 +180,7 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             SecurityKey? securityKey,
             Exception? innerException = null)
-            : base(messageDetail, ValidationFailureType.SigningKeyValidationFailed, exceptionType, stackFrame, securityKey, innerException)
+            : base(messageDetail, ValidationFailureType.SigningKeyValidationFailed, stackFrame, securityKey, innerException)
         {
         }
     }
@@ -219,19 +202,16 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             string? invalidTokenType,
             Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, invalidTokenType, innerException)
+            : base(messageDetail, validationFailureType, stackFrame, invalidTokenType, innerException)
         {
         }
 
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(CustomSecurityTokenInvalidTypeException))
+            return new CustomSecurityTokenInvalidTypeException(MessageDetail.Message, this, InnerException)
             {
-                var exception = new CustomSecurityTokenInvalidTypeException(MessageDetail.Message, InnerException) { InvalidType = InvalidTokenType };
-                exception.SetValidationError(this);
-                return exception;
-            }
-            return base.CreateException();
+                InvalidType = InvalidTokenType
+            };
         }
     }
 
@@ -243,7 +223,7 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             string? invalidTokenType,
             Exception? innerException = null)
-            : base(messageDetail, ValidationFailureType.TokenTypeValidationFailed, exceptionType, stackFrame, invalidTokenType, innerException)
+            : base(messageDetail, ValidationFailureType.TokenTypeValidationFailed, stackFrame, invalidTokenType, innerException)
         {
         }
     }
@@ -265,19 +245,13 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             ValidationError? innerValidationError = null,
             Exception? innerException = null) :
-            base(messageDetail, validationFailureType, exceptionType, stackFrame, innerValidationError, innerException)
+            base(messageDetail, validationFailureType, stackFrame, innerValidationError, innerException)
         {
         }
 
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(CustomSecurityTokenInvalidSignatureException))
-            {
-                var exception = new CustomSecurityTokenInvalidSignatureException(MessageDetail.Message, InnerException);
-                exception.SetValidationError(this);
-                return exception;
-            }
-            return base.CreateException();
+            return new CustomSecurityTokenInvalidSignatureException(MessageDetail.Message, this, InnerException);
         }
     }
 
@@ -290,7 +264,7 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             ValidationError? innerValidationError = null,
             Exception? innerException = null) :
-            base(messageDetail, validationFailureType, exceptionType, stackFrame, innerValidationError, innerException)
+            base(messageDetail, validationFailureType, stackFrame, innerValidationError, innerException)
         {
         }
     }
@@ -312,19 +286,16 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             string? algorithm,
             Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, algorithm, innerException)
+            : base(messageDetail, validationFailureType, stackFrame, algorithm, innerException)
         {
         }
 
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(CustomSecurityTokenInvalidAlgorithmException))
+            return new CustomSecurityTokenInvalidAlgorithmException(MessageDetail.Message, this, InnerException)
             {
-                var exception = new CustomSecurityTokenInvalidAlgorithmException(MessageDetail.Message, InnerException) { InvalidAlgorithm = InvalidAlgorithm };
-                exception.SetValidationError(this);
-                return exception;
-            }
-            return base.CreateException();
+                InvalidAlgorithm = InvalidAlgorithm
+            };
         }
     }
 
@@ -337,7 +308,7 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             string? invalidAlgorithm,
             Exception? innerException = null) :
-            base(messageDetail, validationFailureType, exceptionType, stackFrame, invalidAlgorithm, innerException)
+            base(messageDetail, validationFailureType, stackFrame, invalidAlgorithm, innerException)
         {
         }
     }
@@ -350,6 +321,7 @@ namespace Microsoft.IdentityModel.TestUtils
         /// A custom validation failure type.
         /// </summary>
         public static readonly ValidationFailureType CustomTokenReplayValidationFailureType = new TokenReplayValidationFailure("CustomTokenReplayValidationFailureType");
+
         private class TokenReplayValidationFailure : ValidationFailureType { internal TokenReplayValidationFailure(string name) : base(name) { } }
 
         public CustomTokenReplayValidationError(
@@ -359,21 +331,13 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             DateTime? expirationTime,
             Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, expirationTime, innerException)
+            : base(messageDetail, validationFailureType, stackFrame, expirationTime, innerException)
         {
         }
 
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(CustomSecurityTokenReplayDetectedException))
-            {
-                var exception = new CustomSecurityTokenReplayDetectedException(MessageDetail.Message, InnerException);
-                exception.SetValidationError(this);
-
-                return exception;
-            }
-
-            return base.CreateException();
+            return new CustomSecurityTokenReplayDetectedException(MessageDetail.Message, this, InnerException);
         }
     }
 
@@ -385,7 +349,7 @@ namespace Microsoft.IdentityModel.TestUtils
             StackFrame stackFrame,
             DateTime? expirationTime,
             Exception? innerException = null)
-            : base(messageDetail, ValidationFailureType.TokenReplayValidationFailed, exceptionType, stackFrame, expirationTime, innerException)
+            : base(messageDetail, ValidationFailureType.TokenReplayValidationFailed, stackFrame, expirationTime, innerException)
         {
         }
     }

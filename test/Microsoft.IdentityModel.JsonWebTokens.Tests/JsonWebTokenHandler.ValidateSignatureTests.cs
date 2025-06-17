@@ -3,6 +3,7 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt.Tests;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -39,7 +40,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (theoryData.ValidationParameters is not null && theoryData.KeyToAddToValidationParameters is not null)
                 theoryData.ValidationParameters.IssuerSigningKeys.Add(theoryData.KeyToAddToValidationParameters);
 
-            ValidationResult<SecurityKey, SignatureValidationError> result = JsonWebTokenHandler.ValidateSignature(
+            OperationResult<SecurityKey, ValidationError> operationResult = JsonWebTokenHandler.ValidateSignature(
                 jsonWebToken,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
@@ -48,21 +49,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     DebugId = theoryData.TestId
                 });
 
-            if (result.IsValid)
+            if (operationResult.Succeeded)
             {
                 IdentityComparer.AreSecurityKeysEqual(
-                    result.UnwrapResult(),
-                    theoryData.Result.UnwrapResult(),
+                    operationResult.Result,
+                    theoryData.OperationResult.Result,
                     context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             else
             {
-                ValidationError validationError = result.UnwrapError();
+                ValidationError validationError = operationResult.Error;
                 IdentityComparer.AreStringsEqual(
                     validationError.FailureType.Name,
-                    theoryData.Result.UnwrapError().FailureType.Name,
+                    theoryData.OperationResult.Error.FailureType.Name,
                     context);
 
                 Exception exception = validationError.GetException();
@@ -82,144 +83,128 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var unsignedToken = new JsonWebToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.");
                 return new TheoryData<JsonWebTokenHandlerValidateSignatureTheoryData>
                 {
-                    new JsonWebTokenHandlerValidateSignatureTheoryData {
-                        TestId = "Invalid_Null_JWT",
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_Null_JWT")
+                    {
                         JWT = null,
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 "jwtToken"),
                             ValidationFailureType.NullArgument,
-                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData {
-                        TestId = "Invalid_Null_ValidationParameters",
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_Null_ValidationParameters")
+                    {
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = null,
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData {
-                        TestId = "Invalid_DelegateReturnsFailure",
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_DelegateReturnsFailure")
+                    {
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = new ValidationParameters
                         {
                             SignatureValidator = (token, parameters, configuration, callContext) => new SignatureValidationError(
                                 new MessageDetail("IDX10000: NullArgument", null),
                                 ValidationFailureType.NullArgument,
-                                typeof(SecurityTokenArgumentNullException),
                                 ValidationError.GetCurrentStackFrame())
                         },
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 "NullArgument"),
                             ValidationFailureType.NullArgument,
-                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_NoSignature")
                     {
-                        TestId = "Invalid_NoSignature",
                         JWT = unsignedToken,
                         ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:"),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10504,
                                 LogHelper.MarkAsSecurityArtifact(unsignedToken, JwtTokenUtilities.SafeLogJwtToken)),
                             ValidationFailureType.SignatureValidationFailed,
-                            typeof(SecurityTokenInvalidSignatureException),
                             null)
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_DelegateReturnsSuccess")
                     {
-                        TestId = "Valid_DelegateReturnsSuccess",
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = new ValidationParameters
                         {
                             SignatureValidator = (token, parameters, configuration, callContext) => KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key
                         },
-                        Result = KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key
+                        OperationResult = KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_SignatureValidationResult_Success_KidMatches")
                     {
-                        TestId = "Valid_SignatureValidationResult_Success_KidMatches",
                         SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                         ValidationParameters = new ValidationParameters(),
                         KeyToAddToValidationParameters = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                        Result = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-            },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                        OperationResult = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                    },
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_SignatureValidationResult_Success_X5tMatches")
                     {
-                        TestId = "Valid_SignatureValidationResult_Success_X5tMatches",
                         SigningCredentials = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2,
                         ValidationParameters = new ValidationParameters(),
                         KeyToAddToValidationParameters = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key,
-                        Result = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key,
+                        OperationResult = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key,
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_IssuerSigningKeyResolverReturnsKeyThatMatches")
                     {
-                        TestId = "Valid_IssuerSigningKeyResolverReturnsKeyThatMatches",
                         SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                         ValidationParameters = new ValidationParameters
                         {
                             IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters, configuration, callContext) => KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key
                         },
-                        Result = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key
+                        OperationResult = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_ConfurationReturnsKeyThatMatches")
                     {
-                        TestId = "Valid_ConfurationReturnsKeyThatMatches",
                         SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                         Configuration = new OpenIdConnectConfiguration(),
                         KeyToAddToConfiguration = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                         ValidationParameters = new ValidationParameters(),
-                        Result = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                        OperationResult = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_NoKeyId_TryAllKeys")
                     {
-                        TestId = "Valid_NoKeyId_TryAllKeys",
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
                         ValidationParameters = new ValidationParameters
                         {
                             TryAllIssuerSigningKeys = true
                         },
                         KeyToAddToValidationParameters = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
-                        Result = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
+                        OperationResult = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_NoKeyId_DontTryAllKeys")
                     {
-                        TestId = "Invalid_NoKeyId_DontTryAllKeys",
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
                         ValidationParameters = new ValidationParameters(),
                         KeyToAddToValidationParameters = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10519:"),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(TokenLogMessages.IDX10519),
                             ValidationFailureType.SignatureValidationFailed,
-                            typeof(SecurityTokenSignatureKeyNotFoundException),
                             null)
                     },
-                    new JsonWebTokenHandlerValidateSignatureTheoryData
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_NoKeys")
                     {
-                        TestId = "Invalid_NoKeys",
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10502:"),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(TokenLogMessages.IDX10500),
                             ValidationFailureType.SignatureValidationFailed,
-                            typeof(SecurityTokenSignatureKeyNotFoundException),
                             null)
                     }
                 };
@@ -229,12 +214,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
     public class JsonWebTokenHandlerValidateSignatureTheoryData : TheoryDataBase
     {
+        public JsonWebTokenHandlerValidateSignatureTheoryData(string testId) : base(testId) { }
         public JsonWebToken JWT { get; set; }
         public BaseConfiguration Configuration { get; set; }
         public SigningCredentials SigningCredentials { get; internal set; }
         public SecurityKey KeyToAddToConfiguration { get; internal set; }
         public SecurityKey KeyToAddToValidationParameters { get; internal set; }
-        internal ValidationResult<SecurityKey, ValidationError> Result { get; set; }
+        internal OperationResult<SecurityKey, ValidationError> OperationResult { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
     }
 }

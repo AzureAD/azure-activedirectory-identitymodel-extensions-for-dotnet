@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -10,7 +11,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomTokenTypeValidationDelegates
     {
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorDelegate(
+        internal static OperationResult<ValidatedTokenType, ValidationError> CustomTokenTypeValidatorDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -26,7 +27,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorCustomExceptionDelegate(
+        internal static OperationResult<ValidatedTokenType, ValidationError> CustomTokenTypeValidatorCustomExceptionDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -41,7 +42,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static OperationResult<ValidatedTokenType, ValidationError> CustomTokenTypeValidatorCustomExceptionCustomFailureTypeDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -55,7 +56,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 type);
         }
 
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorUnknownExceptionDelegate(
+        internal static OperationResult<ValidatedTokenType, ValidationError> CustomTokenTypeValidatorUnknownExceptionDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -70,7 +71,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorWithoutGetExceptionOverrideDelegate(
+        internal static OperationResult<ValidatedTokenType, ValidationError> CustomTokenTypeValidatorWithoutGetExceptionOverrideDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -84,7 +85,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidatorDelegate(
+        internal static OperationResult<ValidatedTokenType, ValidationError> TokenTypeValidatorDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -93,13 +94,12 @@ namespace Microsoft.IdentityModel.TestUtils
             return new TokenTypeValidationError(
                 new MessageDetail(nameof(TokenTypeValidatorDelegate), null),
                 ValidationFailureType.TokenTypeValidationFailed,
-                typeof(SecurityTokenInvalidTypeException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidatorThrows(
+        internal static OperationResult<ValidatedTokenType, ValidationError> TokenTypeValidatorThrows(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.TestUtils
             throw new CustomSecurityTokenInvalidTypeException(nameof(TokenTypeValidatorThrows), null);
         }
 
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidatorCustomTokenTypeExceptionTypeDelegate(
+        internal static OperationResult<ValidatedTokenType, ValidationError> TokenTypeValidatorCustomTokenTypeExceptionTypeDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -117,13 +117,12 @@ namespace Microsoft.IdentityModel.TestUtils
             return new TokenTypeValidationError(
                 new MessageDetail(nameof(TokenTypeValidatorCustomTokenTypeExceptionTypeDelegate), null),
                 ValidationFailureType.TokenTypeValidationFailed,
-                typeof(CustomSecurityTokenInvalidTypeException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidatorCustomExceptionTypeDelegate(
+        internal static OperationResult<ValidatedTokenType, ValidationError> TokenTypeValidatorCustomExceptionTypeDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -132,7 +131,6 @@ namespace Microsoft.IdentityModel.TestUtils
             return new TokenTypeValidationError(
                 new MessageDetail(nameof(TokenTypeValidatorCustomExceptionTypeDelegate), null),
                 ValidationFailureType.TokenTypeValidationFailed,
-                typeof(CustomSecurityTokenException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
                 null);

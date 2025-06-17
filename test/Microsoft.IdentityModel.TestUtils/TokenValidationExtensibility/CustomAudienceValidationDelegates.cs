@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -11,7 +12,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomAudienceValidationDelegates
     {
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorDelegate(
+        internal static OperationResult<string, ValidationError> CustomAudienceValidatorDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -27,7 +28,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorCustomExceptionDelegate(
+        internal static OperationResult<string, ValidationError> CustomAudienceValidatorCustomExceptionDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -42,7 +43,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static OperationResult<string, ValidationError> CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -57,7 +58,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorUnknownExceptionDelegate(
+        internal static OperationResult<string, ValidationError> CustomAudienceValidatorUnknownExceptionDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -72,7 +73,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorWithoutGetExceptionOverrideDelegate(
+        internal static OperationResult<string, ValidationError> CustomAudienceValidatorWithoutGetExceptionOverrideDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -83,10 +84,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 typeof(CustomSecurityTokenInvalidAudienceException),
                 ValidationError.GetCurrentStackFrame(),
                 tokenAudiences,
-                null);
+                null)
+                ;
         }
 
-        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorDelegate(
+        internal static OperationResult<string, ValidationError> AudienceValidatorDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -95,22 +97,29 @@ namespace Microsoft.IdentityModel.TestUtils
             return new AudienceValidationError(
                 new MessageDetail(nameof(AudienceValidatorDelegate), null),
                 ValidationFailureType.AudienceValidationFailed,
-                typeof(SecurityTokenInvalidAudienceException),
                 ValidationError.GetCurrentStackFrame(),
                 tokenAudiences,
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorThrows(
+        internal static OperationResult<string, ValidationError> AudienceValidatorThrows(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            throw new CustomSecurityTokenInvalidAudienceException(nameof(AudienceValidatorThrows), null);
+            throw new CustomSecurityTokenInvalidAudienceException(
+                nameof(AudienceValidatorThrows),
+                new AudienceValidationError(
+                    new MessageDetail(nameof(AudienceValidatorDelegate), null),
+                    ValidationFailureType.AudienceValidationFailed,
+                    ValidationError.GetCurrentStackFrame(),
+                    tokenAudiences,
+                    null),
+                null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorCustomAudienceExceptionTypeDelegate(
+        internal static OperationResult<string, ValidationError> AudienceValidatorCustomAudienceExceptionTypeDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -119,13 +128,12 @@ namespace Microsoft.IdentityModel.TestUtils
             return new AudienceValidationError(
                 new MessageDetail(nameof(AudienceValidatorCustomAudienceExceptionTypeDelegate), null),
                 ValidationFailureType.AudienceValidationFailed,
-                typeof(CustomSecurityTokenInvalidAudienceException),
                 ValidationError.GetCurrentStackFrame(),
                 tokenAudiences,
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorCustomExceptionTypeDelegate(
+        internal static OperationResult<string, ValidationError> AudienceValidatorCustomExceptionTypeDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -134,7 +142,6 @@ namespace Microsoft.IdentityModel.TestUtils
             return new AudienceValidationError(
                 new MessageDetail(nameof(AudienceValidatorCustomExceptionTypeDelegate), null),
                 ValidationFailureType.AudienceValidationFailed,
-                typeof(CustomSecurityTokenException),
                 ValidationError.GetCurrentStackFrame(),
                 tokenAudiences,
                 null);

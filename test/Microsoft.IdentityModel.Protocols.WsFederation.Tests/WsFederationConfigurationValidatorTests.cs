@@ -7,8 +7,6 @@ using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
     /// <summary>

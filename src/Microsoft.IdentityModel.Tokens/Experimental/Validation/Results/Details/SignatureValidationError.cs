@@ -8,27 +8,42 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
-    /// Represents an error that occurs when the token's signature cannot be validated.
+    /// Represents a validation error when a <see cref="SecurityToken"/> signature is not valid.
     /// </summary>
     public class SignatureValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SignatureValidationError"/> class.
         /// </summary>
-        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
-        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
-        /// <param name="exceptionType"/> is the type of exception that occurred.
-        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="innerValidationError"/> if present, is the inner validation error that caused this signature validation error.
-        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        /// <param name="messageDetail" />Information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
         public SignatureValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
-            Type exceptionType,
+            StackFrame stackFrame)
+            : this(messageDetail, validationFailureType, stackFrame, null, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SignatureValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" />Information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="innerValidationError"/>If present, is the inner validation error that caused this signature validation error.
+        /// <param name="innerException"/>If present, represents the exception that occurred during validation.
+        public SignatureValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             StackFrame stackFrame,
-            ValidationError? innerValidationError = null,
-            Exception? innerException = null) :
-            base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
+            ValidationError? innerValidationError,
+            Exception? innerException) :
+            base(messageDetail,
+                validationFailureType,
+                stackFrame,
+                innerException)
         {
             InnerValidationError = innerValidationError;
         }
@@ -39,24 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <returns>An instance of an exception.</returns>
         protected override Exception CreateException()
         {
-            var inner = InnerException ?? InnerValidationError?.GetException();
-
-            if (ExceptionType == typeof(SecurityTokenInvalidSignatureException))
-            {
-                SecurityTokenInvalidSignatureException exception = new(MessageDetail.Message, inner);
-                exception.SetValidationError(this);
-
-                return exception;
-            }
-            else if (ExceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
-            {
-                SecurityTokenSignatureKeyNotFoundException exception = new(MessageDetail.Message, inner);
-                exception.SetValidationError(this);
-
-                return exception;
-            }
-
-            return base.CreateException();
+            return new SecurityTokenInvalidSignatureException(MessageDetail.Message, this, InnerException);
         }
 
         /// <summary>
@@ -69,8 +67,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             string parameterName, StackFrame stackFrame) => new(
                 MessageDetail.NullParameter(parameterName),
                 ValidationFailureType.NullArgument,
-                typeof(SecurityTokenArgumentNullException),
                 stackFrame,
+                null,
                 null); // innerValidationError
 
         /// <summary>

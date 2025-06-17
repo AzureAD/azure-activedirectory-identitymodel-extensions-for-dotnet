@@ -9,7 +9,6 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     public class RsaKeyValueTests
     {
         [Fact]
@@ -177,5 +176,4 @@ namespace Microsoft.IdentityModel.Xml.Tests
             public bool ShouldBeConsideredEqual { get; set; }
         }
     }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 }

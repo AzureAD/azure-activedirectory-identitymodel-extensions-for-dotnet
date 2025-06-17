@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.TestUtils;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.Identity.Abstractions;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
@@ -17,14 +18,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ReadToken_ResultType", theoryData);
             SamlSecurityTokenHandler handler = new SamlSecurityTokenHandler();
-            ValidationResult<SamlSecurityToken, ValidationError> result = handler.ReadSamlToken(
+            OperationResult<SamlSecurityToken, ValidationError> operationResult = handler.ReadSamlToken(
                 theoryData.Token,
                 new CallContext());
 
-            if (result.IsValid)
+            if (operationResult.Succeeded)
             {
                 IdentityComparer.AreEqual(
-                    result.UnwrapResult(),
+                    operationResult.Result,
                     handler.ReadToken(theoryData.Token),
                     context);
 
@@ -32,10 +33,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
             else
             {
-                ValidationError validationError = result.UnwrapError();
+                ValidationError validationError = operationResult.Error;
                 IdentityComparer.AreStringsEqual(
                     validationError.FailureType.Name,
-                    theoryData.Result.UnwrapError().FailureType.Name,
+                    theoryData.OperationResult.Error.FailureType.Name,
                     context);
 
                 Exception exception = validationError.GetException();
@@ -60,12 +61,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     Token = null,
                     ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                    Result = new ValidationError(
+                    OperationResult = new ValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("token")),
                         ValidationFailureType.NullArgument,
-                        typeof(SecurityTokenArgumentNullException),
                         null)
                 });
 
@@ -73,12 +73,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     Token = string.Empty,
                     ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                    Result = new ValidationError(
+                    OperationResult = new ValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("token")),
                         ValidationFailureType.NullArgument,
-                        typeof(SecurityTokenArgumentNullException),
                         null)
                 });
 
@@ -86,10 +85,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     Token = ReferenceTokens.SamlToken_MissingMajorVersion,
                     ExpectedException = ExpectedException.SamlSecurityTokenReadException("IDX11402:", inner: typeof(SamlSecurityTokenReadException)),
-                    Result = new ValidationError(
+                    OperationResult = new ValidationError(
                         new MessageDetail(LogMessages.IDX11402, "exception message"),
                         ValidationFailureType.TokenReadingFailed,
-                        typeof(SamlSecurityTokenReadException),
                         null),
                 });
 
@@ -100,13 +98,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
     public class TokenReadingTheoryData : TheoryDataBase
     {
-        public TokenReadingTheoryData(string testId)
+        public TokenReadingTheoryData(string testId) : base(testId)
         {
-            TestId = testId;
         }
 
         public string Token { get; set; }
 
-        internal ValidationResult<SecurityToken, ValidationError> Result { get; set; }
+        internal OperationResult<SecurityToken, ValidationError> OperationResult { get; set; }
     }
 }

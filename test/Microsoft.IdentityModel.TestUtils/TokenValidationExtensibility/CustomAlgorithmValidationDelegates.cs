@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -10,7 +11,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomAlgorithmValidationDelegates
     {
-        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorDelegate(
+        internal static OperationResult<string, ValidationError> CustomAlgorithmValidatorDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -20,13 +21,13 @@ namespace Microsoft.IdentityModel.TestUtils
             // Returns a CustomAlgorithmValidationError : AlgorithmValidationError
             return new CustomAlgorithmValidationError(
                 new MessageDetail(nameof(CustomAlgorithmValidatorDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
+                ValidationFailureType.InvalidAlgorithm,
                 typeof(SecurityTokenInvalidAlgorithmException),
                 ValidationError.GetCurrentStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorCustomExceptionDelegate(
+        internal static OperationResult<string, ValidationError> CustomAlgorithmValidatorCustomExceptionDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -35,13 +36,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomAlgorithmValidationError(
                 new MessageDetail(nameof(CustomAlgorithmValidatorCustomExceptionDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
+                ValidationFailureType.InvalidAlgorithm,
                 typeof(CustomSecurityTokenInvalidAlgorithmException),
                 ValidationError.GetCurrentStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static OperationResult<string, ValidationError> CustomAlgorithmValidatorCustomExceptionCustomFailureTypeDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -56,7 +57,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 algorithm);
         }
 
-        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorUnknownExceptionDelegate(
+        internal static OperationResult<string, ValidationError> CustomAlgorithmValidatorUnknownExceptionDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -65,13 +66,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomAlgorithmValidationError(
                 new MessageDetail(nameof(CustomAlgorithmValidatorUnknownExceptionDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
+                ValidationFailureType.InvalidAlgorithm,
                 typeof(NotSupportedException),
                 ValidationError.GetCurrentStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorWithoutGetExceptionOverrideDelegate(
+        internal static OperationResult<string, ValidationError> CustomAlgorithmValidatorWithoutGetExceptionOverrideDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -80,13 +81,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomAlgorithmWithoutGetExceptionValidationOverrideError(
                 new MessageDetail(nameof(CustomAlgorithmValidatorWithoutGetExceptionOverrideDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
+                ValidationFailureType.InvalidAlgorithm,
                 typeof(CustomSecurityTokenInvalidAlgorithmException),
                 ValidationError.GetCurrentStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string, AlgorithmValidationError> AlgorithmValidatorDelegate(
+        internal static OperationResult<string, ValidationError> AlgorithmValidatorDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -95,23 +96,31 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new AlgorithmValidationError(
                 new MessageDetail(nameof(AlgorithmValidatorDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(SecurityTokenInvalidAlgorithmException),
+                ValidationFailureType.InvalidAlgorithm,
                 ValidationError.GetCurrentStackFrame(),
-                algorithm);
+                algorithm,
+                null);
         }
 
-        internal static ValidationResult<string, AlgorithmValidationError> AlgorithmValidatorThrows(
+        internal static OperationResult<string, ValidationError> AlgorithmValidatorThrows(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            throw new CustomSecurityTokenInvalidAlgorithmException(nameof(AlgorithmValidatorThrows), null);
+            throw new CustomSecurityTokenInvalidAlgorithmException(
+                nameof(AlgorithmValidatorThrows),
+                new AlgorithmValidationError(
+                    new MessageDetail(nameof(AlgorithmValidatorDelegate), null),
+                    ValidationFailureType.InvalidAlgorithm,
+                    ValidationError.GetCurrentStackFrame(),
+                    algorithm,
+                    null),
+                null);
         }
 
-        internal static ValidationResult<string, AlgorithmValidationError> AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate(
+        internal static OperationResult<string, ValidationError> AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -120,13 +129,12 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new AlgorithmValidationError(
                 new MessageDetail(nameof(AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(CustomSecurityTokenInvalidAlgorithmException),
+                ValidationFailureType.InvalidAlgorithm,
                 ValidationError.GetCurrentStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string, AlgorithmValidationError> AlgorithmValidatorCustomExceptionTypeDelegate(
+        internal static OperationResult<string, ValidationError> AlgorithmValidatorCustomExceptionTypeDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -135,8 +143,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new AlgorithmValidationError(
                 new MessageDetail(nameof(AlgorithmValidatorCustomExceptionTypeDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(CustomSecurityTokenException),
+                ValidationFailureType.InvalidAlgorithm,
                 ValidationError.GetCurrentStackFrame(),
                 algorithm);
         }

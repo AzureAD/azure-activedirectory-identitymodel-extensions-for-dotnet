@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
@@ -26,7 +27,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 await samlTokenHandler.ValidateTokenAsync(samlToken.Assertion.CanonicalString, theoryData.TokenValidationParameters);
 
             // Validate the token using ValidationParameters.
-            ValidationResult<ValidatedToken, ValidationError> validationResult =
+            OperationResult<ValidatedToken, ValidationError> operationResult =
                 await samlTokenHandler.ValidateTokenAsync(
                     samlToken,
                     theoryData.ValidationParameters!,
@@ -37,17 +38,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             if (tokenValidationResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationResult.IsValid != theoryData.ExpectedIsValid");
 
-            if (validationResult.IsValid != theoryData.ExpectedIsValid)
-                context.AddDiff($"validationResult.IsValid != theoryData.ExpectedIsValid");
+            if (operationResult.Succeeded != theoryData.ExpectedIsValid)
+                context.AddDiff($"operationResult.Succeeded != theoryData.ExpectedIsValid");
 
             if (!theoryData.ExpectedIsValid)
             {
                 // Verify the exception provided by both paths match.
                 var tokenValidationResultException = tokenValidationResult.Exception;
-                var validationResultException = validationResult.UnwrapError().GetException();
+                var operationResultException = operationResult.Error!.GetException();
 
                 theoryData.ExpectedException.ProcessException(tokenValidationResultException, context);
-                theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResultException, context);
+                theoryData.ExpectedExceptionValidationParameters!.ProcessException(operationResultException, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);

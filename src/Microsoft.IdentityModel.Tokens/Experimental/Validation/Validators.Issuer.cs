@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -22,13 +23,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>An <see cref="ValidationResult{TResult, TError}"/> that contains either the issuer that was validated or an error.</returns>
+        /// <returns>A <see cref="OperationResult{ValidatedIssuer, IssuerValidationError}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
-        public static async Task<ValidationResult<ValidatedIssuer, IssuerValidationError>> ValidateIssuerAsync(
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public static async Task<OperationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+#pragma warning restore RS0016 // Add public types and members to the declared API
             string? issuer,
+#pragma warning disable CA1801 // Review unused parameters
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
-#pragma warning disable CA1801 // Review unused parameters
             CallContext? callContext,
 #pragma warning restore CA1801 // Review unused parameters
             CancellationToken cancellationToken)
@@ -37,21 +40,19 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return new IssuerValidationError(
                     new MessageDetail(LogMessages.IDX10211),
-                    ValidationFailureType.IssuerValidationFailed,
-                    typeof(SecurityTokenInvalidIssuerException),
+                    ValidationFailureType.NoIssuerProvided,
                     ValidationError.GetCurrentStackFrame(),
-                    issuer);
+                    issuer,
+                    null);
             }
 
             if (validationParameters == null)
-                return IssuerValidationError.NullParameter(
-                    nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
-
-            if (securityToken == null)
-                return IssuerValidationError.NullParameter(
-                    nameof(securityToken),
-                    ValidationError.GetCurrentStackFrame());
+                return new IssuerValidationError(
+                    MessageDetail.NullParameter(nameof(validationParameters)),
+                    ValidationFailureType.NullArgument,
+                    ValidationError.GetCurrentStackFrame(),
+                    issuer,
+                    null);
 
             BaseConfiguration? configuration = null;
             if (validationParameters.ConfigurationManager != null)
@@ -60,9 +61,8 @@ namespace Microsoft.IdentityModel.Tokens
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
                 return new IssuerValidationError(
-                    new MessageDetail(LogMessages.IDX10211),
-                    ValidationFailureType.IssuerValidationFailed,
-                    typeof(SecurityTokenInvalidIssuerException),
+                    new MessageDetail(LogMessages.IDX10204),
+                    ValidationFailureType.NoValidIssuerProvided,
                     ValidationError.GetCurrentStackFrame(),
                     issuer);
 
@@ -78,7 +78,9 @@ namespace Microsoft.IdentityModel.Tokens
                     //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
 
 
-                    return new ValidatedIssuer(issuer!, IssuerValidationSource.IssuerMatchedConfiguration);
+                    return new ValidatedIssuer(
+                            issuer!,
+                            IssuerValidationSource.IssuerMatchedConfiguration);
                 }
             }
 
@@ -96,7 +98,9 @@ namespace Microsoft.IdentityModel.Tokens
                     }
 
                     if (string.Equals(validationParameters.ValidIssuers[i], issuer))
-                        return new ValidatedIssuer(issuer!, IssuerValidationSource.IssuerMatchedValidationParameters);
+                        return new ValidatedIssuer(
+                            issuer!,
+                            IssuerValidationSource.IssuerMatchedValidationParameters);
                 }
             }
 
@@ -107,7 +111,6 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                     LogHelper.MarkAsNonPII(configuration?.Issuer)),
                 ValidationFailureType.IssuerValidationFailed,
-                typeof(SecurityTokenInvalidIssuerException),
                 ValidationError.GetCurrentStackFrame(),
                 issuer);
         }

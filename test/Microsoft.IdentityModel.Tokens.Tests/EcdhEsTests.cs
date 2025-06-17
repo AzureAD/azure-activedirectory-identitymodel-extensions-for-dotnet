@@ -7,7 +7,6 @@ using Xunit;
 
 using KEY = Microsoft.IdentityModel.TestUtils.KeyingMaterial;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 #if NET472 || NET6_0_OR_GREATER
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
@@ -170,4 +169,3 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     }
 }
 #endif
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

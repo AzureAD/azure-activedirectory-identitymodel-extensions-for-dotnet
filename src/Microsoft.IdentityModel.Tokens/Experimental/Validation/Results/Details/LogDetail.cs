@@ -11,10 +11,10 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     internal class LogDetail
     {
         /// <summary>
-        /// Creates an instance of <see cref="LogDetail"/>
+        /// Creates an instance of the <see cref="LogDetail"/> class.
         /// </summary>
-        /// <paramref name="messageDetail"/> contains information about the exception that is used to generate the exception message.
-        /// <paramref name="eventLogLevel"/> is the level of the event log.
+        /// <paramref name="messageDetail"/>Information about the exception that is used to generate the exception message.
+        /// <paramref name="eventLogLevel"/>The level of the event log.
         public LogDetail(MessageDetail messageDetail, EventLogLevel eventLogLevel)
         {
             EventLogLevel = eventLogLevel;

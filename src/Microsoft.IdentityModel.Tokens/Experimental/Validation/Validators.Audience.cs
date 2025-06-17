@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
+#pragma warning disable RS0016 // Add public types and members to the declared API
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -23,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
         /// <remarks>An EXACT match is required.</remarks>
-        public static ValidationResult<string, AudienceValidationError> ValidateAudience(
+        public static OperationResult<string, ValidationError> ValidateAudience(
             IList<string> tokenAudiences,
 #pragma warning disable CA1801
             SecurityToken? securityToken,
@@ -34,8 +36,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
             {
                 return AudienceValidationError.NullParameter(
-                    nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
+                        nameof(validationParameters),
+                        ValidationError.GetCurrentStackFrame());
             }
 
             if (tokenAudiences == null)
@@ -50,7 +52,6 @@ namespace Microsoft.IdentityModel.Tokens
                 return new AudienceValidationError(
                     new MessageDetail(LogMessages.IDX10206),
                     ValidationFailureType.NoTokenAudiencesProvided,
-                    typeof(SecurityTokenInvalidAudienceException),
                     ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     validationParameters.ValidAudiences);
@@ -58,16 +59,20 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.ValidAudiences.Count == 0)
             {
+
                 return new AudienceValidationError(
-                        new MessageDetail(LogMessages.IDX10268),
-                        ValidationFailureType.NoValidationParameterAudiencesProvided,
-                        typeof(SecurityTokenInvalidAudienceException),
-                        ValidationError.GetCurrentStackFrame(),
-                        tokenAudiences,
-                        validationParameters.ValidAudiences);
+                    new MessageDetail(LogMessages.IDX10268),
+                    ValidationFailureType.NoValidationParameterAudiencesProvided,
+                    ValidationError.GetCurrentStackFrame(),
+                    tokenAudiences,
+                    validationParameters.ValidAudiences);
             }
 
-            string? validAudience = ValidTokenAudience(tokenAudiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
+            string? validAudience = ValidTokenAudience(
+                tokenAudiences,
+                validationParameters.ValidAudiences,
+                validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
+
             if (validAudience != null)
                 return validAudience;
 
@@ -80,7 +85,6 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
                     ValidationFailureType.AudienceValidationFailed,
-                    typeof(SecurityTokenInvalidAudienceException),
                     ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     validationParameters.ValidAudiences);
@@ -89,13 +93,15 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10215S),
                     ValidationFailureType.AudienceValidationFailed,
-                    typeof(SecurityTokenInvalidAudienceException),
                     ValidationError.GetCurrentStackFrame(),
                     null,
                     null);
         }
 
-        private static string? ValidTokenAudience(IList<string> tokenAudiences, IList<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)
+        private static string? ValidTokenAudience(
+            IList<string> tokenAudiences,
+            IList<string> validAudiences,
+            bool ignoreTrailingSlashWhenValidatingAudience)
         {
             for (int i = 0; i < tokenAudiences.Count; i++)
             {
@@ -155,4 +161,5 @@ namespace Microsoft.IdentityModel.Tokens
         }
     }
 }
+#pragma warning restore RS0016 // Add public types and members to the declared API
 #nullable disable

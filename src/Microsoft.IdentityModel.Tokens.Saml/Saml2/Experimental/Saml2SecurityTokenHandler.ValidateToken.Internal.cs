@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Saml;
 
@@ -25,8 +26,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        /// <returns>A <see cref="OperationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
+#pragma warning disable RS0051 // Add internal types and members to the declared API
+        internal override async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+#pragma warning restore RS0051 // Add internal types and members to the declared API
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -39,14 +42,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return ValidationError.NullParameter(nameof(validationParameters), ValidationError.GetCurrentStackFrame());
 
             var tokenReadingResult = ReadSaml2Token(token, callContext);
-            if (!tokenReadingResult.IsValid)
-                return tokenReadingResult.UnwrapError().AddCurrentStackFrame();
+            if (!tokenReadingResult.Succeeded)
+                return tokenReadingResult.Error!.AddCurrentStackFrame();
 
-            return await ValidateTokenAsync(tokenReadingResult.UnwrapResult(), validationParameters, callContext, cancellationToken).ConfigureAwait(false);
+            return await ValidateTokenAsync(tokenReadingResult.Result!, validationParameters, callContext, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        internal async override Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+#pragma warning disable RS0051 // Add internal types and members to the declared API
+        internal async override Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+#pragma warning restore RS0051 // Add internal types and members to the declared API
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -63,13 +68,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 return new ValidationError(
                     new MessageDetail(
-                        Tokens.Saml.LogMessages.IDX11400,
+                        Saml.LogMessages.IDX11400,
                         this,
                         typeof(Saml2SecurityToken),
                         securityToken.GetType()),
-                    ValidationFailureType.InvalidSecurityToken,
-                    typeof(SecurityTokenArgumentException),
-                    ValidationError.GetCurrentStackFrame());
+                        ValidationFailureType.InvalidSecurityToken,
+                        ValidationError.GetCurrentStackFrame());
             }
 
             if (validationParameters is null)
@@ -86,10 +90,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 validationParameters,
                 callContext);
 
-            if (!conditionsResult.IsValid)
-                return conditionsResult.UnwrapError().AddCurrentStackFrame();
+            if (!conditionsResult.Succeeded)
+                return conditionsResult.Error!.AddCurrentStackFrame();
 
-            ValidationResult<ValidatedIssuer, IssuerValidationError> issuerValidationResult;
+            OperationResult<ValidatedIssuer, ValidationError> issuerValidationResult;
 
             try
             {
@@ -100,8 +104,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     callContext,
                     cancellationToken).ConfigureAwait(false);
 
-                if (!issuerValidationResult.IsValid)
-                    return issuerValidationResult.UnwrapError().AddCurrentStackFrame();
+                if (!issuerValidationResult.Succeeded)
+                    return issuerValidationResult.Error!.AddCurrentStackFrame();
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -110,13 +114,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return new IssuerValidationError(
                     new MessageDetail(Tokens.LogMessages.IDX10269),
                     ValidationFailureType.IssuerValidatorThrew,
-                    typeof(SecurityTokenInvalidIssuerException),
                     ValidationError.GetCurrentStackFrame(),
                     samlToken.Issuer,
                     ex);
             }
 
-            ValidationResult<DateTime?, TokenReplayValidationError>? tokenReplayValidationResult = null;
+            OperationResult<DateTime?, ValidationError>? tokenReplayValidationResult = null;
 
             if (samlToken.Assertion.Conditions is not null)
             {
@@ -128,8 +131,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         validationParameters,
                         callContext);
 
-                    if (!tokenReplayValidationResult.Value.IsValid)
-                        return tokenReplayValidationResult.Value.UnwrapError().AddCurrentStackFrame();
+                    if (!tokenReplayValidationResult.Value.Succeeded)
+                        return tokenReplayValidationResult.Value.Error!.AddCurrentStackFrame();
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -138,7 +141,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     return new TokenReplayValidationError(
                         new MessageDetail(Tokens.LogMessages.IDX10276),
                         ValidationFailureType.TokenReplayValidatorThrew,
-                        typeof(SecurityTokenReplayDetectedException),
                         ValidationError.GetCurrentStackFrame(),
                         samlToken.Assertion.Conditions.NotOnOrAfter,
                         ex);
@@ -146,10 +148,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             var signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
-            if (!signatureValidationResult.IsValid)
-                return signatureValidationResult.UnwrapError().AddCurrentStackFrame();
+            if (!signatureValidationResult.Succeeded)
+                return signatureValidationResult.Error!.AddCurrentStackFrame();
 
-            ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> issuerSigningKeyValidationResult;
+            OperationResult<ValidatedSigningKeyLifetime, ValidationError> issuerSigningKeyValidationResult;
 
             try
             {
@@ -159,8 +161,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     validationParameters,
                     callContext);
 
-                if (!issuerSigningKeyValidationResult.IsValid)
-                    return issuerSigningKeyValidationResult.UnwrapError().AddCurrentStackFrame();
+                if (!issuerSigningKeyValidationResult.Succeeded)
+                    return issuerSigningKeyValidationResult.Error!.AddCurrentStackFrame();
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -169,7 +171,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return new IssuerSigningKeyValidationError(
                     new MessageDetail(Tokens.LogMessages.IDX10274),
                     ValidationFailureType.IssuerSigningKeyValidatorThrew,
-                    typeof(SecurityTokenInvalidSigningKeyException),
                     ValidationError.GetCurrentStackFrame(),
                     samlToken.SigningKey,
                     ex);
@@ -177,19 +178,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             return new ValidatedToken(samlToken, this, validationParameters)
             {
-                ValidatedAudience = conditionsResult.UnwrapResult().ValidatedAudience,
-                ValidatedLifetime = conditionsResult.UnwrapResult().ValidatedLifetime,
-                ValidatedIssuer = issuerValidationResult.UnwrapResult(),
-                ValidatedTokenReplayExpirationTime = tokenReplayValidationResult?.UnwrapResult(),
-                ValidatedSigningKey = signatureValidationResult.UnwrapResult(),
-                ValidatedSigningKeyLifetime = issuerSigningKeyValidationResult.UnwrapResult(),
+                ValidatedAudience = conditionsResult.Result!.ValidatedAudience,
+                ValidatedLifetime = conditionsResult.Result!.ValidatedLifetime,
+                ValidatedIssuer = issuerValidationResult.Result!,
+                ValidatedTokenReplayExpirationTime = tokenReplayValidationResult?.Result,
+                ValidatedSigningKey = signatureValidationResult.Result,
+                ValidatedSigningKeyLifetime = issuerSigningKeyValidationResult.Result,
             };
         }
 
         // ValidatedConditions is basically a named tuple but using a record struct better expresses the intent.
-        internal record struct ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime);
+#pragma warning disable RS0051 // Add internal types and members to the declared API
+        internal class ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime)
+        {
+            /// <summary>
+            /// The audience that was validated.
+            /// </summary>
+            public string? ValidatedAudience { get; } = ValidatedAudience;
+            /// <summary>
+            /// The lifetime that was validated.
+            /// </summary>
+            public ValidatedLifetime? ValidatedLifetime { get; } = ValidatedLifetime;
+        }
 
-        internal virtual ValidationResult<ValidatedConditions, ValidationError> ValidateConditions(
+        internal virtual OperationResult<ValidatedConditions, ValidationError> ValidateConditions(
             Saml2SecurityToken samlToken,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -208,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     ValidationError.GetCurrentStackFrame());
             }
 
-            ValidationResult<ValidatedLifetime, LifetimeValidationError> lifetimeValidationResult;
+            OperationResult<ValidatedLifetime, ValidationError> lifetimeValidationResult;
 
             try
             {
@@ -219,8 +231,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     validationParameters,
                     callContext);
 
-                if (!lifetimeValidationResult.IsValid)
-                    return lifetimeValidationResult.UnwrapError().AddCurrentStackFrame();
+                if (!lifetimeValidationResult.Succeeded)
+                    return lifetimeValidationResult.Error!.AddCurrentStackFrame();
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -229,7 +241,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return new LifetimeValidationError(
                     new MessageDetail(Tokens.LogMessages.IDX10271),
                     ValidationFailureType.LifetimeValidatorThrew,
-                    typeof(SecurityTokenInvalidLifetimeException),
                     ValidationError.GetCurrentStackFrame(),
                     samlToken.Assertion.Conditions.NotBefore,
                     samlToken.Assertion.Conditions.NotOnOrAfter,
@@ -263,7 +274,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (audienceRestriction.Audiences is not List<string> audiencesAsList)
                     audiencesAsList = [.. audienceRestriction.Audiences];
 
-                ValidationResult<string, AudienceValidationError> audienceValidationResult;
+                OperationResult<string, ValidationError> audienceValidationResult;
 
                 try
                 {
@@ -273,8 +284,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         validationParameters,
                         callContext);
 
-                    if (!audienceValidationResult.IsValid)
-                        return audienceValidationResult.UnwrapError().AddCurrentStackFrame();
+                    if (!audienceValidationResult.Succeeded)
+                        return audienceValidationResult.Error!.AddCurrentStackFrame();
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -283,7 +294,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     return new AudienceValidationError(
                         new MessageDetail(Tokens.LogMessages.IDX10270),
                         ValidationFailureType.AudienceValidatorThrew,
-                        typeof(SecurityTokenInvalidAudienceException),
                         ValidationError.GetCurrentStackFrame(),
                         audiencesAsList,
                         validationParameters.ValidAudiences,
@@ -291,11 +301,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
 
                 // Audience is valid, save it for later.
-                validatedAudience = audienceValidationResult.UnwrapResult();
+                validatedAudience = audienceValidationResult.Result;
             }
 
-            return new ValidatedConditions(validatedAudience, lifetimeValidationResult.UnwrapResult());
+            return new ValidatedConditions(validatedAudience, lifetimeValidationResult.Result!);
         }
+#pragma warning restore RS0051 // Add internal types and members to the declared API
 
 #pragma warning disable CA1801 // Review unused parameters
         internal virtual ValidationError? ValidateProxyRestriction(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
@@ -312,7 +323,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         #region Explicit Interface Implementations
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -324,7 +335,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 default).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -337,7 +348,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -349,7 +360,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 default).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,

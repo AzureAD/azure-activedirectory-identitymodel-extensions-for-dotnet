@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.TestUtils;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.Identity.Abstractions;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 {
@@ -17,14 +18,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ReadToken_ResultType", theoryData);
             Saml2SecurityTokenHandler handler = new Saml2SecurityTokenHandler();
-            ValidationResult<Saml2SecurityToken, ValidationError> result = handler.ReadSaml2Token(
+            OperationResult<Saml2SecurityToken, ValidationError> result = handler.ReadSaml2Token(
                 theoryData.Token,
                 new CallContext());
 
-            if (result.IsValid)
+            if (result.Succeeded)
             {
                 IdentityComparer.AreEqual(
-                    result.UnwrapResult(),
+                    result.Result,
                     handler.ReadToken(theoryData.Token),
                     context);
 
@@ -32,10 +33,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             }
             else
             {
-                ValidationError validationError = result.UnwrapError();
+                ValidationError validationError = result.Error;
                 IdentityComparer.AreStringsEqual(
                     validationError.FailureType.Name,
-                    theoryData.Result.UnwrapError().FailureType.Name,
+                    theoryData.OperationResult.Error.FailureType.Name,
                     context);
 
                 Exception exception = validationError.GetException();
@@ -60,12 +61,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 {
                     Token = null,
                     ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                    Result = new ValidationError(
+                    OperationResult = new ValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("token")),
                         ValidationFailureType.NullArgument,
-                        typeof(SecurityTokenArgumentNullException),
                         null)
                 });
 
@@ -73,12 +73,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 {
                     Token = string.Empty,
                     ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                    Result = new ValidationError(
+                    OperationResult = new ValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("token")),
                         ValidationFailureType.NullArgument,
-                        typeof(SecurityTokenArgumentNullException),
                         null)
                 });
 
@@ -86,10 +85,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 {
                     Token = ReferenceTokens.Saml2Token_MissingVersion,
                     ExpectedException = ExpectedException.Saml2SecurityTokenReadException("IDX13003:", inner: typeof(Saml2SecurityTokenReadException)),
-                    Result = new ValidationError(
+                    OperationResult = new ValidationError(
                         new MessageDetail(LogMessages.IDX13003, "exception message"),
                         ValidationFailureType.TokenReadingFailed,
-                        typeof(Saml2SecurityTokenReadException),
                         null),
                 });
 
@@ -107,6 +105,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 
         public string Token { get; set; }
 
-        internal ValidationResult<SecurityToken, ValidationError> Result { get; set; }
+        internal OperationResult<SecurityToken, ValidationError> OperationResult { get; set; }
     }
 }

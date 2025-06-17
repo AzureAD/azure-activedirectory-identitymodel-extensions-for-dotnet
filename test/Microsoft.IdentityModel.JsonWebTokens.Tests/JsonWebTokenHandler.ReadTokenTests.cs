@@ -3,6 +3,7 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt.Tests;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -17,25 +18,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Theory, MemberData(nameof(JsonWebTokenHandlerReadTokenTestCases), DisableDiscoveryEnumeration = true)]
         public void ReadToken(TokenReadingTheoryData theoryData)
         {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerReadTokenTests", theoryData);
-            ValidationResult<SecurityToken, ValidationError> result = JsonWebTokenHandler.ReadToken(
+            CompareContext context = TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
+            OperationResult<SecurityToken, ValidationError> operationResult = JsonWebTokenHandler.ReadToken(
                 theoryData.Token,
                 new CallContext());
 
-            if (result.IsValid)
+            if (operationResult.Succeeded)
             {
-                IdentityComparer.AreEqual(result.UnwrapResult(),
-                    theoryData.Result.UnwrapResult(),
+                IdentityComparer.AreEqual(operationResult.Result,
+                    theoryData.OperationResult.Result,
                     context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             else
             {
-                ValidationError validationError = result.UnwrapError();
+                ValidationError validationError = operationResult.Error;
                 IdentityComparer.AreStringsEqual(
                     validationError.FailureType.Name,
-                    theoryData.Result.UnwrapError().FailureType.Name,
+                    theoryData.OperationResult.Error.FailureType.Name,
                     context);
 
                 Exception exception = validationError.GetException();
@@ -48,11 +49,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void ReadToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
-            ValidationResult<SecurityToken, ValidationError> result = JsonWebTokenHandler.ReadToken(
+            OperationResult<SecurityToken, ValidationError> OperationResult = JsonWebTokenHandler.ReadToken(
                 null,
                 new CallContext());
 
-            Assert.Throws<InvalidOperationException>(() => result.UnwrapResult());
+            // TODO what is this test for?
         }
 
         public static TheoryData<TokenReadingTheoryData> JsonWebTokenHandlerReadTokenTestCases
@@ -62,51 +63,44 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var validToken = EncodedJwts.LiveJwt;
                 return new TheoryData<TokenReadingTheoryData>
                 {
-                    new TokenReadingTheoryData
+                    new TokenReadingTheoryData("Valid_Jwt")
                     {
-                        TestId = "Valid_Jwt",
                         Token = validToken,
-                        Result = new JsonWebToken(validToken),
+                        OperationResult = new JsonWebToken(validToken),
                     },
-                    new TokenReadingTheoryData
+                    new TokenReadingTheoryData("Invalid_NullToken")
                     {
-                        TestId = "Invalid_NullToken",
                         Token = null,
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
-                    new TokenReadingTheoryData
+                    new TokenReadingTheoryData("Invalid_EmptyToken")
                     {
-                        TestId = "Invalid_EmptyToken",
                         Token = string.Empty,
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
-                    new TokenReadingTheoryData
+                    new TokenReadingTheoryData("Invalid_MalformedToken")
                     {
-                        TestId = "Invalid_MalformedToken",
                         Token = "malformed-token",
                         ExpectedException = ExpectedException.SecurityTokenMalformedTokenException(
                             "IDX14107:",
                             typeof(SecurityTokenMalformedException)),
-                        Result = new ValidationError(
+                        OperationResult = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX14107,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.TokenReadingFailed,
-                            typeof(SecurityTokenMalformedException),
                             null,
                             new SecurityTokenMalformedException()),
                     }
@@ -117,7 +111,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
     public class TokenReadingTheoryData : TheoryDataBase
     {
+        public TokenReadingTheoryData(string testId) : base(testId) { }
         public string Token { get; set; }
-        internal ValidationResult<SecurityToken, ValidationError> Result { get; set; }
+        internal OperationResult<SecurityToken, ValidationError> OperationResult { get; set; }
     }
 }

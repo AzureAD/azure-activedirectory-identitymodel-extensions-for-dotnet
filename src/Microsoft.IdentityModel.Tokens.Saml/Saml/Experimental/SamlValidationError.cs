@@ -18,16 +18,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Experimental
         /// </summary>
         /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
         /// <param name="validationFailureType"/> is the type of validation failure that occurred.
-        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        public SamlValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
+            StackFrame stackFrame)
+            : this(messageDetail, validationFailureType, stackFrame, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SamlValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
         /// <param name="innerException"/> is the inner exception that occurred.
         public SamlValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
-            Type exceptionType,
             StackFrame stackFrame,
-            Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
+            Exception? innerException)
+            : base(messageDetail, validationFailureType, stackFrame, innerException)
         {
         }
 
@@ -37,13 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Experimental
         /// <returns>An instance of an Exception.</returns>
         protected override Exception CreateException()
         {
-            if (ExceptionType == typeof(SamlSecurityTokenReadException))
-            {
-                var exception = new SamlSecurityTokenReadException(MessageDetail.Message, InnerException);
-                return exception;
-            }
-
-            return base.CreateException();
+            return new SamlSecurityTokenException(MessageDetail.Message, InnerException);
         }
     }
 }

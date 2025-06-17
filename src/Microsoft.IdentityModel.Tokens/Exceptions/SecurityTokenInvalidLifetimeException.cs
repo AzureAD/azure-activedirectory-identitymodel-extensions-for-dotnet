@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -100,5 +101,26 @@ namespace Microsoft.IdentityModel.Tokens
             if (Expires.HasValue)
                 info.AddValue(_ExpiresKey, Expires.Value);
         }
+
+        #region Experimental
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidLifetimeException"/> class.
+        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
+        /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
+        /// </summary>
+        internal SecurityTokenInvalidLifetimeException(string message, ValidationError validationError)
+            : base(message, validationError)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidLifetimeException"/> class.
+        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
+        /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        /// </summary>
+        internal SecurityTokenInvalidLifetimeException(string message, ValidationError validationError, Exception innerException)
+            : base(message, validationError, innerException)
+        { }
+        #endregion
     }
 }

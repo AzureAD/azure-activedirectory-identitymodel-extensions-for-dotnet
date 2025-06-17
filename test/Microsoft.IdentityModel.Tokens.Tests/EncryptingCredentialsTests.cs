@@ -5,8 +5,6 @@ using System;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class EncryptingCredentialsTests
@@ -146,5 +144,3 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public string Enc { get; set; }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

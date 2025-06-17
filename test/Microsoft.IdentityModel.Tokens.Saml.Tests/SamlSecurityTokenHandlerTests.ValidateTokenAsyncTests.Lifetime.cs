@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
@@ -35,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 await samlTokenHandler.ValidateTokenAsync(samlToken.Assertion.CanonicalString, tokenValidationParameters);
 
             // Validate token using ValidationParameters.
-            ValidationResult<ValidatedToken, ValidationError> validationResult =
+            OperationResult<ValidatedToken, ValidationError> operationResult =
                 await samlTokenHandler.ValidateTokenAsync(
                     samlToken,
                     theoryData.ValidationParameters!,
@@ -43,27 +44,27 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     CancellationToken.None);
 
             // Ensure validity of the results match the expected result.
-            if (tokenValidationResult.IsValid != validationResult.IsValid)
+            if (tokenValidationResult.IsValid != operationResult.Succeeded)
             {
                 context.AddDiff($"tokenValidationResult.IsValid != validationResult.IsSuccess");
-                theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.UnwrapError().GetException(), context);
-                theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
+                theoryData.ExpectedExceptionValidationParameters!.ProcessException(operationResult.Error!.GetException(), context);
+                theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception!, context);
             }
             else
             {
                 if (tokenValidationResult.IsValid)
                 {
                     // Verify validated tokens from both paths match.
-                    ValidatedToken validatedToken = validationResult.UnwrapResult();
+                    ValidatedToken validatedToken = operationResult.Result!;
                     IdentityComparer.AreEqual(validatedToken.SecurityToken, tokenValidationResult.SecurityToken, context);
                 }
                 else
                 {
                     // Verify the exception provided by both paths match.
-                    var tokenValidationResultException = tokenValidationResult.Exception;
-                    theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
-                    var validationResultException = validationResult.UnwrapError().GetException();
-                    theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.UnwrapError().GetException(), context);
+                    var tokenValidationResultException = tokenValidationResult.Exception!;
+                    theoryData.ExpectedException.ProcessException(tokenValidationResultException, context);
+                    var validationResultException = operationResult.Error!.GetException();
+                    theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResultException, context);
                 }
 
                 TestUtilities.AssertFailIfErrors(context);

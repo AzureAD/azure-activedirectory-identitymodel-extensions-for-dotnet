@@ -10,8 +10,6 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
     public class SamlSerializerTests
@@ -1155,5 +1153,3 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -4,6 +4,7 @@
 #nullable enable
 using System.Threading.Tasks;
 using System.Threading;
+using Microsoft.Identity.Abstractions;
 
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
@@ -20,8 +21,10 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="token">The token to be validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        public Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        /// <returns>A <see cref="OperationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+#pragma warning restore RS0016 // Add public types and members to the declared API
             string token,
             ValidationParameters validationParameters,
             CallContext callContext);
@@ -35,8 +38,10 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        public Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        /// <returns>A <see cref="OperationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+#pragma warning restore RS0016 // Add public types and members to the declared API
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -50,8 +55,10 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="securityToken">The <see cref="SecurityToken"/> to be validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        public Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        /// <returns>A <see cref="OperationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+#pragma warning restore RS0016 // Add public types and members to the declared API
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext);
@@ -65,8 +72,10 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        public Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        /// <returns>A <see cref="OperationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+#pragma warning restore RS0016 // Add public types and members to the declared API
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,

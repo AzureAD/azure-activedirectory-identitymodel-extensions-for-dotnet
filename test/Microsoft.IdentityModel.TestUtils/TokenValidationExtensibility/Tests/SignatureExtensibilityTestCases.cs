@@ -116,7 +116,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomSignatureValidationDelegates.SignatureValidatorDelegate), null),
                     ValidationFailureType.SignatureValidationFailed,
-                    typeof(SecurityTokenInvalidSignatureException),
                     new StackFrame("CustomSignatureValidationDelegates.cs", 0))
             });
 
@@ -137,7 +136,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomSignatureValidationDelegates.SignatureValidatorCustomSignatureExceptionTypeDelegate), null),
                     ValidationFailureType.SignatureValidationFailed,
-                    typeof(CustomSecurityTokenInvalidSignatureException),
                     new StackFrame("CustomSignatureValidationDelegates.cs", 0))
             });
 
@@ -158,7 +156,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomSignatureValidationDelegates.SignatureValidatorCustomExceptionTypeDelegate), null),
                     ValidationFailureType.SignatureValidationFailed,
-                    typeof(CustomSecurityTokenException),
                     new StackFrame("CustomSignatureValidationDelegates.cs", 0))
             });
 
@@ -177,7 +174,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         string.Format(Tokens.LogMessages.IDX10272), null),
                     ValidationFailureType.SignatureValidatorThrew,
-                    typeof(SecurityTokenInvalidSignatureException),
                     new StackFrame(stackFrameFileName, 0),
                     null, // no inner validation error
                     new SecurityTokenInvalidSignatureException(nameof(CustomSignatureValidationDelegates.SignatureValidatorThrows))

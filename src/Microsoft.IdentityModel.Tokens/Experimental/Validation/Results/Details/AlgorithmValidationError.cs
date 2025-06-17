@@ -3,12 +3,13 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Logging;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
-    /// Represents a validation error that occurs when a token's algorithm cannot be validated.
+    /// Represents a validation error when a <see cref="SecurityToken"/> algorithm is not valid.
     /// If available, the invalid algorithm is stored in <see cref="InvalidAlgorithm"/>.
     /// </summary>
     public class AlgorithmValidationError : ValidationError
@@ -16,56 +17,67 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <summary>
         /// Initializes a new instance of the <see cref="AlgorithmValidationError"/> class.
         /// </summary>
-        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
-        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
-        /// <param name="exceptionType"/> is the type of exception that occurred.
-        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="invalidAlgorithm"/> is the algorithm that could not be validated. Can be null if the algorithm is missing from the token.
-        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        /// <param name="messageDetail" />Information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="invalidAlgorithm"/>The algorithm that could not be validated. Can be null if the algorithm is missing from the token.
         public AlgorithmValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
-            Type exceptionType,
+            StackFrame stackFrame,
+            string? invalidAlgorithm) :
+            this(messageDetail,
+                validationFailureType,
+                stackFrame,
+                invalidAlgorithm,
+                null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AlgorithmValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" />Information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="invalidAlgorithm"/>The algorithm that could not be validated. Can be null if the algorithm is missing from the token.
+        /// <param name="innerException"/>If present, represents the exception that occurred during validation.
+        public AlgorithmValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             StackFrame stackFrame,
             string? invalidAlgorithm,
-            Exception? innerException = null) :
-            base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
+            Exception? innerException) :
+            base(messageDetail,
+                validationFailureType,
+                stackFrame,
+                innerException)
         {
             InvalidAlgorithm = invalidAlgorithm;
         }
 
         /// <summary>
-        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// Creates an instance of an <see cref="SecurityTokenInvalidAlgorithmException"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        protected override Exception CreateException()
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public override Exception GetException()
+#pragma warning restore RS0016 // Add public types and members to the declared API
         {
-            if (ExceptionType == typeof(SecurityTokenInvalidAlgorithmException))
-            {
-                SecurityTokenInvalidAlgorithmException exception = new(MessageDetail.Message, InnerException)
+            if (FailureType == ValidationFailureType.NullArgument)
+                return new ArgumentNullException(MessageDetail.Message);
+
+            if (FailureType == ValidationFailureType.InvalidAlgorithm)
+                return new SecurityTokenInvalidAlgorithmException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10696,
+                        LogHelper.MarkAsNonPII(InvalidAlgorithm)))
                 {
                     InvalidAlgorithm = InvalidAlgorithm
                 };
-                exception.SetValidationError(this);
-
-                return exception;
-            }
 
             return base.CreateException();
         }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="AlgorithmValidationError"/> representing a null parameter.
-        /// </summary>
-        /// <param name="parameterName">The name of the parameter.</param>
-        /// <param name="stackFrame">The stack frame where the error occurred.</param>
-        /// <returns>A new <see cref="AlgorithmValidationError"/>.</returns>
-        public static new AlgorithmValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
-            MessageDetail.NullParameter(parameterName),
-            ValidationFailureType.NullArgument,
-            typeof(SecurityTokenArgumentNullException),
-            stackFrame,
-            null); // InvalidAlgorithm
 
         /// <summary>
         /// The algorithm that could not be validated.

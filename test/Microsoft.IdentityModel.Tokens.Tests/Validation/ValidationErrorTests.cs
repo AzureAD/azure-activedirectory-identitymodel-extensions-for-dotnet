@@ -43,7 +43,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return new ValidationError(
                     new MessageDetail("This is a test error"),
                     ValidationFailureType.NullArgument,
-                    typeof(SecurityTokenArgumentNullException),
                     ValidationError.GetCurrentStackFrame());
             }
         }

@@ -132,7 +132,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomAudienceValidationDelegates.AudienceValidatorDelegate), null),
                     ValidationFailureType.AudienceValidationFailed,
-                    typeof(SecurityTokenInvalidAudienceException),
                     new StackFrame("CustomAudienceValidationDelegates.cs", 0),
                     tokenAudiences,
                     null)
@@ -156,7 +155,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomAudienceValidationDelegates.AudienceValidatorCustomAudienceExceptionTypeDelegate), null),
                     ValidationFailureType.AudienceValidationFailed,
-                    typeof(CustomSecurityTokenInvalidAudienceException),
                     new StackFrame("CustomAudienceValidationDelegates.cs", 0),
                     tokenAudiences,
                     null)
@@ -180,7 +178,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomAudienceValidationDelegates.AudienceValidatorCustomExceptionTypeDelegate), null),
                     ValidationFailureType.AudienceValidationFailed,
-                    typeof(CustomSecurityTokenException),
                     new StackFrame("CustomAudienceValidationDelegates.cs", 0),
                     tokenAudiences,
                     null)
@@ -202,7 +199,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         string.Format(Tokens.LogMessages.IDX10270), null),
                     ValidationFailureType.AudienceValidatorThrew,
-                    typeof(SecurityTokenInvalidAudienceException),
                     new StackFrame(stackFrameFileName, 0),
                     tokenAudiences,
                     null,

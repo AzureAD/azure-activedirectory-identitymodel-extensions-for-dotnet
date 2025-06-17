@@ -5,6 +5,7 @@ using System;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -15,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract partial class TokenHandler
     {
-        internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        internal virtual Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -25,12 +26,12 @@ namespace Microsoft.IdentityModel.Tokens
                 new NotImplementedException(
                     FormatInvariant(
                         LogMessages.IDX10267,
-                        MarkAsNonPII("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
+                        MarkAsNonPII("internal virtual Task<OperationResult<ValidatedToken, ValidationError>> " +
                         "ValidateTokenAsync(string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)"),
                         MarkAsNonPII(GetType().FullName))));
         }
 
-        internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        internal virtual Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -40,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
                 new NotImplementedException(
                     FormatInvariant(
                         LogMessages.IDX10267,
-                        MarkAsNonPII("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
+                        MarkAsNonPII("internal virtual Task<OperationResult<ValidatedToken, ValidationError>> " +
                         "ValidateTokenAsync(SecurityToken token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)"),
                         MarkAsNonPII(GetType().FullName))));
         }
@@ -54,7 +55,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="issuer">the 'issuer' to use by default when creating a Claim.</param>
         /// <returns>A <see cref="ClaimsIdentity"/>.</returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer)
+        internal virtual ClaimsIdentity CreateClaimsIdentityInternal(
+            SecurityToken securityToken,
+            ValidationParameters validationParameters,
+            string issuer)
         {
             throw LogExceptionMessage(
                 new NotImplementedException(

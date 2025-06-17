@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
-    /// Represents an error that occurs when the issuer of a token cannot be validated.
+    /// Represents a validation error when a <see cref="SecurityToken.Issuer"/> is not valid.
     /// If available, the invalid issuer is stored in <see cref="InvalidIssuer"/>.
     /// </summary>
     public class IssuerValidationError : ValidationError
@@ -16,20 +16,36 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <summary>
         /// Initializes a new instance of the <see cref="IssuerValidationError"/> class.
         /// </summary>
-        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
-        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
-        /// <param name="exceptionType"/> is the type of exception that occurred.
-        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="invalidIssuer"/> is the issuer that could not be validated. Can be null if the issuer is missing from the token.
-        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        /// <param name="messageDetail" />Information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="invalidIssuer"/>The issuer that was not valid. Can be null if the issuer is missing from the token.
         public IssuerValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
-            Type exceptionType,
+            StackFrame stackFrame,
+            string? invalidIssuer)
+            : this(messageDetail, validationFailureType, stackFrame, invalidIssuer, null)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IssuerValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" />Information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="invalidIssuer"/>The issuer that was not valid. Can be null if the issuer is missing from the token.
+        /// <param name="innerException"/>If present, represents the exception that occurred during validation.
+        public IssuerValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             StackFrame stackFrame,
             string? invalidIssuer,
-            Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
+            Exception? innerException)
+            : base(messageDetail,
+                  validationFailureType,
+                  stackFrame,
+                  innerException)
         {
             InvalidIssuer = invalidIssuer;
         }
@@ -40,37 +56,26 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         public string? InvalidIssuer { get; }
 
         /// <summary>
-        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// Creates an instance of an <see cref="SecurityTokenInvalidIssuerException"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an exception.</returns>
-        protected override Exception CreateException()
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public override Exception GetException()
+#pragma warning restore RS0016 // Add public types and members to the declared API
         {
-            if (ExceptionType == typeof(SecurityTokenInvalidIssuerException))
+            if (Exception != null)
+                return Exception;
+
+            if (FailureType == ValidationFailureType.NullArgument)
+                Exception = new ArgumentNullException(MessageDetail.Message);
+
+            Exception ??= new SecurityTokenInvalidIssuerException(MessageDetail.Message, this, InnerException)
             {
-                SecurityTokenInvalidIssuerException exception = new(MessageDetail.Message, InnerException)
-                {
-                    InvalidIssuer = InvalidIssuer
-                };
-                exception.SetValidationError(this);
+                InvalidIssuer = InvalidIssuer
+            };
 
-                return exception;
-            }
-
-            return base.CreateException();
+            return Exception!;
         }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="IssuerValidationError"/> representing a null parameter.
-        /// </summary>
-        /// <param name="parameterName">The name of the parameter.</param>
-        /// <param name="stackFrame">The stack frame where the error occurred.</param>
-        /// <returns>A new <see cref="IssuerValidationError"/>.</returns>
-        public static new IssuerValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
-            MessageDetail.NullParameter(parameterName),
-            ValidationFailureType.NullArgument,
-            typeof(SecurityTokenArgumentNullException),
-            stackFrame,
-            null); // InvalidIssuer
     }
 }
 #nullable restore

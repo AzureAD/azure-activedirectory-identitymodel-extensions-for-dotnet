@@ -13,7 +13,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     internal class SecurityTokenArgumentNullException : ArgumentNullException
     {
         private string? _stackTrace;
-        private ValidationError? _validationError;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenArgumentNullException"/> class.
@@ -44,6 +43,32 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenArgumentNullException"/> class with a specified error message
+        /// and a reference to the inner exception that is the cause of this exception.
+        /// </summary>
+        /// <param name="message">The error message that explains the reason for the exception.</param>
+
+        /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
+        public SecurityTokenArgumentNullException(string? message, ValidationError? validationError)
+            : base(message)
+        {
+            ValidationError = validationError;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenArgumentNullException"/> class with a specified error message
+        /// and a reference to the inner exception that is the cause of this exception.
+        /// </summary>
+        /// <param name="message">The error message that explains the reason for the exception.</param>
+        /// <param name="innerException">The <see cref="Exception"/> that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
+        /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
+        public SecurityTokenArgumentNullException(string? message, Exception? innerException, ValidationError? validationError)
+            : base(message, innerException)
+        {
+            ValidationError = validationError;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenArgumentNullException"/> class with a specified null parameter and an error message.
         /// </summary>
         /// <param name="paramName">The name of the null parameter that triggered the exception.</param>
@@ -53,15 +78,11 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         {
         }
 
-        /// <summary>
-        /// Sets the <see cref="ValidationError"/> that is associated with the exception.
-        /// </summary>
-        /// <param name="validationError">The validation error to associate with the exception.</param>
-        public void SetValidationError(ValidationError validationError)
+        public ValidationError? ValidationError
         {
-            _validationError = validationError;
+            get;
+            set;
         }
-
 
         /// <summary>
         /// Gets the stack trace that is captured when the exception is created.
@@ -72,13 +93,13 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             {
                 if (_stackTrace == null)
                 {
-                    if (_validationError == null)
+                    if (ValidationError == null)
                         return base.StackTrace;
 #if NET8_0_OR_GREATER
-                    _stackTrace = new StackTrace(_validationError.StackFrames).ToString();
+                    _stackTrace = new StackTrace(ValidationError.StackFrames).ToString();
 #else
                     StringBuilder sb = new();
-                    foreach (StackFrame frame in _validationError.StackFrames)
+                    foreach (StackFrame frame in ValidationError.StackFrames)
                     {
                         sb.Append(frame.ToString());
                         sb.Append(Environment.NewLine);

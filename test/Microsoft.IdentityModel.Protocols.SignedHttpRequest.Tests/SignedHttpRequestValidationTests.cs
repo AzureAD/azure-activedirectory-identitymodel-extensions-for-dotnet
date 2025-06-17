@@ -14,8 +14,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
     public class SignedHttpRequestValidationTests
@@ -1775,5 +1773,3 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         public TokenValidationParameters ValidationParameters { get; set; }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

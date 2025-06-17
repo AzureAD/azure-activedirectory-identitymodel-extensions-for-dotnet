@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -22,7 +23,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        public static ValidationResult<string, AlgorithmValidationError> ValidateAlgorithm(
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public static OperationResult<string, ValidationError> ValidateAlgorithm(
+#pragma warning restore RS0016 // Add public types and members to the declared API
             string algorithm,
 #pragma warning disable CA1801
             SecurityKey securityKey,
@@ -32,9 +35,12 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
-                return AlgorithmValidationError.NullParameter(
-                    nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
+                return new AlgorithmValidationError(
+                    MessageDetail.NullParameter(nameof(validationParameters)),
+                    ValidationFailureType.NullArgument,
+                    ValidationError.GetCurrentStackFrame(),
+                    algorithm,
+                    null);
 
             if (validationParameters.ValidAlgorithms != null &&
                 validationParameters.ValidAlgorithms.Count > 0 &&
@@ -43,10 +49,10 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10696,
                         LogHelper.MarkAsNonPII(algorithm)),
-                    ValidationFailureType.AlgorithmValidationFailed,
-                    typeof(SecurityTokenInvalidAlgorithmException),
+                    ValidationFailureType.InvalidAlgorithm,
                     ValidationError.GetCurrentStackFrame(),
-                    algorithm);
+                    algorithm,
+                    null);
 
             return algorithm;
         }

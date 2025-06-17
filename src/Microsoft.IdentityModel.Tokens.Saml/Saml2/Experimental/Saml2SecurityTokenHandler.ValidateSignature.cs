@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Saml;
@@ -14,7 +15,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
-        internal static ValidationResult<SecurityKey, SignatureValidationError> ValidateSignature(
+#pragma warning disable RS0051 // Add internal types and members to the declared API
+        internal static OperationResult<SecurityKey, ValidationError> ValidateSignature(
+#pragma warning restore RS0051 // Add internal types and members to the declared API
             Saml2SecurityToken samlToken,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -38,13 +41,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 try
                 {
-                    ValidationResult<SecurityKey, SignatureValidationError> signatureValidationResult = validationParameters.SignatureValidator(
+                    return validationParameters.SignatureValidator(
                         samlToken,
                         validationParameters,
                         null, // configuration
                         callContext);
-
-                    return signatureValidationResult;
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -53,9 +54,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     return new SignatureValidationError(
                         new MessageDetail(TokenLogMessages.IDX10272),
                         ValidationFailureType.SignatureValidatorThrew,
-                        typeof(SecurityTokenInvalidSignatureException),
                         ValidationError.GetCurrentStackFrame(),
-                        innerException: ex);
+                        null,
+                        ex);
                 }
             }
 
@@ -66,7 +67,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         TokenLogMessages.IDX10504,
                         samlToken.Assertion.CanonicalString),
                     ValidationFailureType.TokenIsNotSigned,
-                    typeof(SecurityTokenValidationException),
                     ValidationError.GetCurrentStackFrame());
 
             SecurityKey? resolvedKey = null;
@@ -108,10 +108,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         continue;
 
                     var result = ValidateSignatureUsingKey(key, samlToken, validationParameters, callContext);
-                    if (result.IsValid)
+                    if (result.Succeeded)
                         return result;
 
-                    (errors ??= new()).Add(result.UnwrapError());
+                    (errors ??= new()).Add(result.Error!);
 
                     (keysAttempted ??= new()).Append(key.KeyId);
                     if (canMatchKey && !keyMatched && key.KeyId is not null && samlToken.Assertion.Signature.KeyInfo is not null)
@@ -128,7 +128,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         GetErrorStrings(errors),
                         samlToken),
                     ValidationFailureType.SignatureValidationFailed,
-                    typeof(SecurityTokenInvalidSignatureException),
                     ValidationError.GetCurrentStackFrame());
 
             string? keysAttemptedString = null;
@@ -145,38 +144,36 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         GetErrorStrings(errors),
                         samlToken),
                     ValidationFailureType.SignatureValidationFailed,
-                    typeof(SecurityTokenSignatureKeyNotFoundException),
                     ValidationError.GetCurrentStackFrame());
 
             return new SignatureValidationError(
                 new MessageDetail(TokenLogMessages.IDX10500),
-                ValidationFailureType.SignatureValidationFailed,
-                typeof(SecurityTokenSignatureKeyNotFoundException),
+                ValidationFailureType.SigningKeyNotFound,
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static ValidationResult<SecurityKey, SignatureValidationError> ValidateSignatureUsingKey(SecurityKey key, Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
+        private static OperationResult<SecurityKey, ValidationError> ValidateSignatureUsingKey(SecurityKey key, Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
         {
             try
             {
-                ValidationResult<string, AlgorithmValidationError> algorithmValidationResult = validationParameters.AlgorithmValidator(
+                OperationResult<string, ValidationError> algorithmValidationResult = validationParameters.AlgorithmValidator(
                     samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
                     key,
                     samlToken,
                     validationParameters,
                     callContext);
 
-                if (!algorithmValidationResult.IsValid)
+                if (!algorithmValidationResult.Succeeded)
                 {
-                    var algorithmValidationError = algorithmValidationResult.UnwrapError().AddCurrentStackFrame();
+                    var algorithmValidationError = algorithmValidationResult.Error!.AddCurrentStackFrame();
                     return new SignatureValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10518,
                             algorithmValidationError.MessageDetail.Message),
                         algorithmValidationError.FailureType, // Surface the algorithm validation error's failure type.
-                        typeof(SecurityTokenInvalidSignatureException),
                         SignatureValidationError.GetCurrentStackFrame(),
-                        algorithmValidationError); // Pass the algorithm validation error as the inner validation error.
+                        algorithmValidationError,
+                        null); // Pass the algorithm validation error as the inner validation error.
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -186,7 +183,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return new SignatureValidationError(
                     new MessageDetail(TokenLogMessages.IDX10273),
                     ValidationFailureType.AlgorithmValidatorThrew,
-                    typeof(SecurityTokenInvalidSignatureException),
                     ValidationError.GetCurrentStackFrame(),
                     null, // No need to create an AlgorithmValidationError for this case.
                     ex);

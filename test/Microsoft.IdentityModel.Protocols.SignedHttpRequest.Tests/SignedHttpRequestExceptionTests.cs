@@ -7,8 +7,6 @@ using System.Runtime.Serialization;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
     public class SignedHttpRequestExceptionTests
@@ -121,5 +119,3 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         public Type ExceptionType { get; set; }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Xunit;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.Identity.Abstractions;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -32,11 +33,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.True(validationResult.IsValid);
-            Assert.NotNull(validationResult.Result);
-            Assert.Null(validationResult.Error);
+            Assert.True(operationResult.Succeeded);
+            Assert.NotNull(operationResult.Result);
+            Assert.Null(operationResult.Error);
         }
 
         [Fact]
@@ -50,13 +51,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<AudienceValidationError>(validationResult.Error);
-            Assert.Contains("IDX10268", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<AudienceValidationError>(operationResult.Error);
+            Assert.Contains("IDX10268", operationResult.Error.Message);
             // IDX10268: Unable to validate audience, validationParameters.ValidAudiences.Count == 0.
         }
 
@@ -71,13 +72,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<IssuerValidationError>(validationResult.Error);
-            Assert.Contains("IDX10211", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<IssuerValidationError>(operationResult.Error);
+            Assert.Contains("IDX10211", operationResult.Error.Message);
             // IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace.
         }
 
@@ -92,13 +93,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<SignatureValidationError>(validationResult.Error);
-            Assert.Contains("IDX10502", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<SignatureValidationError>(operationResult.Error);
+            Assert.Contains("IDX10502", operationResult.Error.Message);
             // IDX10502: Signature validation failed. The token's kid is: 'JsonWebKeyRsa_2048', but did not match any keys in ValidationParameters or Configuration and TryAllIssuerSigningKeys is false. Number of keys in ValidationParameters: '0'. 
             // Number of keys in Configuration: '0'.
             // token: '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
@@ -116,9 +117,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
+            Assert.False(validationResult.Succeeded);
             Assert.Null(validationResult.Result);
             Assert.NotNull(validationResult.Error);
             Assert.IsType<SignatureValidationError>(validationResult.Error);
@@ -138,9 +139,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
+            Assert.False(validationResult.Succeeded);
             Assert.Null(validationResult.Result);
             Assert.NotNull(validationResult.Error);
             Assert.IsType<SignatureValidationError>(validationResult.Error);
@@ -160,9 +161,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
+            Assert.False(validationResult.Succeeded);
             Assert.Null(validationResult.Result);
             Assert.NotNull(validationResult.Error);
             Assert.IsType<LifetimeValidationError>(validationResult.Error);
@@ -182,9 +183,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
+            Assert.False(validationResult.Succeeded);
             Assert.Null(validationResult.Result);
             Assert.NotNull(validationResult.Error);
             Assert.IsType<LifetimeValidationError>(validationResult.Error);
@@ -204,11 +205,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.True(validationResult.IsValid);
-            Assert.NotNull(validationResult.Result);
-            Assert.Null(validationResult.Error);
+            Assert.False(validationResult.Succeeded);
+            Assert.Null(validationResult.Result);
+            Assert.NotNull(validationResult.Error);
             // TODO: Define potentially adding a setting to reject tokens issued in the future.
             // As it is not part of the specification, it should be optional.
         }
@@ -225,13 +226,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<AudienceValidationError>(validationResult.Error);
-            Assert.Contains("IDX10215", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<AudienceValidationError>(operationResult.Error);
+            Assert.Contains("IDX10215", operationResult.Error.Message);
             // IDX10215: Audience validation failed. Audiences: '7e4dcb88-7e75-4ae6-9ad1-5c84c44c80c5'. Did not match: validationParameters.ValidAudiences: 'http://Default.Audience.com'.
         }
 
@@ -247,13 +248,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<IssuerValidationError>(validationResult.Error);
-            Assert.Contains("IDX10212", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<IssuerValidationError>(operationResult.Error);
+            Assert.Contains("IDX10212", operationResult.Error.Message);
             // IDX10212: Issuer validation failed. Issuer: '7bed6a6e-3245-47b9-9e10-1120565cfe3c'. Did not match any: validationParameters.ValidIssuers: 'http://Default.Issuer.com' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: 'Null'. For more details, see https://aka.ms/IdentityModel/issuer-validation. 
         }
 
@@ -269,13 +270,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<SignatureValidationError>(validationResult.Error);
-            Assert.Contains("IDX10519", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<SignatureValidationError>(operationResult.Error);
+            Assert.Contains("IDX10519", operationResult.Error.Message);
             // IDX10519: Signature validation failed. The token's kid is missing and ValidationParameters.TryAllIssuerSigningKeys is set to false.
         }
 
@@ -292,13 +293,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             validationParameters.TryAllIssuerSigningKeys = true;
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<SignatureValidationError>(validationResult.Error);
-            Assert.Contains("IDX10517", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<SignatureValidationError>(operationResult.Error);
+            Assert.Contains("IDX10517", operationResult.Error.Message);
             // IDX10517: Signature validation failed. The token's kid is missing. Keys tried: '{0}'. Number of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details.
         }
 
@@ -314,13 +315,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<IssuerValidationError>(validationResult.Error);
-            Assert.Contains("IDX10211", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<IssuerValidationError>(operationResult.Error);
+            Assert.Contains("IDX10211", operationResult.Error.Message);
             // IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace.
 
             // This message needs to be updated to specifiy that it was not specified in the ValidationParameters?
@@ -338,13 +339,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<AudienceValidationError>(validationResult.Error);
-            Assert.Contains("IDX10206", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<AudienceValidationError>(operationResult.Error);
+            Assert.Contains("IDX10206", operationResult.Error.Message);
             // IDX10206: Unable to validate audience. The 'audiences' parameter is empty.
             // This message needs to be updated to specifiy that it was not specified in the ValidationParameters?
         }
@@ -361,11 +362,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.True(validationResult.IsValid);
-            Assert.NotNull(validationResult.Result);
-            Assert.Null(validationResult.Error);
+            Assert.True(operationResult.Succeeded);
+            Assert.NotNull(operationResult.Result);
+            Assert.Null(operationResult.Error);
             // The iat claim is optional.
         }
 
@@ -381,11 +382,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.True(validationResult.IsValid);
-            Assert.NotNull(validationResult.Result);
-            Assert.Null(validationResult.Error);
+            Assert.True(operationResult.Succeeded);
+            Assert.NotNull(operationResult.Result);
+            Assert.Null(operationResult.Error);
             // The nbf claim is optional.
         }
 
@@ -401,13 +402,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<LifetimeValidationError>(validationResult.Error);
-            Assert.Contains("IDX10225", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<LifetimeValidationError>(operationResult.Error);
+            Assert.Contains("IDX10225", operationResult.Error.Message);
             // IDX10225: Lifetime validation failed. The token is missing an Expiration Time. Tokentype: 'Microsoft.IdentityModel.JsonWebTokens.JsonWebToken'.
         }
 
@@ -423,13 +424,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.False(validationResult.IsValid);
-            Assert.Null(validationResult.Result);
-            Assert.NotNull(validationResult.Error);
-            Assert.IsType<SignatureValidationError>(validationResult.Error);
-            Assert.Contains("IDX10504", validationResult.Error.Message);
+            Assert.False(operationResult.Succeeded);
+            Assert.Null(operationResult.Result);
+            Assert.NotNull(operationResult.Error);
+            Assert.IsType<SignatureValidationError>(operationResult.Error);
+            Assert.Contains("IDX10504", operationResult.Error.Message);
             // IDX10504: Unable to validate signature, token does not have a signature: '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
         }
     }

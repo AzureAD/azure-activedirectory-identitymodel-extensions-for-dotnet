@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
@@ -343,5 +341,3 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

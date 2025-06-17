@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
@@ -15,13 +16,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Validates if a token has been replayed.
         /// </summary>
-        /// <param name="expirationTime">When does the security token expire.</param>
+        /// <param name="expires">The <see cref="DateTime"/> when the security token expires.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
-        public static ValidationResult<DateTime?, TokenReplayValidationError> ValidateTokenReplay(
-            DateTime? expirationTime,
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public static OperationResult<DateTime?, ValidationError> ValidateTokenReplay(
+#pragma warning restore RS0016 // Add public types and members to the declared API
+            DateTime? expires,
             string securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -40,41 +43,38 @@ namespace Microsoft.IdentityModel.Tokens
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)
             {
-                if (expirationTime == null)
+                if (expires == null)
                     return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10227,
                             securityToken),
-                        ValidationFailureType.TokenReplayValidationFailed,
-                        typeof(SecurityTokenNoExpirationException),
+                        ValidationFailureType.TokenReplayNoExpiration,
                         ValidationError.GetCurrentStackFrame(),
-                        expirationTime);
+                        expires);
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
                     return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10228,
                             securityToken),
-                        ValidationFailureType.TokenReplayValidationFailed,
-                        typeof(SecurityTokenReplayDetectedException),
+                        ValidationFailureType.TokenReplayTokenFound,
                         ValidationError.GetCurrentStackFrame(),
-                        expirationTime);
+                        expires);
 
-                if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
+                if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expires.Value))
                     return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10229,
                             securityToken),
-                        ValidationFailureType.TokenReplayValidationFailed,
-                        typeof(SecurityTokenReplayAddFailedException),
+                        ValidationFailureType.TokenReplayAddToCacheFailed,
                         ValidationError.GetCurrentStackFrame(),
-                        expirationTime);
+                        expires);
             }
 
             // if it reaches here, that means no token replay is detected.
             // TODO: Move to CallContext
             //LogHelper.LogInformation(LogMessages.IDX10240);
-            return expirationTime;
+            return expires;
         }
     }
 }

@@ -126,7 +126,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomIssuerValidationDelegates.IssuerValidatorDelegateAsync), null),
                     ValidationFailureType.IssuerValidationFailed,
-                    typeof(SecurityTokenInvalidIssuerException),
                     new StackFrame("CustomIssuerValidationDelegates.cs", 0),
                     issuerGuid)
             });
@@ -149,7 +148,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomIssuerValidationDelegates.IssuerValidatorCustomIssuerExceptionTypeDelegateAsync), null),
                     ValidationFailureType.IssuerValidationFailed,
-                    typeof(CustomSecurityTokenInvalidIssuerException),
                     new StackFrame("CustomIssuerValidationDelegates.cs", 0),
                     issuerGuid)
             });
@@ -172,7 +170,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomIssuerValidationDelegates.IssuerValidatorCustomExceptionTypeDelegateAsync), null),
                     ValidationFailureType.IssuerValidationFailed,
-                    typeof(CustomSecurityTokenException),
                     new StackFrame("CustomIssuerValidationDelegates.cs", 0),
                     issuerGuid)
             });
@@ -193,7 +190,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         string.Format(Tokens.LogMessages.IDX10269), null),
                     ValidationFailureType.IssuerValidatorThrew,
-                    typeof(SecurityTokenInvalidIssuerException),
                     new StackFrame(stackFrameFileName, 0),
                     issuerGuid,
                     new SecurityTokenInvalidIssuerException(nameof(CustomIssuerValidationDelegates.IssuerValidatorThrows))

@@ -30,7 +30,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
             return ExtensibilityTesting.GenerateAlgorithmExtensibilityTestCases(
                 tokenHandlerType,
                 extraStackFrames,
-                "JsonWebTokenHandler.ValidateSignature.cs");
+                "JsonWebTokenHandler.ValidateSignature.cs",
+                "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
         }
     }
 }

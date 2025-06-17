@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -10,7 +11,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomLifetimeValidationDelegates
     {
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorDelegate(
+        internal static OperationResult<ValidatedLifetime, ValidationError> CustomLifetimeValidatorDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -28,7 +29,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorCustomExceptionDelegate(
+        internal static OperationResult<ValidatedLifetime, ValidationError> CustomLifetimeValidatorCustomExceptionDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -45,7 +46,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static OperationResult<ValidatedLifetime, ValidationError> CustomLifetimeValidatorCustomExceptionCustomFailureTypeDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -61,7 +62,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 expires);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorUnknownExceptionDelegate(
+        internal static OperationResult<ValidatedLifetime, ValidationError> CustomLifetimeValidatorUnknownExceptionDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -78,7 +79,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorWithoutGetExceptionOverrideDelegate(
+        internal static OperationResult<ValidatedLifetime, ValidationError> CustomLifetimeValidatorWithoutGetExceptionOverrideDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -95,7 +96,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorDelegate(
+        internal static OperationResult<ValidatedLifetime, ValidationError> LifetimeValidatorDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -105,24 +106,32 @@ namespace Microsoft.IdentityModel.TestUtils
             return new LifetimeValidationError(
                 new MessageDetail(nameof(LifetimeValidatorDelegate), null),
                 ValidationFailureType.LifetimeValidationFailed,
-                typeof(SecurityTokenInvalidLifetimeException),
                 ValidationError.GetCurrentStackFrame(),
                 notBefore,
                 expires,
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorThrows(
+        internal static OperationResult<ValidatedLifetime, ValidationError> LifetimeValidatorThrows(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            throw new CustomSecurityTokenInvalidLifetimeException(nameof(LifetimeValidatorThrows), null);
+            throw new CustomSecurityTokenInvalidLifetimeException(
+                nameof(LifetimeValidatorThrows),
+                new LifetimeValidationError(
+                    new MessageDetail(nameof(LifetimeValidatorDelegate), null),
+                    ValidationFailureType.LifetimeValidationFailed,
+                    ValidationError.GetCurrentStackFrame(),
+                    notBefore,
+                    expires,
+                    null),
+                null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorCustomLifetimeExceptionTypeDelegate(
+        internal static OperationResult<ValidatedLifetime, ValidationError> LifetimeValidatorCustomLifetimeExceptionTypeDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -132,14 +141,13 @@ namespace Microsoft.IdentityModel.TestUtils
             return new LifetimeValidationError(
                 new MessageDetail(nameof(LifetimeValidatorCustomLifetimeExceptionTypeDelegate), null),
                 ValidationFailureType.LifetimeValidationFailed,
-                typeof(CustomSecurityTokenInvalidLifetimeException),
                 ValidationError.GetCurrentStackFrame(),
                 notBefore,
                 expires,
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorCustomExceptionTypeDelegate(
+        internal static OperationResult<ValidatedLifetime, ValidationError> LifetimeValidatorCustomExceptionTypeDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -149,7 +157,6 @@ namespace Microsoft.IdentityModel.TestUtils
             return new LifetimeValidationError(
                 new MessageDetail(nameof(LifetimeValidatorCustomExceptionTypeDelegate), null),
                 ValidationFailureType.LifetimeValidationFailed,
-                typeof(CustomSecurityTokenException),
                 ValidationError.GetCurrentStackFrame(),
                 notBefore,
                 expires,

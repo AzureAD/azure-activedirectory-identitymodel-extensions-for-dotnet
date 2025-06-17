@@ -4,6 +4,7 @@
 using System;
 using System.Text;
 using System.Xml;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Saml.Experimental;
@@ -21,20 +22,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>A <see cref="SamlSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">If <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">If 'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        internal virtual ValidationResult<SamlSecurityToken, ValidationError> ReadSamlToken(string token, CallContext callContext)
+#pragma warning disable RS0051 // Add internal types and members to the declared API
+        internal virtual OperationResult<SamlSecurityToken, ValidationError> ReadSamlToken(string token, CallContext callContext)
+#pragma warning restore RS0051 // Add internal types and members to the declared API
         {
             if (string.IsNullOrEmpty(token))
-                return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
+                return ValidationError.NullParameter(
+                    nameof(token),
+                    ValidationError.GetCurrentStackFrame());
 
             if (token.Length > MaximumTokenSizeInBytes)
                 return new ValidationError(
-                        new MessageDetail(
-                            TokenLogMessages.IDX10209,
-                            LogHelper.MarkAsNonPII(token.Length),
-                            LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
-                        ValidationFailureType.TokenExceedsMaximumSize,
-                        typeof(ArgumentOutOfRangeException),
-                        ValidationError.GetCurrentStackFrame());
+                    new MessageDetail(
+                        TokenLogMessages.IDX10209,
+                        LogHelper.MarkAsNonPII(token.Length),
+                        LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
+                    ValidationFailureType.TokenExceedsMaximumSize,
+                    ValidationError.GetCurrentStackFrame());
 
             try
             {
@@ -50,7 +54,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 return new SamlValidationError(
                     new MessageDetail(LogMessages.IDX11402, ex.Message),
                     ValidationFailureType.TokenReadingFailed,
-                    typeof(SamlSecurityTokenReadException),
                     ValidationError.GetCurrentStackFrame(),
                     ex);
             }

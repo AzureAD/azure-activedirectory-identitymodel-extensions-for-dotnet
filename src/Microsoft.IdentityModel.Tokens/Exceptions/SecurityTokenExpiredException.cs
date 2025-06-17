@@ -10,18 +10,13 @@ namespace Microsoft.IdentityModel.Tokens
     /// Throw this exception when a received Security Token has expiration time in the past.
     /// </summary>
     [Serializable]
-    public class SecurityTokenExpiredException : SecurityTokenValidationException
+    public class SecurityTokenExpiredException : SecurityTokenInvalidLifetimeException
     {
         [NonSerialized]
         const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenExpiredException) + ".";
 
         [NonSerialized]
         const string _ExpiresKey = _Prefix + nameof(Expires);
-
-        /// <summary>
-        /// Gets or sets the Expires value that created the validation exception. This value is always in UTC.
-        /// </summary>
-        public DateTime Expires { get; set; }
 
         /// <summary>
         /// Initializes a new instance of  <see cref="SecurityTokenExpiredException"/>

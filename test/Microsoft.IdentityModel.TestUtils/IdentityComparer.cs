@@ -1366,14 +1366,14 @@ namespace Microsoft.IdentityModel.TestUtils
             var localContext = new CompareContext(context);
 
             AreDateTimesEqualWithEpsilon(
-                validatedSigningKeyLifetime1.ValidFrom,
-                validatedSigningKeyLifetime2.ValidFrom,
+                validatedSigningKeyLifetime1.NotBefore,
+                validatedSigningKeyLifetime2.NotBefore,
                 3,
                 localContext);
 
             AreDateTimesEqualWithEpsilon(
-                validatedSigningKeyLifetime1.ValidTo,
-                validatedSigningKeyLifetime2.ValidTo,
+                validatedSigningKeyLifetime1.Expires,
+                validatedSigningKeyLifetime2.Expires,
                 3,
                 localContext);
 
@@ -1439,13 +1439,6 @@ namespace Microsoft.IdentityModel.TestUtils
                 validationError2.GetType().FullName,
                 "validationError1.GetType().FullName",
                 "validationError2.GetType().FullName",
-                localContext);
-
-            AreStringsEqual(
-                validationError1.ExceptionType.ToString(),
-                validationError2.ExceptionType.ToString(),
-                "validationError1.ExceptionType",
-                "validationError2.ExceptionType",
                 localContext);
 
             AreStringsEqual(

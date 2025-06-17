@@ -11,8 +11,6 @@ using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
     public class WsFederationMessageTests
@@ -824,5 +822,3 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

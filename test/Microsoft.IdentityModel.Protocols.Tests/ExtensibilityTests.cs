@@ -9,8 +9,6 @@ using Microsoft.IdentityModel.TestUtils;
 using Newtonsoft.Json;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Protocols.Tests
 {
     /// <summary>
@@ -140,5 +138,3 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -111,10 +112,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// </summary>
         public ValidationParameters()
         {
-            LogTokenId = true;
-            SaveSigninToken = false;
-            TryAllDecryptionKeys = true;
-            ValidateActor = false;
         }
 
         /// <summary>
@@ -355,7 +352,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Default value is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
-        public bool LogTokenId { get; set; }
+        public bool LogTokenId { get; set; } = true;
+
 
         /// <summary>
         /// Gets or sets a <see cref="string"/> that defines the <see cref="ClaimsIdentity.NameClaimType"/>.
@@ -523,18 +521,18 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
-        public bool TryAllDecryptionKeys { get; set; }
+        public bool TryAllDecryptionKeys { get; set; } = true;
 
         /// <summary>
         /// If the IssuerSigningKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,
         /// all available keys will be tried.
         /// </summary>
-        /// <remarks>Default is false.</remarks>
+        [DefaultValue(false)]
         public bool TryAllIssuerSigningKeys { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, a <see cref="ValidationResult{TResult, TError}"/> MUST be returned by the delegate.
+        /// If the token type cannot be validated, a <see cref="OperationResult{TResult, TError}"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>
@@ -642,6 +640,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Gets or sets a boolean that controls if the actor claim should be validated.
         /// </summary>
         /// <remarks>Default value is false.</remarks>
+        [DefaultValue(false)]
         public bool ValidateActor { get; set; }
     }
 }

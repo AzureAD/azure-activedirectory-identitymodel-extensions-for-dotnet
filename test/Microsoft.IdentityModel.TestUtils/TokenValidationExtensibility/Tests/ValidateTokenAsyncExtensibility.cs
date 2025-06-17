@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -24,19 +25,19 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
 
             try
             {
-                ValidationResult<ValidatedToken, ValidationError> validationResult = await theoryData.TokenHandler.ValidateTokenAsync(
+                OperationResult<ValidatedToken, ValidationError> operationResult = await theoryData.TokenHandler.ValidateTokenAsync(
                     securityToken,
                     theoryData.ValidationParameters!,
                     theoryData.CallContext,
                     CancellationToken.None);
 
-                if (validationResult.IsValid)
+                if (operationResult.Succeeded)
                 {
-                    context.AddDiff("validationResult.IsValid == true, expected false");
+                    context.AddDiff("validationResult.Succeeded == true, expected false");
                 }
                 else
                 {
-                    ValidationError validationError = validationResult.UnwrapError();
+                    ValidationError validationError = operationResult.Error!;
 
                     if (validationError is SignatureValidationError signatureValidationError &&
                         signatureValidationError.InnerValidationError is not null)

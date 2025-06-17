@@ -125,7 +125,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomTokenReplayValidationDelegates.TokenReplayValidationDelegate), null),
                     ValidationFailureType.TokenReplayValidationFailed,
-                    typeof(SecurityTokenReplayDetectedException),
                     new StackFrame("CustomTokenReplayValidationDelegates.cs", 0),
                     expirationTime)
             });
@@ -148,7 +147,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomTokenReplayValidationDelegates.TokenReplayValidatorCustomTokenReplayDetectedExceptionTypeDelegate), null),
                     ValidationFailureType.TokenReplayValidationFailed,
-                    typeof(CustomSecurityTokenReplayDetectedException),
                     new StackFrame("CustomTokenReplayValidationDelegates.cs", 0),
                     expirationTime)
             });
@@ -171,7 +169,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         nameof(CustomTokenReplayValidationDelegates.TokenReplayValidatorCustomExceptionTypeDelegate), null),
                     ValidationFailureType.TokenReplayValidationFailed,
-                    typeof(CustomSecurityTokenException),
                     new StackFrame("CustomTokenReplayValidationDelegates.cs", 0),
                     expirationTime)
             });
@@ -192,7 +189,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         string.Format(Tokens.LogMessages.IDX10276), null),
                     ValidationFailureType.TokenReplayValidatorThrew,
-                    typeof(SecurityTokenReplayDetectedException),
                     new StackFrame(stackFrameFileName, 0),
                     expirationTime,
                     new SecurityTokenReplayDetectedException(nameof(CustomTokenReplayValidationDelegates.TokenReplayValidatorThrows))

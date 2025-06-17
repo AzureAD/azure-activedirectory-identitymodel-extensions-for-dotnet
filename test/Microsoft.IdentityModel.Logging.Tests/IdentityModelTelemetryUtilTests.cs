@@ -9,8 +9,6 @@ using System.Net.Http.Headers;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Logging.Tests
 {
     public class IdentityModelTelemetryUtilTests
@@ -174,5 +172,3 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

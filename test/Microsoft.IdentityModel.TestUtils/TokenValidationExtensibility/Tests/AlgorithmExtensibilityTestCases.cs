@@ -16,7 +16,8 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
         public static TheoryData<AlgorithmExtensibilityTheoryData> GenerateAlgorithmExtensibilityTestCases(
             string tokenHandlerType,
             int extraStackFrames,
-            string stackFrameFileName)
+            string stackFrameFileName,
+            string algorithm = "algorithm")
         {
             TheoryData<AlgorithmExtensibilityTheoryData> theoryData = new();
             CallContext callContext = new CallContext();
@@ -31,7 +32,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                 extraStackFrames: extraStackFrames)
             {
                 ExpectedException = new ExpectedException(
-                    typeof(SecurityTokenInvalidSignatureException),
+                    typeof(SecurityTokenInvalidAlgorithmException),
                     "IDX10518:",
                     typeof(SecurityTokenInvalidAlgorithmException)),
                 ExpectedInnerException = new ExpectedException(
@@ -40,10 +41,10 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                 ValidationError = new CustomAlgorithmValidationError(
                     new MessageDetail(
                         nameof(CustomAlgorithmValidationDelegates.CustomAlgorithmValidatorDelegate), null),
-                    ValidationFailureType.AlgorithmValidationFailed,
+                    ValidationFailureType.InvalidAlgorithm,
                     typeof(SecurityTokenInvalidAlgorithmException),
                     new StackFrame("CustomAlgorithmValidationDelegates.cs", 0),
-                    "algorithm")
+                    $"{algorithm}")
             });
 
             // CustomAlgorithmValidationError : AlgorithmValidationError, ExceptionType: CustomSecurityTokenInvalidAlgorithmException : SecurityTokenInvalidAlgorithmException
@@ -63,10 +64,10 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                 ValidationError = new CustomAlgorithmValidationError(
                     new MessageDetail(
                         nameof(CustomAlgorithmValidationDelegates.CustomAlgorithmValidatorCustomExceptionDelegate), null),
-                    ValidationFailureType.AlgorithmValidationFailed,
+                    ValidationFailureType.InvalidAlgorithm,
                     typeof(CustomSecurityTokenInvalidAlgorithmException),
                     new StackFrame("CustomAlgorithmValidationDelegates.cs", 0),
-                    "algorithm"),
+                    $"{algorithm}"),
             });
 
             // CustomAlgorithmValidationError : AlgorithmValidationError, ExceptionType: NotSupportedException : SystemException
@@ -89,10 +90,10 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                 ValidationError = new CustomAlgorithmValidationError(
                     new MessageDetail(
                         nameof(CustomAlgorithmValidationDelegates.CustomAlgorithmValidatorUnknownExceptionDelegate), null),
-                    ValidationFailureType.AlgorithmValidationFailed,
+                    ValidationFailureType.InvalidAlgorithm,
                     typeof(NotSupportedException),
                     new StackFrame("CustomAlgorithmValidationDelegates.cs", 0),
-                    "algorithm"),
+                    $"{algorithm}"),
             });
 
             // CustomAlgorithmValidationError : AlgorithmValidationError, ExceptionType: NotSupportedException : SystemException, ValidationFailureType: CustomAudienceValidationFailureType
@@ -115,7 +116,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     CustomAlgorithmValidationError.CustomAlgorithmValidationFailureType,
                     typeof(CustomSecurityTokenInvalidAlgorithmException),
                     new StackFrame("CustomAlgorithmValidationDelegates.cs", 0),
-                    "algorithm"),
+                    $"{algorithm}"),
             });
             #endregion
 
@@ -138,10 +139,9 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                 ValidationError = new AlgorithmValidationError(
                     new MessageDetail(
                         nameof(CustomAlgorithmValidationDelegates.AlgorithmValidatorDelegate), null),
-                    ValidationFailureType.AlgorithmValidationFailed,
-                    typeof(SecurityTokenInvalidAlgorithmException),
+                    ValidationFailureType.InvalidAlgorithm,
                     new StackFrame("CustomAlgorithmValidationDelegates.cs", 0),
-                    "algorithm")
+                    $"{algorithm}")
             });
 
             // AlgorithmValidationError : ValidationError, ExceptionType:  CustomSecurityTokenInvalidAlgorithmException : SecurityTokenInvalidAlgorithmException
@@ -164,10 +164,9 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                 ValidationError = new AlgorithmValidationError(
                     new MessageDetail(
                         nameof(CustomAlgorithmValidationDelegates.AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate), null),
-                    ValidationFailureType.AlgorithmValidationFailed,
-                    typeof(CustomSecurityTokenInvalidAlgorithmException),
+                    ValidationFailureType.InvalidAlgorithm,
                     new StackFrame("CustomAlgorithmValidationDelegates.cs", 0),
-                    "algorithm")
+                    $"{algorithm}")
             });
 
             // AlgorithmValidationError : ValidationError, ExceptionType:  CustomSecurityTokenException : SystemException
@@ -190,10 +189,9 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                 ValidationError = new AlgorithmValidationError(
                     new MessageDetail(
                         nameof(CustomAlgorithmValidationDelegates.AlgorithmValidatorCustomExceptionTypeDelegate), null),
-                    ValidationFailureType.AlgorithmValidationFailed,
-                    typeof(CustomSecurityTokenException),
+                    ValidationFailureType.InvalidAlgorithm,
                     new StackFrame("CustomAlgorithmValidationDelegates.cs", 0),
-                    "algorithm")
+                    $"{algorithm}")
             });
 
             // SignatureValidationError : ValidationError, ExceptionType: SecurityTokenInvalidSignatureException, inner: CustomSecurityTokenInvalidAlgorithmException
@@ -216,7 +214,6 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                     new MessageDetail(
                         string.Format(Tokens.LogMessages.IDX10273), null),
                     ValidationFailureType.AlgorithmValidatorThrew,
-                    typeof(SecurityTokenInvalidSignatureException),
                     new StackFrame(stackFrameFileName, 0),
                     null, // no inner validation error
                     new CustomSecurityTokenInvalidAlgorithmException(nameof(CustomAlgorithmValidationDelegates.AlgorithmValidatorThrows), null)

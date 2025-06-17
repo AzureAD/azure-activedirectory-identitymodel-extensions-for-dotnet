@@ -35,23 +35,20 @@ namespace Microsoft.IdentityModel.Xml
             if (SignedInfo is null)
                 return new SignatureValidationError(
                     new MessageDetail(LogMessages.IDX30212),
-                    ValidationFailureType.SignatureValidationFailed,
-                    typeof(SecurityTokenInvalidSignatureException),
+                    ValidationFailureType.SignedInfoNull,
                     ValidationError.GetCurrentStackFrame());
 
             if (!cryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
                 return new SignatureValidationError(
                     new MessageDetail(LogMessages.IDX30207, SignedInfo.SignatureMethod, cryptoProviderFactory.GetType()),
-                    ValidationFailureType.XmlValidationFailed,
-                    typeof(SecurityTokenInvalidSignatureException),
+                    ValidationFailureType.AlgorithmIsNotSupported,
                     ValidationError.GetCurrentStackFrame());
 
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
             if (signatureProvider is null)
                 return new SignatureValidationError(
                     new MessageDetail(LogMessages.IDX30203, cryptoProviderFactory, LogHelper.MarkAsNonPII(key.KeyId), SignedInfo.SignatureMethod),
-                    ValidationFailureType.XmlValidationFailed,
-                    typeof(SecurityTokenInvalidSignatureException),
+                    ValidationFailureType.CryptoProviderReturnedNull,
                     ValidationError.GetCurrentStackFrame());
 
             SignatureValidationError? validationError = null;
@@ -65,8 +62,7 @@ namespace Microsoft.IdentityModel.Xml
                     {
                         validationError = new SignatureValidationError(
                             new MessageDetail(LogMessages.IDX30200, cryptoProviderFactory, LogHelper.MarkAsNonPII(key.KeyId)),
-                            ValidationFailureType.XmlValidationFailed,
-                            typeof(SecurityTokenInvalidSignatureException),
+                            ValidationFailureType.SignatureValidationFailed,
                             ValidationError.GetCurrentStackFrame());
                     }
                 }

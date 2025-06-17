@@ -17,8 +17,6 @@ using ALG = Microsoft.IdentityModel.Tokens.SecurityAlgorithms;
 using EE = Microsoft.IdentityModel.TestUtils.ExpectedException;
 using KM = Microsoft.IdentityModel.TestUtils.KeyingMaterial;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
@@ -1273,4 +1271,3 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             (bool)signatureProvider.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(signatureProvider);
     }
 }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -3,6 +3,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -21,7 +22,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        public static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> ValidateIssuerSigningKey(
+        /// <returns>A <see cref="OperationResult{ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public static OperationResult<ValidatedSigningKeyLifetime, ValidationError> ValidateIssuerSigningKey(
+#pragma warning restore RS0016 // Add public types and members to the declared API
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -32,11 +36,11 @@ namespace Microsoft.IdentityModel.Tokens
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 
+            // TODO error message IDX10253 is not correct and needs adjusting.
             if (securityKey == null)
                 return new IssuerSigningKeyValidationError(
                     new MessageDetail(LogMessages.IDX10253, nameof(securityKey)),
-                    ValidationFailureType.SigningKeyValidationFailed,
-                    typeof(SecurityTokenArgumentNullException),
+                    ValidationFailureType.SigningKeyIsNull,
                     ValidationError.GetCurrentStackFrame(),
                     securityKey);
 
@@ -55,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> ValidateIssuerSigningKeyLifeTime(
+        internal static OperationResult<ValidatedSigningKeyLifetime, ValidationError> ValidateIssuerSigningKeyLifeTime(
             SecurityKey securityKey,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -77,8 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10248,
                             LogHelper.MarkAsNonPII(notBeforeUtc),
                             LogHelper.MarkAsNonPII(utcNow)),
-                        ValidationFailureType.SigningKeyValidationFailed,
-                        typeof(SecurityTokenInvalidSigningKeyException),
+                        ValidationFailureType.SigningKeyNotYetValid,
                         ValidationError.GetCurrentStackFrame(),
                         securityKey);
 
@@ -92,8 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10249,
                             LogHelper.MarkAsNonPII(notAfterUtc),
                             LogHelper.MarkAsNonPII(utcNow)),
-                        ValidationFailureType.SigningKeyValidationFailed,
-                        typeof(SecurityTokenInvalidSigningKeyException),
+                        ValidationFailureType.SigningKeyExpired,
                         ValidationError.GetCurrentStackFrame(),
                         securityKey);
 

@@ -8,28 +8,48 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
-    /// Represents an error that occurs when a token cannot be validated against being re-used or replay is detected.
-    /// If available, the expiration time of the token that failed the validation is included.
+    /// Represents a validation error when a <see cref="SecurityToken"/> replay is detected.
+    /// If available, the expiration time of the <see cref="SecurityToken"/> that failed the validation is included.
     /// </summary>
     public class TokenReplayValidationError : ValidationError
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="IssuerSigningKeyValidationError"/> class.
+        /// Initializes a new instance of the <see cref="TokenReplayValidationError"/> class.
         /// </summary>
-        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
-        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
-        /// <param name="exceptionType"/> is the type of exception that occurred.
-        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="expirationTime"/> is the expiration time of the token that failed the validation. Can be null if the token does not have an expiration time.
-        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        /// <param name="messageDetail"/>Information about the error that is can be used to generate an exception message.
+        /// <param name="validationFailureType"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="expirationTime"/>The <see cref="DateTime"/> of the <see cref="SecurityToken"/> that failed the validation. Can be null if the token does not have an expiration time.
         public TokenReplayValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
-            Type exceptionType,
+            StackFrame stackFrame,
+            DateTime? expirationTime)
+            : this(messageDetail,
+                  validationFailureType,
+                  stackFrame,
+                  expirationTime,
+                  null)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TokenReplayValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" />Information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="expirationTime"/>The <see cref="DateTime"/> of the <see cref="SecurityToken"/> that failed the validation. Can be null if the token does not have an expiration time.
+        /// <param name="innerException"/>If present, represents the exception that occurred during validation.
+        public TokenReplayValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             StackFrame stackFrame,
             DateTime? expirationTime,
-            Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
+            Exception? innerException)
+            : base(messageDetail,
+                  validationFailureType,
+                  stackFrame,
+                  innerException)
         {
             ExpirationTime = expirationTime;
         }
@@ -38,24 +58,19 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an exception.</returns>
-        protected override Exception CreateException()
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public override Exception GetException()
+#pragma warning restore RS0016 // Add public types and members to the declared API
         {
-            if (ExceptionType == typeof(SecurityTokenReplayDetectedException))
-            {
-                SecurityTokenReplayDetectedException exception = new(MessageDetail.Message, InnerException);
-                exception.SetValidationError(this);
+            if (Exception != null)
+                return Exception;
 
-                return exception;
-            }
-            else if (ExceptionType == typeof(SecurityTokenReplayAddFailedException))
-            {
-                SecurityTokenReplayAddFailedException exception = new(MessageDetail.Message, InnerException);
-                exception.SetValidationError(this);
+            if (FailureType == ValidationFailureType.NullArgument)
+                Exception = new ArgumentNullException(MessageDetail.Message);
+            else
+                Exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, this, InnerException);
 
-                return exception;
-            }
-
-            return base.CreateException();
+            return Exception;
         }
 
         /// <summary>
@@ -67,7 +82,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         public static new TokenReplayValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
             MessageDetail.NullParameter(parameterName),
             ValidationFailureType.NullArgument,
-            typeof(SecurityTokenArgumentNullException),
             stackFrame,
             null);
 
