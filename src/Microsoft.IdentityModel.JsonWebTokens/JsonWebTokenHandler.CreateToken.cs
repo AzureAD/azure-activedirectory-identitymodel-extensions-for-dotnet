@@ -1090,6 +1090,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var actorTokenDescriptor = CreateActorTokenDescriptor(tokenDescriptor);
             if (actorTokenDescriptor == null || actorTokenDescriptor.Subject == null)
                 return;
+
             writer.WritePropertyName(tokenDescriptor.ActorClaimType);
             WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
         }
@@ -1110,14 +1111,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             SecurityTokenDescriptor actorTokenDescriptor = null;
 
-            // Check for actor in claims first
             if (tokenDescriptor.Claims?.ContainsKey(tokenDescriptor.ActorClaimType) == true)
             {
-                ClaimsIdentity actor = tokenDescriptor.Claims[tokenDescriptor.ActorClaimType] as ClaimsIdentity;
+                object actorValue = tokenDescriptor.Claims[tokenDescriptor.ActorClaimType];
+                ClaimsIdentity actor = actorValue as ClaimsIdentity;
+
+                if (actor == null)
+                {
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX14315,
+                            LogHelper.MarkAsNonPII(tokenDescriptor.ActorClaimType),
+                            LogHelper.MarkAsNonPII(actorValue?.GetType().ToString() ?? "null"))));
+                }
+
                 actorTokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = actor,
                 };
+
             }
             // Then check for actor in subject
             else if (tokenDescriptor.Subject?.Actor != null)
