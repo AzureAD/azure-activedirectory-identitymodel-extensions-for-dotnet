@@ -1111,12 +1111,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             SecurityTokenDescriptor actorTokenDescriptor = null;
 
-            if (tokenDescriptor.Claims?.ContainsKey(tokenDescriptor.ActorClaimType) == true)
+            if (tokenDescriptor.Claims?.TryGetValue(tokenDescriptor.ActorClaimType, out object actorValue) == true)
             {
-                object actorValue = tokenDescriptor.Claims[tokenDescriptor.ActorClaimType];
-                ClaimsIdentity actor = actorValue as ClaimsIdentity;
-
-                if (actor == null)
+                if (actorValue is not ClaimsIdentity actor)
                 {
                     throw LogHelper.LogExceptionMessage(new SecurityTokenException(
                         LogHelper.FormatInvariant(
