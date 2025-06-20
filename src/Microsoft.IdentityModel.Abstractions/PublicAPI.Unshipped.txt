@@ -1,0 +1,9 @@
+Microsoft.IdentityModel.Abstractions.Experimental.OperationError
+Microsoft.IdentityModel.Abstractions.Experimental.OperationError.OperationError() -> void
+Microsoft.IdentityModel.Abstractions.Experimental.OperationResult<TResult, TError>
+Microsoft.IdentityModel.Abstractions.Experimental.OperationResult<TResult, TError>.Error.get -> TError
+Microsoft.IdentityModel.Abstractions.Experimental.OperationResult<TResult, TError>.IsValid.get -> bool
+Microsoft.IdentityModel.Abstractions.Experimental.OperationResult<TResult, TError>.OperationResult() -> void
+Microsoft.IdentityModel.Abstractions.Experimental.OperationResult<TResult, TError>.OperationResult(TError error) -> void
+Microsoft.IdentityModel.Abstractions.Experimental.OperationResult<TResult, TError>.OperationResult(TResult result) -> void
+Microsoft.IdentityModel.Abstractions.Experimental.OperationResult<TResult, TError>.Result.get -> TResult
