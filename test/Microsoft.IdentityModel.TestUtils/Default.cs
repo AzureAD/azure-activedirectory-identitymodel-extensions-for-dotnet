@@ -1390,7 +1390,7 @@ namespace Microsoft.IdentityModel.TestUtils
             get
             {
                 var validationParameters = TokenValidationParameters(KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key);
-                validationParameters.ValidateLifetime = false;
+                validationParameters.ValidateLifetime = false; // CodeQL [SM04284] Intentional: these parameters are only used for testing
                 return validationParameters;
             }
         }

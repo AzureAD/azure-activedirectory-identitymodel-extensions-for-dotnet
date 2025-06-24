@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
             RequireAudience = other.RequireAudience;
             // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             RequireExpirationTime = other.RequireExpirationTime;
-            RequireSignedTokens = other.RequireSignedTokens;
+            RequireSignedTokens = other.RequireSignedTokens; // CodeQL [SM04387] intentional: Value is copied regardless of whether it is true or false.
             RoleClaimType = other.RoleClaimType;
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReplayValidator = other.TokenReplayValidator;
             TransformBeforeSignatureValidation = other.TransformBeforeSignatureValidation;
             TryAllDecryptionKeys = other.TryAllDecryptionKeys;
-            TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
+            TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys; // CodeQL [SM04387] intentional: Value is copied regardless of whether it is true or false.
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
             // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.

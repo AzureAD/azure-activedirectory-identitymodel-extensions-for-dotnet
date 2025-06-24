@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             var tokenValidationParameters = _tokenValidationParameters.Clone();
             tokenValidationParameters.ValidIssuer = "different-issuer";
             tokenValidationParameters.ValidAudience = "different-audience";
-            tokenValidationParameters.ValidateLifetime = false;
+            tokenValidationParameters.ValidateLifetime = false; // CodeQL [SM04284] intentional: the parameter is disabled for a test case
             return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, tokenValidationParameters).ConfigureAwait(false);
         }
 
