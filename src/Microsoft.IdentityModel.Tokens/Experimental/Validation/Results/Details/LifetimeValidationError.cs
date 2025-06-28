@@ -16,85 +16,76 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <summary>
         /// Initializes a new instance of the <see cref="LifetimeValidationError"/> class.
         /// </summary>
-        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
-        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
-        /// <param name="exceptionType"/> is the type of exception that occurred.
-        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="notBefore"/> is the date from which the token is valid. Can be null if the token does not contain a not before claim.
-        /// <param name="expires"/> is the date at which the token expires. Can be null if the token does not contain an expires claim.
-        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        /// <param name="messageDetail" />Information about the error. Can be used to provide details for error messages.
+        /// <param name="validationFailure"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="notBefore"/>The <see cref="DateTime"/> from which the <see cref="SecurityToken"/> is valid. Can be null if the <see cref="SecurityToken"/> does not contain a not before claim.
+        /// <param name="expires"/>The <see cref="DateTime"/> at which the <see cref="SecurityToken"/> expires. Can be null if the <see cref="SecurityToken"/> does not contain an expires claim.
+        /// <param name="innerException"/> If present, represents the exception that occurred during validation.
         public LifetimeValidationError(
             MessageDetail messageDetail,
-            ValidationFailureType validationFailureType,
-            Type exceptionType,
+            ValidationFailureType validationFailure,
             StackFrame stackFrame,
             DateTime? notBefore,
             DateTime? expires,
-            Exception? innerException = null)
+            Exception? innerException)
 
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
+            : base(messageDetail, validationFailure, stackFrame, innerException)
         {
             NotBefore = notBefore;
             Expires = expires;
         }
 
         /// <summary>
-        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// Initializes a new instance of the <see cref="LifetimeValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" />Information about the error. Can be used to provide details for error messages.
+        /// <param name="validationFailure"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="notBefore"/>The <see cref="DateTime"/> from which the <see cref="SecurityToken"/> is valid. Can be null if the <see cref="SecurityToken"/> does not contain a not before claim.
+        /// <param name="expires"/>The <see cref="DateTime"/> at which the <see cref="SecurityToken"/> expires. Can be null if the <see cref="SecurityToken"/> does not contain an expires claim.
+        public LifetimeValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailure,
+            StackFrame stackFrame,
+            DateTime? notBefore,
+            DateTime? expires)
+            : this(messageDetail,
+                  validationFailure,
+                  stackFrame,
+                  notBefore,
+                  expires,
+                  null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an instance of an <see cref="SecurityTokenInvalidLifetimeException"/>.
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        protected override Exception CreateException()
+        public override Exception GetException()
         {
-            if (ExceptionType == typeof(SecurityTokenNoExpirationException))
+            if (Exception is not null)
+                return Exception;
+
+            if (FailureType == LifetimeValidationFailure.NoExpirationTime
+                || FailureType == LifetimeValidationFailure.Expired
+                || FailureType == LifetimeValidationFailure.NotbeforeGreaterThanExpirationTime
+                || FailureType == LifetimeValidationFailure.NotYetValid
+                || FailureType == LifetimeValidationFailure.ValidationFailed
+                || FailureType == LifetimeValidationFailure.ValidatorThrew)
             {
-                var exception = new SecurityTokenNoExpirationException(MessageDetail.Message, InnerException);
-                exception.SetValidationError(this);
-                return exception;
-            }
-            else if (ExceptionType == typeof(SecurityTokenInvalidLifetimeException))
-            {
-                var exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, InnerException)
+                Exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, this, InnerException)
                 {
                     NotBefore = NotBefore,
                     Expires = Expires
                 };
-                exception.SetValidationError(this);
-                return exception;
-            }
-            else if (ExceptionType == typeof(SecurityTokenNotYetValidException))
-            {
-                var exception = new SecurityTokenNotYetValidException(MessageDetail.Message, InnerException)
-                {
-                    NotBefore = (DateTime)NotBefore!
-                };
-                exception.SetValidationError(this);
-                return exception;
-            }
-            else if (ExceptionType == typeof(SecurityTokenExpiredException))
-            {
-                var exception = new SecurityTokenExpiredException(MessageDetail.Message, InnerException)
-                {
-                    Expires = (DateTime)Expires!
-                };
-                exception.SetValidationError(this);
-                return exception;
-            }
-            else
-                return CreateException(ExceptionType, null);
-        }
 
-        /// <summary>
-        /// Creates a new instance of <see cref="LifetimeValidationError"/> representing a null parameter.
-        /// </summary>
-        /// <param name="parameterName">The name of the parameter.</param>
-        /// <param name="stackFrame">The stack frame where the error occurred.</param>
-        /// <returns>A new <see cref="LifetimeValidationError"/>.</returns>
-        public static new LifetimeValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
-            MessageDetail.NullParameter(parameterName),
-            ValidationFailureType.NullArgument,
-            typeof(SecurityTokenArgumentNullException),
-            stackFrame,
-            null, // NotBefore
-            null); // Expires
+                return Exception;
+            }
+
+            return base.GetException();
+        }
 
         /// <summary>
         /// The date from which the token is valid.

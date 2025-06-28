@@ -3,6 +3,7 @@
   <PropertyGroup>
     <AspNetCoreMinSupportedVersion>2.1.1</AspNetCoreMinSupportedVersion>
     <BannedApiAnalyzersVersion>4.14.0</BannedApiAnalyzersVersion>
+    <MicrosoftIdentityAbstractionsVersion>9.2.0</MicrosoftIdentityAbstractionsVersion>
     <MicrosoftBclTimeProviderVersion>8.0.1</MicrosoftBclTimeProviderVersion>
     <MicrosoftCSharpVersion>4.5.0</MicrosoftCSharpVersion>
     <MicrosoftSourceLinkGitHubVersion>1.0.0</MicrosoftSourceLinkGitHubVersion>

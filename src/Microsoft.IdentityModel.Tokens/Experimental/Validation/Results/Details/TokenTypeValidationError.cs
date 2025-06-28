@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
-    /// Represents an error that occurs when a token type cannot be validated.
+    /// Represents a validation error when the <see cref="SecurityToken"/> type is not valid.
     /// If available, the invalid token type is stored in <see cref="InvalidTokenType"/>.
     /// </summary>
     public class TokenTypeValidationError : ValidationError
@@ -16,56 +16,64 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenTypeValidationError"/> class.
         /// </summary>
-        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
-        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
-        /// <param name="exceptionType"/> is the type of exception that occurred.
-        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="invalidTokenType"/> is the token type that could not be validated. Can be null if the token type is missing from the token.
-        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        /// <param name="messageDetail" />Information about the error. Can be used to provide details for error messages.
+        /// <param name="validationFailure"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="invalidTokenType"/>The token type that was not valid. Can be null if the token type is missing from the token.
         public TokenTypeValidationError(
             MessageDetail messageDetail,
-            ValidationFailureType validationFailureType,
-            Type exceptionType,
+            ValidationFailureType validationFailure,
+            StackFrame stackFrame,
+            string? invalidTokenType)
+            : this(messageDetail,
+                  validationFailure,
+                  stackFrame,
+                  invalidTokenType,
+                  null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TokenTypeValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" />Information about the error. Can be used to provide details for error messages.
+        /// <param name="validationFailure"/>The <see cref="ValidationFailureType"/> that occurred.
+        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="invalidTokenType"/>The token type that was not valid. Can be null if the token type is missing from the token.
+        /// <param name="innerException"/>If present, represents the exception that occurred during validation.
+        public TokenTypeValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailure,
             StackFrame stackFrame,
             string? invalidTokenType,
-            Exception? innerException = null)
-            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
+            Exception? innerException)
+            : base(messageDetail, validationFailure, stackFrame, innerException)
         {
             InvalidTokenType = invalidTokenType;
         }
 
         /// <summary>
-        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// Creates an instance of a <see cref="SecurityTokenInvalidTypeException"/>.
         /// </summary>
         /// <returns>An instance of an exception.</returns>
-        protected override Exception CreateException()
+        public override Exception GetException()
         {
-            if (ExceptionType == typeof(SecurityTokenInvalidTypeException))
+            if (Exception != null)
+                return Exception;
+
+            if (FailureType == TokenTypeValidationFailure.ValidationFailed
+                || FailureType == TokenTypeValidationFailure.ValidatorThrew)
             {
-                SecurityTokenInvalidTypeException exception = new(MessageDetail.Message, InnerException)
+                Exception = new SecurityTokenInvalidTypeException(MessageDetail.Message, this, InnerException)
                 {
                     InvalidType = InvalidTokenType
                 };
-                exception.SetValidationError(this);
 
-                return exception;
+                return Exception;
             }
 
-            return base.CreateException();
+            return base.GetException();
         }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="TokenTypeValidationError"/> representing a null parameter.
-        /// </summary>
-        /// <param name="parameterName">The name of the parameter.</param>
-        /// <param name="stackFrame">The stack frame where the error occurred.</param>
-        /// <returns>A new <see cref="TokenTypeValidationError"/>.</returns>
-        public static new TokenTypeValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
-            MessageDetail.NullParameter(parameterName),
-            ValidationFailureType.NullArgument,
-            typeof(SecurityTokenArgumentNullException),
-            stackFrame,
-            null); // invalidTokenType
 
         /// <summary>
         /// The token type that could not be validated.

@@ -212,7 +212,7 @@ Microsoft.IdentityModel.Tokens.Saml.SamlSubjectEqualityComparer.SamlSubjectEqual
 Microsoft.IdentityModel.Tokens.Saml.SamlTokenUtilities
 Microsoft.IdentityModel.Tokens.Saml.SamlTokenUtilities.SamlTokenUtilities() -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlValidationError
-Microsoft.IdentityModel.Tokens.Saml.SamlValidationError.SamlValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Exception innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlValidationError.SamlValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailure validationFailure, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Exception innerException = null) -> void
 Microsoft.IdentityModel.Tokens.Saml2.AbsoluteUriCollection
 Microsoft.IdentityModel.Tokens.Saml2.AbsoluteUriCollection.AbsoluteUriCollection() -> void
 Microsoft.IdentityModel.Tokens.Saml2.LogMessages
@@ -244,7 +244,7 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidateTokenAsyn
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Subject.Saml2Subject() -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectLocality.Saml2SubjectLocality() -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2ValidationError
-Microsoft.IdentityModel.Tokens.Saml2.Saml2ValidationError.Saml2ValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Exception innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2ValidationError.Saml2ValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailure validationFailure, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Exception innerException = null) -> void
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.CreateClaimsIdentityInternal(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, string issuer) -> System.Security.Claims.ClaimsIdentity
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken>>
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken>>
