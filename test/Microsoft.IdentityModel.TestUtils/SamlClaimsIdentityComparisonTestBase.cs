@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
+using Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
@@ -43,7 +44,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 NotBefore = utcNow.AddHours(-1),
             });
 
-            ValidationResult<ValidatedToken, ValidationError> validationResult = await tokenHandler.ValidateTokenAsync(
+            OperationResult<ValidatedToken, ValidationError> operationResult = await tokenHandler.ValidateTokenAsync(
                 token,
                 validationParameters,
                 new CallContext(),
@@ -54,11 +55,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 tokenValidationParameters);
 
             IdentityComparer.AreBoolsEqual(
-                validationResult.IsValid,
+                operationResult.Succeeded,
                 tokenValidationResult.IsValid, context);
 
             IdentityComparer.AreClaimsIdentitiesEqual(
-                validationResult.UnwrapResult().ClaimsIdentity,
+                operationResult.Result!.ClaimsIdentity,
                 tokenValidationResult.ClaimsIdentity, context);
 
             TestUtilities.AssertFailIfErrors(context);
@@ -70,7 +71,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 SecurityKey signingKey)
         {
             var validationParameters = new ValidationParameters();
-            validationParameters.IssuerSigningKeys.Add(signingKey);
+            validationParameters.SigningKeys.Add(signingKey);
             audiences.ForEach(validationParameters.ValidAudiences.Add);
             issuers.ForEach(validationParameters.ValidIssuers.Add);
             return validationParameters;

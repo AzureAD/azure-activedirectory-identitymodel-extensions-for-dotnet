@@ -12,10 +12,18 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     {
         private string _message;
 
-        // TODO - remove the need to create NonPII objects, we could use tuples <bool, object> where bool == true => object is PII.
-        // TODO - does this need to be ReadOnlyMemory<char>?
         /// <summary>
-        /// Creates an instance of <see cref="MessageDetail"/>
+        /// Creates an instance of <see cref="MessageDetail"/>.
+        /// </summary>
+        /// <param name="message">The message to be formated.</param>
+        public MessageDetail(string message)
+        {
+            // TODO - paramter validation.
+            _message = message;
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="MessageDetail"/>.
         /// </summary>
         /// <param name="formatString">The message to be formated.</param>
         /// <param name="parameters">The parameters for formatting.</param>

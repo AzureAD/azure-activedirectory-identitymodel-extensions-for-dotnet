@@ -5,8 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -18,57 +17,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public partial class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
-        /// Decrypts a JWE and returns the clear text. Decrypts using the keys from configuration
-        /// if no keys are specified in <paramref name="validationParameters"/>.
-        /// </summary>
-        /// <param name="jwtToken">The JWE that contains the cypher text.</param>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for decrypting the token.</param>
-        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>The decoded / cleartext contents of the JWE.</returns>
-        internal async Task<ValidationResult<string, ValidationError>> DecryptTokenWithConfigurationAsync(
-            JsonWebToken jwtToken,
-            ValidationParameters validationParameters,
-            CallContext? callContext,
-            CancellationToken cancellationToken)
-        {
-            if (jwtToken == null)
-            {
-                return ValidationError.NullParameter(
-                    nameof(jwtToken),
-                    ValidationError.GetCurrentStackFrame());
-            }
-
-            if (validationParameters == null)
-            {
-                return ValidationError.NullParameter(
-                    nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
-            }
-
-            if (string.IsNullOrEmpty(jwtToken.Enc))
-            {
-                return new ValidationError(
-                    new MessageDetail(TokenLogMessages.IDX10612),
-                    ValidationFailureType.TokenDecryptionFailed,
-                    typeof(SecurityTokenException),
-                    ValidationError.GetCurrentStackFrame());
-            }
-
-            BaseConfiguration? currentConfiguration = await GetCurrentConfigurationAsync(validationParameters, cancellationToken).ConfigureAwait(false);
-
-            return DecryptToken(jwtToken, validationParameters, currentConfiguration, callContext);
-        }
-
-        /// <summary>
         /// Decrypts a JWE using the keys from <paramref name="validationParameters"/> and returns the clear text.
         /// </summary>
         /// <param name="jwtToken">The JWE that contains the cypher text.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>The decoded / cleartext contents of the JWE.</returns>
-        internal ValidationResult<string, ValidationError> DecryptToken(
+        /// <returns>An <see cref="OperationResult{TResult, TError}"/> with OperationResult.Result containing the clear text or a <see cref="ValidationError"/>.</returns>
+        internal OperationResult<string, ValidationError> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -93,7 +49,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ValidationError(
                     new MessageDetail(TokenLogMessages.IDX10612),
                     ValidationFailureType.TokenDecryptionFailed,
-                    typeof(SecurityTokenException),
                     ValidationError.GetCurrentStackFrame());
             }
 
@@ -110,7 +65,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
-                    typeof(SecurityTokenDecryptionFailedException),
                     ValidationError.GetCurrentStackFrame());
             }
 
@@ -123,33 +77,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 callContext);
         }
 
-        internal (IList<SecurityKey>?, ValidationError?) GetContentEncryptionKeys(JsonWebToken jwtToken, ValidationParameters validationParameters, BaseConfiguration? configuration, CallContext? callContext)
+        internal (IList<SecurityKey>?, ValidationError?) GetContentEncryptionKeys(
+            JsonWebToken jwtToken,
+            ValidationParameters validationParameters,
+            BaseConfiguration? configuration,
+            CallContext? callContext)
         {
             IList<SecurityKey>? keys = null;
 
             // First we check to see if the caller has set a custom decryption resolver on VP for the call, if so any keys set on VP and keys in Configuration are ignored.
             // If no custom decryption resolver is set, we'll check to see if they've set some static decryption keys on VP. If a key is found, we ignore configuration.
             // If no key found in VP, we'll check the configuration.
-            if (validationParameters.TokenDecryptionKeyResolver != null)
+            if (validationParameters.DecryptionKeyResolver != null)
             {
-                keys = validationParameters.TokenDecryptionKeyResolver(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters, callContext);
+                keys = validationParameters.DecryptionKeyResolver(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters, callContext);
             }
             else
             {
-                var key = ResolveTokenDecryptionKey(jwtToken.EncodedToken, jwtToken, validationParameters, callContext);
-                //if (key is not null)
-                //{
-                // TODO: Move to CallContext or return decryption key source as part of result
-                //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                //    LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
-                //}
-                //else
+                var key = ResolveTokenDecryptionKey(jwtToken, validationParameters, callContext);
                 if (key is null && configuration is not null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
-                    // TODO: Move to CallContext or return decryption key source as part of result
-                    //if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
-                    //    LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
                 }
 
                 if (key is not null)
@@ -160,13 +108,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // we need the ECDSASecurityKey for the receiver, use TokenValidationParameters.TokenDecryptionKey
 
             // control gets here if:
-            // 1. User specified delegate: TokenDecryptionKeyResolver returned null
+            // 1. User specified delegate: DecryptionKeyResolver returned null
             // 2. ResolveTokenDecryptionKey returned null
             // 3. ResolveTokenDecryptionKeyFromConfig returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
             if (validationParameters.TryAllDecryptionKeys && keys.IsNullOrEmpty())
             {
-                keys = validationParameters.TokenDecryptionKeys;
+                keys = validationParameters.DecryptionKeys;
                 if (configuration != null)
                 {
                     if (configuration.TokenDecryptionKeys is not List<SecurityKey> configurationKeys)
@@ -252,8 +200,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(keysAttempted?.ToString() ?? ""),
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                    ValidationFailureType.TokenDecryptionFailed,
-                    typeof(SecurityTokenKeyWrapException),
+                    ValidationFailureType.KeyWrapFailed,
                     ValidationError.GetCurrentStackFrame());
 
                 return (null, validationError);
@@ -263,38 +210,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when decrypting a JWE.
         /// </summary>
-        /// <param name="token">The <see cref="string"/> the token that is being decrypted.</param>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> that is being decrypted.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The call context used for logging.</param>
         /// <returns>A <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned.</remarks>
-        internal virtual SecurityKey? ResolveTokenDecryptionKey(string token, JsonWebToken jwtToken, ValidationParameters validationParameters, CallContext? callContext)
+        internal virtual SecurityKey? ResolveTokenDecryptionKey(
+            JsonWebToken jwtToken,
+            ValidationParameters validationParameters,
+            CallContext? callContext)
         {
             if (jwtToken == null || validationParameters == null)
                 return null;
 
-            if (!string.IsNullOrEmpty(jwtToken.Kid) && validationParameters.TokenDecryptionKeys != null)
+            if (!string.IsNullOrEmpty(jwtToken.Kid) && validationParameters.DecryptionKeys != null)
             {
-                for (int i = 0; i < validationParameters.TokenDecryptionKeys.Count; i++)
+                for (int i = 0; i < validationParameters.DecryptionKeys.Count; i++)
                 {
-                    var key = validationParameters.TokenDecryptionKeys[i];
+                    var key = validationParameters.DecryptionKeys[i];
                     if (key != null && string.Equals(key.KeyId, jwtToken.Kid, GetStringComparisonRuleIf509OrECDsa(key)))
                         return key;
                 }
             }
 
-            if (!string.IsNullOrEmpty(jwtToken.X5t) && validationParameters.TokenDecryptionKeys != null)
+            if (!string.IsNullOrEmpty(jwtToken.X5t) && validationParameters.DecryptionKeys != null)
             {
-                for (int i = 0; i < validationParameters.TokenDecryptionKeys.Count; i++)
+                for (int i = 0; i < validationParameters.DecryptionKeys.Count; i++)
                 {
-                    var key = validationParameters.TokenDecryptionKeys[i];
+                    SecurityKey? key = validationParameters.DecryptionKeys[i];
 
                     if (key != null && string.Equals(key.KeyId, jwtToken.X5t, GetStringComparisonRuleIf509(key)))
                         return key;
 
-                    var x509Key = key as X509SecurityKey;
-                    if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
+                    if (key is X509SecurityKey x509Key && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
                         return key;
                 }
             }

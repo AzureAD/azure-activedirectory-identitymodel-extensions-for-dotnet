@@ -32,7 +32,7 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenReplayE
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenType.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.CreateException(System.Type exceptionType, System.Exception innerException) -> System.Exception
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.MessageDetail.get -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail
-Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.Name.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationFailure.Name.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerSigningKeys.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TimeProvider.get -> System.TimeProvider
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TimeProvider.set -> void

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Threading;
-using Microsoft.Extensions.Logging;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens.Experimental
@@ -37,26 +36,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
-        /// Logs the validation result.
-        /// </summary>
-        [CLSCompliant(false)]
-        public void Log(ILogger logger)
-        {
-            if (logger is null)
-                throw new ArgumentNullException(nameof(logger));
-
-            Logger.TokenValidationSucceeded(
-                logger,
-                ValidatedAudience ?? "none",
-                ValidatedLifetime,
-                ValidatedIssuer,
-                ValidatedTokenType,
-                ValidatedSigningKey?.KeyId ?? "none",
-                ActorValidationResult is not null
-            );
-        }
-
-        /// <summary>
         /// The <see cref="SecurityToken"/> that was validated.
         /// </summary>
         public SecurityToken SecurityToken { get; }
@@ -73,44 +52,39 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
 
         #region Validated Properties
         /// <summary>
-        /// The result of validating the actor, if any.
+        /// The result of validating the actor.
         /// </summary>
         public ValidatedToken? ActorValidationResult { get; internal set; }
 
         /// <summary>
-        /// The audience that was validated, if any.
+        /// The audience that was validated.
         /// </summary>
         public string? ValidatedAudience { get; internal set; }
 
         /// <summary>
-        /// The issuer that was validated. If present, it contains the source of the validation as well.
+        /// The algorithm that was validated.
+        /// </summary>
+        public string? ValidatedAlgorithm { get; internal set; }
+
+        /// <summary>
+        /// The issuer that was validated. Contains the source of the validation as well.
         /// </summary>
         public ValidatedIssuer? ValidatedIssuer { get; internal set; }
 
         /// <summary>
-        /// The lifetime that was validated, if any.
+        /// The lifetime that was validated.
         /// </summary>
         public ValidatedLifetime? ValidatedLifetime { get; internal set; }
 
         /// <summary>
-        /// The expiration time of the token that was used to validate the token was not replayed, if any.
-        /// </summary>
-        public DateTime? ValidatedTokenReplayExpirationTime { get; internal set; }
-
-        /// <summary>
-        /// The token type that was validated, if any.
+        /// The token type that was validated.
         /// </summary>
         public ValidatedTokenType? ValidatedTokenType { get; internal set; }
 
         /// <summary>
-        /// The <see cref="SecurityKey"/> that was used to validate the token, if any.
+        /// The <see cref="SecurityKey"/> that was used to validate the signature.
         /// </summary>
-        public SecurityKey? ValidatedSigningKey { get; internal set; }
-
-        /// <summary>
-        /// The validated lifetime of the <see cref="SecurityKey"/> that was used to sign the token, if any.
-        /// </summary>
-        public ValidatedSigningKeyLifetime? ValidatedSigningKeyLifetime { get; internal set; }
+        public SecurityKey? ValidatedSignatureKey { get; internal set; }
         #endregion
 
         #region Claims
@@ -237,83 +211,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             }
         }
 #endif
-        #endregion
-
-        #region Logging
-        /// <summary>
-        /// Internal class used for logging.
-        /// </summary>
-        private static class Logger
-        {
-            private static readonly Action<ILogger, string, string, Exception?> s_tokenValidationFailed =
-                LoggerMessage.Define<string, string>(
-                    LogLevel.Information,
-                    LoggingEventId.TokenValidationFailed,
-                    "[MsIdentityModel] The token validation was unsuccessful due to: {ValidationFailureType} " +
-                    "Error message provided: {ValidationErrorMessage}");
-
-            /// <summary>
-            /// Logger for handling failures in token validation.
-            /// </summary>
-            /// <param name="logger">ILogger.</param>
-            /// <param name="validationFailureType">The cause of the failure.</param>
-            /// <param name="messageDetail">The message provided as part of the failure.</param>
-            public static void TokenValidationFailed(
-                ILogger logger,
-                ValidationFailureType validationFailureType,
-                MessageDetail messageDetail)
-            {
-                if (logger.IsEnabled(LogLevel.Information))
-                {
-                    s_tokenValidationFailed(logger, validationFailureType.Name, messageDetail.Message, null);
-                }
-            }
-
-            private static readonly Action<ILogger, string, ValidatedLifetime?, ValidatedIssuer?, ValidatedTokenType?, string, bool, Exception?> s_tokenValidationSucceeded =
-                LoggerMessage.Define<string, ValidatedLifetime?, ValidatedIssuer?, ValidatedTokenType?, string, bool>(
-                    LogLevel.Debug,
-                    LoggingEventId.TokenValidationSucceeded,
-                    "[MsIdentityModel] The token validation was successful. " +
-                    "Validated audience: {ValidatedAudience} " +
-                    "Validated lifetime: {ValidatedLifetime} " +
-                    "Validated issuer: {ValidatedIssuer} " +
-                    "Validated token type: {ValidatedTokenType} " +
-                    "Validated signing key id: {ValidatedSigningKeyId} " +
-                    "Actor was validated: {ActorWasValidated}");
-
-            /// <summary>
-            /// Logger for handling successful token validation.
-            /// </summary>
-            /// <param name="logger">The instance to be used to log.</param>
-            /// <param name="validatedAudience">The audience that was validated.</param>
-            /// <param name="validatedLifetime">The lifetime that was validated.</param>
-            /// <param name="validatedIssuer">The issuer that was validated.</param>
-            /// <param name="validatedTokenType">The token type that was validated.</param>
-            /// <param name="validatedSigningKeyId">The signing key id that was validated.</param>
-            /// <param name="actorWasValidated">Whether the actor was validated.</param>
-            public static void TokenValidationSucceeded(
-                ILogger logger,
-                string validatedAudience,
-                ValidatedLifetime? validatedLifetime,
-                ValidatedIssuer? validatedIssuer,
-                ValidatedTokenType? validatedTokenType,
-                string validatedSigningKeyId,
-                bool actorWasValidated)
-            {
-                if (logger.IsEnabled(LogLevel.Debug))
-                {
-                    s_tokenValidationSucceeded(
-                        logger,
-                        validatedAudience,
-                        validatedLifetime,
-                        validatedIssuer,
-                        validatedTokenType,
-                        validatedSigningKeyId,
-                        actorWasValidated,
-                        null);
-                }
-            }
-        }
         #endregion
     }
 }

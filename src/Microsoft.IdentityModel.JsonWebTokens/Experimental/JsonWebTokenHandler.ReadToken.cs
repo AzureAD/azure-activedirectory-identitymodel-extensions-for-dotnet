@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -12,19 +13,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public partial class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
-        /// Converts a string into an instance of <see cref="JsonWebToken"/>, returned inside of a <see cref="ValidationResult{TResult, TError}"/>.
+        /// Converts a string into an instance of <see cref="JsonWebToken"/>, returned inside of a <see cref="OperationResult{SecurityToken, ValidationError}"/>.
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <param name="callContext"></param>
-        /// <returns>A <see cref="ValidationResult{SecurityToken, ValidationError}"/> with the <see cref="JsonWebToken"/> if valid, or an error.</returns>
-        /// <exception cref="ArgumentNullException">returned if <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="SecurityTokenMalformedException">returned if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
-        /// <exception cref="SecurityTokenMalformedException">returned if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
-        internal static ValidationResult<SecurityToken, ValidationError> ReadToken(
+        /// <returns>A <see cref="OperationResult{SecurityToken, ValidationError}"/> with the <see cref="JsonWebToken"/> or a <see cref="ValidationError"/>.</returns>
+        internal static OperationResult<SecurityToken, ValidationError> ReadToken(
             string token,
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
             CallContext? callContext)
-#pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
+#pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (string.IsNullOrEmpty(token))
             {
@@ -35,8 +33,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             try
             {
-                JsonWebToken jsonWebToken = new JsonWebToken(token);
-                return jsonWebToken;
+                return new JsonWebToken(token);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -45,7 +42,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ValidationError(
                     new MessageDetail(LogMessages.IDX14107),
                     ValidationFailureType.TokenReadingFailed,
-                    typeof(SecurityTokenMalformedException),
                     ValidationError.GetCurrentStackFrame(),
                     ex);
             }

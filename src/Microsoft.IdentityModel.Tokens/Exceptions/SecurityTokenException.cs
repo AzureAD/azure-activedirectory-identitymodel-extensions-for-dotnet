@@ -3,6 +3,12 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Diagnostics;
+using Microsoft.IdentityModel.Tokens.Experimental;
+
+#if !NET8_0_OR_GREATER
+using System.Text;
+#endif
 
 #if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
 using Microsoft.IdentityModel.Logging;
@@ -14,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Represents a security token exception.
     /// </summary>
     [Serializable]
-    public partial class SecurityTokenException : Exception
+    public class SecurityTokenException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenException"/> class.
@@ -85,5 +91,68 @@ namespace Microsoft.IdentityModel.Tokens
             base.GetObjectData(info, context);
         }
 #endif
+        #region Experimental
+        [NonSerialized]
+        private string _stackTrace;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenException"/> class with a specified error message
+        /// and a reference to the inner exception that is the cause of this exception.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
+        internal SecurityTokenException(string message, ValidationError validationError)
+            : base(message)
+        {
+            ValidationError = validationError;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenException"/> class with a specified error message
+        /// and a reference to the inner exception that is the cause of this exception.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
+        /// <param name="innerException">An <see cref="Exception"/> that represents the root cause of the exception.</param>
+        internal SecurityTokenException(string message, ValidationError validationError, Exception innerException)
+            : base(message, innerException)
+        {
+            ValidationError = validationError;
+        }
+
+        internal ValidationError ValidationError
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the stack trace that is captured when the exception is created.
+        /// </summary>
+        public override string StackTrace
+        {
+            get
+            {
+                if (_stackTrace == null)
+                {
+                    if (ValidationError == null)
+                        return base.StackTrace;
+#if NET8_0_OR_GREATER
+                    _stackTrace = new StackTrace(ValidationError.StackFrames).ToString();
+#else
+                    StringBuilder sb = new();
+                    foreach (StackFrame frame in ValidationError.StackFrames)
+                    {
+                        sb.Append(frame.ToString());
+                        sb.Append(Environment.NewLine);
+                    }
+
+                    _stackTrace = sb.ToString();
+#endif
+                }
+
+                return _stackTrace;
+            }
+        }
+        #endregion
     }
 }

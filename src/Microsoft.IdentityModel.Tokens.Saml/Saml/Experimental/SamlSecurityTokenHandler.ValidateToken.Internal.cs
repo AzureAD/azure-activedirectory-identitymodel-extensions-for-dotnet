@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
@@ -15,37 +16,36 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public partial class SamlSecurityTokenHandler : SecurityTokenHandler, IResultBasedValidation
     {
-        /// <summary>
-        /// Validates a token.
-        /// On a validation failure, no exception will be thrown; instead, the <see cref="ValidationError"/> will contain the information about the error that occurred.
-        /// Callers should always check the ValidationResult.IsValid property to verify the validity of the result.
-        /// </summary>
-        /// <param name="token">The token to be validated.</param>
-        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        internal async override Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        /// <inheritdoc/>
+        internal override async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken)
         {
             if (token is null)
-                return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
+                return ValidationError.NullParameter(
+                    nameof(token),
+                    ValidationError.GetCurrentStackFrame());
 
             if (validationParameters is null)
-                return ValidationError.NullParameter(nameof(validationParameters), ValidationError.GetCurrentStackFrame());
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
 
             var tokenReadingResult = ReadSamlToken(token, callContext);
-            if (!tokenReadingResult.IsValid)
-                return tokenReadingResult.UnwrapError().AddCurrentStackFrame();
+            if (!tokenReadingResult.Succeeded)
+                return tokenReadingResult.Error!.AddCurrentStackFrame();
 
-            return await ValidateTokenAsync(tokenReadingResult.UnwrapResult(), validationParameters, callContext, cancellationToken).ConfigureAwait(false);
+            return await ValidateTokenAsync(
+                    tokenReadingResult.Result!,
+                    validationParameters,
+                    callContext,
+                    cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        internal override async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -58,6 +58,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     ValidationError.GetCurrentStackFrame());
             }
 
+            if (validationParameters is null)
+            {
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
+            }
+
             if (securityToken is not SamlSecurityToken samlToken)
             {
                 return new ValidationError(
@@ -66,218 +73,131 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         this,
                         typeof(SamlSecurityToken),
                         securityToken.GetType()),
-                    ValidationFailureType.InvalidSecurityToken,
-                    typeof(SecurityTokenArgumentException),
+                    ValidationFailureType.SecurityTokenNotExpectedType,
                     ValidationError.GetCurrentStackFrame());
             }
 
-            if (validationParameters is null)
+            if (samlToken.Assertion is null)
             {
-                return ValidationError.NullParameter(
-                    nameof(validationParameters),
+                return new ValidationError(
+                    new MessageDetail(LogMessages.IDX11315),
+                    ValidationFailureType.SecurityTokenNotExpectedType,
                     ValidationError.GetCurrentStackFrame());
             }
 
-            ValidationResult<ValidatedConditions, ValidationError> conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
+            OperationResult<ValidatedLifetime, ValidationError> lifetimeResult =
+                Validators.ValidateLifetimeInternal(
+                    samlToken.Assertion.Conditions?.NotBefore,
+                    samlToken.Assertion.Conditions?.NotOnOrAfter,
+                    samlToken,
+                    validationParameters,
+                    callContext);
 
-            if (!conditionsResult.IsValid)
-                return conditionsResult.UnwrapError().AddCurrentStackFrame();
+            if (!lifetimeResult.Succeeded)
+                return lifetimeResult.Error!.AddCurrentStackFrame();
 
-            ValidationResult<ValidatedIssuer, IssuerValidationError> issuerValidationResult;
-
-            try
+            List<string> audiences = [];
+            if (samlToken.Assertion?.Conditions?.Conditions is not null)
             {
-                issuerValidationResult = await validationParameters.IssuerValidatorAsync(
+                foreach (var condition in samlToken.Assertion.Conditions.Conditions)
+                    if (condition is SamlAudienceRestrictionCondition audienceRestriction)
+                    {
+                        foreach (Uri audience in audienceRestriction.Audiences)
+                            audiences.Add(audience.OriginalString);
+                    }
+            }
+
+            OperationResult<string, ValidationError> audienceResult =
+                Validators.ValidateAudienceInternal(
+                    audiences,
+                    samlToken,
+                    validationParameters,
+                    callContext);
+
+            if (!audienceResult.Succeeded)
+                return audienceResult.Error!.AddCurrentStackFrame();
+
+            OperationResult<ValidatedIssuer, ValidationError> issuerResult =
+                await Validators.ValidateIssuerInternalAsync(
                     samlToken.Issuer,
                     samlToken,
                     validationParameters,
                     callContext,
                     cancellationToken).ConfigureAwait(false);
 
-                if (!issuerValidationResult.IsValid)
-                    return issuerValidationResult.UnwrapError().AddCurrentStackFrame();
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new IssuerValidationError(
-                    new MessageDetail(Tokens.LogMessages.IDX10269),
-                    ValidationFailureType.IssuerValidatorThrew,
-                    typeof(SecurityTokenInvalidIssuerException),
-                    ValidationError.GetCurrentStackFrame(),
-                    samlToken.Issuer,
-                    ex);
-            }
+            if (!issuerResult.Succeeded)
+                return issuerResult.Error!.AddCurrentStackFrame();
 
-            ValidationResult<DateTime?, TokenReplayValidationError>? tokenReplayValidationResult = null;
+            OperationResult<DateTime?, ValidationError>? tokenReplayResult =
+                Validators.ValidateTokenReplayInternal(
+                    samlToken.Assertion!.Conditions?.NotOnOrAfter,
+                    samlToken.Assertion!.CanonicalString!,
+                    validationParameters,
+                    callContext);
 
-            if (samlToken.Assertion.Conditions is not null)
+            if (!tokenReplayResult.Value.Succeeded)
+                return tokenReplayResult.Value.Error!.AddCurrentStackFrame();
+
+            OperationResult<string, ValidationError> algorithmResult =
+                Validators.ValidateAlgorithmInternal(
+                    samlToken.Assertion.Signature?.SignedInfo?.SignatureMethod,
+                    samlToken,
+                    validationParameters,
+                    callContext);
+
+            if (!algorithmResult.Succeeded)
+                return algorithmResult.Error!.AddCurrentStackFrame();
+
+            BaseConfiguration? configuration = null;
+            if (validationParameters.ConfigurationManager is not null)
             {
                 try
                 {
-                    tokenReplayValidationResult = validationParameters.TokenReplayValidator(
-                        samlToken.Assertion.Conditions.NotOnOrAfter,
-                        samlToken.Assertion.CanonicalString,
-                        validationParameters,
-                        callContext);
-
-                    if (!tokenReplayValidationResult.Value.IsValid)
-                        return tokenReplayValidationResult.Value.UnwrapError().AddCurrentStackFrame();
+                    configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
-                catch (Exception ex)
+                catch
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    return new TokenReplayValidationError(
-                        new MessageDetail(Tokens.LogMessages.IDX10276),
-                        ValidationFailureType.TokenReplayValidatorThrew,
-                        typeof(SecurityTokenReplayDetectedException),
-                        ValidationError.GetCurrentStackFrame(),
-                        samlToken.Assertion.Conditions.NotOnOrAfter,
-                        ex);
+                    // The exception is tracked and dismissed as the ValidationParameters may have the issuer
+                    // and signing key set directly on them, allowing the library to continue with token validation.
                 }
             }
 
-            ValidationResult<SecurityKey, SignatureValidationError> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
+            OperationResult<SecurityKey, ValidationError> signatureResult =
+                SamlTokenUtilities.ValidateSignature(
+                    samlToken,
+                    samlToken.Assertion.Signature,
+                    samlToken.Assertion.CanonicalString,
+                    validationParameters,
+                    configuration,
+                    callContext);
 
-            if (!signatureValidationResult.IsValid)
-                return signatureValidationResult.UnwrapError().AddCurrentStackFrame();
+            if (!signatureResult.Succeeded)
+                return signatureResult.Error!.AddCurrentStackFrame();
 
-            ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> issuerSigningKeyValidationResult;
-
-            try
-            {
-                issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
+            OperationResult<ValidatedSignatureKey, ValidationError> signatureKeyResult =
+                Validators.ValidateSignatureKeyInternal(
                     samlToken.SigningKey,
                     samlToken,
                     validationParameters,
                     callContext);
 
-                if (!issuerSigningKeyValidationResult.IsValid)
-                    return issuerSigningKeyValidationResult.UnwrapError().AddCurrentStackFrame();
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new IssuerSigningKeyValidationError(
-                    new MessageDetail(Tokens.LogMessages.IDX10274),
-                    ValidationFailureType.IssuerSigningKeyValidatorThrew,
-                    typeof(SecurityTokenInvalidSigningKeyException),
-                    ValidationError.GetCurrentStackFrame(),
-                    samlToken.SigningKey,
-                    ex);
-            }
+            if (!signatureKeyResult.Succeeded)
+                return signatureKeyResult.Error!.AddCurrentStackFrame();
 
             return new ValidatedToken(samlToken, this, validationParameters)
             {
-                ValidatedAudience = conditionsResult.UnwrapResult().ValidatedAudience,
-                ValidatedLifetime = conditionsResult.UnwrapResult().ValidatedLifetime,
-                ValidatedIssuer = issuerValidationResult.UnwrapResult(),
-                ValidatedTokenReplayExpirationTime = tokenReplayValidationResult?.UnwrapResult(),
-                ValidatedSigningKey = signatureValidationResult.UnwrapResult(),
-                ValidatedSigningKeyLifetime = issuerSigningKeyValidationResult.UnwrapResult(),
+                ValidatedAudience = audienceResult.Result,
+                ValidatedAlgorithm = algorithmResult.Result,
+                ValidatedLifetime = lifetimeResult.Result,
+                ValidatedIssuer = issuerResult.Result,
+                ValidatedSignatureKey = signatureResult.Result
             };
         }
 
-        // ValidatedConditions is basically a named tuple but using a record struct better expresses the intent.
-        internal record struct ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime);
-
-        internal virtual ValidationResult<ValidatedConditions, ValidationError> ValidateConditions(
-            SamlSecurityToken samlToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            if (samlToken.Assertion is null)
-            {
-                return ValidationError.NullParameter(
-                    nameof(samlToken.Assertion),
-                    ValidationError.GetCurrentStackFrame());
-            }
-
-            if (samlToken.Assertion.Conditions is null)
-            {
-                return ValidationError.NullParameter(
-                    nameof(samlToken.Assertion.Conditions),
-                    ValidationError.GetCurrentStackFrame());
-            }
-
-            ValidationResult<ValidatedLifetime, LifetimeValidationError> lifetimeValidationResult;
-
-            try
-            {
-                lifetimeValidationResult = validationParameters.LifetimeValidator(
-                    samlToken.Assertion.Conditions.NotBefore,
-                    samlToken.Assertion.Conditions.NotOnOrAfter,
-                    samlToken,
-                    validationParameters,
-                    callContext);
-
-                if (!lifetimeValidationResult.IsValid)
-                    return lifetimeValidationResult.UnwrapError().AddCurrentStackFrame();
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new LifetimeValidationError(
-                    new MessageDetail(Tokens.LogMessages.IDX10271),
-                    ValidationFailureType.LifetimeValidatorThrew,
-                    typeof(SecurityTokenInvalidLifetimeException),
-                    ValidationError.GetCurrentStackFrame(),
-                    samlToken.Assertion.Conditions.NotBefore,
-                    samlToken.Assertion.Conditions.NotOnOrAfter,
-                    ex);
-            }
-
-            string? validatedAudience = null;
-            foreach (var condition in samlToken.Assertion.Conditions.Conditions)
-            {
-
-                if (condition is SamlAudienceRestrictionCondition audienceRestriction)
-                {
-                    // AudienceRestriction.Audiences is an ICollection<Uri> so we need make a conversion to List<string> before calling our audience validator 
-                    var audiencesAsList = audienceRestriction.Audiences.Select(static x => x.OriginalString).ToList();
-                    ValidationResult<string, AudienceValidationError> audienceValidationResult;
-
-                    try
-                    {
-                        audienceValidationResult = validationParameters.AudienceValidator(
-                            audiencesAsList,
-                            samlToken,
-                            validationParameters,
-                            callContext);
-
-                        if (!audienceValidationResult.IsValid)
-                            return audienceValidationResult.UnwrapError().AddCurrentStackFrame();
-                    }
-#pragma warning disable CA1031 // Do not catch general exception types
-                    catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-                    {
-                        return new AudienceValidationError(
-                            new MessageDetail(Tokens.LogMessages.IDX10270),
-                            ValidationFailureType.AudienceValidatorThrew,
-                            typeof(SecurityTokenInvalidAudienceException),
-                            ValidationError.GetCurrentStackFrame(),
-                            audiencesAsList,
-                            validationParameters.ValidAudiences,
-                            ex);
-                    }
-
-                    validatedAudience = audienceValidationResult.UnwrapResult();
-                }
-
-                if (validatedAudience != null)
-                    break;
-            }
-
-            return new ValidatedConditions(validatedAudience, lifetimeValidationResult.UnwrapResult());
-        }
-
         #region Explicit Interface Implementations
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -289,7 +209,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 default).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -302,7 +222,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -314,7 +234,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 default).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,

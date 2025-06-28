@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -17,13 +18,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Validates the type of the token.
         /// </summary>
-        /// <param name="type">The token type or <c>null</c> if it couldn't be resolved (e.g from the 'typ' header for a JWT).</param>
+        /// <param name="type">The token type.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns> A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
+        /// <returns> A <see cref="OperationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-        public static ValidationResult<ValidatedTokenType, TokenTypeValidationError> ValidateTokenType(
+        internal static OperationResult<ValidatedTokenType, ValidationError> ValidateTokenTypeInternal(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -32,29 +33,78 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801
         {
             if (securityToken == null)
-                return TokenTypeValidationError.NullParameter(
+                return ValidationError.NullParameter(
                     nameof(securityToken),
                     ValidationError.GetCurrentStackFrame());
 
             if (validationParameters == null)
-                return TokenTypeValidationError.NullParameter(
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
+
+            try
+            {
+                OperationResult<ValidatedTokenType, ValidationError> result =
+                    validationParameters.TokenTypeValidator(
+                        type,
+                        securityToken,
+                        validationParameters,
+                        callContext);
+
+                if (!result.Succeeded)
+                    return result.Error!.AddCurrentStackFrame();
+
+                return result;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenTypeValidationError(
+                    new MessageDetail(LogMessages.IDX10275),
+                    TokenTypeValidationFailure.ValidatorThrew,
+                    ValidationError.GetCurrentStackFrame(),
+                    type,
+                    ex);
+            }
+        }
+
+        /// <summary>
+        /// Validates the type of the token.
+        /// </summary>
+        /// <param name="type">The token type.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
+        /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
+        /// <returns> A <see cref="OperationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
+        /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
+        public static OperationResult<ValidatedTokenType, ValidationError> ValidateTokenType(
+            string? type,
+            SecurityToken? securityToken,
+            ValidationParameters validationParameters,
+#pragma warning disable CA1801
+            CallContext callContext)
+#pragma warning restore CA1801
+        {
+            if (securityToken == null)
+                return ValidationError.NullParameter(
+                    nameof(securityToken),
+                    ValidationError.GetCurrentStackFrame());
+
+            if (validationParameters == null)
+                return ValidationError.NullParameter(
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 
             if (validationParameters.ValidTypes.Count == 0)
-            {
-                //TODO: Move to CallContext?
-                //LogHelper.LogVerbose(LogMessages.IDX10255);
                 return new ValidatedTokenType(type ?? "null", validationParameters.ValidTypes.Count);
-            }
 
             if (string.IsNullOrEmpty(type))
                 return new TokenTypeValidationError(
                     new MessageDetail(LogMessages.IDX10256),
-                    ValidationFailureType.TokenTypeValidationFailed,
-                    typeof(SecurityTokenInvalidTypeException),
+                    TokenTypeValidationFailure.ValidationFailed,
                     ValidationError.GetCurrentStackFrame(),
-                    null); // even if it is empty, we report null to match the original behaviour.
+                    null);
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
             {
@@ -63,15 +113,10 @@ namespace Microsoft.IdentityModel.Tokens
                         LogMessages.IDX10257,
                         LogHelper.MarkAsNonPII(type),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
-                    ValidationFailureType.TokenTypeValidationFailed,
-                    typeof(SecurityTokenInvalidTypeException),
+                    TokenTypeValidationFailure.ValidationFailed,
                     ValidationError.GetCurrentStackFrame(),
                     type);
             }
-
-            // TODO: Move to CallContext
-            //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-            //    LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
 
             return new ValidatedTokenType(type!, validationParameters.ValidTypes.Count);
         }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -21,9 +22,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object>? _instancePropertyBag;
-        private IList<SecurityKey>? _issuerSigningKeys;
+        private IList<SecurityKey>? _signingKeys;
         private Dictionary<string, object>? _propertyBag;
-        private IList<SecurityKey>? _tokenDecryptionKeys;
+        private IList<SecurityKey>? _decryptionKeys;
         private IList<string>? _validIssuers;
         private IList<string>? _validTokenTypes;
         private IList<string>? _validAudiences;
@@ -36,20 +37,20 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         private SignatureValidationDelegate? _signatureValidator;
         private TokenReplayValidationDelegate _tokenReplayValidator = Validators.ValidateTokenReplay;
         private TokenTypeValidationDelegate _tokenTypeValidator = Validators.ValidateTokenType;
-        private IssuerSigningKeyValidationDelegate _issuerSigningKeyValidator = Validators.ValidateIssuerSigningKey;
+        private SignatureKeyValidationDelegate _signatureKeyValidator = Validators.ValidateSignatureKey;
 
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
         /// The value is <c>"AuthenticationTypes.Federation"</c>.
         /// To change the value, set <see cref="AuthenticationType"/> to a different value.
         /// </summary>
-        public const string DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
+        public const string DefaultAuthenticationType = "AuthenticationTypes.Federation";
 
         /// <summary>
         /// Default for the clock skew.
         /// </summary>
         /// <remarks>300 seconds (5 minutes).</remarks>
-        public static readonly TimeSpan DefaultClockSkew = TimeSpan.FromSeconds(300); // 5 min.
+        public static readonly TimeSpan DefaultClockSkew = TimeSpan.FromSeconds(300);
 
         /// <summary>
         /// Default for the maximum token size.
@@ -75,9 +76,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             DebugId = other.DebugId;
             IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
-            IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
-            _issuerSigningKeys = other.IssuerSigningKeys;
-            IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
+            SignatureKeyResolver = other.SignatureKeyResolver;
+            _signingKeys = other.SigningKeys;
+            SignatureKeyValidator = other.SignatureKeyValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
@@ -93,8 +94,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             _signatureValidator = other.SignatureValidator;
             TimeProvider = other.TimeProvider;
             TryAllDecryptionKeys = other.TryAllDecryptionKeys;
-            TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
-            _tokenDecryptionKeys = other.TokenDecryptionKeys;
+            DecryptionKeyResolver = other.DecryptionKeyResolver;
+            _decryptionKeys = other.DecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
             TokenTypeValidator = other.TokenTypeValidator;
@@ -111,10 +112,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// </summary>
         public ValidationParameters()
         {
-            LogTokenId = true;
-            SaveSigninToken = false;
-            TryAllDecryptionKeys = true;
-            ValidateActor = false;
         }
 
         /// <summary>
@@ -278,15 +275,12 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of default processing.
-        /// This means that no default <see cref="SecurityKey"/> validation will occur.
-        /// If both <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> and <see cref="IssuerSigningKeyValidator"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
-        /// priority.
+        /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token.
         /// </remarks>
-        public IssuerSigningKeyValidationDelegate IssuerSigningKeyValidator
+        public SignatureKeyValidationDelegate SignatureKeyValidator
         {
-            get => _issuerSigningKeyValidator;
-            set => _issuerSigningKeyValidator = value ?? throw new ArgumentNullException(nameof(value), "IssuerSigningKeyValidator cannot be set as null.");
+            get => _signatureKeyValidator;
+            set => _signatureKeyValidator = value ?? throw new ArgumentNullException(nameof(value), "SignatureKeyValidator cannot be set as null.");
         }
 
         /// <summary>
@@ -309,22 +303,18 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to check the signature. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        public IssuerSigningKeyResolverDelegate? IssuerSigningKeyResolver { get; set; }
+        public SignatureKeyResolverDelegate? SignatureKeyResolver { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> used for signature validation.
         /// </summary>
-        public IList<SecurityKey> IssuerSigningKeys
+        public IList<SecurityKey> SigningKeys
         {
             get
             {
-                return _issuerSigningKeys ??
-                    Interlocked.CompareExchange(ref _issuerSigningKeys, [], null) ??
-                    _issuerSigningKeys;
-            }
-            internal set
-            {
-                _issuerSigningKeys = value;
+                return _signingKeys ??
+                    Interlocked.CompareExchange(ref _signingKeys, [], null) ??
+                    _signingKeys;
             }
         }
 
@@ -355,7 +345,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Default value is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
-        public bool LogTokenId { get; set; }
+        public bool LogTokenId { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a <see cref="string"/> that defines the <see cref="ClaimsIdentity.NameClaimType"/>.
@@ -475,25 +465,21 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        internal DecryptionKeyResolverDelegate? TokenDecryptionKeyResolver { get; set; }
+        internal DecryptionKeyResolverDelegate? DecryptionKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IList{T}"/> that is to be used for decrypting inbound tokens.
+        /// Gets the <see cref="IList{T}"/> that is to be used for decrypting tokens.
         /// </summary>
         /// <remarks>
-        /// The decryption keys in this <see cref="TokenDecryptionKeys"/> collection will only be used if their <see cref="SecurityKey.KeyId"/> matches the 'kid' parameter in the token.
+        /// The decryption keys in this <see cref="DecryptionKeys"/> collection will only be used if their <see cref="SecurityKey.KeyId"/> matches the 'kid' parameter in the token.
         /// </remarks>
-        public IList<SecurityKey> TokenDecryptionKeys
+        public IList<SecurityKey> DecryptionKeys
         {
             get
             {
-                return _tokenDecryptionKeys ??
-                    Interlocked.CompareExchange(ref _tokenDecryptionKeys, [], null) ??
-                    _tokenDecryptionKeys;
-            }
-            internal set
-            {
-                _tokenDecryptionKeys = value;
+                return _decryptionKeys ??
+                    Interlocked.CompareExchange(ref _decryptionKeys, [], null) ??
+                    _decryptionKeys;
             }
         }
 
@@ -519,22 +505,22 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether all <see cref="TokenDecryptionKeys"/> should be tried during token decryption when a key is not matched to token 'kid' or if token 'kid' is empty.
+        /// Gets or sets a value indicating whether all <see cref="DecryptionKeys"/> should be tried during token decryption when a key is not matched to token 'kid' or if token 'kid' is empty.
         /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
-        public bool TryAllDecryptionKeys { get; set; }
+        public bool TryAllDecryptionKeys { get; set; } = true;
 
         /// <summary>
-        /// If the IssuerSigningKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,
+        /// If the SignatureKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,
         /// all available keys will be tried.
         /// </summary>
-        /// <remarks>Default is false.</remarks>
-        public bool TryAllIssuerSigningKeys { get; set; }
+        [DefaultValue(false)]
+        public bool TryAllSigningKeys { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, a <see cref="ValidationResult{TResult, TError}"/> MUST be returned by the delegate.
+        /// If the token type cannot be validated, a <see cref="OperationResult{TResult, TError}"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>
@@ -574,10 +560,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                     Interlocked.CompareExchange(ref _validAlgorithms, [], null) ??
                     _validAlgorithms;
             }
-            internal set
-            {
-                _validAlgorithms = value;
-            }
         }
 
         /// <summary>
@@ -591,10 +573,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 return _validAudiences ??
                     Interlocked.CompareExchange(ref _validAudiences, [], null) ??
                     _validAudiences;
-            }
-            internal set
-            {
-                _validAudiences = value;
             }
         }
 
@@ -610,10 +588,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 return _validIssuers ??
                     Interlocked.CompareExchange(ref _validIssuers, [], null) ??
                     _validIssuers;
-            }
-            internal set
-            {
-                _validIssuers = value;
             }
         }
 
@@ -632,16 +606,13 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                     Interlocked.CompareExchange(ref _validTokenTypes, [], null) ??
                     _validTokenTypes;
             }
-            internal set
-            {
-                _validTokenTypes = value;
-            }
         }
 
         /// <summary>
         /// Gets or sets a boolean that controls if the actor claim should be validated.
         /// </summary>
         /// <remarks>Default value is false.</remarks>
+        [DefaultValue(false)]
         public bool ValidateActor { get; set; }
     }
 }

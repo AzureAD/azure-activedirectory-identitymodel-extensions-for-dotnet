@@ -4,10 +4,9 @@
 using System;
 using System.Text;
 using System.Xml;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
-using Microsoft.IdentityModel.Tokens.Saml;
-using Microsoft.IdentityModel.Tokens.Saml2.Experimental;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
@@ -15,27 +14,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
         /// <summary>
-        /// Converts a string into an instance of <see cref="SamlSecurityToken"/>.
+        /// Converts a string into an instance of <see cref="Saml2SecurityToken"/>, returned inside of a <see cref="OperationResult{SecurityToken, ValidationError}"/>.
         /// </summary>
-        /// <param name="token">a Saml token as a string.</param>
-        /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param>
-        /// <returns>A <see cref="SamlSecurityToken"/></returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">If 'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        internal virtual ValidationResult<Saml2SecurityToken, ValidationError> ReadSaml2Token(string token, CallContext callContext)
+        /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
+        /// <param name="callContext"></param>
+        /// <returns>A <see cref="OperationResult{SecurityToken, ValidationError}"/> with the <see cref="Saml2SecurityToken"/> or a <see cref="ValidationError"/>.</returns>
+        internal virtual OperationResult<SecurityToken, ValidationError> ReadSaml2Token(string token, CallContext callContext)
         {
             if (string.IsNullOrEmpty(token))
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
 
             if (token.Length > MaximumTokenSizeInBytes)
                 return new ValidationError(
-                        new MessageDetail(
-                            TokenLogMessages.IDX10209,
-                            LogHelper.MarkAsNonPII(token.Length),
-                            LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
-                        ValidationFailureType.TokenReadingFailed,
-                        typeof(ArgumentException),
-                        ValidationError.GetCurrentStackFrame());
+                    new MessageDetail(
+                        TokenLogMessages.IDX10209,
+                        LogHelper.MarkAsNonPII(token.Length),
+                        LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
+                    ValidationFailureType.TokenExceedsMaximumSize,
+                    ValidationError.GetCurrentStackFrame());
 
             try
             {
@@ -48,10 +44,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return new Saml2ValidationError(
+                return new ValidationError(
                     new MessageDetail(LogMessages.IDX13003, ex.Message),
                     ValidationFailureType.TokenReadingFailed,
-                    typeof(Saml2SecurityTokenReadException),
                     ValidationError.GetCurrentStackFrame(),
                     ex);
             }
