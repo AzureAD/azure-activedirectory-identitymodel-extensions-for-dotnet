@@ -3,13 +3,41 @@
 
 using System;
 using System.Buffers;
+#if NET9_0_OR_GREATER
 using System.Buffers.Text;
+#endif
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// For Non-Net9.0 Targets: Base64 encode/decode implementation for as per https://tools.ietf.org/html/rfc4648#section-5.
+    /// For Net9.0 Targets: Uses System.Buffers.Text.Base64Url to perform the encoding/decoding.
+    /// Uses ArrayPool[T] to minimize memory usage.
+    /// </summary>
     internal static class Base64UrlEncoding
     {
+        private const uint IntA = 'A';
+        private const uint IntZ = 'Z';
+        private const uint Inta = 'a';
+        private const uint Intz = 'z';
+        private const uint Int0 = '0';
+        private const uint Int9 = '9';
+        private const uint IntEq = '=';
+        private const uint IntPlus = '+';
+        private const uint IntMinus = '-';
+        private const uint IntSlash = '/';
+        private const uint IntUnderscore = '_';
+
+        private static readonly char[] Base64Table =
+        {
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+            'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd',
+            'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+            't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', '-', '_',
+        };
+
         /// <summary>
         /// Decodes a base64url encoded string into a byte array.
         /// </summary>
@@ -155,6 +183,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+
+#if NET9_0_OR_GREATER
         /// <summary>
         /// Decodes a Base64Url encoded substring of a string into a byte array.
         /// </summary>
@@ -164,6 +194,89 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="output">The byte array to place the decoded results into.</param>
         internal static void Decode(ReadOnlySpan<char> input, int offset, int length, byte[] output) =>
             Base64Url.DecodeFromChars(input.Slice(offset, length), output);
+#else
+        /// <remarks>
+        /// Changes from Base64UrlEncoder implementation:
+        /// 1. Padding is optional.
+        /// 2. '+' and '-' are treated the same.
+        /// 3. '/' and '_' are treated the same.
+        /// </remarks>
+        internal static void Decode(ReadOnlySpan<char> input, int offset, int length, byte[] output)
+        {
+            int outputpos = 0;
+            uint curblock = 0x000000FFu;
+            for (int i = offset; i < (offset + length); i++)
+            {
+                uint cur = input[i];
+                if (cur >= IntA && cur <= IntZ)
+                {
+                    cur -= IntA;
+                }
+                else if (cur >= Inta && cur <= Intz)
+                {
+                    cur = (cur - Inta) + 26u;
+                }
+                else if (cur >= Int0 && cur <= Int9)
+                {
+                    cur = (cur - Int0) + 52u;
+                }
+                else if (cur == IntPlus || cur == IntMinus)
+                {
+                    cur = 62u;
+                }
+                else if (cur == IntSlash || cur == IntUnderscore)
+                {
+                    cur = 63u;
+                }
+                else if (cur == IntEq)
+                {
+                    continue;
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10820,
+                            LogHelper.MarkAsNonPII(cur),
+                            input.ToString())));
+                }
+
+                curblock = (curblock << 6) | cur;
+
+                // check if 4 characters have been read, based on number of shifts.
+                if ((0xFF000000u & curblock) == 0xFF000000u)
+                {
+                    output[outputpos++] = (byte)(curblock >> 16);
+                    output[outputpos++] = (byte)(curblock >> 8);
+                    output[outputpos++] = (byte)curblock;
+                    curblock = 0x000000FFu;
+                }
+            }
+
+            // Handle spill over characters. This accounts for case where padding character is not present.
+            if (curblock != 0x000000FFu)
+            {
+                if ((0x03FC0000u & curblock) == 0x03FC0000u)
+                {
+                    // shifted 3 times, 1 padding character, 2 output characters
+                    curblock <<= 6;
+                    output[outputpos++] = (byte)(curblock >> 16);
+                    output[outputpos++] = (byte)(curblock >> 8);
+                }
+                else if ((0x000FF000u & curblock) == 0x000FF000u)
+                {
+                    // shifted 2 times, 2 padding character, 1 output character
+                    curblock <<= 12;
+                    output[outputpos++] = (byte)(curblock >> 16);
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(
+                        LogHelper.FormatInvariant(LogMessages.IDX10821, input.ToString())));
+                }
+            }
+        }
+#endif
 
         /// <summary>
         /// Encodes a byte array into a base64url encoded string.
@@ -220,7 +333,19 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(input.Length))));
 #pragma warning restore CA2208 // Instantiate argument exceptions correctly
 
+#if NET9_0_OR_GREATER
             return Base64Url.EncodeToString(input.AsSpan().Slice(offset, length));
+#else
+            int outputsize = length % 3;
+            if (outputsize > 0)
+                outputsize++;
+
+            outputsize += (length / 3) * 4;
+
+            char[] output = new char[outputsize];
+            WriteEncodedOutput(input, offset, length, output);
+            return new string(output);
+#endif
         }
 
         /// <summary>
@@ -284,5 +409,42 @@ namespace Microsoft.IdentityModel.Tokens
             outputSize += (effectiveLength / 4) * 3;
             return outputSize;
         }
+
+#if !NET9_0_OR_GREATER
+        private static void WriteEncodedOutput(byte[] inputBytes, int offset, int length, Span<char> output)
+        {
+            uint curBlock = 0x000000FFu;
+            int outputPointer = 0;
+
+            for (int i = offset; i < offset + length; i++)
+            {
+                curBlock = (curBlock << 8) | inputBytes[i];
+
+                if ((curBlock & 0xFF000000u) == 0xFF000000u)
+                {
+                    output[outputPointer++] = Base64Table[(curBlock & 0x00FC0000u) >> 18];
+                    output[outputPointer++] = Base64Table[(curBlock & 0x00030000u | curBlock & 0x0000F000u) >> 12];
+                    output[outputPointer++] = Base64Table[(curBlock & 0x00000F00u | curBlock & 0x000000C0u) >> 6];
+                    output[outputPointer++] = Base64Table[curBlock & 0x0000003Fu];
+
+                    curBlock = 0x000000FFu;
+                }
+            }
+
+            if ((curBlock & 0x00FF0000u) == 0x00FF0000u)
+            {
+                // 2 shifts, 3 output characters.
+                output[outputPointer++] = Base64Table[(curBlock & 0x0000FC00u) >> 10];
+                output[outputPointer++] = Base64Table[(curBlock & 0x000003F0u) >> 4];
+                output[outputPointer++] = Base64Table[(curBlock & 0x0000000Fu) << 2];
+            }
+            else if ((curBlock & 0x0000FF00u) == 0x0000FF00u)
+            {
+                // 1 shift, 2 output characters.
+                output[outputPointer++] = Base64Table[(curBlock & 0x000000FCu) >> 2];
+                output[outputPointer++] = Base64Table[(curBlock & 0x00000003u) << 4];
+            }
+        }
+#endif
     }
 }

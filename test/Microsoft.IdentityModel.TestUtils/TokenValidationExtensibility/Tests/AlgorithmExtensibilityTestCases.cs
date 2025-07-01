@@ -6,6 +6,7 @@ using System.Diagnostics;
 using Xunit;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
@@ -196,11 +197,13 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
             });
 
             // SignatureValidationError : ValidationError, ExceptionType: SecurityTokenInvalidSignatureException, inner: CustomSecurityTokenInvalidAlgorithmException
+            int addStackFrames = (tokenHandlerType == "JWT") ? 1 : 0;
+
             theoryData.Add(new AlgorithmExtensibilityTheoryData(
                 "AlgorithmValidatorThrows",
                 tokenHandlerType,
                 CustomAlgorithmValidationDelegates.AlgorithmValidatorThrows,
-                extraStackFrames: extraStackFrames + 1)
+                extraStackFrames: extraStackFrames + addStackFrames)
             {
                 ExpectedException = new ExpectedException(
                     typeof(SecurityTokenInvalidSignatureException),

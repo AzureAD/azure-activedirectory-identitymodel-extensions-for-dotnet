@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -179,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             catch (Exception ex)
             {
-                Assert.Contains("internal virtual Task<ValidationResult<ValidatedToken>> " +
+                Assert.Contains("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
                         "ValidateTokenAsync(string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)",
                         ex.Message);
 
@@ -202,7 +203,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             catch (Exception ex)
             {
-                Assert.Contains("internal virtual Task<ValidationResult<ValidatedToken>> " +
+                Assert.Contains("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
                         "ValidateTokenAsync(SecurityToken token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)",
                         ex.Message);
 

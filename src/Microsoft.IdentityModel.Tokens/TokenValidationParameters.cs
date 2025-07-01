@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
+            TryReadJwtClaim = other.TryReadJwtClaim;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
             // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
@@ -454,6 +455,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; set; }
+
+        /// <summary>
+        /// Gets or sets the delegate that will be called when reading JSON Web Token header and payload claims.
+        /// </summary>
+        public TryReadJwtClaim TryReadJwtClaim { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.

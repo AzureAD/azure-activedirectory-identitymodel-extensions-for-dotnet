@@ -60,7 +60,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 // metadata address is null because the configuration manager is made using an invalid config to trigger an exception
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.MetadataAddressTag, null },
-                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Lkg }
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Lkg },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceUnknown }
             };
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);

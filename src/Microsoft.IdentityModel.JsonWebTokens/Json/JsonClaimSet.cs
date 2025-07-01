@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal JsonClaimSet()
         {
-            _jsonClaims = new Dictionary<string, object>();
+            _jsonClaims = [];
         }
 
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)
@@ -88,9 +88,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 claims.Add(new Claim(claimType, m.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Double, issuer, issuer));
             else if (value is null)
                 claims.Add(new Claim(claimType, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
-            else if (value is IList ilist)
+            else if (value is IList iList)
             {
-                foreach (var item in ilist)
+                foreach (var item in iList)
                     CreateClaimFromObject(claims, claimType, item, issuer);
             }
             else if (value is JsonElement j)
@@ -109,6 +109,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (claim != null)
                         claims.Add(claim);
                 }
+            else
+            {
+                claims.Add(new Claim(claimType, value.ToString(), ClaimValueTypes.String, issuer, issuer));
+            }
         }
 
         internal static Claim CreateClaimFromJsonElement(string claimType, string issuer, JsonElement jsonElement)

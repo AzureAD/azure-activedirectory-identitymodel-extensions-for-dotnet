@@ -10,16 +10,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class CustomJsonWebToken : JsonWebToken
     {
         // Represents claims known to this custom implementation and not to the IdentityModel.
-        public const string CustomClaimName = "CustomClaim";
+        // The claim name is the same in the header and the payload, but the value is different.
+        public const string CustomClaimName = "CustomClaimName";
 
-        private CustomClaim _customClaim;
+        private CustomClaim _customHeaderClaim;
+        private CustomClaim _customPayloadClaim;
 
-        public CustomClaim CustomClaim
+        public CustomClaim CustomHeaderClaim
         {
             get
             {
-                _customClaim ??= Payload.GetValue<CustomClaim>(CustomClaimName);
-                return _customClaim;
+                _customHeaderClaim ??= Header.GetValue<CustomClaim>(CustomClaimName);
+                return _customHeaderClaim;
+            }
+        }
+
+        public CustomClaim CustomPayloadClaim
+        {
+            get
+            {
+                _customPayloadClaim ??= Payload.GetValue<CustomClaim>(CustomClaimName);
+                return _customPayloadClaim;
             }
         }
 
@@ -29,6 +40,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         public CustomJsonWebToken(string header, string payload) : base(header, payload) { }
 
+        private protected override void ReadHeaderValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
+        {
+            // Handle custom claims.
+            if (reader.ValueTextEquals(CustomClaimName))
+            {
+                // Deserialize the custom object claim in an appropriate way.
+                reader.Read(); // Move to the value.
+                _customHeaderClaim = JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
+                claims[CustomClaimName] = _customHeaderClaim;
+                reader.Read();
+            }
+            else
+            {
+                // Call base implementation to handle other claims known to IdentityModel.
+                base.ReadHeaderValue(ref reader, claims);
+            }
+        }
+
         private protected override void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
         {
             // Handle custom claims.
@@ -36,8 +65,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 // Deserialize the custom object claim in an appropriate way.
                 reader.Read(); // Move to the value.
-                _customClaim = JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
-                claims[CustomClaimName] = _customClaim;
+                _customPayloadClaim = JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
+                claims[CustomClaimName] = _customPayloadClaim;
                 reader.Read();
             }
             else
@@ -50,8 +79,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
     public class CustomClaim
     {
-        public CustomClaim()
+        public CustomClaim() { }
+
+        public CustomClaim(string value)
         {
+            CustomClaimValue = value;
         }
 
         public string CustomClaimValue { get; set; }

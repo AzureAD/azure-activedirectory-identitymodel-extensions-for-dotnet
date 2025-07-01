@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 61;
+        int ExpectedPropertyCount = 62;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
@@ -83,6 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 PropertyBag = propertyBag,
                 SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs,
                 SaveSigninToken = true,
+                TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim,
                 TypeValidator = typeValidator,
                 ValidAlgorithms = validAlgorithms,
                 ValidateAudience = false,
@@ -122,6 +123,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.PropertyBag = propertyBag;
             validationParametersSets.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
             validationParametersSets.SaveSigninToken = true;
+            validationParametersSets.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParametersSets.TypeValidator = typeValidator;
             validationParametersSets.ValidateAudience = false;
             validationParametersSets.ValidateIssuer = false;
@@ -308,6 +310,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.TokenReader = ValidationDelegates.TokenReaderReturnsJsonWebToken;
             validationParameters.TokenReplayValidator = ValidationDelegates.TokenReplayValidatorReturnsTrue;
             validationParameters.TransformBeforeSignatureValidation = ValidationDelegates.TransformBeforeSignatureValidation;
+            validationParameters.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParameters.TypeValidator = ValidationDelegates.TypeValidator;
 
             validationParameters.ActorValidationParameters = new TokenValidationParameters();

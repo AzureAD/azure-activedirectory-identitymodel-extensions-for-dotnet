@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Json;
 using Microsoft.IdentityModel.Validators;
 using Newtonsoft.Json;
@@ -3292,6 +3293,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var handlerWithNoDefaultTimes = new JsonWebTokenHandler();
                 handlerWithNoDefaultTimes.SetDefaultTimesOnTokenCreation = false;
 
+                var validConfiguration = new OpenIdConnectConfiguration();
+                validConfiguration.SigningKeys.Add(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key);
+                validConfiguration.TokenDecryptionKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+
                 return new TheoryData<JwtTheoryData>
                 {
                     new JwtTheoryData
@@ -3448,6 +3453,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         },
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
                     },
+                    new JwtTheoryData
+                    {
+                        TestId = "JWE_KeysInConfiguration_Succeeds",
+                        Token = new JsonWebTokenHandler().CreateToken(
+                            Default.PayloadString,
+                            KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                            new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256)),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                            ValidateIssuerSigningKey = true,
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfiguration),
+                        },
+                    },
                 };
 
                 static BaseConfigurationManager CreateConfigurationManager(bool invalidKeyHasKeyId)
@@ -3466,6 +3486,62 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                     return configManager;
                 }
+            }
+        }
+
+        [Theory, MemberData(nameof(DecryptJweTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task DecryptJwe(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.DecryptJwe", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var decryptedToken = await handler.DecryptTokenWithConfigurationAsync(theoryData.JsonWebToken, theoryData.ValidationParameters, default);
+                Assert.Equal(theoryData.Token, decryptedToken);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> DecryptJweTestCases
+        {
+            get
+            {
+                var handlerWithNoDefaultTimes = new JsonWebTokenHandler();
+                handlerWithNoDefaultTimes.SetDefaultTimesOnTokenCreation = false;
+
+                var validConfiguration = new OpenIdConnectConfiguration();
+                validConfiguration.SigningKeys.Add(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key);
+                validConfiguration.TokenDecryptionKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                        TestId = "JWE_KeysInConfiguration_Succeeds",
+                        JsonWebToken = new JsonWebToken(new JsonWebTokenHandler().CreateToken(
+                            Default.PayloadString,
+                            KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                            new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256))),
+                        Token = new JsonWebTokenHandler().CreateToken(
+                            Default.PayloadString,
+                            KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                            ValidateIssuerSigningKey = false,
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfiguration),
+                        },
+                    },
+                };
             }
         }
 
@@ -4570,6 +4646,57 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidIssuer = "http://Default.Issuer.com",
                     },
                     IsValid = false
+                }
+            };
+        }
+
+        [Theory, MemberData(nameof(ReadJsonWebTokenSpanTheoryData))]
+        public void ReadJsonWebToken_Span(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadJsonWebToken_Span", theoryData);
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var readOnlySpan = theoryData.Token.AsMemory();
+                var jwtFromSpan = handler.ReadJsonWebToken(readOnlySpan);
+                var jwtFromString = handler.ReadJsonWebToken(theoryData.Token);
+
+                if (theoryData.ExpectedException == null)
+                {
+                    // Results should match between span and string versions
+                    IdentityComparer.AreEqual(jwtFromSpan, jwtFromString, context);
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ReadJsonWebTokenSpanTheoryData()
+        {
+            return new TheoryData<JwtTheoryData>
+            {
+                new JwtTheoryData
+                {
+                    TestId = "ValidToken",
+                    Token = Default.AsymmetricJws,
+                },
+                new JwtTheoryData
+                {
+                    TestId = "TokenTooLong",
+                    Token = new string('x', TokenValidationParameters.DefaultMaximumTokenSizeInBytes + 1),
+                    ExpectedException = ExpectedException.ArgumentException("IDX10209:"),
+                },
+                new JwtTheoryData
+                {
+                    TestId = "EmptyToken",
+                    Token = string.Empty,
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                 }
             };
         }

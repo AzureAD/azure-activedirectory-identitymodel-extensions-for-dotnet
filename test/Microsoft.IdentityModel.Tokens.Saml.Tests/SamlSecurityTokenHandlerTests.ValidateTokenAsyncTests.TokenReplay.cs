@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
@@ -25,7 +26,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 await samlTokenHandler.ValidateTokenAsync(samlToken.Assertion.CanonicalString, theoryData.TokenValidationParameters);
 
             // Validate the token using ValidationParameters.
-            ValidationResult<ValidatedToken> validationResult =
+            ValidationResult<ValidatedToken, ValidationError> validationResult =
                 await samlTokenHandler.ValidateTokenAsync(
                     samlToken,
                     theoryData.ValidationParameters!,

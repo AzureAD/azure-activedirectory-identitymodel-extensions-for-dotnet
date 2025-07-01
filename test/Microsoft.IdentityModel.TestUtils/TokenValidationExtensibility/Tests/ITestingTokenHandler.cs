@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
@@ -16,7 +17,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
     // since the ValidateTokenAsync method with ValidationParameters is not part of any shared interface.
     internal interface ITestingTokenHandler
     {
-        Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -26,7 +27,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
             string token,
             TokenValidationParameters validationParameters);
 
-        Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -46,7 +47,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
         {
         }
 
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -55,7 +56,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
             return await _handler.ValidateTokenAsync(token, validationParameters, callContext, cancellationToken);
         }
 
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -86,7 +87,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
     {
         private readonly SamlSecurityTokenHandler _handler = new SamlSecurityTokenHandler();
 
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -95,7 +96,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
             return await _handler.ValidateTokenAsync(token, validationParameters, callContext, cancellationToken);
         }
 
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -129,7 +130,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
     {
         private readonly Saml2SecurityTokenHandler _handler = new Saml2SecurityTokenHandler();
 
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -138,7 +139,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
             return await _handler.ValidateTokenAsync(token, validationParameters, callContext, cancellationToken);
         }
 
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
