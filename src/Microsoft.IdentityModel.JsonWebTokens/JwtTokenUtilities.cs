@@ -649,6 +649,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return count;
         }
 
+        /// <summary>
+        /// Counts the number of JWT token segments.
+        /// </summary>
+        /// <remarks>
+        /// This method is kept for backward compatibility when using mixed package versions
+        /// and must not be called directly in new code.
+        /// </remarks>
+        /// <param name="token">The JWT token.</param>
+        /// <param name="maxCount">The maximum number of segments to count up to.</param>
+        /// <returns>The number of segments up to <paramref name="maxCount"/>.</returns>
+        internal static int CountJwtTokenPart(string token, int maxCount) => CountJwtTokenPart(token.AsSpan(), maxCount);
+
         internal static IEnumerable<SecurityKey> ConcatSigningKeys(TokenValidationParameters tvp)
         {
             if (tvp == null)
