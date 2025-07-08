@@ -1,8 +1,14 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.12.1
+====
+### Fundamentals
+- Update .NET SDK version to 9.0.107 used when building or running the code. See [#3385](https://github.com/AzureAD/microsoft-identity-web/pull/3385) for details.
+- To keep our experimental code separate from production code, all files associated with experimental features have been moved to the Experimental folders. See PR [#3261](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3261) for details.
+- Experimental code leaked into TokenValidationResult from early prototypes. See PR [#3259](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3259) for details.
+
 8.12.0
 ====
-
 ## New Features
 - **Enhance ConfigurationManager with event handling**  
   Added event handling capabilities to the `ConfigurationManager`, enabling consumers to subscribe to configuration change events. This enhancement improves extensibility and allows more responsive applications. For details see [#3253](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3253)  
