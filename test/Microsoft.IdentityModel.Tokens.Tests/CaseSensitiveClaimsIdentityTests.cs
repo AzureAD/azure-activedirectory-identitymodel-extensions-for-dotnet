@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -253,6 +254,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(claimsIdentity.RoleClaimType, deserializedClaimsIdentity.RoleClaimType);
         }
 
+        [Fact]
+        public void CaseSensitiveClaimsIdentity_DerivedClassCanSetToken()
+        {
+            var jwt = new JwtSecurityToken();
+            CaseSensitiveClaimsIdentity claimsIdentity = new TestCaseSensitveClaimsIdentity(jwt);
+
+            Assert.Same(jwt, claimsIdentity.SecurityToken);
+        }
+
         public class CaseSensitiveClaimsIdentityTheoryData(string testId) : TheoryDataBase(testId)
         {
             internal ClaimsIdentity ClaimsIdentity { get; set; }
@@ -261,6 +271,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             internal bool ExpectedHasClaim { get; set; }
             internal string ExpectedClaim { get; set; }
             internal List<string> ExpectedClaims { get; set; }
+        }
+
+        public class TestCaseSensitveClaimsIdentity : CaseSensitiveClaimsIdentity
+        {
+            public TestCaseSensitveClaimsIdentity(SecurityToken token)
+            {
+                SecurityToken = token ?? throw new ArgumentNullException(nameof(token));
+            }
         }
 
         private static ClaimsIdentity CreateCaseSensitiveClaimsIdentity(JObject claims, TokenValidationParameters validationParameters = null)
