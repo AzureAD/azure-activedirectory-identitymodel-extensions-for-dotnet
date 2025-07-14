@@ -530,6 +530,66 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        [Fact]
+        public void WithClaims_EmptyCollection_DoesNotAddClaims()
+        {
+            // Arrange
+            var builder = CaseSensitiveClaimsIdentityBuilder.Create();
+            var emptyClaims = new List<Claim>();
+
+            // Act
+            var identity = builder.WithClaims(emptyClaims).Build();
+
+            // Assert
+            Assert.NotNull(identity);
+            Assert.Empty(identity.Claims);
+        }
+
+        [Fact]
+        public void Build_CaseSensitivityPreserved_VerifyClaimRetrieval()
+        {
+            // Arrange
+            var lowerCaseClaim = new Claim("tid", "tenant");
+            var upperCaseClaim = new Claim("TID", "TENANT");
+            var builder = CaseSensitiveClaimsIdentityBuilder.Create()
+                .WithClaim(lowerCaseClaim)
+                .WithClaim(upperCaseClaim);
+
+            // Act
+            var identity = builder.Build();
+
+            // Assert
+            Assert.NotNull(identity);
+            Assert.IsType<CaseSensitiveClaimsIdentity>(identity);
+            
+            // Verify case-sensitive behavior
+            var lowerResult = identity.FindFirst("tid");
+            var upperResult = identity.FindFirst("TID");
+            
+            Assert.NotNull(lowerResult);
+            Assert.NotNull(upperResult);
+            Assert.Equal("tid", lowerResult.Type);
+            Assert.Equal("TID", upperResult.Type);
+            Assert.NotSame(lowerResult, upperResult);
+        }
+
+        [Fact]
+        public void Build_WithMultipleCalls_DoesNotAffectPreviousInstances()
+        {
+            // Arrange
+            var builder = CaseSensitiveClaimsIdentityBuilder.Create()
+                .WithAuthenticationType("Bearer");
+
+            // Act
+            var identity1 = builder.Build();
+            builder.WithClaim("additional", "claim");
+            var identity2 = builder.Build();
+
+            // Assert
+            Assert.Equal(0, identity1.Claims.Count()); // Original should be unchanged
+            Assert.Equal(1, identity2.Claims.Count()); // New instance has additional claim
+        }
+
         // Test helper class
         private class TestSecurityToken : SecurityToken
         {
