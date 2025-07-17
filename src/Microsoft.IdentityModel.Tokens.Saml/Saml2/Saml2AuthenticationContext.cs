@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (value == null)
                     throw LogArgumentNullException(nameof(value));
 
-                if (!value.IsAbsoluteUri)
+                if (!value.IsAbsoluteUri && !AppContextSwitches.AllowRelativeUrisInSaml2AuthnContext)
                     throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, MarkAsNonPII(nameof(ClassReference)), value)));
 
                 _classReference = value;
