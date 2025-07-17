@@ -98,6 +98,12 @@ namespace Microsoft.IdentityModel.Tokens
         private static bool? _useCapitalizedXMLTypeAttr;
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
+
+        internal const string AllowRelativeUrisInSaml2AuthnContextSwitch = "Switch.Microsoft.IdentityModel.AllowRelativeUrisInSaml2AuthnContext";
+        private static bool? _allowRelativeUrisInSaml2AuthnContext;
+        internal static bool AllowRelativeUrisInSaml2AuthnContext => _allowRelativeUrisInSaml2AuthnContext ??= (AppContext.TryGetSwitch(AllowRelativeUrisInSaml2AuthnContextSwitch, out bool allowRelativeUris) && allowRelativeUris);
+
+
         /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
@@ -123,6 +129,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
+
+            _allowRelativeUrisInSaml2AuthnContext = null;
+            AppContext.SetSwitch(AllowRelativeUrisInSaml2AuthnContextSwitch, false);
         }
     }
 }
