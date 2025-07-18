@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// [Saml2Core, 2.7.2.2]
         /// </summary>
         /// <remarks>
-        /// The check for an absoulte URI be disabled by setting <see cref="AppContextSwitches.AllowRelativeUrisInSaml2AuthnContext"/>.
+        /// The check for an absoulte URI can be disabled by setting <see cref="AppContextSwitches.AllowRelativeUrisInSaml2AuthnContext"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         /// <exception cref="ArgumentException">if 'value' is not an absolute Uri.</exception>
