@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
+    [Collection("Saml2AuthenticationContextTests")]
     public class Saml2AuthenticationContextTests
     {
         [Fact]
