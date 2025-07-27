@@ -98,7 +98,9 @@ namespace Microsoft.IdentityModel.Tokens
         private static bool? _useCapitalizedXMLTypeAttr;
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
-
+        /// <summary>
+        /// When enabled, allows using relative URIs in SAML2 authentication context.
+        /// </summary>
         internal const string AllowRelativeUrisInSaml2AuthnContextSwitch = "Switch.Microsoft.IdentityModel.AllowRelativeUrisInSaml2AuthnContext";
         private static bool? _allowRelativeUrisInSaml2AuthnContext;
         internal static bool AllowRelativeUrisInSaml2AuthnContext => _allowRelativeUrisInSaml2AuthnContext ??= (AppContext.TryGetSwitch(AllowRelativeUrisInSaml2AuthnContextSwitch, out bool allowRelativeUris) && allowRelativeUris);
