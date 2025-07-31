@@ -17,6 +17,10 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net472' ">
+    <NoWarn>$(NoWarn);nullable</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="..\..\README.md">
       <Pack>True</Pack>

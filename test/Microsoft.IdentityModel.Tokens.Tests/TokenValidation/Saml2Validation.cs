@@ -10,6 +10,38 @@ namespace Microsoft.IdentityModel.Tokens.TokenValidation.Tests
 #nullable enable
     public class Saml2Validation
     {
+        #region Parameters
+        [Theory, MemberData(nameof(InvalidSecurityTokenParameterTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task InvalidSecurityTokenParameters(ValidateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.InvalidSecurityTokenParameters", theoryData);
+
+            await ValidationUtils.RunSecurityTokenParameterTest(theoryData, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ValidateTokenTheoryData> InvalidSecurityTokenParameterTestCases()
+        {
+            return TestCaseProvider.GenerateInvalidSecurityTokenParameterTestCases(new Saml2SecurityTestingTokenHandler());
+        }
+
+        [Theory, MemberData(nameof(InvalidTokenParametersTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task InvalidTokenParameters(ValidateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.InvalidTokenParameters", theoryData);
+
+            await ValidationUtils.RunTokenParameterTest(theoryData, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ValidateTokenTheoryData> InvalidTokenParametersTestCases()
+        {
+            return TestCaseProvider.GenerateInvalidTokenParameterTestCases(new Saml2SecurityTestingTokenHandler());
+        }
+        #endregion
+
         #region Algorithm
         [Theory, MemberData(nameof(InvalidAlgorithmTestCases), DisableDiscoveryEnumeration = true)]
         public async Task InvalidAlgorithm(ValidateTokenTheoryData theoryData)

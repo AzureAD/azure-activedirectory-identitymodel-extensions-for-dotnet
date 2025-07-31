@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                 new CustomIssuerValidationError(
                     new MessageDetail(nameof(UnknownValidationFailure)),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     Default.GetStackFrame(),
                     issuer)));
         }

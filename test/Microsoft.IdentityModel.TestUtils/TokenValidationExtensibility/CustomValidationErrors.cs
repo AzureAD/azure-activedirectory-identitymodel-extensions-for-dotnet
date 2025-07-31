@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.TestUtils
             IList<string>? tokenAudiences,
             IList<string>? validAudiences,
             Exception? innerException = null) :
-            base(messageDetail, AudienceValidationFailure.AudienceDidNotMatch, stackFrame, tokenAudiences, validAudiences, innerException)
+            base(messageDetail, AudienceValidationFailure.DidNotMatch, stackFrame, tokenAudiences, validAudiences, innerException)
         {
         }
     }

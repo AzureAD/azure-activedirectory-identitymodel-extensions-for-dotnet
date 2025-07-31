@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -22,77 +23,114 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            StackFrame? stackFrame;
             if (string.IsNullOrEmpty(token))
             {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
                 return ValidationError.NullParameter(
                     nameof(token),
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
             }
 
             if (validationParameters is null)
             {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
                 return ValidationError.NullParameter(
                     nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
             }
 
             if (token.Length > MaximumTokenSizeInBytes)
             {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
                 return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10209,
                         LogHelper.MarkAsNonPII(token.Length),
                         LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
-                    ValidationFailureType.SecurityTokenTooLarge,
-                    ValidationError.GetCurrentStackFrame());
+                    ValidationFailureType.TokenExceedsMaximumSize,
+                    stackFrame!);
             }
 
             ValidationResult<SecurityToken, ValidationError> readResult = ReadToken(token, callContext);
-            if (readResult.Succeeded)
+            if (!readResult.Succeeded)
             {
-                ValidationResult<ValidatedToken, ValidationError> validationResult = await ValidateTokenAsync(
-                    readResult.Result!,
-                    validationParameters,
-                    callContext,
-                    cancellationToken)
-                    .ConfigureAwait(false);
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
 
-                if (validationResult.Succeeded)
-                    return validationResult; // No need to unwrap and re-wrap the result.
-
-                return validationResult.Error!.AddStackFrame(ValidationError.GetCurrentStackFrame());
+                return readResult.Error!.AddStackFrame(stackFrame!);
             }
 
-            return readResult.Error!.AddCurrentStackFrame();
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await ValidateTokenAsync(
+                readResult.Result!,
+                validationParameters,
+                callContext,
+                cancellationToken)
+                .ConfigureAwait(false);
+
+            if (!validationResult.Succeeded)
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return validationResult.Error!.AddStackFrame(stackFrame!);
+            }
+
+            return validationResult;
         }
 
         /// <inheritdoc/>
         internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
-            SecurityToken token,
+            SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            if (token is null)
+            StackFrame? stackFrame;
+            string key = string.Empty;
+            if (securityToken is null)
             {
+                key = ValidationError.GetStackFrameKey(memberName: nameof(TokenHandler.ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
                 return ValidationError.NullParameter(
-                    nameof(token),
-                    ValidationError.GetCurrentStackFrame());
+                    nameof(securityToken),
+                    stackFrame!);
             }
 
             if (validationParameters is null)
             {
+                key = ValidationError.GetStackFrameKey(memberName: nameof(TokenHandler.ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
                 return ValidationError.NullParameter(
                     nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
             }
 
-            if (token is not JsonWebToken jsonWebToken)
+            if (securityToken is not JsonWebToken jsonWebToken)
             {
+                key = ValidationError.GetStackFrameKey(memberName: nameof(TokenHandler.ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
                 return new ValidationError(
-                    new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
+                    new MessageDetail(TokenLogMessages.IDX10001, nameof(securityToken), nameof(JsonWebToken)),
                     ValidationFailureType.SecurityTokenNotExpectedType,
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
             }
 
             BaseConfiguration? currentConfiguration =
@@ -107,7 +145,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (result.Succeeded)
                     return result;
 
-                return result.Error!.AddStackFrame(ValidationError.GetCurrentStackFrame());
+                key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateTokenAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return result.Error!.AddStackFrame(stackFrame!);
             }
 
             if (result.Succeeded)
@@ -172,7 +214,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             // If we reach this point, the token validation failed and we should return the error.
-            return result.Error!.AddCurrentStackFrame();
+            key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateTokenAsync));
+            if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+            // If we reach this point, the securityToken validation failed and we should return the error.
+            return result.Error!.AddStackFrame(stackFrame!);
         }
 
         private async ValueTask<ValidationResult<ValidatedToken, ValidationError>> ValidateJWEAsync(
@@ -183,16 +230,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CancellationToken cancellationToken)
         {
             ValidationResult<string, ValidationError> decryptionResult = DecryptToken(
-                jwtToken, validationParameters, configuration, callContext);
+                jwtToken,
+                validationParameters,
+                configuration,
+                callContext);
+
+            StackFrame? stackFrame;
             if (!decryptionResult.Succeeded)
             {
-                return decryptionResult.Error!.AddCurrentStackFrame();
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWEAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return decryptionResult.Error!.AddStackFrame(stackFrame!);
             }
 
             ValidationResult<SecurityToken, ValidationError> readResult = ReadToken(decryptionResult.Result!, callContext);
             if (!readResult.Succeeded)
             {
-                return readResult.Error!.AddCurrentStackFrame();
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWEAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return readResult.Error!.AddStackFrame(stackFrame!);
             }
 
             JsonWebToken decryptedToken = (readResult.Result as JsonWebToken)!;
@@ -202,7 +262,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (!validationResult.Succeeded)
             {
-                return validationResult.Error!.AddCurrentStackFrame();
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return validationResult.Error!.AddStackFrame(stackFrame!);
             }
 
             JsonWebToken jsonWebToken = (validationResult.Result!.SecurityToken as JsonWebToken)!;
@@ -220,6 +284,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            StackFrame? stackFrame;
             DateTime? expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? jsonWebToken.ValidTo : null;
             DateTime? notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? jsonWebToken.ValidFrom : null;
 
@@ -232,20 +297,32 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     callContext);
 
             if (!lifetimeResult.Succeeded)
-                return lifetimeResult.Error!.AddCurrentStackFrame();
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
 
-            if (jsonWebToken.Audiences is not IList<string> tokenAudiences)
-                tokenAudiences = [.. jsonWebToken.Audiences];
+                return lifetimeResult.Error!.AddStackFrame(stackFrame!);
+            }
+
+            if (jsonWebToken.Audiences is not IList<string> audiences)
+                audiences = [.. jsonWebToken.Audiences];
 
             ValidationResult<string, ValidationError> audienceResult =
                 Validators.ValidateAudienceInternal(
-                    tokenAudiences,
+                    audiences,
                     jsonWebToken,
                     validationParameters,
                     callContext);
 
             if (!audienceResult.Succeeded)
-                return audienceResult.Error!.AddCurrentStackFrame();
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return audienceResult.Error!.AddStackFrame(stackFrame!);
+            }
 
             ValidationResult<ValidatedIssuer, ValidationError> issuerResult =
                 await Validators.ValidateIssuerInternalAsync(
@@ -256,17 +333,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     cancellationToken).ConfigureAwait(false);
 
             if (!issuerResult.Succeeded)
-                return issuerResult.Error!.AddCurrentStackFrame();
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
 
-            ValidationResult<DateTime?, ValidationError>? tokenReplayResult =
+                return issuerResult.Error!.AddStackFrame(stackFrame!);
+            }
+
+            ValidationResult<DateTime?, ValidationError> tokenReplayResult =
                 Validators.ValidateTokenReplayInternal(
                     expires,
                     jsonWebToken.EncodedToken,
                     validationParameters,
                     callContext);
 
-            if (!tokenReplayResult.Value.Succeeded)
-                return tokenReplayResult.Value.Error!.AddCurrentStackFrame();
+            if (!tokenReplayResult.Succeeded)
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return tokenReplayResult.Error!.AddStackFrame(stackFrame!);
+            }
 
             ValidationResult<ValidatedTokenType, ValidationError> tokenTypeResult =
                 Validators.ValidateTokenTypeInternal(
@@ -276,7 +365,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     callContext);
 
             if (!tokenTypeResult.Succeeded)
-                return tokenTypeResult.Error!.AddCurrentStackFrame();
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return tokenTypeResult.Error!.AddStackFrame(stackFrame!);
+            }
 
             ValidationResult<string, ValidationError> algorithmResult =
                 Validators.ValidateAlgorithmInternal(
@@ -286,7 +381,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     callContext);
 
             if (!algorithmResult.Succeeded)
-                return algorithmResult.Error!.AddCurrentStackFrame();
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return algorithmResult.Error!.AddStackFrame(stackFrame!);
+            }
 
             // The signature validation delegate is yet to be migrated to ValidationParameters.
             ValidationResult<SecurityKey, ValidationError> signatureResult =
@@ -297,7 +398,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     callContext);
 
             if (!signatureResult.Succeeded)
-                return signatureResult.Error!.AddCurrentStackFrame();
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return signatureResult.Error!.AddStackFrame(stackFrame!);
+            }
 
             ValidationResult<ValidatedSignatureKey, ValidationError> signatureKeyResult =
                 Validators.ValidateSignatureKeyInternal(
@@ -307,7 +414,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     callContext);
 
             if (!signatureKeyResult.Succeeded)
-                return signatureKeyResult.Error!.AddCurrentStackFrame();
+            {
+                string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                return signatureKeyResult.Error!.AddStackFrame(stackFrame!);
+            }
 
             // actor validation
             ValidationResult<ValidatedToken, ValidationError>? actorResult = null;
@@ -315,24 +428,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 ValidationResult<SecurityToken, ValidationError> readResult = ReadToken(jsonWebToken.Actor, callContext);
                 if (!readResult.Succeeded)
-                    return readResult.Error!.AddCurrentStackFrame();
+                {
+                    string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                    if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                        stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
 
-                if (validationParameters.ActorValidationParameters is null)
-                    return ValidationError.NullParameter(
-                        nameof(validationParameters.ActorValidationParameters),
-                        ValidationError.GetCurrentStackFrame());
+                    return readResult.Error!.AddStackFrame(stackFrame!);
+                }
 
-                // TODO - what if actor token is encrypted?
-                JsonWebToken actorToken = (readResult.Result as JsonWebToken)!;
-                actorResult = await ValidateJWSAsync(
-                    actorToken,
-                    validationParameters.ActorValidationParameters,
-                    configuration,
+                ValidationParameters actorValidationParameters = validationParameters.ActorValidationParameters ?? validationParameters;
+                actorResult = await ValidateTokenAsync(
+                    readResult.Result!,
+                    actorValidationParameters,
                     callContext,
                     cancellationToken).ConfigureAwait(false);
 
                 if (!actorResult.Value.Succeeded)
-                    return actorResult.Value.Error!.AddCurrentStackFrame();
+                {
+                    string key = ValidationError.GetStackFrameKey(memberName: nameof(ValidateJWSAsync));
+                    if (!ValidationError.TryGetStackFrame(key, out stackFrame))
+                        stackFrame = ValidationError.GetAsyncStackFrame(key, new StackFrame(0, true));
+
+                    return actorResult.Value.Error!.AddStackFrame(stackFrame!);
+                }
             }
 
             return new ValidatedToken(jsonWebToken, this, validationParameters)
@@ -361,8 +479,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // The exception is tracked and dismissed as the ValidationParameters may have the issuer
-                    // and signing key set directly on them, allowing the library to continue with token validation.
-                    // TODO: Move to CallContext.
+                    // and signing key set directly on them, allowing the library to continue with securityToken validation.
                     //if (LogHelper.IsEnabled(EventLogLevel.Warning))
                     //    LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
                 }

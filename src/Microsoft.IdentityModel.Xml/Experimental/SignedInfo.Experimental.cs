@@ -21,7 +21,6 @@ namespace Microsoft.IdentityModel.Xml
             CryptoProviderFactory cryptoProviderFactory,
             CallContext callContext)
         {
-            // TODO needs to return ValidationResult<SecurityKey, ValidationError>
             if (cryptoProviderFactory == null)
                 return ValidationError.NullParameter(
                     nameof(cryptoProviderFactory),

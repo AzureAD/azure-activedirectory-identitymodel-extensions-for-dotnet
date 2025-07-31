@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             catch (Exception ex)
             {
-                context.AddDiff($"Did not expect an exception: {ex}");
+                TestUtilities.RecordUnexpectedException(context, theoryData, ex);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             catch (Exception ex)
             {
-                context.AddDiff($"Did not expect an exception: {ex}");
+                TestUtilities.RecordUnexpectedException(context, theoryData, ex);
             }
 
             TestUtilities.AssertFailIfErrors(context);

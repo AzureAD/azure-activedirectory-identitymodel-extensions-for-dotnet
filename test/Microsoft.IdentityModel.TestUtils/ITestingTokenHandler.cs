@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.TestUtils
             CancellationToken cancellationToken);
 
         Task<TokenValidationResult> ValidateTokenAsync(
-            string token,
+            string? token,
             TokenValidationParameters validationParameters);
 
         Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
@@ -35,6 +35,10 @@ namespace Microsoft.IdentityModel.TestUtils
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken);
+
+        Task<TokenValidationResult> ValidateTokenAsync(
+            SecurityToken token,
+            TokenValidationParameters validationParameters);
 
         SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor);
 
@@ -82,11 +86,19 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         public async Task<TokenValidationResult> ValidateTokenAsync(
-            string token,
-            TokenValidationParameters validationParameters)
+            string? token,
+            TokenValidationParameters? validationParameters)
         {
             return await _handler.ValidateTokenAsync(token, validationParameters);
         }
+
+        public async Task<TokenValidationResult> ValidateTokenAsync(
+            SecurityToken securityToken,
+            TokenValidationParameters? validationParameters)
+        {
+            return await _handler.ValidateTokenAsync(securityToken, validationParameters);
+        }
+
 
         public SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
@@ -202,10 +214,17 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         public async Task<TokenValidationResult> ValidateTokenAsync(
-            string token,
-            TokenValidationParameters validationParameters)
+            string? token,
+            TokenValidationParameters? validationParameters)
         {
             return await _handler.ValidateTokenAsync(token, validationParameters);
+        }
+
+        public async Task<TokenValidationResult> ValidateTokenAsync(
+            SecurityToken securityToken,
+            TokenValidationParameters? validationParameters)
+        {
+            return await _handler.ValidateTokenAsync(securityToken, validationParameters);
         }
 
         public SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
@@ -320,10 +339,17 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         public async Task<TokenValidationResult> ValidateTokenAsync(
-            string token,
+            string? token,
             TokenValidationParameters validationParameters)
         {
             return await _handler.ValidateTokenAsync(token, validationParameters);
+        }
+
+        public async Task<TokenValidationResult> ValidateTokenAsync(
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters)
+        {
+            return await _handler.ValidateTokenAsync(securityToken, validationParameters);
         }
 
         public SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)

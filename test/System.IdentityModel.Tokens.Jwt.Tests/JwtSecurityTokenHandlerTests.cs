@@ -2070,7 +2070,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Theory, MemberData(nameof(TokenReplayValidationTheoryData), DisableDiscoveryEnumeration = true)]
-        public void TokenReplayValidation(TokenReplayTheoryData theoryData)
+        public void TokenReplayValidation(ValidateTokenReplayTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.TokenReplayValidation", theoryData);
             var context = new CompareContext($"{this}.ReadKeyInfo, {theoryData.TestId}");
@@ -2104,7 +2104,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<TokenReplayTheoryData> TokenReplayValidationTheoryData
+        public static TheoryData<ValidateTokenReplayTheoryData> TokenReplayValidationTheoryData
         {
             get
             {

@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Xml
             if (!cryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
                 return new SignatureValidationError(
                     new MessageDetail(LogMessages.IDX30207, SignedInfo.SignatureMethod, cryptoProviderFactory.GetType()),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     ValidationError.GetCurrentStackFrame());
 
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
@@ -55,7 +55,6 @@ namespace Microsoft.IdentityModel.Xml
 
             try
             {
-                // TODO - follow JsonWebTokenHandler for IDX10511 parameters.
                 using (var memoryStream = new MemoryStream())
                 {
                     SignedInfo.GetCanonicalBytes(memoryStream);

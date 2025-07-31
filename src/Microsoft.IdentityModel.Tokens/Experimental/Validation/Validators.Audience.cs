@@ -25,11 +25,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>An EXACT match is required.</remarks>
         internal static ValidationResult<string, ValidationError> ValidateAudienceInternal(
             IList<string> audiences,
-#pragma warning disable CA1801
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
-#pragma warning restore CA1801
         {
             if (validationParameters == null)
             {
@@ -109,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return new AudienceValidationError(
                     new MessageDetail(LogMessages.IDX10268),
-                    AudienceValidationFailure.NoValidationParameterAudiencesProvided,
+                    AudienceValidationFailure.NoAudiencesProvided,
                     ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     validationParameters.ValidAudiences);
@@ -130,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogMessages.IDX10215,
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
-                    AudienceValidationFailure.AudienceDidNotMatch,
+                    AudienceValidationFailure.DidNotMatch,
                     ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     validationParameters.ValidAudiences);
@@ -138,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return new AudienceValidationError(
                     new MessageDetail(
                         LogMessages.IDX10215S),
-                    AudienceValidationFailure.AudienceDidNotMatch,
+                    AudienceValidationFailure.DidNotMatch,
                     ValidationError.GetCurrentStackFrame(),
                     null,
                     null);

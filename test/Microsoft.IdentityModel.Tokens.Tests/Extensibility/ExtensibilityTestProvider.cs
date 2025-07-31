@@ -14,9 +14,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
     /// These extensibility tests are designed to show consistency across different token handlers for the different validation steps.
     /// Coverage is provided for the following:
     /// 1. The delegates throwing
-    /// 2. The delegates return a xxxValidationError, with a ValidationFailureType that is known to the xxxValidationError and one that is not known.
-    /// 3. The delegates return a CustomxxxValidationError, with a ValidationFailureType that is known to the CustomxxxValidationError and one that is not known.
-    /// 4. The delegates sets a ValidationFailureType that is NOT known to the xxxValidationError or the CustomxxxValidationError.
+    /// 2. The delegates return a xxxValidationError, with a FailureType that is known to the xxxValidationError and one that is not known.
+    /// 3. The delegates return a CustomxxxValidationError, with a FailureType that is known to the CustomxxxValidationError and one that is not known.
+    /// 4. The delegates sets a FailureType that is NOT known to the xxxValidationError or the CustomxxxValidationError.
     /// </summary>
     public class ExtensibilityTestProvider
     {
@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             CallContext callContext = new CallContext();
 
             #region CustomAlgorithmValidationError
-            // Delegate sets ValidationFailureType to a value that is known to CustomAlgorithmValidationError
+            // Delegate sets FailureType to a value that is known to CustomAlgorithmValidationError
             // ValidationError: CustomAlgorithmValidationError
             // FailureType: CustomValidationFailure.ValidationFailed
             // Exception: CustomSecurityTokenInvalidAlgorithmException
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     $"{algorithm}")
             });
 
-            // Delegate sets ValidationFailureType to a value that is known to AlgorithmValidationError
+            // Delegate sets FailureType to a value that is known to AlgorithmValidationError
             // ValidationError: AlgorithmValidationError
             // FailureType: AlgorithmValidationFailure.ValidationFailed
             // Exception: SecurityTokenInvalidAlgorithmException
@@ -69,9 +69,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     $"{algorithm}"),
             });
 
-            // Delegate sets ValidationFailureType to a value that is NOT known to AlgorithmValidationError or CustomAlgorithnmValidationError
+            // Delegate sets FailureType to a value that is NOT known to AlgorithmValidationError or CustomAlgorithnmValidationError
             // ValidationError: CustomAlgorithmValidationError
-            // FailureType: AudienceValidationFailure.AudienceDidNotMatch
+            // FailureType: AudienceValidationFailure.IssuerDidNotMatch
             // Exception: SecurityTokenValidationException
             theoryData.Add(new ExtensibilityTheoryData(
                 "AlgorithmUnknownValidationFailure",
@@ -83,14 +83,14 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     nameof(CustomAlgorithmValidationDelegates.UnknownValidationFailure)),
                 ValidationError = new CustomAlgorithmValidationError(
                     new MessageDetail(nameof(CustomAlgorithmValidationDelegates.UnknownValidationFailure)),
-                    AudienceValidationFailure.AudienceDidNotMatch,
+                    AudienceValidationFailure.DidNotMatch,
                     Default.GetStackFrame(),
                     $"{algorithm}"),
             });
             #endregion
 
             #region AlgorithmValidationError
-            // Delegate returns AlgorithmValidationError and sets ValidationFailureType to a value that is known to AlgorithmValidationError
+            // Delegate returns AlgorithmValidationError and sets FailureType to a value that is known to AlgorithmValidationError
             // ValidationError: AlgorithmValidationError
             // FailureType: AlgorithmValidationFailure.ValidationFailed
             // Exception:  SecurityTokenInvalidAlgorithmException
@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             List<string> tokenAudiences = [audience];
 
             #region CustomAudienceValidationError
-            // Delegate sets ValidationFailureType to a value that is known to CustomAudienceValidationError
+            // Delegate sets FailureType to a value that is known to CustomAudienceValidationError
             // ValidationError: CustomAudienceValidationError
             // FailureType: CustomValidationFailure.AudienceValidationFailed
             // Exception: CustomSecurityTokenInvalidAudienceException
@@ -172,9 +172,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     null)
             });
 
-            // Delegate sets ValidationFailureType to a value that is known to AudienceValidationError
+            // Delegate sets FailureType to a value that is known to AudienceValidationError
             // ValidationError: CustomAudienceValidationError
-            // FailureType: AudienceValidationFailure.AudienceDidNotMatch
+            // FailureType: AudienceValidationFailure.IssuerDidNotMatch
             // Exception: SecurityTokenInvalidAudienceException
             theoryData.Add(new ExtensibilityTheoryData(
                 "AudienceDidNotMatch",
@@ -186,15 +186,15 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     nameof(CustomAudienceValidationDelegates.AudienceDidNotMatch)),
                 ValidationError = new CustomAudienceValidationError(
                     new MessageDetail(nameof(CustomAudienceValidationDelegates.AudienceDidNotMatch)),
-                    AudienceValidationFailure.AudienceDidNotMatch,
+                    AudienceValidationFailure.DidNotMatch,
                     Default.GetStackFrame(),
                     tokenAudiences,
                     null),
             });
 
-            // Delegate sets ValidationFailureType to a value that is NOT known to AudienceValidationError or CustomAudienceValidationError
+            // Delegate sets FailureType to a value that is NOT known to AudienceValidationError or CustomAudienceValidationError
             // ValidationError: CustomAudienceValidationError
-            // FailureType: ValidationFailureType.AlgorithmIsNotSupported
+            // FailureType: FailureType.NotSupported
             // Exception: SecurityTokenValidationException
             theoryData.Add(new ExtensibilityTheoryData(
                 "AudienceUnknownAudienceValidationFailure",
@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     nameof(CustomAudienceValidationDelegates.UnknownValidationFailure)),
                 ValidationError = new CustomAudienceValidationError(
                     new MessageDetail(nameof(CustomAudienceValidationDelegates.UnknownValidationFailure)),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     Default.GetStackFrame(),
                     tokenAudiences,
                     null),
@@ -214,9 +214,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             #endregion
 
             #region AudienceValidationError
-            // Delegate returns AudienceValidationError and sets ValidationFailureType to a value that is known to AudienceValidationError
+            // Delegate returns AudienceValidationError and sets FailureType to a value that is known to AudienceValidationError
             // ValidationError: AudienceValidationError
-            // FailureType: AudienceValidationFailure.AudienceDidNotMatch
+            // FailureType: AudienceValidationFailure.IssuerDidNotMatch
             // Exception:  SecurityTokenInvalidAudienceException
             theoryData.Add(new ExtensibilityTheoryData(
                 "AudienceDidNotMatch",
@@ -228,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     nameof(CustomAudienceValidationDelegates.AudienceValidatorDelegate)),
                 ValidationError = new AudienceValidationError(
                     new MessageDetail(nameof(CustomAudienceValidationDelegates.AudienceValidatorDelegate)),
-                    AudienceValidationFailure.AudienceDidNotMatch,
+                    AudienceValidationFailure.DidNotMatch,
                     Default.GetStackFrame(),
                     tokenAudiences,
                     null)
@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             string issuerGuid = Guid.NewGuid().ToString();
 
             #region return CustomIssuerValidationError
-            // Delegate sets ValidationFailureType to a value that is known to CustomIssuerValidationError
+            // Delegate sets FailureType to a value that is known to CustomIssuerValidationError
             // ValidationError: CustomIssuerValidationError
             // FailureType: CustomValidationError.ValidationFailed
             // Exception: CustomSecurityTokenInvalidIssuerException
@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     issuerGuid)
             });
 
-            // Delegate sets ValidationFailureType to a value that is known to IssuerValidationError
+            // Delegate sets FailureType to a value that is known to IssuerValidationError
             // ValidationError: CustomIssuerValidationError
             // FailureType: IssuerValidationFailure.ValidationFailed
             // Exception: SecurityTokenInvalidIssuerException
@@ -316,9 +316,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     issuerGuid),
             });
 
-            // Delegate sets ValidationFailureType to a value that is not known to IssuerValidationError or CustomIssuerValidationError
+            // Delegate sets FailureType to a value that is not known to IssuerValidationError or CustomIssuerValidationError
             // ValidationError: CustomIssuerValidationError
-            // FailureType: AlgorithmValidationFailure.AlgorithmIsNotSupported
+            // FailureType: AlgorithmValidationFailure.NotSupported
             // Exception: SecurityTokenValidationException
             theoryData.Add(new ExtensibilityTheoryData(
                 "IssuerUnknownValidationFailure",
@@ -330,14 +330,14 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     nameof(CustomIssuerValidationDelegates.UnknownValidationFailure)),
                 ValidationError = new CustomIssuerValidationError(
                     new MessageDetail(nameof(CustomIssuerValidationDelegates.UnknownValidationFailure)),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     Default.GetStackFrame(),
                     issuerGuid),
             });
             #endregion
 
             #region return IssuerValidationError
-            // Delegate returns IssuerValidationError and sets ValidationFailureType to a value that is known to IssuerValidationError
+            // Delegate returns IssuerValidationError and sets FailureType to a value that is known to IssuerValidationError
             // ValidationError: IssuerValidationError
             // FailureType: IssuerValidationFailure.ValidationFailed
             // Exception:  SecurityTokenInvalidIssuerException
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             string issuerGuid = Guid.NewGuid().ToString();
 
             #region return CustomIssuerSigningKeyValidationError
-            // Delegate sets ValidationFailureType to a value that is known to CustomIssuerSigningKeyValidationError
+            // Delegate sets FailureType to a value that is known to CustomIssuerSigningKeyValidationError
             // ValidationError: CustomIssuerSigningKeyValidationError
             // FailureType: CustomValidationFailure.ValidationFailed
             // Exception: CustomSecurityTokenInvalidSigningKeyException
@@ -416,9 +416,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     null)
             });
 
-            // Delegate sets ValidationFailureType to a value that is known to SignatureKeyValidationError
+            // Delegate sets FailureType to a value that is known to SignatureKeyValidationError
             // ValidationError: CustomIssuerSigningKeyValidationError
-            // FailureType: ValidationFailureType.ValidationFailed
+            // FailureType: FailureType.ValidationFailed
             // Exception: SecurityTokenInvalidIssuerSigningKeyException
             theoryData.Add(new ExtensibilityTheoryData(
                 "IssuerSigningKeyValidationFailed",
@@ -435,9 +435,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     null)
             });
 
-            // Delegate sets ValidationFailureType to a value that is NOT known to SignatureKeyValidationError or CustomIssuerSigningKeyValidationError
+            // Delegate sets FailureType to a value that is NOT known to SignatureKeyValidationError or CustomIssuerSigningKeyValidationError
             // ValidationError: CustomIssuerSigningKeyValidationError
-            // FailureType: ValidationFailureType.AlgorithmIsNotSupported
+            // FailureType: FailureType.NotSupported
             // Exception: SecurityTokenValidationException
             theoryData.Add(new ExtensibilityTheoryData(
                 "IssuerSigningKeyUnknownValidationFailure",
@@ -448,16 +448,16 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 ExpectedException = ExpectedException.SecurityTokenValidationException("UnknownValidationFailure"),
                 ValidationError = new CustomIssuerSigningKeyValidationError(
                     new MessageDetail(nameof(CustomIssuerSigningKeyValidationDelegates.UnknownValidationFailure)),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     Default.GetStackFrame(),
                     null)
             });
             #endregion
 
             #region SignatureKeyValidationError
-            // Delegate returns SignatureKeyValidationError and sets ValidationFailureType to a value that is known to SignatureKeyValidationError
+            // Delegate returns SignatureKeyValidationError and sets FailureType to a value that is known to SignatureKeyValidationError
             // ValidationError: SignatureKeyValidationError
-            // FailureType: ValidationFailureType.ValidationFailed
+            // FailureType: FailureType.ValidationFailed
             // Exception:  SecurityTokenInvalidIssuerSigningKeyException
             theoryData.Add(new ExtensibilityTheoryData(
                 "IssuerSigningKeyDelegate",
@@ -477,7 +477,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             // Delegate throws CustomSecurityTokenInvalidIssuerSigningKeyException
             // ValidationError: SignatureKeyValidationError
             // Exception: SecurityTokenInvalidIssuerSigningKeyException
-            // FailureType: ValidationFailureType.ValidatorThrew
+            // FailureType: FailureType.ValidatorThrew
             // InnerException: CustomSecurityTokenInvalidSigningKeyException
             ExtensibilityTheoryData testCase = new ExtensibilityTheoryData(
             "IssuerSigningKeyValidatorThrows",
@@ -517,7 +517,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             DateTime utcPlusOneHour = utcNow.AddHours(1);
 
             #region return CustomLifetimeValidationError
-            // Delegate sets ValidationFailureType to a value that is known to CustomLifetimeValidationError
+            // Delegate sets FailureType to a value that is known to CustomLifetimeValidationError
             // ValidationError: CustomLifetimeValidationError
             // FailureType: CustomValidationFailure.LifetimeValidationFailed
             // Exception: CustomSecurityTokenInvalidLifetimeException
@@ -539,7 +539,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     utcPlusOneHour)
             });
 
-            // Delegate sets ValidationFailureType to a value that is known to LifetimeValidationError
+            // Delegate sets FailureType to a value that is known to LifetimeValidationError
             // ValidationError: LifetimeValidationError
             // FailureType: LifetimeValidationFailure.ValidationFailed
             // Exception: SecurityTokenInvalidLifetimeException
@@ -560,9 +560,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     utcPlusOneHour),
             });
 
-            // Delegate sets ValidationFailureType to a value that is NOT known to LifetimeValidationError or CustomLifetimeValidationError
+            // Delegate sets FailureType to a value that is NOT known to LifetimeValidationError or CustomLifetimeValidationError
             // ValidationError: CustomLifetimeValidationError
-            // FailureType: ValidationFailureType.AlgorithmIsNotSupported
+            // FailureType: FailureType.NotSupported
             // Exception: SecurityTokenValidationException
             theoryData.Add(new ExtensibilityTheoryData(
                 "LifetimeUnknownValidationFailure",
@@ -575,7 +575,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 ValidationError = new CustomLifetimeValidationError(
                     new MessageDetail(
                         nameof(CustomLifetimeValidationDelegates.CustomUnknownValidationFailure)),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     Default.GetStackFrame(),
                     utcNow,
                     utcPlusOneHour),
@@ -583,7 +583,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             #endregion
 
             #region return IssuerSigningKeyValidationError
-            // Delegate returns LifetimeValidationError and sets ValidationFailureType to a value that is known to LifetimeValidationError
+            // Delegate returns LifetimeValidationError and sets FailureType to a value that is known to LifetimeValidationError
             // ValidationError: LifetimeValidationError
             // FailureType: LifetimeValidationFailure.ValidationFailed
             // Exception:  SecurityTokenLifetimeSigningKeyException
@@ -648,7 +648,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             string issuerGuid = Guid.NewGuid().ToString();
 
             #region return CustomSignatureValidationError
-            // Delegate sets ValidationFailureType to a value that is known to CustomSignatureValidationError
+            // Delegate sets FailureType to a value that is known to CustomSignatureValidationError
             // ValidationError: CustomSignatureValidationError
             // FailureType: CustomValidationFailures.ValidationFailed
             // Exception: CustomSecurityTokenInvalidSignatureException
@@ -667,9 +667,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     Default.GetStackFrame())
             });
 
-            // Delegate sets ValidationFailureType to a value that is known to SignatureValidationError
+            // Delegate sets FailureType to a value that is known to SignatureValidationError
             // ValidationError: SignatureValidationError
-            // FailureType: ValidationFailureType.ValidationFailed
+            // FailureType: FailureType.ValidationFailed
             // Exception: SecurityTokenInvalidSignatureException
             theoryData.Add(new ExtensibilityTheoryData(
                 "SignatureValidationFailed",
@@ -685,9 +685,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     Default.GetStackFrame()),
             });
 
-            // Delegate sets ValidationFailureType to a value that is NOT known to SignatureValidationError or CustomSignatureValidationError
+            // Delegate sets FailureType to a value that is NOT known to SignatureValidationError or CustomSignatureValidationError
             // ValidationError: CustomLifetimeValidationError
-            // FailureType: ValidationFailureType.AlgorithmIsNotSupported
+            // FailureType: FailureType.NotSupported
             // Exception: SecurityTokenValidationException
             theoryData.Add(new ExtensibilityTheoryData(
                 "SignatureUnknownValidationFailure",
@@ -699,13 +699,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     nameof(CustomSignatureValidationDelegates.UnknownValidationFailure)),
                 ValidationError = new CustomSignatureValidationError(
                     new MessageDetail(nameof(CustomSignatureValidationDelegates.UnknownValidationFailure)),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     Default.GetStackFrame()),
             });
             #endregion
 
             #region return SignatureValidationError
-            // Delegate returns SignatureValidationError and sets ValidationFailureType to a value that is known to SignatureValidationError
+            // Delegate returns SignatureValidationError and sets FailureType to a value that is known to SignatureValidationError
             // ValidationError: SignatureValidationError
             // FailureType: SignatureValidationFailure.ValidationFailed
             // Exception:  SecurityTokenInvalidSignatureException
@@ -726,7 +726,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             // Delegate throws CustomSecurityTokenInvalidSignatureException
             // ValidationError: SignatureValidationError
             // Exception: SecurityTokenInvalidSignatureException
-            // FailureType: ValidationFailureType.ValidatorThrew
+            // FailureType: FailureType.ValidatorThrew
             // InnerException: CustomSecurityTokenInvalidSignatureException
             ExtensibilityTheoryData testCase = new ExtensibilityTheoryData(
                 "SignatureValidatorThrows",
@@ -763,7 +763,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             DateTime expirationTime = DateTime.UtcNow + TimeSpan.FromHours(1);
 
             #region return CustomTokenReplayValidationError
-            // Delegate sets ValidationFailureType to a value that is known to CustomTokenReplayValidationError
+            // Delegate sets FailureType to a value that is known to CustomTokenReplayValidationError
             // ValidationError: CustomTokenReplayValidationError
             // FailureType: CustomValidationFailure.ValidationFailed
             // Exception: CustomSecurityTokenReplayDetectedException
@@ -783,7 +783,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     expirationTime)
             });
 
-            // Delegate sets ValidationFailureType to a value that is known to TokenReplayDetectedError
+            // Delegate sets FailureType to a value that is known to TokenReplayDetectedError
             // ValidationError: TokenReplayValidationError
             // FailureType: TokenReplayValidationFailure.ValidationFailed
             // Exception: SecurityTokenReplayDetectedException
@@ -802,10 +802,10 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     expirationTime),
             });
 
-            // Delegate sets ValidationFailureType to a value that is NOT known to
+            // Delegate sets FailureType to a value that is NOT known to
             //   TokenReplayValidationError or CustomTokenReplayValidationError
             // ValidationError: CustomTokenReplayValidationError
-            // FailureType: ValidationFailureType.AlgorithmIsNotSupported
+            // FailureType: FailureType.NotSupported
             // Exception: SecurityTokenValidationException
             theoryData.Add(new ExtensibilityTheoryData(
                 "TokenReplayUnknownValidationFailure",
@@ -817,14 +817,14 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                         nameof(CustomTokenReplayValidationDelegates.UnknownValidationFailure)),
                 ValidationError = new CustomTokenReplayValidationError(
                     new MessageDetail(nameof(CustomTokenReplayValidationDelegates.UnknownValidationFailure)),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     Default.GetStackFrame(),
                     expirationTime)
             });
             #endregion
 
             #region return TokenReplayValidationError
-            // Delegate returns TokenReplayValidationError and sets ValidationFailureType to a value that is known to TokenReplayValidationError
+            // Delegate returns TokenReplayValidationError and sets FailureType to a value that is known to TokenReplayValidationError
             // ValidationError: TokenReplayValidationError
             // FailureType: TokenReplayValidationFailure.ValidationFailed
             // Exception:  SecurityTokenReplayDetectedException
@@ -894,7 +894,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             string tokenType = "NOTJWT";
 
             #region return CustomTokenTypeValidationError
-            // Delegate sets ValidationFailureType to a value that is known to CustomTokenTypeValidationError
+            // Delegate sets FailureType to a value that is known to CustomTokenTypeValidationError
             // ValidationError: CustomTokenTypeValidationError
             // FailureType: CustomValidationFailure.ValidationFailed
             // Exception: CustomSecurityTokenInvalidTypeException
@@ -914,7 +914,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     tokenType)
             });
 
-            // Delegate sets ValidationFailureType to a value that is known to TokenTypeValidationError
+            // Delegate sets FailureType to a value that is known to TokenTypeValidationError
             // ValidationError: TokenTypeValidationError
             // FailureType: TokenTypeValidationFailure.ValidationFailed
             // Exception: SecurityTokenInvalidTypeException
@@ -933,9 +933,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     tokenType)
             });
 
-            // Delegate sets ValidationFailureType to a value that is NOT known to TokenTypeValidationError or CustomTokenTypeValidationError
+            // Delegate sets FailureType to a value that is NOT known to TokenTypeValidationError or CustomTokenTypeValidationError
             // ValidationError: CustomTokenTypeValidationError
-            // FailureType: ValidationFailureType.AlgorithmIsNotSupported
+            // FailureType: FailureType.NotSupported
             // Exception: SecurityTokenValidationException
             theoryData.Add(new ExtensibilityTheoryData(
                 "TokenTypeUnknownValidationFailure",
@@ -947,14 +947,14 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     nameof(CustomTokenTypeValidationDelegates.UnknownValidationFailure)),
                 ValidationError = new CustomTokenTypeValidationError(
                     new MessageDetail(nameof(CustomTokenTypeValidationDelegates.UnknownValidationFailure)),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     Default.GetStackFrame(),
                     tokenType),
             });
             #endregion
 
             #region return TokenTypeValidationError
-            // Delegate returns TokenTypeValidationError and sets ValidationFailureType to a value that is known to TokenTypeValidationError
+            // Delegate returns TokenTypeValidationError and sets FailureType to a value that is known to TokenTypeValidationError
             // ValidationError: TokenTypeValidationError
             // FailureType: TokenTypeValidationFailure.ValidationFailed
             // Exception:  SecurityTokenInvalidTokenTypeException

@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomTokenReplayValidationError(
                 new MessageDetail(nameof(UnknownValidationFailure)),
-                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                AlgorithmValidationFailure.NotSupported,
                 Default.GetStackFrame(),
                 expirationTime);
         }

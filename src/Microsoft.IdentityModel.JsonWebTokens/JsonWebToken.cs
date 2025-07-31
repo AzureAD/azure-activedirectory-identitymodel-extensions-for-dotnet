@@ -548,7 +548,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(
                         LogMessages.IDX14102,
-                        LogHelper.MarkAsUnsafeSecurityArtifact(encodedTokenSpan.Slice(0, Dot1).ToString(), t => t.ToString())), // TODO: Add an overload to LogHelper.MarkAsUnsafeSecurityArtifact that accepts span?
+                        LogHelper.MarkAsUnsafeSecurityArtifact(encodedTokenSpan.Slice(0, Dot1).ToString(), t => t.ToString())),
                         ex));
                 }
 

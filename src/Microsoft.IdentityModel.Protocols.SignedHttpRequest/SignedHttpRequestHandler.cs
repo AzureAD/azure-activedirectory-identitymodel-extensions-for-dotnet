@@ -216,7 +216,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         internal virtual void AddAtClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            // TODO - use JsonEncodedText for property names
             writer.WriteString(SignedHttpRequestClaimTypes.At, signedHttpRequestDescriptor.AccessToken);
         }
 

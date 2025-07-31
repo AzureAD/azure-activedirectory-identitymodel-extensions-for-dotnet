@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomAlgorithmValidationError(
                 new MessageDetail(nameof(UnknownValidationFailure)),
-                AudienceValidationFailure.AudienceDidNotMatch,
+                AudienceValidationFailure.DidNotMatch,
                 Default.GetStackFrame(),
                 algorithm);
         }
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new AlgorithmValidationError(
                 new MessageDetail(nameof(AlgorithmValidatorNotSupportedFailureDelegate)),
-                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                AlgorithmValidationFailure.NotSupported,
                 Default.GetStackFrame(),
                 algorithm);
         }

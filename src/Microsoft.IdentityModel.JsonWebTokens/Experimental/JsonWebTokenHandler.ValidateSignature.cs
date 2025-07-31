@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -139,10 +140,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             StringBuilder? exceptionStrings = null;
             StringBuilder? keysAttempted = null;
 
+            // We want to capture all stack frames that were involved with faults.
+            // We capture the stack frames and add to the error.
+            IList<StackFrame>? stackFrames = null;
+
             foreach (SecurityKey key in keys)
             {
                 if (key is null)
-                    continue; // skip null keys
+                    continue;
 
                 keysTried = true;
 
@@ -154,10 +159,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     callContext);
 
                 if (result.Succeeded)
+                {
+                    jwtToken.SigningKey = key;
                     return result;
+                }
 
                 if (result.Error is ValidationError validationError)
                 {
+                    stackFrames ??= [];
+                    foreach (StackFrame stackFrame in validationError.StackFrames)
+                        stackFrames.Add(stackFrame);
+
                     exceptionStrings ??= new StringBuilder();
                     keysAttempted ??= new StringBuilder();
                     exceptionStrings.AppendLine(validationError.MessageDetail.Message);
@@ -165,11 +177,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
+            // This method tries a number of different keys, for each failure we add a stack frame to the stackFrames collection.
+            // We want to add the current stack frame to the end of the list, to keep the order of the stack frames.
+            // If for some reason stackFrames is null or empty, we add the current stack frame as the first and only entry.
+            StackFrame currentStackFrame = ValidationError.GetCurrentStackFrame();
+            StackFrame firstStackFrame = (stackFrames == null || stackFrames.Count == 0) ? currentStackFrame : stackFrames[0];
+            SignatureValidationError signatureValidationError;
+
             if (keysTried)
             {
                 if (kidExists)
                 {
-                    return new SignatureValidationError(
+                    signatureValidationError = new SignatureValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10522,
                             LogHelper.MarkAsNonPII(jwtToken.Kid),
@@ -177,27 +196,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
                             LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
                         SignatureValidationFailure.SigningKeyNotFound,
-                        ValidationError.GetCurrentStackFrame());
+                        firstStackFrame);
                 }
                 else
                 {
-                    return new SignatureValidationError(
+                    signatureValidationError = new SignatureValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10523,
                             LogHelper.MarkAsNonPII(validationParameters.SigningKeys.Count),
                             LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
                             LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
                         SignatureValidationFailure.SigningKeyNotFound,
-                        ValidationError.GetCurrentStackFrame());
+                        firstStackFrame);
                 }
             }
-
-            if (kidExists)
+            else if (kidExists)
             {
-                // No keys were attempted, return the error.
-                // This is the case where the user specified a kid, but no keys were found.
-                // This is not an error, but a warning that no keys were found for the specified kid.
-                return new SignatureValidationError(
+                // There is a kid, but no keys were found.
+                signatureValidationError = new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10524,
                         LogHelper.MarkAsNonPII(jwtToken.Kid),
@@ -205,17 +221,32 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
                         LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
                     SignatureValidationFailure.SigningKeyNotFound,
-                    ValidationError.GetCurrentStackFrame());
+                    firstStackFrame);
+            }
+            else
+            {
+                signatureValidationError = new SignatureValidationError(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10525,
+                        LogHelper.MarkAsNonPII(validationParameters.SigningKeys.Count),
+                        LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
+                        LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
+                    SignatureValidationFailure.SigningKeyNotFound,
+                    firstStackFrame);
             }
 
-            return new SignatureValidationError(
-                new MessageDetail(
-                    TokenLogMessages.IDX10525,
-                    LogHelper.MarkAsNonPII(validationParameters.SigningKeys.Count),
-                    LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
-                    LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
-                SignatureValidationFailure.SigningKeyNotFound,
-                ValidationError.GetCurrentStackFrame());
+            if (stackFrames != null)
+            {
+                for (int i = 1; i < stackFrames.Count; i++)
+                {
+                    if (stackFrames[i] != null)
+                        signatureValidationError.StackFrames.Add(stackFrames[i]);
+                }
+
+                signatureValidationError.StackFrames.Add(currentStackFrame);
+            }
+
+            return signatureValidationError;
         }
 
         private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
@@ -234,7 +265,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         TokenLogMessages.IDX10652,
                         LogHelper.MarkAsNonPII(jsonWebToken.Alg),
                         key),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     ValidationError.GetCurrentStackFrame());
             }
 

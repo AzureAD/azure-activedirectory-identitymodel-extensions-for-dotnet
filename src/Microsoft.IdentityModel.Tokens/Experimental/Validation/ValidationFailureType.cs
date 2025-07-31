@@ -96,28 +96,28 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
-        /// Audience validation failed.
+        /// There was an audience in the token, but it did not match any of the expected audiences in <see cref="ValidationParameters.ValidAudiences"/>.
         /// </summary>
-        public static readonly Experimental.AudienceValidationFailure AudienceDidNotMatch = new AudienceValidationFailed("AudienceDidNotMatch");
-        private class AudienceValidationFailed : Experimental.AudienceValidationFailure { internal AudienceValidationFailed(string name) : base(name) { } }
+        public static readonly AudienceValidationFailure DidNotMatch = new AudienceDidNotMatchType("AudienceDidNotMatch");
+        private class AudienceDidNotMatchType : AudienceValidationFailure { internal AudienceDidNotMatchType(string name) : base(name) { } }
 
         /// <summary>
-        /// Audience validation delegate threw an exception.
+        /// The audience validation delegate threw an exception.
         /// </summary>
-        public static readonly Experimental.AudienceValidationFailure ValidatorThrew = new AudienceValidatorThrewFailure("AudienceValidatorThrew");
-        private class AudienceValidatorThrewFailure : Experimental.AudienceValidationFailure { internal AudienceValidatorThrewFailure(string name) : base(name) { } }
+        public static readonly AudienceValidationFailure ValidatorThrew = new AudienceValidatorThrew("AudienceValidatorThrew");
+        private class AudienceValidatorThrew : AudienceValidationFailure { internal AudienceValidatorThrew(string name) : base(name) { } }
 
         /// <summary>
-        /// No audience found in the <see cref="SecurityToken"/>.
+        /// No audience was found in the <see cref="SecurityToken"/>.
         /// </summary>
-        public static readonly Experimental.AudienceValidationFailure NoAudienceInToken = new NoAudienceInTokenFailure("NoAudienceInToken");
-        private class NoAudienceInTokenFailure : Experimental.AudienceValidationFailure { internal NoAudienceInTokenFailure(string name) : base(name) { } }
+        public static readonly AudienceValidationFailure NoAudienceInToken = new NoAudienceInTokenType("NoAudienceInToken");
+        private class NoAudienceInTokenType : AudienceValidationFailure { internal NoAudienceInTokenType(string name) : base(name) { } }
 
         /// <summary>
         /// No audiences were found in <see cref="ValidationParameters.ValidAudiences"/>.
         /// </summary>
-        public static readonly Experimental.AudienceValidationFailure NoValidationParameterAudiencesProvided = new NoValidationParameterAudiencesProvidedFailure("NoValidationParameterAudiencesProvided");
-        private class NoValidationParameterAudiencesProvidedFailure : Experimental.AudienceValidationFailure { internal NoValidationParameterAudiencesProvidedFailure(string name) : base(name) { } }
+        public static readonly AudienceValidationFailure NoAudiencesProvided = new NoAudiencesProvidedType("NoAudiencesProvided");
+        private class NoAudiencesProvidedType : AudienceValidationFailure { internal NoAudiencesProvidedType(string name) : base(name) { } }
     }
 
     /// <summary>
@@ -133,61 +133,20 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <summary>
         /// General algorithm validation failed.
         /// </summary>
-        public static readonly AlgorithmValidationFailure ValidationFailed = new AlgorithmValidationFailedType("AlgorithmValidationFailed");
-        private class AlgorithmValidationFailedType : AlgorithmValidationFailure { internal AlgorithmValidationFailedType(string name) : base(name) { } }
+        public static readonly AlgorithmValidationFailure ValidationFailed = new AlgorithmValidationFailed("AlgorithmValidationFailed");
+        private class AlgorithmValidationFailed : AlgorithmValidationFailure { internal AlgorithmValidationFailed(string name) : base(name) { } }
 
         /// <summary>
         /// Algorithm validation delegate threw an exception.
         /// </summary>
-        public static readonly AlgorithmValidationFailure ValidatorThrew = new AlgorithmValidatorThrewType("AlgorithmValidatorThrew");
-        private class AlgorithmValidatorThrewType : AlgorithmValidationFailure { internal AlgorithmValidatorThrewType(string name) : base(name) { } }
+        public static readonly AlgorithmValidationFailure ValidatorThrew = new AlgorithmValidatorThrew("AlgorithmValidatorThrew");
+        private class AlgorithmValidatorThrew : AlgorithmValidationFailure { internal AlgorithmValidatorThrew(string name) : base(name) { } }
 
         /// <summary>
-        /// Unsupported algorithm.
+        /// The algorithm is not supported by the runtime.
         /// </summary>
-        public static readonly AlgorithmValidationFailure AlgorithmIsNotSupported = new AlgorithmIsNotSupportedType("AlgorithmIsNotSupported");
-        private class AlgorithmIsNotSupportedType : AlgorithmValidationFailure { internal AlgorithmIsNotSupportedType(string name) : base(name) { } }
-    }
-
-    /// <summary>
-    /// Failures that occur during validation of a <see cref="SecurityToken"/> the signature key.
-    /// </summary>
-    public abstract class SignatureKeyValidationFailure : ValidationFailureType
-    {
-        /// <summary>
-        /// Creates an instance of <see cref="SignatureKeyValidationFailure"/>
-        /// </summary>
-        protected SignatureKeyValidationFailure(string name) : base(name) { }
-
-        /// <summary>
-        /// Signature key validation failed.
-        /// </summary>
-        public static readonly SignatureKeyValidationFailure ValidationFailed = new SignatureKeyValidationFailedType("SignatureKeyValidationFailed");
-        private class SignatureKeyValidationFailedType : SignatureKeyValidationFailure { internal SignatureKeyValidationFailedType(string name) : base(name) { } }
-
-        /// <summary>
-        /// The signature key validator delegate threw an exception.
-        /// </summary>
-        public static readonly SignatureKeyValidationFailure ValidatorThrew = new SignatureKeyValidatorThrewType("SignatureKeyValidatorThrew");
-        private class SignatureKeyValidatorThrewType : SignatureKeyValidationFailure { internal SignatureKeyValidatorThrewType(string name) : base(name) { } }
-
-        /// <summary>
-        /// Signature key was not yet valid.
-        /// </summary>
-        public static readonly SignatureKeyValidationFailure NotYetValid = new SigningKeyNotYetValidType("NotYetValid");
-        private class SigningKeyNotYetValidType : SignatureKeyValidationFailure { internal SigningKeyNotYetValidType(string name) : base(name) { } }
-
-        /// <summary>
-        /// Signature key was expired.
-        /// </summary>
-        public static readonly SignatureKeyValidationFailure KeyExpired = new SigningKeyExpiredType("KeyExpired");
-        private class SigningKeyExpiredType : SignatureKeyValidationFailure { internal SigningKeyExpiredType(string name) : base(name) { } }
-
-        /// <summary>
-        /// Signature key is null.
-        /// </summary>
-        public static readonly SignatureKeyValidationFailure KeyIsNull = new SigningKeyIsNullType("KeyIsNull");
-        private class SigningKeyIsNullType : SignatureKeyValidationFailure { internal SigningKeyIsNullType(string name) : base(name) { } }
+        public static readonly AlgorithmValidationFailure NotSupported = new AlgorithmIsNotSupported("AlgorithmIsNotSupported");
+        private class AlgorithmIsNotSupported : AlgorithmValidationFailure { internal AlgorithmIsNotSupported(string name) : base(name) { } }
     }
 
     /// <summary>
@@ -203,17 +162,24 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <summary>
         /// General issuer validation failure.
         /// </summary>
-        public static readonly IssuerValidationFailure ValidationFailed = new IssuerValidationFailedType("IssuerValidationFailed");
-        private class IssuerValidationFailedType : IssuerValidationFailure { internal IssuerValidationFailedType(string name) : base(name) { } }
+        public static readonly IssuerValidationFailure ValidationFailed = new IssuerValidationFailed("IssuerValidationFailed");
+        private class IssuerValidationFailed : IssuerValidationFailure { internal IssuerValidationFailed(string name) : base(name) { } }
 
         /// <summary>
         /// Issuer validation delegate threw an exception.
         /// </summary>
-        public static readonly IssuerValidationFailure ValidatorThrew = new IssuerValidatorThrewType("IssuerValidatorThrew");
-        private class IssuerValidatorThrewType : IssuerValidationFailure { internal IssuerValidatorThrewType(string name) : base(name) { } }
+        public static readonly IssuerValidationFailure ValidatorThrew = new IssuerValidatorThrew("IssuerValidatorThrew");
+        private class IssuerValidatorThrew : IssuerValidationFailure { internal IssuerValidatorThrew(string name) : base(name) { } }
 
         /// <summary>
-        /// No issuer was found in the security token.
+        /// There was an issuer in the token, but it did not match any of the valid issuers in <see cref="ValidationParameters.ValidIssuers"/>
+        /// or found using <see cref="ValidationParameters.ConfigurationManager"/>.
+        /// </summary>
+        public static readonly IssuerValidationFailure IssuerDidNotMatch = new IssuerDidNotMatchType("IssuerDidNotMatch");
+        private class IssuerDidNotMatchType : IssuerValidationFailure { internal IssuerDidNotMatchType(string name) : base(name) { } }
+
+        /// <summary>
+        /// No issuer was found in the security token or the issuer was an empty string.
         /// </summary>
         public static readonly IssuerValidationFailure NoIssuerInToken = new NoIssuerInTokenType("NoIssuerInToken");
         private class NoIssuerInTokenType : IssuerValidationFailure { internal NoIssuerInTokenType(string name) : base(name) { } }
@@ -221,8 +187,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <summary>
         /// No issuers were found in <see cref="ValidationParameters.ValidIssuers"/>.
         /// </summary>
-        public static readonly IssuerValidationFailure NoValidationParameterIssuersProvided = new NoValidationParameterIssuersProvidedType("NoValidationParameterIssuersProvided");
-        private class NoValidationParameterIssuersProvidedType : IssuerValidationFailure { internal NoValidationParameterIssuersProvidedType(string name) : base(name) { } }
+        public static readonly IssuerValidationFailure NoIssuersProvided = new NoIssuersProvidedType("NoIssuersProvided");
+        private class NoIssuersProvidedType : IssuerValidationFailure { internal NoIssuersProvidedType(string name) : base(name) { } }
     }
 
     /// <summary>
@@ -279,6 +245,47 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     }
 
     /// <summary>
+    /// Failures that occur during validation of a <see cref="SecurityToken"/> the signature key.
+    /// </summary>
+    public abstract class SignatureKeyValidationFailure : ValidationFailureType
+    {
+        /// <summary>
+        /// Creates an instance of <see cref="SignatureKeyValidationFailure"/>
+        /// </summary>
+        protected SignatureKeyValidationFailure(string name) : base(name) { }
+
+        /// <summary>
+        /// Signature key validation failed.
+        /// </summary>
+        public static readonly SignatureKeyValidationFailure ValidationFailed = new SignatureKeyValidationType("SignatureKeyValidationFailed");
+        private class SignatureKeyValidationType : SignatureKeyValidationFailure { internal SignatureKeyValidationType(string name) : base(name) { } }
+
+        /// <summary>
+        /// The signature key validator delegate threw an exception.
+        /// </summary>
+        public static readonly SignatureKeyValidationFailure ValidatorThrew = new SignatureKeyValidatorThrew("SignatureKeyValidatorThrew");
+        private class SignatureKeyValidatorThrew : SignatureKeyValidationFailure { internal SignatureKeyValidatorThrew(string name) : base(name) { } }
+
+        /// <summary>
+        /// Signature key was not yet valid.
+        /// </summary>
+        public static readonly SignatureKeyValidationFailure NotYetValid = new NotYetValidType("NotYetValid");
+        private class NotYetValidType : SignatureKeyValidationFailure { internal NotYetValidType(string name) : base(name) { } }
+
+        /// <summary>
+        /// Signature key was expired.
+        /// </summary>
+        public static readonly SignatureKeyValidationFailure KeyExpired = new SigningKeyExpiredType("KeyExpired");
+        private class SigningKeyExpiredType : SignatureKeyValidationFailure { internal SigningKeyExpiredType(string name) : base(name) { } }
+
+        /// <summary>
+        /// Signature key is null.
+        /// </summary>
+        public static readonly SignatureKeyValidationFailure KeyIsNull = new SigningKeyIsNullType("KeyIsNull");
+        private class SigningKeyIsNullType : SignatureKeyValidationFailure { internal SigningKeyIsNullType(string name) : base(name) { } }
+    }
+
+    /// <summary>
     /// Failures that occur during validation of a <see cref="SecurityToken"/> signature.
     /// </summary>
     public abstract class SignatureValidationFailure : ValidationFailureType
@@ -307,19 +314,13 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         private class TokenIsNotSignedType : SignatureValidationFailure { internal TokenIsNotSignedType(string name) : base(name) { } }
 
         /// <summary>
-        /// The token's signature algorithm validation failed.
-        /// </summary>
-        public static readonly SignatureValidationFailure AlgorithmValidationFailed = new AlgorithmValidationFailedType("AlgorithmValidationFailed");
-        private class AlgorithmValidationFailedType : SignatureValidationFailure { internal AlgorithmValidationFailedType(string name) : base(name) { } }
-
-        /// <summary>
         /// Signing key not found.
         /// </summary>
         public static readonly SignatureValidationFailure SigningKeyNotFound = new SignatureKeyNotFoundType("SigningKeyNotFound");
         private class SignatureKeyNotFoundType : SignatureValidationFailure { internal SignatureKeyNotFoundType(string name) : base(name) { } }
 
         /// <summary>
-        /// Defines a type that represents that an XML validation failed.
+        /// An XML token reference digest validation failed.
         /// </summary>
         public static readonly SignatureValidationFailure ReferenceDigestValidationFailed = new ReferenceDigestValidationFailedType("ReferenceDigestValidationFailed");
         private class ReferenceDigestValidationFailedType : SignatureValidationFailure { internal ReferenceDigestValidationFailedType(string name) : base(name) { } }

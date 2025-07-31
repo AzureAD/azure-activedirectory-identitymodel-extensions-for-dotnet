@@ -70,8 +70,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 return Exception;
 
             if (FailureType == AudienceValidationFailure.NoAudienceInToken
-                || FailureType == AudienceValidationFailure.NoValidationParameterAudiencesProvided
-                || FailureType == AudienceValidationFailure.AudienceDidNotMatch
+                || FailureType == AudienceValidationFailure.NoAudiencesProvided
+                || FailureType == AudienceValidationFailure.DidNotMatch
                 || FailureType == AudienceValidationFailure.ValidatorThrew)
             {
                 if (TokenAudiences == null)
