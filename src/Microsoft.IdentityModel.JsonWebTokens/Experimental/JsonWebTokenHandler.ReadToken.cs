@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
+                // TODO: coordinate with other handlers to ensure consistent error messages.
                 return new ValidationError(
                     new MessageDetail(LogMessages.IDX14107),
                     ValidationFailureType.TokenReadingFailed,

@@ -109,13 +109,13 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ValidatedTokenTyp
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ValidatedTokenType(string! type, int validTypeCount) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ValidTypeCount.get -> int
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError
-Microsoft.IdentityModel.Tokens.Experimental.ValidationError.AddCurrentStackFrame(string! filePath = "", int lineNumber = 0, int skipFrames = 1) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.AddAsyncStackFrame(System.Diagnostics.StackFrame! stackFrame, string! memberName = "", string! filePath = "", int lineNumber = 0) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.AddStackFrame(System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.Exception.get -> System.Exception?
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.Exception.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.FailureType.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.InnerException.get -> System.Exception?
-Microsoft.IdentityModel.Tokens.Experimental.ValidationError.Message.get -> string!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationError.MessageDetail.get -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.StackFrames.get -> System.Collections.Generic.IList<System.Diagnostics.StackFrame!>!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.ValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailure, System.Diagnostics.StackFrame! stackFrame) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.ValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailure, System.Diagnostics.StackFrame! stackFrame, System.Exception? innerException) -> void
@@ -230,7 +230,6 @@ static Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey.operato
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey right) -> bool
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType right) -> bool
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType right) -> bool
-static Microsoft.IdentityModel.Tokens.Experimental.ValidationError.GetCurrentStackFrame(string! filePath = "", int lineNumber = 0, int skipFrames = 1) -> System.Diagnostics.StackFrame!
 static Microsoft.IdentityModel.Tokens.Experimental.ValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError!
 static Microsoft.IdentityModel.Tokens.Validators.ValidateAlgorithm(string? algorithm, Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.Identity.Abstractions.OperationResult<string!, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>
 static Microsoft.IdentityModel.Tokens.Validators.ValidateAudience(System.Collections.Generic.IList<string!>! tokenAudiences, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.Identity.Abstractions.OperationResult<string!, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>

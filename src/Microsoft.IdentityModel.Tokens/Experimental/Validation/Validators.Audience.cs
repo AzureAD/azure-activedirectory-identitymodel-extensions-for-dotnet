@@ -26,11 +26,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>An EXACT match is required.</remarks>
         internal static OperationResult<string, ValidationError> ValidateAudienceInternal(
             IList<string> audiences,
-#pragma warning disable CA1801
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
-#pragma warning restore CA1801
         {
             if (validationParameters == null)
             {

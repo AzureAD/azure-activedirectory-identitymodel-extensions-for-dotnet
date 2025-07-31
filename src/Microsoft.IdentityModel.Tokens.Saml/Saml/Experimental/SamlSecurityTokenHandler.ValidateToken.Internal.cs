@@ -3,10 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Abstractions;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens.Saml
@@ -23,25 +26,65 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            if (token is null)
+            StackFrame? stackFrame;
+            if (string.IsNullOrEmpty(token))
+            {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return ValidationError.NullParameter(
                     nameof(token),
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
+            }
 
             if (validationParameters is null)
+            {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return ValidationError.NullParameter(
                     nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
+            }
 
-            var tokenReadingResult = ReadSamlToken(token, callContext);
-            if (!tokenReadingResult.Succeeded)
-                return tokenReadingResult.Error!.AddCurrentStackFrame();
+            if (token.Length > MaximumTokenSizeInBytes)
+            {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
 
-            return await ValidateTokenAsync(
-                    tokenReadingResult.Result!,
-                    validationParameters,
-                    callContext,
-                    cancellationToken).ConfigureAwait(false);
+                return new ValidationError(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10209,
+                        LogHelper.MarkAsNonPII(token.Length),
+                        LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
+                    ValidationFailureType.TokenExceedsMaximumSize,
+                    stackFrame!);
+            }
+
+            OperationResult<SecurityToken, ValidationError> readResult = ReadToken(token, Serializer, callContext);
+            if (!readResult.Succeeded)
+            {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
+                return readResult.Error!.AddStackFrame(stackFrame!);
+            }
+
+            OperationResult<ValidatedToken, ValidationError> validationResult = await ValidateTokenAsync(
+                readResult.Result!,
+                validationParameters,
+                callContext,
+                cancellationToken).ConfigureAwait(false);
+
+            if (!validationResult.Succeeded)
+            {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
+                return validationResult.Error!.AddAsyncStackFrame(stackFrame!);
+            }
+
+            return validationResult;
         }
 
         /// <inheritdoc/>
@@ -53,36 +96,45 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             if (securityToken is null)
             {
+                if (!ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return ValidationError.NullParameter(
                     nameof(securityToken),
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
             }
 
             if (validationParameters is null)
             {
+                if (!ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return ValidationError.NullParameter(
                     nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
             }
 
             if (securityToken is not SamlSecurityToken samlToken)
             {
+                if (!ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return new ValidationError(
-                    new MessageDetail(
-                        LogMessages.IDX11400,
-                        this,
-                        typeof(SamlSecurityToken),
-                        securityToken.GetType()),
+                    new MessageDetail(TokenLogMessages.IDX10001, nameof(securityToken), nameof(SamlSecurityToken)),
                     ValidationFailureType.SecurityTokenNotExpectedType,
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
             }
+
 
             if (samlToken.Assertion is null)
             {
+                if (!ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return new ValidationError(
                     new MessageDetail(LogMessages.IDX11315),
                     ValidationFailureType.SecurityTokenNotExpectedType,
-                    ValidationError.GetCurrentStackFrame());
+                    stackFrame!);
             }
 
             OperationResult<ValidatedLifetime, ValidationError> lifetimeResult =
@@ -94,7 +146,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     callContext);
 
             if (!lifetimeResult.Succeeded)
-                return lifetimeResult.Error!.AddCurrentStackFrame();
+            {
+                if (ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    return lifetimeResult.Error!.AddStackFrame(stackFrame!);
+
+                return lifetimeResult.Error!.AddAsyncStackFrame(new StackFrame(0, true));
+            }
+
 
             List<string> audiences = [];
             if (samlToken.Assertion?.Conditions?.Conditions is not null)
@@ -115,7 +173,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     callContext);
 
             if (!audienceResult.Succeeded)
-                return audienceResult.Error!.AddCurrentStackFrame();
+            {
+                if (ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    return audienceResult.Error!.AddStackFrame(stackFrame!);
+
+                return audienceResult.Error!.AddAsyncStackFrame(new StackFrame(0, true));
+            }
 
             OperationResult<ValidatedIssuer, ValidationError> issuerResult =
                 await Validators.ValidateIssuerInternalAsync(
@@ -126,7 +189,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     cancellationToken).ConfigureAwait(false);
 
             if (!issuerResult.Succeeded)
-                return issuerResult.Error!.AddCurrentStackFrame();
+            {
+                if (ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    return issuerResult.Error!.AddStackFrame(stackFrame!);
+
+                return issuerResult.Error!.AddAsyncStackFrame(new StackFrame(0, true));
+            }
 
             OperationResult<DateTime?, ValidationError>? tokenReplayResult =
                 Validators.ValidateTokenReplayInternal(
@@ -136,7 +204,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     callContext);
 
             if (!tokenReplayResult.Value.Succeeded)
-                return tokenReplayResult.Value.Error!.AddCurrentStackFrame();
+            {
+                if (ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    return tokenReplayResult.Value.Error!.AddStackFrame(stackFrame!);
+
+                return tokenReplayResult.Value.Error!.AddAsyncStackFrame(new StackFrame(0, true));
+            }
 
             OperationResult<string, ValidationError> algorithmResult =
                 Validators.ValidateAlgorithmInternal(
@@ -146,7 +219,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     callContext);
 
             if (!algorithmResult.Succeeded)
-                return algorithmResult.Error!.AddCurrentStackFrame();
+            {
+                if (ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    return algorithmResult.Error!.AddStackFrame(stackFrame!);
+
+                return algorithmResult.Error!.AddAsyncStackFrame(new StackFrame(0, true));
+            }
 
             BaseConfiguration? configuration = null;
             if (validationParameters.ConfigurationManager is not null)
@@ -174,7 +252,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     callContext);
 
             if (!signatureResult.Succeeded)
-                return signatureResult.Error!.AddCurrentStackFrame();
+            {
+                if (ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    return signatureResult.Error!.AddStackFrame(stackFrame!);
+
+                return signatureResult.Error!.AddAsyncStackFrame(new StackFrame(0, true));
+            }
 
             OperationResult<ValidatedSignatureKey, ValidationError> signatureKeyResult =
                 Validators.ValidateSignatureKeyInternal(
@@ -184,7 +267,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     callContext);
 
             if (!signatureKeyResult.Succeeded)
-                return signatureKeyResult.Error!.AddCurrentStackFrame();
+            {
+                if (ValidationError.TryGetStackFrame(out StackFrame? stackFrame))
+                    return signatureKeyResult.Error!.AddStackFrame(stackFrame!);
+
+                return signatureKeyResult.Error!.AddAsyncStackFrame(new StackFrame(0, true));
+            }
 
             return new ValidatedToken(samlToken, this, validationParameters)
             {

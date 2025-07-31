@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Abstractions;
@@ -33,13 +34,20 @@ namespace Microsoft.IdentityModel.Tokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            StackFrame? stackFrame;
+
             if (validationParameters == null)
+            {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return new IssuerValidationError(
                     MessageDetail.NullParameter(nameof(validationParameters)),
                     ValidationFailureType.NullArgument,
-                    ValidationError.GetCurrentStackFrame(),
+                    stackFrame ?? new StackFrame(0, true),
                     issuer,
                     null);
+            }
 
             try
             {
@@ -52,7 +60,12 @@ namespace Microsoft.IdentityModel.Tokens
                         cancellationToken).ConfigureAwait(false);
 
                 if (!result.Succeeded)
-                    return result.Error!.AddCurrentStackFrame();
+                {
+                    if (!ValidationError.TryGetStackFrame(out stackFrame))
+                        stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
+                    return result.Error!.AddStackFrame(stackFrame ?? new StackFrame(0, true));
+                }
 
                 return result;
             }
@@ -60,10 +73,13 @@ namespace Microsoft.IdentityModel.Tokens
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return new IssuerValidationError(
                     new MessageDetail(LogMessages.IDX10269),
                     IssuerValidationFailure.ValidatorThrew,
-                    ValidationError.GetCurrentStackFrame(),
+                    stackFrame ?? new StackFrame(0, true),
                     issuer,
                     ex);
             }
@@ -88,23 +104,33 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // Review unused parameters
             CancellationToken cancellationToken)
         {
+            StackFrame? stackFrame;
+
             if (string.IsNullOrWhiteSpace(issuer))
             {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return new IssuerValidationError(
                     new MessageDetail(LogMessages.IDX10211),
                     IssuerValidationFailure.NoIssuerInToken,
-                    ValidationError.GetCurrentStackFrame(),
+                    stackFrame!,
                     issuer,
                     null);
             }
 
             if (validationParameters == null)
+            {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return new IssuerValidationError(
                     MessageDetail.NullParameter(nameof(validationParameters)),
                     ValidationFailureType.NullArgument,
-                    ValidationError.GetCurrentStackFrame(),
+                    stackFrame!,
                     issuer,
                     null);
+            }
 
             BaseConfiguration? configuration = null;
             if (validationParameters.ConfigurationManager != null)
@@ -112,16 +138,20 @@ namespace Microsoft.IdentityModel.Tokens
 
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
+            {
+                if (!ValidationError.TryGetStackFrame(out stackFrame))
+                    stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
                 return new IssuerValidationError(
                     new MessageDetail(
                         LogMessages.IDX10212,
                         LogHelper.MarkAsNonPII(issuer),
-                        "ValdIssuers is empty",
-                        LogHelper.MarkAsNonPII(configuration?.Issuer)
-                        ),
+                        "ValidIssuers is empty",
+                        LogHelper.MarkAsNonPII(configuration?.Issuer)),
                     IssuerValidationFailure.NoValidationParameterIssuersProvided,
-                    ValidationError.GetCurrentStackFrame(),
+                    stackFrame!,
                     issuer);
+            }
 
             if (configuration != null)
             {
@@ -159,6 +189,9 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
+            if (!ValidationError.TryGetStackFrame(out stackFrame))
+                stackFrame = ValidationError.GetAsyncStackFrame(new StackFrame(0, true));
+
             return new IssuerValidationError(
                 new MessageDetail(
                     LogMessages.IDX10212,
@@ -166,7 +199,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                     LogHelper.MarkAsNonPII(configuration?.Issuer)),
                 IssuerValidationFailure.ValidationFailed,
-                ValidationError.GetCurrentStackFrame(),
+                stackFrame!,
                 issuer);
         }
     }

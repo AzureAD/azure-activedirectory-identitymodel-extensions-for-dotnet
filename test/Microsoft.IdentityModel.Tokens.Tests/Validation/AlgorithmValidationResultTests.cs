@@ -7,6 +7,7 @@ using Xunit;
 using System;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.Identity.Abstractions;
+using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
@@ -33,6 +34,12 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 else
                 {
                     ValidationError validationError = operationResult.Error;
+                    foreach (StackFrame stackFrame in operationResult.Error!.StackFrames)
+                    {
+                        if (stackFrame!.ToString().ToLowerInvariant().Contains("movenext"))
+                            context.AddDiff($"StackFrame contains 'movenext': {stackFrame}");
+                    }
+
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
                         theoryData.OperationResult.Error.FailureType.Name,

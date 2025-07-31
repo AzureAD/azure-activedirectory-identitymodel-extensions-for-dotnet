@@ -7,7 +7,6 @@ using System.Xml;
 using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
-using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -17,27 +16,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Converts a string into an instance of <see cref="Saml2SecurityToken"/>, returned inside of a <see cref="OperationResult{SecurityToken, ValidationError}"/>.
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
+        /// <param name="serializer"></param>
         /// <param name="callContext"></param>
         /// <returns>A <see cref="OperationResult{SecurityToken, ValidationError}"/> with the <see cref="Saml2SecurityToken"/> or a <see cref="ValidationError"/>.</returns>
-        internal virtual OperationResult<SecurityToken, ValidationError> ReadSaml2Token(string token, CallContext callContext)
+#pragma warning disable CA1801 // Review unused parameters
+        internal static OperationResult<SecurityToken, ValidationError> ReadToken(
+            string token,
+            Saml2Serializer serializer,
+            CallContext callContext)
+#pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrEmpty(token))
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
-
-            if (token.Length > MaximumTokenSizeInBytes)
-                return new ValidationError(
-                    new MessageDetail(
-                        TokenLogMessages.IDX10209,
-                        LogHelper.MarkAsNonPII(token.Length),
-                        LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
-                    ValidationFailureType.TokenExceedsMaximumSize,
-                    ValidationError.GetCurrentStackFrame());
 
             try
             {
                 using (var reader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max))
                 {
-                    return ReadSaml2Token(reader);
+                    var assertion = serializer.ReadAssertion(reader);
+                    if (assertion == null)
+                        return new ValidationError(
+                            new MessageDetail(LogMessages.IDX13315, LogHelper.MarkAsNonPII(serializer.GetType())),
+                            ValidationFailureType.TokenReadingFailed,
+                            ValidationError.GetCurrentStackFrame());
+
+                    return new Saml2SecurityToken(assertion);
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types

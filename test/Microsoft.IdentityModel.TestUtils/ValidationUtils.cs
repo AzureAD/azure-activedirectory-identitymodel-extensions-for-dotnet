@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Abstractions;
@@ -37,7 +38,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 if (!operationResult.Succeeded)
                 {
                     context.AddDiff($"Expected test to succeed, test failed: {theoryData.TestId}.");
-                    context.AddDiff($"Message: {operationResult.Error!.Message}");
+                    context.AddDiff($"Message: {operationResult.Error!.MessageDetail.Message}");
                 }
                 else
                 {
@@ -96,7 +97,14 @@ namespace Microsoft.IdentityModel.TestUtils
                         }
                     }
 
-                    theoryData.ExpectedExceptionValidationParameters!.ProcessException(operationResult.Error!.GetException(), context, "OperationResult");
+                    ValidationError validationError = operationResult.Error!;
+                    foreach (StackFrame stackFrame in operationResult.Error!.StackFrames)
+                    {
+                        if (stackFrame!.ToString().ToLowerInvariant().Contains("movenext"))
+                            context.AddDiff($"StackFrame contains 'movenext': {stackFrame}");
+                    }
+
+                    theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationError.GetException(), context, "OperationResult");
                 }
             }
             else
