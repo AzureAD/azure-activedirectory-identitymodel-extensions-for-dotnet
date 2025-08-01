@@ -807,6 +807,8 @@ override Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.Ge
 override Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 override Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 override Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.get -> System.DateTime
+Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.set -> void
 override Microsoft.IdentityModel.Tokens.SymmetricKeyWrapProvider.Algorithm.get -> string
 override Microsoft.IdentityModel.Tokens.SymmetricKeyWrapProvider.Context.get -> string
 override Microsoft.IdentityModel.Tokens.SymmetricKeyWrapProvider.Context.set -> void

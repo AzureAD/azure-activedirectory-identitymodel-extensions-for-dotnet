@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         #region Experimental
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenReplayAddFailedException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidOperationException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenReplayAddFailedException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidOperationException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">An <see cref="Exception"/> that represents the root cause of the exception.</param>

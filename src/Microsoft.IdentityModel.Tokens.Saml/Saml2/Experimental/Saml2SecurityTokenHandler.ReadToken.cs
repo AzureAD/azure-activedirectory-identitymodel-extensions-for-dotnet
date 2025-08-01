@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Converts a string into an instance of <see cref="Saml2SecurityToken"/>, returned inside of a <see cref="OperationResult{SecurityToken, ValidationError}"/>.
         /// </summary>
-        /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
+        /// <param name="token">A Saml2 token as a string.</param>
         /// <param name="callContext"></param>
         /// <returns>A <see cref="OperationResult{SecurityToken, ValidationError}"/> with the <see cref="Saml2SecurityToken"/> or a <see cref="ValidationError"/>.</returns>
         internal virtual OperationResult<SecurityToken, ValidationError> ReadSaml2Token(string token, CallContext callContext)

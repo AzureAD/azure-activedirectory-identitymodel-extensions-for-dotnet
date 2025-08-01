@@ -30,12 +30,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlWriteException"/> class.
         /// </summary>
-        /// <param name="message">
-        ///
-        ///
-        ///
-        ///
-        /// Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
         public XmlWriteException(string message, Exception innerException)
             : base(message, innerException)

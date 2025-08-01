@@ -13,82 +13,82 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
 {
     public class TokenExtensibility
     {
-        [Theory, MemberData(nameof(JwtExtensibilityTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task JwtExtensibilityTests(ExtensibilityTheoryData theoryData)
+        [Theory, MemberData(nameof(JwtInvalidExtensibilityTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task JwtInvalidExtensibilityTests(ExtensibilityTheoryData theoryData)
         {
-            await ExtensibilityRunner.RunTest(theoryData, this, nameof(TokenExtensibility));
+            await ExtensibilityRunner.RunInvalidTest(theoryData, this, nameof(TokenExtensibility));
         }
 
-        public static TheoryData<ExtensibilityTheoryData> JwtExtensibilityTestCases()
+        public static TheoryData<ExtensibilityTheoryData> JwtInvalidExtensibilityTestCases()
         {
             TheoryData<ExtensibilityTheoryData> theoryData = new();
             var tokenHandler = new JsonWebTokenHandler();
             var token = Default.JsonWebToken();
 
-            return GenerateTestCases(tokenHandler, token);
+            return GenerateInvalidTestCases(tokenHandler, token);
         }
 
-        [Theory, MemberData(nameof(Saml2ExtensibilityTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task Saml2ExtensibilityTests(ExtensibilityTheoryData theoryData)
+        [Theory, MemberData(nameof(Saml2InvalidExtensibilityTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task Saml2InvalidExtensibilityTests(ExtensibilityTheoryData theoryData)
         {
-            await ExtensibilityRunner.RunTest(theoryData, this, nameof(TokenExtensibility));
+            await ExtensibilityRunner.RunInvalidTest(theoryData, this, nameof(TokenExtensibility));
         }
 
-        public static TheoryData<ExtensibilityTheoryData> Saml2ExtensibilityTestCases()
+        public static TheoryData<ExtensibilityTheoryData> Saml2InvalidExtensibilityTestCases()
         {
             TheoryData<ExtensibilityTheoryData> theoryData = new();
             var tokenHandler = new Saml2SecurityTokenHandler();
             var token = Default.Saml2SecurityToken();
 
-            return GenerateTestCases(tokenHandler, token);
+            return GenerateInvalidTestCases(tokenHandler, token);
         }
 
 
-        [Theory, MemberData(nameof(SamlExtensibilityTestCases), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(SamlInvalidExtensibilityTestCases), DisableDiscoveryEnumeration = true)]
         public async Task SamlExtensibilityTests(ExtensibilityTheoryData theoryData)
         {
-            await ExtensibilityRunner.RunTest(theoryData, this, nameof(TokenExtensibility));
+            await ExtensibilityRunner.RunInvalidTest(theoryData, this, nameof(TokenExtensibility));
         }
 
-        public static TheoryData<ExtensibilityTheoryData> SamlExtensibilityTestCases()
+        public static TheoryData<ExtensibilityTheoryData> SamlInvalidExtensibilityTestCases()
         {
             TheoryData<ExtensibilityTheoryData> theoryData = new();
             var tokenHandler = new SamlSecurityTokenHandler();
             var token = Default.SamlSecurityToken();
 
-            return GenerateTestCases(tokenHandler, token);
+            return GenerateInvalidTestCases(tokenHandler, token);
         }
 
 
-        public static TheoryData<ExtensibilityTheoryData> GenerateTestCases(TokenHandler tokenHandler, SecurityToken token)
+        public static TheoryData<ExtensibilityTheoryData> GenerateInvalidTestCases(TokenHandler tokenHandler, SecurityToken token)
         {
             TheoryData<ExtensibilityTheoryData> theoryData = new();
 
-            foreach (var test in ExtensibilityTestProvider.GenerateAlgorithmTestCases(tokenHandler, token, "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"))
+            foreach (var test in ExtensibilityTestProvider.GenerateInvalidAlgorithmTestCases(tokenHandler, token, "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"))
                 theoryData.Add(test);
 
             foreach (var test in ExtensibilityTestProvider.GenerateAudienceTestCases(tokenHandler, token))
                 theoryData.Add(test);
 
-            foreach (var test in ExtensibilityTestProvider.GenerateIssuerTestCases(tokenHandler, token))
+            foreach (var test in ExtensibilityTestProvider.GenerateInvalidIssuerTestCases(tokenHandler, token))
                 theoryData.Add(test);
 
-            foreach (var test in ExtensibilityTestProvider.GenerateIssuerSigningKeyTestCases(tokenHandler, token))
+            foreach (var test in ExtensibilityTestProvider.GenerateInvalidIssuerSigningKeyTestCases(tokenHandler, token))
                 theoryData.Add(test);
 
-            foreach (var test in ExtensibilityTestProvider.GenerateLifetimeTestCases(tokenHandler, token))
+            foreach (var test in ExtensibilityTestProvider.GenerateInvalidLifetimeTestCases(tokenHandler, token))
                 theoryData.Add(test);
 
-            foreach (var test in ExtensibilityTestProvider.GenerateSignatureTestCases(tokenHandler, token))
+            foreach (var test in ExtensibilityTestProvider.GenerateInvalidSignatureTestCases(tokenHandler, token))
                 theoryData.Add(test);
 
-            foreach (var test in ExtensibilityTestProvider.GenerateTokenReplayTestCases(tokenHandler, token))
+            foreach (var test in ExtensibilityTestProvider.GenerateInvalidTokenReplayTestCases(tokenHandler, token))
                 theoryData.Add(test);
 
             // SAML and SAML2 do not have token type extensibility.
             if (tokenHandler is JsonWebTokenHandler)
             {
-                foreach (var test in ExtensibilityTestProvider.GenerateTokenTypeTestCases(tokenHandler, token))
+                foreach (var test in ExtensibilityTestProvider.GenerateInvalidTokenTypeTestCases(tokenHandler, token))
                     theoryData.Add(test);
             }
 

@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
 {
     public partial class ExtensibilityRunner
     {
-        public static async Task RunTest(ExtensibilityTheoryData theoryData, object testInstance, string methodName)
+        public static async Task RunInvalidTest(ExtensibilityTheoryData theoryData, object testInstance, string methodName)
         {
             var context = TestUtilities.WriteHeader($"{testInstance}.{methodName}", theoryData);
             context.IgnoreType = false;

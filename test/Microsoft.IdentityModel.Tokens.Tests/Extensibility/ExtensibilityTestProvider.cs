@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
     public class ExtensibilityTestProvider
     {
         #region Algorithm
-        public static TheoryData<ExtensibilityTheoryData> GenerateAlgorithmTestCases(
+        public static TheoryData<ExtensibilityTheoryData> GenerateInvalidAlgorithmTestCases(
             TokenHandler tokenHandler,
             SecurityToken securityToken,
             string algorithm = "algorithm")
@@ -268,7 +268,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         #endregion
 
         #region Issuer
-        public static TheoryData<ExtensibilityTheoryData> GenerateIssuerTestCases(
+        public static TheoryData<ExtensibilityTheoryData> GenerateInvalidIssuerTestCases(
             TokenHandler tokenHandler,
             SecurityToken securityToken)
         {
@@ -387,7 +387,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         #endregion
 
         #region IssuerSigningKey
-        public static TheoryData<ExtensibilityTheoryData> GenerateIssuerSigningKeyTestCases(
+        public static TheoryData<ExtensibilityTheoryData> GenerateInvalidIssuerSigningKeyTestCases(
             TokenHandler tokenHandler,
             SecurityToken securityToken)
         {
@@ -507,7 +507,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         #endregion
 
         #region Lifetime
-        public static TheoryData<ExtensibilityTheoryData> GenerateLifetimeTestCases(
+        public static TheoryData<ExtensibilityTheoryData> GenerateInvalidLifetimeTestCases(
             TokenHandler tokenHandler,
             SecurityToken securityToken)
         {
@@ -639,7 +639,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         #endregion
 
         #region Signature
-        public static TheoryData<ExtensibilityTheoryData> GenerateSignatureTestCases(
+        public static TheoryData<ExtensibilityTheoryData> GenerateInvalidSignatureTestCases(
             TokenHandler tokenHandler,
             SecurityToken securityToken)
         {
@@ -754,7 +754,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         #endregion
 
         #region TokenReplay
-        public static TheoryData<ExtensibilityTheoryData> GenerateTokenReplayTestCases(
+        public static TheoryData<ExtensibilityTheoryData> GenerateInvalidTokenReplayTestCases(
             TokenHandler tokenHandler,
             SecurityToken securityToken)
         {
@@ -885,7 +885,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         #endregion
 
         #region TokenType
-        public static TheoryData<ExtensibilityTheoryData> GenerateTokenTypeTestCases(
+        public static TheoryData<ExtensibilityTheoryData> GenerateInvalidTokenTypeTestCases(
             TokenHandler tokenHandler,
             SecurityToken securityToken)
         {

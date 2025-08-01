@@ -193,8 +193,6 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidationParam
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidAudiences.get -> System.Collections.Generic.IList<string!>!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidIssuers.get -> System.Collections.Generic.IList<string!>!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidTypes.get -> System.Collections.Generic.IList<string!>!
-Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.get -> System.DateTime
-Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.ValidationFailure.get -> Microsoft.IdentityModel.Tokens.ValidationFailure
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.ValidationFailure.set -> void
 Microsoft.IdentityModel.Tokens.ValidationFailure
