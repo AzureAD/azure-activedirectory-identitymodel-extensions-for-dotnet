@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
         public PIITests()
         {
-            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.ShowPII = false;
         }
 
         [Fact]
