@@ -42,9 +42,11 @@ $runSettingsPath = $PSScriptRoot + "\build\CodeCoverage.runsettings"
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $dotnetexe = "$dotnetDir\dotnet.exe";
 $startTime = Get-Date
+$TargetNetNext = "True"
 Write-Host "Start Time:     " $startTime
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "dotnetexe:      " $dotnetexe;
+Write-Host "TargetNetNext:  " $TargetNetNext;
 
 $ErrorActionPreference = "Stop"
 
@@ -66,8 +68,8 @@ foreach ($testProject in $testProjects)
         Write-Host ">>> Set-Location $root\test\$name"
         Push-Location
         Set-Location $root\test\$name
-        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
-        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
+        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -property:TargetNetNext=$TargetNetNext -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
+        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -property:TargetNetNext=$TargetNetNext -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
 
         if($p.ExitCode -ne 0)
         {

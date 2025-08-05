@@ -16,11 +16,7 @@
   </PropertyGroup>
 
 <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <!--
-      Unknown if 10.0 has the same problem as 9 where there are some runtime incompatibilities if 
-      CoreWCF compiles against an older version but then run with a newer version in a related package.
-    -->
-    <MicrosoftExtensionsLoggingAbstractionsVersion>10.0.0</MicrosoftExtensionsLoggingAbstractionsVersion>
+    <MicrosoftExtensionsLoggingAbstractionsVersion>10.0.0-preview.*</MicrosoftExtensionsLoggingAbstractionsVersion>
 </PropertyGroup>
 
 <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">

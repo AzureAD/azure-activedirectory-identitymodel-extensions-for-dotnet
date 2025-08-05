@@ -34,9 +34,11 @@ Write-Host "slnFile:         " $slnFile;
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $dotnetexe = "$dotnetDir\dotnet.exe";
 $startTime = Get-Date
+$TargetNetNext = "True"
 Write-Host "Start Time:     " $startTime
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "dotnetexe:      " $dotnetexe;
+Write-Host "TargetNetNext:  " $TargetNetNext;
 
 $ErrorActionPreference = "Stop"
 
@@ -51,8 +53,8 @@ foreach ($testProject in $testProjects)
         Write-Host ">>> Set-Location $root\test\$name"
         pushd
         Set-Location $root\test\$name
-        Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -v q -c $buildType"
-        $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -v q -c $buildType"
+        Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -property:TargetNetNext=$TargetNetNext -v q -c $buildType"
+        $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -property:TargetNetNext=$TargetNetNext -v q -c $buildType"
 
         if($p.ExitCode -ne 0)
         {

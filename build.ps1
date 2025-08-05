@@ -72,6 +72,7 @@ $msbuildexe = "$msbuildDir\msbuild.exe";
 $nugetVersion = $buildConfiguration.SelectSingleNode("root/nugetVersion").InnerText;
 $releaseVersion = [string]$buildConfiguration.SelectSingleNode("root/release").InnerText;
 $nugetPreview = $buildConfiguration.SelectSingleNode("root/nugetPreview").InnerText;
+$TargetNetNext = "True"
 
 WriteSectionHeader("Environment");
 $startTime = Get-Date
@@ -83,6 +84,7 @@ Write-Host "msbuildexe:     " $msbuildexe;
 Write-Host "nugetVersion:   " $nugetVersion;
 Write-Host "releaseVersion: " $releaseVersion;
 Write-Host "nugetPreview:   " $nugetPreview;
+Write-Host "targetNetNext:  " $TargetNetNext
 WriteSectionFooter("End Environment");
 
 $ErrorActionPreference = "Stop"
@@ -120,10 +122,10 @@ CreateArtifactsRoot($artifactsRoot);
 pushd
 Set-Location $root
 Write-Host ""
-Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
+Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile /p:TargetNetNext=$TargetNetNext"
 Write-Host ""
 Write-Host "msbuildexe: " $msbuildexe
-$p = Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
+$p = Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile /p:TargetNetNext=$TargetNetNext"
 
 if($p.ExitCode -ne 0)
 {
@@ -155,8 +157,8 @@ if ($runTests -eq "YES")
             Write-Host ">>> Set-Location $root\test\$name"
             pushd
             Set-Location $root\test\$name
-            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
-            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
+            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -property:TargetNetNext=$TargetNetNext -v n -c $buildType"
+            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -property:TargetNetNext=$TargetNetNext -v n -c $buildType"
 
             if($p.ExitCode -ne 0)
             {
