@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
                             int charsRead;
                             
                             // Read from the stream until all data is consumed or max size is reached
-                            while (totalCharsRead < MaximumDeflateSize && (charsRead = reader.Read(chars, totalCharsRead, MaximumDeflateSize - totalCharsRead)) > 0)
+                            while (totalCharsRead <= MaximumDeflateSize && (charsRead = reader.Read(chars, totalCharsRead, MaximumDeflateSize - totalCharsRead)) > 0)
                             {
                                 totalCharsRead += charsRead;
                             }
