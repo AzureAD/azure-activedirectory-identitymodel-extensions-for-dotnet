@@ -17,6 +17,9 @@ on:
     branches:
       - dev
 
+env:
+  TargetNetNext: True
+
 jobs:
   build:
     runs-on: windows-latest
@@ -39,7 +42,7 @@ jobs:
     - name: Setup latest .NET 10 preview SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '10.0.x-preview'
+        dotnet-version: '10.0.x'
 
     - name: Strong name bypass
       run: |

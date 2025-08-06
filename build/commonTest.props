@@ -20,10 +20,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'">
-    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup>
     <NoWarn>$(NoWarn);SYSLIB0050</NoWarn>
     <NoWarn>$(NoWarn);SYSLIB0051</NoWarn>

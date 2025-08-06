@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <!-- This must be set to True to build with NET 10.0 locally-->
+    <!-- This must be set to True to build with NET 10.0 locally or set it in a CLI arg-->
     <TargetNetNext>False</TargetNetNext>
   </PropertyGroup>
   

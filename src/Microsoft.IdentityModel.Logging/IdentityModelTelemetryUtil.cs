@@ -39,7 +39,9 @@ namespace Microsoft.IdentityModel.Logging
             "ID_NET8_0";
 #elif NET9_0
             "ID_NET9_0";
-#elif NET10_0
+#else
+            // We can't use NET10_0 here until after NET 10's release or Visual Studio will crash if NET 10 is not installed.
+            // In the tests we check to make sure the version running is actually NET 10.
             "ID_NET10_0";
 #endif
 

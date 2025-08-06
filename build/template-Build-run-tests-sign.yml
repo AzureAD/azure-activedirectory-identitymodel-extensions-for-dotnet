@@ -35,6 +35,7 @@ steps:
 
 - task: UseDotNet@2
   displayName: 'Use .Net Core SDK 10.x'
+  includePreviewVersions: true
   inputs:
     version: 10.x
     installationPath: $(Agent.ToolsDirectory)/dotnet

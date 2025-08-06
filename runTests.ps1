@@ -30,6 +30,9 @@ function WriteSectionFooter($sectionName)
 
 ################################################# Functions ############################################################
 
+env:
+    TargetNetNext: True
+
 WriteSectionHeader("runTests.ps1");
 Write-Host "buildType:       " $buildType;
 Write-Host "dotnetDir:       " $dotnetDir
@@ -46,7 +49,7 @@ $TargetNetNext = "True"
 Write-Host "Start Time:     " $startTime
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "dotnetexe:      " $dotnetexe;
-Write-Host "TargetNetNext:  " $TargetNetNext;
+Write-Host "TargetNetNext:  " $env:TargetNetNext;
 
 $ErrorActionPreference = "Stop"
 
@@ -68,8 +71,8 @@ foreach ($testProject in $testProjects)
         Write-Host ">>> Set-Location $root\test\$name"
         Push-Location
         Set-Location $root\test\$name
-        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -property:TargetNetNext=$TargetNetNext -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
-        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -property:TargetNetNext=$TargetNetNext -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
+        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
+        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
 
         if($p.ExitCode -ne 0)
         {
