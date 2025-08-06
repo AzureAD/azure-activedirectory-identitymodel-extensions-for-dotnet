@@ -79,13 +79,13 @@ namespace Microsoft.IdentityModel.Tokens
                         {
                             int totalCharsRead = 0;
                             int charsRead;
-                            
+
                             // Read from the stream until all data is consumed or max size is reached
                             while (totalCharsRead <= MaximumDeflateSize && (charsRead = reader.Read(chars, totalCharsRead, MaximumDeflateSize - totalCharsRead)) > 0)
                             {
                                 totalCharsRead += charsRead;
                             }
-                            
+
                             // if there is one more char to read, then the token is too large.
                             if (reader.Peek() != -1)
                             {
