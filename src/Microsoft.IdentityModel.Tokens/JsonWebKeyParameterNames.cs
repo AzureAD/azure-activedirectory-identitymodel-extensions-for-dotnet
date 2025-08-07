@@ -5,6 +5,7 @@ using System;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+#pragma warning disable RS0016 // Add public types and members to the declared API
     /// <summary>
     /// JsonWebKey parameter names
     /// see: https://datatracker.ietf.org/doc/html/rfc7517
@@ -26,6 +27,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string N = "n";
         public const string Oth = "oth";
         public const string P = "p";
+        public const string Pub = "pub";
         public const string Q = "q";
         public const string QI = "qi";
         public const string Use = "use";
@@ -58,6 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static ReadOnlySpan<byte> N => "n"u8;
         public static ReadOnlySpan<byte> Oth => "oth"u8;
         public static ReadOnlySpan<byte> P => "p"u8;
+        public static ReadOnlySpan<byte> Pub => "pub"u8;
         public static ReadOnlySpan<byte> Q => "q"u8;
         public static ReadOnlySpan<byte> QI => "qi"u8;
         public static ReadOnlySpan<byte> Use => "use"u8;

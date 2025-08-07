@@ -10,6 +10,7 @@
     <PackageTags>.NET;Windows;Authentication;Identity;SecurityTokens;Cryptographic operations;Signing;Verifying Signatures;Encryption</PackageTags>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NoWarn>NU5101</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">
@@ -80,5 +81,29 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsVersion)" />
   </ItemGroup>
-	
+
+  <ItemGroup>
+    <Content Include=".\PQC\symcrypt.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath>lib\</PackagePath>
+    </Content>
+
+    <Content Include=".\PQC\symcrypt.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath>lib\</PackagePath>
+    </Content>
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="PQC\SymCryptWin64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PQC\SymCryptWin64.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

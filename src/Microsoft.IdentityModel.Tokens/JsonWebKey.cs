@@ -12,6 +12,8 @@ using Microsoft.IdentityModel.Tokens.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+#pragma warning disable RS0016 // Add public types and members to the declared API
+
     /// <summary>
     /// Represents a JSON Web Key as defined in https://datatracker.ietf.org/doc/html/rfc7517.
     /// </summary>
@@ -232,6 +234,16 @@ namespace Microsoft.IdentityModel.Tokens
         public string P { get; set; }
 
         /// <summary>
+        /// Gets or sets the 'pub' (ML-DSa) PublicKey
+        /// </summary>
+        /// <remarks>Value is formatted as: Base64urlUInt</remarks>
+        [JsonPropertyName(JsonWebKeyParameterNames.Pub)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+#endif
+        public string Pub { get; set; }
+
+        /// <summary>
         /// Gets or sets the 'q' (RSA - Second  Prime Factor)..
         /// </summary>
         /// <remarks>Value is formatted as: Base64urlUInt</remarks>
@@ -397,7 +409,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Computes the JWK thumprint per spec: https://datatracker.ietf.org/doc/html/rfc7638 />.
+        /// Computes the JWK thumbprint per spec: https://datatracker.ietf.org/doc/html/rfc7638 />.
         /// </summary>
         /// <returns>A the JWK thumbprint.</returns>
         public override byte[] ComputeJwkThumbprint()
@@ -519,5 +531,6 @@ namespace Microsoft.IdentityModel.Tokens
             return $"{GetType()}, Use: '{Use}',  Kid: '{Kid}', Kty: '{Kty}', InternalId: '{InternalId}'.";
         }
     }
+#pragma warning restore RS0016 // Add public types and members to the declared API
 }
 

@@ -71,6 +71,21 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Serializes the <see cref="JsonWebKeySet"/> to a JSON string.
+        /// </summary>
+        /// <param name="jsonWebKeySet">the <see cref="JsonWebKeySet"/> to serialize.</param>
+        /// <returns></returns>
+#pragma warning disable RS0016 // Add public types and members to the declared API
+        public static string Write(JsonWebKeySet jsonWebKeySet)
+#pragma warning restore RS0016 // Add public types and members to the declared API
+        {
+            if (jsonWebKeySet == null)
+                throw LogHelper.LogArgumentNullException(nameof(jsonWebKeySet));
+
+            return JsonWebKeySetSerializer.Write(jsonWebKeySet);
+        }
+
+        /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
         /// </summary>
         [JsonExtensionData]
@@ -91,7 +106,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Default value for the flag that controls whether unresolved JsonWebKeys will be included in the resulting collection of <see cref="GetSigningKeys"/> method.
         /// </summary>
         [DefaultValue(true)]
-        public static bool DefaultSkipUnresolvedJsonWebKeys = true;
+        public static bool DefaultSkipUnresolvedJsonWebKeys = false;
 
         /// <summary>
         /// Flag that controls whether unresolved JsonWebKeys will be included in the resulting collection of <see cref="GetSigningKeys"/> method.

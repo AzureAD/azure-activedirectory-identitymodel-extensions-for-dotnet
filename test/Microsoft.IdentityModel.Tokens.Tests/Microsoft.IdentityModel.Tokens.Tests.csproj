@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -23,6 +23,7 @@
     <PackageReference Include="Microsoft.Azure.KeyVault.Cryptography" Version="$(MicrosoftAzureKeyVaultCryptographyVersion)" />
     <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntimeVersion)" />
+    <PackageReference Include="System.Formats.Cbor" Version="8.0.0"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,15 @@
   <ItemGroup>
     <None Update="google-certs.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PQC\symcrypt.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="PQC\symcrypt.lib">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PQC\symcrypt.pdb">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

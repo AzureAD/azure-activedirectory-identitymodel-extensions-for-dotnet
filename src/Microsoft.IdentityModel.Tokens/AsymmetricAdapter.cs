@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// This adapter abstracts the 'RSA' differences between versions of .NET targets.
     /// </summary>
-    internal class AsymmetricAdapter : IDisposable
+    internal partial class AsymmetricAdapter : IDisposable
     {
 #if DESKTOP
         private bool _useRSAOeapPadding;
@@ -73,6 +73,10 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 InitializeUsingRsaSecurityKey(rsaKey, algorithm);
             }
+            else if (key is MldsaSecurityKey mldsaKey)
+            {
+                InitializeUsingMldsaSecurityKey(mldsaKey);
+            }
             else if (key is X509SecurityKey x509Key)
             {
                 InitializeUsingX509SecurityKey(x509Key, algorithm, requirePrivateKey);
@@ -83,6 +87,8 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (securityKey is RsaSecurityKey rsaSecurityKeyFromJsonWebKey)
                         InitializeUsingRsaSecurityKey(rsaSecurityKeyFromJsonWebKey, algorithm);
+                    else if (securityKey is MldsaSecurityKey mldsaSecurityKeyFromJsonWebKey)
+                        InitializeUsingMldsaSecurityKey(mldsaSecurityKeyFromJsonWebKey);
                     else if (securityKey is X509SecurityKey x509SecurityKeyFromJsonWebKey)
                         InitializeUsingX509SecurityKey(x509SecurityKeyFromJsonWebKey, algorithm, requirePrivateKey);
                     else if (securityKey is ECDsaSecurityKey edcsaSecurityKeyFromJsonWebKey)

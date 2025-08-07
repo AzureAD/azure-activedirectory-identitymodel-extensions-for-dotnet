@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Microsoft.IdentityModel.Tokens.MldsaSecurityKey" Collapsed="true">
+    <Position X="3.5" Y="2.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAgQAIAAAIKIQAAAQAAEAAAEAAAAAACIQBAAA=</HashCode>
+      <FileName>PQC\MldsaSecurityKey.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_mldsa" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.MldsaArm" Collapsed="true">
+    <Position X="7.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAEAAAAAAAAAAAAAEAAAEIAAAAAAIAAAAA=</HashCode>
+      <FileName>PQC\MldsaSSL - Copy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.MldsaWin" Collapsed="true">
+    <Position X="5.75" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAEAAAAAAAAAAAAAEAAAEIAAAAAAIAAAAA=</HashCode>
+      <FileName>PQC\MldsaWin.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.AsymmetricSecurityKey" Collapsed="true">
+    <Position X="2.5" Y="1.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACIAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AsymmetricSecurityKey.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.RsaSecurityKey" Collapsed="true">
+    <Position X="1.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAGAAAAAAAAAAIDIACAAAAAAgAAAAEAJAAAIAAAAA=</HashCode>
+      <FileName>RsaSecurityKey.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Security.Cryptography.AsymmetricAlgorithm" Collapsed="true">
+    <Position X="7.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.Mldsa" Collapsed="true">
+    <Position X="7.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgSAEAAAAAAQAAAQAAEAAAEAAAAAIAIQBAAA=</HashCode>
+      <FileName>PQC\Mldsa.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.SymCryptWin" Collapsed="true">
+    <Position X="5.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PQC\SymCryptWin.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.SymCryptSSL" Collapsed="true">
+    <Position X="9.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PQC\SymCryptSSL.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.MldsaSSL" Collapsed="true">
+    <Position X="9.25" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAEAAAAAAAAAAAAAEAAAEIAAAAAAIAAAAA=</HashCode>
+      <FileName>PQC\MldsaSSL.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.SymCryptArm" Collapsed="true">
+    <Position X="7.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PQC\SymCryptSArm.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

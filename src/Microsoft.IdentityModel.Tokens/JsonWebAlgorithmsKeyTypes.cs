@@ -7,7 +7,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Constants for JsonWebAlgorithms  "kty" Key Type (sec 6.1)
     /// https://datatracker.ietf.org/doc/html/rfc7518#section-6.1
     /// </summary>
-    public static class JsonWebAlgorithmsKeyTypes
+    public static partial class JsonWebAlgorithmsKeyTypes
     {
 #pragma warning disable 1591
         public const string EllipticCurve = "EC";

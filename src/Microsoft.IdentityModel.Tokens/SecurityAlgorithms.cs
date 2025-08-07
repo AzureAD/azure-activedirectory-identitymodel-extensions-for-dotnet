@@ -6,7 +6,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Constants for Security Algorithm.
     /// </summary>
-    public static class SecurityAlgorithms
+    public static partial class SecurityAlgorithms
     {
 #pragma warning disable 1591
         // See: https://www.w3.org/TR/xmlenc-core1/#sec-AES

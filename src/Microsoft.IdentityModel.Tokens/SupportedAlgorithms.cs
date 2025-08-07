@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Defines the default set of algorithms this library supports
     /// </summary>
-    internal static class SupportedAlgorithms
+    internal static partial class SupportedAlgorithms
     {
         private const int RsaMinKeySize = 2048;
 
@@ -120,6 +120,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case SecurityAlgorithms.Mldsa44:
+                    return HashAlgorithmName.SHA256;
+
                 case SecurityAlgorithms.EcdsaSha256:
                 case SecurityAlgorithms.EcdsaSha256Signature:
                 case SecurityAlgorithms.RsaSha256:
@@ -213,6 +216,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (key as RsaSecurityKey != null)
                 return IsSupportedRsaAlgorithm(algorithm, key);
 
+            if (key as MldsaSecurityKey != null)
+                return IsSupportedMldsaAlgorithm(algorithm);
+
             if (key is X509SecurityKey x509Key)
             {
                 // only RSA keys are supported
@@ -224,6 +230,8 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (key is JsonWebKey jsonWebKey)
             {
+                if (JsonWebAlgorithmsKeyTypes.MLDSA.Equals(jsonWebKey.Kty))
+                    return IsSupportedMldsaAlgorithm(algorithm);
                 if (JsonWebAlgorithmsKeyTypes.RSA.Equals(jsonWebKey.Kty))
                     return IsSupportedRsaAlgorithm(algorithm, key);
                 else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(jsonWebKey.Kty))
@@ -393,6 +401,8 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.RsaSsaPssSha512 or
             SecurityAlgorithms.RsaSsaPssSha512Signature or
             SecurityAlgorithms.RsaSha512Signature => 1024,
+
+            SecurityAlgorithms.Mldsa44 => 2420,
 
             // if we don't know the algorithm, report 2K twice as big as any known algorithm.
             _ => 2048,

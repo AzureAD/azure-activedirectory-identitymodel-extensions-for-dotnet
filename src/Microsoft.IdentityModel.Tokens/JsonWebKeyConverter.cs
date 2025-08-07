@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Converts a <see cref="SecurityKey"/> into a <see cref="JsonWebKey"/>
     /// Supports: converting to a <see cref="JsonWebKey"/> from one of: <see cref="RsaSecurityKey"/>, <see cref="X509SecurityKey"/>, and <see cref=" SymmetricSecurityKey"/>.
     /// </summary>
-    public class JsonWebKeyConverter
+    public partial class JsonWebKeyConverter
     {
         /// <summary>
         /// Converts a <see cref="SecurityKey"/> into a <see cref="JsonWebKey"/>
@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens
             else if (key is ECDsaSecurityKey ecdsaSecurityKey)
                 return ConvertFromECDsaSecurityKey(ecdsaSecurityKey);
 #endif
+            else if (key is MldsaSecurityKey mldsaSecurityKey)
+                return ConvertFromMldsaSecurityKey(mldsaSecurityKey);
             else
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))));
         }
@@ -81,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens
                 DQ = parameters.DQ != null ? Base64UrlEncoder.Encode(parameters.DQ) : null,
                 QI = parameters.InverseQ != null ? Base64UrlEncoder.Encode(parameters.InverseQ) : null,
                 Kty = JsonWebAlgorithmsKeyTypes.RSA,
-                Kid = key.KeyId,
+                Kid = key.KeyId ?? key.InternalId,
                 ConvertedSecurityKey = key
             };
         }
@@ -225,6 +227,10 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (TryCreateToRsaSecurityKey(webKey, out key))
                         return true;
+                }
+                else if (JsonWebAlgorithmsKeyTypes.MLDSA.Equals(webKey.Kty))
+                {
+                    return TryConvertToMldsaSecurityKey(webKey, out key);
                 }
                 else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty))
                 {
