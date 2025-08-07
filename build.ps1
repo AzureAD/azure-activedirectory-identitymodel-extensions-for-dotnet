@@ -55,8 +55,8 @@ if ($env:VSINSTALLDIR)
         $msbuildDir = $env:VSINSTALLDIR+"\MSBuild\Current\Bin";
     }
 }
-env:
-    TargetNetNext: True
+
+$env:TargetNetNext = "True"
 
 WriteSectionHeader("build.ps1 - parameters");
 Write-Host "buildType:                  " $buildType;

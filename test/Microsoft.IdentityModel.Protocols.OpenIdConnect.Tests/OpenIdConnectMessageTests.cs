@@ -288,19 +288,7 @@ new OpenIdConnectMessageTheoryData("EmptyJsonStringEmptyJobj")
 #elif NET9_0
             if (!message.SkuTelemetryValue.Equals("ID_NET9_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET9_0");
-#else // we can't use elif NET10_0 or Visual Studio will crash if NET 10 is not installed
-            //TODO: Use elif NET10_0 after NET 10's release
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-            process.StartInfo.FileName = "dotnet.exe";
-            process.StartInfo.Arguments = "--version";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.Start();
-
-            string version = process.StandardOutput.ReadToEnd()?.TrimEnd();
-
-            process.WaitForExit();
-            Assert.StartsWith("10.", version, StringComparison.OrdinalIgnoreCase);
+#elif NET10_0
             if (!message.SkuTelemetryValue.Equals("ID_NET10_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET10_0");
 #endif
@@ -560,10 +548,7 @@ new OpenIdConnectMessageTheoryData("EmptyJsonStringEmptyJobj")
             TestUtilities.WriteHeader("OidcCreateLogoutRequestUrl - " + testId, true);
 
             var context = new CompareContext();
-#if NET462
-            if (!message.SkuTelemetryValue.Equals("ID_NET462"))
-                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET462");
-#elif NET472
+#if NET472
             if (!message.SkuTelemetryValue.Equals("ID_NET472"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET472");
 #elif NET6_0
@@ -575,19 +560,7 @@ new OpenIdConnectMessageTheoryData("EmptyJsonStringEmptyJobj")
 #elif NET9_0
             if (!message.SkuTelemetryValue.Equals("ID_NET9_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET9_0");
-#else // we can't use elif NET10_0 or Visual Studio will crash if NET 10 is not installed
-            //TODO: Use elif NET10_0 after NET 10's release
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-            process.StartInfo.FileName = "dotnet.exe";
-            process.StartInfo.Arguments = "--version";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.Start();
-
-            string version = process.StandardOutput.ReadToEnd()?.TrimEnd();
-
-            process.WaitForExit();
-            Assert.StartsWith("10.", version, StringComparison.OrdinalIgnoreCase);
+#elif NET10_0
             if (!message.SkuTelemetryValue.Equals("ID_NET10_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET10_0");
 #endif
