@@ -44,7 +44,7 @@ $runSettingsPath = $PSScriptRoot + "\build\CodeCoverage.runsettings"
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $dotnetexe = "$dotnetDir\dotnet.exe";
 $startTime = Get-Date
-$TargetNetNext = "True"
+
 Write-Host "Start Time:     " $startTime
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "dotnetexe:      " $dotnetexe;
