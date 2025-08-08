@@ -2,6 +2,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 8.13.1
 ====
+## Dependencies
+Microsoft.IdentityModel now depends on Microsoft.Identity.Abstractions 9.3.0
+
 ## Bug Fixes
 - Fixed a decompression failure happening for large JWE payloads. See [#3286](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3286) for details.
 
