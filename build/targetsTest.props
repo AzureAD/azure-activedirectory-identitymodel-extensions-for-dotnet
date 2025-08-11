@@ -1,8 +1,8 @@
 <Project>
-  <PropertyGroup>
-    <!-- This must be set to True to build with NET 10.0 locally or set it in a CLI arg -->
-    <TargetNetNext>False</TargetNetNext>
-  </PropertyGroup>
+  <!-- TargetNetNext must be set to True to build with NET 10.0 locally you can uncomment this PropertyGroup or set it in a CLI arg -->
+  <!-- <PropertyGroup>
+    <TargetNetNext>True</TargetNetNext> 
+  </PropertyGroup> -->
 
   <PropertyGroup>
     <TestTargets Condition="'$(LocalBuild)' != 'True'">net462;net472;net6.0;net8.0;net9.0</TestTargets>
