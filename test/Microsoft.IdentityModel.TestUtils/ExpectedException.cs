@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
@@ -104,28 +105,28 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public void ProcessException(Exception exception, CompareContext context, string description = null)
+        public void ProcessException(Exception exception, CompareContext context)
         {
-            ProcessException(exception, context.Diffs, description);
+            ProcessException(exception, context.Diffs);
         }
 
-        public void ProcessException(Exception exception, List<string> errors = null, string description = null)
+        public void ProcessException(Exception exception, List<string> errors = null)
         {
             if (TypeExpected == null && InnerTypeExpected != null)
             {
-                HandleError("(TypeExpected == null && InnerTypeExpected != null. TypeExpected == null && InnerTypeExpected != null.", errors, description);
+                HandleError("(TypeExpected == null && InnerTypeExpected != null. TypeExpected == null && InnerTypeExpected != null.", errors);
                 return;
             }
 
             if (TypeExpected == null)
             {
-                HandleError("exception != null, expectedException.TypeExpected == null.\nexception: " + exception, errors, description);
+                HandleError("exception != null, expectedException.TypeExpected == null.\nexception: " + exception, errors);
                 return;
             }
 
             if (exception == null)
             {
-                HandleError("exception == null, expectedException.TypeExpected != null.\nexpectedException.TypeExpected: " + TypeExpected, errors, description);
+                HandleError("exception == null, expectedException.TypeExpected != null.\nexpectedException.TypeExpected: " + TypeExpected, errors);
                 return;
             }
 
@@ -133,36 +134,36 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 if (exception.GetType() != TypeExpected)
                 {
-                    HandleError("exception.GetType() != expectedException.TypeExpected:\nexception.GetType(): " + exception.GetType() + "\nexpectedException.TypeExpected: " + TypeExpected, errors, description);
+                    HandleError("exception.GetType() != expectedException.TypeExpected:\nexception.GetType(): " + exception.GetType() + "\nexpectedException.TypeExpected: " + TypeExpected, errors);
                     return;
                 }
 
                 if (!string.IsNullOrWhiteSpace(SubstringExpected) && !exception.Message.Contains(SubstringExpected))
                 {
-                    HandleError($"!exception.Message.Contains('{SubstringExpected}').\nexception.Message: {exception.Message} \nexpectedException.SubstringExpected: {SubstringExpected}", errors, description);
+                    HandleError($"!exception.Message.Contains('{SubstringExpected}').\nexception.Message: {exception.Message} \nexpectedException.SubstringExpected: {SubstringExpected}", errors);
                     return;
                 }
 
                 if (exception.InnerException != null && InnerTypeExpected == null && !IgnoreInnerException)
                 {
-                    HandleError("exception.InnerException != null && expectedException.InnerTypeExpected == null && !IgnoreInnerException.\nexception.InnerException: " + exception.InnerException, errors, description);
+                    HandleError("exception.InnerException != null && expectedException.InnerTypeExpected == null && !IgnoreInnerException.\nexception.InnerException: " + exception.InnerException, errors);
                     return;
                 }
 
                 if (exception.InnerException == null && InnerTypeExpected != null && !IgnoreInnerException)
                 {
-                    HandleError("exception.InnerException == null && expectedException.InnerTypeExpected != null && !IgnoreInnerException.\nexpectedException.InnerTypeExpected: " + InnerTypeExpected, errors, description);
+                    HandleError("exception.InnerException == null && expectedException.InnerTypeExpected != null && !IgnoreInnerException.\nexpectedException.InnerTypeExpected: " + InnerTypeExpected, errors);
                     return;
                 }
 
                 if ((InnerTypeExpected != null) && (exception.InnerException.GetType() != InnerTypeExpected) && !IgnoreInnerException)
                 {
-                    HandleError("exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected, errors, description);
+                    HandleError("exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected, errors);
                 }
 
                 if (!string.IsNullOrWhiteSpace(InnerSubstringExpected) && !exception.InnerException.Message.Contains(InnerSubstringExpected))
                 {
-                    HandleError($"!InnerException.Message.Contains('{InnerSubstringExpected}').\nInnerException.Message: {exception.InnerException.Message} \nexpectedException.InnerSubstringExpected: {InnerSubstringExpected}", errors, description);
+                    HandleError($"!InnerException.Message.Contains('{InnerSubstringExpected}').\nInnerException.Message: {exception.InnerException.Message} \nexpectedException.InnerSubstringExpected: {InnerSubstringExpected}", errors);
                     return;
                 }
 
@@ -175,7 +176,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     PropertyInfo propertyInfo = TypeExpected.GetProperty(property.Key);
                     if (propertyInfo == null)
                     {
-                        HandleError("exception type " + TypeExpected + " does not have expected property " + property.Key, errors, description);
+                        HandleError("exception type " + TypeExpected + " does not have expected property " + property.Key, errors);
                     }
                     object runtimeValue = propertyInfo.GetValue(exception);
 
@@ -184,14 +185,14 @@ namespace Microsoft.IdentityModel.TestUtils
 
                     if (runtimeValue != null && runtimeValue.GetType() != expectedTypeNonNullable && !expectedTypeNonNullable.IsAssignableFrom(runtimeValue.GetType()))
                     {
-                        HandleError("exception type " + TypeExpected + " does not match the expected property " + property.Key + " type.\nexpected type: " + expectedTypeNonNullable + ", actual type: " + runtimeValue.GetType(), errors, description);
+                        HandleError("exception type " + TypeExpected + " does not match the expected property " + property.Key + " type.\nexpected type: " + expectedTypeNonNullable + ", actual type: " + runtimeValue.GetType(), errors);
                     }
 
                     if (runtimeValue != property.Value &&
                         ((runtimeValue != null && !runtimeValue.Equals(property.Value)) ||
                          (property.Value != null && !property.Value.Equals(runtimeValue))))
                     {
-                        HandleError("exception type " + TypeExpected + " doesn't have the expected property value " + property.Key + " value.\nexpected value: " + property.Value + ", actual value: " + runtimeValue, errors, description);
+                        HandleError("exception type " + TypeExpected + " doesn't have the expected property value " + property.Key + " value.\nexpected value: " + property.Value + ", actual value: " + runtimeValue, errors);
                     }
                 }
             }
@@ -217,17 +218,17 @@ namespace Microsoft.IdentityModel.TestUtils
                 context.Diffs.Add("expectedException.TypeExpected != null: " + TypeExpected);
         }
 
-        private static void HandleError(string error, List<string> errors, string description = null)
+        private static void HandleError(string error, List<string> errors)
         {
             if (errors != null)
-            {
-                if (!string.IsNullOrWhiteSpace(description))
-                    error = $"{description}: {error}";
-
-                errors.Add(error + Environment.NewLine);
-            }
+                errors.Add(error);
             else
                 throw new TestException($"List<string> errors == null, error in test: {error}.");
+        }
+
+        public static ExpectedException SecurityTokenArgumentNullException(string substringExpected = null, Type inner = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenArgumentNullException), substringExpected, inner);
         }
 
         public static ExpectedException SecurityTokenEncryptionKeyNotFoundException(string substringExpected = null, Type innerTypeExpected = null)

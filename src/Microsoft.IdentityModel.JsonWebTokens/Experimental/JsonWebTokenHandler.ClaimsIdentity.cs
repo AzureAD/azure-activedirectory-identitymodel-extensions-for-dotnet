@@ -6,7 +6,6 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
-using System.Collections.Generic;
 
 #nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -34,10 +33,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
-        internal virtual ClaimsIdentity CreateClaimsIdentity(
-            JsonWebToken? jwtToken,
-            ValidationParameters validationParameters,
-            string issuer)
+        internal virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken? jwtToken, ValidationParameters validationParameters, string issuer)
         {
             // TODO: Make protected once ValidationParameters is public.
             _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
@@ -73,9 +69,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(
-                            new InvalidOperationException(
-                                LogHelper.FormatInvariant(
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
                                     LogMessages.IDX14112,
                                     LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
                                     jwtClaim.Value)));
@@ -121,12 +115,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(
-                            new InvalidOperationException(
-                                LogHelper.FormatInvariant(
-                                    LogMessages.IDX14112,
-                                    LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
-                                    jwtClaim.Value)));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
 
                     if (CanReadToken(jwtClaim.Value))
                     {
@@ -141,9 +130,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 else
                 {
-                    Claim claim = new(claimType, jwtClaim.Value, jwtClaim.ValueType, issuer, issuer, identity);
+                    Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, issuer, issuer, identity);
 
-                    foreach (KeyValuePair<string, string> kv in jwtClaim.Properties)
+                    foreach (var kv in jwtClaim.Properties)
                         claim.Properties[kv.Key] = kv.Value;
 
                     identity.AddClaim(claim);

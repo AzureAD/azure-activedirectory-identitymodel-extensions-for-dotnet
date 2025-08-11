@@ -16,7 +16,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
-    public partial class JwtValidationTests
+    public partial class JsonWebTokenHandlerValidateTokenAsyncTests
     {
         [Theory, MemberData(nameof(ValidateTokenAsync_DecryptionTestCases), DisableDiscoveryEnumeration = true)]
         public async Task ValidateTokenAsync_Decryption(ValidateTokenAsyncDecryptionTheoryData theoryData)
@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenValidationParameters = CreateTokenValidationParameters(KeyingMaterial.DefaultX509Key_2048),
                         ValidationParameters = CreateValidationParameters(KeyingMaterial.DefaultX509Key_2048),
                     },
+
 #if NET472 || NET6_0_OR_GREATER
                     new ValidateTokenAsyncDecryptionTheoryData("Valid_JWE_EcdhEs")
                     {
@@ -60,6 +61,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = CreateValidationParameters(new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true)),
                     },
 #endif
+
                     new ValidateTokenAsyncDecryptionTheoryData("Invalid_JWE_NoDecryptionKeys")
                     {
                         EncryptingCredentials = new EncryptingCredentials(
@@ -70,7 +72,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = CreateValidationParameters(),
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
                     },
                     new ValidateTokenAsyncDecryptionTheoryData("Invalid_JWE_WrongDecryptionKey")
                     {
@@ -156,15 +157,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 {
                     ValidationParameters validationParameters = new ValidationParameters();
 
-                    if (tokenDecryptionKey != null)
-                        validationParameters.DecryptionKeys.Add(tokenDecryptionKey);
+                    if (tokenDecryptionKey is not null)
+                        validationParameters.TokenDecryptionKeys = [tokenDecryptionKey];
 
                     validationParameters.ConfigurationManager = configurationManager;
 
                     // Skip all validations. We just want to decrypt the JWE
                     validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
                     validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-                    validationParameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
+                    validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
                     validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
                     validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
                     validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
@@ -217,7 +218,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
-        public class ValidateTokenAsyncDecryptionTheoryData : ValidateTokenTheoryData
+        public class ValidateTokenAsyncDecryptionTheoryData : ValidateTokenAsyncBaseTheoryData
         {
             public ValidateTokenAsyncDecryptionTheoryData(string testId) : base(testId) { }
 

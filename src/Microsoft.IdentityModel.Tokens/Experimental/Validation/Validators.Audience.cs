@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -19,62 +18,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Determines if the audiences found in a <see cref="SecurityToken"/> are valid.
         /// </summary>
-        /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <remarks>An EXACT match is required.</remarks>
-        internal static OperationResult<string, ValidationError> ValidateAudienceInternal(
-            IList<string> audiences,
-#pragma warning disable CA1801
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-#pragma warning restore CA1801
-        {
-            if (validationParameters == null)
-            {
-                return ValidationError.NullParameter(
-                        nameof(validationParameters),
-                        ValidationError.GetCurrentStackFrame());
-            }
-
-            try
-            {
-                OperationResult<string, ValidationError> result = validationParameters.AudienceValidator(
-                    audiences,
-                    securityToken,
-                    validationParameters,
-                    callContext);
-
-                if (!result.Succeeded)
-                    return result.Error!.AddCurrentStackFrame();
-
-                return result;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new AudienceValidationError(
-                    new MessageDetail(Tokens.LogMessages.IDX10270),
-                    AudienceValidationFailure.ValidatorThrew,
-                    ValidationError.GetCurrentStackFrame(),
-                    audiences,
-                    validationParameters.ValidAudiences,
-                    ex);
-            }
-        }
-
-        /// <summary>
-        /// Determines if the audiences found in a <see cref="SecurityToken"/> are valid.
-        /// </summary>
         /// <param name="tokenAudiences">The audiences found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
         /// <remarks>An EXACT match is required.</remarks>
-        public static OperationResult<string, ValidationError> ValidateAudience(
+        public static ValidationResult<string, AudienceValidationError> ValidateAudience(
             IList<string> tokenAudiences,
 #pragma warning disable CA1801
             SecurityToken? securityToken,
@@ -84,14 +33,14 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (validationParameters == null)
             {
-                return ValidationError.NullParameter(
-                        nameof(validationParameters),
-                        ValidationError.GetCurrentStackFrame());
+                return AudienceValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
             }
 
             if (tokenAudiences == null)
             {
-                return ValidationError.NullParameter(
+                return AudienceValidationError.NullParameter(
                     nameof(tokenAudiences),
                     ValidationError.GetCurrentStackFrame());
             }
@@ -100,7 +49,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return new AudienceValidationError(
                     new MessageDetail(LogMessages.IDX10206),
-                    AudienceValidationFailure.NoAudienceInToken,
+                    ValidationFailureType.NoTokenAudiencesProvided,
+                    typeof(SecurityTokenInvalidAudienceException),
                     ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     validationParameters.ValidAudiences);
@@ -109,29 +59,28 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.ValidAudiences.Count == 0)
             {
                 return new AudienceValidationError(
-                    new MessageDetail(LogMessages.IDX10268),
-                    AudienceValidationFailure.NoValidationParameterAudiencesProvided,
-                    ValidationError.GetCurrentStackFrame(),
-                    tokenAudiences,
-                    validationParameters.ValidAudiences);
+                        new MessageDetail(LogMessages.IDX10268),
+                        ValidationFailureType.NoValidationParameterAudiencesProvided,
+                        typeof(SecurityTokenInvalidAudienceException),
+                        ValidationError.GetCurrentStackFrame(),
+                        tokenAudiences,
+                        validationParameters.ValidAudiences);
             }
 
-            string? validAudience = ValidTokenAudience(
-                tokenAudiences,
-                validationParameters.ValidAudiences,
-                validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
-
+            string? validAudience = ValidTokenAudience(tokenAudiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
             if (validAudience != null)
                 return validAudience;
 
             // TODO we shouldn't be serializing here.
+
             if (AppContextSwitches.DoNotScrubExceptions)
                 return new AudienceValidationError(
                     new MessageDetail(
                         LogMessages.IDX10215,
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
-                    AudienceValidationFailure.AudienceDidNotMatch,
+                    ValidationFailureType.AudienceValidationFailed,
+                    typeof(SecurityTokenInvalidAudienceException),
                     ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     validationParameters.ValidAudiences);
@@ -139,16 +88,14 @@ namespace Microsoft.IdentityModel.Tokens
                 return new AudienceValidationError(
                     new MessageDetail(
                         LogMessages.IDX10215S),
-                    AudienceValidationFailure.AudienceDidNotMatch,
+                    ValidationFailureType.AudienceValidationFailed,
+                    typeof(SecurityTokenInvalidAudienceException),
                     ValidationError.GetCurrentStackFrame(),
                     null,
                     null);
         }
 
-        private static string? ValidTokenAudience(
-            IList<string> tokenAudiences,
-            IList<string> validAudiences,
-            bool ignoreTrailingSlashWhenValidatingAudience)
+        private static string? ValidTokenAudience(IList<string> tokenAudiences, IList<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)
         {
             for (int i = 0; i < tokenAudiences.Count; i++)
             {

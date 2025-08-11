@@ -11,107 +11,143 @@ using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 using Microsoft.IdentityModel.Tokens.Experimental;
-using Microsoft.Identity.Abstractions;
 
-namespace Microsoft.IdentityModel.Tokens.Validation.Tests
+namespace Microsoft.IdentityModel.Tokens.IssuerValidation.Tests
 {
-    public class IssuerValidationTests
+    public partial class IssuerValidationResultTests
     {
-        [Theory, MemberData(nameof(InvalidIssuerTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task InvalidIssuers(IssuerValidationTheoryData theoryData)
+        [Theory, MemberData(nameof(IssuerValdationResultsTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task IssuerValidatorAsyncTests(IssuerValidationResultsTheoryData theoryData)
         {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.InvalidIssuers", theoryData);
+            CompareContext context = TestUtilities.WriteHeader($"{this}.IssuerValidatorAsyncTests", theoryData);
 
             if (theoryData.ValidIssuerToAdd != null)
                 theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
 
-            try
+            ValidationResult<ValidatedIssuer, IssuerValidationError> result = await Validators.ValidateIssuerAsync(
+                theoryData.Issuer,
+                theoryData.SecurityToken,
+                theoryData.ValidationParameters,
+                new CallContext(),
+                CancellationToken.None);
+
+            if (result.IsValid)
             {
-                OperationResult<ValidatedIssuer, ValidationError> operationResult =
-                    await Validators.ValidateIssuerAsync(
-                        theoryData.Issuer,
-                        theoryData.SecurityToken,
-                        theoryData.ValidationParameters,
-                        theoryData.CallContext,
-                        CancellationToken.None);
+                IdentityComparer.AreValidatedIssuersEqual(
+                    theoryData.Result.UnwrapResult(),
+                    result.UnwrapResult(),
+                    context);
 
-                if (operationResult.Succeeded)
-                {
-                    context.AddDiff($"Expected operationResult to fail, but it succeeded with: {operationResult.Result}.");
-                }
-                else
-                {
-                    ValidationError validationError = operationResult.Error;
-                    IdentityComparer.AreStringsEqual(
-                        validationError.FailureType.Name,
-                        theoryData.OperationResult.Error.FailureType.Name,
-                        context);
-
-                    theoryData.ExpectedException.ProcessException(validationError.GetException(), context);
-                }
+                theoryData.ExpectedException.ProcessNoException(context);
             }
-            catch (Exception ex)
+            else
             {
-                context.AddDiff($"Did not expect an exception: {ex}.");
+                ValidationError validationError = result.UnwrapError();
+                IdentityComparer.AreStringsEqual(
+                    validationError.FailureType.Name,
+                    theoryData.Result.UnwrapError().FailureType.Name,
+                    context);
+
+                Exception exception = validationError.GetException();
+                theoryData.ExpectedException.ProcessException(exception, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<IssuerValidationTheoryData> InvalidIssuerTestCases
+        public static TheoryData<IssuerValidationResultsTheoryData> IssuerValdationResultsTestCases
         {
             get
             {
-                TheoryData<IssuerValidationTheoryData> theoryData = new();
+                TheoryData<IssuerValidationResultsTheoryData> theoryData = new();
 
                 string validIssuer = Guid.NewGuid().ToString();
                 string issClaim = Guid.NewGuid().ToString();
-                //var validConfig = new OpenIdConnectConfiguration() { Issuer = issClaim };
+                var validConfig = new OpenIdConnectConfiguration() { Issuer = issClaim };
                 string[] validIssuers = new string[] { validIssuer };
 
-                theoryData.Add(new IssuerValidationTheoryData("NULL_Issuer")
+                theoryData.Add(new IssuerValidationResultsTheoryData("NULL_Issuer")
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"),
-                    OperationResult = new IssuerValidationError(
+                    Result = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10211,
                             LogHelper.MarkAsNonPII(null),
                             LogHelper.MarkAsNonPII(validIssuer),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(null)),
                             LogHelper.MarkAsNonPII(null)),
-                        IssuerValidationFailure.NoIssuerInToken,
+                        ValidationFailureType.IssuerValidationFailed,
+                        typeof(SecurityTokenInvalidIssuerException),
                         null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters()
                 });
 
-                theoryData.Add(new IssuerValidationTheoryData("NULL_ValidationParameters")
+                theoryData.Add(new IssuerValidationResultsTheoryData("NULL_ValidationParameters")
                 {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                     Issuer = issClaim,
-                    OperationResult = new IssuerValidationError(
+                    Result = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("validationParameters")),
                         ValidationFailureType.NullArgument,
+                        typeof(SecurityTokenArgumentNullException),
                         null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = null
                 });
 
-                theoryData.Add(new IssuerValidationTheoryData("Invalid_Issuer")
+                theoryData.Add(new IssuerValidationResultsTheoryData("NULL_SecurityToken")
+                {
+                    ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
+                    Issuer = issClaim,
+                    Result = new IssuerValidationError(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII("securityToken")),
+                        ValidationFailureType.NullArgument,
+                        typeof(SecurityTokenArgumentNullException),
+                        null,
+                        null),
+                    SecurityToken = null,
+                    ValidationParameters = new ValidationParameters()
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromConfig")
+                {
+                    Issuer = issClaim,
+                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedConfiguration),
+                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
+                    ValidationParameters = new ValidationParameters()
+                    {
+                        ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig)
+                    }
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromValidationParametersValidIssuers")
+                {
+                    Issuer = issClaim,
+                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedValidationParameters),
+                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
+                    ValidationParameters = new ValidationParameters(),
+                    ValidIssuerToAdd = issClaim
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("Invalid_Issuer")
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
                     Issuer = issClaim,
-                    OperationResult = new IssuerValidationError(
+                    Result = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10212,
                             LogHelper.MarkAsNonPII(issClaim),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validIssuers)),
                             LogHelper.MarkAsNonPII(null)),
-                        IssuerValidationFailure.ValidationFailed,
+                        ValidationFailureType.IssuerValidationFailed,
+                        typeof(SecurityTokenInvalidIssuerException),
                         null,
                         issClaim),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
@@ -122,96 +158,25 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 return theoryData;
             }
         }
-
-        [Theory, MemberData(nameof(ValidIssuerTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task ValidIssuers(IssuerValidationTheoryData theoryData)
-        {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.ValidIssuers", theoryData);
-
-            if (theoryData.ValidIssuerToAdd != null)
-                theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
-
-            OperationResult<ValidatedIssuer, ValidationError> operationResult =
-                await Validators.ValidateIssuerAsync(
-                    theoryData.Issuer,
-                    theoryData.SecurityToken,
-                    theoryData.ValidationParameters,
-                    theoryData.CallContext,
-                    CancellationToken.None);
-
-            try
-            {
-                if (operationResult.Succeeded)
-                {
-                    IdentityComparer.AreValidatedIssuersEqual(
-                        theoryData.OperationResult.Result,
-                        operationResult.Result,
-                        context);
-                }
-                else
-                {
-                    context.AddDiff($"Expected operationResult to succeed, but it failed with: {operationResult.Error}.");
-                }
-            }
-            catch (Exception ex)
-            {
-                context.AddDiff($"Did not expect an exception: {ex}.");
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        public static TheoryData<IssuerValidationTheoryData> ValidIssuerTestCases
-        {
-            get
-            {
-                TheoryData<IssuerValidationTheoryData> theoryData = new();
-
-                string validIssuer = Guid.NewGuid().ToString();
-                string issClaim = Guid.NewGuid().ToString();
-                var validConfig = new OpenIdConnectConfiguration() { Issuer = issClaim };
-                string[] validIssuers = new string[] { validIssuer };
-
-                theoryData.Add(new IssuerValidationTheoryData("FromConfig")
-                {
-                    Issuer = issClaim,
-                    OperationResult = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedConfiguration),
-                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new ValidationParameters()
-                    {
-                        ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig)
-                    }
-                });
-
-                theoryData.Add(new IssuerValidationTheoryData("FromValidationParametersValidIssuers")
-                {
-                    Issuer = issClaim,
-                    OperationResult = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedValidationParameters),
-                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new ValidationParameters(),
-                    ValidIssuerToAdd = issClaim
-                });
-
-                return theoryData;
-            }
-        }
     }
 
-    public class IssuerValidationTheoryData : TheoryDataBase
+    public class IssuerValidationResultsTheoryData : TheoryDataBase
     {
-        public IssuerValidationTheoryData(string testId) : base(testId) { }
+        public IssuerValidationResultsTheoryData(string testId) : base(testId)
+        {
+        }
 
         public BaseConfiguration Configuration { get; set; }
 
         public string Issuer { get; set; }
 
-        internal OperationResult<ValidatedIssuer, IssuerValidationError> OperationResult { get; set; }
+        internal ValidationResult<ValidatedIssuer, IssuerValidationError> Result { get; set; }
 
         public SecurityToken SecurityToken { get; set; }
 
         internal ValidationParameters ValidationParameters { get; set; }
 
-        internal ValidationFailureType ValidationFailure { get; set; }
+        internal ValidationFailureType ValidationFailureType { get; set; }
         public string ValidIssuerToAdd { get; internal set; }
     }
 }

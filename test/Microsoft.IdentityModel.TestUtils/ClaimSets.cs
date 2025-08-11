@@ -62,15 +62,6 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim("roles", "roles1", ClaimValueTypes.String, Default.Issuer),
             };
 
-            // these can be used for Saml, Saml2 and Jwt tokens
-            ClaimsWithLongName = new List<Claim>
-            {
-                new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.NameIdentifier, "Bob", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, Default.Issuer),
-            };
-
             DerivedGlobalClaims = new List<Claim>()
             {
                 new Claim("Arabic", @"?????", ClaimValueTypes.String, Default.Issuer),
@@ -142,12 +133,6 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         public static List<Claim> AadClaims
-        {
-            get;
-            private set;
-        }
-
-        public static List<Claim> ClaimsWithLongName
         {
             get;
             private set;

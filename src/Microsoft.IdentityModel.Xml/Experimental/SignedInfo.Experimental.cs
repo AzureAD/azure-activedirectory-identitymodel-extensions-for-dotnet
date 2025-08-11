@@ -17,17 +17,18 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         /// <param name="cryptoProviderFactory">supplies any required cryptographic operators.</param>
         /// <param name="callContext"> contextual information for diagnostics.</param>
-        internal ValidationError? Verify(
+        internal SignatureValidationError? Verify(
             CryptoProviderFactory cryptoProviderFactory,
+#pragma warning disable CA1801
             CallContext callContext)
+#pragma warning restore CA1801
         {
-            // TODO needs to return OperationResult<SecurityKey, ValidationError>
             if (cryptoProviderFactory == null)
-                return ValidationError.NullParameter(
+                return SignatureValidationError.NullParameter(
                     nameof(cryptoProviderFactory),
                     ValidationError.GetCurrentStackFrame());
 
-            ValidationError? validationError = null;
+            SignatureValidationError? validationError = null;
 
             for (int i = 0; i < References.Count; i++)
             {

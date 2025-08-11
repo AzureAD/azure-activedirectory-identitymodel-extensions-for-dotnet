@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -15,13 +14,14 @@ namespace Microsoft.IdentityModel.TestUtils
     public static class SkipValidationDelegates
     {
         internal static AlgorithmValidationDelegate SkipAlgorithmValidation = delegate (
-            string? algorithm,
+            string algorithm,
+            SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters
             validationParameters,
             CallContext callContext)
         {
-            return algorithm ?? string.Empty;
+            return algorithm;
         };
 
         internal static AudienceValidationDelegate SkipAudienceValidation = delegate (
@@ -40,17 +40,17 @@ namespace Microsoft.IdentityModel.TestUtils
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult(new OperationResult<ValidatedIssuer, ValidationError>(
+            return Task.FromResult(new ValidationResult<ValidatedIssuer, IssuerValidationError>(
                 new ValidatedIssuer(issuer, IssuerValidationSource.NotValidated)));
         };
 
-        internal static SignatureKeyValidationDelegate SkipIssuerSigningKeyValidation = delegate (
+        internal static IssuerSigningKeyValidationDelegate SkipIssuerSigningKeyValidation = delegate (
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            return new ValidatedSignatureKey(
+            return new ValidatedSigningKeyLifetime(
                 null, // ValidFrom
                 null, // ValidTo
                 null);// ValidationTime

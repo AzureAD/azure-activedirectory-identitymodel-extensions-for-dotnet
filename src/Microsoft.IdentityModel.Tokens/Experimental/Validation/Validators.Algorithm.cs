@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -16,92 +15,26 @@ namespace Microsoft.IdentityModel.Tokens
     public static partial class Validators
     {
         /// <summary>
-        /// Validates a <see cref="SecurityToken"/> is using a valid algorithm.
+        /// Validates a given algorithm for a <see cref="SecurityKey"/>.
         /// </summary>
         /// <param name="algorithm">The algorithm to be validated.</param>
+        /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        internal static OperationResult<string, ValidationError> ValidateAlgorithmInternal(
-            string? algorithm,
+        public static ValidationResult<string, AlgorithmValidationError> ValidateAlgorithm(
+            string algorithm,
 #pragma warning disable CA1801
+            SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
-                return new AlgorithmValidationError(
-                    MessageDetail.NullParameter(nameof(validationParameters)),
-                    ValidationFailureType.NullArgument,
-                    ValidationError.GetCurrentStackFrame(),
-                    algorithm,
-                    null);
-
-            try
-            {
-                OperationResult<string, ValidationError> result =
-                    validationParameters.AlgorithmValidator(
-                        algorithm,
-                        securityToken,
-                        validationParameters,
-                        callContext);
-
-                if (!result.Succeeded)
-                    return result.Error!.AddCurrentStackFrame();
-
-                return result;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new AlgorithmValidationError(
-                    new MessageDetail(LogMessages.IDX10273),
-                    AlgorithmValidationFailure.ValidatorThrew,
-                    ValidationError.GetCurrentStackFrame(),
-                    algorithm,
-                    ex);
-            }
-        }
-
-        /// <summary>
-        /// Validates a <see cref="SecurityToken"/> is using a valid algorithm.
-        /// </summary>
-        /// <param name="algorithm">The algorithm to be validated.</param>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
-        /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        public static OperationResult<string, ValidationError> ValidateAlgorithm(
-            string? algorithm,
-#pragma warning disable CA1801
-            SecurityToken securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-#pragma warning restore CA1801
-        {
-            if (validationParameters == null)
-                return new AlgorithmValidationError(
-                    MessageDetail.NullParameter(nameof(validationParameters)),
-                    ValidationFailureType.NullArgument,
-                    ValidationError.GetCurrentStackFrame(),
-                    algorithm,
-                    null);
-
-            if (string.IsNullOrEmpty(algorithm) &&
-                validationParameters.ValidAlgorithms != null &&
-                validationParameters.ValidAlgorithms.Count > 0)
-            {
-                return new AlgorithmValidationError(
-                    new MessageDetail(
-                        LogMessages.IDX10696,
-                        LogHelper.MarkAsNonPII("null")),
-                    AlgorithmValidationFailure.ValidationFailed,
-                    ValidationError.GetCurrentStackFrame(),
-                    "null",
-                    null);
-
-            }
+                return AlgorithmValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
 
             if (validationParameters.ValidAlgorithms != null &&
                 validationParameters.ValidAlgorithms.Count > 0 &&
@@ -110,12 +43,12 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10696,
                         LogHelper.MarkAsNonPII(algorithm)),
-                    AlgorithmValidationFailure.ValidationFailed,
+                    ValidationFailureType.AlgorithmValidationFailed,
+                    typeof(SecurityTokenInvalidAlgorithmException),
                     ValidationError.GetCurrentStackFrame(),
-                    algorithm,
-                    null);
+                    algorithm);
 
-            return algorithm!;
+            return algorithm;
         }
     }
 }

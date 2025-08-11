@@ -8,73 +8,68 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
-    /// Represents a validation error when a <see cref="SecurityToken"/> replay is detected.
-    /// If available, the expiration time of the <see cref="SecurityToken"/> that failed the validation is included.
+    /// Represents an error that occurs when a token cannot be validated against being re-used or replay is detected.
+    /// If available, the expiration time of the token that failed the validation is included.
     /// </summary>
     public class TokenReplayValidationError : ValidationError
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TokenReplayValidationError"/> class.
+        /// Initializes a new instance of the <see cref="IssuerSigningKeyValidationError"/> class.
         /// </summary>
-        /// <param name="messageDetail" />Information about the error. Can be used to provide details for error messages.
-        /// <param name="validationFailure"/>The <see cref="ValidationFailureType"/> that occurred.
-        /// <param name="stackFrame"/>The stack frame where the exception occurred.
-        /// <param name="expirationTime"/>The <see cref="DateTime"/> of the <see cref="SecurityToken"/> that failed the validation. Can be null if the token does not have an expiration time.
+        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
+        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        /// <param name="expirationTime"/> is the expiration time of the token that failed the validation. Can be null if the token does not have an expiration time.
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
         public TokenReplayValidationError(
             MessageDetail messageDetail,
-            ValidationFailureType validationFailure,
-            StackFrame stackFrame,
-            DateTime? expirationTime)
-            : this(messageDetail,
-                  validationFailure,
-                  stackFrame,
-                  expirationTime,
-                  null)
-        { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenReplayValidationError"/> class.
-        /// </summary>
-        /// <param name="messageDetail" />Information about the error. Can be used to provide details for error messages.
-        /// <param name="validationFailure"/>The <see cref="ValidationFailureType"/> that occurred.
-        /// <param name="stackFrame"/>The stack frame where the exception occurred.
-        /// <param name="expirationTime"/>The <see cref="DateTime"/> of the <see cref="SecurityToken"/> that failed the validation. Can be null if the token does not have an expiration time.
-        /// <param name="innerException"/>If present, represents the exception that occurred during validation.
-        public TokenReplayValidationError(
-            MessageDetail messageDetail,
-            ValidationFailureType validationFailure,
+            ValidationFailureType validationFailureType,
+            Type exceptionType,
             StackFrame stackFrame,
             DateTime? expirationTime,
-            Exception? innerException)
-            : base(messageDetail,
-                  validationFailure,
-                  stackFrame,
-                  innerException)
+            Exception? innerException = null)
+            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
         {
             ExpirationTime = expirationTime;
         }
 
         /// <summary>
-        /// Creates an instance of an <see cref="SecurityTokenReplayDetectedException"/>.
+        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an exception.</returns>
-        public override Exception GetException()
+        protected override Exception CreateException()
         {
-            if (Exception != null)
-                return Exception;
-
-            if (FailureType == TokenReplayValidationFailure.ValidationFailed
-                || FailureType == TokenReplayValidationFailure.ValidatorThrew
-                || FailureType == TokenReplayValidationFailure.NoExpiration
-                || FailureType == TokenReplayValidationFailure.TokenFoundInCache
-                || FailureType == TokenReplayValidationFailure.AddToCacheFailed)
+            if (ExceptionType == typeof(SecurityTokenReplayDetectedException))
             {
-                Exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, this, InnerException);
-                return Exception;
+                SecurityTokenReplayDetectedException exception = new(MessageDetail.Message, InnerException);
+                exception.SetValidationError(this);
+
+                return exception;
+            }
+            else if (ExceptionType == typeof(SecurityTokenReplayAddFailedException))
+            {
+                SecurityTokenReplayAddFailedException exception = new(MessageDetail.Message, InnerException);
+                exception.SetValidationError(this);
+
+                return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="TokenReplayValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="TokenReplayValidationError"/>.</returns>
+        public static new TokenReplayValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null);
 
         /// <summary>
         /// The expiration time of the token that failed the validation.

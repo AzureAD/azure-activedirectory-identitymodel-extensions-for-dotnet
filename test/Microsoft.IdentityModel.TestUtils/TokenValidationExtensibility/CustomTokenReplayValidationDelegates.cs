@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -11,96 +10,124 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomTokenReplayValidationDelegates
     {
-        internal static OperationResult<DateTime?, ValidationError> CustomTokenReplayValidationFailed(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidationDelegate(
+            DateTime? expirationTime,
+            string securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            // Returns a CustomTokenReplayValidationError : IssuerValidationError
+            return new CustomTokenReplayValidationError(
+                new MessageDetail(nameof(CustomTokenReplayValidationDelegate), null),
+                ValidationFailureType.TokenReplayValidationFailed,
+                typeof(SecurityTokenReplayDetectedException),
+                ValidationError.GetCurrentStackFrame(),
+                expirationTime);
+        }
+
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidatorCustomExceptionDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomTokenReplayValidationError(
-                new MessageDetail(nameof(CustomTokenReplayValidationFailed)),
-                CustomValidationFailure.TokenReplayValidationFailed,
-                Default.GetStackFrame(),
+                new MessageDetail(nameof(CustomTokenReplayValidatorCustomExceptionDelegate), null),
+                ValidationFailureType.TokenReplayValidationFailed,
+                typeof(CustomSecurityTokenReplayDetectedException),
+                ValidationError.GetCurrentStackFrame(),
                 expirationTime);
         }
 
-        internal static OperationResult<DateTime?, ValidationError> TokenReplayValidationFailed(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidatorCustomExceptionCustomFailureTypeDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomTokenReplayValidationError(
-                new MessageDetail(nameof(TokenReplayValidationFailed)),
-                TokenReplayValidationFailure.ValidationFailed,
-                Default.GetStackFrame(),
-                expirationTime);
-        }
-
-        internal static OperationResult<DateTime?, ValidationError> UnknownValidationFailure(
-            DateTime? expirationTime,
-            string securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new CustomTokenReplayValidationError(
-                new MessageDetail(nameof(UnknownValidationFailure)),
-                AlgorithmValidationFailure.AlgorithmIsNotSupported,
-                Default.GetStackFrame(),
-                expirationTime);
-        }
-
-        internal static OperationResult<DateTime?, ValidationError> TokenReplayValidationDelegate(
-            DateTime? expirationTime,
-            string securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new TokenReplayValidationError(
-                new MessageDetail(nameof(TokenReplayValidationDelegate)),
-                TokenReplayValidationFailure.ValidationFailed,
-                Default.GetStackFrame(),
-                expirationTime);
-        }
-
-        internal static OperationResult<DateTime?, ValidationError> TokenReplayValidatorThrows(
-            DateTime? expirationTime,
-            string securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            throw new CustomSecurityTokenReplayDetectedException(
-                nameof(TokenReplayValidatorThrows),
-                new TokenReplayValidationError(
-                    new MessageDetail(nameof(TokenReplayValidatorThrows)),
-                    TokenReplayValidationFailure.ValidationFailed,
-                    Default.GetStackFrame(),
-                    expirationTime),
+                new MessageDetail(nameof(CustomTokenReplayValidatorCustomExceptionCustomFailureTypeDelegate), null),
+                CustomTokenReplayValidationError.CustomTokenReplayValidationFailureType,
+                typeof(CustomSecurityTokenReplayDetectedException),
+                ValidationError.GetCurrentStackFrame(),
+                expirationTime,
                 null);
         }
 
-        internal static OperationResult<DateTime?, ValidationError> TokenReplayValidatorCustomTokenReplayDetectedExceptionTypeDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidatorUnknownExceptionDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            return new TokenReplayValidationError(
-                new MessageDetail(nameof(TokenReplayValidatorCustomTokenReplayDetectedExceptionTypeDelegate)),
-                TokenReplayValidationFailure.ValidationFailed,
-                Default.GetStackFrame(),
+            return new CustomTokenReplayValidationError(
+                new MessageDetail(nameof(CustomTokenReplayValidatorUnknownExceptionDelegate), null),
+                ValidationFailureType.TokenReplayValidationFailed,
+                typeof(NotSupportedException),
+                ValidationError.GetCurrentStackFrame(),
                 expirationTime);
         }
-        internal static OperationResult<DateTime?, ValidationError> TokenReplayValidatorCustomExceptionTypeDelegate(
+
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidatorWithoutGetExceptionOverrideDelegate(
+            DateTime? expirationTime,
+            string securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return new CustomTokenReplayWithoutGetExceptionValidationOverrideError(
+                new MessageDetail(nameof(CustomTokenReplayValidatorWithoutGetExceptionOverrideDelegate), null),
+                typeof(CustomSecurityTokenReplayDetectedException),
+                ValidationError.GetCurrentStackFrame(),
+                expirationTime);
+        }
+
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidationDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new TokenReplayValidationError(
-                new MessageDetail(nameof(TokenReplayValidatorCustomExceptionTypeDelegate)),
-                TokenReplayValidationFailure.ValidationFailed,
-                Default.GetStackFrame(),
+                new MessageDetail(nameof(TokenReplayValidationDelegate), null),
+                ValidationFailureType.TokenReplayValidationFailed,
+                typeof(SecurityTokenReplayDetectedException),
+                ValidationError.GetCurrentStackFrame(),
+                expirationTime);
+        }
+
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidatorThrows(
+            DateTime? expirationTime,
+            string securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            throw new CustomSecurityTokenReplayDetectedException(nameof(TokenReplayValidatorThrows), null);
+        }
+
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidatorCustomTokenReplayDetectedExceptionTypeDelegate(
+            DateTime? expirationTime,
+            string securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return new TokenReplayValidationError(
+                new MessageDetail(nameof(TokenReplayValidatorCustomTokenReplayDetectedExceptionTypeDelegate), null),
+                ValidationFailureType.TokenReplayValidationFailed,
+                typeof(CustomSecurityTokenReplayDetectedException),
+                ValidationError.GetCurrentStackFrame(),
+                expirationTime);
+        }
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidatorCustomExceptionTypeDelegate(
+            DateTime? expirationTime,
+            string securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return new TokenReplayValidationError(
+                new MessageDetail(nameof(TokenReplayValidatorCustomExceptionTypeDelegate), null),
+                ValidationFailureType.TokenReplayValidationFailed,
+                typeof(CustomSecurityTokenException),
+                ValidationError.GetCurrentStackFrame(),
                 expirationTime);
         }
     }

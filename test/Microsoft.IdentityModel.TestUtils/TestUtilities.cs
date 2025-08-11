@@ -53,10 +53,10 @@ namespace Microsoft.IdentityModel.TestUtils
             //validationParameters.IssuerSigningKeyResolver = tokenValidationParameters.IssuerSigningKeyResolver;
             if (tokenValidationParameters.IssuerSigningKeys != null)
                 foreach (SecurityKey key in tokenValidationParameters.IssuerSigningKeys)
-                    validationParameters.SigningKeys.Add(key);
+                    validationParameters.IssuerSigningKeys.Add(key);
 
             if (tokenValidationParameters.IssuerSigningKey != null)
-                validationParameters.SigningKeys.Add(tokenValidationParameters.IssuerSigningKey);
+                validationParameters.IssuerSigningKeys.Add(tokenValidationParameters.IssuerSigningKey);
 
             validationParameters.LogTokenId = tokenValidationParameters.LogTokenId;
             validationParameters.NameClaimType = tokenValidationParameters.NameClaimType;
@@ -71,14 +71,14 @@ namespace Microsoft.IdentityModel.TestUtils
             validationParameters.SaveSigninToken = tokenValidationParameters.SaveSigninToken;
 
             if (tokenValidationParameters.TokenDecryptionKey != null)
-                validationParameters.DecryptionKeys.Add(tokenValidationParameters.TokenDecryptionKey);
+                validationParameters.TokenDecryptionKeys.Add(tokenValidationParameters.TokenDecryptionKey);
 
             if (tokenValidationParameters.TokenDecryptionKeys != null)
                 foreach (SecurityKey key in tokenValidationParameters.TokenDecryptionKeys)
-                    validationParameters.DecryptionKeys.Add(key);
+                    validationParameters.TokenDecryptionKeys.Add(key);
 
             validationParameters.TokenReplayCache = tokenValidationParameters.TokenReplayCache;
-            validationParameters.TryAllSigningKeys = tokenValidationParameters.TryAllIssuerSigningKeys;
+            validationParameters.TryAllIssuerSigningKeys = tokenValidationParameters.TryAllIssuerSigningKeys;
             validationParameters.ValidateActor = tokenValidationParameters.ValidateActor;
             validationParameters.ValidateWithLKG = tokenValidationParameters.ValidateWithLKG;
 
@@ -530,8 +530,6 @@ namespace Microsoft.IdentityModel.TestUtils
 
     public class TokenReplayCache : ITokenReplayCache
     {
-        public TokenReplayCache() { }
-
         public bool OnAddReturnValue { get; set; }
 
         public bool OnFindReturnValue { get; set; }

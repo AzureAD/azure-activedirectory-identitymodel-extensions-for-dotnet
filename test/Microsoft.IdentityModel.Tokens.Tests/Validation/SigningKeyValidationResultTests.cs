@@ -3,7 +3,6 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -11,46 +10,44 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
-    public class SigningKeyTests
+    public class SigningKeyValidationResultTests
     {
-        [Theory, MemberData(nameof(InvalidTestCases), DisableDiscoveryEnumeration = true)]
-        public void InvalidSigningKeys(SigningKeyValidationTheoryData theoryData)
+        [Theory, MemberData(nameof(SigningKeyValidationTestCases), DisableDiscoveryEnumeration = true)]
+        public void SecurityKey(SigningKeyValidationTheoryData theoryData)
         {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.InvalidSigningKeys", theoryData);
+            CompareContext context = TestUtilities.WriteHeader($"{this}.SigningKeyValidationResultTests", theoryData);
 
-            try
+            ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> result = Validators.ValidateIssuerSigningKey(
+                theoryData.SecurityKey,
+                theoryData.SecurityToken,
+                theoryData.ValidationParameters,
+                new CallContext());
+
+            if (result.IsValid)
             {
-                OperationResult<ValidatedSignatureKey, ValidationError> operationResult =
-                    Validators.ValidateSignatureKey(
-                        theoryData.SecurityKey,
-                        theoryData.SecurityToken,
-                        theoryData.ValidationParameters,
-                        theoryData.CallContext);
+                IdentityComparer.AreValidatedSigningKeyLifetimesEqual(
+                    theoryData.Result.UnwrapResult(),
+                    result.UnwrapResult(),
+                    context);
 
-                if (operationResult.Succeeded)
-                {
-                    context.AddDiff($"Expected operation to fail, but it succeeded with result: {operationResult.Result}.");
-                }
-                else
-                {
-                    ValidationError validationError = operationResult.Error;
-                    IdentityComparer.AreStringsEqual(
-                        validationError.FailureType.Name,
-                        theoryData.OperationResult.Error.FailureType.Name,
-                        context);
-
-                    theoryData.ExpectedException.ProcessException(validationError.GetException(), context);
-                }
+                theoryData.ExpectedException.ProcessNoException();
             }
-            catch (Exception ex)
+            else
             {
-                context.AddDiff($"Did not expect an exception: {ex}.");
+                ValidationError validationError = result.UnwrapError();
+                IdentityComparer.AreStringsEqual(
+                    validationError.FailureType.Name,
+                    theoryData.Result.UnwrapError().FailureType.Name,
+                    context);
+
+                Exception exception = validationError.GetException();
+                theoryData.ExpectedException.ProcessException(exception, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<SigningKeyValidationTheoryData> InvalidTestCases
+        public static TheoryData<SigningKeyValidationTheoryData> SigningKeyValidationTestCases
         {
             get
             {
@@ -61,131 +58,109 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 return new TheoryData<SigningKeyValidationTheoryData>
                 {
-                    // TODO Error message IDX10253 message is not accurate.
-                    new SigningKeyValidationTheoryData("SecurityKeyIsNull")
+                    new SigningKeyValidationTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10253:"),
+                        TestId = "Valid_SecurityTokenIsPresent",
+                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                        SecurityToken = new JwtSecurityToken(),
+                        ValidationParameters = new ValidationParameters(){ TimeProvider = timeProvider },
+                        Result = new ValidatedSigningKeyLifetime(null, null, utcNow)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
+                        TestId = "Invalid_SecurityKeyIsNull",
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException(substringExpected: "IDX10253:"),
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters(){ TimeProvider = timeProvider },
-                        OperationResult = new SignatureKeyValidationError(
+                        Result = new IssuerSigningKeyValidationError(
                             new MessageDetail(LogMessages.IDX10253),
-                            SignatureKeyValidationFailure.KeyIsNull,
+                            ValidationFailureType.SigningKeyValidationFailed,
+                            typeof(SecurityTokenArgumentNullException),
                             null,
-                            null)
+                            null), // InvalidSigningKey
                     },
-                    new SigningKeyValidationTheoryData("SecurityTokenIsNull")
+                    new SigningKeyValidationTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10000:"),
+                        TestId = "Invalid_SecurityTokenIsNull",
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException(substringExpected: "IDX10000:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = null,
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        OperationResult = new SignatureKeyValidationError(
+                        Result = new IssuerSigningKeyValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
                             ValidationFailureType.NullArgument,
+                            typeof(SecurityTokenArgumentNullException),
                             null,
-                            null)
+                            null), // InvalidSigningKey
                     },
-                    new SigningKeyValidationTheoryData("ValidationParametersIsNull")
+                    new SigningKeyValidationTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10000:"),
+                        TestId = "Invalid_ValidationParametersIsNull",
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException(substringExpected: "IDX10000:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = null,
-                        OperationResult = new SignatureKeyValidationError(
+                        Result = new IssuerSigningKeyValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
+                            typeof(SecurityTokenArgumentNullException),
                             null,
                             null), // InvalidSigningKey
                     },
-                    new SigningKeyValidationTheoryData("SecurityKeyIsExpired")
+                    new SigningKeyValidationTheoryData
                     {
+                        TestId = "Invalid_SecurityKeyIsExpired",
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10249:"),
                         SecurityKey = KeyingMaterial.ExpiredX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        OperationResult = new SignatureKeyValidationError(
+                        Result = new IssuerSigningKeyValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10249,
                                 LogHelper.MarkAsNonPII(utcExpired),
                                 LogHelper.MarkAsNonPII(utcNow)),
-                            SignatureKeyValidationFailure.KeyExpired,
+                            ValidationFailureType.SigningKeyValidationFailed,
+                            typeof(SecurityTokenInvalidSigningKeyException),
                             null,
                             null), // InvalidSigningKey
                     },
-                    new SigningKeyValidationTheoryData("SecurityKeyIsNotYetValid")
+                    new SigningKeyValidationTheoryData
                     {
+                        TestId = "Invalid_SecurityKeyIsNotYetValid",
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10248:"),
                         SecurityKey = KeyingMaterial.NotYetValidX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        OperationResult = new SignatureKeyValidationError(
+                        Result = new IssuerSigningKeyValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10248,
                                 LogHelper.MarkAsNonPII(utcNotYetValid),
                                 LogHelper.MarkAsNonPII(utcNow)),
-                            SignatureKeyValidationFailure.NotYetValid,
+                            ValidationFailureType.SigningKeyValidationFailed,
+                            typeof(SecurityTokenInvalidSigningKeyException),
                             null,
                             null), // InvalidSigningKey
-                    }
-                };
-            }
-        }
-
-        [Theory, MemberData(nameof(ValidTestCases), DisableDiscoveryEnumeration = true)]
-        public void ValidSigningKeys(SigningKeyValidationTheoryData theoryData)
-        {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.ValidSigningKeys", theoryData);
-
-            try
-            {
-                OperationResult<ValidatedSignatureKey, ValidationError> operationResult =
-                    Validators.ValidateSignatureKey(
-                        theoryData.SecurityKey,
-                        theoryData.SecurityToken,
-                        theoryData.ValidationParameters,
-                        theoryData.CallContext);
-
-                if (operationResult.Succeeded)
-                {
-                    IdentityComparer.AreValidatedSigningKeyLifetimesEqual(
-                        theoryData.OperationResult.Result,
-                        operationResult.Result,
-                        context);
-                }
-                else
-                {
-                    context.AddDiff($"Expected operation to succeed, but it failed with error: {operationResult.Error}.");
-                }
-            }
-            catch (Exception ex)
-            {
-                context.AddDiff($"Did not expect an exception: {ex}.");
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        public static TheoryData<SigningKeyValidationTheoryData> ValidTestCases
-        {
-            get
-            {
-                MockTimeProvider timeProvider = new MockTimeProvider();
-                DateTime utcNow = timeProvider.GetUtcNow().UtcDateTime;
-
-                return new TheoryData<SigningKeyValidationTheoryData>
-                {
-                    new SigningKeyValidationTheoryData("SecurityTokenIsPresent")
+                    },
+                    new SigningKeyValidationTheoryData
                     {
-                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                        TestId = "Invalid_SecurityKeyIsNull",
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10253:"),
+                        SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new ValidationParameters(){ TimeProvider = timeProvider },
-                        OperationResult = new ValidatedSignatureKey(null, null, utcNow)
-                    }
+                        ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
+                        Result = new IssuerSigningKeyValidationError(
+                            new MessageDetail(LogMessages.IDX10253),
+                            ValidationFailureType.SigningKeyValidationFailed,
+                            typeof(SecurityTokenArgumentNullException),
+                            null,
+                            null), // InvalidSigningKey
+                    },
+
                 };
             }
         }
@@ -193,11 +168,10 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
     public class SigningKeyValidationTheoryData : TheoryDataBase
     {
-        public SigningKeyValidationTheoryData(string testId) : base(testId) { }
         public SecurityKey SecurityKey { get; set; }
         public SecurityToken SecurityToken { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
         public BaseConfiguration BaseConfiguration { get; set; }
-        internal OperationResult<ValidatedSignatureKey, SignatureKeyValidationError> OperationResult { get; set; }
+        internal ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> Result { get; set; }
     }
 }

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
@@ -16,110 +15,66 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Validates if a token has been replayed.
         /// </summary>
-        /// <param name="expires">The <see cref="DateTime"/> when the security token expires.</param>
+        /// <param name="expirationTime">When does the security token expire.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        internal static OperationResult<DateTime?, ValidationError> ValidateTokenReplayInternal(
-            DateTime? expires,
+#pragma warning disable CA1801 // Review unused parameters
+        public static ValidationResult<DateTime?, TokenReplayValidationError> ValidateTokenReplay(
+            DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
-#pragma warning disable CA1801 // Review unused parameters
-            CallContext callContext)
-#pragma warning restore CA1801 // Review unused parameters
-        {
-            if (validationParameters == null)
-                return ValidationError.NullParameter(
-                    nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
-
-            try
-            {
-                OperationResult<DateTime?, ValidationError> result =
-                    validationParameters.TokenReplayValidator(
-                        expires,
-                        securityToken,
-                        validationParameters,
-                        callContext);
-
-                if (!result.Succeeded)
-                    return result.Error!.AddCurrentStackFrame();
-
-                return result;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new TokenReplayValidationError(
-                    new MessageDetail(Tokens.LogMessages.IDX10276),
-                    TokenReplayValidationFailure.ValidatorThrew,
-                    ValidationError.GetCurrentStackFrame(),
-                    expires,
-                    ex);
-            }
-        }
-
-        /// <summary>
-        /// Validates if a token has been replayed.
-        /// </summary>
-        /// <param name="expires">The <see cref="DateTime"/> when the security token expires.</param>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        public static OperationResult<DateTime?, ValidationError> ValidateTokenReplay(
-            DateTime? expires,
-            string securityToken,
-            ValidationParameters validationParameters,
-#pragma warning disable CA1801 // Review unused parameters
             CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                return ValidationError.NullParameter(
+                return TokenReplayValidationError.NullParameter(
                     nameof(securityToken),
                     ValidationError.GetCurrentStackFrame());
 
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return TokenReplayValidationError.NullParameter(
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)
             {
-                if (expires == null)
+                if (expirationTime == null)
                     return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10227,
                             securityToken),
-                        TokenReplayValidationFailure.NoExpiration,
+                        ValidationFailureType.TokenReplayValidationFailed,
+                        typeof(SecurityTokenNoExpirationException),
                         ValidationError.GetCurrentStackFrame(),
-                        expires);
+                        expirationTime);
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
                     return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10228,
                             securityToken),
-                        TokenReplayValidationFailure.TokenFoundInCache,
+                        ValidationFailureType.TokenReplayValidationFailed,
+                        typeof(SecurityTokenReplayDetectedException),
                         ValidationError.GetCurrentStackFrame(),
-                        expires);
+                        expirationTime);
 
-                if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expires.Value))
+                if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
                     return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10229,
                             securityToken),
-                        TokenReplayValidationFailure.AddToCacheFailed,
+                        ValidationFailureType.TokenReplayValidationFailed,
+                        typeof(SecurityTokenReplayAddFailedException),
                         ValidationError.GetCurrentStackFrame(),
-                        expires);
+                        expirationTime);
             }
 
             // if it reaches here, that means no token replay is detected.
             // TODO: Move to CallContext
             //LogHelper.LogInformation(LogMessages.IDX10240);
-            return expires;
+            return expirationTime;
         }
     }
 }

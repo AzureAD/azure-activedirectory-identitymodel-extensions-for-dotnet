@@ -8,68 +8,75 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
-    /// Represents a validation error when the <see cref="SecurityToken"/> signature is not valid.
+    /// Represents an error that occurs when the token's signature cannot be validated.
     /// </summary>
     public class SignatureValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SignatureValidationError"/> class.
         /// </summary>
-        /// <param name="messageDetail" />Information about the error. Can be used to provide details for error messages.
-        /// <param name="validationFailure"/>The <see cref="ValidationFailureType"/> that occurred.
-        /// <param name="stackFrame"/>The stack frame where the exception occurred.
+        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
+        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        /// <param name="innerValidationError"/> if present, is the inner validation error that caused this signature validation error.
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
         public SignatureValidationError(
             MessageDetail messageDetail,
-            ValidationFailureType validationFailure,
-            StackFrame stackFrame)
-            : this(messageDetail, validationFailure, stackFrame, null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SignatureValidationError"/> class.
-        /// </summary>
-        /// <param name="messageDetail" />Information about the error. Can be used to provide details for error messages.
-        /// <param name="validationFailure"/>The <see cref="ValidationFailureType"/> that occurred.
-        /// <param name="stackFrame"/>The stack frame where the exception occurred.
-        /// <param name="innerException"/>If present, represents the exception that occurred during validation.
-        public SignatureValidationError(
-            MessageDetail messageDetail,
-            ValidationFailureType validationFailure,
+            ValidationFailureType validationFailureType,
+            Type exceptionType,
             StackFrame stackFrame,
-            Exception? innerException) :
-            base(messageDetail,
-                validationFailure,
-                stackFrame,
-                innerException)
+            ValidationError? innerValidationError = null,
+            Exception? innerException = null) :
+            base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
         {
+            InnerValidationError = innerValidationError;
         }
 
         /// <summary>
-        /// <see cref="SecurityTokenInvalidSignatureException"/> or <see cref="SecurityTokenSignatureKeyNotFoundException"/>.
+        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
-        /// <returns>An instance of an Exception.</returns>
-        public override Exception GetException()
+        /// <returns>An instance of an exception.</returns>
+        protected override Exception CreateException()
         {
-            if (Exception is not null)
-                return Exception;
+            var inner = InnerException ?? InnerValidationError?.GetException();
 
-            if (FailureType == SignatureValidationFailure.ValidationFailed
-                || FailureType == SignatureValidationFailure.TokenIsNotSigned
-                || FailureType == SignatureValidationFailure.ReferenceDigestValidationFailed
-                || FailureType == SignatureValidationFailure.ValidatorThrew)
+            if (ExceptionType == typeof(SecurityTokenInvalidSignatureException))
             {
-                Exception = new SecurityTokenInvalidSignatureException(MessageDetail.Message, this, InnerException);
-                return Exception;
+                SecurityTokenInvalidSignatureException exception = new(MessageDetail.Message, inner);
+                exception.SetValidationError(this);
+
+                return exception;
             }
-            else if (FailureType == SignatureValidationFailure.SigningKeyNotFound)
+            else if (ExceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
             {
-                Exception = new SecurityTokenSignatureKeyNotFoundException(MessageDetail.Message, this, InnerException);
-                return Exception;
+                SecurityTokenSignatureKeyNotFoundException exception = new(MessageDetail.Message, inner);
+                exception.SetValidationError(this);
+
+                return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="SignatureValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="SignatureValidationError"/>.</returns>
+        public static new SignatureValidationError NullParameter(
+            string parameterName, StackFrame stackFrame) => new(
+                MessageDetail.NullParameter(parameterName),
+                ValidationFailureType.NullArgument,
+                typeof(SecurityTokenArgumentNullException),
+                stackFrame,
+                null); // innerValidationError
+
+        /// <summary>
+        /// The inner validation error that caused this signature validation error.
+        /// </summary>
+        public ValidationError? InnerValidationError { get; }
     }
 }
 #nullable restore
