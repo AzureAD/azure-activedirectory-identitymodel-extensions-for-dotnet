@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -169,6 +170,24 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     true,
                     "X509_CustomCryptoProviderFactory",
                     theoryData);
+
+                // Add "none" and "noNe" test cases for all key types
+                var keyTypes = new Dictionary<string, SecurityKey>
+                {
+                    { "JsonWebKey_Ecdsa", KeyingMaterial.JsonWebKeyP256 },
+                    { "JsonWebKey_Rsa", KeyingMaterial.JsonWebKeyRsa_2048 },
+                    { "JsonWebKey_Symmetric", KeyingMaterial.JsonWebKeySymmetric256 },
+                    { "Rsa", KeyingMaterial.RsaSecurityKey_2048 },
+                    { "Symmetric", KeyingMaterial.DefaultSymmetricSecurityKey_256 },
+                    { "X509", KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256 },
+                    { "Ecdsa", KeyingMaterial.Ecdsa384Key }
+                };
+
+                foreach (var keyType in keyTypes)
+                {
+                    SupportedAlgorithmTheoryData.AddTestCase("none", keyType.Value, false, $"{keyType.Key}_none", theoryData);
+                    SupportedAlgorithmTheoryData.AddTestCase("noNe", keyType.Value, false, $"{keyType.Key}_noNe", theoryData);
+                }
 
                 return theoryData;
             }
