@@ -2,7 +2,7 @@
   <PropertyGroup>
     <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
     <BannedApiAnalyzersVersion>4.14.0</BannedApiAnalyzersVersion>
-    <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
+    <DotNetCoreAppRuntimeVersion>2.1.300</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>3.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
     <MicrosoftNETTestSdkVersion>17.11.1</MicrosoftNETTestSdkVersion>
     <!--
@@ -14,14 +14,16 @@
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
     <OpenTelemetryVersion>1.6.0</OpenTelemetryVersion>
+    <SystemNetHttp>4.3.4</SystemNetHttp>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemTextJson>8.0.5</SystemTextJson>
+    <SystemTextRegularExpressions>4.3.1</SystemTextRegularExpressions>
     <XunitRunnerConsoleVersion>2.9.2</XunitRunnerConsoleVersion>
     <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
     <XunitVersion>2.9.2</XunitVersion>
     <MicrosoftRestClientRuntimeVersion>2.3.24</MicrosoftRestClientRuntimeVersion>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
     <XunitRunnerVisualStudioVersion>3.0.0-pre.49</XunitRunnerVisualStudioVersion>
   </PropertyGroup>
@@ -33,5 +35,9 @@
   
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <MicrosoftExtensionsTimeProviderTestingVersion>8.10.0</MicrosoftExtensionsTimeProviderTestingVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <SystemTextJson>10.0.0-preview.7.25380.108</SystemTextJson>
   </PropertyGroup>
 </Project>
