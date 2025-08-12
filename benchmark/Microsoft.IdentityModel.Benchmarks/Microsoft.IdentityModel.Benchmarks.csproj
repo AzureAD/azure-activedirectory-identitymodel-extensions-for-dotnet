@@ -5,13 +5,14 @@
     <PackageId>Microsoft.IdentityModel.Benchmarks</PackageId>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks); </TargetFrameworks>
+    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks);net10.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <ErrorOnDuplicatePublishOutputFiles>False</ErrorOnDuplicatePublishOutputFiles>
     <IsPackable>false</IsPackable>
     <LangVersion>13</LangVersion>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 
   <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
