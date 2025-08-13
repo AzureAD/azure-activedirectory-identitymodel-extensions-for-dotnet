@@ -56,8 +56,6 @@ if ($env:VSINSTALLDIR)
     }
 }
 
-$env:TargetNetNext = "True"
-
 WriteSectionHeader("build.ps1 - parameters");
 Write-Host "buildType:                  " $buildType;
 Write-Host "dotnetDir:                  " $dotnetDir
