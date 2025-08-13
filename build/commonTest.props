@@ -26,6 +26,14 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Compiling w/ Net 10.0 gives this warning "PackageReference [package name] will not be pruned. Consider removing this package from your dependencies,
+    as it is likely unnecessary." for System.Text.RegularExpressions and System.Net.Http, however those refs are necessary due to CVEs for those
+    two libraries. -->
+    <NoWarn>$(NoWarn);NU1510</NoWarn>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1510</WarningsNotAsErrors>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="Moq" Version="$(MoqVersion)" />
