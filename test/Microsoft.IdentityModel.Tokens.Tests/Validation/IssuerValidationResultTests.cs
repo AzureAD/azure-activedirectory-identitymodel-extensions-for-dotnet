@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 using Microsoft.IdentityModel.Tokens.Experimental;
-using Microsoft.Identity.Abstractions;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
@@ -27,7 +26,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<ValidatedIssuer, ValidationError> operationResult =
+                ValidationResult<ValidatedIssuer, ValidationError> validationResult =
                     await Validators.ValidateIssuerAsync(
                         theoryData.Issuer,
                         theoryData.SecurityToken,
@@ -35,13 +34,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         theoryData.CallContext,
                         CancellationToken.None);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
-                    context.AddDiff($"Expected operationResult to fail, but it succeeded with: {operationResult.Result}.");
+                    context.AddDiff($"Expected validationResult to fail, but it succeeded with: {validationResult.Result}.");
                 }
                 else
                 {
-                    ValidationError validationError = operationResult.Error;
+                    ValidationError validationError = validationResult.Error;
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
                         theoryData.OperationResult.Error.FailureType.Name,
@@ -131,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             if (theoryData.ValidIssuerToAdd != null)
                 theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
 
-            OperationResult<ValidatedIssuer, ValidationError> operationResult =
+            ValidationResult<ValidatedIssuer, ValidationError> validationResult =
                 await Validators.ValidateIssuerAsync(
                     theoryData.Issuer,
                     theoryData.SecurityToken,
@@ -141,16 +140,16 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
                     IdentityComparer.AreValidatedIssuersEqual(
                         theoryData.OperationResult.Result,
-                        operationResult.Result,
+                        validationResult.Result,
                         context);
                 }
                 else
                 {
-                    context.AddDiff($"Expected operationResult to succeed, but it failed with: {operationResult.Error}.");
+                    context.AddDiff($"Expected validationResult to succeed, but it failed with: {validationResult.Error}.");
                 }
             }
             catch (Exception ex)
@@ -205,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         public string Issuer { get; set; }
 
-        internal OperationResult<ValidatedIssuer, IssuerValidationError> OperationResult { get; set; }
+        internal ValidationResult<ValidatedIssuer, IssuerValidationError> OperationResult { get; set; }
 
         public SecurityToken SecurityToken { get; set; }
 

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -22,9 +21,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>A <see cref="OperationResult{ValidatedLifetime, LifetimeValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
+        /// <returns>A <see cref="ValidationResult{ValidatedLifetime, LifetimeValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
         /// <remarks>All time comparisons apply <see cref="ValidationParameters.ClockSkew"/>.</remarks>
-        internal static OperationResult<ValidatedLifetime, ValidationError> ValidateLifetimeInternal(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> ValidateLifetimeInternal(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -38,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                OperationResult<ValidatedLifetime, ValidationError> result =
+                ValidationResult<ValidatedLifetime, ValidationError> result =
                     validationParameters.LifetimeValidator(
                         notBefore,
                         expires,
@@ -73,9 +72,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>A <see cref="OperationResult{ValidatedLifetime, LifetimeValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
+        /// <returns>A <see cref="ValidationResult{ValidatedLifetime, LifetimeValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
         /// <remarks>All time comparisons apply <see cref="ValidationParameters.ClockSkew"/>.</remarks>
-        public static OperationResult<ValidatedLifetime, ValidationError> ValidateLifetime(
+        public static ValidationResult<ValidatedLifetime, ValidationError> ValidateLifetime(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,

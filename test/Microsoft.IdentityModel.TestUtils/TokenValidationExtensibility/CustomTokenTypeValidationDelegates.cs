@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -10,7 +9,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomTokenTypeValidationDelegates
     {
-        internal static OperationResult<ValidatedTokenType, ValidationError> CustomTokenTypeValidationFailed(
+        internal static ValidationResult<ValidatedTokenType, ValidationError> CustomTokenTypeValidationFailed(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -24,7 +23,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedTokenType, ValidationError> TokenTypeValidationFailed(
+        internal static ValidationResult<ValidatedTokenType, ValidationError> TokenTypeValidationFailed(
             string? tokenType,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -38,7 +37,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedTokenType, ValidationError> UnknownValidationFailure(
+        internal static ValidationResult<ValidatedTokenType, ValidationError> UnknownValidationFailure(
             string? tokenType,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -51,7 +50,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 tokenType);
         }
 
-        internal static OperationResult<ValidatedTokenType, ValidationError> TokenTypeValidatorDelegate(
+        internal static ValidationResult<ValidatedTokenType, ValidationError> TokenTypeValidatorDelegate(
             string? tokenType,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -65,7 +64,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedTokenType, ValidationError> TokenTypeValidatorThrows(
+        internal static ValidationResult<ValidatedTokenType, ValidationError> TokenTypeValidatorThrows(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,

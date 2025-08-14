@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Xml;
@@ -55,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return obj.GetType().ToString();
         }
 
-        internal static OperationResult<SecurityKey, ValidationError> ValidateSignature(
+        internal static ValidationResult<SecurityKey, ValidationError> ValidateSignature(
             SecurityToken securityToken,
             Signature signature,
             string canonicalString,
@@ -182,7 +181,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static OperationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
+        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
             byte[] signatureBytes,
             byte[] canonicalBytes,
             SecurityToken securityToken,
@@ -255,7 +254,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        private static OperationResult<SecurityKey, ValidationError> ValidateSignatureUsingAllKeys(
+        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureUsingAllKeys(
             byte[] signatureValueBytes,
             byte[] canonicalBytes,
             SecurityToken securityToken,
@@ -279,7 +278,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 keysTried = true;
 
-                OperationResult<SecurityKey, ValidationError> result = ValidateSignatureWithKey(
+                ValidationResult<SecurityKey, ValidationError> result = ValidateSignatureWithKey(
                     signatureValueBytes,
                     canonicalBytes,
                     securityToken,

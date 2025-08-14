@@ -7,7 +7,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -63,7 +62,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.TokenValidationParameters.EnableEntraIdSigningKeyCloudInstanceValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.TokenValidationParameters);
-                OperationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(theoryData.Token, validationParameters, new CallContext(), CancellationToken.None);
+                ValidationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(theoryData.Token, validationParameters, new CallContext(), CancellationToken.None);
 
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);
@@ -216,7 +215,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.TokenValidationParameters.EnableAadSigningKeyIssuerValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.TokenValidationParameters);
-                OperationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(jwt, validationParameters, new CallContext(), CancellationToken.None);
+                ValidationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(jwt, validationParameters, new CallContext(), CancellationToken.None);
                 theoryData.ExpectedException.ProcessNoException(context);
 
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);

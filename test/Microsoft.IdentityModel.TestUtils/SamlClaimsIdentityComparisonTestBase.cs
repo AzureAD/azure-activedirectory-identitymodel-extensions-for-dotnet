@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -44,7 +43,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 NotBefore = utcNow.AddHours(-1),
             });
 
-            OperationResult<ValidatedToken, ValidationError> operationResult = await tokenHandler.ValidateTokenAsync(
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await tokenHandler.ValidateTokenAsync(
                 token,
                 validationParameters,
                 new CallContext(),
@@ -55,11 +54,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 tokenValidationParameters);
 
             IdentityComparer.AreBoolsEqual(
-                operationResult.Succeeded,
+                validationResult.Succeeded,
                 tokenValidationResult.IsValid, context);
 
             IdentityComparer.AreClaimsIdentitiesEqual(
-                operationResult.Result!.ClaimsIdentity,
+                validationResult.Result!.ClaimsIdentity,
                 tokenValidationResult.ClaimsIdentity, context);
 
             TestUtilities.AssertFailIfErrors(context);

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -11,7 +10,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomAudienceValidationDelegates
     {
-        internal static OperationResult<string, ValidationError> CustomValidationFailed(
+        internal static ValidationResult<string, ValidationError> CustomValidationFailed(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -25,7 +24,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<string, ValidationError> AudienceDidNotMatch(
+        internal static ValidationResult<string, ValidationError> AudienceDidNotMatch(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -39,7 +38,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<string, ValidationError> UnknownValidationFailure(
+        internal static ValidationResult<string, ValidationError> UnknownValidationFailure(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -53,7 +52,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<string, ValidationError> WithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<string, ValidationError> WithoutGetExceptionOverrideDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -67,7 +66,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ;
         }
 
-        internal static OperationResult<string, ValidationError> AudienceValidatorDelegate(
+        internal static ValidationResult<string, ValidationError> AudienceValidatorDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -81,7 +80,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<string, ValidationError> AudienceValidatorThrows(
+        internal static ValidationResult<string, ValidationError> AudienceValidatorThrows(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,

@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Microsoft.Identity.Abstractions;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens.Experimental
@@ -14,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <summary>
     /// Represents an error that occurred during a <see cref="SecurityToken"/> validation.
     /// </summary>
-    public class ValidationError : OperationError
+    public class ValidationError
     {
         /// <summary>
         /// Creates an instance of <see cref="ValidationError"/>.

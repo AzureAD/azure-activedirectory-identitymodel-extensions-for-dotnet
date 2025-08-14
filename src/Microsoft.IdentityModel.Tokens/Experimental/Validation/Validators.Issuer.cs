@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -24,9 +23,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>A <see cref="OperationResult{ValidatedIssuer, IssuerValidationError}"/> that contains either the issuer that was validated or an error.</returns>
+        /// <returns>A <see cref="ValidationResult{ValidatedIssuer, IssuerValidationError}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static async Task<OperationResult<ValidatedIssuer, ValidationError>> ValidateIssuerInternalAsync(
+        internal static async Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerInternalAsync(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -43,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                OperationResult<ValidatedIssuer, ValidationError> result =
+                ValidationResult<ValidatedIssuer, ValidationError> result =
                     await validationParameters.IssuerValidatorAsync(
                         issuer,
                         securityToken,
@@ -77,9 +76,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>A <see cref="OperationResult{ValidatedIssuer, IssuerValidationError}"/> that contains either the issuer that was validated or an error.</returns>
+        /// <returns>A <see cref="ValidationResult{ValidatedIssuer, IssuerValidationError}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
-        public static async Task<OperationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+        public static async Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
             string? issuer,
 #pragma warning disable CA1801 // Review unused parameters
             SecurityToken? securityToken,

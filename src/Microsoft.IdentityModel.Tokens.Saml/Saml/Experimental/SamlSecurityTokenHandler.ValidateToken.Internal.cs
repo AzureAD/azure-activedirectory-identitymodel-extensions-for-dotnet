@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
@@ -17,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public partial class SamlSecurityTokenHandler : SecurityTokenHandler, IResultBasedValidation
     {
         /// <inheritdoc/>
-        internal override async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -45,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <inheritdoc/>
-        internal override async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -85,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     ValidationError.GetCurrentStackFrame());
             }
 
-            OperationResult<ValidatedLifetime, ValidationError> lifetimeResult =
+            ValidationResult<ValidatedLifetime, ValidationError> lifetimeResult =
                 Validators.ValidateLifetimeInternal(
                     samlToken.Assertion.Conditions?.NotBefore,
                     samlToken.Assertion.Conditions?.NotOnOrAfter,
@@ -107,7 +106,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     }
             }
 
-            OperationResult<string, ValidationError> audienceResult =
+            ValidationResult<string, ValidationError> audienceResult =
                 Validators.ValidateAudienceInternal(
                     audiences,
                     samlToken,
@@ -117,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (!audienceResult.Succeeded)
                 return audienceResult.Error!.AddCurrentStackFrame();
 
-            OperationResult<ValidatedIssuer, ValidationError> issuerResult =
+            ValidationResult<ValidatedIssuer, ValidationError> issuerResult =
                 await Validators.ValidateIssuerInternalAsync(
                     samlToken.Issuer,
                     samlToken,
@@ -128,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (!issuerResult.Succeeded)
                 return issuerResult.Error!.AddCurrentStackFrame();
 
-            OperationResult<DateTime?, ValidationError>? tokenReplayResult =
+            ValidationResult<DateTime?, ValidationError>? tokenReplayResult =
                 Validators.ValidateTokenReplayInternal(
                     samlToken.Assertion!.Conditions?.NotOnOrAfter,
                     samlToken.Assertion!.CanonicalString!,
@@ -138,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (!tokenReplayResult.Value.Succeeded)
                 return tokenReplayResult.Value.Error!.AddCurrentStackFrame();
 
-            OperationResult<string, ValidationError> algorithmResult =
+            ValidationResult<string, ValidationError> algorithmResult =
                 Validators.ValidateAlgorithmInternal(
                     samlToken.Assertion.Signature?.SignedInfo?.SignatureMethod,
                     samlToken,
@@ -164,7 +163,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
             }
 
-            OperationResult<SecurityKey, ValidationError> signatureResult =
+            ValidationResult<SecurityKey, ValidationError> signatureResult =
                 SamlTokenUtilities.ValidateSignature(
                     samlToken,
                     samlToken.Assertion.Signature,
@@ -176,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (!signatureResult.Succeeded)
                 return signatureResult.Error!.AddCurrentStackFrame();
 
-            OperationResult<ValidatedSignatureKey, ValidationError> signatureKeyResult =
+            ValidationResult<ValidatedSignatureKey, ValidationError> signatureKeyResult =
                 Validators.ValidateSignatureKeyInternal(
                     samlToken.SigningKey,
                     samlToken,
@@ -197,7 +196,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         #region Explicit Interface Implementations
-        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -209,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 default).ConfigureAwait(false);
         }
 
-        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -222,7 +221,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -234,7 +233,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 default).ConfigureAwait(false);
         }
 
-        async Task<OperationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,

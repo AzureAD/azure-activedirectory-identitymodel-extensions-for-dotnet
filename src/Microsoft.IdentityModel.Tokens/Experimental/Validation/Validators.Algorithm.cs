@@ -3,11 +3,10 @@
 
 using System;
 using System.Linq;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
-
 #nullable enable
+
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -22,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        internal static OperationResult<string, ValidationError> ValidateAlgorithmInternal(
+        internal static ValidationResult<string, ValidationError> ValidateAlgorithmInternal(
             string? algorithm,
 #pragma warning disable CA1801
             SecurityToken securityToken,
@@ -40,7 +39,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                OperationResult<string, ValidationError> result =
+                ValidationResult<string, ValidationError> result =
                     validationParameters.AlgorithmValidator(
                         algorithm,
                         securityToken,
@@ -72,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        public static OperationResult<string, ValidationError> ValidateAlgorithm(
+        public static ValidationResult<string, ValidationError> ValidateAlgorithm(
             string? algorithm,
 #pragma warning disable CA1801
             SecurityToken securityToken,

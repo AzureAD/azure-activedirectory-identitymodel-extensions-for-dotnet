@@ -3,7 +3,6 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -20,23 +19,23 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<ValidatedSignatureKey, ValidationError> operationResult =
+                ValidationResult<ValidatedSignatureKey, ValidationError> validationResult =
                     Validators.ValidateSignatureKey(
                         theoryData.SecurityKey,
                         theoryData.SecurityToken,
                         theoryData.ValidationParameters,
                         theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
-                    context.AddDiff($"Expected operation to fail, but it succeeded with result: {operationResult.Result}.");
+                    context.AddDiff($"Expected validation to fail, but it succeeded with result: {validationResult.Result}.");
                 }
                 else
                 {
-                    ValidationError validationError = operationResult.Error;
+                    ValidationError validationError = validationResult.Error;
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
-                        theoryData.OperationResult.Error.FailureType.Name,
+                        theoryData.ValidationResult.Error.FailureType.Name,
                         context);
 
                     theoryData.ExpectedException.ProcessException(validationError.GetException(), context);
@@ -68,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters(){ TimeProvider = timeProvider },
-                        OperationResult = new SignatureKeyValidationError(
+                        ValidationResult = new SignatureKeyValidationError(
                             new MessageDetail(LogMessages.IDX10253),
                             SignatureKeyValidationFailure.KeyIsNull,
                             null,
@@ -80,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = null,
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        OperationResult = new SignatureKeyValidationError(
+                        ValidationResult = new SignatureKeyValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
@@ -94,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = null,
-                        OperationResult = new SignatureKeyValidationError(
+                        ValidationResult = new SignatureKeyValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
@@ -108,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.ExpiredX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        OperationResult = new SignatureKeyValidationError(
+                        ValidationResult = new SignatureKeyValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10249,
                                 LogHelper.MarkAsNonPII(utcExpired),
@@ -123,7 +122,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.NotYetValidX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        OperationResult = new SignatureKeyValidationError(
+                        ValidationResult = new SignatureKeyValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10248,
                                 LogHelper.MarkAsNonPII(utcNotYetValid),
@@ -143,23 +142,23 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<ValidatedSignatureKey, ValidationError> operationResult =
+                ValidationResult<ValidatedSignatureKey, ValidationError> validationResult =
                     Validators.ValidateSignatureKey(
                         theoryData.SecurityKey,
                         theoryData.SecurityToken,
                         theoryData.ValidationParameters,
                         theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
                     IdentityComparer.AreValidatedSigningKeyLifetimesEqual(
-                        theoryData.OperationResult.Result,
-                        operationResult.Result,
+                        theoryData.ValidationResult.Result,
+                        validationResult.Result,
                         context);
                 }
                 else
                 {
-                    context.AddDiff($"Expected operation to succeed, but it failed with error: {operationResult.Error}.");
+                    context.AddDiff($"Expected validation to succeed, but it failed with error: {validationResult.Error}.");
                 }
             }
             catch (Exception ex)
@@ -184,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters(){ TimeProvider = timeProvider },
-                        OperationResult = new ValidatedSignatureKey(null, null, utcNow)
+                        ValidationResult = new ValidatedSignatureKey(null, null, utcNow)
                     }
                 };
             }
@@ -198,6 +197,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public SecurityToken SecurityToken { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
         public BaseConfiguration BaseConfiguration { get; set; }
-        internal OperationResult<ValidatedSignatureKey, SignatureKeyValidationError> OperationResult { get; set; }
+        internal ValidationResult<ValidatedSignatureKey, SignatureKeyValidationError> ValidationResult { get; set; }
     }
 }

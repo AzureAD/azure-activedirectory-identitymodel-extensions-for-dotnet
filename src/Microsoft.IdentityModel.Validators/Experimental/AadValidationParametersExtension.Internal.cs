@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -120,7 +119,7 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> that are used to validate the token.</param>
         /// <returns><c>true</c> if the issuer signing key certificate is valid; otherwise, <c>false</c>.</returns>
-        private static OperationResult<ValidatedSignatureKey, ValidationError> ValidateIssuerSigningKeyCertificate(SecurityKey securityKey, ValidationParameters validationParameters)
+        private static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateIssuerSigningKeyCertificate(SecurityKey securityKey, ValidationParameters validationParameters)
         {
             if (securityKey == null)
             {

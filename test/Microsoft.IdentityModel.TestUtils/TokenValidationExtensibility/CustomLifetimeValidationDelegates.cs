@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -11,7 +10,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomLifetimeValidationDelegates
     {
-        internal static OperationResult<ValidatedLifetime, ValidationError> CustomLifetimeValidationFailed(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> CustomLifetimeValidationFailed(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -27,7 +26,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedLifetime, ValidationError> LifetimeValidationFailed(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> LifetimeValidationFailed(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -43,7 +42,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedLifetime, ValidationError> LifetimeValidator(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> LifetimeValidator(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -58,7 +57,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 expires);
         }
 
-        internal static OperationResult<ValidatedLifetime, ValidationError> CustomUnknownValidationFailure(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> CustomUnknownValidationFailure(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -74,7 +73,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedLifetime, ValidationError> ValidatorDelegate(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> ValidatorDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -90,7 +89,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedLifetime, ValidationError> ValidatorThrows(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> ValidatorThrows(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,

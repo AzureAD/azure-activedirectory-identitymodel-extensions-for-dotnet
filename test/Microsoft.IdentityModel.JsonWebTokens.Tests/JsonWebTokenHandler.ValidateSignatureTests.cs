@@ -3,7 +3,6 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt.Tests;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -40,16 +39,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (theoryData.ValidationParameters is not null && theoryData.KeyToAddToValidationParameters is not null)
                 theoryData.ValidationParameters.SigningKeys.Add(theoryData.KeyToAddToValidationParameters);
 
-            OperationResult<SecurityKey, ValidationError> operationResult = JsonWebTokenHandler.ValidateSignature(
+            ValidationResult<SecurityKey, ValidationError> validationResult = JsonWebTokenHandler.ValidateSignature(
                 jsonWebToken,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
                 theoryData.CallContext);
 
-            if (operationResult.Succeeded)
+            if (validationResult.Succeeded)
             {
                 IdentityComparer.AreSecurityKeysEqual(
-                    operationResult.Result,
+                    validationResult.Result,
                     theoryData.OperationResult.Result,
                     context);
 
@@ -57,7 +56,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             else
             {
-                ValidationError validationError = operationResult.Error;
+                ValidationError validationError = validationResult.Error;
                 IdentityComparer.AreStringsEqual(
                     validationError.FailureType.Name,
                     theoryData.OperationResult.Error.FailureType.Name,
@@ -217,7 +216,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public SigningCredentials SigningCredentials { get; internal set; }
         public SecurityKey KeyToAddToConfiguration { get; internal set; }
         public SecurityKey KeyToAddToValidationParameters { get; internal set; }
-        internal OperationResult<SecurityKey, ValidationError> OperationResult { get; set; }
+        internal ValidationResult<SecurityKey, ValidationError> OperationResult { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
     }
 }
