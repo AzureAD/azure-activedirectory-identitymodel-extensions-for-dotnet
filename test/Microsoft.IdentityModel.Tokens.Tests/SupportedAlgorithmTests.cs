@@ -183,10 +183,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     { "Ecdsa", KeyingMaterial.Ecdsa384Key }
                 };
 
+                // All permutations of "none" with different capitalizations
+                var nonePermutations = new[]
+                {
+                    "none",
+                    "None",
+                    "nOne",
+                    "noNe",
+                    "nonE",
+                    "NOne",
+                    "NONe",
+                    "NOnE",
+                    "noNE",
+                    "nONE",
+                    "NoNe",
+                    "NoNE",
+                    "NOnE",
+                    "nONe",
+                    "nonE",
+                    "NONE"
+                };
+
                 foreach (var keyType in keyTypes)
                 {
-                    SupportedAlgorithmTheoryData.AddTestCase("none", keyType.Value, false, $"{keyType.Key}_none", theoryData);
-                    SupportedAlgorithmTheoryData.AddTestCase("noNe", keyType.Value, false, $"{keyType.Key}_noNe", theoryData);
+                    foreach (var permutation in nonePermutations)
+                    {
+                        SupportedAlgorithmTheoryData.AddTestCase(permutation, keyType.Value, false, $"{keyType.Key}_{permutation}", theoryData);
+                    }
                 }
 
                 return theoryData;
