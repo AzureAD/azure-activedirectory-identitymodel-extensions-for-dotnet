@@ -3,7 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 8.14.0
 ====
 ## Bug Fixes
-- Reverted [#3284](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3284) which unintentionally changed some public API. As a result, also removed the dependency on Microsoft.IdentityModel.Abstractions. See [#3293](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3293) for details.
+- Switch back to use `ValidationResult` instead of `OperationResult` when validating a token in a new experimental validation flow. Additionally removed the dependency on Microsoft.IdentityModel.Abstractions. See [#3299](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3299) for details.
 
 8.13.1
 ====
