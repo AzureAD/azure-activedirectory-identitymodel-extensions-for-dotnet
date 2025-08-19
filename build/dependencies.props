@@ -15,11 +15,11 @@
     <SystemTextJson>8.0.5</SystemTextJson>
   </PropertyGroup>
 
-<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <MicrosoftExtensionsLoggingAbstractionsVersion>10.0.0-preview.*</MicrosoftExtensionsLoggingAbstractionsVersion>
-</PropertyGroup>
+  </PropertyGroup>
 
-<PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <!--
       Do not bump to 9.0. complicated reasons due to some runtime incompatibilities if 
       CoreWCF compiles against an older version but then run with a newer version in a related package.

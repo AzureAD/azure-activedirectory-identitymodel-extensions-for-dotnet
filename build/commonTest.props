@@ -11,7 +11,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet</PackageProjectUrl>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsNotAsErrors>0618</WarningsNotAsErrors>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);0618</WarningsNotAsErrors>
     <IsTestProject>true</IsTestProject>
     <TargetFrameworks>$(TestTargets)</TargetFrameworks>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.1'">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
