@@ -14,6 +14,10 @@
     <SystemTextJson>8.0.5</SystemTextJson>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <SuppressNETCoreSdkPreviewMessage Condition="'$(TargetNetNext)' == 'True'">true</SuppressNETCoreSdkPreviewMessage>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <MicrosoftExtensionsLoggingAbstractionsVersion>10.0.0-preview.*</MicrosoftExtensionsLoggingAbstractionsVersion>
   </PropertyGroup>
