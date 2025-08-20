@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// Ignore Spelling: Metadata Validator
+// Ignore Spelling: Metadata Validator Retreiver
 
 using System;
 using System.Collections.Generic;
@@ -20,6 +20,8 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
+    [ResetAppContextSwitches]
+    [Collection(nameof(AppContextSwitches.UpdateConfigAsBlocking))]
     public class ConfigurationManagerTests
     {
         /// <summary>
@@ -175,6 +177,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public async Task FetchMetadataFailureTest()
         {
+            await FetchMetadataFailureTestBody();
+        }
+
+        [Fact]
+        public async Task FetchMetadataFailureTest_Blocking()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            await FetchMetadataFailureTestBody();
+        }
+
+        private async ValueTask FetchMetadataFailureTestBody()
+        {
             var context = new CompareContext($"{this}.FetchMetadataFailureTest");
 
             var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
@@ -208,6 +222,48 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
+        public async Task VerifyInterlockGuardForRequestRefresh()
+        {
+            ManualResetEvent waitEvent = new ManualResetEvent(false);
+            ManualResetEvent signalEvent = new ManualResetEvent(false);
+            InMemoryDocumentRetriever inMemoryDocumentRetriever = InMemoryDocumentRetrieverWithEvents(waitEvent, signalEvent);
+
+            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                    "AADCommonV1Json",
+                    new OpenIdConnectConfigurationRetriever(),
+                    inMemoryDocumentRetriever);
+
+            // populate the configurationManager with AADCommonV1Config
+            TestUtilities.SetField(configurationManager, "_currentConfiguration", OpenIdConfigData.AADCommonV1Config);
+
+            // InMemoryDocumentRetrieverWithEvents will block until waitEvent.Set() is called.
+            // The first RequestRefresh will not have finished before the next RequestRefresh() is called.
+            // The guard '_lastRequestRefresh' will not block as we set it to DateTimeOffset.MinValue.
+            // Interlocked guard will block.
+            // Configuration should be AADCommonV1Config
+            signalEvent.Reset();
+            configurationManager.RequestRefresh();
+
+            // InMemoryDocumentRetrieverWithEvents will signal when it is OK to change the MetadataAddress
+            // otherwise, it may be the case that the MetadataAddress is changed before the previous Task has finished.
+            signalEvent.WaitOne();
+
+            // AADCommonV1Json would have been passed to the the previous retriever, which is blocked on an event.
+            configurationManager.MetadataAddress = "AADCommonV2Json";
+            TestUtilities.SetField(configurationManager, "_lastRequestRefresh", DateTimeOffset.MinValue);
+            configurationManager.RequestRefresh();
+
+            // Set the event to release the lock and let the previous retriever finish.
+            waitEvent.Set();
+
+            // Configuration should be AADCommonV1Config
+            var configuration = await configurationManager.GetConfigurationAsync();
+            Assert.True(configuration.Issuer.Equals(OpenIdConfigData.AADCommonV1Config.Issuer),
+                    $"configuration.Issuer from configurationManager was not as expected," +
+                    $"configuration.Issuer: '{configuration.Issuer}' != expected '{OpenIdConfigData.AADCommonV1Config.Issuer}'.");
+        }
+
+        [Fact]
         public async Task VerifyInterlockGuardForGetConfigurationAsync()
         {
             ManualResetEvent waitEvent = new ManualResetEvent(false);
@@ -232,7 +288,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             waitEvent.Reset();
             signalEvent.Reset();
 
-            TestUtilities.SetField(configurationManager, "_syncAfter", DateTime.MinValue);
+            TestUtilities.SetField(configurationManager, "_syncAfter", DateTimeOffset.MinValue);
             await configurationManager.GetConfigurationAsync(CancellationToken.None);
 
             // InMemoryDocumentRetrieverWithEvents will signal when it is OK to change the MetadataAddress
@@ -276,14 +332,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             catch (Exception firstFetchMetadataFailure)
             {
                 // _syncAfter should not have been changed, because the fetch failed.
-                DateTime syncAfter = (DateTime)TestUtilities.GetField(configManager, "_syncAfter");
-                if (syncAfter != DateTime.MinValue)
+                var syncAfter = TestUtilities.GetField(configManager, "_syncAfter");
+                if ((DateTimeOffset)syncAfter != DateTimeOffset.MinValue)
                     context.AddDiff($"ConfigurationManager._syncAfter: '{syncAfter}' should equal '{DateTimeOffset.MinValue}'.");
 
                 if (firstFetchMetadataFailure.InnerException == null)
                     context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
-
-                DateTime requestTime = DateTime.UtcNow;
 
                 // Fetch metadata again during refresh interval, the exception should be same from above.
                 try
@@ -297,10 +351,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
 
                     // _syncAfter should not have been changed, because the fetch failed.
-                    syncAfter = (DateTime)TestUtilities.GetField(configManager, "_syncAfter");
-
-                    if (!IdentityComparer.AreDatesEqualWithEpsilon(requestTime, syncAfter, 1))
-                        context.AddDiff($"ConfigurationManager._syncAfter: '{syncAfter}' should equal be within 1 second of '{requestTime}'.");
+                    syncAfter = TestUtilities.GetField(configManager, "_syncAfter");
+                    if ((DateTimeOffset)syncAfter != DateTimeOffset.MinValue)
+                        context.AddDiff($"ConfigurationManager._syncAfter: '{syncAfter}' should equal '{DateTimeOffset.MinValue}'.");
 
                     IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
                 }
@@ -310,11 +363,59 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
+        public async Task BootstrapRefreshIntervalTest_Blocking()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+
+            var context = new CompareContext($"{this}.BootstrapRefreshIntervalTest_Blocking");
+
+            var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever) { RefreshInterval = TimeSpan.FromSeconds(2) };
+
+            // First time to fetch metadata.
+            try
+            {
+                var configuration = await configManager.GetConfigurationAsync();
+            }
+            catch (Exception firstFetchMetadataFailure)
+            {
+                // Refresh interval is BootstrapRefreshInterval
+                var syncAfter = (DateTimeOffset)configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
+                if (syncAfter > DateTime.UtcNow + TimeSpan.FromSeconds(2))
+                    context.AddDiff($"Expected the refresh interval is longer than 2 seconds.");
+
+                if (firstFetchMetadataFailure.InnerException == null)
+                    context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
+
+                // Fetch metadata again during refresh interval, the exception should be same from above.
+                try
+                {
+                    configManager.RequestRefresh();
+                    var configuration = await configManager.GetConfigurationAsync();
+                }
+                catch (Exception secondFetchMetadataFailure)
+                {
+                    if (secondFetchMetadataFailure.InnerException == null)
+                        context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
+
+                    syncAfter = (DateTimeOffset)configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
+
+                    // Refresh interval is RefreshInterval
+                    if (syncAfter > DateTime.UtcNow + configManager.RefreshInterval)
+                        context.AddDiff($"Expected the refresh interval is longer than 2 seconds.");
+
+                    IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
+                }
+            }
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
         public void GetSets()
         {
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
-            int ExpectedPropertyCount = 7;
+            int ExpectedPropertyCount = 8;
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
@@ -346,19 +447,34 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Theory, MemberData(nameof(AutomaticIntervalTestCases), DisableDiscoveryEnumeration = true)]
         public async Task AutomaticRefreshInterval(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
+            await AutomaticRefreshIntervalBody(theoryData, false);
+        }
+
+        [Theory, MemberData(nameof(AutomaticIntervalTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task AutomaticRefreshInterval_Blocking(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            await AutomaticRefreshIntervalBody(theoryData, true);
+        }
+
+        private async Task AutomaticRefreshIntervalBody(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData, bool blocking)
+        {
             var context = new CompareContext($"{this}.AutomaticRefreshInterval");
+
+            AutoResetEvent resetEvent = SetupResetEvent(theoryData.ConfigurationManager);
 
             try
             {
-
                 var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
                 IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
 
                 theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
-                TestUtilities.SetField(theoryData.ConfigurationManager, "_syncAfter", theoryData.SyncAfter.UtcDateTime);
+                TestUtilities.SetField(theoryData.ConfigurationManager, "_syncAfter", theoryData.SyncAfter);
                 var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
-                // we wait 100 ms here to make the task is finished.
-                Thread.Sleep(100);
+
+                if (theoryData.WaitForEvent && !blocking)
+                    WaitOrFail(resetEvent);
+
                 updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
                 IdentityComparer.AreEqual(updatedConfiguration, theoryData.ExpectedUpdatedConfiguration, context);
 
@@ -414,7 +530,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
                     SyncAfter = DateTime.UtcNow,
-                    UpdatedMetadataAddress = "AADCommonV2Json"
+                    UpdatedMetadataAddress = "AADCommonV2Json",
+                    WaitForEvent = true
                 });
 
                 return theoryData;
@@ -424,7 +541,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Theory, MemberData(nameof(RequestRefreshTestCases), DisableDiscoveryEnumeration = true)]
         public async Task RequestRefresh(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
+            await RequestRefreshBody(theoryData, false);
+        }
+
+        [Theory, MemberData(nameof(RequestRefreshTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task RequestRefresh_Blocking(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            await RequestRefreshBody(theoryData, true);
+        }
+
+        private async Task RequestRefreshBody(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData, bool blocking)
+        {
             var context = new CompareContext($"{this}.RequestRefresh");
+
+            AutoResetEvent resetEvent = SetupResetEvent(theoryData.ConfigurationManager);
+
+            var timeProvider = new FakeTimeProvider();
+            theoryData.ConfigurationManager.TimeProvider = timeProvider;
 
             var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
@@ -434,19 +568,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (theoryData.RequestRefresh)
             {
                 theoryData.ConfigurationManager.RequestRefresh();
+
+                if (theoryData.WaitForEvent && !blocking)
+                    WaitOrFail(resetEvent);
+
                 configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             }
-
-            if (theoryData.SleepTimeInMs > 0)
-                Thread.Sleep(theoryData.SleepTimeInMs);
 
             theoryData.ConfigurationManager.RefreshInterval = theoryData.RefreshInterval;
             theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
 
+            timeProvider.Advance(TimeSpan.FromMilliseconds(theoryData.SleepTimeInMs));
+
             theoryData.ConfigurationManager.RequestRefresh();
 
-            if (theoryData.SleepTimeInMs > 0)
-                Thread.Sleep(theoryData.SleepTimeInMs);
+            if (theoryData.WaitForEvent && !blocking)
+                WaitOrFail(resetEvent);
 
             var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -473,7 +610,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     RefreshInterval = TimeSpan.FromSeconds(1),
                     RequestRefresh = true,
                     SleepTimeInMs = 1000,
-                    UpdatedMetadataAddress = "AADCommonV2Json"
+                    UpdatedMetadataAddress = "AADCommonV2Json",
+                    WaitForEvent = true,
                 });
 
                 // RefreshInterval set to TimeSpan.MaxValue should return same config.
@@ -501,7 +639,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
                     SleepTimeInMs = 100,
-                    UpdatedMetadataAddress = "AADCommonV2Json"
+                    UpdatedMetadataAddress = "AADCommonV2Json",
+                    WaitForEvent = true
                 });
 
                 return theoryData;
@@ -564,13 +703,32 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
-        public async Task CheckSyncAfterAndRefreshRequested()
+        public async Task CheckSyncAfter_Blocking()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            await CheckSyncAfterBody(true);
+        }
+
+        [Fact]
+        public async Task CheckSyncAfter()
+        {
+            await CheckSyncAfterBody();
+        }
+
+        private async Task CheckSyncAfterBody(bool blocking = false)
         {
             // This test checks that the _syncAfter field is set correctly after a refresh.
             var context = new CompareContext($"{this}.CheckSyncAfterAndRefreshRequested");
 
+            var cts = new CancellationTokenSource();
+
             var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "OpenIdConnectMetadata.json",
+                new OpenIdConnectConfigurationRetriever(),
+                docRetriever);
+
+            AutoResetEvent resetEvent = SetupResetEvent(configManager);
 
             // This is the minimum time that should pass before an automatic refresh occurs
             // stored in advance to avoid any time drift issues.
@@ -580,34 +738,44 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             // force a refresh by setting internal field
-            TestUtilities.SetField(configManager, "_syncAfter", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
+            TestUtilities.SetField(configManager, "_syncAfter", DateTimeOffset.UtcNow.Subtract(TimeSpan.FromHours(1)));
             configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
-            // wait 1000ms here because update of config is run as a new task.
-            Thread.Sleep(1000);
+
+            if (!blocking)
+                WaitOrFail(resetEvent);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
-            DateTime syncAfter = (DateTime)TestUtilities.GetField(configManager, "_syncAfter");
+            DateTimeOffset syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
             if (syncAfter < minimumRefreshInterval)
                 context.Diffs.Add($"(AutomaticRefreshInterval) syncAfter '{syncAfter}' < DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval: '{minimumRefreshInterval}'.");
 
             // make same check for RequestRefresh
             // force a refresh by setting internal field
-            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
+            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow.Subtract(TimeSpan.FromHours(1)));
 
             configManager.RequestRefresh();
 
-            bool refreshRequested = (bool)TestUtilities.GetField(configManager, "_refreshRequested");
-            if (!refreshRequested)
-                context.Diffs.Add("Refresh is expected to be requested after RequestRefresh is called");
+            if (blocking)
+            {
+                bool refreshRequested = (bool)TestUtilities.GetField(configManager, "_refreshRequested");
+                if (!refreshRequested)
+                    context.Diffs.Add("Refresh is expected to be requested after RequestRefresh is called");
+            }
 
             await configManager.GetConfigurationAsync();
 
-            refreshRequested = (bool)TestUtilities.GetField(configManager, "_refreshRequested");
-            if (refreshRequested)
-                context.Diffs.Add("Refresh is not expected to be requested after GetConfigurationAsync is called");
+            if (blocking)
+            {
+                bool refreshRequested = (bool)TestUtilities.GetField(configManager, "_refreshRequested");
+                if (refreshRequested)
+                    context.Diffs.Add("Refresh is expected to be requested after RequestRefresh is called");
+            }
+
+            if (!blocking)
+                WaitOrFail(resetEvent);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
-            syncAfter = (DateTime)TestUtilities.GetField(configManager, "_syncAfter");
+            syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
             if (syncAfter < minimumRefreshInterval)
                 context.Diffs.Add($"(RequestRefresh) syncAfter '{syncAfter}' < DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval: '{minimumRefreshInterval}'.");
 
@@ -617,17 +785,33 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public async Task GetConfigurationAsync()
         {
-            var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            await GetConfigurationBody();
+        }
+
+        [Fact]
+        public async Task GetConfigurationAsync_Blocking()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            await GetConfigurationBody();
+        }
+
+        private async Task GetConfigurationBody()
+        {
             var context = new CompareContext($"{this}.GetConfiguration");
 
-            // Unable to obtain a new configuration, but _currentConfiguration is not null so it should be returned.
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            var docRetriever = new FileDocumentRetriever();
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "OpenIdConnectMetadata.json",
+                new OpenIdConnectConfigurationRetriever(),
+                docRetriever);
+
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
-            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
+            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow.Subtract(TimeSpan.FromHours(1)));
             configManager.MetadataAddress = "http://127.0.0.1";
             configManager.RequestRefresh();
+
+            // Unable to obtain a new configuration, but _currentConfiguration is not null so it should be returned.
             var configuration2 = await configManager.GetConfigurationAsync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, configuration2, context);
             if (!object.ReferenceEquals(configuration, configuration2))
@@ -642,6 +826,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         // a new LKG is set.
         [Fact]
         public void ResetLastKnownGoodLifetime()
+        {
+            ResetLastKnownGoodLifetimeBody();
+        }
+
+        [Fact]
+        public void ResetLastKnownGoodLifetime_Blocking()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            ResetLastKnownGoodLifetimeBody();
+        }
+
+        private void ResetLastKnownGoodLifetimeBody()
         {
             TestUtilities.WriteHeader($"{this}.ResetLastKnownGoodLifetime");
             var context = new CompareContext();
@@ -718,121 +914,31 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]
-        public async Task RequestRefresh_RespectsRefreshInterval()
+        [Theory, MemberData(nameof(ValidateOpenIdConnectConfigurationTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task ValidateOpenIdConnectConfigurationTests_Blocking(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
-            // This test checks that the _syncAfter field is set correctly after a refresh.
-            var context = new CompareContext($"{this}.RequestRefresh_RespectsRefreshInterval");
-
-            var timeProvider = new FakeTimeProvider();
-
-            var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
-            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
-
-            // Get the first configuration.
-            var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            configManager.RequestRefresh();
-
-            var configAfterFirstRefresh = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            // First RequestRefresh triggers a refresh.
-            if (object.ReferenceEquals(configuration, configAfterFirstRefresh))
-                context.Diffs.Add("object.ReferenceEquals(configuration, configAfterFirstRefresh)");
-
-            configManager.RequestRefresh();
-
-            var configAfterNoTimePassed = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            // Second RequestRefresh should not trigger a refresh because the refresh interval has not passed.
-            if (!object.ReferenceEquals(configAfterFirstRefresh, configAfterNoTimePassed))
-                context.Diffs.Add("!object.ReferenceEquals(configAfterFirstRefresh, configAfterNoTimePassed)");
-
-            // Advance time to trigger a refresh.
-            timeProvider.Advance(configManager.RefreshInterval);
-
-            configManager.RequestRefresh();
-
-            var configAfterRefreshInterval = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            // Third RequestRefresh should trigger a refresh because the refresh interval has passed.
-            if (object.ReferenceEquals(configAfterNoTimePassed, configAfterRefreshInterval))
-                context.Diffs.Add("object.ReferenceEquals(configAfterNoTimePassed, configAfterRefreshInterval)");
-
-            // Advance time just prior to a refresh.
-            timeProvider.Advance(configManager.RefreshInterval.Subtract(TimeSpan.FromSeconds(1)));
-
-            var configAfterLessThanRefreshInterval = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            // Fourth RequestRefresh should not trigger a refresh because the refresh interval has not passed.
-            if (!object.ReferenceEquals(configAfterRefreshInterval, configAfterLessThanRefreshInterval))
-                context.Diffs.Add("object.ReferenceEquals(configAfterRefreshInterval, configAfterLessThanRefreshInterval)");
-
-            // Advance time 365 days.
-            timeProvider.Advance(TimeSpan.FromDays(365));
-
-            var configAfterOneYear = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            // Fifth RequestRefresh should trigger a refresh because the refresh interval has passed.
-            if (!object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear))
-                context.Diffs.Add("object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear)");
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        [Fact]
-        public async Task GetConfigurationAsync_RespectsRefreshInterval()
-        {
-            var context = new CompareContext($"{this}.GetConfigurationAsync_RespectsRefreshInterval");
-
-            var timeProvider = new FakeTimeProvider();
-
-            var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
-            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
-
-            TimeSpan advanceInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval.Add(TimeSpan.FromSeconds(configManager.AutomaticRefreshInterval.TotalSeconds / 20));
-
-            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
-
-            // Get the first configuration.
-            var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            var configNoAdvanceInTime = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            // First GetConfigurationAsync should not trigger a refresh because the refresh interval has not passed.
-            if (!object.ReferenceEquals(configuration, configNoAdvanceInTime))
-                context.Diffs.Add("!object.ReferenceEquals(configuration, configNoAdvanceInTime)");
-
-            // Advance time to trigger a refresh.
-            timeProvider.Advance(advanceInterval);
-
-            var configAfterTimeIsAdvanced = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            // Same config, but a task is queued to update the configuration.
-            if (!object.ReferenceEquals(configNoAdvanceInTime, configAfterTimeIsAdvanced))
-                context.Diffs.Add("!object.ReferenceEquals(configuration, configAfterTimeIsAdvanced)");
-
-            // Need to wait for background task to finish.
-            Thread.Sleep(250);
-
-            var configAfterBackgroundTask = await configManager.GetConfigurationAsync(CancellationToken.None);
-
-            // Configuration should be updated after the background task finishes.
-            if (object.ReferenceEquals(configAfterTimeIsAdvanced, configAfterBackgroundTask))
-                context.Diffs.Add("object.ReferenceEquals(configuration, configAfterBackgroundTask)");
-
-            TestUtilities.AssertFailIfErrors(context);
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            await ValidateOIDCConfigurationBody(theoryData, true);
         }
 
         [Theory, MemberData(nameof(ValidateOpenIdConnectConfigurationTestCases), DisableDiscoveryEnumeration = true)]
         public async Task ValidateOpenIdConnectConfigurationTests(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
+            await ValidateOIDCConfigurationBody(theoryData);
+        }
+
+        private async Task ValidateOIDCConfigurationBody(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData, bool blocking = false)
+        {
             TestUtilities.WriteHeader($"{this}.ValidateOpenIdConnectConfigurationTests");
             var context = new CompareContext();
             OpenIdConnectConfiguration configuration;
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetriever, theoryData.DocumentRetriever, theoryData.ConfigurationValidator);
+            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                theoryData.MetadataAddress,
+                theoryData.ConfigurationRetriever,
+                theoryData.DocumentRetriever,
+                theoryData.ConfigurationValidator);
+
+            var resetEvent = SetupResetEvent(configurationManager);
 
             if (theoryData.PresetCurrentConfiguration)
                 TestUtilities.SetField(configurationManager, "_currentConfiguration", new OpenIdConnectConfiguration() { Issuer = Default.Issuer });
@@ -840,11 +946,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
                 //create a listener and enable it for logs
-                var listener = TestUtils.SampleListener.CreateLoggerListener(EventLevel.Warning);
+                using var listener = TestUtils.SampleListener.CreateLoggerListener(EventLevel.Warning);
+
                 configuration = await configurationManager.GetConfigurationAsync();
 
-                // we need to sleep here to make sure the task that updates configuration has finished.
-                Thread.Sleep(250);
+                if (!blocking && theoryData.ExpectedException is null && string.IsNullOrEmpty(theoryData.ExpectedErrorMessage))
+                    WaitOrFail(resetEvent);
+
+                // Need to wait for the events on the listener to be processed.
+                if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage))
+                {
+                    var success = await PollForConditionAsync(
+                        () => listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage),
+                        TimeSpan.FromMilliseconds(100),
+                        TimeSpan.FromSeconds(10));
+                }
 
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage) && !listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage))
                     context.AddDiff($"Expected exception to contain: '{theoryData.ExpectedErrorMessage}'.{Environment.NewLine}Log is:{Environment.NewLine}'{listener.TraceBuffer}'");
@@ -860,6 +976,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        internal static async Task<bool> PollForConditionAsync(Func<bool> condition, TimeSpan interval, TimeSpan timeout)
+        {
+            var startTime = DateTime.UtcNow;
+
+            while (DateTime.UtcNow - startTime < timeout)
+            {
+                if (condition())
+                    return true;
+
+                try
+                {
+                    await Task.Delay(interval);
+                }
+                catch (TaskCanceledException)
+                {
+                    return false;
+                }
+            }
+
+            return false;
         }
 
         public static TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>> ValidateOpenIdConnectConfigurationTestCases
@@ -887,7 +1025,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21818:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadata.json",
-                    TestId = "ValidConfiguration_NotEnoughKey"
+                    TestId = "ValidConfiguration_NotEnoughKey",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -898,7 +1037,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX21818: ",
                     MetadataAddress = "OpenIdConnectMetadata.json",
-                    TestId = "ValidConfiguration_NotEnoughKey_PresetCurrentConfiguration"
+                    TestId = "ValidConfiguration_NotEnoughKey_PresetCurrentConfiguration",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -908,7 +1048,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10810:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadataUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_UnrecognizedKty"
+                    TestId = "InvalidConfiguration_UnrecognizedKty",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -919,7 +1060,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX10810: ",
                     MetadataAddress = "OpenIdConnectMetadataUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_UnrecognizedKty_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_UnrecognizedKty_PresetCurrentConfiguration",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -929,7 +1071,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21817:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet"
+                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -940,7 +1083,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX21817: ",
                     MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet_PresetCurrentConfiguration",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -950,7 +1094,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10814:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadataBadRsaDataMissingComponent.json",
-                    TestId = "InvalidConfiguration_RsaKeyMissingComponent"
+                    TestId = "InvalidConfiguration_RsaKeyMissingComponent",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -961,7 +1106,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX10814: ",
                     MetadataAddress = "OpenIdConnectMetadataBadRsaDataMissingComponent.json",
-                    TestId = "InvalidConfiguration_RsaKeyMissingComponent_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_RsaKeyMissingComponent_PresetCurrentConfiguration",
+                    WaitForEvent = true
                 });
 
                 return theoryData;
@@ -989,6 +1135,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 },
                 waitEvent,
                 signalEvent);
+        }
+
+        internal static AutoResetEvent SetupResetEvent(ConfigurationManager<OpenIdConnectConfiguration> configurationManager)
+        {
+            var resetEvent = new AutoResetEvent(false);
+
+            Action _waitAction = () => resetEvent.Set();
+            configurationManager._onBackgroundTaskFinish = _waitAction;
+
+            return resetEvent;
+        }
+
+        internal static void WaitOrFail(AutoResetEvent are)
+        {
+            if (!are.WaitOne(30000))
+                Assert.Fail("Failed to receive a signal in 30s, failing test");
         }
 
         public class ConfigurationManagerTheoryData<T> : TheoryDataBase where T : class
@@ -1028,6 +1190,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             public int SleepTimeInMs { get; set; } = 0;
 
             public DateTimeOffset SyncAfter { get; set; } = DateTime.UtcNow;
+
+            public bool WaitForEvent { get; set; }
 
             public override string ToString()
             {

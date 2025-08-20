@@ -57,6 +57,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.MetadataAddressTag, null },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Lkg },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceUnknown },
             };
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);

@@ -511,7 +511,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     return tokenValidationResult;
                 }
-                else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception))
+                else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception, (currentConfiguration != null && currentConfiguration.TokenDecryptionKeys.Count > 0)))
                 {
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
                     // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
@@ -521,7 +521,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         _telemetryClient.IncrementConfigurationRefreshRequestCounter(
                             validationParameters.ConfigurationManager.MetadataAddress,
-                            TelemetryConstants.Protocols.Lkg);
+                            TelemetryConstants.Protocols.Lkg,
+                            TelemetryConstants.Protocols.ConfigurationSourceUnknown);
 
                         validationParameters.ConfigurationManager.RequestRefresh();
                         validationParameters.RefreshBeforeValidation = true;
@@ -597,7 +598,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
-            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer, null)
+            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer)
             {
                 IsValid = true,
                 TokenType = tokenType

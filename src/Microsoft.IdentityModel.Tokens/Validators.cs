@@ -117,12 +117,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (AudienceIsValid(audiences, validationParameters, validationParametersAudiences))
                 return;
 
-            SecurityTokenInvalidAudienceException ex = new SecurityTokenInvalidAudienceException(
-                LogHelper.FormatInvariant(LogMessages.IDX10214,
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(audiences)),
-                    LogHelper.MarkAsNonPII(validationParameters.ValidAudience ?? "null"),
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))))
-            { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) };
+            SecurityTokenInvalidAudienceException ex;
+
+            if (AppContextSwitches.DoNotScrubExceptions)
+                ex = new SecurityTokenInvalidAudienceException(
+                    LogHelper.FormatInvariant(LogMessages.IDX10214,
+                        LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(audiences)),
+                        LogHelper.MarkAsNonPII(validationParameters.ValidAudience ?? "null"),
+                        LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))))
+                { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) };
+            else
+                ex = new SecurityTokenInvalidAudienceException(
+                    LogHelper.FormatInvariant(LogMessages.IDX10214S));
 
             if (!validationParameters.LogValidationExceptions)
                 throw ex;
@@ -137,10 +143,10 @@ namespace Microsoft.IdentityModel.Tokens
                 if (string.IsNullOrWhiteSpace(tokenAudience))
                     continue;
 
-                foreach (string validAudience in validationParametersAudiences)
+                bool TryMatchAudience(string validAudience)
                 {
                     if (string.IsNullOrWhiteSpace(validAudience))
-                        continue;
+                        return false;
 
                     if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
                     {
@@ -148,6 +154,25 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
 
                         return true;
+                    }
+
+                    return false;
+                }
+
+                if (validationParametersAudiences is IList<string> audienceList)
+                {
+                    for (int i = 0; i < audienceList.Count; i++)
+                    {
+                        if (TryMatchAudience(audienceList[i]))
+                            return true;
+                    }
+                }
+                else
+                {
+                    foreach (string validAudience in validationParametersAudiences)
+                    {
+                        if (TryMatchAudience(validAudience))
+                            return true;
                     }
                 }
             }
@@ -435,11 +460,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
-        /// <exception cref="SecurityTokenNoExpirationException">If 'expires.HasValue' is false and <see cref="TokenValidationParameters.RequireExpirationTime"/> is true.</exception>
-        /// <exception cref="SecurityTokenInvalidLifetimeException">If 'notBefore' is &gt; 'expires'.</exception>
-        /// <exception cref="SecurityTokenNotYetValidException">If 'notBefore' is &gt; DateTime.UtcNow.</exception>
-        /// <exception cref="SecurityTokenExpiredException">If 'expires' is &lt; DateTime.UtcNow.</exception>
         /// <remarks>All time comparisons apply <see cref="TokenValidationParameters.ClockSkew"/>.</remarks>
         public static void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {

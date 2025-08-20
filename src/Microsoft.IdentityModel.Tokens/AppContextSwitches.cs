@@ -71,6 +71,34 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseRfcDefinitionOfEpkAndKid => _useRfcDefinitionOfEpkAndKid ??= (AppContext.TryGetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, out bool isEnabled) && isEnabled);
 
         /// <summary>
+        /// Enabling this switch will cause the configuration manager to block other requests to GetConfigurationAsync if a request is already in progress.
+        /// The default configuration refresh behavior is if a request is already in progress, the current configuration will be returned until the ongoing request is completed on
+        /// a background thread.
+        /// </summary>
+        internal const string UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking";
+
+        private static bool? _updateConfigAsBlockingCall;
+
+        /// <summary>
+        /// Unused, part of a previous release. This is a friend, so we cannot remove.
+        /// </summary>
+        internal static bool UpdateConfigAsBlocking => _updateConfigAsBlockingCall ??= (AppContext.TryGetSwitch(UpdateConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
+
+        /// <summary>
+        /// When enabled, some exceptions and log messages will contain additional details. Enable temporarily only for debugging purposes.
+        /// </summary>
+        internal const string DoNotScrubExceptionsSwitch = "Switch.Microsoft.IdentityModel.DoNotScrubExceptions";
+        private static bool? _doNotScrubExceptions;
+        internal static bool DoNotScrubExceptions => _doNotScrubExceptions ??= (AppContext.TryGetSwitch(DoNotScrubExceptionsSwitch, out bool doNotScrubExceptions) && doNotScrubExceptions);
+
+        /// <summary>
+        /// When enabled, the XML type attribute will be capitalized (XML) for saml configurations.
+        /// </summary>
+        internal const string UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr";
+        private static bool? _useCapitalizedXMLTypeAttr;
+        internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -86,6 +114,15 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useRfcDefinitionOfEpkAndKid = null;
             AppContext.SetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, false);
+
+            _updateConfigAsBlockingCall = null;
+            AppContext.SetSwitch(UpdateConfigAsBlockingSwitch, false);
+
+            _doNotScrubExceptions = null;
+            AppContext.SetSwitch(DoNotScrubExceptionsSwitch, false);
+
+            _useCapitalizedXMLTypeAttr = null;
+            AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
         }
     }
 }

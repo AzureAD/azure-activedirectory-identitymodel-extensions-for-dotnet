@@ -1,139 +1,83 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomIssuerSigningKeyValidationDelegates
     {
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorDelegate(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> CustomValidationFailed(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            // Returns a CustomIssuerSigningKeyValidationError : IssuerSigningKeyValidationError
             return new CustomIssuerSigningKeyValidationError(
-                new MessageDetail(nameof(CustomIssuerSigningKeyValidatorDelegate), null),
-                ValidationFailureType.SigningKeyValidationFailed,
-                typeof(SecurityTokenInvalidSigningKeyException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(CustomValidationFailed)),
+                CustomValidationFailure.IssuerSigningKeyValidationFailed,
+                Default.GetStackFrame(),
                 signingKey,
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorCustomExceptionDelegate(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyValidationFailed(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomIssuerSigningKeyValidationError(
-                new MessageDetail(nameof(CustomIssuerSigningKeyValidatorCustomExceptionDelegate), null),
-                ValidationFailureType.SigningKeyValidationFailed,
-                typeof(CustomSecurityTokenInvalidSigningKeyException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(IssuerSigningKeyValidationFailed)),
+                SignatureKeyValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 signingKey,
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> UnknownValidationFailure(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomIssuerSigningKeyValidationError(
-                new MessageDetail(nameof(CustomIssuerSigningKeyValidatorCustomExceptionCustomFailureTypeDelegate), null),
-                CustomIssuerSigningKeyValidationError.CustomIssuerSigningKeyValidationFailureType,
-                typeof(CustomSecurityTokenInvalidSigningKeyException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(UnknownValidationFailure)),
+                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                Default.GetStackFrame(),
                 signingKey);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomIssuerSigningKeyValidationError(
-                new MessageDetail(nameof(CustomIssuerSigningKeyValidatorUnknownExceptionDelegate), null),
-                ValidationFailureType.SigningKeyValidationFailed,
-                typeof(NotSupportedException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(IssuerSigningKeyDelegate)),
+                SignatureKeyValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 signingKey,
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyValidatorThrows(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            return new CustomIssuerSigningKeyWithoutGetExceptionValidationOverrideError(
-                new MessageDetail(nameof(CustomIssuerSigningKeyValidatorWithoutGetExceptionOverrideDelegate), null),
-                typeof(CustomSecurityTokenInvalidSigningKeyException),
-                ValidationError.GetCurrentStackFrame(),
-                signingKey,
-                null);
-        }
-
-        internal static ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidatorDelegate(
-            SecurityKey signingKey,
-            SecurityToken securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new IssuerSigningKeyValidationError(
-                new MessageDetail(nameof(IssuerSigningKeyValidatorDelegate), null),
-                ValidationFailureType.SigningKeyValidationFailed,
-                typeof(SecurityTokenInvalidSigningKeyException),
-                ValidationError.GetCurrentStackFrame(),
-                signingKey,
-                null);
-        }
-
-        internal static ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidatorThrows(
-            SecurityKey signingKey,
-            SecurityToken securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            throw new CustomSecurityTokenInvalidSigningKeyException(nameof(IssuerSigningKeyValidatorThrows), null);
-        }
-
-        internal static ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidatorCustomIssuerSigningKeyExceptionTypeDelegate(
-            SecurityKey signingKey,
-            SecurityToken securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new IssuerSigningKeyValidationError(
-                new MessageDetail(nameof(IssuerSigningKeyValidatorCustomIssuerSigningKeyExceptionTypeDelegate), null),
-                ValidationFailureType.SigningKeyValidationFailed,
-                typeof(CustomSecurityTokenInvalidSigningKeyException),
-                ValidationError.GetCurrentStackFrame(),
-                signingKey,
-                null);
-        }
-
-        internal static ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidatorCustomExceptionTypeDelegate(
-            SecurityKey signingKey,
-            SecurityToken securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new IssuerSigningKeyValidationError(
-                new MessageDetail(nameof(IssuerSigningKeyValidatorCustomExceptionTypeDelegate), null),
-                ValidationFailureType.SigningKeyValidationFailed,
-                typeof(CustomSecurityTokenException),
-                ValidationError.GetCurrentStackFrame(),
-                signingKey,
+            throw new CustomSecurityTokenInvalidSigningKeyException(
+                nameof(IssuerSigningKeyValidatorThrows),
+                new SignatureKeyValidationError(
+                    new MessageDetail(nameof(IssuerSigningKeyValidatorThrows)),
+                    SignatureKeyValidationFailure.ValidationFailed,
+                    Default.GetStackFrame(),
+                    signingKey,
+                    null),
                 null);
         }
     }

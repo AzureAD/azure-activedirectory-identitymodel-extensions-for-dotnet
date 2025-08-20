@@ -270,6 +270,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         Audiences = audiences1WithTwoSlashes,
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TokenValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 }
+                    },
+                    new AudienceValidationTheoryData("ValidAudiencesList_OptimizedPath")
+                    {
+                        Audiences = new List<string> { "audience1" },
+                        TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAudiences = new List<string> { "invalidAudience", "audience1" }  // Using List<string> to test IList optimization
+                        }
+                    },
+                    new AudienceValidationTheoryData("ValidAudiencesList_EmptyList_OptimizedPath")
+                    {
+                        Audiences = new List<string> { "audience1" },
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                        TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAudiences = new List<string>()  // Empty list should still return false through optimized path
+                        }
                     }
                 };
             }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="System.Security.Claims" Version="$(SystemSecurityClaimsVersion)" />
     <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="$(MicrosoftExtensionsTimeProviderTestingVersion)" />
   </ItemGroup>
 
   <ItemGroup>
