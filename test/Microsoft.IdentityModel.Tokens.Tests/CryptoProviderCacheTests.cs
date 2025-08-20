@@ -601,7 +601,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public string Algorithm { get; set; }
 
-#if NETCOREAPP
+#if NET
         public CryptoProviderCache CryptoProviderCache { get; set; }
 #elif NET462 || NET472
         public CryptoProviderCache CryptoProviderCache { get; set; }

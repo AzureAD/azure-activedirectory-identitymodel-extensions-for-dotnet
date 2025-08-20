@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.TestExtensions
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
             var token = CreateToken(tokenDescriptor);
 
-#if NETCOREAPP
+#if NET
             return string.Concat(token.AsSpan(0, token.LastIndexOf(value: '.')), ".InvalidSignature");
 #else
             return token.Substring(0, token.LastIndexOf(value: '.')) + ".InvalidSignature";

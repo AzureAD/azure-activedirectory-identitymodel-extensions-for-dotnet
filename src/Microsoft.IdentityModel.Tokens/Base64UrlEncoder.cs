@@ -9,7 +9,7 @@ using System.Buffers.Text;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 
-#if NETCOREAPP
+#if NET
 using System.Runtime.CompilerServices;
 #endif
 
@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.Tokens
             return Decode(str.AsSpan());
         }
 
-#if NETCOREAPP
+#if NET
         [SkipLocalsInit]
 #endif
 
@@ -238,7 +238,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
-#if NETCOREAPP
+#if NET
         [SkipLocalsInit]
 #endif
 
