@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -23,8 +22,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">The parameters used for validation.</param>
         /// <param name="configuration">The optional configuration used for validation.</param>
         /// <param name="callContext">The context in which the method is called.</param>
-        /// <returns>A <see cref="OperationResult{SecurityKey, ValidationError}"/> with the <see cref="SecurityKey"/> that signed the tokenif valid or a <see cref="ValidationError"/>.</returns>
-        internal static OperationResult<SecurityKey, ValidationError> ValidateSignature(
+        /// <returns>A <see cref="ValidationResult{SecurityKey, ValidationError}"/> with the <see cref="SecurityKey"/> that signed the tokenif valid or a <see cref="ValidationError"/>.</returns>
+        internal static ValidationResult<SecurityKey, ValidationError> ValidateSignature(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -45,7 +44,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 try
                 {
-                    OperationResult<SecurityKey, ValidationError> signatureValidationResult =
+                    ValidationResult<SecurityKey, ValidationError> signatureValidationResult =
                         validationParameters.SignatureValidator(
                             jwtToken,
                             validationParameters,
@@ -127,7 +126,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static OperationResult<SecurityKey, ValidationError> ValidateSignatureUsingAllKeys(
+        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureUsingAllKeys(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -148,7 +147,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 keysTried = true;
 
                 // Validate the signature with each key.
-                OperationResult<SecurityKey, ValidationError> result = ValidateSignatureWithKey(
+                ValidationResult<SecurityKey, ValidationError> result = ValidateSignatureWithKey(
                     jwtToken,
                     validationParameters,
                     key,
@@ -219,7 +218,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static OperationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
+        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             SecurityKey key,

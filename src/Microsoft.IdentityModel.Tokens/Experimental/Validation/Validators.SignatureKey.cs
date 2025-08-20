@@ -3,7 +3,6 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -22,8 +21,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>A <see cref="OperationResult{ValidatedSignatureKey, ValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
-        internal static OperationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKeyInternal(
+        /// <returns>A <see cref="ValidationResult{ValidatedSignatureKey, ValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKeyInternal(
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -36,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                OperationResult<ValidatedSignatureKey, ValidationError> result =
+                ValidationResult<ValidatedSignatureKey, ValidationError> result =
                     validationParameters.SignatureKeyValidator(
                         securityKey,
                         securityToken,
@@ -68,8 +67,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>A <see cref="OperationResult{ValidatedSignatureKey, IssuerSigningKeyValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
-        public static OperationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
+        /// <returns>A <see cref="ValidationResult{ValidatedSignatureKey, IssuerSigningKeyValidationError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
+        public static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -103,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static OperationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
             SecurityKey securityKey,
             ValidationParameters validationParameters,
             CallContext callContext)

@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -19,19 +18,19 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             context.IgnoreType = false;
             try
             {
-                OperationResult<ValidatedToken, ValidationError> operationResult = await theoryData.TokenHandler.ValidateTokenAsync(
+                ValidationResult<ValidatedToken, ValidationError> validationResult = await theoryData.TokenHandler.ValidateTokenAsync(
                     theoryData.SecurityToken,
                     theoryData.ValidationParameters!,
                     theoryData.CallContext,
                     CancellationToken.None);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
-                    context.AddDiff("operationResult.Succeeded == true, expected false");
+                    context.AddDiff("validationResult.Succeeded == true, expected false");
                 }
                 else
                 {
-                    ValidationError validationError = operationResult.Error!;
+                    ValidationError validationError = validationResult.Error!;
                     IdentityComparer.AreValidationErrorsEqual(
                         validationError,
                         theoryData.ValidationError,

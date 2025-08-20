@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
@@ -20,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        internal static OperationResult<DateTime?, ValidationError> ValidateTokenReplayInternal(
+        internal static ValidationResult<DateTime?, ValidationError> ValidateTokenReplayInternal(
             DateTime? expires,
             string securityToken,
             ValidationParameters validationParameters,
@@ -35,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                OperationResult<DateTime?, ValidationError> result =
+                ValidationResult<DateTime?, ValidationError> result =
                     validationParameters.TokenReplayValidator(
                         expires,
                         securityToken,
@@ -67,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        public static OperationResult<DateTime?, ValidationError> ValidateTokenReplay(
+        public static ValidationResult<DateTime?, ValidationError> ValidateTokenReplay(
             DateTime? expires,
             string securityToken,
             ValidationParameters validationParameters,

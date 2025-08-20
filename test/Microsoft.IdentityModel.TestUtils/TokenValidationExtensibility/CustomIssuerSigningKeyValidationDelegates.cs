@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -10,7 +9,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomIssuerSigningKeyValidationDelegates
     {
-        internal static OperationResult<ValidatedSignatureKey, ValidationError> CustomValidationFailed(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> CustomValidationFailed(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -24,7 +23,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyValidationFailed(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyValidationFailed(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -38,7 +37,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedSignatureKey, ValidationError> UnknownValidationFailure(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> UnknownValidationFailure(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -51,7 +50,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 signingKey);
         }
 
-        internal static OperationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyDelegate(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -65,7 +64,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static OperationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyValidatorThrows(
+        internal static ValidationResult<ValidatedSignatureKey, ValidationError> IssuerSigningKeyValidatorThrows(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,

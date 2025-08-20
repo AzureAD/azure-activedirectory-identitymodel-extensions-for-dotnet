@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -21,7 +20,7 @@ namespace Microsoft.IdentityModel.TestUtils
     // since the ValidateTokenAsync method with ValidationParameters is not part of any shared interface.
     internal interface ITestingTokenHandler
     {
-        Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -31,7 +30,7 @@ namespace Microsoft.IdentityModel.TestUtils
             string token,
             TokenValidationParameters validationParameters);
 
-        Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -64,7 +63,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
         }
 
-        public async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -73,7 +72,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await _handler.ValidateTokenAsync(token, validationParameters, callContext, cancellationToken);
         }
 
-        public async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -184,7 +183,7 @@ namespace Microsoft.IdentityModel.TestUtils
     {
         private readonly SamlSecurityTokenHandler _handler = new SamlSecurityTokenHandler();
 
-        public async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -193,7 +192,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await _handler.ValidateTokenAsync(token, validationParameters, callContext, cancellationToken);
         }
 
-        public async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -302,7 +301,7 @@ namespace Microsoft.IdentityModel.TestUtils
     {
         private readonly Saml2SecurityTokenHandler _handler = new Saml2SecurityTokenHandler();
 
-        public async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -311,7 +310,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await _handler.ValidateTokenAsync(token, validationParameters, callContext, cancellationToken);
         }
 
-        public async Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,

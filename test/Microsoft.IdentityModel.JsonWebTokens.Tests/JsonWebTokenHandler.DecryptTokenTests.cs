@@ -3,7 +3,6 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt.Tests;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.TestUtils;
@@ -38,16 +37,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerDecryptTokenTests", theoryData);
-            OperationResult<string, ValidationError> operationResult = jsonWebTokenHandler.DecryptToken(
+            ValidationResult<string, ValidationError> validationResult = jsonWebTokenHandler.DecryptToken(
                 theoryData.Token,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
                 theoryData.CallContext);
 
-            if (operationResult.Succeeded)
+            if (validationResult.Succeeded)
             {
                 IdentityComparer.AreStringsEqual(
-                    operationResult.Result,
+                    validationResult.Result,
                     theoryData.OperationResult.Result,
                     context);
 
@@ -55,7 +54,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             else
             {
-                ValidationError validationError = operationResult.Error;
+                ValidationError validationError = validationResult.Error;
                 IdentityComparer.AreStringsEqual(
                     validationError.FailureType.Name,
                     theoryData.OperationResult.Error.FailureType.Name,
@@ -72,7 +71,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void DecryptToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
-            OperationResult<string, ValidationError> tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
+            ValidationResult<string, ValidationError> tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
                 null,
                 null,
                 null,
@@ -311,7 +310,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     {
         public TokenDecryptingTheoryData(string testId) : base(testId) { }
         public JsonWebToken Token { get; set; }
-        internal OperationResult<string, ValidationError> OperationResult { get; set; }
+        internal ValidationResult<string, ValidationError> OperationResult { get; set; }
         public BaseConfiguration Configuration { get; internal set; }
         public SecurityTokenDescriptor SecurityTokenDescriptor { get; internal set; }
         public string TokenString { get; internal set; }

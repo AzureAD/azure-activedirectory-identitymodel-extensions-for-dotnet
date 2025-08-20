@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -19,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<ValidatedLifetime, ValidationError> operationResult =
+                ValidationResult<ValidatedLifetime, ValidationError> validationResult =
                     Validators.ValidateLifetime(
                         theoryData.NotBefore,
                         theoryData.Expires,
@@ -27,13 +26,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         theoryData.ValidationParameters,
                         theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
-                    context.AddDiff($"Expected operationResult to fail, but it succeeded with: {operationResult.Result}.");
+                    context.AddDiff($"Expected validationResult to fail, but it succeeded with: {validationResult.Result}.");
                 }
                 else
                 {
-                    ValidationError validationError = operationResult.Error;
+                    ValidationError validationError = validationResult.Error;
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
                         theoryData.OperationResult.Error!.FailureType.Name,
@@ -187,23 +186,23 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<ValidatedLifetime, ValidationError> operationResult = Validators.ValidateLifetime(
+                ValidationResult<ValidatedLifetime, ValidationError> validationResult = Validators.ValidateLifetime(
                     theoryData.NotBefore,
                     theoryData.Expires,
                     theoryData.SecurityToken,
                     theoryData.ValidationParameters,
                     theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
                     IdentityComparer.AreValidatedLifetimesEqual(
                         theoryData.OperationResult.Result,
-                        operationResult.Result,
+                        validationResult.Result,
                         context);
                 }
                 else
                 {
-                    context.AddDiff($"Expected operationResult to succeed, but it failed with: {operationResult.Error}.");
+                    context.AddDiff($"Expected validationResult to succeed, but it failed with: {validationResult.Error}.");
                 }
             }
             catch (Exception ex)
@@ -274,7 +273,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public DateTime? Expires { get; set; }
         public SecurityToken SecurityToken { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
-        internal OperationResult<ValidatedLifetime, LifetimeValidationError> OperationResult { get; set; }
+        internal ValidationResult<ValidatedLifetime, LifetimeValidationError> OperationResult { get; set; }
         internal ValidationFailureType ValidationFailure { get; set; }
     }
 }

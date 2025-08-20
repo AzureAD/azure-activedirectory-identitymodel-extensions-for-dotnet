@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -520,7 +519,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, a <see cref="OperationResult{TResult, TError}"/> MUST be returned by the delegate.
+        /// If the token type cannot be validated, a <see cref="ValidationResult{TResult, TError}"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>

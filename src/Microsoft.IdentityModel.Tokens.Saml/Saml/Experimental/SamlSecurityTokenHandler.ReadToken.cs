@@ -4,7 +4,6 @@
 using System;
 using System.Text;
 using System.Xml;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -14,12 +13,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
         /// <summary>
-        /// Converts a string into an instance of <see cref="SamlSecurityToken"/>, returned inside of a <see cref="OperationResult{SecurityToken, ValidationError}"/>.
+        /// Converts a string into an instance of <see cref="SamlSecurityToken"/>, returned inside of a <see cref="ValidationResult{SecurityToken, ValidationError}"/>.
         /// </summary>
         /// <param name="token">A Saml token as a string.</param>
         /// <param name="callContext"></param>
-        /// <returns>A <see cref="OperationResult{SecurityToken, ValidationError}"/> with the <see cref="SamlSecurityToken"/> or a <see cref="ValidationError"/>.</returns>
-        internal virtual OperationResult<SecurityToken, ValidationError> ReadSamlToken(string token, CallContext callContext)
+        /// <returns>A <see cref="ValidationResult{SecurityToken, ValidationError}"/> with the <see cref="SamlSecurityToken"/> or a <see cref="ValidationError"/>.</returns>
+        internal virtual ValidationResult<SecurityToken, ValidationError> ReadSamlToken(string token, CallContext callContext)
         {
             if (string.IsNullOrEmpty(token))
                 return ValidationError.NullParameter(

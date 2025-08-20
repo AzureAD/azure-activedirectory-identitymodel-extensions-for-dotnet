@@ -3,7 +3,6 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -12,14 +11,14 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomIssuerValidationDelegates
     {
-        internal async static Task<OperationResult<ValidatedIssuer, ValidationError>> CustomValidationFailed(
+        internal async static Task<ValidationResult<ValidatedIssuer, ValidationError>> CustomValidationFailed(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            return await Task.FromResult(new OperationResult<ValidatedIssuer, ValidationError>(
+            return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                 new CustomIssuerValidationError(
                     new MessageDetail(nameof(CustomValidationFailed)),
                     CustomValidationFailure.IssuerValidationFailed,
@@ -27,14 +26,14 @@ namespace Microsoft.IdentityModel.TestUtils
                     issuer)));
         }
 
-        internal async static Task<OperationResult<ValidatedIssuer, ValidationError>> IssuerValidationFailed(
+        internal async static Task<ValidationResult<ValidatedIssuer, ValidationError>> IssuerValidationFailed(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            return await Task.FromResult(new OperationResult<ValidatedIssuer, ValidationError>(
+            return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                 new CustomIssuerValidationError(
                     new MessageDetail(nameof(IssuerValidationFailed)),
                     IssuerValidationFailure.ValidationFailed,
@@ -42,14 +41,14 @@ namespace Microsoft.IdentityModel.TestUtils
                     issuer)));
         }
 
-        internal async static Task<OperationResult<ValidatedIssuer, ValidationError>> UnknownValidationFailure(
+        internal async static Task<ValidationResult<ValidatedIssuer, ValidationError>> UnknownValidationFailure(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            return await Task.FromResult(new OperationResult<ValidatedIssuer, ValidationError>(
+            return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                 new CustomIssuerValidationError(
                     new MessageDetail(nameof(UnknownValidationFailure)),
                     AlgorithmValidationFailure.AlgorithmIsNotSupported,
@@ -57,14 +56,14 @@ namespace Microsoft.IdentityModel.TestUtils
                     issuer)));
         }
 
-        internal async static Task<OperationResult<ValidatedIssuer, ValidationError>> IssuerValidatorDelegateAsync(
+        internal async static Task<ValidationResult<ValidatedIssuer, ValidationError>> IssuerValidatorDelegateAsync(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            return await Task.FromResult(new OperationResult<ValidatedIssuer, ValidationError>(
+            return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                 new IssuerValidationError(
                     new MessageDetail(nameof(IssuerValidatorDelegateAsync)),
                     IssuerValidationFailure.ValidationFailed,
@@ -72,7 +71,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     issuer)));
         }
 
-        internal static Task<OperationResult<ValidatedIssuer, ValidationError>> IssuerValidatorThrows(
+        internal static Task<ValidationResult<ValidatedIssuer, ValidationError>> IssuerValidatorThrows(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,

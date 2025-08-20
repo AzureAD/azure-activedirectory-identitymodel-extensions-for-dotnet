@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -24,24 +23,24 @@ namespace Microsoft.IdentityModel.TestUtils
                         theoryData.Token,
                         theoryData.TokenValidationParameters!);
 
-                OperationResult<ValidatedToken, ValidationError> operationResult =
+                ValidationResult<ValidatedToken, ValidationError> validationResult =
                     await theoryData.TestingTokenHandler.ValidateTokenAsync(
                         theoryData.Token,
                         theoryData.ValidationParameters!,
                         theoryData.CallContext,
                         CancellationToken.None);
 
-                if (tokenValidationResult.IsValid != operationResult.Succeeded)
-                    context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != operationResult.Succeeded: '{operationResult.Succeeded}'.");
+                if (tokenValidationResult.IsValid != validationResult.Succeeded)
+                    context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != validationResult.Succeeded: '{validationResult.Succeeded}'.");
 
-                if (!operationResult.Succeeded)
+                if (!validationResult.Succeeded)
                 {
                     context.AddDiff($"Expected test to succeed, test failed: {theoryData.TestId}.");
-                    context.AddDiff($"Message: {operationResult.Error!.Message}");
+                    context.AddDiff($"Message: {validationResult.Error!.Message}");
                 }
                 else
                 {
-                    IdentityComparer.AreEqual(operationResult.Result!.SecurityToken, tokenValidationResult.SecurityToken, context);
+                    IdentityComparer.AreEqual(validationResult.Result!.SecurityToken, tokenValidationResult.SecurityToken, context);
                 }
             }
             else
@@ -59,22 +58,22 @@ namespace Microsoft.IdentityModel.TestUtils
                         theoryData.Token,
                         theoryData.TokenValidationParameters!);
 
-                OperationResult<ValidatedToken, ValidationError> operationResult =
+                ValidationResult<ValidatedToken, ValidationError> validationResult =
                     await theoryData.TestingTokenHandler.ValidateTokenAsync(
                         theoryData.Token,
                         theoryData.ValidationParameters!,
                         theoryData.CallContext,
                         CancellationToken.None);
 
-                // TODO add check for ValidationErrorType in the operationResult.Error
+                // TODO add check for ValidationErrorType in the validationResult.Error
 
-                if (tokenValidationResult.IsValid != operationResult.Succeeded)
-                    context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != OperationResult.Succeeded: '{operationResult.Succeeded}'.");
+                if (tokenValidationResult.IsValid != validationResult.Succeeded)
+                    context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != OperationResult.Succeeded: '{validationResult.Succeeded}'.");
 
                 if (tokenValidationResult.IsValid)
                     context.AddDiff($"Expected test to fail, test succeeded (TokenValidationResult): {theoryData.TestId}.");
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
                     context.AddDiff($"Expected test to fail, test succeeded (OperationResult): {theoryData.TestId}.");
                 }
@@ -96,7 +95,7 @@ namespace Microsoft.IdentityModel.TestUtils
                         }
                     }
 
-                    theoryData.ExpectedExceptionValidationParameters!.ProcessException(operationResult.Error!.GetException(), context, "OperationResult");
+                    theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.Error!.GetException(), context, "OperationResult");
                 }
             }
             else

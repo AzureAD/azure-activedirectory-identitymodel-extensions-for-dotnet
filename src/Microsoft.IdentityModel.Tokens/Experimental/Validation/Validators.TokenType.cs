@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -22,9 +21,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns> A <see cref="OperationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
+        /// <returns> A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-        internal static OperationResult<ValidatedTokenType, ValidationError> ValidateTokenTypeInternal(
+        internal static ValidationResult<ValidatedTokenType, ValidationError> ValidateTokenTypeInternal(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -44,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                OperationResult<ValidatedTokenType, ValidationError> result =
+                ValidationResult<ValidatedTokenType, ValidationError> result =
                     validationParameters.TokenTypeValidator(
                         type,
                         securityToken,
@@ -76,9 +75,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns> A <see cref="OperationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
+        /// <returns> A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-        public static OperationResult<ValidatedTokenType, ValidationError> ValidateTokenType(
+        public static ValidationResult<ValidatedTokenType, ValidationError> ValidateTokenType(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,

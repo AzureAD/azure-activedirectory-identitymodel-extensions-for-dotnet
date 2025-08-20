@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
@@ -30,18 +29,18 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         theoryData.ValidationParameters.ValidAudiences.Add(audience);
                 }
 
-                OperationResult<string, ValidationError> operationResult =
+                ValidationResult<string, ValidationError> validationResult =
                     Validators.ValidateAudience(
                         theoryData.TokenAudiences,
                         theoryData.SecurityToken,
                         theoryData.ValidationParameters,
                         theoryData.CallContext);
 
-                if (operationResult.Succeeded)
-                    context.Diffs.Add($"Expected operation to fail, but it succeeded. TestId {theoryData.TestId}.");
+                if (validationResult.Succeeded)
+                    context.Diffs.Add($"Expected validation to fail, but it succeeded. TestId {theoryData.TestId}.");
                 else
                 {
-                    ValidationError validationError = operationResult.Error;
+                    ValidationError validationError = validationResult.Error;
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
                         theoryData.OperationResult.Error.FailureType.Name,
@@ -190,20 +189,20 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<string, ValidationError> operationResult =
+                ValidationResult<string, ValidationError> validationResult =
                     Validators.ValidateAudience(
                         theoryData.TokenAudiences,
                         theoryData.SecurityToken,
                         theoryData.ValidationParameters,
                         theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
-                    context.Diffs.Add($"Expected operation to fail, but it succeeded. TestId {theoryData.TestId}.");
+                    context.Diffs.Add($"Expected validation to fail, but it succeeded. TestId {theoryData.TestId}.");
                 }
                 else
                 {
-                    ValidationError validationError = operationResult.Error;
+                    ValidationError validationError = validationResult.Error;
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
                         theoryData.OperationResult.Error.FailureType.Name,
@@ -468,23 +467,23 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<string, ValidationError> operationResult =
+                ValidationResult<string, ValidationError> validationResult =
                     Validators.ValidateAudience(
                         theoryData.TokenAudiences,
                         theoryData.SecurityToken,
                         theoryData.ValidationParameters,
                         theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
                     IdentityComparer.AreStringsEqual(
-                        operationResult.Result,
+                        validationResult.Result,
                         theoryData.OperationResult.Result,
                         context);
                 }
                 else
                 {
-                    context.Diffs.Add($"Expected operation to succeed, but it failed with: {operationResult.Error}.");
+                    context.Diffs.Add($"Expected validation to succeed, but it failed with: {validationResult.Error}.");
                 }
             }
             catch (Exception ex)
@@ -554,7 +553,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             internal ValidationParameters ValidationParameters { get; set; } = new ValidationParameters();
             internal ValidationFailureType ValidationFailure { get; set; }
             public List<string> ValidAudiences { get; set; }
-            internal OperationResult<string, AudienceValidationError> OperationResult { get; set; }
+            internal ValidationResult<string, AudienceValidationError> OperationResult { get; set; }
             internal bool DoNotScrubErrorMessages { get; set; }
         }
     }

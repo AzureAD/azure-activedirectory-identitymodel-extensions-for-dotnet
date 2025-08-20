@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -20,14 +19,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             CompareContext context = TestUtilities.WriteHeader($"{this}.CallStack", theoryData);
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
 
-            OperationResult<ValidatedToken, ValidationError> operationResult =
+            ValidationResult<ValidatedToken, ValidationError> validationResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     theoryData.SecurityToken,
                     theoryData.ValidationParameters,
                     theoryData.CallContext,
                     CancellationToken.None);
 
-            operationResult =
+            validationResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     theoryData.SecurityToken,
                     theoryData.ValidationParameters,
@@ -93,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public StackFrameTheoryData(string testId) : base(testId) { }
         public SecurityToken SecurityToken { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
-        internal OperationResult<ValidatedLifetime, LifetimeValidationError> OperationResult { get; set; }
+        internal ValidationResult<ValidatedLifetime, LifetimeValidationError> OperationResult { get; set; }
         internal ValidationFailureType ValidationFailure { get; set; }
     }
 }

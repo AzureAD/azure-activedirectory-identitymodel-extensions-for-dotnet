@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using Xunit;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
-using Microsoft.Identity.Abstractions;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -31,7 +30,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
             CallContext callContext = new CallContext();
 
-            OperationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.Succeeded);
             Assert.Null(validationResult.Result);
@@ -52,7 +51,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             );
             CallContext callContext = new CallContext();
 
-            OperationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.True(validationResult.Succeeded);
             Assert.NotNull(validationResult.Result);
@@ -72,11 +71,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             );
             CallContext callContext = new CallContext();
 
-            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.True(operationResult.Succeeded);
-            Assert.NotNull(operationResult.Result);
-            Assert.Null(operationResult.Error);
+            Assert.True(validationResult.Succeeded);
+            Assert.NotNull(validationResult.Result);
+            Assert.Null(validationResult.Error);
             // The iat claim is optional.
         }
 
@@ -91,11 +90,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             );
             CallContext callContext = new CallContext();
 
-            OperationResult<ValidatedToken, ValidationError> operationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            Assert.True(operationResult.Succeeded);
-            Assert.NotNull(operationResult.Result);
-            Assert.Null(operationResult.Error);
+            Assert.True(validationResult.Succeeded);
+            Assert.NotNull(validationResult.Result);
+            Assert.Null(validationResult.Error);
             // The nbf claim is optional.
         }
     }

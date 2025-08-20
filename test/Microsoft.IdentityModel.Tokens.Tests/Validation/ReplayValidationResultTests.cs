@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -18,19 +17,19 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             CompareContext context = TestUtilities.WriteHeader($"{this}.InvalidReplays", theoryData);
             try
             {
-                OperationResult<DateTime?, ValidationError> operationResult = Validators.ValidateTokenReplay(
+                ValidationResult<DateTime?, ValidationError> validationResult = Validators.ValidateTokenReplay(
                     theoryData.ExpirationTime,
                     theoryData.SecurityToken,
                     theoryData.ValidationParameters,
                     theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
-                    context.AddDiff($"Expected operationResult to fail, but it succeeded with: {operationResult.Result}.");
+                    context.AddDiff($"Expected validationResult to fail, but it succeeded with: {validationResult.Result}.");
                 }
                 else
                 {
-                    ValidationError validationError = operationResult.Error;
+                    ValidationError validationError = validationResult.Error;
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
                         theoryData.OperationResult.Error.FailureType.Name,
@@ -173,23 +172,23 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<DateTime?, ValidationError> operationResult = Validators.ValidateTokenReplay(
+                ValidationResult<DateTime?, ValidationError> validationResult = Validators.ValidateTokenReplay(
                     theoryData.ExpirationTime,
                     theoryData.SecurityToken,
                     theoryData.ValidationParameters,
                     theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
                     IdentityComparer.AreDateTimesEqualWithEpsilon(
-                        operationResult.Result,
+                        validationResult.Result,
                         theoryData.OperationResult.Result,
                         1,
                         context);
                 }
                 else
                 {
-                    ValidationError validationError = operationResult.Error;
+                    ValidationError validationError = validationResult.Error;
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
                         theoryData.OperationResult.Error.FailureType.Name,
@@ -247,6 +246,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public DateTime? ExpirationTime { get; set; }
         public string SecurityToken { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
-        internal OperationResult<DateTime?, TokenReplayValidationError> OperationResult { get; set; }
+        internal ValidationResult<DateTime?, TokenReplayValidationError> OperationResult { get; set; }
     }
 }
