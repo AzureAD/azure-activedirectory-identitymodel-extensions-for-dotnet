@@ -14,8 +14,14 @@
     <SystemTextJson>8.0.5</SystemTextJson>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <SuppressNETCoreSdkPreviewMessage Condition="'$(TargetNetNext)' == 'True'">true</SuppressNETCoreSdkPreviewMessage>
+  <PropertyGroup Condition="'$(TargetNetNext)' == 'True'">
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <!-- Compiling w/ Net 10.0 SDK gives the NU1510 warning in every net core version "PackageReference System.Formats.Asn1 will not be pruned.
+    Consider removing this package from your dependencies, as it is likely unnecessary." However, the ref is necessary due to Microsoft Security Advisory CVE-2024-38095.
+    For NU5104 it prevents us from packing release packages with prerelease dependencies. But we want to do that so customers can get a preview of running with .NET 10. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1510;NU5104</WarningsNotAsErrors>
+    <NoWarn>$(NoWarn);NU1510;NU5104</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
