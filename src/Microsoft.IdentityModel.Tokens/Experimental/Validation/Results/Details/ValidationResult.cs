@@ -3,7 +3,7 @@
 
 using System;
 
-#if NETCOREAPP
+#if NET
 using System.Diagnostics.CodeAnalysis;
 #endif
 
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <c>true</c> if the validation succeeded and <see cref="Result"/> contains a valid value;
         /// <c>false</c> if the validation failed and <see cref="Error"/> contains the error.
         /// </value>
-#if NETCOREAPP
+#if NET
         [MemberNotNullWhen(true, nameof(Result))]
         [MemberNotNullWhen(false, nameof(Error))]
 #endif

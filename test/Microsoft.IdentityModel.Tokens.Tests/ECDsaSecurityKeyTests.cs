@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // testing constructor that takes ECDsa instance
             ECDsaSecurityKeyConstructorWithEcdsa(null, ExpectedException.ArgumentNullException("ecdsa"));
-#if !NETCOREAPP
+#if !NET
             ECDsaSecurityKeyConstructorWithEcdsa(new ECDsaCng(), ExpectedException.NoExceptionExpected);
             var ecdsaSecurityKey = new ECDsaSecurityKey(new ECDsaCng());
 #else
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void CanComputeJwkThumbprint()
         {
-#if NET472 || NETCOREAPP
+#if NET472 || NET
             Assert.True(KeyingMaterial.Ecdsa256Key.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on an ECDsaSecurityKey on net472 or .net core.");
 #else
             Assert.False(KeyingMaterial.Ecdsa256Key.CanComputeJwkThumbprint(), "ECDsaSecurityKey shouldn't be able to compute JWK thumbprint on Desktop (net461 target).");

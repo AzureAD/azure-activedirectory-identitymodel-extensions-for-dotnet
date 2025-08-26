@@ -318,7 +318,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string P521_Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW";
         public static string P521_Invalid = "AAAAAAA----Z8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW";
 
-#if NET472 || NETCOREAPP
+#if NET472 || NET
         public static ECParameters Ecdsa256Parameters;
         public static ECParameters Ecdsa256Parameters_Public;
         public static ECParameters Ecdsa384Parameters;
@@ -484,7 +484,7 @@ namespace Microsoft.IdentityModel.TestUtils
             Ecdsa256Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Public)) { KeyId = "ECDsa256Key_Public" };
             Ecdsa384Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Public)) { KeyId = "ECDsa384Key_Public" };
             Ecdsa521Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Public)) { KeyId = "ECDsa521Key_Public" };
-#elif NET472 || NETCOREAPP
+#elif NET472 || NET
             var Ecdsa256 = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             var Ecdsa384 = ECDsa.Create(ECCurve.NamedCurves.nistP384);
             var Ecdsa521 = ECDsa.Create(ECCurve.NamedCurves.nistP521);
@@ -575,7 +575,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 #endif
 
-#if NET472 || NETCOREAPP
+#if NET472 || NET
         public static RsaSecurityKey RsaSecurityKey_2048_FromRsa
         {
             get
@@ -704,7 +704,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-#if NET472_OR_GREATER || NETCOREAPP
+#if NET472_OR_GREATER || NET
         /// <summary>
         /// Can be used to generate a self-signed certificate for testing purposes.
         /// Since we support .NET 4.6.2, we can't call directly as CertificateRequest is not available.

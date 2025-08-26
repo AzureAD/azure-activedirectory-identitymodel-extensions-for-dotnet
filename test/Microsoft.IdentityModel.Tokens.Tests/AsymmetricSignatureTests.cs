@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NETCOREAPP
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey()),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NETCOREAPP
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NETCOREAPP
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
