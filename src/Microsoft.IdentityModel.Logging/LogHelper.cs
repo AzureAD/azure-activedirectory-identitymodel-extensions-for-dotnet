@@ -545,7 +545,7 @@ namespace Microsoft.IdentityModel.Logging
                     sanitized.Append("\\n");
                 else if (c == '\t')
                     sanitized.Append("\\t");
-                else if (char.IsControl(c))
+                else if (char.IsControl(c) || CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.Format)
                     sanitized.Append($"\\u{(int)c:X4}");
                 else
                     sanitized.Append(c);
