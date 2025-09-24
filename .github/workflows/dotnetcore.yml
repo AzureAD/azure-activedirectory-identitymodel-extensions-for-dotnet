@@ -39,6 +39,11 @@ jobs:
       with:
         global-json-file: ./global.json
 
+    - name: Setup Net6.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+
     - name: Setup latest .NET 10 preview SDK
       uses: actions/setup-dotnet@v4
       with:
