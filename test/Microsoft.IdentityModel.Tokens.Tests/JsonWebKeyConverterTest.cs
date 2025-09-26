@@ -74,32 +74,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<JsonWebKeyConverterTheoryData> ConvertSecurityKeyToJsonWebKeyTheoryData
-        {
-            get
-            {
-                var theoryData = ConversionKeyTheoryData;
-#if !NET472 && !NET
-                theoryData.Add(new JsonWebKeyConverterTheoryData
-                {
-                    SecurityKey = KeyingMaterial.Ecdsa256Key,
-                    JsonWebKey = KeyingMaterial.JsonWebKeyP256_Public,
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10674"),
-                    TestId = "SecurityKeyNotSupported"
-                });
-#endif
-                return theoryData;
-            }
-        }
-
-        public static TheoryData<JsonWebKeyConverterTheoryData> ConvertToJsonWebKeyToSecurityKeyTheoryData
-        {
-            get
-            {
-                return ConversionKeyTheoryData;
-            }
-        }
-
         public static TheoryData<JsonWebKeyConverterTheoryData> ConversionKeyTheoryData
         {
             get
@@ -153,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
                     TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
                 });
-#if NET472 || NET
+#if NET472 || NET_CORE
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key_Public,

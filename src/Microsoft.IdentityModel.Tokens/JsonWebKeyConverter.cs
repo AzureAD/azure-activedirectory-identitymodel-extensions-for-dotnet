@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">a <see cref="X509SecurityKey"/> to convert.</param>
         /// <param name="representAsRsaKey">
-        /// <c>true</c> to represent the <paramref name="key"/> as an <see cref="RsaSecurityKey"/>, 
+        /// <c>true</c> to represent the <paramref name="key"/> as an <see cref="RsaSecurityKey"/>,
         /// <c>false</c> to represent the <paramref name="key"/> as an <see cref="X509SecurityKey"/>, using the "x5c" parameter.
         /// </param>
         /// <returns>a <see cref="JsonWebKey"/>.</returns>

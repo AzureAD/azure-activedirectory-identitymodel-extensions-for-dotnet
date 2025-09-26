@@ -16,8 +16,10 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class X509SecurityKey : AsymmetricSecurityKey
     {
+        const string RSAOid = "1.2.840.113549.1.1.1";
+        const string ECDsaOid = "1.2.840.10045.2.1";
+
         AsymmetricAlgorithm _privateKey;
-        bool _privateKeyAvailabilityDetermined;
         AsymmetricAlgorithm _publicKey;
 #if NET9_0_OR_GREATER
         Lock _thisLock = new();
@@ -48,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Instantiates a <see cref="X509SecurityKey"/> using a <see cref="X509Certificate2"/>.
         /// </summary>
         /// <param name="certificate">The <see cref="X509Certificate2"/> to use.</param>
-        /// <param name="keyId">The value to set for the KeyId</param>
+        /// <param name="keyId">The value to set for the KeyId.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="certificate"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="keyId"/> is null or empty.</exception>
         public X509SecurityKey(X509Certificate2 certificate, string keyId)
@@ -78,15 +80,25 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                if (!_privateKeyAvailabilityDetermined)
+                if (_privateKey == null)
                 {
                     lock (ThisLock)
                     {
-                        if (!_privateKeyAvailabilityDetermined)
+                        if (_privateKey == null)
                         {
-                            var rsaPrivateKey = Certificate.GetRSAPrivateKey();
-                            _privateKey = rsaPrivateKey != null ? rsaPrivateKey : Certificate.GetECDsaPrivateKey();
-                            _privateKeyAvailabilityDetermined = true;
+                            switch (Certificate.PublicKey.Oid.Value)
+                            {
+                                case RSAOid:
+                                    {
+                                        _privateKey = Certificate.GetRSAPrivateKey();
+                                        break;
+                                    }
+                                case ECDsaOid:
+                                    {
+                                        _privateKey = Certificate.GetECDsaPrivateKey();
+                                        break;
+                                    }
+                            }
                         }
                     }
                 }
@@ -108,8 +120,19 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (_publicKey == null)
                         {
-                            var rsaPublicKey = Certificate.GetRSAPublicKey();
-                            _publicKey = rsaPublicKey != null ? rsaPublicKey : Certificate.GetECDsaPublicKey();
+                            switch (Certificate.PublicKey.Oid.Value)
+                            {
+                                case RSAOid:
+                                    {
+                                        _publicKey = Certificate.GetRSAPublicKey();
+                                        break;
+                                    }
+                                case ECDsaOid:
+                                    {
+                                        _publicKey = Certificate.GetECDsaPublicKey();
+                                        break;
+                                    }
+                            }
                         }
                     }
                 }
@@ -129,10 +152,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>
-        [System.Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus.")]
+        [Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus.")]
         public override bool HasPrivateKey
         {
-            get { return (PrivateKey != null); }
+            get { return PrivateKey != null; }
         }
 
         /// <summary>
@@ -162,7 +185,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Determines whether the <see cref="X509SecurityKey"/> can compute a JWK thumbprint.
         /// </summary>
         /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
-        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
+        /// <remarks>See: <see href="https://datatracker.ietf.org/doc/html/rfc7638"/></remarks>
         public override bool CanComputeJwkThumbprint()
         {
             return PublicKey is RSA || PublicKey is ECDsa;
@@ -172,7 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Computes a sha256 hash over the <see cref="X509SecurityKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
-        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
+        /// <remarks>See: <see href="https://datatracker.ietf.org/doc/html/rfc7638"/></remarks>
         public override byte[] ComputeJwkThumbprint()
         {
             return PublicKey is RSA ? new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint() : new ECDsaSecurityKey(PublicKey as ECDsa).ComputeJwkThumbprint();
