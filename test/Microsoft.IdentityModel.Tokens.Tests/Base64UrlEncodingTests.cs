@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -314,15 +315,25 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
         }
 
         [Fact]
-        public void ValidateAndGetOutputSizeTests()
+        public void ValidateAndGetOutputSizeTests_InvalidInput_Throws()
         {
-            string input = string.Empty;
-            Assert.Throws<ArgumentNullException>(() => Base64UrlEncoding.ValidateAndGetOutputSize(input.AsSpan(), 0, 0));
+            Assert.Throws<ArgumentNullException>(() => Base64UrlEncoding.ValidateAndGetOutputSize(string.Empty.AsSpan(), 0, 0));
             Assert.Throws<ArgumentException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), -1, 3));
             Assert.Throws<ArgumentException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, -1));
             Assert.Throws<ArgumentException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, 4));
-            Assert.Throws<FormatException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abcde".AsSpan(), 0, 5));
 
+            IdentityModelEventSource.ShowPII = true;
+            var ex = Assert.Throws<FormatException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abcde".AsSpan(), 0, 5));
+            Assert.Equal(string.Format(LogMessages.IDX10400, "abcde"), ex.Message);
+
+            IdentityModelEventSource.ShowPII = false;
+            ex = Assert.Throws<FormatException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abcde".AsSpan(), 0, 5));
+            Assert.Equal(string.Format(LogMessages.IDX10400, string.Format(IdentityModelEventSource.HiddenPIIString, "abcde".GetType())), ex.Message);
+        }
+
+        [Fact]
+        public void ValidateAndGetOutputSizeTests_ValidInput_ReturnsSize()
+        {
             int actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, 0);
             Assert.Equal(0, actualOutputSize);
 
