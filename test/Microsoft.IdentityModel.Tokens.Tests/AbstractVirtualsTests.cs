@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             catch (Exception ex)
             {
-                Assert.Contains("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
+                Assert.Contains("internal virtual Task<OperationResult<ValidatedToken, ValidationError>> " +
                         "ValidateTokenAsync(string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)",
                         ex.Message);
 
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             catch (Exception ex)
             {
-                Assert.Contains("internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> " +
+                Assert.Contains("internal virtual Task<OperationResult<ValidatedToken, ValidationError>> " +
                         "ValidateTokenAsync(SecurityToken token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)",
                         ex.Message);
 

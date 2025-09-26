@@ -9,8 +9,16 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10519 = "IDX10519: Signature
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10520 = "IDX10520: Signature validation failed. The key provided could not validate the signature. Key tried: '{0}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10521 = "IDX10521: Signature validation failed. An exception was thrown when trying to validate the signature. Key tried: '{0}'. Exception: '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10620 = "IDX10620: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CryptoProviderFactory are null." -> string
-Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, System.Exception exception) -> void
-Microsoft.IdentityModel.Telemetry.TelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, System.Exception exception) -> void
+Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource) -> void
+Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource, System.Exception exception) -> void
+Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, System.Exception exception) -> void
+Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration, System.Exception exception) -> void
+Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource) -> void
+Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource, System.Exception exception) -> void
+Microsoft.IdentityModel.Telemetry.TelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, System.Exception exception) -> void
+Microsoft.IdentityModel.Telemetry.TelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Telemetry.TelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.ValidatedSigningKeyLifetime(System.DateTime? validFrom, System.DateTime? validTo, System.DateTime? validationTime) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ActorValidationResult.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ClaimsIdentityNoLocking.get -> System.Security.Claims.ClaimsIdentity
@@ -24,7 +32,7 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenReplayE
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenType.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.CreateException(System.Type exceptionType, System.Exception innerException) -> System.Exception
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.MessageDetail.get -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail
-Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.Name.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationFailure.Name.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerSigningKeys.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TimeProvider.get -> System.TimeProvider
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TimeProvider.set -> void

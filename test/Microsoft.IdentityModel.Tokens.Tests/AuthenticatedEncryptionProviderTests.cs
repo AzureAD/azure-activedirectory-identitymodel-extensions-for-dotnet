@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#if NET_CORE
+#if NET
         [Fact]
         public void AesGcm_Dispose()
         {

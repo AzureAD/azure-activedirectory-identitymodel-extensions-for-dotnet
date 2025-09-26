@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     SecurityKey = KeyingMaterial.DefaultX509Key_2048_Public,
                     TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
                 });
-#if NET472 || NET_CORE
+#if NET472 || NET
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
@@ -173,8 +173,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedInternalId = Base64UrlEncoder.Encode(KeyingMaterial.JsonWebKeyRsa_2048_Public.ComputeJwkThumbprint()),
                         TestId = nameof(KeyingMaterial.JsonWebKeyRsa_2048_Public)
                     },
-#if NET472 || NET_CORE
-                    // EcdsaSecurityKey should have InternalId set to its jwk thumbprint on NET472 and NET_CORE.
+#if NET472 || NET
+                    // EcdsaSecurityKey should have InternalId set to its jwk thumbprint on NET472 and NET.
                     new SecurityKeyTheoryData
                     {
                         SecurityKey = KeyingMaterial.Ecdsa256Key_Public,

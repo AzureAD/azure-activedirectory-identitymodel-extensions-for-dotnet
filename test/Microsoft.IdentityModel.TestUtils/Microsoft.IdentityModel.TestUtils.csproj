@@ -14,12 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Security.Claims" Version="$(SystemSecurityClaimsVersion)" />
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
-    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="$(MicrosoftExtensionsTimeProviderTestingVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.OpenIdConnect\Microsoft.IdentityModel.Protocols.OpenIdConnect.csproj" />
@@ -28,6 +22,12 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="$(MicrosoftExtensionsTimeProviderTestingVersion)" />
+    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
   </ItemGroup>
 
   <ItemGroup>

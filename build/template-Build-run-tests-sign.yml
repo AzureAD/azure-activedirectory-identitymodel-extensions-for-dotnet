@@ -33,6 +33,14 @@ steps:
     version: 8.x
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 10.x'
+  inputs:
+    useGlobalJson: false
+    includePreviewVersions: true
+    version: 10.x
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet --list-sdks'
   inputs:

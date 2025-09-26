@@ -74,13 +74,14 @@ Through its robust architecture and battle-tested components, IdentityModel prov
 - Test with different key types and sizes
 - Verify protocol compliance
 
-### Public API Changes
-- The project uses Microsoft.CodeAnalysis.PublicApiAnalyzers (version 3.3.4)
-- For any public API changes:
-  1. Update PublicAPI.Unshipped.txt in the relevant package directory
-  2. Include complete API signatures
-  3. Consider backward compatibility impacts
-  4. Document breaking changes clearly
+### Public and Internal API Changes
+- The project uses Microsoft.CodeAnalysis.PublicApiAnalyzers
+- For any public and internal API (i.e. public and internal member) changes:
+  1. Update PublicAPI.Unshipped.txt in the relevant package directory for a public API change
+  2. Update InternalAPI.Unshipped.txt in the relevant package directory for an internal API change
+  3. Include complete API signatures
+  4. Consider backward compatibility impacts
+  5. Document breaking changes clearly
 
 Example format:
 ```diff
@@ -92,4 +93,4 @@ Example format:
 -Microsoft.IdentityModel.Tokens.ObsoleteTokenValidationMethod() -> void
 ```
 
-The analyzer enforces documentation of all public API changes in PublicAPI.Unshipped.txt and will fail the build if changes are not properly reflected.
+The analyzer enforces documentation of all public API changes in PublicAPI.Unshipped.txt and all internal API changes in InternalAPI.Unshipped.txt and will fail the build if changes are not properly reflected.

@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the <see cref="SecurityToken"/> associated with this claims identity.
         /// </summary>
         [field: NonSerialized]
-        public SecurityToken SecurityToken { get; internal set; }
+        public SecurityToken SecurityToken { get; protected internal set; }
 
         /// <summary>
         /// Initializes an instance of <see cref="CaseSensitiveClaimsIdentity"/>.

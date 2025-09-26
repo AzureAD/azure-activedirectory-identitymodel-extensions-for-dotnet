@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.IdentityModel.Logging
@@ -399,7 +400,7 @@ namespace Microsoft.IdentityModel.Logging
             // If it's not a ISafeLogSecurityArtifact then just return the object which will be converted to string.
             // It's possible a raw string will contain a security artifact and be exposed here but the alternative is to scrub all objects
             // which defeats the purpose of the ShowPII flag.
-            return arg;
+            return Sanitize(arg.ToString()); //Sanitizes PII strings when ShowPII is true.
         }
 
         private static string RemovePII(object arg)
@@ -408,7 +409,7 @@ namespace Microsoft.IdentityModel.Logging
                 return ex.ToString();
 
             if (arg is NonPII)
-                return arg.ToString();
+                return Sanitize(arg.ToString()); // Sanitizes non-PII
 
             return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenPIIString, arg?.GetType().ToString() ?? "Null");
         }
@@ -522,6 +523,35 @@ namespace Microsoft.IdentityModel.Logging
                 entry.Message = message;
 
             return entry;
+        }
+
+        /// <summary>
+        /// Sanitizes a string by encoding potentially harmful characters.
+        /// </summary>
+        /// <param name="input">The input string to sanitize</param>
+        /// <returns>A sanitized string safe for logging</returns>
+        private static string Sanitize(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            var sanitized = new StringBuilder(input.Length);
+
+            foreach (char c in input)
+            {
+                if (c == '\r')
+                    sanitized.Append("\\r");
+                else if (c == '\n')
+                    sanitized.Append("\\n");
+                else if (c == '\t')
+                    sanitized.Append("\\t");
+                else if (char.IsControl(c) || CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.Format)
+                    sanitized.Append($"\\u{(int)c:X4}");
+                else
+                    sanitized.Append(c);
+            }
+
+            return sanitized.ToString();
         }
     }
 }

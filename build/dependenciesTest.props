@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
-    <BannedApiAnalyzersVersion>3.3.4</BannedApiAnalyzersVersion>
+    <BannedApiAnalyzersVersion>4.14.0</BannedApiAnalyzersVersion>
     <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>3.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
     <MicrosoftNETTestSdkVersion>17.11.1</MicrosoftNETTestSdkVersion>
@@ -23,14 +23,25 @@
     <XunitVersion>2.9.2</XunitVersion>
     <MicrosoftRestClientRuntimeVersion>2.3.24</MicrosoftRestClientRuntimeVersion>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <SuppressNETCoreSdkPreviewMessage Condition="'$(TargetNetNext)' == 'True'">true</SuppressNETCoreSdkPreviewMessage>
+  </PropertyGroup>
+
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
     <XunitRunnerVisualStudioVersion>3.0.0-pre.49</XunitRunnerVisualStudioVersion>
   </PropertyGroup>
+  
   <!-- MicrosoftExtensionsTimeProviderTesting 8.x has a 6.0.0 target, 9.x does not. -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'net6.0'">
     <MicrosoftExtensionsTimeProviderTestingVersion>9.0.0</MicrosoftExtensionsTimeProviderTestingVersion>
   </PropertyGroup>
+  
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <MicrosoftExtensionsTimeProviderTestingVersion>8.10.0</MicrosoftExtensionsTimeProviderTestingVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <SystemTextJson>10.0.0-preview.*</SystemTextJson>
   </PropertyGroup>
 </Project>

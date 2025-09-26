@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -11,132 +10,90 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomAudienceValidationDelegates
     {
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorDelegate(
-            IList<string> tokenAudiences,
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            // Returns a CustomAudienceValidationError : AudienceValidationError
-            return new CustomAudienceValidationError(
-                new MessageDetail(nameof(CustomAudienceValidatorDelegate), null),
-                ValidationFailureType.AudienceValidationFailed,
-                typeof(SecurityTokenInvalidAudienceException),
-                ValidationError.GetCurrentStackFrame(),
-                tokenAudiences,
-                null);
-        }
-
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorCustomExceptionDelegate(
+        internal static ValidationResult<string, ValidationError> CustomValidationFailed(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomAudienceValidationError(
-                new MessageDetail(nameof(CustomAudienceValidatorCustomExceptionDelegate), null),
-                ValidationFailureType.AudienceValidationFailed,
-                typeof(CustomSecurityTokenInvalidAudienceException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(CustomValidationFailed)),
+                CustomValidationFailure.AudienceValidationFailed,
+                Default.GetStackFrame(),
                 tokenAudiences,
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<string, ValidationError> AudienceDidNotMatch(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomAudienceValidationError(
-                new MessageDetail(nameof(CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate), null),
-                CustomAudienceValidationError.CustomAudienceValidationFailureType,
-                typeof(CustomSecurityTokenInvalidAudienceException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(AudienceDidNotMatch)),
+                AudienceValidationFailure.AudienceDidNotMatch,
+                Default.GetStackFrame(),
                 tokenAudiences,
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<string, ValidationError> UnknownValidationFailure(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomAudienceValidationError(
-                new MessageDetail(nameof(CustomAudienceValidatorUnknownExceptionDelegate), null),
-                ValidationFailureType.AudienceValidationFailed,
-                typeof(NotSupportedException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(UnknownValidationFailure)),
+                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                Default.GetStackFrame(),
                 tokenAudiences,
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<string, ValidationError> WithoutGetExceptionOverrideDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomAudienceWithoutGetExceptionValidationOverrideError(
-                new MessageDetail(nameof(CustomAudienceValidatorWithoutGetExceptionOverrideDelegate), null),
-                typeof(CustomSecurityTokenInvalidAudienceException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(WithoutGetExceptionOverrideDelegate)),
+                Default.GetStackFrame(),
                 tokenAudiences,
-                null);
+                null)
+                ;
         }
 
-        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorDelegate(
+        internal static ValidationResult<string, ValidationError> AudienceValidatorDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new AudienceValidationError(
-                new MessageDetail(nameof(AudienceValidatorDelegate), null),
-                ValidationFailureType.AudienceValidationFailed,
-                typeof(SecurityTokenInvalidAudienceException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(AudienceValidatorDelegate)),
+                AudienceValidationFailure.AudienceDidNotMatch,
+                Default.GetStackFrame(),
                 tokenAudiences,
                 null);
         }
 
-        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorThrows(
+        internal static ValidationResult<string, ValidationError> AudienceValidatorThrows(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            throw new CustomSecurityTokenInvalidAudienceException(nameof(AudienceValidatorThrows), null);
-        }
-
-        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorCustomAudienceExceptionTypeDelegate(
-            IList<string> tokenAudiences,
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new AudienceValidationError(
-                new MessageDetail(nameof(AudienceValidatorCustomAudienceExceptionTypeDelegate), null),
-                ValidationFailureType.AudienceValidationFailed,
-                typeof(CustomSecurityTokenInvalidAudienceException),
-                ValidationError.GetCurrentStackFrame(),
-                tokenAudiences,
-                null);
-        }
-
-        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorCustomExceptionTypeDelegate(
-            IList<string> tokenAudiences,
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new AudienceValidationError(
-                new MessageDetail(nameof(AudienceValidatorCustomExceptionTypeDelegate), null),
-                ValidationFailureType.AudienceValidationFailed,
-                typeof(CustomSecurityTokenException),
-                ValidationError.GetCurrentStackFrame(),
-                tokenAudiences,
+            throw new CustomSecurityTokenInvalidAudienceException(
+                nameof(AudienceValidatorThrows),
+                new AudienceValidationError(
+                    new MessageDetail(nameof(AudienceValidatorDelegate)),
+                    AudienceValidationFailure.AudienceDidNotMatch,
+                    Default.GetStackFrame(),
+                    tokenAudiences,
+                    null),
                 null);
         }
     }

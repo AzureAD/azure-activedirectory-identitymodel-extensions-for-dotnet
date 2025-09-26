@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// The original string used to create this instance if a string was provided.
         /// </summary>
         [JsonIgnore]
-        internal string JsonData
+        public string JsonData
         {
             get
             {

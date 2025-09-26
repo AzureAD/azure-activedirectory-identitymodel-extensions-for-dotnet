@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -32,6 +34,11 @@ namespace Microsoft.IdentityModel.TestUtils
         static Default()
         {
             _referenceDigestValue = Convert.ToBase64String(XmlUtilities.CreateDigestBytes("<OuterXml></OuterXml>", false));
+        }
+
+        public static StackFrame GetStackFrame()
+        {
+            return new StackFrame("StackFrameName", 0, 0);
         }
 
         public static string AadV1Authority
@@ -72,6 +79,14 @@ namespace Microsoft.IdentityModel.TestUtils
         public static SigningCredentials AsymmetricSigningCredentials
         {
             get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Digest);
+        }
+
+        public static SigningCredentials RsaSigningCredentials
+        {
+            get => new SigningCredentials(
+                    new RsaSecurityKey(KeyingMaterial.RsaParameters_2048) { KeyId = Guid.NewGuid().ToString() },
+                    SecurityAlgorithms.RsaSha256,
+                    SecurityAlgorithms.Sha256);
         }
 
         public static SigningCredentials AsymmetricSigningCredentialsWithoutSpecifyingDigest
@@ -214,6 +229,11 @@ namespace Microsoft.IdentityModel.TestUtils
             get => new CaseSensitiveClaimsIdentity(Claims, AuthenticationType);
         }
 
+        public static ClaimsIdentity ClaimsIdentityLongNames
+        {
+            get => new CaseSensitiveClaimsIdentity(ClaimSets.ClaimsWithLongName, AuthenticationType);
+        }
+
         public static string ClaimsIdentityLabel
         {
             get => "Default.ClaimsIdentityLabel";
@@ -314,6 +334,47 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string Jwt(SecurityTokenDescriptor tokenDescriptor)
         {
             return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
+        }
+
+        public static JsonWebTokens.JsonWebToken JsonWebToken()
+        {
+            JsonWebTokens.JsonWebTokenHandler tokenHandler = new JsonWebTokens.JsonWebTokenHandler();
+            return new JsonWebTokens.JsonWebToken(tokenHandler.CreateToken(new SecurityTokenDescriptor()
+            {
+                Issuer = Issuer,
+                SigningCredentials = SigningCredentials,
+                Subject = ClaimsIdentity,
+            }));
+        }
+
+        public static Saml2SecurityToken Saml2SecurityToken()
+        {
+            var tokenHandler = new Saml2SecurityTokenHandler();
+            SecurityToken securityToken = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Audience = Audience,
+                Issuer = Issuer,
+                SigningCredentials = SigningCredentials,
+                Subject = SamlClaimsIdentity,
+            });
+
+            string token = tokenHandler.WriteToken(securityToken);
+            return tokenHandler.ReadSaml2Token(token);
+        }
+
+        public static SamlSecurityToken SamlSecurityToken()
+        {
+            var tokenHandler = new SamlSecurityTokenHandler();
+            SecurityToken securityToken = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Audience = Audience,
+                Issuer = Issuer,
+                SigningCredentials = SigningCredentials,
+                Subject = SamlClaimsIdentity,
+            });
+
+            string token = tokenHandler.WriteToken(securityToken);
+            return tokenHandler.ReadSamlToken(token);
         }
 
         public static string Location
@@ -1092,6 +1153,22 @@ namespace Microsoft.IdentityModel.TestUtils
                 CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
                 SignatureMethod = SecurityAlgorithms.RsaSha256Signature
             };
+        }
+
+        public static IList<SecurityKey> SigningKeys
+        {
+            get
+            {
+                return new List<SecurityKey>
+                {
+                    AsymmetricSigningKeyPublic
+                };
+            }
+        }
+
+        public static SigningCredentials SigningCredentials
+        {
+            get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Digest);
         }
 
         public static SignedInfo SignedInfoReferenceWithId
