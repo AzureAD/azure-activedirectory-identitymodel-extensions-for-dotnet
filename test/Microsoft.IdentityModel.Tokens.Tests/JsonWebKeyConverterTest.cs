@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
                     TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
                 });
-#if NET472 || NET_CORE
+#if NET472 || NET
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public_As_RSA,
                     TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
                 });
-#if NET472 || NET_CORE
+#if NET472 || NET
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.DefaultX509Key_256ECDSA,

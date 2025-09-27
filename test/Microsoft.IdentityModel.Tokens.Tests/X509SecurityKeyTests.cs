@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-#if NET472 || NET_CORE
+#if NET472 || NET
         [Fact]
         public void Constructor_WithECDsa()
         {
