@@ -13,33 +13,42 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
 {
     public class TelemetryClientDomainExtractionTests
     {
-        [Fact]
-        public void DebugMethodCall()
+        [Theory]
+        [InlineData("https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "login.microsoftonline.com")]
+        [InlineData("https://www.login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "login.microsoftonline.com")]
+        [InlineData("https://accounts.google.com/.well-known/openid-configuration", "accounts.google.com")]
+        [InlineData("https://login.windows.net/common/.well-known/openid-configuration", "login.windows.net")]  
+        [InlineData("http://localhost:8080/.well-known/openid-configuration", "localhost")]
+        [InlineData("https://example.com/path/to/config", "example.com")]
+        [InlineData("https://subdomain.example.org/config.json", "subdomain.example.org")]
+        public void GetMetadataAddressForTelemetry_SuccessCase_ReturnsExpectedDomain(string fullAddress, string expectedDomain)
         {
-            // Debug what's happening with reflection
+            // Act - using reflection to call the private method
+            var method = typeof(TelemetryClient).GetMethod("GetMetadataAddressForTelemetry", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            var result = (string)method.Invoke(null, new object[] { fullAddress, true });
+
+            // Assert
+            Assert.Equal(expectedDomain, result);
+        }
+
+        [Fact]
+        public void DebugAppContextSwitch()
+        {
+            // Check if the AppContext switch is causing issues
+            var switchValue = AppContextSwitches.UseFullMetadataAddressForTelemetry;
+            
+            // Test a simple call
             var telemetryClientType = typeof(TelemetryClient);
-            var methods = telemetryClientType.GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-            
-            var foundMethods = new List<string>();
-            foreach (var m in methods)
-            {
-                foundMethods.Add($"{m.Name}({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))})");
-            }
-            
-            // This should help us see what methods are available
-            Assert.True(foundMethods.Count > 0, $"Available methods: {string.Join(", ", foundMethods)}");
-            
             var method = telemetryClientType.GetMethod("GetMetadataAddressForTelemetry", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
             
-            Assert.NotNull(method); // This should pass if the method exists
-            
-            // Test the method directly
             var testUrl = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
             var result = (string)method.Invoke(null, new object[] { testUrl, true });
             
-            // For now, let's just ensure it doesn't throw and see what we get
-            Assert.NotNull(result);
+            // The switch should be false by default, so we should get the host name
+            Assert.False(switchValue, $"Switch value: {switchValue}");
+            Assert.Equal("login.microsoftonline.com", result);
         }
 
         [Theory]
@@ -87,6 +96,9 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             
             try
             {
+                // Reset switches first to clear any cached values
+                AppContextSwitches.ResetAllSwitches();
+                
                 // Enable the switch to use full metadata address
                 AppContext.SetSwitch(AppContextSwitches.UseFullMetadataAddressForTelemetrySwitch, true);
                 
@@ -101,7 +113,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             finally
             {
                 // Cleanup
-                AppContext.SetSwitch(AppContextSwitches.UseFullMetadataAddressForTelemetrySwitch, false);
+                AppContextSwitches.ResetAllSwitches();
             }
         }
 
