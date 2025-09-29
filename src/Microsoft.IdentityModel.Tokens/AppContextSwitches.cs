@@ -99,6 +99,14 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
+        /// When enabled, telemetry will use the full metadata address instead of just the domain name for IdentityModelConfiguration metrics.
+        /// By default (when disabled), only the domain name is used for successful operations to reduce OpenTelemetry cardinality.
+        /// </summary>
+        internal const string UseFullMetadataAddressForTelemetrySwitch = "Switch.Microsoft.IdentityModel.UseFullMetadataAddressForTelemetry";
+        private static bool? _useFullMetadataAddressForTelemetry;
+        internal static bool UseFullMetadataAddressForTelemetry => _useFullMetadataAddressForTelemetry ??= (AppContext.TryGetSwitch(UseFullMetadataAddressForTelemetrySwitch, out bool useFullMetadataAddressForTelemetry) && useFullMetadataAddressForTelemetry);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -123,6 +131,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
+
+            _useFullMetadataAddressForTelemetry = null;
+            AppContext.SetSwitch(UseFullMetadataAddressForTelemetrySwitch, false);
         }
     }
 }
