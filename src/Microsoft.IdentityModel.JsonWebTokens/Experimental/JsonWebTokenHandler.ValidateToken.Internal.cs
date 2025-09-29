@@ -189,6 +189,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return decryptionResult.Error!.AddCurrentStackFrame();
             }
 
+            if (!CanReadToken(decryptionResult.Result!))
+            {
+                return new ValidationError(
+                    new MessageDetail(LogMessages.IDX14107),
+                    ValidationFailureType.TokenReadingFailed,
+                    ValidationError.GetCurrentStackFrame());
+            }
+
             ValidationResult<SecurityToken, ValidationError> readResult = ReadToken(decryptionResult.Result!, callContext);
             if (!readResult.Succeeded)
             {
@@ -313,6 +321,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ValidationResult<ValidatedToken, ValidationError>? actorResult = null;
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
+                if (!CanReadToken(jsonWebToken.Actor))
+                {
+                    return new ValidationError(
+                        new MessageDetail(LogMessages.IDX14107),
+                        ValidationFailureType.TokenReadingFailed,
+                        ValidationError.GetCurrentStackFrame());
+                }
+
                 ValidationResult<SecurityToken, ValidationError> readResult = ReadToken(jsonWebToken.Actor, callContext);
                 if (!readResult.Succeeded)
                     return readResult.Error!.AddCurrentStackFrame();
