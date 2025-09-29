@@ -16,7 +16,12 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class X509SecurityKey : AsymmetricSecurityKey
     {
+        // OID for RSA encryption
+        // <see href="https://www.ietf.org/rfc/rfc3447"/> and <see href="https://www.ietf.org/rfc/rfc5698"/>
         const string RSAOid = "1.2.840.113549.1.1.1";
+
+        // OID for ECDSA
+        // <see href="https://datatracker.ietf.org/doc/html/rfc3279#section-2.3.5"/> and <see href="https://datatracker.ietf.org/doc/html/rfc5480"/>
         const string ECDsaOid = "1.2.840.10045.2.1";
 
         AsymmetricAlgorithm _privateKey;

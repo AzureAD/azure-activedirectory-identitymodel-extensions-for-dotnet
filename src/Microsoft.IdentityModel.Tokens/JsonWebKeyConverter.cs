@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return ConvertFromSymmetricSecurityKey(symmetricKey);
             else if (key is X509SecurityKey x509Key)
                 return ConvertFromX509SecurityKey(x509Key);
-#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+#if NET472_OR_GREATER || NETSTANDARD2_0 || NET
             else if (key is ECDsaSecurityKey ecdsaSecurityKey)
                 return ConvertFromECDsaSecurityKey(ecdsaSecurityKey);
 #endif
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaPrivateKey) { KeyId = key.KeyId });
                 }
-#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+#if NET472_OR_GREATER || NETSTANDARD2_0 || NET
                 else if (key.PrivateKey is ECDsa ecdsaPrivateKey)
                 {
                     return ConvertFromECDsaSecurityKey(new ECDsaSecurityKey(ecdsaPrivateKey) { KeyId = key.KeyId });
@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaPublicKey) { KeyId = key.KeyId });
             }
-#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+#if NET472_OR_GREATER || NETSTANDARD2_0 || NET
             else if (key.PublicKey is ECDsa ecdsaPublicKey)
             {
                 return ConvertFromECDsaSecurityKey(new ECDsaSecurityKey(ecdsaPublicKey) { KeyId = key.KeyId });
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
-#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+#if NET472_OR_GREATER || NETSTANDARD2_0 || NET
         /// <summary>
         /// Converts a <see cref="ECDsaSecurityKey"/> into a <see cref="JsonWebKey"/>
         /// </summary>
