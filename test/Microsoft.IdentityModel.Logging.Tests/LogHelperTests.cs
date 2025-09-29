@@ -437,6 +437,58 @@ namespace Microsoft.IdentityModel.Logging.Tests
             // Assert
             Assert.Equal("This is a string with no arguments.", result);
         }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_SanitizesSpecialCharacters()
+        {
+            string format = "Value: {0}";
+            object[] args = new object[] { LogHelper.MarkAsNonPII("A\rB\nC\tD\r\nE" + (char)2) };
+
+            string result = LogHelper.FormatInvariant(format, args);
+
+            Assert.Equal("Value: A\\rB\\nC\\tD\\r\\nE\\u0002", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_PIIArgument_DoesNotSanitizeWhenShowPIIDisabled()
+        {
+            string format = "Value: {0}";
+            object[] args = new object[] { "A\rB\nC\tD\r\nE" + (char)2 };
+            IdentityModelEventSource.ShowPII = false;
+
+            string result = LogHelper.FormatInvariant(format, args);
+
+            Assert.Equal($"Value: {string.Format(IdentityModelEventSource.HiddenPIIString, typeof(string).ToString())}", result);
+
+            IdentityModelEventSource.ShowPII = false;
+        }
+
+        [Fact]
+        public void FormatInvariant_PIIArgument_SanitizeWhenShowPIIEnabled()
+        {
+            string format = "Value: {0}";
+            object[] args = new object[] { "A\rB\nC\tD\r\nE" + (char)2 };
+            IdentityModelEventSource.ShowPII = true;
+
+            string result = LogHelper.FormatInvariant(format, args);
+
+            Assert.Equal("Value: A\\rB\\nC\\tD\\r\\nE\\u0002", result);
+
+            IdentityModelEventSource.ShowPII = false;
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_SanitizesUnicodeFormatCharacters()
+        {
+            // U+200B ZERO WIDTH SPACE and U+2060 WORD JOINER are Unicode format characters
+            string format = "Value: {0}";
+            string input = "A" + '\u200B' + "B" + '\u2060' + "C";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            // Both format characters should be replaced with their \uXXXX representation
+            Assert.Equal("Value: A\\u200BB\\u2060C", result);
+        }
     }
 
     public class MockSecurityToken : SecurityToken
