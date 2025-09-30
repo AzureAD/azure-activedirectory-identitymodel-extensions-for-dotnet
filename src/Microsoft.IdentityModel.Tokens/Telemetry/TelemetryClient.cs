@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Telemetry
         /// <param name="metadataAddress">The full metadata address</param>
         /// <param name="isSuccessCase">True if this is a successful operation, false for error cases</param>
         /// <returns>Domain name for success cases (when switch is disabled), full address otherwise</returns>
-        private static string GetMetadataAddressForTelemetry(string metadataAddress, bool isSuccessCase = true)
+        internal static string GetMetadataAddressForTelemetry(string metadataAddress, bool isSuccessCase = true)
         {
             // Always use full address for error cases or when the switch is enabled
             if (!isSuccessCase || AppContextSwitches.UseFullMetadataAddressForTelemetry || string.IsNullOrEmpty(metadataAddress))
