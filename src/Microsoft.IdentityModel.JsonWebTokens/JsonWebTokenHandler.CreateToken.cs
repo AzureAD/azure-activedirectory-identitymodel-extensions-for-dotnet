@@ -797,6 +797,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenDescriptor.Subject == null)
                 return;
 
+            // Handle Actor property separately before processing individual claims
+            if (tokenDescriptor.Subject.Actor != null)
+            {
+                string actorValue = CreateActorValue(tokenDescriptor.Subject.Actor);
+                JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Actort, actorValue);
+            }
+
             bool expReset = false;
             bool iatReset = false;
             bool nbfReset = false;
@@ -876,6 +883,56 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             expSet |= expReset;
             iatSet |= iatReset;
             nbfSet |= nbfReset;
+        }
+
+        /// <summary>
+        /// Creates the 'value' for the actor claim: { actort, 'value' }
+        /// </summary>
+        /// <param name="actor"><see cref="ClaimsIdentity"/> as actor.</param>
+        /// <returns><see cref="string"/> representing the actor.</returns>
+        internal static string CreateActorValue(ClaimsIdentity actor)
+        {
+            if (actor == null)
+                throw LogHelper.LogArgumentNullException(nameof(actor));
+
+            if (actor.BootstrapContext != null)
+            {
+                string encodedJwt = actor.BootstrapContext as string;
+                if (encodedJwt != null)
+                {
+                    if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                        LogHelper.LogVerbose(LogMessages.IDX14318);
+                    return encodedJwt;
+                }
+
+                JsonWebToken jwtToken = actor.BootstrapContext as JsonWebToken;
+                if (jwtToken != null)
+                {
+                    if (jwtToken.EncodedToken != null)
+                    {
+                        if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                            LogHelper.LogVerbose(LogMessages.IDX14319);
+                        return jwtToken.EncodedToken;
+                    }
+                    else
+                    {
+                        if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                            LogHelper.LogVerbose(LogMessages.IDX14320);
+                        // For JsonWebToken without EncodedToken, we need to recreate it
+                        // This is a fallback scenario that should be rare
+                        return CreateToken(new SecurityTokenDescriptor { Subject = actor }, true, TokenHandler.DefaultTokenLifetimeInMinutes);
+                    }
+                }
+
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogMessages.IDX14317);
+            }
+
+            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                LogHelper.LogVerbose(LogMessages.IDX14321);
+
+            // Create a token from the actor's claims using the static CreateToken method
+            return CreateToken(new SecurityTokenDescriptor { Subject = actor }, true, TokenHandler.DefaultTokenLifetimeInMinutes);
         }
 
         internal static void WriteJwsHeader(

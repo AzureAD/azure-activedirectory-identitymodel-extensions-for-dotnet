@@ -3286,6 +3286,172 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public void CreateToken_WithActor_ShouldSerializeActorIntoJWT()
+        {
+            // Arrange
+            var handler = new JsonWebTokenHandler();
+            
+            // Create actor identity with claims
+            var actorIdentity = new CaseSensitiveClaimsIdentity("TestActor");
+            actorIdentity.AddClaim(new Claim(ClaimTypes.Name, "ActorName"));
+            actorIdentity.AddClaim(new Claim(ClaimTypes.Role, "ActorRole"));
+            actorIdentity.AddClaim(new Claim("custom_actor_claim", "actor_value"));
+
+            // Create main subject identity with actor
+            var subjectIdentity = new CaseSensitiveClaimsIdentity("TestSubject");
+            subjectIdentity.AddClaim(new Claim(ClaimTypes.Name, "SubjectName"));
+            subjectIdentity.AddClaim(new Claim(ClaimTypes.Role, "SubjectRole"));
+            subjectIdentity.Actor = actorIdentity;
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = subjectIdentity,
+                Issuer = "test-issuer",
+                Audience = "test-audience",
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2
+            };
+
+            // Act
+            string token = handler.CreateToken(tokenDescriptor);
+
+            // Assert
+            Assert.False(string.IsNullOrEmpty(token));
+
+            // Validate that the token contains the actort claim
+            var jsonToken = handler.ReadJsonWebToken(token);
+            Assert.NotNull(jsonToken);
+
+            // Check that actort claim exists
+            var actortClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Actort);
+            Assert.NotNull(actortClaim);
+            Assert.False(string.IsNullOrEmpty(actortClaim.Value));
+
+            // Parse the actor token to verify it contains actor claims
+            var actorToken = handler.ReadJsonWebToken(actortClaim.Value);
+            Assert.NotNull(actorToken);
+
+            // Verify actor claims are present
+            var actorNameClaim = actorToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+            Assert.NotNull(actorNameClaim);
+            Assert.Equal("ActorName", actorNameClaim.Value);
+
+            var actorRoleClaim = actorToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+            Assert.NotNull(actorRoleClaim);
+            Assert.Equal("ActorRole", actorRoleClaim.Value);
+
+            var customActorClaim = actorToken.Claims.FirstOrDefault(c => c.Type == "custom_actor_claim");
+            Assert.NotNull(customActorClaim);
+            Assert.Equal("actor_value", customActorClaim.Value);
+        }
+
+        [Fact]
+        public void CreateToken_WithActorBootstrapContext_ShouldUseBootstrapToken()
+        {
+            // Arrange
+            var handler = new JsonWebTokenHandler();
+            
+            // Create an existing JWT token to use as bootstrap context
+            var existingTokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.Name, "BootstrapActor"),
+                    new Claim("bootstrap_claim", "bootstrap_value")
+                }),
+                Issuer = "bootstrap-issuer",
+                Audience = "bootstrap-audience",
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2
+            };
+            string existingToken = handler.CreateToken(existingTokenDescriptor);
+
+            // Create actor identity with bootstrap context
+            var actorIdentity = new CaseSensitiveClaimsIdentity("TestActor");
+            actorIdentity.AddClaim(new Claim(ClaimTypes.Name, "ActorName")); // This should be ignored
+            actorIdentity.BootstrapContext = existingToken;
+
+            // Create main subject identity with actor
+            var subjectIdentity = new CaseSensitiveClaimsIdentity("TestSubject");
+            subjectIdentity.AddClaim(new Claim(ClaimTypes.Name, "SubjectName"));
+            subjectIdentity.Actor = actorIdentity;
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = subjectIdentity,
+                Issuer = "test-issuer",
+                Audience = "test-audience",
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2
+            };
+
+            // Act
+            string token = handler.CreateToken(tokenDescriptor);
+
+            // Assert
+            var jsonToken = handler.ReadJsonWebToken(token);
+            var actortClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Actort);
+            Assert.NotNull(actortClaim);
+
+            // The actor token should be the bootstrap token
+            Assert.Equal(existingToken, actortClaim.Value);
+
+            // Verify the bootstrap token content
+            var actorToken = handler.ReadJsonWebToken(actortClaim.Value);
+            var bootstrapNameClaim = actorToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+            Assert.Equal("BootstrapActor", bootstrapNameClaim.Value);
+
+            var bootstrapCustomClaim = actorToken.Claims.FirstOrDefault(c => c.Type == "bootstrap_claim");
+            Assert.Equal("bootstrap_value", bootstrapCustomClaim.Value);
+        }
+
+        [Fact]
+        public void CreateToken_CompareActorHandlingWithJwtSecurityTokenHandler()
+        {
+            // Arrange - Create identical token descriptors for both handlers
+            var actorIdentity = new CaseSensitiveClaimsIdentity("TestActor");
+            actorIdentity.AddClaim(new Claim(ClaimTypes.Name, "ActorName"));
+            actorIdentity.AddClaim(new Claim(ClaimTypes.Role, "ActorRole"));
+
+            var subjectIdentity = new CaseSensitiveClaimsIdentity("TestSubject");
+            subjectIdentity.AddClaim(new Claim(ClaimTypes.Name, "SubjectName"));
+            subjectIdentity.Actor = actorIdentity;
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = subjectIdentity,
+                Issuer = "test-issuer",
+                Audience = "test-audience",
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2
+            };
+
+            // Act - Create tokens with both handlers
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+
+            string jsonWebToken = jsonWebTokenHandler.CreateToken(tokenDescriptor);
+            string jwtSecurityToken = jwtSecurityTokenHandler.CreateEncodedJwt(tokenDescriptor);
+
+            // Assert - Both tokens should have actort claims
+            var jsonToken = jsonWebTokenHandler.ReadJsonWebToken(jsonWebToken);
+            var jwtToken = jwtSecurityTokenHandler.ReadJwtToken(jwtSecurityToken);
+
+            var jsonActortClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Actort);
+            var jwtActortClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Actort);
+
+            Assert.NotNull(jsonActortClaim);
+            Assert.NotNull(jwtActortClaim);
+
+            // Both should produce valid actor tokens
+            var jsonActorToken = jsonWebTokenHandler.ReadJsonWebToken(jsonActortClaim.Value);
+            var jwtActorToken = jwtSecurityTokenHandler.ReadJwtToken(jwtActortClaim.Value);
+
+            Assert.NotNull(jsonActorToken);
+            Assert.NotNull(jwtActorToken);
+
+            // Verify actor claims are present in both
+            Assert.Equal("ActorName", jsonActorToken.Claims.First(c => c.Type == ClaimTypes.Name).Value);
+            Assert.Equal("ActorName", jwtActorToken.Claims.First(c => c.Type == ClaimTypes.Name).Value);
+        }
+
         public static TheoryData<JwtTheoryData> ValidateJweTestCases
         {
             get

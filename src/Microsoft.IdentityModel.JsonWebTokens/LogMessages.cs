@@ -51,5 +51,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14310 = "IDX14310: JWE authentication tag is missing.";
         internal const string IDX14311 = "IDX14311: Unable to decode the authentication tag as a Base64Url encoded string.";
         internal const string IDX14312 = "IDX14312: Unable to decode the cipher text as a Base64Url encoded string.";
+
+        // Actor handling
+        internal const string IDX14317 = "IDX14317: actor.BootstrapContext is not a string AND actor.BootstrapContext is not a JsonWebToken";
+        internal const string IDX14318 = "IDX14318: Creating actor value using actor.BootstrapContext(as string)";
+        internal const string IDX14319 = "IDX14319: Creating actor value using actor.BootstrapContext.EncodedToken";
+        internal const string IDX14320 = "IDX14320: Creating actor value by writing the JsonWebToken created from actor.BootstrapContext";
+        internal const string IDX14321 = "IDX14321: actor.BootstrapContext is null. Creating the token using actor.Claims.";
     }
 }
