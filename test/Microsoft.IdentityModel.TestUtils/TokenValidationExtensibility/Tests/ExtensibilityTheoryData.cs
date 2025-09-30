@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Security.Claims;
+//using System.Security.Claims;
+//using System;
 using System;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -11,79 +12,50 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
 {
     public class ExtensibilityTheoryData : TheoryDataBase
     {
-        string _tokenHandlerType;
-        SecurityTokenDescriptor? _securityTokenDescriptor;
-
         internal ExtensibilityTheoryData(
             string testId,
-            string tokenHandlerType,
-            int extraStackFrames) : base(testId)
+            TokenHandler tokenHandler,
+            SecurityToken securityToken) : base(testId)
         {
-            ExtraStackFrames = extraStackFrames;
-            TokenHandler = CreateSecurityTokenHandlerForType(tokenHandlerType);
-            _tokenHandlerType = tokenHandlerType;
+            TokenHandler = tokenHandler;
+            SecurityToken = securityToken;
+            ValidationParameters = new ValidationParameters
+            {
+                AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation,
+                AudienceValidator = SkipValidationDelegates.SkipAudienceValidation,
+                SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation,
+                IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation,
+                LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation,
+                //SignatureValidator = SkipValidationDelegates.SkipSignatureValidation,
+                TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation,
+                TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation
+            };
 
-            ValidationParameters = CreateValidationParametersSkippingValidations();
+            ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
         }
 
         internal static ITestingTokenHandler CreateSecurityTokenHandlerForType(string tokenHandlerType)
         {
             return tokenHandlerType switch
             {
-                "JWT" => new JsonWebTokenHandlerWithResult(),
-                "SAML" => new SamlSecurityTokenHandlerWithResult(),
-                "SAML2" => new Saml2SecurityTokenHandlerWithResult(),
+                "JWT" => new JsonWebTestingTokenHandler(),
+                "SAML" => new SamlSecurityTestingTokenHandler(),
+                "SAML2" => new Saml2SecurityTestingTokenHandler(),
                 _ => throw new NotImplementedException(tokenHandlerType)
             };
         }
 
-        private SecurityTokenDescriptor PopulateSubjectForSecurityTokenDescriptor(
-            SecurityTokenDescriptor securityTokenDescriptor,
-            string tokenHandlerType)
+        public SecurityToken SecurityToken
         {
-            ClaimsIdentity subject = tokenHandlerType switch
-            {
-                "JWT" => Default.ClaimsIdentity,
-                "SAML" or "SAML2" => Default.SamlClaimsIdentity,
-                _ => throw new NotImplementedException(tokenHandlerType)
-            };
-
-            securityTokenDescriptor.Subject = subject;
-
-            return securityTokenDescriptor;
+            get;
+            set;
         }
 
-        private ValidationParameters CreateValidationParametersSkippingValidations()
-        {
-            var validationParameters = new ValidationParameters();
-
-            validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
-            validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-            validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
-            validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
-            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
-            validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
-            validationParameters.TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation;
-            validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
-
-            return validationParameters;
-        }
-
-        public SecurityTokenDescriptor SecurityTokenDescriptor
-        {
-            get => _securityTokenDescriptor!;
-            set => _securityTokenDescriptor = PopulateSubjectForSecurityTokenDescriptor(value, _tokenHandlerType);
-        }
-
-        internal ITestingTokenHandler TokenHandler { get; }
-
-        public bool IsValid { get; set; }
+        internal TokenHandler TokenHandler { get; }
 
         internal ValidationParameters ValidationParameters { get; }
 
         internal ValidationError? ValidationError { get; set; }
-
-        internal int ExtraStackFrames { get; }
 
         internal ExpectedException? ExpectedInnerException { get; set; }
     }

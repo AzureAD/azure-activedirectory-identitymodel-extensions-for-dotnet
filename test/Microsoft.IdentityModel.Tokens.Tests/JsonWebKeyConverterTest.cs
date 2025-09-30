@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 var theoryData = ConversionKeyTheoryData;
-#if !NET472 && !NET_CORE
+#if !NET472 && !NET
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key,
@@ -154,7 +154,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
                     TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
                 });
-#if NET472 || NET_CORE
+#if NET472 || NET
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key_Public,

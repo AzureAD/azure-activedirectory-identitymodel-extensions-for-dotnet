@@ -1361,7 +1361,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        internal static bool AreValidatedSigningKeyLifetimesEqual(ValidatedSigningKeyLifetime validatedSigningKeyLifetime1, ValidatedSigningKeyLifetime validatedSigningKeyLifetime2, CompareContext context)
+        internal static bool AreValidatedSigningKeyLifetimesEqual(ValidatedSignatureKey validatedSigningKeyLifetime1, ValidatedSignatureKey validatedSigningKeyLifetime2, CompareContext context)
         {
             var localContext = new CompareContext(context);
 
@@ -1419,19 +1419,22 @@ namespace Microsoft.IdentityModel.TestUtils
             }
             else
             {
+
                 // It is assumed that validationError1 is the result from the validation call graph.
                 // validationError2 is set when building the test case.
                 // Check the number of frames and the first filename.
-                if (validationError1.StackFrames.Count != validationError2.StackFrames.Count)
-                    localContext.Diffs.Add($"(validationError1.StackFrames.Count != validationError2.StackFrames.Count: {validationError1.StackFrames.Count}, {validationError2.StackFrames.Count})");
+                if (context.ValidateProperty(validationError1.GetType(), "StackFramesCount"))
+                    if (validationError1.StackFrames.Count != validationError2.StackFrames.Count)
+                        localContext.Diffs.Add($"(validationError1.StackFrames.Count != validationError2.StackFrames.Count: {validationError1.StackFrames.Count}, {validationError2.StackFrames.Count})");
 
-                if (!validationError1.StackFrames[0].GetFileName().Contains(validationError2.StackFrames[0].GetFileName()))
-                {
-                    localContext.Diffs.Add($"(validationError1.StackFrames[0].GetFileName(): " +
-                        $"'{validationError1.StackFrames[0].GetFileName()}', " +
-                        $"does not contain validationError2.StackFrames[0].GetFileName():" +
-                        $"'{validationError2.StackFrames[0].GetFileName()}'.");
-                }
+                if (context.ValidateProperty(validationError1.GetType(), "StackFrames"))
+                    if (!validationError1.StackFrames[0].GetFileName().Contains(validationError2.StackFrames[0].GetFileName()))
+                    {
+                        localContext.Diffs.Add($"(validationError1.StackFrames[0].GetFileName(): " +
+                            $"'{validationError1.StackFrames[0].GetFileName()}', " +
+                            $"does not contain validationError2.StackFrames[0].GetFileName():" +
+                            $"'{validationError2.StackFrames[0].GetFileName()}'.");
+                    }
             }
 
             AreStringsEqual(
@@ -1439,13 +1442,6 @@ namespace Microsoft.IdentityModel.TestUtils
                 validationError2.GetType().FullName,
                 "validationError1.GetType().FullName",
                 "validationError2.GetType().FullName",
-                localContext);
-
-            AreStringsEqual(
-                validationError1.ExceptionType.ToString(),
-                validationError2.ExceptionType.ToString(),
-                "validationError1.ExceptionType",
-                "validationError2.ExceptionType",
                 localContext);
 
             AreStringsEqual(

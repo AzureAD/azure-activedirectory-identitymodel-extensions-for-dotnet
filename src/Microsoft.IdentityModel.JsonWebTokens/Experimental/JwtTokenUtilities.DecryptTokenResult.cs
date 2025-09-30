@@ -49,10 +49,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
                 if (cryptoProviderFactory == null)
                 {
-                    // TODO: Move to CallContext
-                    //if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                    //    LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
-
                     continue;
                 }
 
@@ -60,18 +56,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
                     {
-                        //TODO: Move to CallContext
-                        //if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        //    LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
-
                         algorithmNotSupportedByCryptoProvider = true;
                         continue;
                     }
 
-                    ValidationResult<string, AlgorithmValidationError> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
-                    if (!result.IsValid)
+                    ValidationResult<string, ValidationError> result = validationParameters.AlgorithmValidator(zipAlgorithm, jsonWebToken, validationParameters, callContext);
+                    if (!result.Succeeded)
                     {
-                        (exceptionStrings ??= new StringBuilder()).AppendLine(result.UnwrapError().MessageDetail.Message);
+                        (exceptionStrings ??= new StringBuilder()).AppendLine(result.Error!.MessageDetail.Message);
                         continue;
                     }
 
@@ -123,8 +115,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 return new ValidationError(
                     new MessageDetail(GetIDX10679LogMessage(zipAlgorithm)),
-                    ValidationFailureType.TokenDecryptionFailed,
-                    typeof(SecurityTokenDecompressionFailedException),
+                    ValidationFailureType.TokenDecompressionFailed,
                     ValidationError.GetCurrentStackFrame(),
                     ex);
             }
@@ -147,8 +138,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         exceptionStrings?.ToString() ?? string.Empty,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
-                    typeof(SecurityTokenDecryptionFailedException),
                     ValidationError.GetCurrentStackFrame());
+
             else if (algorithmNotSupportedByCryptoProvider)
                 return new ValidationError(
                     new MessageDetail(
@@ -156,17 +147,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(decryptionParameters.Alg),
                         LogHelper.MarkAsNonPII(decryptionParameters.Enc)),
                     ValidationFailureType.TokenDecryptionFailed,
-                    typeof(SecurityTokenDecryptionFailedException),
                     ValidationError.GetCurrentStackFrame());
+
             else
                 return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
-                    typeof(SecurityTokenDecryptionFailedException),
                     ValidationError.GetCurrentStackFrame());
         }
-
     }
 }

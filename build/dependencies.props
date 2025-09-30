@@ -14,8 +14,19 @@
     <SystemTextJson>8.0.5</SystemTextJson>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetNetNext)' == 'True'">
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <!-- NU5104 prevents us from packing release packages with prerelease dependencies. But we want to do that so customers can get a preview of running with .NET 10. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1510;NU5104</WarningsNotAsErrors>
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
+  </PropertyGroup>
 
-<PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <MicrosoftExtensionsLoggingAbstractionsVersion>10.0.0-preview.*</MicrosoftExtensionsLoggingAbstractionsVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <!--
       Do not bump to 9.0. complicated reasons due to some runtime incompatibilities if 
       CoreWCF compiles against an older version but then run with a newer version in a related package.

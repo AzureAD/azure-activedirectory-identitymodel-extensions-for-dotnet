@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             Assert.Throws<ArgumentNullException>(() => validationParameters.LifetimeValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.TokenTypeValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.AudienceValidator = null);
-            Assert.Throws<ArgumentNullException>(() => validationParameters.IssuerSigningKeyValidator = null);
+            Assert.Throws<ArgumentNullException>(() => validationParameters.SignatureKeyValidator = null);
         }
 
         [Fact]

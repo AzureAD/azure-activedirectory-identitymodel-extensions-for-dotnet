@@ -16,14 +16,22 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         [Theory, MemberData(nameof(StackFrameTestCases), DisableDiscoveryEnumeration = true)]
         public async Task CallStack(StackFrameTheoryData theoryData)
         {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.LifetimeValidatorTests", theoryData);
+            CompareContext context = TestUtilities.WriteHeader($"{this}.CallStack", theoryData);
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
 
             ValidationResult<ValidatedToken, ValidationError> validationResult =
-                await jsonWebTokenHandler.ValidateTokenAsync(theoryData.SecurityToken, theoryData.ValidationParameters, theoryData.CallContext, CancellationToken.None);
+                await jsonWebTokenHandler.ValidateTokenAsync(
+                    theoryData.SecurityToken,
+                    theoryData.ValidationParameters,
+                    theoryData.CallContext,
+                    CancellationToken.None);
 
             validationResult =
-                await jsonWebTokenHandler.ValidateTokenAsync(theoryData.SecurityToken, theoryData.ValidationParameters, theoryData.CallContext, CancellationToken.None);
+                await jsonWebTokenHandler.ValidateTokenAsync(
+                    theoryData.SecurityToken,
+                    theoryData.ValidationParameters,
+                    theoryData.CallContext,
+                    CancellationToken.None);
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -32,7 +40,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             get
             {
-
                 TheoryData<StackFrameTheoryData> theoryData = new TheoryData<StackFrameTheoryData>();
 
                 theoryData.Add(new StackFrameTheoryData("Expired")
@@ -56,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
             validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
             validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
-            validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
+            validationParameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
             validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
 
             return validationParameters;
@@ -82,16 +89,10 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
     public class StackFrameTheoryData : TheoryDataBase
     {
-        public StackFrameTheoryData(string testId) : base(testId)
-        {
-        }
-
+        public StackFrameTheoryData(string testId) : base(testId) { }
         public SecurityToken SecurityToken { get; set; }
-
         internal ValidationParameters ValidationParameters { get; set; }
-
-        internal ValidationResult<ValidatedLifetime, LifetimeValidationError> Result { get; set; }
-
-        internal ValidationFailureType ValidationFailureType { get; set; }
+        internal ValidationResult<ValidatedLifetime, LifetimeValidationError> OperationResult { get; set; }
+        internal ValidationFailureType ValidationFailure { get; set; }
     }
 }

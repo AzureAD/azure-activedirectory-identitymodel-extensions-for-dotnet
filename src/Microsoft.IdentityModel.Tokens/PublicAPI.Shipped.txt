@@ -438,8 +438,6 @@ Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(str
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(string message, System.Exception innerException) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException
-Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.get -> System.DateTime
-Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.SecurityTokenExpiredException() -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.SecurityTokenExpiredException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.SecurityTokenExpiredException(string message, System.Exception inner) -> void
@@ -543,12 +541,9 @@ Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.Securi
 Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.SecurityTokenSignatureKeyNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(Microsoft.IdentityModel.Tokens.ValidationFailure validationFailure, string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(string message, System.Exception innerException) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.ValidationFailure.get -> Microsoft.IdentityModel.Tokens.ValidationFailure
-Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.ValidationFailure.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenValidationException
 Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException() -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException(string message) -> void
@@ -746,10 +741,6 @@ Microsoft.IdentityModel.Tokens.TryReadJwtClaim
 Microsoft.IdentityModel.Tokens.TypeValidator
 Microsoft.IdentityModel.Tokens.UniqueId
 Microsoft.IdentityModel.Tokens.Utility
-Microsoft.IdentityModel.Tokens.ValidationFailure
-Microsoft.IdentityModel.Tokens.ValidationFailure.InvalidIssuer = 2 -> Microsoft.IdentityModel.Tokens.ValidationFailure
-Microsoft.IdentityModel.Tokens.ValidationFailure.InvalidLifetime = 1 -> Microsoft.IdentityModel.Tokens.ValidationFailure
-Microsoft.IdentityModel.Tokens.ValidationFailure.None = 0 -> Microsoft.IdentityModel.Tokens.ValidationFailure
 Microsoft.IdentityModel.Tokens.Validators
 Microsoft.IdentityModel.Tokens.X509EncryptingCredentials
 Microsoft.IdentityModel.Tokens.X509EncryptingCredentials.Certificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
@@ -816,6 +807,8 @@ override Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.Ge
 override Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 override Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 override Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.get -> System.DateTime
+Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.set -> void
 override Microsoft.IdentityModel.Tokens.SymmetricKeyWrapProvider.Algorithm.get -> string
 override Microsoft.IdentityModel.Tokens.SymmetricKeyWrapProvider.Context.get -> string
 override Microsoft.IdentityModel.Tokens.SymmetricKeyWrapProvider.Context.set -> void
@@ -984,13 +977,3 @@ virtual Microsoft.IdentityModel.Tokens.TokenValidationParameters.CreateClaimsIde
 ~virtual Microsoft.IdentityModel.Tokens.TransformBeforeSignatureValidation.Invoke(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> Microsoft.IdentityModel.Tokens.SecurityToken
 ~virtual Microsoft.IdentityModel.Tokens.TryReadJwtClaim.Invoke(ref System.Text.Json.Utf8JsonReader reader, Microsoft.IdentityModel.Tokens.JwtSegmentType jwtSegmentType, string claimName, out object claimValue) -> bool
 ~virtual Microsoft.IdentityModel.Tokens.TypeValidator.Invoke(string type, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> string
-virtual Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationDelegate.Invoke(string! algorithm, Microsoft.IdentityModel.Tokens.SecurityKey! securityKey, Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<string!, Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError!>
-virtual Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationDelegate.Invoke(System.Collections.Generic.IList<string!>! tokenAudiences, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<string!, Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError!>
-virtual Microsoft.IdentityModel.Tokens.Experimental.DecryptionKeyResolverDelegate.Invoke(string! token, Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, string! kid, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext? callContext) -> System.Collections.Generic.IList<Microsoft.IdentityModel.Tokens.SecurityKey!>!
-virtual Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyResolverDelegate.Invoke(string! token, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, string? kid, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration? configuration, Microsoft.IdentityModel.Tokens.CallContext? callContext) -> Microsoft.IdentityModel.Tokens.SecurityKey?
-virtual Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationDelegate.Invoke(Microsoft.IdentityModel.Tokens.SecurityKey! signingKey, Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime, Microsoft.IdentityModel.Tokens.Experimental.IssuerSigningKeyValidationError!>
-virtual Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationDelegateAsync.Invoke(string! issuer, Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer, Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError!>>!
-virtual Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationDelegate.Invoke(System.DateTime? notBefore, System.DateTime? expires, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime, Microsoft.IdentityModel.Tokens.Experimental.LifetimeValidationError!>
-virtual Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationDelegate.Invoke(Microsoft.IdentityModel.Tokens.SecurityToken! token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration? configuration, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.SecurityKey!, Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationError!>
-virtual Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationDelegate.Invoke(System.DateTime? expirationTime, string! securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<System.DateTime?, Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationError!>
-virtual Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationDelegate.Invoke(string? type, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType, Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationError!>

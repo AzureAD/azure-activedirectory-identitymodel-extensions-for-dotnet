@@ -10,58 +10,54 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomLifetimeValidationDelegates
     {
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorDelegate(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> CustomLifetimeValidationFailed(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            // Returns a CustomLifetimeValidationError : LifetimeValidationError
             return new CustomLifetimeValidationError(
-                new MessageDetail(nameof(CustomLifetimeValidatorDelegate), null),
-                ValidationFailureType.LifetimeValidationFailed,
-                typeof(SecurityTokenInvalidLifetimeException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(CustomLifetimeValidationFailed)),
+                CustomValidationFailure.LifetimeValidationFailed,
+                Default.GetStackFrame(),
                 notBefore,
                 expires,
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorCustomExceptionDelegate(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> LifetimeValidationFailed(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            return new CustomLifetimeValidationError(
-                new MessageDetail(nameof(CustomLifetimeValidatorCustomExceptionDelegate), null),
-                ValidationFailureType.LifetimeValidationFailed,
-                typeof(CustomSecurityTokenInvalidLifetimeException),
-                ValidationError.GetCurrentStackFrame(),
+            return new LifetimeValidationError(
+                new MessageDetail(nameof(LifetimeValidationFailure.ValidationFailed)),
+                LifetimeValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 notBefore,
                 expires,
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> LifetimeValidator(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            return new CustomLifetimeValidationError(
-                new MessageDetail(nameof(CustomLifetimeValidatorCustomExceptionCustomFailureTypeDelegate), null),
-                CustomLifetimeValidationError.CustomLifetimeValidationFailureType,
-                typeof(CustomSecurityTokenInvalidLifetimeException),
-                ValidationError.GetCurrentStackFrame(),
+            return new LifetimeValidationError(
+                new MessageDetail(nameof(LifetimeValidator)),
+                LifetimeValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 notBefore,
                 expires);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> CustomUnknownValidationFailure(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -69,33 +65,15 @@ namespace Microsoft.IdentityModel.TestUtils
             CallContext callContext)
         {
             return new CustomLifetimeValidationError(
-                new MessageDetail(nameof(CustomLifetimeValidatorUnknownExceptionDelegate), null),
-                ValidationFailureType.LifetimeValidationFailed,
-                typeof(NotSupportedException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(CustomUnknownValidationFailure)),
+                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                Default.GetStackFrame(),
                 notBefore,
                 expires,
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorWithoutGetExceptionOverrideDelegate(
-            DateTime? notBefore,
-            DateTime? expires,
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new CustomLifetimeWithoutGetExceptionValidationOverrideError(
-                new MessageDetail(nameof(CustomLifetimeValidatorWithoutGetExceptionOverrideDelegate), null),
-                ValidationFailureType.LifetimeValidationFailed,
-                typeof(CustomSecurityTokenInvalidLifetimeException),
-                ValidationError.GetCurrentStackFrame(),
-                notBefore,
-                expires,
-                null);
-        }
-
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorDelegate(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> ValidatorDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -103,56 +81,30 @@ namespace Microsoft.IdentityModel.TestUtils
             CallContext callContext)
         {
             return new LifetimeValidationError(
-                new MessageDetail(nameof(LifetimeValidatorDelegate), null),
-                ValidationFailureType.LifetimeValidationFailed,
-                typeof(SecurityTokenInvalidLifetimeException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(ValidatorDelegate)),
+                LifetimeValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 notBefore,
                 expires,
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorThrows(
+        internal static ValidationResult<ValidatedLifetime, ValidationError> ValidatorThrows(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            throw new CustomSecurityTokenInvalidLifetimeException(nameof(LifetimeValidatorThrows), null);
-        }
-
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorCustomLifetimeExceptionTypeDelegate(
-            DateTime? notBefore,
-            DateTime? expires,
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new LifetimeValidationError(
-                new MessageDetail(nameof(LifetimeValidatorCustomLifetimeExceptionTypeDelegate), null),
-                ValidationFailureType.LifetimeValidationFailed,
-                typeof(CustomSecurityTokenInvalidLifetimeException),
-                ValidationError.GetCurrentStackFrame(),
-                notBefore,
-                expires,
-                null);
-        }
-
-        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorCustomExceptionTypeDelegate(
-            DateTime? notBefore,
-            DateTime? expires,
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new LifetimeValidationError(
-                new MessageDetail(nameof(LifetimeValidatorCustomExceptionTypeDelegate), null),
-                ValidationFailureType.LifetimeValidationFailed,
-                typeof(CustomSecurityTokenException),
-                ValidationError.GetCurrentStackFrame(),
-                notBefore,
-                expires,
+            throw new CustomSecurityTokenInvalidLifetimeException(
+                nameof(ValidatorThrows),
+                new LifetimeValidationError(
+                    new MessageDetail(nameof(ValidatorThrows)),
+                    LifetimeValidationFailure.ValidatorThrew,
+                    Default.GetStackFrame(),
+                    notBefore,
+                    expires,
+                    null),
                 null);
         }
     }
