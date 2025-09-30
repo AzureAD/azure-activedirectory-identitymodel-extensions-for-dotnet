@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Telemetry.Tests
 {
+    [ResetAppContextSwitches]
     public class TelemetryClientDomainExtractionTests
     {
         [Theory]
@@ -74,9 +76,6 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
 
             try
             {
-                // Reset switches first to clear any cached values
-                AppContextSwitches.ResetAllSwitches();
-
                 // Enable the switch to use full metadata address
                 AppContext.SetSwitch(AppContextSwitches.UseFullMetadataAddressForTelemetrySwitch, true);
 
@@ -88,8 +87,8 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             }
             finally
             {
-                // Cleanup
-                AppContextSwitches.ResetAllSwitches();
+                // Cleanup is handled by ResetAppContextSwitches attribute
+                AppContext.SetSwitch(AppContextSwitches.UseFullMetadataAddressForTelemetrySwitch, false);
             }
         }
 
