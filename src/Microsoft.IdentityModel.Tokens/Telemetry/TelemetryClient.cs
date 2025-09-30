@@ -39,13 +39,7 @@ namespace Microsoft.IdentityModel.Telemetry
             try
             {
                 var uri = new Uri(metadataAddress, UriKind.Absolute);
-
-                // Extract domain, removing 'www.' prefix if present
-                string host = uri.Host;
-                if (host.StartsWith("www.", StringComparison.OrdinalIgnoreCase))
-                    host = host.Substring(4);
-
-                return host;
+                return uri.Host;
             }
             catch (UriFormatException)
             {

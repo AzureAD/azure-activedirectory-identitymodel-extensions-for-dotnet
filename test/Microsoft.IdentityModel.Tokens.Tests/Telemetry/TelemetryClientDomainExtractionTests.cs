@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
     {
         [Theory]
         [InlineData("https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "login.microsoftonline.com")]
-        [InlineData("https://www.login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "login.microsoftonline.com")]
+        [InlineData("https://www.login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "www.login.microsoftonline.com")]
         [InlineData("https://accounts.google.com/.well-known/openid-configuration", "accounts.google.com")]
         [InlineData("https://login.windows.net/common/.well-known/openid-configuration", "login.windows.net")]
         [InlineData("http://localhost:8080/.well-known/openid-configuration", "localhost")]
