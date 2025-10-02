@@ -73,7 +73,7 @@ steps:
   inputs:
     command: 'build'
     projects: '$(WilsonSourceDirectory)Product.proj'
-    arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
+    arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:TargetNetNext=$(TargetNetNext)'
 
 - task: PowerShell@2
   displayName: 'Run Tests'
@@ -151,7 +151,7 @@ steps:
   displayName: 'Pack libraries'
   inputs:
     command: 'pack'
-    arguments: '--no-restore'
+    arguments: '--no-restore /p:TargetNetNext=$(TargetNetNext)'
     packDirectory: '$(Build.SourcesDirectory)\artifacts'
     nobuild: true
     verbosityPack: 'Minimal'
