@@ -30,7 +30,10 @@ function WriteSectionFooter($sectionName)
 
 ################################################# Functions ############################################################
 
-$env:TargetNetNext = "True"
+# Set TargetNetNext to True by default if not already set
+if (-not $env:TargetNetNext) {
+    $env:TargetNetNext = "True"
+}
 
 WriteSectionHeader("runTests.ps1");
 Write-Host "buildType:       " $buildType;
