@@ -1,9 +1,9 @@
 # template-Build-run-tests-sign.yml
 
 parameters:
-  - name: TargetNetNext
-    type: string
-    default: 'True'
+    - name: TargetNetNext
+      type: string
+      default: "True"
 
 steps:
     - script: echo $(BuildConfiguration)
@@ -158,7 +158,7 @@ steps:
       displayName: "Pack libraries"
       inputs:
           command: "pack"
-          arguments: "--no-restore /p:TargetNetNext=${{ parameters.TargetNetNext }}"
+          arguments: "--no-restore"
           packDirectory: '$(Build.SourcesDirectory)\artifacts'
           nobuild: true
           verbosityPack: "Minimal"
