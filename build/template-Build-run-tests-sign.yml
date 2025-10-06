@@ -1,4 +1,8 @@
 # template-Build-run-tests-sign.yml
+parameters:
+- name: TargetNetNext
+  type: string
+  default: "True"
 
 steps:
 - script: echo $(BuildConfiguration)
@@ -73,7 +77,7 @@ steps:
   inputs:
     command: 'build'
     projects: '$(WilsonSourceDirectory)Product.proj'
-    arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
+    arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:TargetNetNext=${{ parameters.TargetNetNext }}'
 
 - task: PowerShell@2
   displayName: 'Run Tests'
@@ -81,6 +85,8 @@ steps:
     targetType: filePath
     filePath: ./$(WilsonSourceDirectory)runTests.ps1
     arguments: '-buildType $(BuildConfiguration) -runningInCI $True'
+  env:
+    TargetNetNext: ${{ parameters.TargetNetNext }}
 
 - task: PublishTestResults@2
   condition: succeededOrFailed()
@@ -151,7 +157,7 @@ steps:
   displayName: 'Pack libraries'
   inputs:
     command: 'pack'
-    arguments: '--no-restore'
+    arguments: '--no-restore /p:TargetNetNext=${{ parameters.TargetNetNext }} /p:WarningsNotAsErrors=NU5128'
     packDirectory: '$(Build.SourcesDirectory)\artifacts'
     nobuild: true
     verbosityPack: 'Minimal'
