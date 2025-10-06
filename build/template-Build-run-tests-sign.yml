@@ -158,7 +158,7 @@ steps:
       displayName: "Pack libraries"
       inputs:
           command: "pack"
-          arguments: "--no-restore"
+          arguments: "--no-restore /p:TargetNetNext=${{ parameters.TargetNetNext }}"
           packDirectory: '$(Build.SourcesDirectory)\artifacts'
           nobuild: true
           verbosityPack: "Minimal"
