@@ -18,7 +18,7 @@ on:
       - dev
 
 env:
-  TargetNetNext: True
+  TargetNetNext: false
 
 jobs:
   build:
