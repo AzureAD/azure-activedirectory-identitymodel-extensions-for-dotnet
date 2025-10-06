@@ -27,6 +27,16 @@ jobs:
 
     name: "Build and run unit tests"
     steps:
+
+    - name: Enable Long Paths
+      run: New-ItemProperty
+            -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem"
+            -Name "LongPathsEnabled"
+            -Value "1"
+            -PropertyType DWORD
+            -Force
+      shell: pwsh
+    
     - name: Set git core.longpaths flag
       run: |
           git config --system core.longpaths true
