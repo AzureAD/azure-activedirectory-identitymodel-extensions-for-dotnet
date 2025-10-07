@@ -4,7 +4,7 @@
     <BannedApiAnalyzersVersion>4.14.0</BannedApiAnalyzersVersion>
     <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>3.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
-    <MicrosoftNETTestSdkVersion>17.11.1</MicrosoftNETTestSdkVersion>
+    <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
     <!--
     Locking the Moq version similar to https://github.com/Azure/azure-sdk-for-net/pull/38113/.
     This version should not be changed without team discussion.
