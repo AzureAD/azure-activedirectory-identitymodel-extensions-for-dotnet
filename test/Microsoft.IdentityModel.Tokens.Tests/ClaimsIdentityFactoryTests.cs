@@ -9,14 +9,10 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    [Collection(nameof(ClaimsIdentityFactoryTests))]
+    [ResetAppContextSwitches]
+    [Collection("AppContextSwitches")]
     public class ClaimsIdentityFactoryTests
     {
-        public ClaimsIdentityFactoryTests()
-        {
-            AppContextSwitches.ResetAllSwitches();
-        }
-
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -47,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.Equal(jsonWebToken, ((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
             }
 
-            AppContextSwitches.ResetAllSwitches();
+            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, false);
         }
 
         [Theory]
