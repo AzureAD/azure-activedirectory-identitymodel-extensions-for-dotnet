@@ -18,7 +18,7 @@ on:
       - dev
 
 env:
-  TargetNetNext: True
+  TargetNetNext: false
 
 jobs:
   build:
@@ -44,10 +44,11 @@ jobs:
       with:
         global-json-file: ./global.json
 
-    - name: Setup latest .NET 10 preview SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x'
+    # Fails test coverage generation
+    #- name: Setup latest .NET 10 preview SDK
+    #  uses: actions/setup-dotnet@v4
+    #  with:
+    #    dotnet-version: '10.0.x'
 
     - name: Strong name bypass
       run: |
