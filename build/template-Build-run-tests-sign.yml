@@ -155,6 +155,10 @@ steps:
 #Sign Wilson 7x task group
 - template: template-sign-wilson.yaml
 
+# Temporarily suppress NU5128 warning for .NET 10.0 preview framework
+# NU5128 occurs when NuGet packaging validation can't find exact matches between
+# target frameworks in dependencies and lib/ref folders. This is expected for
+# preview .NET versions due to tooling lag and will resolve when .NET 10.0 RTMs.
 - task: DotNetCoreCLI@2
   displayName: 'Pack libraries'
   inputs:
