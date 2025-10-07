@@ -78,6 +78,8 @@ steps:
     command: 'build'
     projects: '$(WilsonSourceDirectory)Product.proj'
     arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:TargetNetNext=${{ parameters.TargetNetNext }}'
+  env:
+    TargetNetNext: ${{ parameters.TargetNetNext }}
 
 - task: PowerShell@2
   displayName: 'Run Tests'
@@ -164,6 +166,8 @@ steps:
     configuration: $(BuildConfiguration)
     packagesToPack: '$(WilsonSourceDirectory)Product.proj'
     externalFeedCredentials: 'Internal Analyzers'
+  env:
+    TargetNetNext: ${{ parameters.TargetNetNext }}
 
 - task: onebranch.pipeline.signing@1
   displayName: 'Sign Packages with OneBranch'
