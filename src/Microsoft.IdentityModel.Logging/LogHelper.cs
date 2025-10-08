@@ -553,7 +553,10 @@ namespace Microsoft.IdentityModel.Logging
 #if NET8_0_OR_GREATER
             // Fast path: check if string contains any characters that need sanitization
             int firstIndex = input.AsSpan().IndexOfAny(s_asciiControlChars);
-            bool hasSpecialChars = firstIndex >= 0 || input.IndexOfAny(new[] { '\r', '\n', '\t' }) >= 0;
+            bool hasSpecialChars = firstIndex >= 0 ||
+                                   input.IndexOf('\r') >= 0 ||
+                                   input.IndexOf('\n') >= 0 ||
+                                   input.IndexOf('\t') >= 0;
 
             // Additional check for Unicode format characters (not in SearchValues)
             if (!hasSpecialChars)
