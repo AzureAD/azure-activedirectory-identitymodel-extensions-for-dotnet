@@ -42,6 +42,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <SystemTextJson>10.0.0-preview.*</SystemTextJson>
+    <SystemTextJson>10.0.0-*</SystemTextJson>
   </PropertyGroup>
 </Project>

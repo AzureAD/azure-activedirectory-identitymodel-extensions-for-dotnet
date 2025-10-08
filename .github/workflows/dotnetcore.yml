@@ -44,11 +44,10 @@ jobs:
       with:
         global-json-file: ./global.json
 
-    # Fails test coverage generation
-    #- name: Setup latest .NET 10 preview SDK
-    #  uses: actions/setup-dotnet@v4
-    #  with:
-    #    dotnet-version: '10.0.x'
+    - name: Setup .NET 10 RC SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
 
     - name: Strong name bypass
       run: |
