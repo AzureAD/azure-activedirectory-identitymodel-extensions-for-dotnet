@@ -8,6 +8,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.IdentityModel.Abstractions;
+#if NET8_0_OR_GREATER
+using System.Buffers;
+#endif
 
 namespace Microsoft.IdentityModel.Logging
 {
@@ -440,7 +443,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="callback">A callback function to log the security artifact safely.</param>
         /// <returns>An argument marked as SecurityArtifact.</returns>
         /// <remarks>
-        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms such as removing signatures
+        /// Since even the payload may sometimes contain security artifacts, naï¿½ve disarm algorithms such as removing signatures
         /// will not work. For now the <paramref name="callback"/> will only be leveraged if
         /// <see cref="IdentityModelEventSource.LogCompleteSecurityArtifact"/> is set and no unsafe callback is provided. Future changes
         /// may introduce a support for best effort disarm logging.
@@ -460,7 +463,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <exception cref="ArgumentNullException">if <paramref name="callback"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="callbackUnsafe"/> is null.</exception>
         /// <remarks>
-        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms such as removing signatures
+        /// Since even the payload may sometimes contain security artifacts, naï¿½ve disarm algorithms such as removing signatures
         /// will not work. For now the <paramref name="callback"/> is currently unused. Future changes
         /// may introduce a support for best effort disarm logging which will leverage <paramref name="callback"/>.
         /// </remarks>
@@ -525,6 +528,18 @@ namespace Microsoft.IdentityModel.Logging
             return entry;
         }
 
+#if NET8_0_OR_GREATER
+        // SearchValues for common ASCII control characters that need sanitization
+        // Includes: U+0000-U+0008, U+000B-U+000C, U+000E-U+001F, U+007F-U+009F
+        // Note: \r (U+000D), \n (U+000A), and \t (U+0009) are handled separately for special formatting
+        private static readonly SearchValues<char> s_asciiControlChars = SearchValues.Create(
+            "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008" + // U+0000-U+0008
+            "\u000B\u000C" +                                           // U+000B-U+000C (skip \n and \r)
+            "\u000E\u000F\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001A\u001B\u001C\u001D\u001E\u001F" + // U+000E-U+001F
+            "\u007F\u0080\u0081\u0082\u0083\u0084\u0085\u0086\u0087\u0088\u0089\u008A\u008B\u008C\u008D\u008E\u008F" + // U+007F-U+008F
+            "\u0090\u0091\u0092\u0093\u0094\u0095\u0096\u0097\u0098\u0099\u009A\u009B\u009C\u009D\u009E\u009F");   // U+0090-U+009F
+#endif
+
         /// <summary>
         /// Sanitizes a string by encoding potentially harmful characters.
         /// </summary>
@@ -535,6 +550,46 @@ namespace Microsoft.IdentityModel.Logging
             if (string.IsNullOrEmpty(input))
                 return input;
 
+#if NET8_0_OR_GREATER
+            // Fast path: check if string contains any characters that need sanitization
+            int firstIndex = input.AsSpan().IndexOfAny(s_asciiControlChars);
+            bool hasSpecialChars = firstIndex >= 0 || input.IndexOfAny(new[] { '\r', '\n', '\t' }) >= 0;
+
+            // Additional check for Unicode format characters (not in SearchValues)
+            if (!hasSpecialChars)
+            {
+                for (int i = 0; i < input.Length; i++)
+                {
+                    char c = input[i];
+                    if (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.Format)
+                    {
+                        hasSpecialChars = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasSpecialChars)
+                return input;
+
+            var sanitized = new StringBuilder(input.Length);
+
+            foreach (char c in input)
+            {
+                if (c == '\r')
+                    sanitized.Append("\\r");
+                else if (c == '\n')
+                    sanitized.Append("\\n");
+                else if (c == '\t')
+                    sanitized.Append("\\t");
+                else if (s_asciiControlChars.Contains(c) || CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.Format)
+                    sanitized.Append($"\\u{(int)c:X4}");
+                else
+                    sanitized.Append(c);
+            }
+
+            return sanitized.ToString();
+#else
             var sanitized = new StringBuilder(input.Length);
 
             foreach (char c in input)
@@ -552,6 +607,7 @@ namespace Microsoft.IdentityModel.Logging
             }
 
             return sanitized.ToString();
+#endif
         }
     }
 }

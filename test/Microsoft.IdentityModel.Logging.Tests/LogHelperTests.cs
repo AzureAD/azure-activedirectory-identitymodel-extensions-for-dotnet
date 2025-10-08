@@ -489,6 +489,114 @@ namespace Microsoft.IdentityModel.Logging.Tests
             // Both format characters should be replaced with their \uXXXX representation
             Assert.Equal("Value: A\\u200BB\\u2060C", result);
         }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_NoSanitizableCharacters_ReturnsSameString()
+        {
+            // Test the fast path where no characters need sanitization
+            string format = "Value: {0}";
+            string input = "This is a normal string with no control characters";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            Assert.Equal($"Value: {input}", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_OnlyASCIIControlCharacters()
+        {
+            // Test with various ASCII control characters
+            string format = "Value: {0}";
+            string input = "A" + (char)0x00 + "B" + (char)0x08 + "C" + (char)0x0B + "D" + (char)0x7F + "E";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            Assert.Equal("Value: A\\u0000B\\u0008C\\u000BD\\u007FE", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_ExtendedASCIIControlCharacters()
+        {
+            // Test with extended ASCII control characters (U+0080-U+009F)
+            string format = "Value: {0}";
+            string input = "A" + (char)0x80 + "B" + (char)0x9F + "C";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            Assert.Equal("Value: A\\u0080B\\u009FC", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_VeryLongString()
+        {
+            // Test with a very long string to ensure performance
+            string format = "Value: {0}";
+            string normalPart = new string('A', 1000);
+            string input = normalPart + "\r\n\t" + normalPart;
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            Assert.Equal($"Value: {normalPart}\\r\\n\\t{normalPart}", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_EmptyString()
+        {
+            // Test with empty string
+            string format = "Value: {0}";
+            string input = "";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            Assert.Equal("Value: ", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_NullString()
+        {
+            // Test with null - MarkAsNonPII should handle this
+            string format = "Value: {0}";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(null));
+
+            Assert.Equal("Value: Null", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_DirectionalFormattingCharacters()
+        {
+            // Test Unicode directional formatting characters (U+202A-U+202E)
+            string format = "Value: {0}";
+            string input = "A" + '\u202A' + "B" + '\u202E' + "C";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            Assert.Equal("Value: A\\u202AB\\u202EC", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_ZeroWidthNoBreakSpace()
+        {
+            // Test U+FEFF (Zero Width No-Break Space / BOM)
+            string format = "Value: {0}";
+            string input = "A" + '\uFEFF' + "B";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            Assert.Equal("Value: A\\uFEFFB", result);
+        }
+
+        [Fact]
+        public void FormatInvariant_NonPIIArgument_MixedControlAndFormatCharacters()
+        {
+            // Test with a mix of control and format characters
+            string format = "Value: {0}";
+            string input = "Start" + (char)0x01 + "\r\n\t" + '\u200B' + (char)0x7F + '\u202A' + "End";
+
+            string result = LogHelper.FormatInvariant(format, LogHelper.MarkAsNonPII(input));
+
+            Assert.Equal("Value: Start\\u0001\\r\\n\\t\\u200B\\u007F\\u202AEnd", result);
+        }
     }
 
     public class MockSecurityToken : SecurityToken
