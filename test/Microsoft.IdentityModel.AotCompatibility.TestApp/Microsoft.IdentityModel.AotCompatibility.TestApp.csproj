@@ -2,7 +2,7 @@
   
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks);</TargetFrameworks>
+    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks);net10.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>full</TrimMode>
