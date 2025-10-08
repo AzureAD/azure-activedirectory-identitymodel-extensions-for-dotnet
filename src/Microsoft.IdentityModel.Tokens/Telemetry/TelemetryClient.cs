@@ -36,16 +36,11 @@ namespace Microsoft.IdentityModel.Telemetry
             if (!isSuccessCase || AppContextSwitches.UseFullMetadataAddressForTelemetry || string.IsNullOrEmpty(metadataAddress))
                 return metadataAddress;
 
-            try
-            {
-                var uri = new Uri(metadataAddress, UriKind.Absolute);
-                return uri.Host;
-            }
-            catch (UriFormatException)
-            {
-                // If parsing fails, return the original address
-                return metadataAddress;
-            }
+
+            if (Uri.TryCreate(metadataAddress, UriKind.Absolute, out Uri result))
+                return result.Host;
+
+            return metadataAddress;
         }
 
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource)
