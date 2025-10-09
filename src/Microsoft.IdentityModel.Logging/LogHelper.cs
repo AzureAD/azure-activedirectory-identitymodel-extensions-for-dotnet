@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="callback">A callback function to log the security artifact safely.</param>
         /// <returns>An argument marked as SecurityArtifact.</returns>
         /// <remarks>
-        /// Since even the payload may sometimes contain security artifacts, naï¿½ve disarm algorithms such as removing signatures
+        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms such as removing signatures
         /// will not work. For now the <paramref name="callback"/> will only be leveraged if
         /// <see cref="IdentityModelEventSource.LogCompleteSecurityArtifact"/> is set and no unsafe callback is provided. Future changes
         /// may introduce a support for best effort disarm logging.
@@ -479,7 +479,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <exception cref="ArgumentNullException">if <paramref name="callback"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="callbackUnsafe"/> is null.</exception>
         /// <remarks>
-        /// Since even the payload may sometimes contain security artifacts, naï¿½ve disarm algorithms such as removing signatures
+        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms such as removing signatures
         /// will not work. For now the <paramref name="callback"/> is currently unused. Future changes
         /// may introduce a support for best effort disarm logging which will leverage <paramref name="callback"/>.
         /// </remarks>
