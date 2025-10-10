@@ -102,6 +102,14 @@ namespace Microsoft.IdentityModel.TestUtils
         public static X509SecurityKey DefaultX509Key_2048_With_KeyId = new X509SecurityKey(DefaultCert_2048) { KeyId = DefaultX509Key_2048_KeyId };
         public static SigningCredentials DefaultX509SigningCreds_2048_RsaSha2_Sha2 = new SigningCredentials(DefaultX509Key_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
         public static X509Certificate2 DefaultAsymmetricCert_2048 = CertificateHelper.LoadX509Certificate(DefaultX509Data_2048, CertPassword, X509KeyStorageFlags.MachineKeySet);
+
+        // 256 bit ECDSA
+        public static X509Certificate2 DefaultCert_256ECDSA;
+        public static string DefaultX509Key_256ECDSA_Thumbprint;
+        public static string DefaultX509Key_256ECDSA_KeyId = "DefaultX509Key_256ECDSA_KeyId";
+        public static X509SecurityKey DefaultX509Key_256ECDSA;
+        public static X509SecurityKey DefaultX509Key_256ECDSA_With_KeyId;
+
         public static string DefaultX509Data_2048_Public = @"MIICyjCCAbKgAwIBAgIQJPMYqnyiTY1GQYAwZxadMjANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDExZBREZTIFNpZ25pbmcgLSBTVFMuY29tMB4XDTEyMTAwOTIyMTA0OVoXDTEzMTAwOTIyMTA0OVowITEfMB0GA1UEAxMWQURGUyBTaWduaW5nIC0gU1RTLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmeVPJz8o7ayB3AS2dJtsIo/eXqeNhZ+ZqEJgHVHc0JAAgNNwR++moMt8+iIlOKZiAL8dvQBKOuPms+FfqrG1HshnMiLcuadtWUqOntxUdyQLcEKvdaFOqOppqmasqGFtRLPwYKIkZOkj8ikndNzI6PZV46mw18nLaN6rTByMnjVA5n9Lf7Cdu7lmxlKGJOI5F0IfeaW68/kY1bdw3KAEb1aOKHj0r7RJ2joRuHJ+96kw1bA2T6bGC/1LYND3DFsnQQtMBl7LlDrSG1gGoiZxCoQmPCxfrTCrYKGK6y9j6IQ4MCmJpnt0l/INL5i88TjctF4IkJwbJGn9iY2fIIBxMCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAq/SyHGCLpBm+Gmh5I7BAWJXvtPaIelt30WgKVXRHccxRVIYpKOfAA2iPuD/CVruFz6pnP4K7o2KLAs+XJptigYzLEjKw6rY4836ZJC8m5kfBVanu45OW39nxzxp1udbxQ5gAdmvnY/2agpFhCFR8M1BtWON6G3SzHwo2dXHh+ettOO2LtK38e1+Uy+KGowRw/m4gprSIvgN3AAo7e0PnFblZn6vRgMsK60QB5D8f+Kxdg2I3ZGQcPBQI2fpjEDQCZVc2LV4ywPX4QDPfmYjn+1IaU9w7unbh+oUGQsrdKw3gsdzWEsX/IMXTDf46FEOjV+JqE7VilzcNuDcQ0x9K8gAA";
 
         public static X509Certificate2 DefaultCert_2048_Public
@@ -218,7 +226,6 @@ namespace Microsoft.IdentityModel.TestUtils
         public static readonly ECDsaSecurityKey Ecdsa521Key_Public;
 
         // SymmetricKeys
-
         public static string DefaultSymmetricKeyEncoded_56 = "bd0Q+Z6Ydw==";
         public static byte[] DefaultSymmetricKeyBytes_56 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_56);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_56 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_56) { KeyId = "DefaultSymmetricSecurityKey_56" };
@@ -507,8 +514,12 @@ namespace Microsoft.IdentityModel.TestUtils
             Ecdsa256Key_Public = new ECDsaSecurityKey(Ecdsa256_Public) { KeyId = "ECDsa256Key_Public" };
             Ecdsa384Key_Public = new ECDsaSecurityKey(Ecdsa384_Public) { KeyId = "ECDsa384Key_Public" };
             Ecdsa521Key_Public = new ECDsaSecurityKey(Ecdsa521_Public) { KeyId = "ECDsa521Key_Public" };
-#endif
 
+            DefaultCert_256ECDSA = new CertificateRequest("CN=KeyStoreTestCertificate", Ecdsa256, HashAlgorithmName.SHA256).CreateSelfSigned(notBefore: DateTimeOffset.UtcNow, notAfter: DateTimeOffset.UtcNow.AddHours(1));
+            DefaultX509Key_256ECDSA_Thumbprint = DefaultCert_256ECDSA.Thumbprint;
+            DefaultX509Key_256ECDSA = new X509SecurityKey(DefaultCert_256ECDSA);
+            DefaultX509Key_256ECDSA_With_KeyId = new X509SecurityKey(DefaultCert_256ECDSA) { KeyId = DefaultX509Key_256ECDSA_KeyId };
+#endif
         }
 
 #if NET462
@@ -614,7 +625,8 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get
             {
-                AsymmetricAlgorithm publicKey = RSACertificateExtensions.GetRSAPublicKey(DefaultCert_2048);
+                AsymmetricAlgorithm publicKey;
+                publicKey = RSACertificateExtensions.GetRSAPublicKey(DefaultCert_2048);
                 RSA rsa = publicKey as RSA;
                 RSAParameters parameters = rsa.ExportParameters(false);
                 return new RsaSecurityKey(parameters);
@@ -627,7 +639,8 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 var certData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD";
                 var cert = CertificateHelper.LoadX509Certificate(certData);
-                AsymmetricAlgorithm publicKey = RSACertificateExtensions.GetRSAPublicKey(cert);
+                AsymmetricAlgorithm publicKey;
+                publicKey = RSACertificateExtensions.GetRSAPublicKey(cert);
                 RSA rsa = publicKey as RSA;
                 RSAParameters parameters = rsa.ExportParameters(false);
                 return new RsaSecurityKey(parameters);
@@ -661,7 +674,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 jsonWebKey.Kty = JsonWebAlgorithmsKeyTypes.RSA;
                 var cert = CertificateHelper.LoadX509Certificate(certData);
                 AsymmetricAlgorithm publicKey;
+#if NET462 || NET472
                 publicKey = RSACertificateExtensions.GetRSAPublicKey(cert);
+#else
+                publicKey = cert.PublicKey.GetRSAPublicKey();
+#endif
                 RSA rsa = publicKey as RSA;
                 RSAParameters parameters = rsa.ExportParameters(false);
                 jsonWebKey.E = Base64UrlEncoder.Encode(parameters.Exponent);
@@ -675,7 +692,11 @@ namespace Microsoft.IdentityModel.TestUtils
             get
             {
                 AsymmetricAlgorithm publicKey;
+#if NET462 || NET472
                 publicKey = RSACertificateExtensions.GetRSAPublicKey(DefaultCert_2048);
+#else
+                publicKey = DefaultCert_2048.PublicKey.GetRSAPublicKey();
+#endif
                 RSA rsa = publicKey as RSA;
                 RSAParameters parameters = rsa.ExportParameters(false);
                 var jsonWebKey = new JsonWebKey();
@@ -693,7 +714,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 var certData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD";
                 var cert = CertificateHelper.LoadX509Certificate(certData);
                 AsymmetricAlgorithm publicKey;
+#if NET462 || NET472
                 publicKey = RSACertificateExtensions.GetRSAPublicKey(cert);
+#else
+                publicKey = cert.PublicKey.GetRSAPublicKey();
+#endif
                 RSA rsa = publicKey as RSA;
                 RSAParameters parameters = rsa.ExportParameters(false);
                 var jsonWebKey = new JsonWebKey();
@@ -1054,6 +1079,81 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
+#if NET472 || NET
+        public static JsonWebKey JsonWebKeyX509_256ECDSA
+        {
+            get
+            {
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                    Kid = DefaultX509Key_256ECDSA_Thumbprint,
+                    X5t = Base64UrlEncoder.Encode(DefaultCert_256ECDSA.GetCertHash())
+                };
+
+                jsonWebKey.X5c.Add(Convert.ToBase64String(DefaultCert_256ECDSA.RawData));
+                return jsonWebKey;
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyX509_256ECDSA_With_KeyId
+        {
+            get
+            {
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                    Kid = DefaultX509Key_256ECDSA_KeyId,
+                    X5t = Base64UrlEncoder.Encode(DefaultCert_256ECDSA.GetCertHash())
+                };
+
+                jsonWebKey.X5c.Add(Convert.ToBase64String(DefaultCert_256ECDSA.RawData));
+                return jsonWebKey;
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyX509_256ECDSA_As_ECDSA
+        {
+            get
+            {
+                var ecdsa = DefaultX509Key_256ECDSA.PrivateKey as ECDsa;
+                var ecParams = ecdsa.ExportParameters(true);
+
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                    Kid = DefaultX509Key_256ECDSA_Thumbprint,
+                    Crv = JsonWebKeyECTypes.P256,
+                    D = Base64UrlEncoder.Encode(ecParams.D),
+                    X = Base64UrlEncoder.Encode(ecParams.Q.X),
+                    Y = Base64UrlEncoder.Encode(ecParams.Q.Y)
+                };
+
+                return jsonWebKey;
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyX509_256ECDSA_As_ECDSA_With_KeyId
+        {
+            get
+            {
+                var ecdsa = DefaultX509Key_256ECDSA_With_KeyId.PrivateKey as ECDsa;
+                var ecParams = ecdsa.ExportParameters(true);
+
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                    Kid = DefaultX509Key_256ECDSA_KeyId,
+                    Crv = JsonWebKeyECTypes.P256,
+                    D = Base64UrlEncoder.Encode(ecParams.D),
+                    X = Base64UrlEncoder.Encode(ecParams.Q.X),
+                    Y = Base64UrlEncoder.Encode(ecParams.Q.Y)
+                };
+
+                return jsonWebKey;
+            }
+        }
+#endif
         private static SecureString ConvertToSecureString(string password)
         {
             if (password == null)
