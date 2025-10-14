@@ -47,7 +47,7 @@ jobs:
     - name: Setup .NET 10 RC 2 SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '10.0.100-rc.2'
+        dotnet-version: '10.0.100-rc.2.25502.107'
 
     - name: Strong name bypass
       run: |

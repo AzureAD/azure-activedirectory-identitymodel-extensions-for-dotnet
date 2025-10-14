@@ -38,11 +38,11 @@ steps:
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
 - task: UseDotNet@2
-  displayName: 'Use .Net SDK 10.0.100-rc.2'
+  displayName: 'Use .Net SDK 10.0.100-rc.2.25502.107'
   inputs:
     useGlobalJson: false
     includePreviewVersions: true
-    version: '10.0.100-rc.2'
+    version: '10.0.100-rc.2.25502.107'
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
 - task: DotNetCoreCLI@2
