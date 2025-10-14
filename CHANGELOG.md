@@ -1,5 +1,17 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.15.0
+====
+### Fundamentals
+- Update to .NET 10 RC 2 (SDK 10.0.100-rc.2.25502.107)
+  - Updated `global.json` to use .NET 10 RC 2 SDK version 10.0.100-rc.2.25502.107
+  - Updated GitHub Actions workflows to explicitly install .NET 10 RC 2 SDK
+  - Updated Azure Pipelines template to explicitly install .NET 10 RC 2 SDK
+  - Updated Microsoft.Extensions.Logging.Abstractions to 10.0.0-rc.2.25502.107 for net10.0 target
+  - Updated System.Text.Json to 10.0.0-rc.2.25502.107 for net10.0 target in tests
+  - Verified net10.0 binaries are created successfully
+  - Confirmed all tests pass on .NET 10 RC 2
+
 8.14.0
 ====
 ## Bug Fixes
