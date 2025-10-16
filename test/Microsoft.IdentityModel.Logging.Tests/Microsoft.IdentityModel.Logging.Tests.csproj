@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -25,7 +25,6 @@
   <ItemGroup>
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="$(OpenTelemetryVersion)"/>
     <PackageReference Include="OpenTelemetry.Exporter.InMemory" Version="$(OpenTelemetryVersion)"/>
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
     <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
   </ItemGroup>
 
@@ -33,4 +32,8 @@
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+  
 </Project>
