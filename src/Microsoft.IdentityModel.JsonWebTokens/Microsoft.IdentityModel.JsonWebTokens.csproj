@@ -35,10 +35,10 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
-  <ItemGroup>
-  <PackageReference Include="System.ValueTuple" Version="4.5.0" Condition="'$(TargetFramework)' == 'net462'" />
- </ItemGroup>
+  
+  <PropertyGroup>
+    <RestoreEnablePackagePruning Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' "> false</RestoreEnablePackagePruning>
+  </PropertyGroup>
   
   <ItemGroup>
     <AdditionalFiles Include="InternalAPI.Shipped.txt" />
