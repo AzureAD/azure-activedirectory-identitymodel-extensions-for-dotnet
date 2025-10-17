@@ -37,13 +37,9 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <RestoreEnablePackagePruning Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' "> false</RestoreEnablePackagePruning>
+    <RestoreEnablePackagePruning > false</RestoreEnablePackagePruning>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">   
-    <Reference Include ="System.ValueTuple" />
-  </ItemGroup>
-  
   <ItemGroup>
     <AdditionalFiles Include="InternalAPI.Shipped.txt" />
   </ItemGroup>
