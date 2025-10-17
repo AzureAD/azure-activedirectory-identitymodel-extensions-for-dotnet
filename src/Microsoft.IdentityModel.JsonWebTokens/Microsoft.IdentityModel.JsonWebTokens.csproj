@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\common.props" />
 
@@ -35,10 +35,14 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-  
+
   <PropertyGroup>
     <RestoreEnablePackagePruning Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' "> false</RestoreEnablePackagePruning>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">   
+    <Reference Include ="System.ValueTuple" />
+  </ItemGroup>
   
   <ItemGroup>
     <AdditionalFiles Include="InternalAPI.Shipped.txt" />
