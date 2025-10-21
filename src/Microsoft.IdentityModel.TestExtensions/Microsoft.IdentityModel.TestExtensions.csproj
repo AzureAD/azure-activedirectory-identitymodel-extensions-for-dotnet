@@ -13,6 +13,8 @@
     <SignAssembly>true</SignAssembly>
     <Nullable>enable</Nullable>
     <EnablePackageValidation>false</EnablePackageValidation>
+    <!-- Suppress IL2026 (RequiresUnreferencedCode) and IL3050 (RequiresDynamicCode) warnings for System.Text.Json serialization.
+         TestExtensions is a test utility library that does not require AOT compatibility. -->
     <NoWarn>$(NoWarn);IL2026;IL3050</NoWarn>
   </PropertyGroup>
 
