@@ -32,22 +32,22 @@ jobs:
           git config --system core.longpaths true
 
     - name: Checkout repository
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v5
 
     - name: Setup .NET 6.x
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '6.x'
 
     - name: Setup .NET SDK from global.json
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         global-json-file: ./global.json
 
     - name: Setup latest .NET 10 preview SDK
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '10.0.x'
+        dotnet-version: '10.0.100-rc.1.25451.107'
 
     - name: Strong name bypass
       run: |
