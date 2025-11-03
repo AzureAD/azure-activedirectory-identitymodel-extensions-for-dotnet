@@ -6,10 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.TestExtensions
 {
@@ -160,7 +159,7 @@ namespace Microsoft.IdentityModel.TestExtensions
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
             var token = CreateToken(tokenDescriptor);
 
-#if NETCOREAPP
+#if NET
             return string.Concat(token.AsSpan(0, token.LastIndexOf(value: '.')), ".InvalidSignature");
 #else
             return token.Substring(0, token.LastIndexOf(value: '.')) + ".InvalidSignature";
@@ -427,11 +426,7 @@ namespace Microsoft.IdentityModel.TestExtensions
             if (claims == null)
                 throw new ArgumentNullException(nameof(claims));
 
-            var jobj = new JObject();
-            foreach (var claim in claims)
-                jobj.Add(claim.Key, JToken.FromObject(claim.Value));
-
-            return jobj.ToString(Formatting.None);
+            return JsonSerializer.Serialize(claims);
         }
     }
 }

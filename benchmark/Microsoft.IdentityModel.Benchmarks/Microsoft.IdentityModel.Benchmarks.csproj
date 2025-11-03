@@ -5,7 +5,7 @@
     <PackageId>Microsoft.IdentityModel.Benchmarks</PackageId>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks); </TargetFrameworks>
+    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks);net10.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
@@ -23,6 +23,14 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.5" />
   </ItemGroup>-->
+
+  <PropertyGroup>
+    <SuppressNETCoreSdkPreviewMessage Condition="'$(TargetNetNext)' == 'True'">true</SuppressNETCoreSdkPreviewMessage>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+  </PropertyGroup>
   
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />

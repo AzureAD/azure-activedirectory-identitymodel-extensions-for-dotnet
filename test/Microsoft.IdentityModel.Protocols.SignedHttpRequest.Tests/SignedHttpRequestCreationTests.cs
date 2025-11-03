@@ -910,7 +910,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKey1, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
                         ExpectedClaimValue = $@"{{""cnf"":{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(rsaJwkFromX509Key.ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.E}"":""{rsaJwkFromX509Key.E}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{rsaJwkFromX509Key.N}""}}}}}}"
                     },
-#if NET472 || NET_CORE
+#if NET472 || NET
                     new CreateSignedHttpRequestTheoryData("ValidEcdsaKey")
                     {
                         ExpectedClaim = ConfirmationClaimTypes.Cnf,

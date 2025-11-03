@@ -25,7 +25,8 @@
   <ItemGroup>
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="$(OpenTelemetryVersion)"/>
     <PackageReference Include="OpenTelemetry.Exporter.InMemory" Version="$(OpenTelemetryVersion)"/>
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
+    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
   </ItemGroup>
 
   <ItemGroup>

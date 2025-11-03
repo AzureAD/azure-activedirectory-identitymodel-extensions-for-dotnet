@@ -1,142 +1,120 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomAlgorithmValidationDelegates
     {
-        internal static ValidationResult<string> CustomAlgorithmValidatorDelegate(
-            string algorithm,
-            SecurityKey securityKey,
+        internal static ValidationResult<string, ValidationError> CustomAlgorithmValidationFailed(
+            string? algorithm,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             // Returns a CustomAlgorithmValidationError : AlgorithmValidationError
             return new CustomAlgorithmValidationError(
-                new MessageDetail(nameof(CustomAlgorithmValidatorDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(SecurityTokenInvalidAlgorithmException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(CustomAlgorithmValidationFailed)),
+                CustomValidationFailure.AlgorithmValidationFailed,
+                Default.GetStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string> CustomAlgorithmValidatorCustomExceptionDelegate(
-            string algorithm,
-            SecurityKey securityKey,
+        internal static ValidationResult<string, ValidationError> UnknownValidationFailure(
+            string? algorithm,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomAlgorithmValidationError(
-                new MessageDetail(nameof(CustomAlgorithmValidatorCustomExceptionDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(CustomSecurityTokenInvalidAlgorithmException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(UnknownValidationFailure)),
+                AudienceValidationFailure.AudienceDidNotMatch,
+                Default.GetStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string> CustomAlgorithmValidatorCustomExceptionCustomFailureTypeDelegate(
-            string algorithm,
-            SecurityKey securityKey,
+        internal static ValidationResult<string, ValidationError> AlgorithmValidationFailed(
+            string? algorithm,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomAlgorithmValidationError(
-                new MessageDetail(nameof(CustomAlgorithmValidatorCustomExceptionCustomFailureTypeDelegate), null),
-                CustomAlgorithmValidationError.CustomAlgorithmValidationFailureType,
-                typeof(CustomSecurityTokenInvalidAlgorithmException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(AlgorithmValidationFailed)),
+                AlgorithmValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string> CustomAlgorithmValidatorUnknownExceptionDelegate(
-            string algorithm,
-            SecurityKey securityKey,
-            SecurityToken securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return new CustomAlgorithmValidationError(
-                new MessageDetail(nameof(CustomAlgorithmValidatorUnknownExceptionDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(NotSupportedException),
-                ValidationError.GetCurrentStackFrame(),
-                algorithm);
-        }
-
-        internal static ValidationResult<string> CustomAlgorithmValidatorWithoutGetExceptionOverrideDelegate(
-            string algorithm,
-            SecurityKey securityKey,
+        internal static ValidationResult<string, ValidationError> CustomWithoutGetExceptionOverride(
+            string? algorithm,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new CustomAlgorithmWithoutGetExceptionValidationOverrideError(
-                new MessageDetail(nameof(CustomAlgorithmValidatorWithoutGetExceptionOverrideDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(CustomSecurityTokenInvalidAlgorithmException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(CustomWithoutGetExceptionOverride), null),
+                AlgorithmValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string> AlgorithmValidatorDelegate(
-            string algorithm,
-            SecurityKey securityKey,
+        internal static ValidationResult<string, ValidationError> AlgorithmValidatorDelegate(
+            string? algorithm,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new AlgorithmValidationError(
-                new MessageDetail(nameof(AlgorithmValidatorDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(SecurityTokenInvalidAlgorithmException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(AlgorithmValidatorDelegate)),
+                AlgorithmValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string> AlgorithmValidatorThrows(
-            string algorithm,
-            SecurityKey securityKey,
+        internal static ValidationResult<string, ValidationError> AlgorithmValidatorThrows(
+            string? algorithm,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
-            throw new CustomSecurityTokenInvalidAlgorithmException(nameof(AlgorithmValidatorThrows), null);
+            throw new CustomSecurityTokenInvalidAlgorithmException(
+                nameof(AlgorithmValidatorThrows),
+                new AlgorithmValidationError(
+                    new MessageDetail(nameof(AlgorithmValidatorThrows), null),
+                    AlgorithmValidationFailure.ValidationFailed,
+                    Default.GetStackFrame(),
+                    algorithm,
+                    null),
+                null);
         }
 
-        internal static ValidationResult<string> AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate(
-            string algorithm,
-            SecurityKey securityKey,
+        internal static ValidationResult<string, ValidationError> AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate(
+            string? algorithm,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new AlgorithmValidationError(
-                new MessageDetail(nameof(AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(CustomSecurityTokenInvalidAlgorithmException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate)),
+                AlgorithmValidationFailure.ValidationFailed,
+                Default.GetStackFrame(),
                 algorithm);
         }
 
-        internal static ValidationResult<string> AlgorithmValidatorCustomExceptionTypeDelegate(
-            string algorithm,
-            SecurityKey securityKey,
+        internal static ValidationResult<string, ValidationError> AlgorithmValidatorNotSupportedFailureDelegate(
+            string? algorithm,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext)
         {
             return new AlgorithmValidationError(
-                new MessageDetail(nameof(AlgorithmValidatorCustomExceptionTypeDelegate), null),
-                ValidationFailureType.AlgorithmValidationFailed,
-                typeof(CustomSecurityTokenException),
-                ValidationError.GetCurrentStackFrame(),
+                new MessageDetail(nameof(AlgorithmValidatorNotSupportedFailureDelegate)),
+                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                Default.GetStackFrame(),
                 algorithm);
         }
     }

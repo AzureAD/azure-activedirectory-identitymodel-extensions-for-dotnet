@@ -893,7 +893,8 @@ namespace System.IdentityModel.Tokens.Jwt
                     {
                         TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                             validationParameters.ConfigurationManager.MetadataAddress,
-                            TelemetryConstants.Protocols.Lkg);
+                            TelemetryConstants.Protocols.Lkg,
+                            TelemetryConstants.Protocols.ConfigurationSourceUnknown);
 
                         validationParameters.ConfigurationManager.RequestRefresh();
                         validationParameters.RefreshBeforeValidation = true;
