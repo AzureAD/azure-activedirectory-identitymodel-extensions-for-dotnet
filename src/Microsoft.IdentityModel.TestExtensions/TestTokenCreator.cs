@@ -6,10 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.TestExtensions
 {
@@ -427,11 +426,7 @@ namespace Microsoft.IdentityModel.TestExtensions
             if (claims == null)
                 throw new ArgumentNullException(nameof(claims));
 
-            var jobj = new JObject();
-            foreach (var claim in claims)
-                jobj.Add(claim.Key, JToken.FromObject(claim.Value));
-
-            return jobj.ToString(Formatting.None);
+            return JsonSerializer.Serialize(claims);
         }
     }
 }

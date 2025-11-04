@@ -16,7 +16,7 @@
     <OpenTelemetryVersion>1.6.0</OpenTelemetryVersion>
     <SystemNetHttp>4.3.4</SystemNetHttp>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
-    <SystemTextJson>8.0.5</SystemTextJson>
+    <SystemTextJsonVersion>8.0.5</SystemTextJsonVersion>
     <SystemTextRegularExpressions>4.3.1</SystemTextRegularExpressions>
     <XunitRunnerConsoleVersion>2.9.2</XunitRunnerConsoleVersion>
     <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
@@ -39,9 +39,5 @@
   
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <MicrosoftExtensionsTimeProviderTestingVersion>8.10.0</MicrosoftExtensionsTimeProviderTestingVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <SystemTextJson>10.0.0-preview.*</SystemTextJson>
   </PropertyGroup>
 </Project>
