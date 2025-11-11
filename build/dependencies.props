@@ -11,7 +11,7 @@
     <SystemDiagnosticSourceVersion>6.0.2</SystemDiagnosticSourceVersion>
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
-    <SystemTextJson>8.0.5</SystemTextJson>
+    <SystemTextJsonVersion>8.0.5</SystemTextJsonVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetNetNext)' == 'True'">
@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <MicrosoftExtensionsLoggingAbstractionsVersion>10.0.0-preview.*</MicrosoftExtensionsLoggingAbstractionsVersion>
+    <MicrosoftExtensionsLoggingAbstractionsVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsLoggingAbstractionsVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
