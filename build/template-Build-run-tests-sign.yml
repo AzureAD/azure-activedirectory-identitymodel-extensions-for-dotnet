@@ -2,7 +2,7 @@
 parameters:
 - name: TargetNetNext
   type: string
-  default: "True"
+  default: "False"
 
 steps:
 - script: echo $(BuildConfiguration)
@@ -39,6 +39,7 @@ steps:
 
 - task: UseDotNet@2
   displayName: 'Use .Net Core SDK 10.x'
+  condition: eq('${{ parameters.TargetNetNext }}', 'True')
   inputs:
     useGlobalJson: false
     includePreviewVersions: true
