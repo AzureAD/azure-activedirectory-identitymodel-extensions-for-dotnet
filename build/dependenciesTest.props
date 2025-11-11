@@ -24,10 +24,6 @@
     <MicrosoftRestClientRuntimeVersion>2.3.24</MicrosoftRestClientRuntimeVersion>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <SuppressNETCoreSdkPreviewMessage Condition="'$(TargetNetNext)' == 'True'">true</SuppressNETCoreSdkPreviewMessage>
-  </PropertyGroup>
-
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
     <XunitRunnerVisualStudioVersion>3.0.0-pre.49</XunitRunnerVisualStudioVersion>
   </PropertyGroup>
