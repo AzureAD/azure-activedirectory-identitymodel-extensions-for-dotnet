@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -26,11 +26,6 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntimeVersion)"/>
-    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
   </ItemGroup>
 
   <ItemGroup>

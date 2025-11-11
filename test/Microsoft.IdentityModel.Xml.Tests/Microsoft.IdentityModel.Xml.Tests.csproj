@@ -13,14 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
-    <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Tests\Microsoft.IdentityModel.Tokens.Tests.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntimeVersion)"/>
-    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -29,9 +29,8 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>

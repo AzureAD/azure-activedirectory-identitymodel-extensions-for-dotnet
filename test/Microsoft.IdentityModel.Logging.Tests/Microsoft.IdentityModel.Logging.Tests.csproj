@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -13,20 +13,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.OpenIdConnect\Microsoft.IdentityModel.Protocols.OpenIdConnect.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.WsFederation\Microsoft.IdentityModel.Protocols.WsFederation.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="$(OpenTelemetryVersion)"/>
     <PackageReference Include="OpenTelemetry.Exporter.InMemory" Version="$(OpenTelemetryVersion)"/>
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
