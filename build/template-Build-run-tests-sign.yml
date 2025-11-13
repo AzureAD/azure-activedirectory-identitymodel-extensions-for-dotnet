@@ -78,7 +78,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: ./$(WilsonSourceDirectory)runTests.ps1
-    arguments: '-buildType $(BuildConfiguration) -runningInCI $True'
+    arguments: '-buildType $(BuildConfiguration) -runningInCI $True -dotnetDir "$(Agent.ToolsDirectory)/dotnet"'
   env:
     TargetNetNext: ${{ parameters.TargetNetNext }}
 
