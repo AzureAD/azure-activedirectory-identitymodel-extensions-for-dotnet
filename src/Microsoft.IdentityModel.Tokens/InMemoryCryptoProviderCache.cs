@@ -301,11 +301,6 @@ namespace Microsoft.IdentityModel.Tokens
             return _verifyingSignatureProviders.EventQueueCount;
         }
 
-        /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
-        /// </summary>
-        internal long TaskCount => _signingSignatureProviders.TaskCount + _verifyingSignatureProviders.TaskCount;
-
         #endregion
     }
 }

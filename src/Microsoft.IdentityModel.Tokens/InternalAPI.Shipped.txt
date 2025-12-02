@@ -380,7 +380,6 @@ Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.SetValue(TKey ke
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.SetValue(TKey key, TValue value, System.DateTime expirationTime) -> bool
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.ShouldRemove
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.StopEventQueueTask() -> void
-Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.TaskCount.get -> int
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.ToArray() -> System.Collections.Generic.KeyValuePair<TKey, Microsoft.IdentityModel.Tokens.LRUCacheItem<TKey, TValue>>[]
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.TryGetValue(TKey key, out TValue value) -> bool
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.TryRemove(TKey key) -> bool
@@ -396,7 +395,6 @@ Microsoft.IdentityModel.Tokens.InMemoryCryptoProviderCache.LinkedListCountSignin
 Microsoft.IdentityModel.Tokens.InMemoryCryptoProviderCache.LinkedListCountVerifying() -> long
 Microsoft.IdentityModel.Tokens.InMemoryCryptoProviderCache.MapCountSigning() -> long
 Microsoft.IdentityModel.Tokens.InMemoryCryptoProviderCache.MapCountVerifying() -> long
-Microsoft.IdentityModel.Tokens.InMemoryCryptoProviderCache.TaskCount.get -> long
 Microsoft.IdentityModel.Tokens.InternalValidators
 Microsoft.IdentityModel.Tokens.ISecurityTokenException
 Microsoft.IdentityModel.Tokens.ISecurityTokenException.SetValidationError(Microsoft.IdentityModel.Tokens.ValidationError validationError) -> void

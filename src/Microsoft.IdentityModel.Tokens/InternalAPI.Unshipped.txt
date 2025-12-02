@@ -113,4 +113,3 @@ virtual Microsoft.IdentityModel.Tokens.ValidationError.CreateException() -> Syst
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.TrySetValue(TKey key, TValue value) -> bool
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.TrySetValue(TKey key, TValue value, System.DateTime expirationTime) -> bool
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.StopEventQueueTaskImmediately() -> void
-static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttr.get -> bool

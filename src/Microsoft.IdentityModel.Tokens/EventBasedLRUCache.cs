@@ -34,15 +34,15 @@ namespace Microsoft.IdentityModel.Tokens
         internal delegate bool ShouldRemove(TValue Value);
 
         private readonly int _capacity;
-        private List<LRUCacheItem<TKey, TValue>> _compactedItems = new List<LRUCacheItem<TKey, TValue>>();
+        private readonly List<LRUCacheItem<TKey, TValue>> _compactedItems = new List<LRUCacheItem<TKey, TValue>>();
         // The percentage of the cache to be removed when _maxCapacityPercentage is reached.
         private readonly double _compactionPercentage = .20;
-        private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
-        private ConcurrentQueue<Action> _eventQueue = new ConcurrentQueue<Action>();
+        private readonly LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
+        private readonly ConcurrentQueue<Action> _eventQueue = new ConcurrentQueue<Action>();
         private readonly TaskCreationOptions _options;
         // if true, then items will be maintained in a LRU fashion, moving to front of list when accessed in the cache.
         private readonly bool _maintainLRU;
-        private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
+        private readonly ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
         private readonly int _compactIntervalInSeconds;
@@ -59,12 +59,10 @@ namespace Microsoft.IdentityModel.Tokens
         private int _compactValuesState = ActionNotQueued;
         private int _removeExpiredValuesState = ActionNotQueued;
         private int _processCompactedValuesState = ActionNotQueued;
-        private readonly Task _eventQTask;
-        private int _eventQueuePollingInterval = 50; // in milliseconds
 
-        // In moving the creation of the task to the constructor, there will only be one Task.
-        // We kept the internal TaskCount and need to reference an instance variable to keep the method the same.
-        private int _taskCount = 1;
+        private readonly Task _eventQTask;
+        private readonly int _eventQueuePollingInterval = 50; // in milliseconds
+
 
         // set to true when the AppDomain is to be unloaded or the default AppDomain process is ready to exit
         private bool _stopEventQueueTask;
@@ -88,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
         #endregion
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="EventBasedLRUCache{TKey, TValue}"/> class.
         /// </summary>
         /// <param name="capacity">The capacity of the cache, used to determine if experiencing overflow.</param>
         /// <param name="options">The event queue task creation option, default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of ThreadPool.</param>
@@ -151,12 +149,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// This is the delegate for the event queue task.
+        /// This is the delegate for the event queue task which is only called
+        /// by the constructor.
         /// </summary>
         private void EventQueueTaskAction()
         {
-            Interlocked.Increment(ref _taskCount);
-
             try
             {
                 // Keep running until instructed to stop.
@@ -198,8 +195,6 @@ namespace Microsoft.IdentityModel.Tokens
                 if (LogHelper.IsEnabled(EventLogLevel.Warning))
                     LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
             }
-
-            Interlocked.Decrement(ref _taskCount);
         }
 
         /// <summary>
@@ -244,7 +239,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// Remove all expired cache items from the _map ONLY. This is called for the non-LRU (_maintainLRU = false) scenaro.
         /// The enumerator returned from the dictionary is safe to use concurrently with reads and writes to the dictionary, according to the MS document.
         /// </summary>
-        /// <returns>Number of items removed.</returns>
         internal void RemoveExpiredValues()
         {
             try
@@ -371,20 +365,11 @@ namespace Microsoft.IdentityModel.Tokens
             return currentCount - (int)(currentCount * _compactionPercentage);
         }
 
-        public void SetValue(TKey key, TValue value)
-        {
-            TrySetValue(key, value, DateTime.MaxValue);
-        }
+        public void SetValue(TKey key, TValue value) => TrySetValue(key, value, DateTime.MaxValue);
 
-        public bool SetValue(TKey key, TValue value, DateTime expirationTime)
-        {
-            return TrySetValue(key, value, expirationTime);
-        }
+        public bool SetValue(TKey key, TValue value, DateTime expirationTime) => TrySetValue(key, value, expirationTime);
 
-        public bool TrySetValue(TKey key, TValue value)
-        {
-            return TrySetValue(key, value, DateTime.MaxValue);
-        }
+        public bool TrySetValue(TKey key, TValue value) => TrySetValue(key, value, DateTime.MaxValue);
 
         public bool TrySetValue(TKey key, TValue value, DateTime expirationTime)
         {
@@ -398,7 +383,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_removeExpiredValues && expirationTime < DateTime.UtcNow)
                 return false;
 
-            if (Interlocked.CompareExchange(ref _compactValuesState, ActionQueuedOrRunning, ActionQueuedOrRunning) == ActionQueuedOrRunning)
+            if (_compactValuesState == ActionQueuedOrRunning)
                 return false;
 
             // just need to update value and move it to the top
@@ -460,10 +445,7 @@ namespace Microsoft.IdentityModel.Tokens
             return true;
         }
 
-        internal KeyValuePair<TKey, LRUCacheItem<TKey, TValue>>[] ToArray()
-        {
-            return _map.ToArray();
-        }
+        internal KeyValuePair<TKey, LRUCacheItem<TKey, TValue>>[] ToArray() => _map.ToArray();
 
         /// Each time a node gets accessed, it gets moved to the beginning (head) of the list if the _maintainLRU == true
         public bool TryGetValue(TKey key, out TValue value)
@@ -497,7 +479,9 @@ namespace Microsoft.IdentityModel.Tokens
         // A better design would be to have TryRemove move the SignatureProvider to the compacted list.
         // This would need a new action in LRUCache, AddItemToCompactedList.
 
-        /// Removes a particular key from the cache.
+        /// <summary>
+        /// Removes a particular key from the cache.    
+        /// </summary>
         public bool TryRemove(TKey key)
         {
             if (key == null)
@@ -535,46 +519,21 @@ namespace Microsoft.IdentityModel.Tokens
             return true;
         }
 
+
+        // The following members in the region are internal to facilitate testing.
         #region FOR TESTING (INTERNAL ONLY)
 
-        /// <summary>
-        /// FOR TESTING ONLY.
-        /// </summary>
-        /// <returns></returns>
         internal LinkedList<LRUCacheItem<TKey, TValue>> LinkedList => _doubleLinkedList;
 
-        /// <summary>
-        /// FOR TESTING ONLY.
-        /// </summary>
         internal long LinkedListCount => _doubleLinkedList.Count;
 
-        /// <summary>
-        /// FOR TESTING ONLY.
-        /// </summary>
         internal long MapCount => _map.Count;
 
-        /// <summary>
-        /// FOR TESTING ONLY.
-        /// </summary>
-        /// <returns></returns>
         internal ICollection<LRUCacheItem<TKey, TValue>> MapValues => _map.Values;
 
-        /// <summary>
-        /// FOR TESTING ONLY.
-        /// </summary>
         internal long EventQueueCount => _eventQueue.Count;
 
-        /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
-        /// This is for tests to verify all tasks exit at the end of tests if the queue is empty.
-        /// In moving the creation of the task to the constructor, there will only be one Task.
-        /// We kept the internal TaskCount and need to reference an instance variable to keep the method the same.
-        /// </summary>
-        internal int TaskCount => _taskCount;
 
-        /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
-        /// </summary>
         internal void WaitForProcessing()
         {
             while (!_eventQueue.IsEmpty)
