@@ -480,7 +480,7 @@ namespace Microsoft.IdentityModel.Tokens
         // This would need a new action in LRUCache, AddItemToCompactedList.
 
         /// <summary>
-        /// Removes a particular key from the cache.    
+        /// Removes a particular key from the cache.
         /// </summary>
         public bool TryRemove(TKey key)
         {
