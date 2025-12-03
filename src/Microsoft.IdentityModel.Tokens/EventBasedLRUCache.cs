@@ -435,6 +435,10 @@ namespace Microsoft.IdentityModel.Tokens
                             localThis._doubleLinkedList.AddFirst(localCacheItem);
                         });
                     }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
