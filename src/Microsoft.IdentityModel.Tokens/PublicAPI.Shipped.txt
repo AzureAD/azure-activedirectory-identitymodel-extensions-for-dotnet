@@ -857,7 +857,6 @@ static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromRSASecurity
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromSecurityKey(Microsoft.IdentityModel.Tokens.SecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromSymmetricSecurityKey(Microsoft.IdentityModel.Tokens.SymmetricSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
-static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key, bool representAsRsaKey) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, out Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
 static Microsoft.IdentityModel.Tokens.JsonWebKeySet.Create(string json) -> Microsoft.IdentityModel.Tokens.JsonWebKeySet
 static Microsoft.IdentityModel.Tokens.JsonWebKeySet.DefaultSkipUnresolvedJsonWebKeys -> bool
