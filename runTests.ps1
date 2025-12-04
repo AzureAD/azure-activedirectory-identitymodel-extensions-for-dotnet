@@ -30,9 +30,19 @@ function WriteSectionFooter($sectionName)
 
 ################################################# Functions ############################################################
 
-$env:TargetNetNext = "True"
-
 WriteSectionHeader("runTests.ps1");
+
+if (Test-Path $env:TargetNetNext)
+{
+    Write-Host "using TargetNetNext from env:"  $env:TargetNetNext
+}
+else 
+{
+    Write-Host "using TargetNetNext as false"
+    $env:TargetNetNext = "False"
+}
+
+
 Write-Host "buildType:       " $buildType;
 Write-Host "dotnetDir:       " $dotnetDir
 Write-Host "root:            " $root;
@@ -48,7 +58,6 @@ $startTime = Get-Date
 Write-Host "Start Time:     " $startTime
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "dotnetexe:      " $dotnetexe;
-Write-Host "TargetNetNext:  " $env:TargetNetNext;
 
 $ErrorActionPreference = "Stop"
 

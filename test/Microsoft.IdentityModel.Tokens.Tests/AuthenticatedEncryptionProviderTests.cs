@@ -67,6 +67,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void AesGcmEncryptionOnWindows()
         {
+#if NET10_0_OR_GREATER
+            // AES-GCM is now supported on all platforms in .NET 10+
+            var context = new CompareContext();
+            try
+            {
+                var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
+            }
+            catch (Exception ex)
+            {
+                context.AddDiff($"AuthenticatedEncryptionProvider is not supposed to throw an exception, Exception:{ex.ToString()}");
+            }
+            TestUtilities.AssertFailIfErrors(context);
+#else
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
@@ -84,14 +97,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 }
                 TestUtilities.AssertFailIfErrors(context);
             }
+#endif
         }
 
 #if NET
         [Fact]
         public void AesGcm_Dispose()
         {
+#if !NET10_0_OR_GREATER
+            // In .NET 9 and below, AES-GCM is only supported on Windows
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
+#endif
 
             AuthenticatedEncryptionProvider encryptionProvider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
             encryptionProvider.Dispose();

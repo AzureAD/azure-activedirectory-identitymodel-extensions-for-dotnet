@@ -1,5 +1,73 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.15.0
+====
+## New Features
+- **Add ECDsa support in `X509SecurityKey` and `JsonWebKeyConverter.ConvertFromX509SecurityKey`**  
+  Extended `X509SecurityKey` and `JsonWebKeyConverter.ConvertFromX509SecurityKey` to support ECDSA keys.  
+  See PR [#2377](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2377) for details.
+
+## Bug Fixes
+- **Sanitize logs to avoid leaking sensitive data**  
+  Updated logging to sanitize sensitive values, reducing the risk of inadvertently exposing secrets or PII in logs.  
+  See PR [#3316](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3316) for details.
+- **Optimize log sanitization with `SearchValues`**  
+  Improved the performance of the log sanitization logic introduced earlier by using `SearchValues`, making sanitization more efficient in high-throughput scenarios.  
+  See PR [#3341](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3341) for details.
+- **Update test for `IDX10400`**  
+  Adjusted the `IDX10400` test to align with the current behavior and error messaging.  
+  See PR [#3314](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3314) for details.
+
+## Fundamentals
+- **Add supported algorithm tests**  
+  Added new tests to validate the set of supported cryptographic algorithms, increasing confidence in algorithm coverage and compatibility.  
+  See PR [#3296](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3296) for details.
+- **Migrate repository agent rules from `.clinerules` to `agents.md`**  
+  Moved repository agent/AI-assist rules into markdown documentation to make them more visible and easier to maintain.  
+  See PR [#3313](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3313) for details.
+- **Migrate `Microsoft.IdentityModel.TestExtensions` from Newtonsoft.Json to System.Text.Json**  
+  Updated `Microsoft.IdentityModel.TestExtensions` to use `System.Text.Json` instead of `Newtonsoft.Json`, aligning tests with the runtime serialization stack.  
+  See PR [#3356](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3356) for details.
+- **Disable code coverage comments**  
+  Turned off automated code coverage comments on PRs to reduce noise while retaining coverage data elsewhere.  
+  See PR [#3349](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3349) for details.
+- **Fix CodeQL alerts**  
+  Addressed CodeQL-reported issues to improve security posture and static analysis cleanliness.  
+  See PR [#3364](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3364) for details.
+
+### .NET 10 / SDK and tooling updates
+- **Building with .NET 10 preview / RC 1**  
+  Updated the repository to build and test against .NET 10.0 preview/RC1, ensuring early compatibility with the upcoming runtime.  
+  See PRs [#3287](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3287), [#3357](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3357), and [#3358](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3358) for details.
+- **Fix .NET 10 test execution consistency**  
+  Ensured consistent use of the `TargetNetNext` parameter across build, test, and pack phases so .NET 10.0 tests execute reliably.  
+  See PR [#3337](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3337) for details.
+- **Update project files and workflows for .NET 10.0 compatibility**  
+  Adjusted project files and CI workflows to correctly target and run on .NET 10.0, including test and pack scenarios.  
+  See PR [#3363](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3363) for details.
+- **Update .NET version to meet CG compliance**  
+  Updated the .NET version references to be compliant with corporate governance (CG) requirements.  
+  See PR [#3353](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3353) for details.
+- **Update Coverlet collector and test SDK**  
+  - Bumped `CoverletCollectorVersion` to 6.0.4.  
+    See PR [#3333](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3333) for details.  
+  - Upgraded `Microsoft.NET.Test.Sdk` to a newer version for improved test reliability and tooling support.  
+    See PR [#3336](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3336) for details.
+- **Update `runTests.ps1` to specify dotnet directory**  
+  Updated `runTests.ps1` to accept an explicit dotnet directory, improving test execution robustness in environments with multiple SDK installations.  
+  See PR [#3368](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3368) for details.
+- **Adjust dotnetcore workflow targeting for .NET 10 SDK**  
+  Iterated on the CI workflow configuration to correctly target the .NET 10 SDK:  
+  - Temporarily removed targeting of the .NET 10 SDK in `dotnetcore.yml`.  
+    See PR [#3335](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3335).  
+  - Reverted that change to restore .NET 10 SDK targeting.  
+    See PR [#3339](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3339) for details.
+
+### Documentation
+- **Update support policy documentation**  
+  Refreshed `supportPolicy.md` to reflect the latest support policy for IdentityModel.  
+  See PR [#3367](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3367) for details.
+  
 8.14.0
 ====
 ## Bug Fixes
