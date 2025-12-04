@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
@@ -995,7 +998,276 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        /// <summary>
+        /// Testing adding/removing providers to the Default cache w/o leaking task at the end of test.
+        /// </summary>
+        [Fact]
+        public void ProviderCache_EnsureNoHangingTasks()
+        {
+            long taskIdleTimeoutInSeconds = 1;
+            var cache = new InMemoryCryptoProviderCache();
+            var factory = new CryptoProviderFactory(cache);
 
+            // create signing providers
+            var signingProviders = CreateSigningProviders(factory);
+
+            // create verifying providers
+            var verifyingProviders = CreateVerifyingProviders(factory);
+
+            WaitTillTasksStarted(cache, taskIdleTimeoutInSeconds); // wait for the event queue task to start
+
+            // make sure providers can be retrieved from the cache
+            if (cache.TryGetSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, typeof(AsymmetricSignatureProvider).ToString(), true, out var tmpProvider))
+            {
+                Assert.True(tmpProvider != null);
+            }
+
+            // remove all signing providers
+            foreach (var provider in signingProviders)
+                cache.TryRemove(provider);
+
+            foreach (var provider in verifyingProviders)
+                cache.TryRemove(provider);
+
+            //=============================================================================================
+            // repeat the steps and verify tasks will be restarted again and stopped when cache is empty...
+            //=============================================================================================
+            signingProviders = CreateSigningProviders(factory); // create signing providers
+
+            WaitTillTasksStarted(cache, taskIdleTimeoutInSeconds); // wait for the event queue task to start
+
+            // remove all signing providers
+            foreach (var provider in signingProviders)
+                cache.TryRemove(provider);
+
+            // Dispose() should stop the event queue task if it is running.
+            cache.Dispose();
+
+            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoHangingTasks");
+        }
+
+        /// <summary>
+        /// Test adding and removing providers by multiple threads w/o exception.
+        /// </summary>
+        [Fact]
+        public void ProviderCache_EnsureNoException_MultipleThreads()
+        {
+            var cache = new InMemoryCryptoProviderCache();
+            var factory = new CryptoProviderFactory(cache);
+
+            int count = 5;
+            List<Thread> signingThreads = new List<Thread>(count);
+            for (int i = 0; i < count; i++)
+            {
+                var thread = new Thread(() => ThreadStartProcAddAndRemoveProviders(factory, CreateSigningProviders));
+                thread.Start();
+                signingThreads.Add(thread);
+            }
+
+            List<Thread> verifyingThreads = new List<Thread>(count);
+            for (int i = 0; i < count; i++)
+            {
+                var thread = new Thread(() => ThreadStartProcAddAndRemoveProviders(factory, CreateVerifyingProviders));
+                thread.Start();
+                verifyingThreads.Add(thread);
+            }
+
+            // wait for all threads to finish
+            foreach (Thread thread in signingThreads)
+                thread.Join();
+
+            foreach (Thread thread in verifyingThreads)
+                thread.Join();
+
+            // Dispose() should stop the event queue task if it is running.
+            cache.Dispose();
+
+            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoException_MultipleThreads");
+        }
+
+        /// <summary>
+        /// Test to ensure no hanging task at the end when calling the JwtSecurityTokenHandler.WriteToken() method.
+        /// The JwtHeader is created with SymmetricEncryptingCredentials.
+        /// </summary>
+        [Fact]
+        public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials()
+        {
+            var cache = new InMemoryCryptoProviderCache();
+            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
+
+            var testClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
+            };
+
+            var header = new JwtHeader(new EncryptingCredentials(
+                    KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
+                    KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Alg,
+                    KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Enc)
+            { CryptoProviderFactory = cryptoProviderFactory });
+
+            JwtPayload payload = new JwtPayload("IssuerName", "Audience", testClaims, DateTime.Now.AddHours(-1), DateTime.Now.AddHours(1), DateTime.Now.AddHours(-1));
+            var token = new JwtSecurityToken(header, payload);
+
+            string certHash = "Test Cert Hash";
+            token.Header[JwtHeaderParameterNames.X5t] = certHash;
+            token.Header[JwtHeaderParameterNames.Kid] = certHash;
+
+            var handler = new JwtSecurityTokenHandler();
+            _ = handler.WriteToken(token);
+
+            // Dispose() should stop the event queue task if it is running.
+            cache.Dispose();
+
+            // when JwtHeader is created with SymmetricEncryptingCredentials, the provider will not be added to cache (an error in logic???)
+            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials");
+        }
+
+        /// <summary>
+        /// Test to ensure no hanging task at the end when calling the JwtSecurityTokenHandler.WriteToken() method.
+        /// The JwtHeader is created with SigningCredentials.
+        /// </summary>
+        [Fact]
+        public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials()
+        {
+            var cache = new InMemoryCryptoProviderCache();
+            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
+
+            var testClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
+            };
+
+            // create new key, set the newly created crypto provider factory on it
+            var signingCredentials = new SigningCredentials(new X509SecurityKey(KeyingMaterial.DefaultCert_2048), SecurityAlgorithms.RsaSha256) { CryptoProviderFactory = cryptoProviderFactory };
+
+            var token = new JwtSecurityToken(
+                issuer: "IssuerName",
+                audience: "Audience",
+                claims: testClaims,
+                notBefore: DateTime.Now.AddHours(-1),
+                expires: DateTime.Now.AddHours(1),
+                signingCredentials: signingCredentials);
+
+            string certHash = "Test Cert Hash";
+
+            token.Header[JwtHeaderParameterNames.X5t] = certHash;
+            token.Header[JwtHeaderParameterNames.Kid] = certHash;
+
+            var handler = new JwtSecurityTokenHandler();
+            _ = handler.WriteToken(token);
+
+            // Dispose() should stop the event queue task if it is running.
+            cache.Dispose();
+
+            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials");
+        }
+
+        private void AssertNoHangingingTasks(InMemoryCryptoProviderCache cache, string callName)
+        {
+            WaitTillTaskComplete(cache, MaxEventQueueTaskWaitTimeInSeconds); // wait for the event queue task to complete
+            Assert.True(cache.EventQueueCountSigning() == 0, $"{callName}: unexpected task count: {cache.EventQueueCountSigning()}, expected: 0");
+        }
+
+        /// <summary>
+        /// The max wait time (in seconds) for the event queue task to exit.
+        /// </summary>
+        private int MaxEventQueueTaskWaitTimeInSeconds => 5;
+
+        /// <summary>
+        /// Helper method to wait for the event queue tasks to start, up to the specified time in seconds.
+        /// </summary>
+        /// <param name="cache">the cache to check</param>
+        /// <param name="secondsTimeout">the timeout in seconds</param>
+        private void WaitTillTasksStarted(InMemoryCryptoProviderCache cache, long secondsTimeout)
+        {
+            int i = 0;
+            for (; i < secondsTimeout; i++)
+            {
+                if (cache.EventQueueCountSigning() > 0)
+                    break;
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        /// <summary>
+        /// Helper method to wait for tasks to complete, up to the specified time in seconds.
+        /// </summary>
+        /// <param name="cache">the cache to check</param>
+        /// <param name="secondsTimeout">the timeout in seconds</param>
+        private void WaitTillTaskComplete(InMemoryCryptoProviderCache cache, long secondsTimeout)
+        {
+            int i = 0;
+            for (; i < secondsTimeout; i++)
+            {
+                if (cache.EventQueueCountSigning() == 0)
+                    break;
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        /// <summary>
+        /// Thread proc that creates and removes providers.
+        /// </summary>
+        /// <param name="factory">The input to the <paramref name="func"/>.</param>
+        /// <param name="func">func creating providers (signing and verifying).</param>
+        private static void ThreadStartProcAddAndRemoveProviders(CryptoProviderFactory factory, CreateProvidersFunc func)
+        {
+            var cache = factory.CryptoProviderCache as InMemoryCryptoProviderCache;
+
+            // create signing providers
+            var providers = func(factory);
+            foreach (var provider in providers)
+            {
+                provider.AddRef();
+                Thread.Sleep(100);
+                provider.Release();
+            }
+
+            Thread.Sleep(500);
+            foreach (var provider in providers)
+                cache.TryRemove(provider);
+        }
+
+        public delegate IList<SignatureProvider> CreateProvidersFunc(CryptoProviderFactory factory);
+
+        /// <summary>
+        /// Helper method to create some signing providers.
+        /// </summary>
+        /// <param name="factory"><see cref="CryptoProviderFactory"/>the factory to create providers</param>
+        /// <returns>a list of signing providers</returns>
+        private static IList<SignatureProvider> CreateSigningProviders(CryptoProviderFactory factory)
+        {
+            var providers = new List<SignatureProvider>();
+
+            providers.Add(factory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm));
+            providers.Add(factory.CreateForSigning(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature));
+            providers.Add(factory.CreateForSigning(Default.SymmetricSigningKey512, ALG.HmacSha512));
+            providers.Add(factory.CreateForSigning(Default.SymmetricSigningKey384, ALG.HmacSha384));
+
+            return providers;
+        }
+
+        /// <summary>
+        /// Helper method to create some verifying providers.
+        /// </summary>
+        /// <param name="factory"><see cref="CryptoProviderFactory"/>the factory to create providers</param>
+        /// <returns>a list of verifying providers</returns>
+        private static IList<SignatureProvider> CreateVerifyingProviders(CryptoProviderFactory factory)
+        {
+            var providers = new List<SignatureProvider>();
+
+            providers.Add(factory.CreateForVerifying(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm));
+            providers.Add(factory.CreateForVerifying(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature));
+            providers.Add(factory.CreateForVerifying(Default.SymmetricSigningKey512, ALG.HmacSha512));
+            providers.Add(factory.CreateForVerifying(Default.SymmetricSigningKey384, ALG.HmacSha384));
+
+            return providers;
+        }
 
         private static bool GetSignatureProviderIsDisposedByReflect(SignatureProvider signatureProvider) =>
             (bool)signatureProvider.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(signatureProvider);

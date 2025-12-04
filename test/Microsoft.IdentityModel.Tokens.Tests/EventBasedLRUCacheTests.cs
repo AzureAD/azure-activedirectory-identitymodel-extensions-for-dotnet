@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
             var cache = new EventBasedLRUCache<int?, string>(10, removeExpiredValues: false);
-            cache.TrySetValue(1, "one");
+            cache.TrySetValue(1, "one", DateTime.MaxValue);
             if (!cache.Contains(1))
                 context.AddDiff("Cache should contain the key value pair {1, 'one'}, but the Contains() method returned false.");
 
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
                 if (i % 2 == 0)
                     cache.TrySetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(expiredInSeconds));
                 else
-                    cache.TrySetValue(i, i.ToString());
+                    cache.TrySetValue(i, i.ToString(), DateTime.MaxValue);
             }
         }
 
@@ -179,18 +179,18 @@ namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
             var cache = new EventBasedLRUCache<int?, string>(1, removeExpiredValues: false);
-            Assert.Throws<ArgumentNullException>(() => cache.TrySetValue(1, null));
+            Assert.Throws<ArgumentNullException>(() => cache.TrySetValue(1, null, DateTime.MaxValue));
 
-            cache.TrySetValue(1, "one");
+            cache.TrySetValue(1, "one", DateTime.MaxValue);
             if (!cache.Contains(1))
                 context.AddDiff("The key value pair {1, 'one'} should have been added to the cache, but the Contains() method returned false.");
 
-            cache.TrySetValue(1, "one");
+            cache.TrySetValue(1, "one", DateTime.MaxValue);
             if (!cache.Contains(1))
                 context.AddDiff("The key value pair {1, 'one'} should have been added to the cache, but the Contains() method returned false.");
 
             // The LRU item should be removed, allowing this value to be added even though the cache is full.
-            bool wasAdded = cache.TrySetValue(2, "two");
+            bool wasAdded = cache.TrySetValue(2, "two", DateTime.MaxValue);
             if (cache.Contains(2))
                 context.AddDiff("The key value pair {2, 'two'} should have been added to the cache, but the Contains() method returned false.");
 
@@ -210,7 +210,7 @@ namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
 
             try
             {
-                cache.TrySetValue(3, null);
+                cache.TrySetValue(3, null, DateTime.MaxValue);
                 context.AddDiff("The second parameter passed into the SetValue() method was null, but no exception was thrown.");
             }
             catch (Exception ex)
@@ -228,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
             var cache = new EventBasedLRUCache<int?, string>(2, removeExpiredValues: false);
-            cache.TrySetValue(1, "one");
+            cache.TrySetValue(1, "one", DateTime.MaxValue);
 
             if (!cache.TryGetValue(1, out var value))
             {
@@ -261,7 +261,7 @@ namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
             var context = new CompareContext($"{this}.RemoveValue");
             var cache = new EventBasedLRUCache<int?, string>(1, removeExpiredValues: false);
 
-            cache.TrySetValue(1, "one");
+            cache.TrySetValue(1, "one", DateTime.MaxValue);
 
             if (!cache.TryRemove(1, out _))
                 context.AddDiff("The key value pair {1, 'one'} should have been removed from the cache, but the TryRemove() method returned false.");
@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
             {
                 taskList.Add(Task.Factory.StartNew(() =>
                 {
-                    cache.TrySetValue(i, i.ToString());
+                    cache.TrySetValue(i, i.ToString(), DateTime.MaxValue);
                 }));
             }
 
@@ -405,7 +405,7 @@ namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
 
             for (int i = 0; i < 100000; i++)
             {
-                cache.TrySetValue(i, i.ToString());
+                cache.TrySetValue(i, i.ToString(), DateTime.MaxValue);
             }
 
             // Cache size should be less than the capacity (somewhere between 800-1000 items).

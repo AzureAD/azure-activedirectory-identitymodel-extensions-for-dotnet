@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.Tokens
             // The cache does NOT already have a crypto provider associated with this key.
             if (!signatureProviderCache.Contains(cacheKey))
             {
-                if (signatureProviderCache.TrySetValue(cacheKey, signatureProvider))
+                if (signatureProviderCache.TrySetValue(cacheKey, signatureProvider, DateTime.MaxValue))
                 {
                     signatureProvider.CryptoProviderCache = this;
                     return true;

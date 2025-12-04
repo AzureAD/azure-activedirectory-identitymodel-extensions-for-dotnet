@@ -79,9 +79,6 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static bool? _updateConfigAsBlockingCall;
 
-        /// <summary>
-        /// Unused, part of a previous release. This is a friend, so we cannot remove.
-        /// </summary>
         internal static bool UpdateConfigAsBlocking => _updateConfigAsBlockingCall ??= (AppContext.TryGetSwitch(UpdateConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
 
         /// <summary>
@@ -97,6 +94,15 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr";
         private static bool? _useCapitalizedXMLTypeAttr;
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
+
+
+        /// <summary>
+        /// Enabling this switch will cause the crypto provider to use the caching behavior prior to 8.16.0
+        /// </summary>
+        internal const string UseLegacyCryptoProviderCache = "Switch.Microsoft.IdentityModel.UseLegacyCryptoProviderCache";
+        private static bool? _useLegacyCryptoProviderCache;
+
+        internal static bool UseLegacyCryptoProviderCacheFlag => _useLegacyCryptoProviderCache ??= (AppContext.TryGetSwitch(UseLegacyCryptoProviderCache, out bool useLegacy) && useLegacy);
 
         /// <summary>
         /// Used for testing to reset all switches to its default value.
