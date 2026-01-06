@@ -4,6 +4,9 @@
   <Import Project="version.props" />
 
   <PropertyGroup>
+    <AssemblyVersion>8.15.0.0</AssemblyVersion>
+    <FileVersion>8.15.0.0</FileVersion>
+    <InformationalVersion>8.15.0</InformationalVersion>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <DelaySign>false</DelaySign>
     <OutputTypeEx>library</OutputTypeEx>
