@@ -991,6 +991,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             adfsStrings.Add(new KeyValuePair<string, string>("commonname", "http://schemas.xmlsoap.org/claims/CommonName"));
             adfsStrings.Add(new KeyValuePair<string, string>("adfs1email", "http://schemas.xmlsoap.org/claims/EmailAddress"));
             adfsStrings.Add(new KeyValuePair<string, string>("group", "http://schemas.xmlsoap.org/claims/Group"));
+            adfsStrings.Add(new KeyValuePair<string, string>("groups", "http://schemas.microsoft.com/ws/2008/06/identity/claims/groups"));
             adfsStrings.Add(new KeyValuePair<string, string>("adfs1upn", "http://schemas.xmlsoap.org/claims/UPN"));
             adfsStrings.Add(new KeyValuePair<string, string>("role", "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"));
             adfsStrings.Add(new KeyValuePair<string, string>("family_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"));
@@ -1127,9 +1128,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void MapInboundClaims()
         {
             var handler = new JwtSecurityTokenHandler();
+            const int expectedDefaultMappingCount = 74;
 
             // By default, JwtSecurityTokenHandler.DefaultMapInboundClaims should be true so make sure we initialize the InboundClaimTypeMap with the default mappings.
-            Assert.Equal(73, handler.InboundClaimTypeMap.Count);
+            Assert.Equal(expectedDefaultMappingCount, handler.InboundClaimTypeMap.Count);
 
             JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
             handler = new JwtSecurityTokenHandler();
@@ -1152,7 +1154,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler.MapInboundClaims = true;
 
             // Check to make sure that setting MapInboundClaims to true initializes the InboundClaimType map with the default mappings if it was previously empty.
-            Assert.Equal(73, handler.InboundClaimTypeMap.Count);
+            Assert.Equal(expectedDefaultMappingCount, handler.InboundClaimTypeMap.Count);
 
             // Check to make sure that changing the instance property did not alter the static property.
             Assert.True(JwtSecurityTokenHandler.DefaultMapInboundClaims == false);
