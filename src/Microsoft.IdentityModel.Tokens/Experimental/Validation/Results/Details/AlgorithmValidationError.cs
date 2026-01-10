@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 return Exception;
 
             if (FailureType == AlgorithmValidationFailure.ValidationFailed
-             || FailureType == AlgorithmValidationFailure.AlgorithmIsNotSupported
+             || FailureType == AlgorithmValidationFailure.NotSupported
              || FailureType == AlgorithmValidationFailure.ValidatorThrew)
             {
                 Exception = new SecurityTokenInvalidAlgorithmException(

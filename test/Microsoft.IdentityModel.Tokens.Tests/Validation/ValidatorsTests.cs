@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {
                         Audiences = new List<string> { "    " },
                         ExpectedException =  ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                        TokenValidationParameters = new TokenValidationParameters{ ValidAudience = "audience"}
+                        TokenValidationParameters = new TokenValidationParameters{ ValidAudience = "audience"},
                     },
                     new AudienceValidationTheoryData("AudiencesNull")
                     {
@@ -457,7 +457,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         // Each TokenReplayValidator in this test checks that the expiration parameter passed into it is equal to the expiration time of the token.
         // If they're not equal, the test will fail.
         [Theory, MemberData(nameof(CheckParametersForTokenReplayTheoryData), DisableDiscoveryEnumeration = true)]
-        public void CheckParametersForTokenReplay(TokenReplayTheoryData theoryData)
+        public void CheckParametersForTokenReplay(ValidateTokenReplayTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CheckParametersForTokenReplay", theoryData);
             var context = new CompareContext($"{this}.CheckParametersForTokenReplay, {theoryData.TestId}");
@@ -468,7 +468,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             tvp.ValidateAudience = false;
             tvp.ValidateIssuer = false;
             tvp.ValidateLifetime = false;
-            var token = theoryData.SecurityToken;
+            var token = theoryData.Token;
             var tokenValidator = theoryData.SecurityTokenHandler;
 
             try
@@ -485,7 +485,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<TokenReplayTheoryData> CheckParametersForTokenReplayTheoryData
+        public static TheoryData<ValidateTokenReplayTheoryData> CheckParametersForTokenReplayTheoryData
         {
             get
             {

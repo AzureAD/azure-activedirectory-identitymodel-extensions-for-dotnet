@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Null(validationResult.Result);
             Assert.NotNull(validationResult.Error);
             Assert.IsType<LifetimeValidationError>(validationResult.Error);
-            Assert.Contains("IDX10222:", validationResult.Error.Message);
+            Assert.Contains("IDX10222:", validationResult.Error.MessageDetail.Message);
             // IDX10222: Lifetime validation failed. The token is not yet valid. ValidFrom (UTC): '1/6/2025 9:03:26 PM', Current time (UTC): '1/6/2025 5:03:26 PM'.
         }
 
@@ -56,8 +56,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.True(validationResult.Succeeded);
             Assert.NotNull(validationResult.Result);
             Assert.Null(validationResult.Error);
-            // TODO: Define potentially adding a setting to reject tokens issued in the future.
-            // As it is not part of the specification, it should be optional.
         }
 
         [Fact]

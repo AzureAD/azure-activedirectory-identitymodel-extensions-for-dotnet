@@ -65,9 +65,10 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 return Exception;
 
             if (FailureType == IssuerValidationFailure.NoIssuerInToken
+                || FailureType == IssuerValidationFailure.IssuerDidNotMatch
                 || FailureType == IssuerValidationFailure.ValidationFailed
                 || FailureType == IssuerValidationFailure.ValidatorThrew
-                || FailureType == IssuerValidationFailure.NoValidationParameterIssuersProvided)
+                || FailureType == IssuerValidationFailure.NoIssuersProvided)
             {
                 Exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, this, InnerException);
                 return Exception;

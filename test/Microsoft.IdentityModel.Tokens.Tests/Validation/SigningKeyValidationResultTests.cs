@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
     public class SigningKeyTests
     {
         [Theory, MemberData(nameof(InvalidTestCases), DisableDiscoveryEnumeration = true)]
-        public void InvalidSigningKeys(SigningKeyValidationTheoryData theoryData)
+        public void InvalidSigningKeys(ValidateSigningKeyTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.InvalidSigningKeys", theoryData);
 
@@ -43,13 +43,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             catch (Exception ex)
             {
-                context.AddDiff($"Did not expect an exception: {ex}.");
+                TestUtilities.RecordUnexpectedException(context, theoryData, ex);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<SigningKeyValidationTheoryData> InvalidTestCases
+        public static TheoryData<ValidateSigningKeyTheoryData> InvalidTestCases
         {
             get
             {
@@ -58,10 +58,10 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 DateTime utcExpired = KeyingMaterial.ExpiredX509SecurityKey_Public.Certificate.NotAfter.ToUniversalTime();
                 DateTime utcNotYetValid = KeyingMaterial.NotYetValidX509SecurityKey_Public.Certificate.NotBefore.ToUniversalTime();
 
-                return new TheoryData<SigningKeyValidationTheoryData>
+                return new TheoryData<ValidateSigningKeyTheoryData>
                 {
                     // TODO Error message IDX10253 message is not accurate.
-                    new SigningKeyValidationTheoryData("SecurityKeyIsNull")
+                    new ValidateSigningKeyTheoryData("SecurityKeyIsNull")
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10253:"),
                         SecurityKey = null,
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             null,
                             null)
                     },
-                    new SigningKeyValidationTheoryData("SecurityTokenIsNull")
+                    new ValidateSigningKeyTheoryData("SecurityTokenIsNull")
                     {
                         ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10000:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             null,
                             null)
                     },
-                    new SigningKeyValidationTheoryData("ValidationParametersIsNull")
+                    new ValidateSigningKeyTheoryData("ValidationParametersIsNull")
                     {
                         ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10000:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             null,
                             null), // InvalidSigningKey
                     },
-                    new SigningKeyValidationTheoryData("SecurityKeyIsExpired")
+                    new ValidateSigningKeyTheoryData("SecurityKeyIsExpired")
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10249:"),
                         SecurityKey = KeyingMaterial.ExpiredX509SecurityKey_Public,
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             null,
                             null), // InvalidSigningKey
                     },
-                    new SigningKeyValidationTheoryData("SecurityKeyIsNotYetValid")
+                    new ValidateSigningKeyTheoryData("SecurityKeyIsNotYetValid")
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10248:"),
                         SecurityKey = KeyingMaterial.NotYetValidX509SecurityKey_Public,
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         }
 
         [Theory, MemberData(nameof(ValidTestCases), DisableDiscoveryEnumeration = true)]
-        public void ValidSigningKeys(SigningKeyValidationTheoryData theoryData)
+        public void ValidSigningKeys(ValidateSigningKeyTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ValidSigningKeys", theoryData);
 
@@ -163,22 +163,22 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             catch (Exception ex)
             {
-                context.AddDiff($"Did not expect an exception: {ex}.");
+                TestUtilities.RecordUnexpectedException(context, theoryData, ex);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<SigningKeyValidationTheoryData> ValidTestCases
+        public static TheoryData<ValidateSigningKeyTheoryData> ValidTestCases
         {
             get
             {
                 MockTimeProvider timeProvider = new MockTimeProvider();
                 DateTime utcNow = timeProvider.GetUtcNow().UtcDateTime;
 
-                return new TheoryData<SigningKeyValidationTheoryData>
+                return new TheoryData<ValidateSigningKeyTheoryData>
                 {
-                    new SigningKeyValidationTheoryData("SecurityTokenIsPresent")
+                    new ValidateSigningKeyTheoryData("SecurityTokenIsPresent")
                     {
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
@@ -188,15 +188,5 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 };
             }
         }
-    }
-
-    public class SigningKeyValidationTheoryData : TheoryDataBase
-    {
-        public SigningKeyValidationTheoryData(string testId) : base(testId) { }
-        public SecurityKey SecurityKey { get; set; }
-        public SecurityToken SecurityToken { get; set; }
-        internal ValidationParameters ValidationParameters { get; set; }
-        public BaseConfiguration BaseConfiguration { get; set; }
-        internal ValidationResult<ValidatedSignatureKey, SignatureKeyValidationError> ValidationResult { get; set; }
     }
 }

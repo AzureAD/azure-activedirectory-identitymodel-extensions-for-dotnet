@@ -23,24 +23,34 @@ namespace Microsoft.IdentityModel.TestUtils
                         theoryData.Token,
                         theoryData.TokenValidationParameters!);
 
-                ValidationResult<ValidatedToken, ValidationError> validationResult =
-                    await theoryData.TestingTokenHandler.ValidateTokenAsync(
-                        theoryData.Token,
-                        theoryData.ValidationParameters!,
-                        theoryData.CallContext,
-                        CancellationToken.None);
-
-                if (tokenValidationResult.IsValid != validationResult.Succeeded)
-                    context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != validationResult.Succeeded: '{validationResult.Succeeded}'.");
-
-                if (!validationResult.Succeeded)
+                try
                 {
-                    context.AddDiff($"Expected test to succeed, test failed: {theoryData.TestId}.");
-                    context.AddDiff($"Message: {validationResult.Error!.Message}");
+#pragma warning disable CS8604 // Possible null reference argument.
+                    ValidationResult<ValidatedToken, ValidationError> validationResult =
+                        await theoryData.TestingTokenHandler.ValidateTokenAsync(
+                            theoryData.Token,
+                            theoryData.ValidationParameters!,
+                            theoryData.CallContext,
+                            CancellationToken.None);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                    if (tokenValidationResult.IsValid != validationResult.Succeeded)
+                        context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != validationResult.Succeeded: '{validationResult.Succeeded}'.");
+
+                    if (!validationResult.Succeeded)
+                    {
+                        context.AddDiff($"Expected test to succeed, test failed: {theoryData.TestId}.");
+                        context.AddDiff($"Message: {validationResult.Error!.MessageDetail.Message}");
+                    }
+                    else
+                    {
+                        IdentityComparer.AreEqual(validationResult.Result!.SecurityToken, tokenValidationResult.SecurityToken, context);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    IdentityComparer.AreEqual(validationResult.Result!.SecurityToken, tokenValidationResult.SecurityToken, context);
+                    TestUtilities.RecordUnexpectedException(context, theoryData, ex);
+                    return;
                 }
             }
             else
@@ -51,6 +61,8 @@ namespace Microsoft.IdentityModel.TestUtils
 
         internal static async Task RunInvalidTest(ValidateTokenTheoryData theoryData, CompareContext context)
         {
+            // TokenHandler.ValidateTokenAsync only checks FailureType and Exception.
+            // Indivdual validators (Algorithm, Audience, Issuer, etc.) the ValidationError is validated.
             if (theoryData.TestingTokenHandler != null)
             {
                 TokenValidationResult tokenValidationResult =
@@ -58,44 +70,149 @@ namespace Microsoft.IdentityModel.TestUtils
                         theoryData.Token,
                         theoryData.TokenValidationParameters!);
 
-                ValidationResult<ValidatedToken, ValidationError> validationResult =
-                    await theoryData.TestingTokenHandler.ValidateTokenAsync(
-                        theoryData.Token,
-                        theoryData.ValidationParameters!,
-                        theoryData.CallContext,
-                        CancellationToken.None);
-
-                // TODO add check for ValidationErrorType in the validationResult.Error
-
-                if (tokenValidationResult.IsValid != validationResult.Succeeded)
-                    context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != OperationResult.Succeeded: '{validationResult.Succeeded}'.");
-
-                if (tokenValidationResult.IsValid)
-                    context.AddDiff($"Expected test to fail, test succeeded (TokenValidationResult): {theoryData.TestId}.");
-
-                if (validationResult.Succeeded)
+                try
                 {
-                    context.AddDiff($"Expected test to fail, test succeeded (OperationResult): {theoryData.TestId}.");
-                }
-                else
-                {
-                    // The default value is set for JWT tokens as these are the most commonly used tokens.
-                    // RelaxTVPException property is used to accommodate exception differences TVP validation errors between JWT, SAML and SAML2 tokens.
-                    // The model using ValidationParameters, all tokens will provide the same exception for validation errors.
-                    if (!theoryData.RelaxTVPException)
+#pragma warning disable CS8604 // Possible null reference argument.
+                    ValidationResult<ValidatedToken, ValidationError> validationResult =
+                        await theoryData.TestingTokenHandler.ValidateTokenAsync(
+                            theoryData.Token,
+                            theoryData.ValidationParameters!,
+                            theoryData.CallContext,
+                            CancellationToken.None);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                    if (tokenValidationResult.IsValid != validationResult.Succeeded)
+                        context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}'\n!=\nValidationResult.Succeeded: '{validationResult.Succeeded}'.");
+
+                    if (tokenValidationResult.IsValid)
+                        context.AddDiff($"Expected test to fail, test succeeded (TokenValidationResult): {theoryData.TestId}.");
+
+                    if (validationResult.Succeeded)
                     {
-                        theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context, "TokenValidationResult");
+                        context.AddDiff($"Expected test to fail, test succeeded (ValidationResult): {theoryData.TestId}.");
                     }
                     else
                     {
-                        // check that the exception is derived from SecurityTokenException
-                        if (tokenValidationResult.Exception is not SecurityTokenException securityTokenException)
+                        // The default value is set for JWT tokens as these are the most commonly used tokens.
+                        // RelaxTVPException property is used to accommodate exception differences TVP validation errors between JWT, SAML and SAML2 tokens.
+                        // The model using ValidationParameters, all tokens will provide the same exception for validation errors.
+                        if (!theoryData.RelaxTVPException)
                         {
-                            context.AddDiff($"Expected SecurityTokenException, got: {tokenValidationResult.Exception.GetType().FullName}.");
+                            theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context, "TokenValidationResult");
                         }
-                    }
+                        else
+                        {
+                            // check that the exception is derived from SecurityTokenException
+                            if (tokenValidationResult.Exception is not SecurityTokenException securityTokenException)
+                            {
+                                context.AddDiff($"TokenValidationResult: Expected SecurityTokenException, got: {tokenValidationResult.Exception.GetType().FullName}.");
+                            }
+                        }
 
-                    theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.Error!.GetException(), context, "OperationResult");
+                        theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.Error!.GetException(), context, "ValidationResult");
+                        ValidationError validationError = validationResult.Error!;
+                        TestUtilities.RecordIfMoveNextFound(context, validationError);
+
+                        theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationError.GetException(), context, "ValidationResult");
+
+                        if (theoryData.FailureType != validationError.FailureType)
+                            context.AddDiff($"ValidationError.FailureType: {validationError.FailureType}\n!=\ntheoryData.FailureType: {theoryData.FailureType}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TestUtilities.RecordUnexpectedException(context, theoryData, ex);
+                }
+            }
+            else
+            {
+                context.AddDiff("TestingTokenHandler is null, cannot run test.");
+            }
+        }
+
+        internal static async Task RunTokenParameterTest(ValidateTokenTheoryData theoryData, CompareContext context)
+        {
+            if (theoryData.TestingTokenHandler != null)
+            {
+                TokenValidationResult tokenValidationResult =
+                    await theoryData.TestingTokenHandler!.ValidateTokenAsync(
+                        theoryData.Token,
+                        theoryData.TokenValidationParameters!);
+
+                try
+                {
+#pragma warning disable CS8604 // Possible null reference argument.
+                    ValidationResult<ValidatedToken, ValidationError> validationResult =
+                        await theoryData.TestingTokenHandler.ValidateTokenAsync(
+                            theoryData.Token,
+                            theoryData.ValidationParameters!,
+                            theoryData.CallContext,
+                            CancellationToken.None);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                    if (tokenValidationResult.IsValid != validationResult.Succeeded)
+                        context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != ValidationResult.Succeeded: '{validationResult.Succeeded}'.");
+
+                    if (tokenValidationResult.IsValid)
+                        context.AddDiff($"Expected test to fail, test succeeded (TokenValidationResult): {theoryData.TestId}.");
+
+                    if (validationResult.Succeeded)
+                    {
+                        context.AddDiff($"Expected test to fail, test succeeded (ValidationResult): {theoryData.TestId}.");
+                    }
+                    else
+                    {
+                        theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context, "TokenValidationResult");
+                        theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.Error!.GetException(), context, "ValidationResult");
+                        ValidationError validationError = validationResult.Error!;
+                        TestUtilities.RecordIfMoveNextFound(context, validationError);
+
+                        theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationError.GetException(), context, "ValidationResult");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TestUtilities.RecordUnexpectedException(context, theoryData, ex);
+                }
+            }
+            else
+            {
+                context.AddDiff("TestingTokenHandler is null, cannot run test.");
+            }
+        }
+
+        internal static async Task RunSecurityTokenParameterTest(ValidateTokenTheoryData theoryData, CompareContext context)
+        {
+            if (theoryData.TestingTokenHandler != null)
+            {
+                try
+                {
+#pragma warning disable CS8604 // Possible null reference argument.
+                    ValidationResult<ValidatedToken, ValidationError> validationResult =
+                        await theoryData.TestingTokenHandler.ValidateTokenAsync(
+                            theoryData.SecurityToken,
+                            theoryData.ValidationParameters!,
+                            theoryData.CallContext,
+                            CancellationToken.None);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                    if (validationResult.Succeeded)
+                    {
+                        context.AddDiff($"Expected test to fail, test succeeded (ValidationResult): {theoryData.TestId}.");
+                    }
+                    else
+                    {
+                        Exception exception = validationResult.Error!.GetException();
+                        theoryData.ExpectedExceptionValidationParameters!.ProcessException(exception, context, "ValidationResult");
+                        ValidationError validationError = validationResult.Error!;
+                        TestUtilities.RecordIfMoveNextFound(context, validationError);
+
+                        theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationError.GetException(), context, "ValidationResult");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TestUtilities.RecordUnexpectedException(context, theoryData, ex);
                 }
             }
             else
@@ -113,16 +230,29 @@ namespace Microsoft.IdentityModel.TestUtils
             return openIdConnectConfiguration;
         }
 
+        public static OpenIdConnectConfiguration CreateOpenIdConntectConfiguration(
+            List<SecurityKey>? signingKeys = null,
+            string? issuer = null)
+        {
+            OpenIdConnectConfiguration openIdConnectConfiguration = new OpenIdConnectConfiguration();
+            if (signingKeys != null)
+                signingKeys.ForEach(openIdConnectConfiguration.SigningKeys.Add);
+
+            if (issuer != null)
+                openIdConnectConfiguration.Issuer = issuer;
+
+            return openIdConnectConfiguration;
+        }
+
         public static TokenValidationParameters CreateTokenValidationParameters(
             IList<string>? algorithms = null,
             IList<string>? audiences = null,
             TimeSpan? clockSkew = null,
             IList<string>? issuers = null,
-            IList<SecurityKey>? keys = null,
+            IList<SecurityKey>? signingKeys = null,
             TimeProvider? timeProvider = null,
             TokenReplayCache? tokenReplayCache = null)
         {
-
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
 
             if (algorithms != null)
@@ -142,8 +272,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 tokenValidationParameters.ValidIssuer = Default.Issuer;
 
 
-            if (keys != null)
-                tokenValidationParameters.IssuerSigningKeys = keys;
+            if (signingKeys != null)
+                tokenValidationParameters.IssuerSigningKeys = signingKeys;
             else
                 tokenValidationParameters.IssuerSigningKey = Default.AsymmetricSigningCredentials.Key;
 
@@ -168,7 +298,8 @@ namespace Microsoft.IdentityModel.TestUtils
             List<SecurityKey>? signingKeys = null,
             TimeSpan? clockSkew = null,
             TimeProvider? timeProvider = null,
-            TokenReplayCache? tokenReplayCache = null)
+            TokenReplayCache? tokenReplayCache = null,
+            bool TryAllSigningKeys = true)
         {
             ValidationParameters validationParameters = new ValidationParameters();
 
@@ -201,6 +332,8 @@ namespace Microsoft.IdentityModel.TestUtils
 
             if (timeProvider != null)
                 validationParameters.TimeProvider = timeProvider;
+
+            validationParameters.TryAllSigningKeys = TryAllSigningKeys;
 
             return validationParameters;
         }

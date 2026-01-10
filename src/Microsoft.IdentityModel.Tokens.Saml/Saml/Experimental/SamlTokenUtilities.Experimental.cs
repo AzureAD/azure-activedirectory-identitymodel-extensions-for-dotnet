@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
@@ -49,8 +50,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (obj == null)
                 return string.Empty;
 
-            // TODO - remove signature, if present, from the token.
-            // For now, we just return the type of the object.
             return obj.GetType().ToString();
         }
 
@@ -192,8 +191,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
-            // TODO - this is not an AlgorithmValidationFailure, but a CryptoProviderFactory failure.
-            // TODO we need tests across token handlers
             CryptoProviderFactory cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(signature.SignedInfo.SignatureMethod, key))
             {
@@ -202,7 +199,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         Tokens.LogMessages.IDX10652,
                         LogHelper.MarkAsNonPII(signature.SignedInfo.SignatureMethod),
                         key),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    AlgorithmValidationFailure.NotSupported,
                     ValidationError.GetCurrentStackFrame());
             }
 
@@ -265,16 +262,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             CallContext callContext)
         {
             bool keysTried = false;
-            bool kidExists = !string.IsNullOrEmpty(signature?.KeyInfo?.Id);
+            bool kidExists = signature?.KeyInfo is not null;
 
             IEnumerable<SecurityKey> keys = TokenUtilities.GetAllSigningKeys(configuration, validationParameters, callContext);
             StringBuilder exceptionStrings = null;
             StringBuilder keysAttempted = null;
 
+            // We want to capture all stack frames that were involved with faults.
+            // We capture the stack frames and add to the error.
+            IList<StackFrame> stackFrames = null;
+
             foreach (SecurityKey key in keys)
             {
                 if (key is null)
-                    continue; // skip null keys
+                    continue;
 
                 keysTried = true;
 
@@ -293,20 +294,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     return result;
                 }
 
-                if (result.Error is SignatureValidationError signatureValidationError)
+                if (result.Error is ValidationError validationError)
                 {
+                    stackFrames ??= [];
+                    foreach (StackFrame stackFrame in validationError.StackFrames)
+                        stackFrames.Add(stackFrame);
+
                     exceptionStrings ??= new StringBuilder();
                     keysAttempted ??= new StringBuilder();
-                    exceptionStrings.AppendLine(signatureValidationError.MessageDetail.Message);
+                    exceptionStrings.AppendLine(validationError.MessageDetail.Message);
                     keysAttempted.AppendLine(key.ToString());
                 }
             }
+
+            StackFrame currentStackFrame = ValidationError.GetCurrentStackFrame();
+            StackFrame firstStackFrame = (stackFrames == null) ? currentStackFrame! : stackFrames[0];
+            SignatureValidationError signatureValidationError;
 
             if (keysTried)
             {
                 if (kidExists)
                 {
-                    return new SignatureValidationError(
+                    signatureValidationError = new SignatureValidationError(
                         new MessageDetail(
                             Tokens.LogMessages.IDX10522,
                             LogHelper.MarkAsNonPII(signature?.KeyInfo?.Id),
@@ -314,42 +323,56 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                             LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
                             LogHelper.MarkAsSecurityArtifact(canonicalString, SafeLogSamlToken)),
                         SignatureValidationFailure.SigningKeyNotFound,
-                        ValidationError.GetCurrentStackFrame());
+                        currentStackFrame);
                 }
                 else
                 {
-                    return new SignatureValidationError(
+                    signatureValidationError = new SignatureValidationError(
                         new MessageDetail(
                             Tokens.LogMessages.IDX10523,
                             LogHelper.MarkAsNonPII(validationParameters.SigningKeys.Count),
                             LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
                             LogHelper.MarkAsSecurityArtifact(canonicalString, SafeLogSamlToken)),
                         SignatureValidationFailure.SigningKeyNotFound,
-                        ValidationError.GetCurrentStackFrame());
+                        currentStackFrame);
                 }
             }
-
-            if (kidExists)
+            else if (kidExists)
             {
-                return new SignatureValidationError(
+                signatureValidationError = new SignatureValidationError(
                     new MessageDetail(
-                        Tokens.LogMessages.IDX10526,
+                        Tokens.LogMessages.IDX10524,
                         LogHelper.MarkAsNonPII(signature?.KeyInfo?.Id),
                         LogHelper.MarkAsNonPII(validationParameters.SigningKeys.Count),
                         LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
                         LogHelper.MarkAsSecurityArtifact(canonicalString, SafeLogSamlToken)),
                     SignatureValidationFailure.SigningKeyNotFound,
-                    ValidationError.GetCurrentStackFrame());
+                    currentStackFrame);
+            }
+            else
+            {
+                signatureValidationError = new SignatureValidationError(
+                    new MessageDetail(
+                        Tokens.LogMessages.IDX10525,
+                        LogHelper.MarkAsNonPII(validationParameters.SigningKeys.Count),
+                        LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
+                        LogHelper.MarkAsSecurityArtifact(canonicalString, SafeLogSamlToken)),
+                    SignatureValidationFailure.SigningKeyNotFound,
+                    currentStackFrame);
             }
 
-            return new SignatureValidationError(
-                new MessageDetail(
-                    Tokens.LogMessages.IDX10525,
-                    LogHelper.MarkAsNonPII(validationParameters.SigningKeys.Count),
-                    LogHelper.MarkAsNonPII(configuration?.SigningKeys?.Count ?? 0),
-                    LogHelper.MarkAsSecurityArtifact(canonicalString, SafeLogSamlToken)),
-                SignatureValidationFailure.SigningKeyNotFound,
-                ValidationError.GetCurrentStackFrame());
+            if (stackFrames is not null)
+            {
+                for (int i = 1; i < stackFrames.Count; i++)
+                {
+                    if (stackFrames[i] != null)
+                        signatureValidationError.StackFrames.Add(stackFrames[i]);
+                }
+
+                signatureValidationError.StackFrames.Add(currentStackFrame);
+            }
+
+            return signatureValidationError;
         }
     }
 }

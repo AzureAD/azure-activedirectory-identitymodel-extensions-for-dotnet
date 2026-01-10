@@ -61,6 +61,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13313 = "IDX13313: 'AuthnStatement' cannot be empty.";
         internal const string IDX13312 = "IDX13312: 'AuthnContext' cannot be empty.";
         internal const string IDX13314 = "IDX13314: 'AuthzDecisionStatement' cannot be empty (must have at least one 'Subject').";
+        internal const string IDX13315 = "IDX13315: Saml2Serializer: '{0}' was unable to read a SAML2 Token";
 
         // Saml2SecurityTokenHandler writing
         internal const string IDX13142 = "IDX13142: A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";

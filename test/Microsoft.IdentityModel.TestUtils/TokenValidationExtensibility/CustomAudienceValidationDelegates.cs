@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomAudienceValidationError(
                 new MessageDetail(nameof(AudienceDidNotMatch)),
-                AudienceValidationFailure.AudienceDidNotMatch,
+                AudienceValidationFailure.DidNotMatch,
                 Default.GetStackFrame(),
                 tokenAudiences,
                 null);
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomAudienceValidationError(
                 new MessageDetail(nameof(UnknownValidationFailure)),
-                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                AlgorithmValidationFailure.NotSupported,
                 Default.GetStackFrame(),
                 tokenAudiences,
                 null);
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new AudienceValidationError(
                 new MessageDetail(nameof(AudienceValidatorDelegate)),
-                AudienceValidationFailure.AudienceDidNotMatch,
+                AudienceValidationFailure.DidNotMatch,
                 Default.GetStackFrame(),
                 tokenAudiences,
                 null);
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 nameof(AudienceValidatorThrows),
                 new AudienceValidationError(
                     new MessageDetail(nameof(AudienceValidatorDelegate)),
-                    AudienceValidationFailure.AudienceDidNotMatch,
+                    AudienceValidationFailure.DidNotMatch,
                     Default.GetStackFrame(),
                     tokenAudiences,
                     null),

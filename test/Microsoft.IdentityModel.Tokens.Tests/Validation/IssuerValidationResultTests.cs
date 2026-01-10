@@ -11,13 +11,14 @@ using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
     public class IssuerValidationTests
     {
         [Theory, MemberData(nameof(InvalidIssuerTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task InvalidIssuers(IssuerValidationTheoryData theoryData)
+        public async Task InvalidIssuers(ValidateIssuerTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.InvalidIssuers", theoryData);
 
@@ -41,9 +42,10 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 else
                 {
                     ValidationError validationError = validationResult.Error;
+                    TestUtilities.RecordIfMoveNextFound(context, validationError);
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
-                        theoryData.OperationResult.Error.FailureType.Name,
+                        theoryData.ValidationResult.Error.FailureType.Name,
                         context);
 
                     theoryData.ExpectedException.ProcessException(validationError.GetException(), context);
@@ -51,27 +53,27 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             catch (Exception ex)
             {
-                context.AddDiff($"Did not expect an exception: {ex}.");
+                TestUtilities.RecordUnexpectedException(context, theoryData, ex);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<IssuerValidationTheoryData> InvalidIssuerTestCases
+        public static TheoryData<ValidateIssuerTheoryData> InvalidIssuerTestCases
         {
             get
             {
-                TheoryData<IssuerValidationTheoryData> theoryData = new();
+                TheoryData<ValidateIssuerTheoryData> theoryData = new();
 
                 string validIssuer = Guid.NewGuid().ToString();
                 string issClaim = Guid.NewGuid().ToString();
                 //var validConfig = new OpenIdConnectConfiguration() { Issuer = issClaim };
                 string[] validIssuers = new string[] { validIssuer };
 
-                theoryData.Add(new IssuerValidationTheoryData("NULL_Issuer")
+                theoryData.Add(new ValidateIssuerTheoryData("NULL_Issuer")
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"),
-                    OperationResult = new IssuerValidationError(
+                    ValidationResult = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10211,
                             LogHelper.MarkAsNonPII(null),
@@ -85,11 +87,11 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     ValidationParameters = new ValidationParameters()
                 });
 
-                theoryData.Add(new IssuerValidationTheoryData("NULL_ValidationParameters")
+                theoryData.Add(new ValidateIssuerTheoryData("NULL_ValidationParameters")
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                     Issuer = issClaim,
-                    OperationResult = new IssuerValidationError(
+                    ValidationResult = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("validationParameters")),
@@ -100,17 +102,17 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     ValidationParameters = null
                 });
 
-                theoryData.Add(new IssuerValidationTheoryData("Invalid_Issuer")
+                theoryData.Add(new ValidateIssuerTheoryData("Invalid_Issuer")
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
                     Issuer = issClaim,
-                    OperationResult = new IssuerValidationError(
+                    ValidationResult = new IssuerValidationError(
                         new MessageDetail(
                             LogMessages.IDX10212,
                             LogHelper.MarkAsNonPII(issClaim),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validIssuers)),
                             LogHelper.MarkAsNonPII(null)),
-                        IssuerValidationFailure.ValidationFailed,
+                        IssuerValidationFailure.IssuerDidNotMatch,
                         null,
                         issClaim),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
@@ -123,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         }
 
         [Theory, MemberData(nameof(ValidIssuerTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task ValidIssuers(IssuerValidationTheoryData theoryData)
+        public async Task ValidIssuers(ValidateIssuerTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ValidIssuers", theoryData);
 
@@ -143,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 if (validationResult.Succeeded)
                 {
                     IdentityComparer.AreValidatedIssuersEqual(
-                        theoryData.OperationResult.Result,
+                        theoryData.ValidationResult.Result,
                         validationResult.Result,
                         context);
                 }
@@ -154,27 +156,27 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             catch (Exception ex)
             {
-                context.AddDiff($"Did not expect an exception: {ex}.");
+                TestUtilities.RecordUnexpectedException(context, theoryData, ex);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<IssuerValidationTheoryData> ValidIssuerTestCases
+        public static TheoryData<ValidateIssuerTheoryData> ValidIssuerTestCases
         {
             get
             {
-                TheoryData<IssuerValidationTheoryData> theoryData = new();
+                TheoryData<ValidateIssuerTheoryData> theoryData = new();
 
                 string validIssuer = Guid.NewGuid().ToString();
                 string issClaim = Guid.NewGuid().ToString();
                 var validConfig = new OpenIdConnectConfiguration() { Issuer = issClaim };
                 string[] validIssuers = new string[] { validIssuer };
 
-                theoryData.Add(new IssuerValidationTheoryData("FromConfig")
+                theoryData.Add(new ValidateIssuerTheoryData("FromConfig")
                 {
                     Issuer = issClaim,
-                    OperationResult = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedConfiguration),
+                    ValidationResult = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedConfiguration),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters()
                     {
@@ -182,10 +184,10 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     }
                 });
 
-                theoryData.Add(new IssuerValidationTheoryData("FromValidationParametersValidIssuers")
+                theoryData.Add(new ValidateIssuerTheoryData("FromValidationParametersValidIssuers")
                 {
                     Issuer = issClaim,
-                    OperationResult = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedValidationParameters),
+                    ValidationResult = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedValidationParameters),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters(),
                     ValidIssuerToAdd = issClaim
@@ -194,23 +196,5 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 return theoryData;
             }
         }
-    }
-
-    public class IssuerValidationTheoryData : TheoryDataBase
-    {
-        public IssuerValidationTheoryData(string testId) : base(testId) { }
-
-        public BaseConfiguration Configuration { get; set; }
-
-        public string Issuer { get; set; }
-
-        internal ValidationResult<ValidatedIssuer, IssuerValidationError> OperationResult { get; set; }
-
-        public SecurityToken SecurityToken { get; set; }
-
-        internal ValidationParameters ValidationParameters { get; set; }
-
-        internal ValidationFailureType ValidationFailure { get; set; }
-        public string ValidIssuerToAdd { get; internal set; }
     }
 }

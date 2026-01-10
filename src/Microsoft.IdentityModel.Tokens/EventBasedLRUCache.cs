@@ -58,7 +58,6 @@ namespace Microsoft.IdentityModel.Tokens
         #region event queue
         private int _eventQueuePollingInterval = 50;
         // The idle timeout, the _eventQueueTask will end after being idle for the specified time interval (execution continues even if the queue is empty to reduce the task startup overhead), default to 120 seconds.
-        // TODO: consider implementing a better algorithm that tracks and predicts the usage patterns and adjusts this value dynamically.
         private long _eventQueueTaskIdleTimeoutInSeconds = 120;
         // The time when the _eventQueueTask should end. The intent is to reduce the overhead costs of starting/ending tasks too frequently
         // but at the same time keep the _eventQueueTask a short running task.

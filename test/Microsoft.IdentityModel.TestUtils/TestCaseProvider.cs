@@ -12,6 +12,87 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     public class TestCaseProvider
     {
+        #region Parameters
+        /// <summary>
+        /// Tests are generated for invalid parameters for ValidateTokenAsync that takes a SecurityToken.
+        /// </summary>
+        /// <param name="testingTokenHandler"></param>
+        /// <returns></returns>
+        internal static TheoryData<ValidateTokenTheoryData> GenerateInvalidSecurityTokenParameterTestCases(ITestingTokenHandler testingTokenHandler)
+        {
+            TheoryData<ValidateTokenTheoryData> testCases = new();
+            TokenValidationParameters tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(algorithms: [SecurityAlgorithms.EcdsaSha256]);
+            ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(algorithms: [SecurityAlgorithms.EcdsaSha256]);
+
+            testCases.Add(new ValidateTokenTheoryData("SecurityTokenNull")
+            {
+                ExpectedExceptionValidationParameters = ExpectedException.ArgumentNullException("IDX10000:"),
+                TestingTokenHandler = testingTokenHandler,
+                ValidationParameters = validationParameters,
+            });
+
+            testCases.Add(new ValidateTokenTheoryData("ValidationParametersNull")
+            {
+                ExpectedExceptionValidationParameters = ExpectedException.ArgumentNullException("IDX10000:"),
+                SecurityToken = new DerivedSecurityToken(),
+                TestingTokenHandler = testingTokenHandler,
+                ValidationParameters = null
+            });
+
+            testCases.Add(new ValidateTokenTheoryData("SecurityTokenTypeUnknown")
+            {
+                ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenValidationException("IDX10001:"),
+                SecurityToken = new DerivedSecurityToken(),
+                TestingTokenHandler = testingTokenHandler,
+                ValidationParameters = validationParameters,
+            });
+
+            return testCases;
+        }
+
+        /// <summary>
+        /// Tests are generated for invalid parameters for ValidateTokenAsync that takes a string.
+        /// </summary>
+        /// <param name="testingTokenHandler"></param>
+        /// <returns></returns>
+        internal static TheoryData<ValidateTokenTheoryData> GenerateInvalidTokenParameterTestCases(ITestingTokenHandler testingTokenHandler)
+        {
+            TheoryData<ValidateTokenTheoryData> testCases = new();
+            TokenValidationParameters tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(algorithms: [SecurityAlgorithms.EcdsaSha256]);
+            ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(algorithms: [SecurityAlgorithms.EcdsaSha256]);
+
+            testCases.Add(new ValidateTokenTheoryData("TokenNull")
+            {
+                ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                ExpectedExceptionValidationParameters = ExpectedException.ArgumentNullException("IDX10000:"),
+                TestingTokenHandler = testingTokenHandler,
+                Token = null,
+            });
+
+            testCases.Add(new ValidateTokenTheoryData("ValidationParametersNull")
+            {
+                ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                ExpectedExceptionValidationParameters = ExpectedException.ArgumentNullException("IDX10000:"),
+                TestingTokenHandler = testingTokenHandler,
+                Token = "SecurityToken",
+                TokenValidationParameters = null,
+                ValidationParameters = null
+            });
+
+            testCases.Add(new ValidateTokenTheoryData("TokenTooLarge")
+            {
+                ExpectedException = ExpectedException.ArgumentException("IDX10209:"),
+                ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenValidationException("IDX10209:"),
+                TestingTokenHandler = testingTokenHandler,
+                Token = new string('a', 1000000), // 1 million characters
+                TokenValidationParameters = tokenValidationParameters,
+                ValidationParameters = validationParameters,
+            });
+
+            return testCases;
+        }
+        #endregion
+
         #region Algorithm
         internal static TheoryData<ValidateTokenTheoryData> GenerateInvalidAlgorithmTestCases(ITestingTokenHandler testingTokenHandler)
         {
@@ -31,7 +112,8 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
                 ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAlgorithmException("IDX10696:"),
-                RelaxTVPException = true,
+                FailureType = AlgorithmValidationFailure.NotSupported,
+                RelaxTVPException = testingTokenHandler is JsonWebTestingTokenHandler ? false : true,
                 Token = testingTokenHandler.CreateStringToken(securityTokenDescriptor),
                 TestingTokenHandler = testingTokenHandler,
                 TokenValidationParameters = tokenValidationParameters,
@@ -44,7 +126,8 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
                 ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAlgorithmException("IDX10696:"),
-                RelaxTVPException = true,
+                FailureType = AlgorithmValidationFailure.NotSupported,
+                RelaxTVPException = testingTokenHandler is JsonWebTestingTokenHandler ? false : true,
                 Token = testingTokenHandler.CreateStringToken(securityTokenDescriptor),
                 TestingTokenHandler = testingTokenHandler,
                 TokenValidationParameters = tokenValidationParameters,
@@ -101,7 +184,6 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationParameters = validationParameters
             });
 
-
             return testCases;
         }
         #endregion  
@@ -129,6 +211,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
+                    FailureType = AudienceValidationFailure.DidNotMatch,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -144,6 +227,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10268:"),
+                    FailureType = AudienceValidationFailure.NoAudiencesProvided,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -157,6 +241,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10268:"),
+                    FailureType = AudienceValidationFailure.NoAudiencesProvided,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -178,6 +263,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10206:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10206:"),
+                    FailureType = AudienceValidationFailure.NoAudienceInToken,
                     RelaxTVPException = true,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
@@ -283,6 +369,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
+                    FailureType = IssuerValidationFailure.IssuerDidNotMatch,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -291,7 +378,6 @@ namespace Microsoft.IdentityModel.TestUtils
 
             // Token with null issuer, should fail validation
             // SAML and SAML2 tokens do not allow setting a null or empty issuer, so this test is only for JWT tokens.
-            // TODO add a specific test for SAML/SAML2 tokens.
             if (tokenHandler is JsonWebTestingTokenHandler)
             {
                 // Token with issuer, but no valid issuers in parameters
@@ -311,6 +397,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"),
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"),
+                        FailureType = IssuerValidationFailure.NoIssuerInToken,
                         Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                         TestingTokenHandler = tokenHandler,
                         TokenValidationParameters = tokenValidationParameters,
@@ -333,6 +420,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"),
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"),
+                        FailureType = IssuerValidationFailure.NoIssuerInToken,
                         Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                         TestingTokenHandler = tokenHandler,
                         TokenValidationParameters = tokenValidationParameters,
@@ -358,6 +446,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
+                    FailureType = IssuerValidationFailure.NoIssuersProvided,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -372,6 +461,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
+                    FailureType = IssuerValidationFailure.NoIssuersProvided,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -386,7 +476,6 @@ namespace Microsoft.IdentityModel.TestUtils
             TheoryData<ValidateTokenTheoryData> theoryData = new TheoryData<ValidateTokenTheoryData>();
 
             // TODO - add tests for configuration
-            // Valid_IssuerIsConfigurationIssuer
 
             string guid = Guid.NewGuid().ToString();
             // Token with issuer matching valid issuer
@@ -461,6 +550,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidLifetimeException("IDX10223:"),
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
+                    FailureType = LifetimeValidationFailure.Expired,
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
                     ValidationParameters = validationParameters,
@@ -483,6 +573,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidLifetimeException("IDX10223:"),
+                    FailureType = LifetimeValidationFailure.Expired,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -507,6 +598,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenNotYetValidException("IDX10222:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidLifetimeException("IDX10222:"),
+                    FailureType = LifetimeValidationFailure.NotYetValid,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -532,6 +624,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     {
                         ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10225:"),
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidLifetimeException("IDX10225:"),
+                        FailureType = LifetimeValidationFailure.NoExpirationTime,
                         Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                         TestingTokenHandler = tokenHandler,
                         TokenValidationParameters = tokenValidationParameters,
@@ -679,6 +772,7 @@ namespace Microsoft.IdentityModel.TestUtils
                         typeof(SecurityTokenValidationException),
                         "IDX14107:",
                         typeof(SecurityTokenMalformedException)),
+                    FailureType = ValidationFailureType.TokenReadingFailed,
                     Token = "malformed_token",
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -739,6 +833,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException("IDX10520:"),
                     RelaxTVPException = true,
+                    FailureType = SignatureValidationFailure.ValidationFailed,
                     Token = tokenHandler.CreateTamperedSignature(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -752,6 +847,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:"),
                     RelaxTVPException = true,
+                    FailureType = SignatureValidationFailure.TokenIsNotSigned,
                     Token = tokenHandler.CreateWithoutSignature(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -766,6 +862,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException("IDX10520:"),
+                    FailureType = SignatureValidationFailure.ValidationFailed,
                     Token = tokenHandler.CreateWithTamperedPayload(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -780,6 +877,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10514:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException("IDX30201:"),
+                    FailureType = SignatureValidationFailure.ReferenceDigestValidationFailed,
                     Token = tokenHandler.CreateWithTamperedPayload(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -796,6 +894,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException("IDX10520:"),
+                    FailureType = SignatureValidationFailure.ValidationFailed,
                     Token = tokenHandler.CreateWithTamperedHeader(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -820,8 +919,9 @@ namespace Microsoft.IdentityModel.TestUtils
                 new ValidateTokenTheoryData("KeyNotAvailable")
                 {
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:"),
-                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10527"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10522"),
                     RelaxTVPException = true,
+                    FailureType = SignatureValidationFailure.SigningKeyNotFound,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -829,7 +929,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 });
 
             // Token signed with a key that is not available, multiple siging signingKeys, KeyId present
-            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(keys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
+            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
             validationParameters = ValidationUtils.CreateValidationParameters(signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
             ExpectedException expectedException;
 
@@ -842,7 +942,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 new ValidateTokenTheoryData("KeyNotAvailableMultipleSigningKeys")
                 {
                     ExpectedException = expectedException,
-                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10527"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10522"),
+                    FailureType = SignatureValidationFailure.SigningKeyNotFound,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -871,7 +972,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 new ValidateTokenTheoryData("KeyNotAvailableNoKid")
                 {
                     ExpectedException = expectedException,
-                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10526:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10523:"),
+                    FailureType = SignatureValidationFailure.SigningKeyNotFound,
                     Token = tokenHandler.CreateStringTokenNoKid(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -879,7 +981,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 });
 
             // Token signed with a key that is not available, multiple siging signingKeys, KeyId NOT present, TryAllSigningKeys false
-            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(keys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
+            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
             tokenValidationParameters.TryAllIssuerSigningKeys = false;
             validationParameters = ValidationUtils.CreateValidationParameters(signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
             validationParameters.TryAllSigningKeys = false;
@@ -894,6 +996,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10526:"),
+                    FailureType = SignatureValidationFailure.SigningKeyNotFound,
                     Token = tokenHandler.CreateStringTokenNoKid(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     ValidationParameters = validationParameters,
@@ -901,7 +1004,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 });
 
             // Token signed with a key that is not available, multiple siging signingKeys, KeyId NOT present, TryAllSigningKeys true
-            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(keys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
+            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
             tokenValidationParameters.TryAllIssuerSigningKeys = true;
             validationParameters = ValidationUtils.CreateValidationParameters(signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
             validationParameters.TryAllSigningKeys = true;
@@ -912,10 +1015,12 @@ namespace Microsoft.IdentityModel.TestUtils
                 expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10517:");
 
             theoryData.Add(
-                new ValidateTokenTheoryData("NoMatchingKeys_NoKid_TryAllKeys")
+                new ValidateTokenTheoryData("" +
+                "NoMatchingKeys_NoKid_TryAllKeys")
                 {
                     ExpectedException = expectedException,
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10523:"),
+                    FailureType = SignatureValidationFailure.SigningKeyNotFound,
                     Token = tokenHandler.CreateStringTokenNoKid(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     ValidationParameters = validationParameters,
@@ -923,13 +1028,14 @@ namespace Microsoft.IdentityModel.TestUtils
                 });
 
             // No signingKeys available, KeyId NOT present
-            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(keys: []);
+            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(signingKeys: []);
             validationParameters = ValidationUtils.CreateValidationParameters(signingKeys: []);
             theoryData.Add(
                 new ValidateTokenTheoryData("NoValidationKeys_NoKid_DontTryAllKeys")
                 {
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
-                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10526:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10525:"),
+                    FailureType = SignatureValidationFailure.SigningKeyNotFound,
                     Token = tokenHandler.CreateStringTokenNoKid(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     ValidationParameters = validationParameters,
@@ -940,16 +1046,13 @@ namespace Microsoft.IdentityModel.TestUtils
                 new ValidateTokenTheoryData("NoKeyId_NoKeys")
                 {
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
-                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10526:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10525:"),
+                    FailureType = SignatureValidationFailure.SigningKeyNotFound,
                     Token = tokenHandler.CreateStringTokenNoKid(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     ValidationParameters = validationParameters,
                     TokenValidationParameters = tokenValidationParameters
                 });
-
-            //Invalid_TokenSignedWithDifferentKey_KeyIdPresent_TryAllKeysFalse
-            //Invalid_TokenSignedWithDifferentKey_KeyIdPresent_TryAllKeysTrue
-            // Token signed with different key, KeyId present, TryAllKeys true
 
             // TODO need tests with config.
 
@@ -981,7 +1084,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     ValidationParameters = validationParameters,
                 });
 
-            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(keys: []);
+            tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(signingKeys: []);
             tokenValidationParameters.ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(ValidationUtils.CreateDeaultOpenIdConntectConfiguration());
             validationParameters = ValidationUtils.CreateValidationParameters(signingKeys: []);
             validationParameters.ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(ValidationUtils.CreateDeaultOpenIdConntectConfiguration());
@@ -1028,6 +1131,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10249:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10249:"),
+                    FailureType = SignatureKeyValidationFailure.KeyExpired,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -1044,6 +1148,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10248:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10248:"),
+                    FailureType = SignatureKeyValidationFailure.NotYetValid,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -1111,6 +1216,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     {
                         ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10227:"),
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenReplayDetectedException("IDX10227:"),
+                        FailureType = TokenReplayValidationFailure.NoExpiration,
                         Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                         TestingTokenHandler = tokenHandler,
                         TokenValidationParameters = tokenValidationParameters,
@@ -1135,6 +1241,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenReplayDetectedException("IDX10228:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenReplayDetectedException("IDX10228:"),
+                    FailureType = TokenReplayValidationFailure.TokenFoundInCache,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,
@@ -1150,6 +1257,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     ExpectedException = ExpectedException.SecurityTokenReplayAddFailedException("IDX10229:"),
                     ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenReplayDetectedException("IDX10229:"),
+                    FailureType = TokenReplayValidationFailure.AddToCacheFailed,
                     Token = tokenHandler.CreateStringToken(securityTokenDescriptor),
                     TestingTokenHandler = tokenHandler,
                     TokenValidationParameters = tokenValidationParameters,

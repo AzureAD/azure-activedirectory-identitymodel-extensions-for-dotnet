@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Protocols;

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
@@ -525,6 +526,21 @@ namespace Microsoft.IdentityModel.TestUtils
                 Console.WriteLine("====================================");
 
             Console.WriteLine(">>>> " + testcase);
+        }
+
+        public static void RecordIfMoveNextFound(CompareContext context, ValidationError validationError)
+        {
+            foreach (StackFrame stackFrame in validationError.StackFrames)
+            {
+                // the runtime will create a StackFrame with the name 'movenext' in an asnyc method.
+                if (stackFrame!.ToString().ToLowerInvariant().Contains("movenext"))
+                    context.AddDiff($"StackFrame contains 'movenext': {stackFrame}");
+            }
+        }
+
+        public static void RecordUnexpectedException(CompareContext context, TheoryDataBase theoryData, Exception ex)
+        {
+            context.Diffs.Add($"Unexpected exception thrown: {ex.Message}. TestId {theoryData.TestId}.");
         }
     }
 

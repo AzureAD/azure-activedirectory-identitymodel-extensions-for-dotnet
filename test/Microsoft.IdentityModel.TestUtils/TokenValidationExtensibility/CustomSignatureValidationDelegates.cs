@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomSignatureValidationError(
                 new MessageDetail(nameof(UnknownValidationFailure)),
-                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                AlgorithmValidationFailure.NotSupported,
                 Default.GetStackFrame());
         }
 

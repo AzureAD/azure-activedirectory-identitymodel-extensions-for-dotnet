@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10696,
                         LogHelper.MarkAsNonPII(algorithm)),
-                    AlgorithmValidationFailure.ValidationFailed,
+                    AlgorithmValidationFailure.NotSupported,
                     ValidationError.GetCurrentStackFrame(),
                     algorithm,
                     null);

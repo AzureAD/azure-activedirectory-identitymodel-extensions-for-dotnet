@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomLifetimeValidationError(
                 new MessageDetail(nameof(CustomUnknownValidationFailure)),
-                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                AlgorithmValidationFailure.NotSupported,
                 Default.GetStackFrame(),
                 notBefore,
                 expires,

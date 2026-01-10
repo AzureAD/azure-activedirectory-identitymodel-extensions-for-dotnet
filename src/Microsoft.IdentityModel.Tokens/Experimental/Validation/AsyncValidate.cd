@@ -28,27 +28,6 @@
       <FileName>Validation\Results\Details\AlgorithmValidationError.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Microsoft.IdentityModel.Tokens.ValidationError">
-    <Position X="9.5" Y="8" Width="6.5" />
-    <Members>
-      <Field Name="_exceptionType" Hidden="true" />
-      <Property Name="CachedStackFrames" Hidden="true" />
-      <Method Name="GetException" Hidden="true" />
-      <Property Name="MessageDetail" Hidden="true" />
-      <Method Name="ValidationError" Hidden="true" />
-    </Members>
-    <NestedTypes>
-      <Class Name="Microsoft.IdentityModel.Tokens.ValidationError.Logger" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Validation\Results\Details\ValidationError.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Class>
-    </NestedTypes>
-    <TypeIdentifier>
-      <HashCode>AQAEAAAIAAAAAAACAAAAGAAEAAwAAAAQBEAAJAAAAAA=</HashCode>
-      <FileName>Validation\Results\Details\ValidationError.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="Microsoft.IdentityModel.Tokens.AudienceValidationError">
     <Position X="8.25" Y="12.75" Width="3" />
     <InheritanceLine Type="Microsoft.IdentityModel.Tokens.ValidationError" FixedToPoint="true">
@@ -142,24 +121,6 @@
       <Property Name="ValidatedTokenType" />
     </ShowAsAssociation>
   </Class>
-  <Struct Name="Microsoft.IdentityModel.Tokens.ValidationResult&lt;TResult&gt;">
-    <Position X="4" Y="8" Width="3.75" />
-    <Members>
-      <Field Name="_error" Hidden="true" />
-      <Field Name="_result" Hidden="true" />
-      <Method Name="implicit operator ValidationResult&lt;TResult&gt;" Hidden="true" />
-      <Method Name="operator !=" Hidden="true" />
-      <Method Name="operator ==" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAQACgAgAAEQBAAACIIAAABAAAAAAAiA=</HashCode>
-      <FileName>Validation\Results\ValidationResult.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="Error" />
-    </ShowAsAssociation>
-    <Lollipop Position="0.2" />
-  </Struct>
   <Struct Name="Microsoft.IdentityModel.Tokens.ValidatedIssuer">
     <Position X="11" Y="15.75" Width="3.5" />
     <Members>

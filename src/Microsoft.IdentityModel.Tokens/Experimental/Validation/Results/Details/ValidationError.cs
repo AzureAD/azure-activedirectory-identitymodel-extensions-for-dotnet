@@ -11,10 +11,13 @@ using System.Runtime.CompilerServices;
 namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
-    /// Represents an error that occurred during a <see cref="SecurityToken"/> validation.
+    /// Represents an error that occurred during the validation of a <see cref="SecurityToken"/>.
     /// </summary>
     public class ValidationError
     {
+        // The CachedStckFrames dictionary contains the cached StackFrames for the entire runtime.
+        internal static ConcurrentDictionary<string, StackFrame> CachedStackFrames { get; } = new();
+
         /// <summary>
         /// Creates an instance of <see cref="ValidationError"/>.
         /// </summary>
@@ -79,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Gets or sets the exception associated with the <see cref="ValidationError"/>.
         /// </summary>
 #pragma warning disable CA1721 // Property names should not match get methods
-        protected Exception? Exception { get; set; }
+        public Exception? Exception { get; protected set; }
 #pragma warning restore CA1721 // Property names should not match get methods
 
         /// <summary>
@@ -105,17 +108,14 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         public Exception? InnerException { get; }
 
         /// <summary>
-        /// Gets the message that contains details of the error.
+        /// Gets the <see cref="MessageDetail"/> which contains information about the error. Can be used to provide details for error messages.
         /// </summary>
-        public string Message => MessageDetail.Message;
+        public MessageDetail MessageDetail { get; }
 
         /// <summary>
-        /// Gets the message which contains information about the error. Can be used to provide details for error messages.
-        /// </summary>
-        internal MessageDetail MessageDetail { get; }
-
-        /// <summary>
-        /// Gets the stack frames where the exception occurred.
+        /// Gets the collection of <see cref="StackFrame"/> instances that represent the call stack locations
+        /// where this <see cref="ValidationError"/> was recorded or augmented. This can be used for enhanced
+        /// diagnostics and tracing of validation errors, especially in asynchronous or layered validation flows.
         /// </summary>
         public IList<StackFrame> StackFrames { get; }
 
@@ -131,17 +131,81 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
+        /// Adds the <see cref="StackFrame"/> to the cache using the key.
+        /// If there is no cache entry for the key, a new stack frame is created and added to the cache.
+        /// </summary>
+        /// <param name="key">The key for the cached stack frame.</param>
+        /// <param name="stackFrame">The <see cref="StackFrame"/> to use as a template if a cached frame does not exist.</param>
+        /// <param name="memberName">The name of the calling member. Will be automatically provided by the compiler.</param>
+        /// <returns>The <see cref="StackFrame"/>that was found or added.</returns>
+        internal static StackFrame GetAsyncStackFrame(
+            string key,
+            StackFrame stackFrame,
+            [CallerMemberName] string memberName = "")
+        {
+            // GetOrAdd is thread-safe and will only create a new entry if it does not already exist.
+            StackFrame cachedFrame = CachedStackFrames.GetOrAdd(key, _ =>
+            {
+                StackFrame frame = stackFrame ?? new StackFrame(1, true);
+                return new IdentityModelStackFrame(
+                    frame.GetILOffset(),
+                    frame.GetNativeOffset(),
+                    frame.GetFileName() ?? string.Empty,
+                    frame.GetFileLineNumber(),
+                    frame.GetFileColumnNumber(),
+                    memberName);
+            });
+
+            // Defensive: never return null
+            return cachedFrame ?? new StackFrame(0, true);
+        }
+
+        /// <summary>
         /// Adds the current stack frame to the list of stack frames and returns the updated object.
         /// If there is no cache entry for the given file path and line number, a new stack frame is created and added to the cache.
         /// </summary>
+        /// <param name="key">The key for the cached stack frame.</param>
+        /// <param name="cachedFrame">The <see cref="StackFrame"/>that was found.</param>
+        /// <returns>true if found, false otherwise.</returns>
+        internal static bool TryGetStackFrame(
+            string key,
+            out StackFrame? cachedFrame)
+        {
+            return CachedStackFrames.TryGetValue(key, out cachedFrame);
+        }
+
+        /// <summary>
+        /// Gets the key for the cached stack frame based on the current member name, file path, and line number.
+        /// </summary>
+        /// <param name="memberName">The name of the calling member. Will be automatically provided by the compiler by default.</param>
+        /// <param name="filePath">The path to the file from which this method is called. Captured automatically by default.</param>
+        /// <param name="lineNumber">The line number from which this method is called. Captured automatically by default.</param>
+        /// <returns>The updated object.</returns>
+        internal static string GetStackFrameKey(
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0)
+        {
+            return memberName + filePath + lineNumber;
+        }
+
+        /// <summary>
+        /// Adds the current stack frame to the list of stack frames and returns the updated object.
+        /// If there is no cache entry for the given file path and line number, a new stack frame is created and added to the cache.
+        /// </summary>
+        /// <param name="memberName">The name of the calling member. Will be automatically provided by the compiler by default.</param>
         /// <param name="filePath">The path to the file from which this method is called. Captured automatically by default.</param>
         /// <param name="lineNumber">The line number from which this method is called. CAptured automatically by default.</param>
         /// <param name="skipFrames">The number of stack frames to skip when capturing. Used to avoid capturing this method and get the caller instead.</param>
         /// <returns>The updated object.</returns>
-        public ValidationError AddCurrentStackFrame([CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, int skipFrames = 1)
+        internal ValidationError AddCurrentStackFrame(
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0,
+            int skipFrames = 1)
         {
             // We add 1 to the skipped frames to skip the current method
-            StackFrames.Add(GetCurrentStackFrame(filePath, lineNumber, skipFrames + 1));
+            StackFrames.Add(GetCurrentStackFrame(memberName, filePath, lineNumber, skipFrames + 1));
             return this;
         }
 
@@ -149,25 +213,22 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Returns the stack frame corresponding to the file path and line number from which this method is called.
         /// If there is no cache entry for the given file path and line number, a new stack frame is created and added to the cache.
         /// </summary>
+        /// <param name="memberName">The name of the calling member. Will be automatically provided by the compiler by default.</param>
         /// <param name="filePath">The path to the file from which this method is called. Captured automatically by default.</param>
         /// <param name="lineNumber">The line number from which this method is called. CAptured automatically by default.</param>
         /// <param name="skipFrames">The number of stack frames to skip when capturing. Used to avoid capturing this method and get the caller instead.</param>
         /// <returns>The captured stack frame.</returns>
         /// <remarks>If this is called from a helper method, consider adding an extra skip frame to avoid capturing the helper instead.</remarks>
-        public static StackFrame GetCurrentStackFrame(
-            [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, int skipFrames = 1)
+        internal static StackFrame
+            GetCurrentStackFrame(
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0, int skipFrames = 1)
         {
-            // String is allocated, but it goes out of scope immediately after the call
-            string key = filePath + lineNumber;
-
             return CachedStackFrames.GetOrAdd(
-                key,
-                // Need to skip the call to the delegate + GetOrAdd when creating the frame
+                memberName + filePath + lineNumber,
                 _ => new StackFrame(skipFrames + 2, true));
         }
-
-        // ConcurrentDictionary is thread-safe and only locks when adding a new item.
-        private static ConcurrentDictionary<string, StackFrame> CachedStackFrames { get; } = new();
     }
 }
 #nullable restore
