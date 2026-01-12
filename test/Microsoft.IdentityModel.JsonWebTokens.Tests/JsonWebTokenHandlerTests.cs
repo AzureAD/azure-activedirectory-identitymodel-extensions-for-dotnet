@@ -4700,6 +4700,94 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
             };
         }
+
+        [Theory, MemberData(nameof(GroupsClaimMappingTheoryData), DisableDiscoveryEnumeration = true)]
+        public async Task ValidateGroupsClaimMapping(JwtTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateGroupsClaimMapping", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var validationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters);
+
+                Assert.True(validationResult.IsValid);
+
+                // Verify the groups claim is in the claims dictionary
+                if (validationResult.Claims != null && validationResult.Claims.TryGetValue("groups", out var groupsValue))
+                {
+                    Assert.NotNull(groupsValue);
+                }
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<JwtTheoryData> GroupsClaimMappingTheoryData()
+        {
+            var handler = new JsonWebTokenHandler();
+            var theoryData = new TheoryData<JwtTheoryData>();
+
+            // Test Case 1: Single groups claim
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                Audience = Default.Audience,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    { "groups", "Admin" }
+                }
+            };
+            var token = handler.CreateToken(descriptor);
+
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "SingleGroupsClaim",
+                Token = token,
+                ValidationParameters = new TokenValidationParameters
+                {
+                    RequireSignedTokens = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
+                }
+            });
+
+            // Test Case 2: Multiple groups claims
+            var multiDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                Audience = Default.Audience,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    { "groups", new[] { "Admin", "Users", "Developers" } }
+                }
+            };
+            var multiToken = handler.CreateToken(multiDescriptor);
+
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "MultipleGroupsClaims",
+                Token = multiToken,
+                ValidationParameters = new TokenValidationParameters
+                {
+                    RequireSignedTokens = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
+                }
+            });
+
+            return theoryData;
+        }
     }
 
     public class CreateTokenTheoryData : TheoryDataBase
