@@ -63,19 +63,10 @@ namespace Microsoft.IdentityModel.Tokens
 
         public void Decrypt(byte[] nonce, byte[] ciphertext, byte[] tag, byte[] plaintext, byte[] associatedData = null)
         {
+            AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
 #if NET6_0_OR_GREATER
-            if (nonce == null)
-                throw new ArgumentNullException(nameof(nonce));
-            if (plaintext == null)
-                throw new ArgumentNullException(nameof(plaintext));
-            if (ciphertext == null)
-                throw new ArgumentNullException(nameof(ciphertext));
-            if (tag == null)
-                throw new ArgumentNullException(nameof(tag));
-
             _aesGcm.Decrypt(nonce, ciphertext, tag, plaintext, associatedData);
 #else
-            AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
             AesAead.Decrypt(_keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: true);
 #endif
         }
@@ -83,19 +74,10 @@ namespace Microsoft.IdentityModel.Tokens
         #region FOR TESTING ONLY
         internal void Encrypt(byte[] nonce, byte[] plaintext, byte[] ciphertext, byte[] tag, byte[] associatedData = null)
         {
+            AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
 #if NET6_0_OR_GREATER
-            if (nonce == null)
-                throw new ArgumentNullException(nameof(nonce));
-            if (plaintext == null)
-                throw new ArgumentNullException(nameof(plaintext));
-            if (ciphertext == null)
-                throw new ArgumentNullException(nameof(ciphertext));
-            if (tag == null)
-                throw new ArgumentNullException(nameof(tag));
-
             _aesGcm.Encrypt(nonce, plaintext, ciphertext, tag, associatedData);
 #else
-            AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
             AesAead.Encrypt(_keyHandle, nonce, associatedData, plaintext, ciphertext, tag);
 #endif
         }
