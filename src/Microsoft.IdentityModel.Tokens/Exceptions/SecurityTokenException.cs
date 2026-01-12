@@ -4,7 +4,7 @@
 using System;
 using System.Runtime.Serialization;
 using System.Diagnostics;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 
 #if !NET8_0_OR_GREATER
 using System.Text;

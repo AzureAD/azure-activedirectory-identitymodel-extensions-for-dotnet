@@ -3,7 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Tokens
 {
