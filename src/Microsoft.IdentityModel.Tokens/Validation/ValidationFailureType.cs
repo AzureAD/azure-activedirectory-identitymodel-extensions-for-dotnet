@@ -98,26 +98,26 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Audience validation failed.
         /// </summary>
-        public static readonly Experimental.AudienceValidationFailure AudienceDidNotMatch = new AudienceValidationFailed("AudienceDidNotMatch");
-        private class AudienceValidationFailed : Experimental.AudienceValidationFailure { internal AudienceValidationFailed(string name) : base(name) { } }
+        public static readonly AudienceValidationFailure AudienceDidNotMatch = new AudienceValidationFailed("AudienceDidNotMatch");
+        private class AudienceValidationFailed : AudienceValidationFailure { internal AudienceValidationFailed(string name) : base(name) { } }
 
         /// <summary>
         /// Audience validation delegate threw an exception.
         /// </summary>
-        public static readonly Experimental.AudienceValidationFailure ValidatorThrew = new AudienceValidatorThrewFailure("AudienceValidatorThrew");
-        private class AudienceValidatorThrewFailure : Experimental.AudienceValidationFailure { internal AudienceValidatorThrewFailure(string name) : base(name) { } }
+        public static readonly AudienceValidationFailure ValidatorThrew = new AudienceValidatorThrewFailure("AudienceValidatorThrew");
+        private class AudienceValidatorThrewFailure : AudienceValidationFailure { internal AudienceValidatorThrewFailure(string name) : base(name) { } }
 
         /// <summary>
         /// No audience found in the <see cref="SecurityToken"/>.
         /// </summary>
-        public static readonly Experimental.AudienceValidationFailure NoAudienceInToken = new NoAudienceInTokenFailure("NoAudienceInToken");
-        private class NoAudienceInTokenFailure : Experimental.AudienceValidationFailure { internal NoAudienceInTokenFailure(string name) : base(name) { } }
+        public static readonly AudienceValidationFailure NoAudienceInToken = new NoAudienceInTokenFailure("NoAudienceInToken");
+        private class NoAudienceInTokenFailure : AudienceValidationFailure { internal NoAudienceInTokenFailure(string name) : base(name) { } }
 
         /// <summary>
         /// No audiences were found in <see cref="ValidationParameters.ValidAudiences"/>.
         /// </summary>
-        public static readonly Experimental.AudienceValidationFailure NoValidationParameterAudiencesProvided = new NoValidationParameterAudiencesProvidedFailure("NoValidationParameterAudiencesProvided");
-        private class NoValidationParameterAudiencesProvidedFailure : Experimental.AudienceValidationFailure { internal NoValidationParameterAudiencesProvidedFailure(string name) : base(name) { } }
+        public static readonly AudienceValidationFailure NoValidationParameterAudiencesProvided = new NoValidationParameterAudiencesProvidedFailure("NoValidationParameterAudiencesProvided");
+        private class NoValidationParameterAudiencesProvidedFailure : AudienceValidationFailure { internal NoValidationParameterAudiencesProvidedFailure(string name) : base(name) { } }
     }
 
     /// <summary>
