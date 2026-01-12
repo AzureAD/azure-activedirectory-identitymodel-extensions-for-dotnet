@@ -322,13 +322,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
                     LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), LogHelper.MarkAsNonPII(key.KeyId));
 
+                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    jsonWebToken.Alg,
+                    key.KeySize);
+
                 return false;
             }
 
-            Validators.ValidateAlgorithm(jsonWebToken.Alg, key, jsonWebToken, validationParameters);
-            var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, jsonWebToken.Alg);
+            SignatureProvider signatureProvider = null;
+
             try
             {
+                Validators.ValidateAlgorithm(jsonWebToken.Alg, key, jsonWebToken, validationParameters);
+                signatureProvider = cryptoProviderFactory.CreateForVerifying(key, jsonWebToken.Alg);
+
                 if (signatureProvider == null)
                     throw LogHelper.LogExceptionMessage
                         (new InvalidOperationException(
@@ -337,7 +345,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                                 LogHelper.MarkAsNonPII(key == null ? "Null" : key.KeyId),
                                 LogHelper.MarkAsNonPII(jsonWebToken.Alg))));
 
-                return EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
+                bool isValid = EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                     jsonWebToken.EncodedToken,
                     0,
                     jsonWebToken.Dot2,
@@ -346,10 +354,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     jsonWebToken.Dot2,
                     signatureProvider,
                     ValidateSignature);
+
+                Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: isValid,
+                    jsonWebToken.Alg,
+                    key.KeySize);
+
+                return isValid;
+            }
+            catch
+            {
+                Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    jsonWebToken.Alg,
+                    key.KeySize);
+
+                throw;
             }
             finally
             {
-                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+                if (signatureProvider is not null)
+                    cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
         }
 

@@ -44,51 +44,118 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             StringBuilder exceptionStrings = null;
             StringBuilder keysAttempted = null;
             string zipAlgorithm = null;
-            foreach (SecurityKey key in decryptionParameters.Keys)
+
+            // Use KeysWithWrappingKeySizes if available (experimental path with telemetry optimization)
+            if (decryptionParameters.KeysWithWrappingKeySizes != null)
             {
-                var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
-                if (cryptoProviderFactory == null)
+                foreach (var (key, wrappingKeySize) in decryptionParameters.KeysWithWrappingKeySizes)
                 {
-                    continue;
-                }
-
-                try
-                {
-                    if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
+                    var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+                    if (cryptoProviderFactory == null)
                     {
-                        algorithmNotSupportedByCryptoProvider = true;
                         continue;
                     }
 
-                    ValidationResult<string, ValidationError> result = validationParameters.AlgorithmValidator(zipAlgorithm, jsonWebToken, validationParameters, callContext);
-                    if (!result.Succeeded)
+                    try
                     {
-                        (exceptionStrings ??= new StringBuilder()).AppendLine(result.Error!.MessageDetail.Message);
-                        continue;
+                        if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
+                        {
+                            algorithmNotSupportedByCryptoProvider = true;
+                            continue;
+                        }
+
+                        ValidationResult<string, ValidationError> result = validationParameters.AlgorithmValidator(zipAlgorithm, jsonWebToken, validationParameters, callContext);
+                        if (!result.Succeeded)
+                        {
+                            (exceptionStrings ??= new StringBuilder()).AppendLine(result.Error!.MessageDetail.Message);
+                            continue;
+                        }
+
+                        decryptedTokenBytes = DecryptToken(
+                            cryptoProviderFactory,
+                            key,
+                            jsonWebToken.Enc,
+                            jsonWebToken.CipherTextBytes,
+                            jsonWebToken.HeaderAsciiBytes,
+                            jsonWebToken.InitializationVectorBytes,
+                            jsonWebToken.AuthenticationTagBytes);
+
+                        zipAlgorithm = jsonWebToken.Zip;
+                        decryptionSucceeded = true;
+
+                        // Record telemetry with wrapping key size (no lookup needed - it's right here!)
+                        Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
+                        break;
                     }
-
-                    decryptedTokenBytes = DecryptToken(
-                        cryptoProviderFactory,
-                        key,
-                        jsonWebToken.Enc,
-                        jsonWebToken.CipherTextBytes,
-                        jsonWebToken.HeaderAsciiBytes,
-                        jsonWebToken.InitializationVectorBytes,
-                        jsonWebToken.AuthenticationTagBytes);
-
-                    zipAlgorithm = jsonWebToken.Zip;
-                    decryptionSucceeded = true;
-                    break;
-                }
 #pragma warning disable CA1031 // Do not catch general exception types
-                catch (Exception ex)
+                    catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
-                {
-                    (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
-                }
+                    {
+                        (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
 
-                if (key != null)
-                    (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+                        // Record telemetry for failed decryption with wrapping key size
+                        Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
+                    }
+
+                    if (key != null)
+                        (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+                }
+            }
+            else
+            {
+                // Legacy path: use Keys collection (fallback for compatibility)
+                foreach (SecurityKey key in decryptionParameters.Keys)
+                {
+                    var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+                    if (cryptoProviderFactory == null)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
+                        {
+                            algorithmNotSupportedByCryptoProvider = true;
+                            continue;
+                        }
+
+                        ValidationResult<string, ValidationError> result = validationParameters.AlgorithmValidator(zipAlgorithm, jsonWebToken, validationParameters, callContext);
+                        if (!result.Succeeded)
+                        {
+                            (exceptionStrings ??= new StringBuilder()).AppendLine(result.Error!.MessageDetail.Message);
+                            continue;
+                        }
+
+                        decryptedTokenBytes = DecryptToken(
+                            cryptoProviderFactory,
+                            key,
+                            jsonWebToken.Enc,
+                            jsonWebToken.CipherTextBytes,
+                            jsonWebToken.HeaderAsciiBytes,
+                            jsonWebToken.InitializationVectorBytes,
+                            jsonWebToken.AuthenticationTagBytes);
+
+                        zipAlgorithm = jsonWebToken.Zip;
+                        decryptionSucceeded = true;
+
+                        // Legacy telemetry: use key size directly (may be CEK size)
+                        Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, key.KeySize);
+                        break;
+                    }
+#pragma warning disable CA1031 // Do not catch general exception types
+                    catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                    {
+                        (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
+
+                        // Legacy telemetry for failed decryption
+                        Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, key?.KeySize ?? 0);
+                    }
+
+                    if (key != null)
+                        (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+                }
             }
 
             if (!decryptionSucceeded)

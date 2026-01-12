@@ -1,0 +1,1 @@
+System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.GetContentEncryptionKeys(System.IdentityModel.Tokens.Jwt.JwtSecurityToken jwtToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Collections.Generic.IList<(Microsoft.IdentityModel.Tokens.SecurityKey Key, int WrappingKeySize)>

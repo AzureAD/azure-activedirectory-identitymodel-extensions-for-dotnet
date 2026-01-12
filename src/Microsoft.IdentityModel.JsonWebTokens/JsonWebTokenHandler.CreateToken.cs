@@ -1282,7 +1282,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        internal IList<(SecurityKey Key, int WrappingKeySize)> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             IEnumerable<SecurityKey> keys = null;
 
@@ -1329,70 +1329,91 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
                 || jwtToken.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
-                return keys;
+            {
+                // For direct key use, the key itself is the CEK, so we pair each key with its own size
+                if (keys == null)
+                    return null;
 
-            var unwrappedKeys = new List<SecurityKey>();
+                var directKeysWithSizes = new List<(SecurityKey, int)>(keys is ICollection<SecurityKey> keyCollection ? keyCollection.Count : 0);
+                foreach (var key in keys)
+                {
+                    if (key != null)
+                        directKeysWithSizes.Add((key, key.KeySize));
+                }
+                return directKeysWithSizes;
+            }
+
+            if (keys is null)
+                return null; // Cannot iterate over null.
+
+            var keysWithSizes = new List<(SecurityKey Key, int WrappingKeySize)>();
+
             // keep track of exceptions thrown, keys that were tried
             StringBuilder exceptionStrings = null;
             StringBuilder keysAttempted = null;
-            if (keys != null)
+            foreach (var key in keys)
             {
-                foreach (var key in keys)
+                try
                 {
-                    try
-                    {
 #if NET472 || NET6_0_OR_GREATER
-                        if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
+                    if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
+                    {
+                        ECDsaSecurityKey publicKey;
+
+                        // Since developers may have already worked around this issue, implicitly taking a dependency on the
+                        // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
+                        // is treated as opt-in. When the library is at the point where it is able to make breaking changes
+                        // (such as the next major version update) we should consider whether or not this app-compat switch
+                        // needs to be maintained.
+                        if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
                         {
-                            ECDsaSecurityKey publicKey;
-
-                            // Since developers may have already worked around this issue, implicitly taking a dependency on the
-                            // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
-                            // is treated as opt-in. When the library is at the point where it is able to make breaking changes
-                            // (such as the next major version update) we should consider whether or not this app-compat switch
-                            // needs to be maintained.
-                            if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
-                            {
-                                // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
-                                jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Epk, out string epk);
-                                publicKey = new ECDsaSecurityKey(new JsonWebKey(epk), false);
-                            }
-                            else
-                            {
-                                publicKey = validationParameters.TokenDecryptionKey as ECDsaSecurityKey;
-                            }
-
-                            var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
-                                key as ECDsaSecurityKey,
-                                publicKey,
-                                jwtToken.Alg,
-                                jwtToken.Enc);
-                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
-                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
-                            SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
-                            var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
-                            var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
-                            unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                            // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Epk, out string epk);
+                            publicKey = new ECDsaSecurityKey(new JsonWebKey(epk), false);
                         }
                         else
-#endif
-                        if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
                         {
-                            var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
-                            var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
-                            unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                            publicKey = validationParameters.TokenDecryptionKey as ECDsaSecurityKey;
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
-                    }
 
-                    (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+                        var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
+                            key as ECDsaSecurityKey,
+                            publicKey,
+                            jwtToken.Alg,
+                            jwtToken.Enc);
+                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
+                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
+                        SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
+                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+                        var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
+                        var cek = new SymmetricSecurityKey(unwrappedKey);
+                        // Pair this CEK with its original ECDSA wrapping key size for telemetry
+                        keysWithSizes.Add((cek, key.KeySize));
+                    }
+                    else if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
+#else
+                    if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
+#endif
+                    {
+                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
+                        var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
+                        var cek = new SymmetricSecurityKey(unwrappedKey);
+                        // Pair this CEK with its original wrapping key size for telemetry (e.g., RSA 2048/3072/4096)
+                        keysWithSizes.Add((cek, key.KeySize));
+                    }
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
+                }
+
+                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
-            if (unwrappedKeys.Count > 0 || exceptionStrings is null)
-                return unwrappedKeys;
+
+            if (keysWithSizes.Count > 0 || exceptionStrings is null)
+                return keysWithSizes;
             else
                 throw LogHelper.LogExceptionMessage(
                     new SecurityTokenKeyWrapException(

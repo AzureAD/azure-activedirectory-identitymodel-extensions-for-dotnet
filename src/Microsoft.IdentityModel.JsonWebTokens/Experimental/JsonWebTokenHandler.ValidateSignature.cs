@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -100,6 +101,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (validationParameters.TryAllSigningKeys)
                 return ValidateSignatureUsingAllKeys(jwtToken, validationParameters, configuration, callContext);
+
+            TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                isSuccess: false,
+                jwtToken.Alg,
+                0);
 
             // kid was NOT found, no matching keys available.
             if (string.IsNullOrEmpty(jwtToken.Kid))
@@ -229,6 +235,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CryptoProviderFactory cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Alg, key))
             {
+                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    jsonWebToken.Alg,
+                    key.KeySize);
+
                 return new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10652,
@@ -242,6 +253,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             try
             {
                 if (signatureProvider == null)
+                {
+                    TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                        isSuccess: false,
+                        jsonWebToken.Alg,
+                        key.KeySize);
+
                     return new SignatureValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10636,
@@ -249,6 +266,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogHelper.MarkAsNonPII(jsonWebToken.Alg)),
                         ValidationFailureType.CryptoProviderReturnedNull,
                         ValidationError.GetCurrentStackFrame());
+                }
 
                 bool valid = EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                     jsonWebToken.EncodedToken,
@@ -262,21 +280,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 if (valid)
                 {
+                    TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                        isSuccess: true,
+                        jsonWebToken.Alg,
+                        key.KeySize);
+
                     jsonWebToken.SigningKey = key;
                     return key;
                 }
                 else
+                {
+                    TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                        isSuccess: false,
+                        jsonWebToken.Alg,
+                        key.KeySize);
+
                     return new SignatureValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10520,
                             LogHelper.MarkAsNonPII(key.ToString())),
                         SignatureValidationFailure.ValidationFailed,
                         ValidationError.GetCurrentStackFrame());
+                }
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
+                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    jsonWebToken.Alg,
+                    key.KeySize);
+
                 return new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10521,

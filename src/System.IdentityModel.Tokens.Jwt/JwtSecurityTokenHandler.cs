@@ -1250,22 +1250,61 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>'true' if signature is valid.</returns>
         private static bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateAlgorithm(algorithm, key, securityToken, validationParameters);
-
-            var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
-            var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
-            if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(
-                    new InvalidOperationException(
-                        LogHelper.FormatInvariant(TokenLogMessages.IDX10636, LogHelper.MarkAsNonPII(key == null ? "Null" : key.KeyId), LogHelper.MarkAsNonPII(algorithm))));
+            CryptoProviderFactory cryptoProviderFactory = null;
+            SignatureProvider signatureProvider = null;
 
             try
             {
-                return signatureProvider.Verify(encodedBytes, signature);
+                Validators.ValidateAlgorithm(algorithm, key, securityToken, validationParameters);
+
+                cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+                signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
+            }
+            catch (Exception)
+            {
+                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    algorithm,
+                    key.KeySize);
+                throw;
+            }
+
+            if (signatureProvider == null)
+            {
+                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    algorithm,
+                    key.KeySize);
+
+                throw LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(TokenLogMessages.IDX10636, LogHelper.MarkAsNonPII(key == null ? "Null" : key.KeyId), LogHelper.MarkAsNonPII(algorithm))));
+            }
+
+            try
+            {
+                bool isValid = signatureProvider.Verify(encodedBytes, signature);
+
+                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: isValid,
+                    algorithm,
+                    key.KeySize);
+
+                return isValid;
+            }
+            catch
+            {
+                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    algorithm,
+                    key.KeySize);
+
+                throw;
             }
             finally
             {
-                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+                if (cryptoProviderFactory is not null && signatureProvider is not null)
+                    cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
         }
 
@@ -1768,7 +1807,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters);
         }
 
-        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JwtSecurityToken jwtToken, IEnumerable<SecurityKey> keys)
+        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JwtSecurityToken jwtToken, IList<(SecurityKey Key, int WrappingKeySize)> keysWithSizes)
         {
             return new JwtTokenDecryptionParameters
             {
@@ -1781,12 +1820,12 @@ namespace System.IdentityModel.Tokens.Jwt
                 HeaderAsciiBytes = Encoding.ASCII.GetBytes(jwtToken.EncodedHeader),
                 InitializationVectorBytes = Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
                 MaximumDeflateSize = MaximumTokenSizeInBytes,
-                Keys = keys,
                 Zip = jwtToken.Header.Zip,
+                KeysWithWrappingKeySizes = keysWithSizes,
             };
         }
 
-        internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
+        internal IList<(SecurityKey Key, int WrappingKeySize)> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             IEnumerable<SecurityKey> keys = null;
 
@@ -1807,9 +1846,18 @@ namespace System.IdentityModel.Tokens.Jwt
                 keys = GetAllDecryptionKeys(validationParameters);
 
             if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg))
-                return keys;
+            {
+                // For direct key use, the key itself is the CEK, so we pair each key with its own size
+                var directKeysWithSizes = new List<(SecurityKey, int)>();
+                foreach (var key in keys)
+                {
+                    if (key != null)
+                        directKeysWithSizes.Add((key, key.KeySize));
+                }
+                return directKeysWithSizes;
+            }
 
-            var unwrappedKeys = new List<SecurityKey>();
+            var keysWithSizes = new List<(SecurityKey Key, int WrappingKeySize)>();
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
@@ -1848,26 +1896,33 @@ namespace System.IdentityModel.Tokens.Jwt
                         SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
-                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                        var cek = new SymmetricSecurityKey(unwrappedKey);
+                        // Pair this CEK with its original ECDSA wrapping key size for telemetry
+                        keysWithSizes.Add((cek, key.KeySize));
                     }
-                    else
-#endif
+                    else if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
+#else
                     if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
+#endif
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Header.Alg);
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
-                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                        var cek = new SymmetricSecurityKey(unwrappedKey);
+                        // Pair this CEK with its original wrapping key size for telemetry (e.g., RSA 2048/3072/4096)
+                        keysWithSizes.Add((cek, key.KeySize));
                     }
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     exceptionStrings.AppendLine(ex.ToString());
                 }
                 keysAttempted.AppendLine(key.KeyId);
             }
 
-            if (unwrappedKeys.Count > 0 || exceptionStrings.Length == 0)
-                return unwrappedKeys;
+            if (keysWithSizes.Count > 0 || exceptionStrings.Length == 0)
+                return keysWithSizes;
             else
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, LogHelper.MarkAsNonPII(keysAttempted.ToString()), exceptionStrings, jwtToken)));
         }

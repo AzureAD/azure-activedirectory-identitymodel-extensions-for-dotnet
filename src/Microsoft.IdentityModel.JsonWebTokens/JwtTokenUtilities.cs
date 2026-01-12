@@ -262,57 +262,87 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             bool decryptionSucceeded = false;
             bool algorithmNotSupportedByCryptoProvider = false;
             byte[] decryptedTokenBytes = null;
-
-            // keep track of exceptions thrown, keys that were tried
             StringBuilder exceptionStrings = null;
             StringBuilder keysAttempted = null;
             string zipAlgorithm = null;
-            foreach (SecurityKey key in decryptionParameters.Keys)
+
+            // Use optimized path with wrapping key sizes if available
+            if (decryptionParameters.KeysWithWrappingKeySizes != null)
             {
-                var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
-                if (cryptoProviderFactory == null)
+                int count = decryptionParameters.KeysWithWrappingKeySizes.Count;
+                for (int i = 0; i < count; i++)
                 {
-                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        LogHelper.LogWarning(TokenLogMessages.IDX10607, LogHelper.MarkAsNonPII(key.KeyId));
+                    var (key, keySize) = decryptionParameters.KeysWithWrappingKeySizes[i];
 
-                    continue;
-                }
-
-                try
-                {
-                    if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
-                    {
-                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                            LogHelper.LogWarning(
-                                TokenLogMessages.IDX10611,
-                                LogHelper.MarkAsNonPII(decryptionParameters.Enc),
-                                LogHelper.MarkAsNonPII(key.KeyId));
-
-                        algorithmNotSupportedByCryptoProvider = true;
-                        continue;
-                    }
-
-                    Validators.ValidateAlgorithm(decryptionParameters.Enc, key, securityToken, validationParameters);
-                    decryptedTokenBytes = DecryptToken(
-                        cryptoProviderFactory,
+                    if (TryDecryptWithKey(
                         key,
-                        decryptionParameters.Enc,
-                        decryptionParameters.CipherTextBytes,
-                        decryptionParameters.HeaderAsciiBytes,
-                        decryptionParameters.InitializationVectorBytes,
-                        decryptionParameters.AuthenticationTagBytes);
-
-                    zipAlgorithm = decryptionParameters.Zip;
-                    decryptionSucceeded = true;
-                    break;
+                        keySize,
+                        securityToken,
+                        validationParameters,
+                        decryptionParameters,
+                        ref algorithmNotSupportedByCryptoProvider,
+                        ref decryptedTokenBytes,
+                        ref zipAlgorithm,
+                        ref exceptionStrings,
+                        ref keysAttempted))
+                    {
+                        decryptionSucceeded = true;
+                        break;
+                    }
                 }
-                catch (Exception ex)
+            }
+            else if (decryptionParameters.Keys != null)
+            {
+                // Legacy path: use IList for indexed access if possible, otherwise enumerate
+                if (decryptionParameters.Keys is IList<SecurityKey> keyList)
                 {
-                    (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
-                }
+                    int count = keyList.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        SecurityKey key = keyList[i];
+                        int keySize = key?.KeySize ?? 0;
 
-                if (key != null)
-                    (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+                        if (TryDecryptWithKey(
+                            key,
+                            keySize,
+                            securityToken,
+                            validationParameters,
+                            decryptionParameters,
+                            ref algorithmNotSupportedByCryptoProvider,
+                            ref decryptedTokenBytes,
+                            ref zipAlgorithm,
+                            ref exceptionStrings,
+                            ref keysAttempted))
+                        {
+                            decryptionSucceeded = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Fall back to enumerator for non-list collections
+                    foreach (SecurityKey key in decryptionParameters.Keys)
+                    {
+                        int keySize = key?.KeySize ?? 0;
+
+                        if (TryDecryptWithKey(
+                            key,
+                            keySize,
+                            securityToken,
+                            validationParameters,
+                            decryptionParameters,
+                            ref algorithmNotSupportedByCryptoProvider,
+                            ref decryptedTokenBytes,
+                            ref zipAlgorithm,
+                            ref exceptionStrings,
+                            ref keysAttempted))
+                        {
+                            decryptionSucceeded = true;
+                            break;
+                        }
+                    }
+                }
             }
 
             ValidateDecryption(decryptionParameters, decryptionSucceeded, algorithmNotSupportedByCryptoProvider, exceptionStrings, keysAttempted);
@@ -331,6 +361,73 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         GetIDX10679LogMessage(zipAlgorithm),
                         ex));
             }
+        }
+
+        private static bool TryDecryptWithKey(
+            SecurityKey key,
+            int keySize,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters,
+            JwtTokenDecryptionParameters decryptionParameters,
+            ref bool algorithmNotSupportedByCryptoProvider,
+            ref byte[] decryptedTokenBytes,
+            ref string zipAlgorithm,
+            ref StringBuilder exceptionStrings,
+            ref StringBuilder keysAttempted)
+        {
+            var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+            if (cryptoProviderFactory == null)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(TokenLogMessages.IDX10607, LogHelper.MarkAsNonPII(key.KeyId));
+
+                return false;
+            }
+
+            try
+            {
+                if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
+                {
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(
+                            TokenLogMessages.IDX10611,
+                            LogHelper.MarkAsNonPII(decryptionParameters.Enc),
+                            LogHelper.MarkAsNonPII(key.KeyId));
+
+                    algorithmNotSupportedByCryptoProvider = true;
+                    return false;
+                }
+
+                Validators.ValidateAlgorithm(decryptionParameters.Enc, key, securityToken, validationParameters);
+                decryptedTokenBytes = DecryptToken(
+                    cryptoProviderFactory,
+                    key,
+                    decryptionParameters.Enc,
+                    decryptionParameters.CipherTextBytes,
+                    decryptionParameters.HeaderAsciiBytes,
+                    decryptionParameters.InitializationVectorBytes,
+                    decryptionParameters.AuthenticationTagBytes);
+
+                zipAlgorithm = decryptionParameters.Zip;
+
+                // Record telemetry for successful decryption
+                Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(true, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
+                return true;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
+
+                // Record telemetry for failed decryption
+                Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(false, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
+            }
+
+            if (key != null)
+                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+
+            return false;
         }
 
         private static void ValidateDecryption(JwtTokenDecryptionParameters decryptionParameters, bool decryptionSucceeded, bool algorithmNotSupportedByCryptoProvider, StringBuilder exceptionStrings, StringBuilder keysAttempted)
