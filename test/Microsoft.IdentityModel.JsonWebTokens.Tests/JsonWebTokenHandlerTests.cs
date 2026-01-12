@@ -844,7 +844,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidIssuer = Default.Issuer
                         },
                         Configuration = configurationWithMismatchedKeys,
-                        ExpectedDecryptionKeys =  new List<SecurityKey>(),
+                        ExpectedDecryptionKeys =  null,
                     }
                 };
             }
