@@ -1092,6 +1092,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
 
+                        Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                            isSuccess: true,
+                            samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
+                            key.KeySize);
+
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
                             LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
 
@@ -1100,6 +1105,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     }
                     catch (Exception ex)
                     {
+                        Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                            isSuccess: false,
+                            samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
+                            key.KeySize);
+
                         exceptionStrings.AppendLine(ex.ToString());
                     }
 

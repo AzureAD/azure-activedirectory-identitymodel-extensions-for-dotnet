@@ -219,19 +219,36 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         ValidationError.GetCurrentStackFrame());
 
                 if (!signatureProvider.Verify(canonicalBytes, signatureBytes))
+                {
+                    Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                        isSuccess: false,
+                        signature.SignedInfo.SignatureMethod,
+                        key.KeySize);
+
                     return new SignatureValidationError(
                         new MessageDetail(
                             Tokens.LogMessages.IDX10520,
                             LogHelper.MarkAsNonPII(key.ToString())),
                         SignatureValidationFailure.ValidationFailed,
                         ValidationError.GetCurrentStackFrame());
+                }
 
                 var result = signature.SignedInfo.Verify(cryptoProviderFactory, callContext);
                 if (result == null)
                 {
+                    Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                        isSuccess: true,
+                        signature.SignedInfo.SignatureMethod,
+                        key.KeySize);
+
                     securityToken.SigningKey = key;
                     return key;
                 }
+
+                Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    signature.SignedInfo.SignatureMethod,
+                    key.KeySize);
 
                 return result;
             }
@@ -239,6 +256,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
+                Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    isSuccess: false,
+                    signature.SignedInfo.SignatureMethod,
+                    key.KeySize);
+
                 return new SignatureValidationError(
                     new MessageDetail(
                         Tokens.LogMessages.IDX10521,
