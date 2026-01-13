@@ -28,15 +28,14 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void ImportKey(byte[] key)
         {
-#if NET6_0_OR_GREATER
+
 #if NET8_0_OR_GREATER
             _aesGcm = new System.Security.Cryptography.AesGcm(key, TagSize);
-#else
+#elif NET6_0_OR_GREATER
             // .NET 6 and .NET 7 use the obsolete constructor without tagSizeInBytes parameter
 #pragma warning disable SYSLIB0053 // Type or member is obsolete
             _aesGcm = new System.Security.Cryptography.AesGcm(key);
 #pragma warning restore SYSLIB0053 // Type or member is obsolete
-#endif
 #else
             _keyHandle = Interop.BCrypt.BCryptImportKey(s_aesGcm, key);
 #endif
