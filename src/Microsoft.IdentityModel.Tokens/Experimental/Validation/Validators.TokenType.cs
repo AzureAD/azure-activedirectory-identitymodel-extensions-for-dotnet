@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 ValidationResult<ValidatedTokenType, ValidationError> result =
-                    validationParameters.TokenTypeValidator(
+                    validationParameters.TokenTypeValidator.ValidateTokenType(
                         type,
                         securityToken,
                         validationParameters,

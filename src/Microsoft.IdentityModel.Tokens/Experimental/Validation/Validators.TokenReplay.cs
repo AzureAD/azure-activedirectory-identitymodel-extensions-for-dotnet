@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 ValidationResult<DateTime?, ValidationError> result =
-                    validationParameters.TokenReplayValidator(
+                    validationParameters.TokenReplayValidator.ValidateTokenReplay(
                         expires,
                         securityToken,
                         validationParameters,

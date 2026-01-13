@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 ValidationResult<ValidatedLifetime, ValidationError> result =
-                    validationParameters.LifetimeValidator(
+                    validationParameters.LifetimeValidator.ValidateLifetime(
                         notBefore,
                         expires,
                         securityToken,

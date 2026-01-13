@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                ValidationResult<string, ValidationError> result = validationParameters.AudienceValidator(
+                ValidationResult<string, ValidationError> result = validationParameters.AudienceValidator.ValidateAudience(
                     audiences,
                     securityToken,
                     validationParameters,
