@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {

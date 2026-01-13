@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 
 #nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens

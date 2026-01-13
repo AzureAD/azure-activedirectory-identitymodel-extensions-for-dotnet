@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml

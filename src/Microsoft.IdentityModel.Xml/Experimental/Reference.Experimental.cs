@@ -4,7 +4,7 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {

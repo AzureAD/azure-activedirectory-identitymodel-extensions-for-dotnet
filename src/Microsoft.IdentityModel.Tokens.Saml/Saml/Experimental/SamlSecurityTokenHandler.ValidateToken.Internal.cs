@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens.Saml
@@ -13,10 +13,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Saml Tokens. See: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
-    public partial class SamlSecurityTokenHandler : SecurityTokenHandler, IResultBasedValidation
+    public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
         /// <inheritdoc/>
-        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <inheritdoc/>
-        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -194,58 +194,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 ValidatedSignatureKey = signatureResult.Result
             };
         }
-
-        #region Explicit Interface Implementations
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
-            string token,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return await ValidateTokenAsync(
-                token,
-                validationParameters,
-                callContext,
-                default).ConfigureAwait(false);
-        }
-
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
-            string token,
-            ValidationParameters validationParameters,
-            CallContext callContext,
-            CancellationToken cancellationToken)
-        {
-            return await ValidateTokenAsync(
-                token,
-                validationParameters,
-                callContext,
-                cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
-            SecurityToken token,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-        {
-            return await ValidateTokenAsync(
-                token,
-                validationParameters,
-                callContext,
-                default).ConfigureAwait(false);
-        }
-
-        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
-            SecurityToken token,
-            ValidationParameters validationParameters,
-            CallContext callContext,
-            CancellationToken cancellationToken)
-        {
-            return await ValidateTokenAsync(
-                token,
-                validationParameters,
-                callContext,
-                cancellationToken).ConfigureAwait(false);
-        }
-        #endregion
     }
 }
 #nullable restore

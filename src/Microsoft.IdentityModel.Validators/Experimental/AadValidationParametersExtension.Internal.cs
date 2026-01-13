@@ -6,7 +6,7 @@ using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Validators
 {

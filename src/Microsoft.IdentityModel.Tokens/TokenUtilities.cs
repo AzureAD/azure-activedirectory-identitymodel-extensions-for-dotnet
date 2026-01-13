@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 

@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using System.Diagnostics;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Validators
 {

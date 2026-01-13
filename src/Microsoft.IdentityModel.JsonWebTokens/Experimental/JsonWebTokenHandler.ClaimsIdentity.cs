@@ -5,7 +5,7 @@ using System;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
 
 #nullable enable
