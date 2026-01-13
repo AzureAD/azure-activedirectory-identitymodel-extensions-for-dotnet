@@ -24,7 +24,7 @@ public class SamlSignatureValidationTelemetryTests
     public void ValidateToken_SamlSignatureValidationSuccess_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         ITestingTokenHandler handler = new SamlSecurityTestingTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -63,7 +63,7 @@ public class SamlSignatureValidationTelemetryTests
     public void ValidateToken_SamlSignatureValidationFailure_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         ITestingTokenHandler handler = new SamlSecurityTestingTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -110,7 +110,7 @@ public class SamlSignatureValidationTelemetryTests
     public void ValidateToken_Saml2SignatureValidationSuccess_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         ITestingTokenHandler handler = new Saml2SecurityTestingTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -149,7 +149,7 @@ public class SamlSignatureValidationTelemetryTests
     public void ValidateToken_Saml2SignatureValidationFailure_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         ITestingTokenHandler handler = new Saml2SecurityTestingTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -196,7 +196,7 @@ public class SamlSignatureValidationTelemetryTests
     public void ValidateToken_SamlSymmetricSignature_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         ITestingTokenHandler handler = new SamlSecurityTestingTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -235,7 +235,7 @@ public class SamlSignatureValidationTelemetryTests
     public void ValidateToken_Saml2SymmetricSignature_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         ITestingTokenHandler handler = new Saml2SecurityTestingTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -274,7 +274,7 @@ public class SamlSignatureValidationTelemetryTests
     public void ValidateToken_SamlRsa2048Signature_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         ITestingTokenHandler handler = new SamlSecurityTestingTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -313,7 +313,7 @@ public class SamlSignatureValidationTelemetryTests
     public void ValidateToken_Saml2Rsa2048Signature_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         ITestingTokenHandler handler = new Saml2SecurityTestingTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -365,13 +365,15 @@ public class SamlSignatureValidationTelemetryTests
     /// <summary>
     /// Test meter listener to capture telemetry measurements
     /// </summary>
-    private class TestMeterListener
+    private class TestMeterListener : System.IDisposable
     {
         private readonly MeterListener _listener;
         private readonly List<Measurement> _measurements = new List<Measurement>();
+        private readonly long _startTimestamp;
 
         public TestMeterListener()
         {
+            _startTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
             _listener = new MeterListener();
             _listener.InstrumentPublished = (instrument, listener) =>
             {
@@ -389,7 +391,8 @@ public class SamlSignatureValidationTelemetryTests
                     {
                         InstrumentName = instrument.Name,
                         Value = measurement,
-                        Tags = tags.ToArray()
+                        Tags = tags.ToArray(),
+                        Timestamp = System.Diagnostics.Stopwatch.GetTimestamp()
                     });
                 }
             });
@@ -401,8 +404,16 @@ public class SamlSignatureValidationTelemetryTests
         {
             lock (_measurements)
             {
-                return _measurements.Where(m => m.InstrumentName == instrumentName).ToList();
+                // Only return measurements that were recorded after this listener started
+                return _measurements
+                    .Where(m => m.InstrumentName == instrumentName && m.Timestamp >= _startTimestamp)
+                    .ToList();
             }
+        }
+
+        public void Dispose()
+        {
+            _listener?.Dispose();
         }
 
         public class Measurement
@@ -410,6 +421,7 @@ public class SamlSignatureValidationTelemetryTests
             public string InstrumentName { get; set; }
             public long Value { get; set; }
             public KeyValuePair<string, object>[] Tags { get; set; }
+            public long Timestamp { get; set; }
         }
     }
 

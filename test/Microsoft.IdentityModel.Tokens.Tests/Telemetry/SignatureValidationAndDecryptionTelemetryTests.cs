@@ -27,7 +27,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_SignatureValidationSuccess_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -63,7 +63,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_SignatureValidationFailure_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -100,7 +100,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_TokenDecryptionSuccess_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -139,7 +139,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_TokenDecryptionFailure_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -178,7 +178,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_ExperimentalAPI_SignatureValidationSuccess_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -217,7 +217,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_ExperimentalAPI_TokenDecryptionSuccess_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -259,7 +259,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_ExperimentalAPI_SignatureValidationFailure_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -298,7 +298,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_ExperimentalAPI_TokenDecryptionFailure_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -340,7 +340,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public void ValidateToken_LegacyJwtSecurityTokenHandler_SignatureValidationSuccess_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -376,7 +376,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public void ValidateToken_LegacyJwtSecurityTokenHandler_SignatureValidationFailure_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -419,7 +419,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public void ValidateToken_LegacyJwtSecurityTokenHandler_TokenDecryptionSuccess_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -458,7 +458,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public void ValidateToken_LegacyJwtSecurityTokenHandler_TokenDecryptionFailure_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -504,7 +504,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_SymmetricSignature_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -540,7 +540,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_RsaKeyWrapEncryption_2048_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var encryptingCredentials = new EncryptingCredentials(
             KeyingMaterial.RsaSecurityKey_2048,
@@ -604,7 +604,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_RsaKeyWrapEncryption_3072_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
 
         // Create RSA 3072-bit key for encryption
@@ -654,7 +654,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_RsaKeyWrapEncryption_4096_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
 
         // Create RSA 4096-bit key for encryption
@@ -704,7 +704,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_RsaOaepKeyWrapEncryption_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
         var encryptingCredentials = new EncryptingCredentials(
             KeyingMaterial.RsaSecurityKey_2048,
@@ -749,7 +749,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_DirectKeyUseEncryption_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
 
         // Direct key use means no key wrapping - the encryption key is used directly
@@ -797,7 +797,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_AesKeyWrapEncryption_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
 
         // Use AES key wrapping (symmetric key wrap)
@@ -846,7 +846,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_ES256Signature_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
 
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -887,7 +887,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_ES384Signature_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
 
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP384);
@@ -928,7 +928,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
     public async Task ValidateToken_ES512Signature_RecordsTelemetry()
     {
         // Arrange
-        var listener = new TestMeterListener();
+        using var listener = new TestMeterListener();
         var handler = new JsonWebTokenHandler();
 
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP521);
@@ -983,13 +983,15 @@ public class SignatureValidationAndDecryptionTelemetryTests
     /// <summary>
     /// Test meter listener to capture telemetry measurements
     /// </summary>
-    private class TestMeterListener
+    private class TestMeterListener : System.IDisposable
     {
         private readonly MeterListener _listener;
         private readonly List<Measurement> _measurements = new List<Measurement>();
+        private readonly long _startTimestamp;
 
         public TestMeterListener()
         {
+            _startTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
             _listener = new MeterListener();
             _listener.InstrumentPublished = (instrument, listener) =>
             {
@@ -1007,7 +1009,8 @@ public class SignatureValidationAndDecryptionTelemetryTests
                     {
                         InstrumentName = instrument.Name,
                         Value = measurement,
-                        Tags = tags.ToArray()
+                        Tags = tags.ToArray(),
+                        Timestamp = System.Diagnostics.Stopwatch.GetTimestamp()
                     });
                 }
             });
@@ -1019,8 +1022,16 @@ public class SignatureValidationAndDecryptionTelemetryTests
         {
             lock (_measurements)
             {
-                return _measurements.Where(m => m.InstrumentName == instrumentName).ToList();
+                // Only return measurements that were recorded after this listener started
+                return _measurements
+                    .Where(m => m.InstrumentName == instrumentName && m.Timestamp >= _startTimestamp)
+                    .ToList();
             }
+        }
+
+        public void Dispose()
+        {
+            _listener?.Dispose();
         }
 
         public class Measurement
@@ -1028,6 +1039,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
             public string InstrumentName { get; set; }
             public long Value { get; set; }
             public KeyValuePair<string, object>[] Tags { get; set; }
+            public long Timestamp { get; set; }
         }
     }
 }
