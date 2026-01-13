@@ -1916,6 +1916,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <inheritdoc/>
         public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
         {
+            return ValidateTokenAsync(token, validationParameters, CancellationToken.None);
+        }
+
+        /// <inheritdoc/>
+        public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
+        {
             try
             {
                 var claimsPrincipal = ValidateToken(token, validationParameters, out var validatedToken);

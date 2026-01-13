@@ -1,0 +1,2 @@
+#nullable enable
+~override System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
