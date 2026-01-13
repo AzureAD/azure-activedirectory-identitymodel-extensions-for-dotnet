@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // If no key found in VP, we'll check the configuration.
             if (validationParameters.DecryptionKeyResolver != null)
             {
-                keys = validationParameters.DecryptionKeyResolver(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters, callContext);
+                keys = validationParameters.DecryptionKeyResolver.ResolveDecryptionKey(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters, callContext);
             }
             else
             {

@@ -142,7 +142,7 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IncludeTokenOnF
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.InstancePropertyBag.get -> System.Collections.Generic.IDictionary<string!, object!>!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IsClone.get -> bool
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IsClone.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureKeyResolver.get -> Microsoft.IdentityModel.Tokens.Experimental.SignatureKeyResolverDelegate?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureKeyResolver.get -> Microsoft.IdentityModel.Tokens.Experimental.ISignatureKeyResolver?
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureKeyResolver.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureKeyValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.ISignatureKeyValidator!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureKeyValidator.set -> void

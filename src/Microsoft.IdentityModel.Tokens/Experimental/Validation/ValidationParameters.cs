@@ -297,12 +297,12 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         public bool IsClone { get; protected set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for signature validation.
+        /// Gets or sets a resolver that will be called to retrieve a <see cref="SecurityKey"/> used for signature validation.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to check the signature. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        public SignatureKeyResolverDelegate? SignatureKeyResolver { get; set; }
+        public ISignatureKeyResolver? SignatureKeyResolver { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> used for signature validation.
@@ -459,12 +459,12 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         internal TimeProvider TimeProvider { get; set; } = TimeProvider.System;
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
+        /// Gets or sets a resolver that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        internal DecryptionKeyResolverDelegate? DecryptionKeyResolver { get; set; }
+        internal IDecryptionKeyResolver? DecryptionKeyResolver { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that is to be used for decrypting tokens.
