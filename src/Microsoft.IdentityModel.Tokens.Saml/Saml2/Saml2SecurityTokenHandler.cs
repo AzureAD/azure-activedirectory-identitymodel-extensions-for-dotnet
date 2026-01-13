@@ -457,7 +457,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
 
-                        Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                        Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                             isSuccess: true,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
                             key.KeySize);
@@ -470,7 +470,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     }
                     catch (Exception ex)
                     {
-                        Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                        Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                             isSuccess: false,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
                             key.KeySize);

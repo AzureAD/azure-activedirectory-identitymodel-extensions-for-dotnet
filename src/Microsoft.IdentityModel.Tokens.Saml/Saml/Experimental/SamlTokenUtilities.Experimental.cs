@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 if (!signatureProvider.Verify(canonicalBytes, signatureBytes))
                 {
-                    Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: false,
                         signature.SignedInfo.SignatureMethod,
                         key.KeySize);
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 var result = signature.SignedInfo.Verify(cryptoProviderFactory, callContext);
                 if (result == null)
                 {
-                    Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                    Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: true,
                         signature.SignedInfo.SignatureMethod,
                         key.KeySize);
@@ -245,7 +245,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     return key;
                 }
 
-                Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     signature.SignedInfo.SignatureMethod,
                     key.KeySize);
@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     signature.SignedInfo.SignatureMethod,
                     key.KeySize);

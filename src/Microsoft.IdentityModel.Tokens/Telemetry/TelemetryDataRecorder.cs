@@ -60,17 +60,6 @@ namespace Microsoft.IdentityModel.Telemetry
             unit: "ms",
             description: "Configuration retrieval latency during configuration manager operations.");
 
-        // Attribute keys
-        private const string StatusKey = "status";
-        private const string AlgKey = "alg";
-        private const string EncKey = "enc";
-        private const string KeySizeKey = "key_size";
-
-        // Attribute values
-        private const string SuccessVal = "success";
-        private const string FailureVal = "failure";
-
-
         internal static void RecordConfigurationRetrievalDurationHistogram(long requestDurationInMs, in TagList tagList)
         {
             TotalDurationHistogram.Record(requestDurationInMs, tagList);
@@ -87,22 +76,15 @@ namespace Microsoft.IdentityModel.Telemetry
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void IncrementSignatureValidationCounter(bool isSuccess, string algorithm, int keySize)
+        internal static void IncrementSignatureValidationCounter(in TagList tagList)
         {
-            SignatureValidationCounter.Add(1,
-                new(StatusKey, isSuccess ? SuccessVal : FailureVal),
-                new(AlgKey, algorithm),
-                new(KeySizeKey, keySize));
+            SignatureValidationCounter.Add(1, tagList);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, int keySize)
+        internal static void IncrementTokenDecryptionCounter(in TagList tagList)
         {
-            TokenDecryptionCounter.Add(1,
-                new(StatusKey, isSuccess ? SuccessVal : FailureVal),
-                new(AlgKey, encryptionAlgorithm),
-                new(EncKey, encryptionScheme),
-                new(KeySizeKey, keySize));
+            TokenDecryptionCounter.Add(1, tagList);
         }
     }
 }

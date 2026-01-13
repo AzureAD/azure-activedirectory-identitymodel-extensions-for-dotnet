@@ -322,7 +322,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
                     LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), LogHelper.MarkAsNonPII(key.KeyId));
 
-                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     jsonWebToken.Alg,
                     key.KeySize);
@@ -355,7 +355,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     signatureProvider,
                     ValidateSignature);
 
-                Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: isValid,
                     jsonWebToken.Alg,
                     key.KeySize);
@@ -364,7 +364,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             catch
             {
-                Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     jsonWebToken.Alg,
                     key.KeySize);

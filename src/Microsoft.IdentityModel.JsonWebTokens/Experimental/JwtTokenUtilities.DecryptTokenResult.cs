@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         decryptionSucceeded = true;
 
                         // Record telemetry with wrapping key size (no lookup needed - it's right here!)
-                        Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
+                        Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
                         break;
                     }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
 
                         // Record telemetry for failed decryption with wrapping key size
-                        Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
+                        Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
                     }
 
                     if (key != null)
@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         decryptionSucceeded = true;
 
                         // Legacy telemetry: use key size directly (may be CEK size)
-                        Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, key.KeySize);
+                        Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, key.KeySize);
                         break;
                     }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
 
                         // Legacy telemetry for failed decryption
-                        Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, key?.KeySize ?? 0);
+                        Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, key?.KeySize ?? 0);
                     }
 
                     if (key != null)

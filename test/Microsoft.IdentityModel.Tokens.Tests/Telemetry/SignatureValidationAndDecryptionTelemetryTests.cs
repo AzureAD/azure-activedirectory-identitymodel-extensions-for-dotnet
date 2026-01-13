@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -51,9 +52,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.RsaSha256 },
-                { "key_size", KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.KeySizeTag, KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
             });
     }
 
@@ -87,9 +89,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "failure" },
-                { "alg", SecurityAlgorithms.RsaSha256 },
-                { "key_size", Default.SymmetricSigningKey256.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningKey256.KeySize }
             });
     }
 
@@ -124,10 +127,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", Default.SymmetricEncryptingCredentials.Alg },
-                { "enc", Default.SymmetricEncryptingCredentials.Enc },
-                { "key_size", Default.SymmetricEncryptingCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
+                { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
+                { TelemetryConstants.KeySizeTag, Default.SymmetricEncryptingCredentials.Key.KeySize }
             });
     }
 
@@ -162,10 +166,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "failure" },
-                { "alg", Default.SymmetricEncryptingCredentials.Alg },
-                { "enc", Default.SymmetricEncryptingCredentials.Enc },
-                { "key_size", KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
+                { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
+                { TelemetryConstants.KeySizeTag, KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
             });
     }
 
@@ -201,9 +206,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.RsaSha256 },
-                { "key_size", KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.KeySizeTag, KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
             });
     }
 
@@ -241,10 +247,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", Default.SymmetricEncryptingCredentials.Alg },
-                { "enc", Default.SymmetricEncryptingCredentials.Enc },
-                { "key_size", Default.SymmetricEncryptingCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
+                { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
+                { TelemetryConstants.KeySizeTag, Default.SymmetricEncryptingCredentials.Key.KeySize }
             });
     }
 
@@ -280,9 +287,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "failure" },
-                { "alg", SecurityAlgorithms.RsaSha256 },
-                { "key_size", 0 } // keys don't match, so key size is reported as 0
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.KeySizeTag, 0 } // keys don't match, so key size is reported as 0
             });
     }
 
@@ -320,10 +328,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "failure" },
-                { "alg", Default.SymmetricEncryptingCredentials.Alg },
-                { "enc", Default.SymmetricEncryptingCredentials.Enc },
-                { "key_size", KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
+                { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
+                { TelemetryConstants.KeySizeTag, KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
             });
     }
 
@@ -356,9 +365,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.RsaSha256 },
-                { "key_size", KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.KeySizeTag, KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
             });
     }
 
@@ -398,9 +408,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "failure" },
-                { "alg", SecurityAlgorithms.RsaSha256 },
-                { "key_size", Default.SymmetricSigningKey256.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningKey256.KeySize }
             });
     }
 
@@ -435,10 +446,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", Default.SymmetricEncryptingCredentials.Alg },
-                { "enc", Default.SymmetricEncryptingCredentials.Enc },
-                { "key_size", Default.SymmetricEncryptingCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
+                { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
+                { TelemetryConstants.KeySizeTag, Default.SymmetricEncryptingCredentials.Key.KeySize }
             });
     }
 
@@ -480,10 +492,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "failure" },
-                { "alg", Default.SymmetricEncryptingCredentials.Alg },
-                { "enc", Default.SymmetricEncryptingCredentials.Enc },
-                { "key_size", KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
+                { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
+                { TelemetryConstants.KeySizeTag, KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
             });
     }
 
@@ -516,9 +529,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", Default.SymmetricSigningCredentials.Algorithm },
-                { "key_size", Default.SymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningCredentials.Key.KeySize }
             });
     }
 
@@ -559,10 +573,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", encryptingCredentials.Alg },
-                { "enc", encryptingCredentials.Enc },
-                { "key_size", 2048 }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, encryptingCredentials.Alg },
+                { TelemetryConstants.EncryptionSchemeTag, encryptingCredentials.Enc },
+                { TelemetryConstants.KeySizeTag, 2048 }
             });
     }
 
@@ -627,10 +642,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.RsaPKCS1 },
-                { "enc", SecurityAlgorithms.Aes256CbcHmacSha512 },
-                { "key_size", 3072 }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaPKCS1 },
+                { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes256CbcHmacSha512 },
+                { TelemetryConstants.KeySizeTag, 3072 }
             });
     }
 
@@ -676,10 +692,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.RsaPKCS1 },
-                { "enc", SecurityAlgorithms.Aes256CbcHmacSha512 },
-                { "key_size", 4096 }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaPKCS1 },
+                { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes256CbcHmacSha512 },
+                { TelemetryConstants.KeySizeTag, 4096 }
             });
     }
 
@@ -720,10 +737,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.RsaOAEP },
-                { "enc", SecurityAlgorithms.Aes256CbcHmacSha512 },
-                { "key_size", 2048 }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaOAEP },
+                { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes256CbcHmacSha512 },
+                { TelemetryConstants.KeySizeTag, 2048 }
             });
     }
 
@@ -767,10 +785,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", JsonWebTokens.JwtConstants.DirectKeyUseAlg },
-                { "enc", SecurityAlgorithms.Aes128CbcHmacSha256 },
-                { "key_size", encryptionKey.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, JsonWebTokens.JwtConstants.DirectKeyUseAlg },
+                { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes128CbcHmacSha256 },
+                { TelemetryConstants.KeySizeTag, encryptionKey.KeySize }
             });
     }
 
@@ -814,10 +833,11 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.Aes256KW },
-                { "enc", SecurityAlgorithms.Aes256CbcHmacSha512 },
-                { "key_size", kekKey.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.Aes256KW },
+                { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes256CbcHmacSha512 },
+                { TelemetryConstants.KeySizeTag, kekKey.KeySize }
             });
     }
 
@@ -856,9 +876,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.EcdsaSha256 },
-                { "key_size", ecdsaKey.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha256 },
+                { TelemetryConstants.KeySizeTag, ecdsaKey.KeySize }
             });
     }
 
@@ -896,9 +917,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.EcdsaSha384 },
-                { "key_size", ecdsaKey.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha384 },
+                { TelemetryConstants.KeySizeTag, ecdsaKey.KeySize }
             });
     }
 
@@ -936,9 +958,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", SecurityAlgorithms.EcdsaSha512 },
-                { "key_size", ecdsaKey.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha512 },
+                { TelemetryConstants.KeySizeTag, ecdsaKey.KeySize }
             });
     }
 #endif

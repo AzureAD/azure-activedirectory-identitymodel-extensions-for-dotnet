@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -51,9 +52,10 @@ public class SamlSignatureValidationTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", Default.AsymmetricSigningCredentials.Algorithm },
-                { "key_size", Default.AsymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, Default.AsymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.KeySizeTag, Default.AsymmetricSigningCredentials.Key.KeySize }
             });
     }
 
@@ -97,9 +99,10 @@ public class SamlSignatureValidationTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "failure" },
-                { "alg", KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
-                { "key_size", KeyingMaterial.RsaSecurityKey2.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
+                { TelemetryConstants.KeySizeTag, KeyingMaterial.RsaSecurityKey2.KeySize }
             });
     }
 
@@ -135,9 +138,10 @@ public class SamlSignatureValidationTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", Default.AsymmetricSigningCredentials.Algorithm },
-                { "key_size", Default.AsymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, Default.AsymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.KeySizeTag, Default.AsymmetricSigningCredentials.Key.KeySize }
             });
     }
 
@@ -181,9 +185,10 @@ public class SamlSignatureValidationTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "failure" },
-                { "alg", KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
-                { "key_size", KeyingMaterial.RsaSecurityKey2.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
+                { TelemetryConstants.KeySizeTag, KeyingMaterial.RsaSecurityKey2.KeySize }
             });
     }
 
@@ -219,9 +224,10 @@ public class SamlSignatureValidationTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", Default.SymmetricSigningCredentials.Algorithm },
-                { "key_size", Default.SymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningCredentials.Key.KeySize }
             });
     }
 
@@ -257,9 +263,10 @@ public class SamlSignatureValidationTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", Default.SymmetricSigningCredentials.Algorithm },
-                { "key_size", Default.SymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningCredentials.Key.KeySize }
             });
     }
 
@@ -295,9 +302,10 @@ public class SamlSignatureValidationTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
-                { "key_size", 2048 }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
+                { TelemetryConstants.KeySizeTag, 2048 }
             });
     }
 
@@ -333,9 +341,10 @@ public class SamlSignatureValidationTelemetryTests
         AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                { "status", "success" },
-                { "alg", KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
-                { "key_size", 2048 }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
+                { TelemetryConstants.KeySizeTag, 2048 }
             });
     }
 

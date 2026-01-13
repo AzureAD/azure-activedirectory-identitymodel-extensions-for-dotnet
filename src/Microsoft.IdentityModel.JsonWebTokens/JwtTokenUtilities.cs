@@ -411,7 +411,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 zipAlgorithm = decryptionParameters.Zip;
 
                 // Record telemetry for successful decryption
-                Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(true, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
+                Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(true, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
                 return true;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -421,7 +421,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
 
                 // Record telemetry for failed decryption
-                Telemetry.TelemetryDataRecorder.IncrementTokenDecryptionCounter(false, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
+                Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(false, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
             }
 
             if (key != null)

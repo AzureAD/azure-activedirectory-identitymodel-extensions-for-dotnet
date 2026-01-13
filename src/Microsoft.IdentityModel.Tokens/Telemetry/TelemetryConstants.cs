@@ -37,6 +37,35 @@ namespace Microsoft.IdentityModel.Telemetry
         /// </summary>
         public const string BlockingTypeTag = "Blocking";
 
+        /// <summary>
+        /// Telemetry tag indicating the status of an operation (success or failure).
+        /// </summary>
+        public const string StatusTag = "Status";
+
+        /// <summary>
+        /// Telemetry tag indicating the cryptographic algorithm used.
+        /// </summary>
+        public const string AlgorithmTag = "Algorithm";
+
+        /// <summary>
+        /// Telemetry tag indicating the encryption scheme used.
+        /// </summary>
+        public const string EncryptionSchemeTag = "EncryptionScheme";
+
+        /// <summary>
+        /// Telemetry tag indicating the size of the cryptographic key in bits.
+        /// </summary>
+        public const string KeySizeTag = "KeySize";
+        /// <summary>
+        /// Telemetry value indicating a successful operation.
+        /// </summary>
+        public const string SuccessValue = "Success";
+
+        /// <summary>
+        /// Telemetry value indicating a failed operation.
+        /// </summary>
+        public const string FailureValue = "Failure";
+
         public static class Protocols
         {
             // Configuration manager refresh statuses

@@ -1262,7 +1262,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception)
             {
-                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
                     key.KeySize);
@@ -1271,7 +1271,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (signatureProvider == null)
             {
-                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
                     key.KeySize);
@@ -1285,7 +1285,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 bool isValid = signatureProvider.Verify(encodedBytes, signature);
 
-                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: isValid,
                     algorithm,
                     key.KeySize);
@@ -1294,7 +1294,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch
             {
-                TelemetryDataRecorder.IncrementSignatureValidationCounter(
+                Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
                     key.KeySize);

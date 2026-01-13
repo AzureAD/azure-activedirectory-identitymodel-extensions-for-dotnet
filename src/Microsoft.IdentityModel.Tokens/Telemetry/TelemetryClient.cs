@@ -51,6 +51,46 @@ namespace Microsoft.IdentityModel.Telemetry
             TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
+        /// <summary>
+        /// Increments the signature validation counter with algorithm and key size details.
+        /// </summary>
+        /// <param name="isSuccess">Whether the signature validation succeeded.</param>
+        /// <param name="algorithm">The signature algorithm used (e.g., RS256, ES256, HS256).</param>
+        /// <param name="keySize">The size of the key in bits (e.g., 2048, 3072, 4096).</param>
+        public static void IncrementSignatureValidationCounter(bool isSuccess, string algorithm, int keySize)
+        {
+            var tagList = new TagList()
+            {
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, isSuccess ? TelemetryConstants.SuccessValue : TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, algorithm },
+                { TelemetryConstants.KeySizeTag, keySize }
+            };
+
+            TelemetryDataRecorder.IncrementSignatureValidationCounter(tagList);
+        }
+
+        /// <summary>
+        /// Increments the token decryption counter with encryption algorithm, scheme, and key size details.
+        /// </summary>
+        /// <param name="isSuccess">Whether the token decryption succeeded.</param>
+        /// <param name="encryptionAlgorithm">The key encryption algorithm used (e.g., RSA-OAEP, A256KW).</param>
+        /// <param name="encryptionScheme">The content encryption scheme used (e.g., A256GCM, A128CBC-HS256).</param>
+        /// <param name="keySize">The size of the key encryption key in bits (e.g., 2048, 3072, 4096 for RSA, 128, 256 for AES).</param>
+        public static void IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, int keySize)
+        {
+            var tagList = new TagList()
+            {
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, isSuccess ? TelemetryConstants.SuccessValue : TelemetryConstants.FailureValue },
+                { TelemetryConstants.AlgorithmTag, encryptionAlgorithm },
+                { TelemetryConstants.EncryptionSchemeTag, encryptionScheme },
+                { TelemetryConstants.KeySizeTag, keySize }
+            };
+
+            TelemetryDataRecorder.IncrementTokenDecryptionCounter(tagList);
+        }
+
         public void LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, TimeSpan operationDuration)
         {
             var tagList = new TagList()
