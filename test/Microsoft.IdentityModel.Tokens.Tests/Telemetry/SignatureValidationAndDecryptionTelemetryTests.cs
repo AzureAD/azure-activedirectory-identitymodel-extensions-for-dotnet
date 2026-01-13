@@ -15,6 +15,11 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Telemetry.Tests;
 
+/// <summary>
+/// Tests for JWT signature validation and decryption telemetry.
+/// These tests must run sequentially to avoid telemetry cross-contamination from parallel test execution.
+/// </summary>
+[Collection("Telemetry Tests")]
 public class SignatureValidationAndDecryptionTelemetryTests
 {
     [Fact]

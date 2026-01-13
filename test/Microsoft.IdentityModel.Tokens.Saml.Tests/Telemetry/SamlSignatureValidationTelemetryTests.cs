@@ -12,6 +12,11 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests.Telemetry;
 
+/// <summary>
+/// Tests for SAML signature validation telemetry.
+/// These tests must run sequentially to avoid telemetry cross-contamination from parallel test execution.
+/// </summary>
+[Collection("Telemetry Tests")]
 public class SamlSignatureValidationTelemetryTests
 {
     [Fact]
