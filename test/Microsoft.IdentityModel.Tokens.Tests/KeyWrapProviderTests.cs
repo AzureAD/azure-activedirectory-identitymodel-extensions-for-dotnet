@@ -341,6 +341,141 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 WrappedKey = wrappedKey
             });
         }
+
+#if NET10_0_OR_GREATER
+        /// <summary>
+        /// Test to verify .NET 10 native AES Key Wrap APIs produce results compatible with the manual implementation.
+        /// This ensures backward compatibility when using EncryptKeyWrapPadded/DecryptKeyWrapPadded (RFC 5649)
+        /// for inputs that are multiples of 8 bytes (RFC 3394 compatible).
+        /// </summary>
+        [Theory, MemberData(nameof(Net10BackwardCompatibilityTheoryData), DisableDiscoveryEnumeration = true)]
+        public void Net10_WrapUnwrap_BackwardCompatibility(KeyWrapTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.Net10_WrapUnwrap_BackwardCompatibility", theoryData);
+            try
+            {
+                // Create a provider using .NET 10 native implementation
+                var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm);
+                
+                // Wrap the key
+                var wrappedKey = provider.WrapKey(theoryData.KeyToWrap);
+                
+                // Verify wrapped key is not null and has expected length
+                Assert.NotNull(wrappedKey);
+                Assert.True(wrappedKey.Length > theoryData.KeyToWrap.Length, "Wrapped key should be longer than original");
+                Assert.True(wrappedKey.Length % 8 == 0, "Wrapped key length should be a multiple of 8 bytes");
+                
+                // Unwrap the key
+                byte[] unwrappedKey = provider.UnwrapKey(wrappedKey);
+                
+                // Verify unwrapped key matches original
+                Assert.True(Utility.AreEqual(unwrappedKey, theoryData.KeyToWrap), "Unwrapped key should match original key");
+                
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<KeyWrapTheoryData> Net10BackwardCompatibilityTheoryData()
+        {
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
+
+            // Test with various key sizes and data sizes (all multiples of 8 bytes for RFC 3394 compatibility)
+            AddNet10CompatibilityTest("Aes128_16ByteData", SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey128, 16, theoryData);
+            AddNet10CompatibilityTest("Aes128_24ByteData", SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey128, 24, theoryData);
+            AddNet10CompatibilityTest("Aes128_32ByteData", SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey128, 32, theoryData);
+            AddNet10CompatibilityTest("Aes256_16ByteData", SecurityAlgorithms.Aes256KW, Default.SymmetricEncryptionKey256, 16, theoryData);
+            AddNet10CompatibilityTest("Aes256_24ByteData", SecurityAlgorithms.Aes256KW, Default.SymmetricEncryptionKey256, 24, theoryData);
+            AddNet10CompatibilityTest("Aes256_32ByteData", SecurityAlgorithms.Aes256KW, Default.SymmetricEncryptionKey256, 32, theoryData);
+            AddNet10CompatibilityTest("Aes256_40ByteData", SecurityAlgorithms.Aes256KW, Default.SymmetricEncryptionKey256, 40, theoryData);
+
+            return theoryData;
+        }
+
+        private static void AddNet10CompatibilityTest(string testId, string algorithm, SecurityKey key, int dataSize, TheoryData<KeyWrapTheoryData> theoryData)
+        {
+            byte[] keyToWrap = new byte[dataSize];
+            new Random(42).NextBytes(keyToWrap); // Use fixed seed for reproducibility
+
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = keyToWrap,
+                WrapAlgorithm = algorithm,
+                WrapKey = key,
+                TestId = $"Net10_BackwardCompatibility_{testId}"
+            });
+        }
+
+        /// <summary>
+        /// Test to verify that wrapped keys from .NET 10 can be unwrapped correctly.
+        /// This validates the native EncryptKeyWrapPadded/DecryptKeyWrapPadded implementation.
+        /// </summary>
+        [Theory, MemberData(nameof(Net10RoundTripTheoryData), DisableDiscoveryEnumeration = true)]
+        public void Net10_WrapUnwrap_RoundTrip(KeyWrapTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.Net10_WrapUnwrap_RoundTrip", theoryData);
+            try
+            {
+                var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm);
+                
+                // Perform multiple round trips to ensure consistency
+                for (int i = 0; i < 3; i++)
+                {
+                    var wrappedKey = provider.WrapKey(theoryData.KeyToWrap);
+                    byte[] unwrappedKey = provider.UnwrapKey(wrappedKey);
+                    
+                    Assert.True(Utility.AreEqual(unwrappedKey, theoryData.KeyToWrap), 
+                        $"Round trip {i + 1}: Unwrapped key should match original key");
+                }
+                
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<KeyWrapTheoryData> Net10RoundTripTheoryData()
+        {
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
+
+            // Test different algorithms and key sizes
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes128KW,
+                WrapKey = Default.SymmetricEncryptionKey128,
+                TestId = "Net10_RoundTrip_Aes128KW"
+            });
+
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes256KW,
+                WrapKey = Default.SymmetricEncryptionKey256,
+                TestId = "Net10_RoundTrip_Aes256KW"
+            });
+
+            // Test with JsonWebKey
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes128KW,
+                WrapKey = KeyingMaterial.JsonWebKeySymmetric128,
+                TestId = "Net10_RoundTrip_JsonWebKey_Aes128KW"
+            });
+
+            return theoryData;
+        }
+#endif
     }
 }
 

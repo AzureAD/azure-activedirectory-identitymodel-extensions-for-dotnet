@@ -166,17 +166,21 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 // Create the AES provider
                 SymmetricAlgorithm symmetricAlgorithm = Aes.Create();
+                symmetricAlgorithm.KeySize = keyBytes.Length * 8;
+                symmetricAlgorithm.Key = keyBytes;
+
 #if !NET10_0_OR_GREATER
                 // For .NET 9 and below, we manually implement AES-KW using ECB mode
+                // On .NET 10+, we use native EncryptKeyWrapPadded/DecryptKeyWrapPadded which implement RFC 5649
+                // RFC 5649 is backward compatible with RFC 3394 when input is a multiple of 8 bytes
                 symmetricAlgorithm.Mode = CipherMode.ECB; // CodeQL [SM02199] Approved necessary usage of AES-ECB for implementing AES-KW 
                 symmetricAlgorithm.Padding = PaddingMode.None;
+
                 // Set the AES IV to Zeroes
                 var aesIv = new byte[symmetricAlgorithm.BlockSize >> 3];
                 Utility.Zero(aesIv);
                 symmetricAlgorithm.IV = aesIv;
 #endif
-                symmetricAlgorithm.KeySize = keyBytes.Length * 8;
-                symmetricAlgorithm.Key = keyBytes;
 
                 return symmetricAlgorithm;
             }
@@ -230,7 +234,8 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] UnwrapKeyPrivate(byte[] inputBuffer, int inputOffset, int inputCount)
         {
 #if NET10_0_OR_GREATER
-            // Use native AES Key Unwrap (RFC 3394) available in .NET 10+
+            // Use native AES Key Unwrap (RFC 5649) available in .NET 10+
+            // RFC 5649 is backward compatible with RFC 3394 when input is a multiple of 8 bytes
             byte[] wrappedKey;
             if (inputOffset == 0 && inputCount == inputBuffer.Length)
             {
@@ -242,7 +247,7 @@ namespace Microsoft.IdentityModel.Tokens
                 Array.Copy(inputBuffer, inputOffset, wrappedKey, 0, inputCount);
             }
 
-            return _symmetricAlgorithm.Value.UnwrapKey(wrappedKey);
+            return ((Aes)_symmetricAlgorithm.Value).DecryptKeyWrapPadded(wrappedKey);
 #else
             /*
                 1) Initialize variables.
@@ -401,7 +406,8 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] WrapKeyPrivate(byte[] inputBuffer, int inputOffset, int inputCount)
         {
 #if NET10_0_OR_GREATER
-            // Use native AES Key Wrap (RFC 3394) available in .NET 10+
+            // Use native AES Key Wrap (RFC 5649) available in .NET 10+
+            // RFC 5649 is backward compatible with RFC 3394 when input is a multiple of 8 bytes
             byte[] keyToWrap;
             if (inputOffset == 0 && inputCount == inputBuffer.Length)
             {
@@ -413,7 +419,7 @@ namespace Microsoft.IdentityModel.Tokens
                 Array.Copy(inputBuffer, inputOffset, keyToWrap, 0, inputCount);
             }
 
-            return _symmetricAlgorithm.Value.WrapKey(keyToWrap);
+            return ((Aes)_symmetricAlgorithm.Value).EncryptKeyWrapPadded(keyToWrap);
 #else
             /*
                1) Initialize variables.
