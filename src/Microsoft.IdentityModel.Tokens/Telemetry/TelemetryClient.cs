@@ -22,12 +22,33 @@ namespace Microsoft.IdentityModel.Telemetry
             AppContextSwitches.UpdateConfigAsBlocking.ToString()
         );
 
+        /// <summary>
+        /// Extracts the domain name from a metadata address for telemetry purposes.
+        /// Returns the full address if domain extraction fails or if the UseFullMetadataAddressForTelemetry switch is enabled.
+        /// In error cases, always returns the full address for better debugging.
+        /// </summary>
+        /// <param name="metadataAddress">The full metadata address</param>
+        /// <param name="isSuccessCase">True if this is a successful operation, false for error cases</param>
+        /// <returns>Domain name for success cases (when switch is disabled), full address otherwise</returns>
+        internal static string GetMetadataAddressForTelemetry(string metadataAddress, bool isSuccessCase = true)
+        {
+            // Always use full address for error cases or when the switch is enabled
+            if (!isSuccessCase || AppContextSwitches.UseFullMetadataAddressForTelemetry || string.IsNullOrEmpty(metadataAddress))
+                return metadataAddress;
+
+
+            if (Uri.TryCreate(metadataAddress, UriKind.Absolute, out Uri result))
+                return result.Host;
+
+            return metadataAddress;
+        }
+
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
-                { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.MetadataAddressTag, GetMetadataAddressForTelemetry(metadataAddress, isSuccessCase: true) },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
                 { TelemetryConstants.ConfigurationSourceTag, configurationSource },
                 _blockingTagValue
@@ -41,7 +62,7 @@ namespace Microsoft.IdentityModel.Telemetry
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
-                { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.MetadataAddressTag, GetMetadataAddressForTelemetry(metadataAddress, isSuccessCase: false) },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
                 { TelemetryConstants.ConfigurationSourceTag, configurationSource },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
@@ -56,7 +77,7 @@ namespace Microsoft.IdentityModel.Telemetry
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
-                { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.MetadataAddressTag, GetMetadataAddressForTelemetry(metadataAddress, isSuccessCase: true) },
                 { TelemetryConstants.ConfigurationSourceTag, configurationSource },
             };
 
@@ -69,7 +90,7 @@ namespace Microsoft.IdentityModel.Telemetry
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
-                { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.MetadataAddressTag, GetMetadataAddressForTelemetry(metadataAddress, isSuccessCase: false) },
                 { TelemetryConstants.ConfigurationSourceTag, configurationSource },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
                 _blockingTagValue
@@ -87,7 +108,7 @@ namespace Microsoft.IdentityModel.Telemetry
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
-                { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.MetadataAddressTag, GetMetadataAddressForTelemetry(metadataAddress, isSuccessCase: false) },
                 { TelemetryConstants.ConfigurationSourceTag, configurationSource },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
                 _blockingTagValue
