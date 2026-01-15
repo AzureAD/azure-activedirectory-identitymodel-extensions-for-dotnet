@@ -58,12 +58,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ConvertX509SecurityKeyToJsonWebKeyTheoryData", theoryData);
             try
             {
-                var convertedKey = JsonWebKeyConverter.ConvertFromX509SecurityKey(theoryData.SecurityKey as X509SecurityKey, theoryData.RepresentAsRsaKey);
+                var convertedKey = JsonWebKeyConverter.ConvertFromX509SecurityKey(theoryData.SecurityKey as X509SecurityKey, theoryData.ExtractKeyMaterial);
 
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(convertedKey, theoryData.JsonWebKey, context);
 
-                if (!theoryData.RepresentAsRsaKey && convertedKey.ConvertedSecurityKey.GetType() != typeof(X509SecurityKey))
+                if (!theoryData.ExtractKeyMaterial && convertedKey.ConvertedSecurityKey.GetType() != typeof(X509SecurityKey))
                     context.AddDiff($"convertedKey.ConvertedSecurityKey.GetType() should be {typeof(X509SecurityKey)}.");
             }
             catch (Exception ex)
@@ -174,9 +174,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.DefaultX509Key_2048_With_KeyId,
-                    RepresentAsRsaKey = true,
+                    ExtractKeyMaterial = true,
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_As_RSA_With_KeyId,
-                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048_With_KeyId) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048_With_KeyId) + nameof(JsonWebKeyConverterTheoryData.ExtractKeyMaterial)
                 });
 
                 theoryData.Add(new JsonWebKeyConverterTheoryData
@@ -189,9 +189,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.DefaultX509Key_2048,
-                    RepresentAsRsaKey = true,
+                    ExtractKeyMaterial = true,
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_As_RSA,
-                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048) + nameof(JsonWebKeyConverterTheoryData.ExtractKeyMaterial)
                 });
 
                 theoryData.Add(new JsonWebKeyConverterTheoryData
@@ -204,9 +204,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.DefaultX509Key_2048_Public,
-                    RepresentAsRsaKey = true,
+                    ExtractKeyMaterial = true,
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public_As_RSA,
-                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public) + nameof(JsonWebKeyConverterTheoryData.ExtractKeyMaterial)
                 });
 #if NET472 || NET
                 theoryData.Add(new JsonWebKeyConverterTheoryData
@@ -226,17 +226,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.DefaultX509Key_256ECDSA,
-                    RepresentAsRsaKey = true,
+                    ExtractKeyMaterial = true,
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_256ECDSA_As_ECDSA,
-                    TestId = nameof(KeyingMaterial.DefaultX509Key_256ECDSA_With_KeyId) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_256ECDSA_With_KeyId) + nameof(JsonWebKeyConverterTheoryData.ExtractKeyMaterial)
                 });
 
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.DefaultX509Key_256ECDSA_With_KeyId,
-                    RepresentAsRsaKey = true,
+                    ExtractKeyMaterial = true,
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_256ECDSA_As_ECDSA_With_KeyId,
-                    TestId = nameof(KeyingMaterial.DefaultX509Key_256ECDSA) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_256ECDSA) + nameof(JsonWebKeyConverterTheoryData.ExtractKeyMaterial)
                 });
 #endif
                 return theoryData;
@@ -258,7 +258,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         // related to ConvertX509SecurityKeyToJsonWebKeyTheoryData
-        public bool RepresentAsRsaKey { get; set; }
+        public bool ExtractKeyMaterial { get; set; }
     }
 }
 
