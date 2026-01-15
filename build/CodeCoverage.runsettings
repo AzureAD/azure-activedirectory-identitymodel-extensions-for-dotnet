@@ -7,9 +7,8 @@
 <RunSettings>
     <DataCollectionRunSettings>
         <DataCollectors>
-            <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0">
+            <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0" assemblyQualifiedName="Microsoft.VisualStudio.Coverage.DynamicCoverageDataCollector, Microsoft.VisualStudio.TraceCollector, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
                 <Configuration>
-                    <Format>Cobertura</Format>
                     <CodeCoverage>
 
                         <!--
@@ -40,17 +39,7 @@ Included items must then not match any entries in the exclude list to remain inc
                                 <ModulePath>.*\microsoft.identitymodel.xml.dll</ModulePath>
                                 <ModulePath>.*\system.identitymodel.tokens.jwt.dll</ModulePath>
                             </Include>
-                            <Exclude>
-                                <ModulePath>.*\\test\\.*</ModulePath>
-                                <ModulePath>.*Test\.dll</ModulePath>
-                            </Exclude>
                         </ModulePaths>
-                        <Attributes>
-                            <Exclude>
-                                <Attribute>^System\.Diagnostics\.CodeAnalysis\.ExcludeFromCodeCoverageAttribute$</Attribute>
-                                <Attribute>^System\.CodeDom\.Compiler\.GeneratedCodeAttribute$</Attribute>
-                            </Exclude>
-                        </Attributes>
                         <Sources>
                             <Exclude>
                                 <Source>.*\.g\.cs$</Source>
