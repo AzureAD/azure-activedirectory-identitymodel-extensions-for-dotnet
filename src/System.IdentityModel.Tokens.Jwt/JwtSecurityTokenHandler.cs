@@ -1304,8 +1304,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             finally
             {
-                if (cryptoProviderFactory is not null && signatureProvider is not null)
-                    cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
         }
 
@@ -1849,7 +1848,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg))
             {
                 // For direct key use, the key itself is the CEK, so we pair each key with its own size
-                var directKeysWithSizes = new List<(SecurityKey, int)>();
+                var directKeysWithSizes = new List<(SecurityKey, int)>(keys is ICollection<SecurityKey> localKeyCollection ? localKeyCollection.Count : 0);
                 foreach (var key in keys)
                 {
                     if (key != null)
@@ -1858,7 +1857,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 return directKeysWithSizes;
             }
 
-            var keysWithSizes = new List<(SecurityKey Key, int WrappingKeySize)>();
+            var keysWithSizes = new List<(SecurityKey Key, int WrappingKeySize)>(keys is ICollection<SecurityKey> keyCollection ? keyCollection.Count : 0);
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
@@ -1897,9 +1896,9 @@ namespace System.IdentityModel.Tokens.Jwt
                         SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
-                        var cek = new SymmetricSecurityKey(unwrappedKey);
+                        var contentEncryptionKey = new SymmetricSecurityKey(unwrappedKey);
                         // Pair this CEK with its original ECDSA wrapping key size for telemetry
-                        keysWithSizes.Add((cek, key.KeySize));
+                        keysWithSizes.Add((contentEncryptionKey, key.KeySize));
                     }
                     else if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
 #else
@@ -1908,9 +1907,9 @@ namespace System.IdentityModel.Tokens.Jwt
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Header.Alg);
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
-                        var cek = new SymmetricSecurityKey(unwrappedKey);
+                        var contentEncryptionKey = new SymmetricSecurityKey(unwrappedKey);
                         // Pair this CEK with its original wrapping key size for telemetry (e.g., RSA 2048/3072/4096)
-                        keysWithSizes.Add((cek, key.KeySize));
+                        keysWithSizes.Add((contentEncryptionKey, key.KeySize));
                     }
                 }
 #pragma warning disable CA1031 // Do not catch general exception types

@@ -1334,7 +1334,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (keys == null)
                     return null;
 
-                var directKeysWithSizes = new List<(SecurityKey, int)>(keys is ICollection<SecurityKey> keyCollection ? keyCollection.Count : 0);
+                var directKeysWithSizes = new List<(SecurityKey, int)>(keys is ICollection<SecurityKey> localKeyCollection ? localKeyCollection.Count : 0);
                 foreach (var key in keys)
                 {
                     if (key != null)
@@ -1346,7 +1346,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (keys is null)
                 return null; // Cannot iterate over null.
 
-            var keysWithSizes = new List<(SecurityKey Key, int WrappingKeySize)>();
+            var keysWithSizes = new List<(SecurityKey Key, int WrappingKeySize)>(keys is ICollection<SecurityKey> keyCollection ? keyCollection.Count : 0);
 
             // keep track of exceptions thrown, keys that were tried
             StringBuilder exceptionStrings = null;
@@ -1386,9 +1386,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
-                        var cek = new SymmetricSecurityKey(unwrappedKey);
+                        var contentEncryptionKey = new SymmetricSecurityKey(unwrappedKey);
                         // Pair this CEK with its original ECDSA wrapping key size for telemetry
-                        keysWithSizes.Add((cek, key.KeySize));
+                        keysWithSizes.Add((contentEncryptionKey, key.KeySize));
                     }
                     else if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
 #else
@@ -1397,9 +1397,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
                         var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
-                        var cek = new SymmetricSecurityKey(unwrappedKey);
+                        var contentEncryptionKey = new SymmetricSecurityKey(unwrappedKey);
                         // Pair this CEK with its original wrapping key size for telemetry (e.g., RSA 2048/3072/4096)
-                        keysWithSizes.Add((cek, key.KeySize));
+                        keysWithSizes.Add((contentEncryptionKey, key.KeySize));
                     }
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
