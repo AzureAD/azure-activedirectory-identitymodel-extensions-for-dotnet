@@ -60,7 +60,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string canonicalString,
             ValidationParameters validationParameters,
             BaseConfiguration configuration,
-            CallContext callContext)
+            CallContext callContext,
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
             if (securityToken is null)
             {
@@ -142,7 +143,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         signature,
                         validationParameters,
                         key,
-                        callContext);
+                        callContext,
+                        telemetryClient);
 
                 }
                 else if (validationParameters.TryAllSigningKeys)
@@ -154,7 +156,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         canonicalString,
                         validationParameters,
                         configuration,
-                        callContext);
+                        callContext,
+                        telemetryClient);
             }
 
             if (signature.KeyInfo == null)
@@ -189,8 +192,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ValidationParameters validationParameters,
             SecurityKey key,
 #pragma warning disable CA1801 // Review unused parameters
-            CallContext callContext)
+            CallContext callContext,
 #pragma warning restore CA1801 // Review unused parameters
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
             // TODO - this is not an AlgorithmValidationFailure, but a CryptoProviderFactory failure.
             // TODO we need tests across token handlers
@@ -220,7 +224,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 if (!signatureProvider.Verify(canonicalBytes, signatureBytes))
                 {
-                    Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                    telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: false,
                         signature.SignedInfo.SignatureMethod,
                         key.KeySize);
@@ -236,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 var result = signature.SignedInfo.Verify(cryptoProviderFactory, callContext);
                 if (result == null)
                 {
-                    Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                    telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: true,
                         signature.SignedInfo.SignatureMethod,
                         key.KeySize);
@@ -245,7 +249,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     return key;
                 }
 
-                Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     signature.SignedInfo.SignatureMethod,
                     key.KeySize);
@@ -256,7 +260,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     signature.SignedInfo.SignatureMethod,
                     key.KeySize);
@@ -284,7 +288,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string canonicalString,
             ValidationParameters validationParameters,
             BaseConfiguration configuration,
-            CallContext callContext)
+            CallContext callContext,
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
             bool keysTried = false;
             bool kidExists = !string.IsNullOrEmpty(signature?.KeyInfo?.Id);
@@ -307,7 +312,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     signature,
                     validationParameters,
                     key,
-                    callContext);
+                    callContext,
+                    telemetryClient);
 
                 if (result.Succeeded)
                 {

@@ -19,12 +19,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="decryptionParameters">The decryption parameters container.</param>
         /// <param name="callContext">The call context used for logging.</param>
+        /// <param name="telemetryClient">The telemetry client for recording metrics.</param>
         /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
         internal static ValidationResult<string, ValidationError> DecryptJwtToken(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters,
-            CallContext callContext)
+            CallContext callContext,
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
             if (validationParameters == null)
                 return ValidationError.NullParameter(
@@ -84,7 +86,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         decryptionSucceeded = true;
 
                         // Record telemetry with wrapping key size (no lookup needed - it's right here!)
-                        Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
+                        telemetryClient.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
                         break;
                     }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -94,7 +96,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
 
                         // Record telemetry for failed decryption with wrapping key size
-                        Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
+                        telemetryClient.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, wrappingKeySize);
                     }
 
                     if (key != null)
@@ -140,7 +142,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         decryptionSucceeded = true;
 
                         // Legacy telemetry: use key size directly (may be CEK size)
-                        Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, key.KeySize);
+                        telemetryClient.IncrementTokenDecryptionCounter(true, jsonWebToken.Alg, jsonWebToken.Enc, key.KeySize);
                         break;
                     }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -150,7 +152,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
 
                         // Legacy telemetry for failed decryption
-                        Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, key?.KeySize ?? 0);
+                        telemetryClient.IncrementTokenDecryptionCounter(false, jsonWebToken.Alg, jsonWebToken.Enc, key?.KeySize ?? 0);
                     }
 
                     if (key != null)

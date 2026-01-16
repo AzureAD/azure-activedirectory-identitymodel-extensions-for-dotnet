@@ -397,7 +397,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, keys);
 
-            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters);
+            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters, _telemetryClient);
         }
 
         private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JsonWebToken jwtToken, IList<(SecurityKey Key, int WrappingKeySize)> keysWithSizes)

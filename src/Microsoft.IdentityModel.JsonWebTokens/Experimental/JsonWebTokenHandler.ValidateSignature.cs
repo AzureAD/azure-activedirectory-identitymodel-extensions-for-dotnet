@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -24,7 +23,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="configuration">The optional configuration used for validation.</param>
         /// <param name="callContext">The context in which the method is called.</param>
         /// <returns>A <see cref="ValidationResult{SecurityKey, ValidationError}"/> with the <see cref="SecurityKey"/> that signed the tokenif valid or a <see cref="ValidationError"/>.</returns>
-        internal static ValidationResult<SecurityKey, ValidationError> ValidateSignature(
+        internal ValidationResult<SecurityKey, ValidationError> ValidateSignature(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -102,7 +101,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (validationParameters.TryAllSigningKeys)
                 return ValidateSignatureUsingAllKeys(jwtToken, validationParameters, configuration, callContext);
 
-            TelemetryClient.IncrementSignatureValidationCounter(
+            _telemetryClient.IncrementSignatureValidationCounter(
                 isSuccess: false,
                 jwtToken.Alg,
                 0);
@@ -132,7 +131,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureUsingAllKeys(
+        private ValidationResult<SecurityKey, ValidationError> ValidateSignatureUsingAllKeys(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -224,7 +223,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
+        private ValidationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             SecurityKey key,
@@ -235,7 +234,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CryptoProviderFactory cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Alg, key))
             {
-                TelemetryClient.IncrementSignatureValidationCounter(
+                _telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     jsonWebToken.Alg,
                     key.KeySize);
@@ -254,7 +253,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (signatureProvider == null)
                 {
-                    TelemetryClient.IncrementSignatureValidationCounter(
+                    _telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: false,
                         jsonWebToken.Alg,
                         key.KeySize);
@@ -280,7 +279,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 if (valid)
                 {
-                    TelemetryClient.IncrementSignatureValidationCounter(
+                    _telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: true,
                         jsonWebToken.Alg,
                         key.KeySize);
@@ -290,7 +289,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 else
                 {
-                    TelemetryClient.IncrementSignatureValidationCounter(
+                    _telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: false,
                         jsonWebToken.Alg,
                         key.KeySize);
@@ -307,7 +306,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                TelemetryClient.IncrementSignatureValidationCounter(
+                _telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     jsonWebToken.Alg,
                     key.KeySize);

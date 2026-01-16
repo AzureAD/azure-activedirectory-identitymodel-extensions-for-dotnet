@@ -253,6 +253,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             TokenValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters)
         {
+            return DecryptJwtToken(
+                securityToken,
+                validationParameters,
+                decryptionParameters,
+                Microsoft.IdentityModel.Telemetry.NullTelemetryClient.Instance);
+        }
+
+        /// <summary>
+        /// Decrypts a JWT token.
+        /// </summary>
+        /// <param name="securityToken">The JWT token, could be a JwtSecurityToken or JsonWebToken.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="decryptionParameters">The decryption parameters container.</param>
+        /// <param name="telemetryClient">The telemetry client for recording metrics.</param>
+        /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
+        internal static string DecryptJwtToken(
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters,
+            JwtTokenDecryptionParameters decryptionParameters,
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
+        {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
@@ -280,6 +301,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         securityToken,
                         validationParameters,
                         decryptionParameters,
+                        telemetryClient,
                         ref algorithmNotSupportedByCryptoProvider,
                         ref decryptedTokenBytes,
                         ref zipAlgorithm,
@@ -308,6 +330,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             securityToken,
                             validationParameters,
                             decryptionParameters,
+                            telemetryClient,
                             ref algorithmNotSupportedByCryptoProvider,
                             ref decryptedTokenBytes,
                             ref zipAlgorithm,
@@ -332,6 +355,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             securityToken,
                             validationParameters,
                             decryptionParameters,
+                            telemetryClient,
                             ref algorithmNotSupportedByCryptoProvider,
                             ref decryptedTokenBytes,
                             ref zipAlgorithm,
@@ -369,6 +393,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters,
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient,
             ref bool algorithmNotSupportedByCryptoProvider,
             ref byte[] decryptedTokenBytes,
             ref string zipAlgorithm,
@@ -411,7 +436,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 zipAlgorithm = decryptionParameters.Zip;
 
                 // Record telemetry for successful decryption
-                Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(true, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
+                telemetryClient.IncrementTokenDecryptionCounter(true, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
                 return true;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -421,7 +446,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
 
                 // Record telemetry for failed decryption
-                Telemetry.TelemetryClient.IncrementTokenDecryptionCounter(false, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
+                telemetryClient.IncrementTokenDecryptionCounter(false, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
             }
 
             if (key != null)

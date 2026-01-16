@@ -30,6 +30,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private SamlSerializer _serializer = new SamlSerializer();
 
+        internal Microsoft.IdentityModel.Telemetry.ITelemetryClient _telemetryClient = new Microsoft.IdentityModel.Telemetry.TelemetryClient();
+
         #region fields
         /// <summary>
         /// Gets a value indicating whether this handler supports validation of tokens
@@ -1092,7 +1094,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
 
-                        Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                        _telemetryClient.IncrementSignatureValidationCounter(
                             isSuccess: true,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
                             key.KeySize);
@@ -1105,7 +1107,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     }
                     catch (Exception ex)
                     {
-                        Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                        _telemetryClient.IncrementSignatureValidationCounter(
                             isSuccess: false,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
                             key.KeySize);

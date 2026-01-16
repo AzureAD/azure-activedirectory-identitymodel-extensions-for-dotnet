@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -27,6 +28,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId,
         };
+
+        private ITelemetryClient telemetryClient = new TelemetryClient();
 
         [Fact]
         public void LogSecurityArtifactTest()
@@ -231,7 +234,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 JwtTokenUtilities.DecryptJwtToken(
                     securityToken: null,
                     validationParameters: validationParameters,
-                    decryptionParameters: null));
+                    decryptionParameters: null,
+                    telemetryClient: telemetryClient));
 
             Assert.Equal(expectedExceptionParamName, exception.ParamName);
         }
@@ -249,7 +253,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 JwtTokenUtilities.DecryptJwtToken(
                     securityToken: null,
                     validationParameters: validationParameters,
-                    decryptionParameters: decryptionParameters));
+                    decryptionParameters: decryptionParameters,
+                    telemetryClient: telemetryClient));
 
             Assert.Equal(expectedExceptionParamName, exception.ParamName);
         }
@@ -299,7 +304,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 JwtTokenUtilities.DecryptJwtToken(
                     securityToken: null,
                     validationParameters: validationParameters,
-                    decryptionParameters: decryptionParameters));
+                    decryptionParameters: decryptionParameters,
+                    telemetryClient: telemetryClient));
 
             Assert.Contains(expectedWarning, listener.TraceBuffer);
             Assert.Contains(expectedExceptionMessage, listener.TraceBuffer);
@@ -349,7 +355,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             // Act & Assert
             var exception = Assert.Throws<SecurityTokenDecryptionFailedException>(() =>
-                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters));
+                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters, telemetryClient));
 
             Assert.Contains(expectedWarning, listener.TraceBuffer);
             Assert.Contains(expectedExceptionMessage, listener.TraceBuffer);
@@ -387,7 +393,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             // Act & Assert
             var exception = Assert.Throws<SecurityTokenDecryptionFailedException>(() =>
-                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters));
+                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters, telemetryClient));
 
             Assert.Contains(expectedExceptionMessage, listener.TraceBuffer);
             Assert.Equal(expectedExceptionMessage, exception.Message);
@@ -448,7 +454,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             // Act & Assert
             var exception = Assert.Throws<SecurityTokenDecryptionFailedException>(() =>
-                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters));
+                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters, telemetryClient));
 
             Assert.Contains(partialExceptionMessage, listener.TraceBuffer);
             Assert.Contains(partialExceptionMessage, exception.Message);
@@ -497,7 +503,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             // Act & Assert
             var exception = Assert.Throws<SecurityTokenDecompressionFailedException>(() =>
-                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters));
+                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters, telemetryClient));
 
             Assert.Contains(exceptionMessage, listener.TraceBuffer);
             Assert.Contains(exceptionMessage, exception.Message);

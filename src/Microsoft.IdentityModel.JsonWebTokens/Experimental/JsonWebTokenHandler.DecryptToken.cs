@@ -73,7 +73,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 jwtToken,
                 validationParameters,
                 decryptionParameters,
-                callContext);
+                callContext,
+                _telemetryClient);
         }
 
         internal (IList<(SecurityKey Key, int WrappingKeySize)>? KeysWithSizes, ValidationError?) GetContentEncryptionKeys(

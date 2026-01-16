@@ -14,8 +14,8 @@ using System.Xml;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Telemetry;
+using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -1247,8 +1247,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="algorithm">Crypto algorithm to use.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">Priority will be given to <see cref="TokenValidationParameters.CryptoProviderFactory"/> over <see cref="SecurityKey.CryptoProviderFactory"/>.</param>
+        /// <param name="telemetryClient">The telemetry client for recording metrics.</param>
         /// <returns>'true' if signature is valid.</returns>
-        private static bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        private static bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters, Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
             CryptoProviderFactory cryptoProviderFactory = null;
             SignatureProvider signatureProvider = null;
@@ -1262,7 +1263,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception)
             {
-                Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
                     key.KeySize);
@@ -1271,7 +1272,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (signatureProvider == null)
             {
-                Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
                     key.KeySize);
@@ -1285,7 +1286,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 bool isValid = signatureProvider.Verify(encodedBytes, signature);
 
-                Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: isValid,
                     algorithm,
                     key.KeySize);
@@ -1294,7 +1295,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch
             {
-                Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(
+                telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
                     key.KeySize);
@@ -1394,7 +1395,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, jwtToken, validationParameters))
+                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, jwtToken, validationParameters, TelemetryClient))
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                                 LogHelper.LogInformation(TokenLogMessages.IDX10242, jwtToken);
@@ -1804,7 +1805,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, keys);
 
-            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters);
+            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters, TelemetryClient);
         }
 
         private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JwtSecurityToken jwtToken, IList<(SecurityKey Key, int WrappingKeySize)> keysWithSizes)

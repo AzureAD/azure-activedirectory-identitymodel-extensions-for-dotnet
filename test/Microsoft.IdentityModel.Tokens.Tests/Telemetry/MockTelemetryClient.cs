@@ -65,6 +65,16 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
+        void ITelemetryClient.IncrementSignatureValidationCounter(bool isSuccess, string algorithm, int keySize)
+        {
+            // Stub implementation for testing
+        }
+
+        void ITelemetryClient.IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, int keySize)
+        {
+            // Stub implementation for testing
+        }
+
         void ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");
         void ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, Exception exception) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");
         void ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");
