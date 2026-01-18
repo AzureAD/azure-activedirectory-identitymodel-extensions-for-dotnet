@@ -121,6 +121,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Determines if the <see cref="ReadOnlyMemory{T}"/> is a well formed JSON Web Token (JWT). See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/>.
+        /// </summary>
+        /// <param name="token"><see cref="ReadOnlyMemory{T}"/> that should represent a valid JWT.</param>
+        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching:
+        /// <para>JWS: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE: (dir): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE: (wrappedkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
+        /// </remarks>
+        /// <returns>
+        /// <para><see langword="false"/> if the token is null or whitespace.</para>
+        /// <para><see langword="false"/> if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
+        /// <para><see langword="true"/> if the token is in JSON Compact Serialization format.</para>
+        /// </returns>
+        public virtual bool CanReadToken(ReadOnlyMemory<char> token)
+        {
+            return JwtTokenUtilities.CanReadToken(token, MaximumTokenSizeInBytes);
+        }
+
+        /// <summary>
         /// Determines if the string is a well formed JSON Web Token (JWT). See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/>.
         /// </summary>
         /// <param name="token">String that should represent a valid JWT.</param>
@@ -139,6 +158,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrWhiteSpace(token))
                 return false;
 
+#if NET8_0_OR_GREATER
+            return CanReadToken(token.AsMemory());
+#else
             if (token.Length > MaximumTokenSizeInBytes)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -169,6 +191,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     LogHelper.LogInformation(LogMessages.IDX14107);
                     return false;
             }
+#endif
         }
 
         private static StringComparison GetStringComparisonRuleIf509(SecurityKey securityKey) =>
