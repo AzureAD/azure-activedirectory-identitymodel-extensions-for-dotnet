@@ -68,6 +68,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// describes the authentication context declaration that follows.
         /// [Saml2Core, 2.7.2.2]
         /// </summary>
+        /// <remarks>
+        /// The check for an absolute URI can be disabled by setting <see cref="AppContextSwitches.AllowRelativeUrisInSaml2AuthnContext"/>.
+        /// </remarks>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         /// <exception cref="ArgumentException">if 'value' is not an absolute Uri.</exception>
         public Uri ClassReference
@@ -78,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (value == null)
                     throw LogArgumentNullException(nameof(value));
 
-                if (!value.IsAbsoluteUri)
+                if (!value.IsAbsoluteUri && !AppContextSwitches.AllowRelativeUrisInSaml2AuthnContext)
                     throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, MarkAsNonPII(nameof(ClassReference)), value)));
 
                 _classReference = value;
