@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Telemetry.Tests
 {
@@ -65,12 +66,12 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
-        void ITelemetryClient.IncrementSignatureValidationCounter(bool isSuccess, string algorithm, int keySize)
+        void ITelemetryClient.IncrementSignatureValidationCounter(bool isSuccess, string algorithm, SecurityKey key)
         {
             // Stub implementation for testing
         }
 
-        void ITelemetryClient.IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, int keySize)
+        void ITelemetryClient.IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, SecurityKey key)
         {
             // Stub implementation for testing
         }

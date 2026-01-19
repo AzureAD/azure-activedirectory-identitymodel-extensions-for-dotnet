@@ -1266,7 +1266,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
-                    key.KeySize);
+                    key);
                 throw;
             }
 
@@ -1275,7 +1275,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
-                    key.KeySize);
+                    key);
 
                 throw LogHelper.LogExceptionMessage(
                     new InvalidOperationException(
@@ -1289,7 +1289,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: isValid,
                     algorithm,
-                    key.KeySize);
+                    key);
 
                 return isValid;
             }
@@ -1298,7 +1298,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     algorithm,
-                    key.KeySize);
+                    key);
 
                 throw;
             }
@@ -1800,14 +1800,14 @@ namespace System.IdentityModel.Tokens.Jwt
             if (string.IsNullOrEmpty(jwtToken.Header.Enc))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
 
-            var keys = GetContentEncryptionKeys(jwtToken, validationParameters);
+            var keysWithWrappingKeys = GetContentEncryptionKeys(jwtToken, validationParameters);
 
-            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, keys);
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, keysWithWrappingKeys);
 
             return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters, TelemetryClient);
         }
 
-        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JwtSecurityToken jwtToken, IList<(SecurityKey Key, int WrappingKeySize)> keysWithSizes)
+        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JwtSecurityToken jwtToken, IList<(SecurityKey Key, SecurityKey WrappingKey)> keysWithWrappingKeys)
         {
             return new JwtTokenDecryptionParameters
             {
@@ -1821,11 +1821,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 InitializationVectorBytes = Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
                 MaximumDeflateSize = MaximumTokenSizeInBytes,
                 Zip = jwtToken.Header.Zip,
-                KeysWithWrappingKeySizes = keysWithSizes,
+                KeysWithWrappingKeys = keysWithWrappingKeys,
             };
         }
 
-        internal IList<(SecurityKey Key, int WrappingKeySize)> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
+        internal IList<(SecurityKey Key, SecurityKey WrappingKey)> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             IEnumerable<SecurityKey> keys = null;
 
@@ -1848,16 +1848,16 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg))
             {
                 // For direct key use, the key itself is the CEK, so we pair each key with its own size
-                var directKeysWithSizes = new List<(SecurityKey, int)>(keys is ICollection<SecurityKey> localKeyCollection ? localKeyCollection.Count : 0);
+                var directKeysWithWrappingKeys = new List<(SecurityKey, SecurityKey)>(keys is ICollection<SecurityKey> localKeyCollection ? localKeyCollection.Count : 0);
                 foreach (var key in keys)
                 {
                     if (key != null)
-                        directKeysWithSizes.Add((key, key.KeySize));
+                        directKeysWithWrappingKeys.Add((key, key));
                 }
-                return directKeysWithSizes;
+                return directKeysWithWrappingKeys;
             }
 
-            var keysWithSizes = new List<(SecurityKey Key, int WrappingKeySize)>(keys is ICollection<SecurityKey> keyCollection ? keyCollection.Count : 0);
+            var keysWithWrappingKeys = new List<(SecurityKey Key, SecurityKey WrappingKey)>(keys is ICollection<SecurityKey> keyCollection ? keyCollection.Count : 0);
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
@@ -1898,7 +1898,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
                         var contentEncryptionKey = new SymmetricSecurityKey(unwrappedKey);
                         // Pair this CEK with its original ECDSA wrapping key size for telemetry
-                        keysWithSizes.Add((contentEncryptionKey, key.KeySize));
+                        keysWithWrappingKeys.Add((contentEncryptionKey, key));
                     }
                     else if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
 #else
@@ -1909,7 +1909,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
                         var contentEncryptionKey = new SymmetricSecurityKey(unwrappedKey);
                         // Pair this CEK with its original wrapping key size for telemetry (e.g., RSA 2048/3072/4096)
-                        keysWithSizes.Add((contentEncryptionKey, key.KeySize));
+                        keysWithWrappingKeys.Add((contentEncryptionKey, key));
                     }
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -1921,8 +1921,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 keysAttempted.AppendLine(key.KeyId);
             }
 
-            if (keysWithSizes.Count > 0 || exceptionStrings.Length == 0)
-                return keysWithSizes;
+            if (keysWithWrappingKeys.Count > 0 || exceptionStrings.Length == 0)
+                return keysWithWrappingKeys;
             else
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, LogHelper.MarkAsNonPII(keysAttempted.ToString()), exceptionStrings, jwtToken)));
         }

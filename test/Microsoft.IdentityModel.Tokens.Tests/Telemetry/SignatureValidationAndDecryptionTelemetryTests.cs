@@ -53,10 +53,10 @@ public class SignatureValidationAndDecryptionTelemetryTests
         TelemetryAssertionHelpers.AssertTelemetryRecorded(listener, TelemetryDataRecorder.SignatureValidationCounterName,
             new Dictionary<string, object>
             {
-                    { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                    { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
-                    { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
-                    { TelemetryConstants.KeySizeTag, KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
+                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -93,7 +93,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
-                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningKey256.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -132,7 +132,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
                 { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
-                { TelemetryConstants.KeySizeTag, Default.SymmetricEncryptingCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -171,7 +171,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
                 { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
-                { TelemetryConstants.KeySizeTag, KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-512" }
             });
     }
 
@@ -210,7 +210,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
-                { TelemetryConstants.KeySizeTag, KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -252,7 +252,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
                 { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
-                { TelemetryConstants.KeySizeTag, Default.SymmetricEncryptingCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -291,7 +291,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
-                { TelemetryConstants.KeySizeTag, 0 } // keys don't match, so key size is reported as 0
+                { TelemetryConstants.KeyAlgorithmTag, "NO-KEY" } // keys don't match, so key algorithm is reported as NO-KEY to avoid mixing with unknown key types
             });
     }
 
@@ -333,7 +333,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
                 { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
-                { TelemetryConstants.KeySizeTag, KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-512" }
             });
     }
 
@@ -369,7 +369,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
-                { TelemetryConstants.KeySizeTag, KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -412,7 +412,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
-                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningKey256.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -451,7 +451,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
                 { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
-                { TelemetryConstants.KeySizeTag, Default.SymmetricEncryptingCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -497,7 +497,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricEncryptingCredentials.Alg },
                 { TelemetryConstants.EncryptionSchemeTag, Default.SymmetricEncryptingCredentials.Enc },
-                { TelemetryConstants.KeySizeTag, KeyingMaterial.DefaultSymmetricSecurityKey_512.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-512" }
             });
     }
 
@@ -533,7 +533,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
-                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -578,7 +578,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, encryptingCredentials.Alg },
                 { TelemetryConstants.EncryptionSchemeTag, encryptingCredentials.Enc },
-                { TelemetryConstants.KeySizeTag, 2048 }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -628,7 +628,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaPKCS1 },
                 { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes256CbcHmacSha512 },
-                { TelemetryConstants.KeySizeTag, 3072 }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-3072" }
             });
     }
 
@@ -678,7 +678,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaPKCS1 },
                 { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes256CbcHmacSha512 },
-                { TelemetryConstants.KeySizeTag, 4096 }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-4096" }
             });
     }
 
@@ -723,7 +723,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaOAEP },
                 { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes256CbcHmacSha512 },
-                { TelemetryConstants.KeySizeTag, 2048 }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -771,7 +771,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, JsonWebTokens.JwtConstants.DirectKeyUseAlg },
                 { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes128CbcHmacSha256 },
-                { TelemetryConstants.KeySizeTag, encryptionKey.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -819,7 +819,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.Aes256KW },
                 { TelemetryConstants.EncryptionSchemeTag, SecurityAlgorithms.Aes256CbcHmacSha512 },
-                { TelemetryConstants.KeySizeTag, kekKey.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -861,7 +861,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha256 },
-                { TelemetryConstants.KeySizeTag, ecdsaKey.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "ECDSA-P256" }
             });
     }
 
@@ -902,7 +902,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha384 },
-                { TelemetryConstants.KeySizeTag, ecdsaKey.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "ECDSA-P384" }
             });
     }
 
@@ -943,7 +943,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha512 },
-                { TelemetryConstants.KeySizeTag, ecdsaKey.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "ECDSA-P521" }
             });
     }
 #endif

@@ -330,7 +330,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     jsonWebToken.Alg,
-                    key.KeySize);
+                    key);
 
                 return false;
             }
@@ -363,7 +363,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: isValid,
                     jsonWebToken.Alg,
-                    key.KeySize);
+                    key);
 
                 return isValid;
             }
@@ -372,7 +372,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     jsonWebToken.Alg,
-                    key.KeySize);
+                    key);
 
                 throw;
             }

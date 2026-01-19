@@ -1097,7 +1097,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         _telemetryClient.IncrementSignatureValidationCounter(
                             isSuccess: true,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
-                            key.KeySize);
+                            key);
 
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
                             LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
@@ -1110,7 +1110,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         _telemetryClient.IncrementSignatureValidationCounter(
                             isSuccess: false,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
-                            key.KeySize);
+                            key);
 
                         exceptionStrings.AppendLine(ex.ToString());
                     }

@@ -288,16 +288,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string zipAlgorithm = null;
 
             // Use optimized path with wrapping key sizes if available
-            if (decryptionParameters.KeysWithWrappingKeySizes != null)
+            if (decryptionParameters.KeysWithWrappingKeys != null)
             {
-                int count = decryptionParameters.KeysWithWrappingKeySizes.Count;
+                int count = decryptionParameters.KeysWithWrappingKeys.Count;
                 for (int i = 0; i < count; i++)
                 {
-                    var (key, keySize) = decryptionParameters.KeysWithWrappingKeySizes[i];
+                    var (key, wrappingKey) = decryptionParameters.KeysWithWrappingKeys[i];
 
                     if (TryDecryptWithKey(
                         key,
-                        keySize,
+                        wrappingKey,
                         securityToken,
                         validationParameters,
                         decryptionParameters,
@@ -322,11 +322,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     for (int i = 0; i < count; i++)
                     {
                         SecurityKey key = keyList[i];
-                        int keySize = key?.KeySize ?? 0;
 
                         if (TryDecryptWithKey(
                             key,
-                            keySize,
+                            wrappingKey: null,
                             securityToken,
                             validationParameters,
                             decryptionParameters,
@@ -347,11 +346,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // Fall back to enumerator for non-list collections
                     foreach (SecurityKey key in decryptionParameters.Keys)
                     {
-                        int keySize = key?.KeySize ?? 0;
-
                         if (TryDecryptWithKey(
                             key,
-                            keySize,
+                            wrappingKey: null,
                             securityToken,
                             validationParameters,
                             decryptionParameters,
@@ -389,7 +386,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private static bool TryDecryptWithKey(
             SecurityKey key,
-            int keySize,
+            SecurityKey wrappingKey,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters,
@@ -436,7 +433,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 zipAlgorithm = decryptionParameters.Zip;
 
                 // Record telemetry for successful decryption
-                telemetryClient.IncrementTokenDecryptionCounter(true, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
+                telemetryClient.IncrementTokenDecryptionCounter(true, decryptionParameters.Alg, decryptionParameters.Enc, wrappingKey);
                 return true;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -446,7 +443,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
 
                 // Record telemetry for failed decryption
-                telemetryClient.IncrementTokenDecryptionCounter(false, decryptionParameters.Alg, decryptionParameters.Enc, keySize);
+                telemetryClient.IncrementTokenDecryptionCounter(false, decryptionParameters.Alg, decryptionParameters.Enc, wrappingKey);
             }
 
             if (key != null)

@@ -51,13 +51,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
-            (IList<(SecurityKey Key, int WrappingKeySize)>? KeysWithSizes, ValidationError? ValidationError) result =
+            (IList<(SecurityKey Key, SecurityKey WrappingKey)>? KeysWithWrappingKeys, ValidationError? ValidationError) result =
                 GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
 
             if (result.ValidationError != null)
                 return result.ValidationError.AddCurrentStackFrame();
 
-            if (result.KeysWithSizes == null || result.KeysWithSizes.Count == 0)
+            if (result.KeysWithWrappingKeys == null || result.KeysWithWrappingKeys.Count == 0)
             {
                 return new ValidationError(
                     new MessageDetail(
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
-            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, result.KeysWithSizes);
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, result.KeysWithWrappingKeys);
 
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 _telemetryClient);
         }
 
-        internal (IList<(SecurityKey Key, int WrappingKeySize)>? KeysWithSizes, ValidationError?) GetContentEncryptionKeys(
+        internal (IList<(SecurityKey Key, SecurityKey WrappingKey)>? KeysWithWrappingKeys, ValidationError?) GetContentEncryptionKeys(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -140,19 +140,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (keys == null)
                     return (null, null);
 
-                var directKeysWithSizes = new List<(SecurityKey, int)>(keys.Count);
+                var directKeysWithWrappingKeys = new List<(SecurityKey, SecurityKey)>(keys.Count);
                 foreach (var key in keys)
                 {
                     if (key != null)
-                        directKeysWithSizes.Add((key, key.KeySize));
+                        directKeysWithWrappingKeys.Add((key, key));
                 }
-                return (directKeysWithSizes, null);
+                return (directKeysWithWrappingKeys, null);
             }
 
             if (keys is null)
                 return (null, null); // Cannot iterate over null.
 
-            var keysWithSizes = new List<(SecurityKey Key, int WrappingKeySize)>();
+            var keysWithWrappingKeys = new List<(SecurityKey Key, SecurityKey WrappingKey)>();
             // keep track of exceptions thrown, keys that were tried
             StringBuilder? exceptionStrings = null;
             StringBuilder? keysAttempted = null;
@@ -182,7 +182,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
                             var contentEncryptionKey = new SymmetricSecurityKey(unwrappedKey);
                             // Pair this CEK with its original ECDSA wrapping key size for telemetry
-                            keysWithSizes.Add((contentEncryptionKey, key.KeySize));
+                            keysWithWrappingKeys.Add((contentEncryptionKey, key));
                         }
                     }
                     else if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
@@ -194,7 +194,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
                         var contentEncryptionKey = new SymmetricSecurityKey(unwrappedKey);
                         // Pair this CEK with its original wrapping key size for telemetry (e.g., RSA 2048/3072/4096)
-                        keysWithSizes.Add((contentEncryptionKey, key.KeySize));
+                        keysWithWrappingKeys.Add((contentEncryptionKey, key));
                     }
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -207,8 +207,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
-            if (keysWithSizes.Count > 0 || exceptionStrings is null)
-                return (keysWithSizes, null);
+            if (keysWithWrappingKeys.Count > 0 || exceptionStrings is null)
+                return (keysWithWrappingKeys, null);
             else
             {
                 ValidationError validationError = new(

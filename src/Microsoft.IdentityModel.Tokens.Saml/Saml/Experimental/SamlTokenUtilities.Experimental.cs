@@ -227,7 +227,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: false,
                         signature.SignedInfo.SignatureMethod,
-                        key.KeySize);
+                        key);
 
                     return new SignatureValidationError(
                         new MessageDetail(
@@ -243,7 +243,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: true,
                         signature.SignedInfo.SignatureMethod,
-                        key.KeySize);
+                        key);
 
                     securityToken.SigningKey = key;
                     return key;
@@ -252,7 +252,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     signature.SignedInfo.SignatureMethod,
-                    key.KeySize);
+                    key);
 
                 return result;
             }
@@ -263,7 +263,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     signature.SignedInfo.SignatureMethod,
-                    key.KeySize);
+                    key);
 
                 return new SignatureValidationError(
                     new MessageDetail(

@@ -53,7 +53,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, Default.AsymmetricSigningCredentials.Algorithm },
-                { TelemetryConstants.KeySizeTag, Default.AsymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -100,7 +100,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
                 { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
-                { TelemetryConstants.KeySizeTag, KeyingMaterial.RsaSecurityKey2.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -139,7 +139,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, Default.AsymmetricSigningCredentials.Algorithm },
-                { TelemetryConstants.KeySizeTag, Default.AsymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -186,7 +186,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.FailureValue },
                 { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
-                { TelemetryConstants.KeySizeTag, KeyingMaterial.RsaSecurityKey2.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -225,7 +225,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
-                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -264,7 +264,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
-                { TelemetryConstants.KeySizeTag, Default.SymmetricSigningCredentials.Key.KeySize }
+                { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
 
@@ -303,7 +303,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
-                { TelemetryConstants.KeySizeTag, 2048 }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 
@@ -342,7 +342,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.StatusTag, TelemetryConstants.SuccessValue },
                 { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
-                { TelemetryConstants.KeySizeTag, 2048 }
+                { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
 }

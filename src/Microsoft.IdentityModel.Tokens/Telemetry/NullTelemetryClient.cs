@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Telemetry;
 
@@ -23,9 +24,9 @@ internal class NullTelemetryClient : ITelemetryClient
 
     void ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception) { }
 
-    void ITelemetryClient.IncrementSignatureValidationCounter(bool isSuccess, string algorithm, int keySize) { }
+    void ITelemetryClient.IncrementSignatureValidationCounter(bool isSuccess, string algorithm, SecurityKey key) { }
 
-    void ITelemetryClient.IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, int keySize) { }
+    void ITelemetryClient.IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, SecurityKey key) { }
 
     void ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, Exception exception) { }
 

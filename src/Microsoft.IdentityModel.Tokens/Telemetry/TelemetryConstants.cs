@@ -53,9 +53,9 @@ namespace Microsoft.IdentityModel.Telemetry
         public const string EncryptionSchemeTag = "EncryptionScheme";
 
         /// <summary>
-        /// Telemetry tag indicating the size of the cryptographic key in bits.
+        /// Telemetry tag indicating the key algorithm used.
         /// </summary>
-        public const string KeySizeTag = "KeySize";
+        public const string KeyAlgorithmTag = "KeyAlgorithm";
         /// <summary>
         /// Telemetry value indicating a successful operation.
         /// </summary>

@@ -76,12 +76,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         public string Zip { get; set; }
 
+
         /// <summary>
-        /// Gets or sets the collection of content encryption keys paired with their original wrapping key sizes.
-        /// This is used for telemetry to track STS key upgrades (e.g., RSA 2048 → 3072 → 4096).
-        /// For direct key use (no wrapping), the key size will be the same as the key's own size.
-        /// When set, this takes precedence over Keys for decryption and telemetry.
+        /// Gets or sets the collection of <see cref="SecurityKey"/>s along with their corresponding wrapping keys to attempt to decrypt with.
         /// </summary>
-        public IList<(SecurityKey Key, int WrappingKeySize)> KeysWithWrappingKeySizes { get; set; }
+        public IList<(SecurityKey key, SecurityKey wrappingKey)> KeysWithWrappingKeys { get; set; }
     }
 }

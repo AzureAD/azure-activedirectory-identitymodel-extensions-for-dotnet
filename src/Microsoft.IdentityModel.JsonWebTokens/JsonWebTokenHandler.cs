@@ -400,7 +400,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters, _telemetryClient);
         }
 
-        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JsonWebToken jwtToken, IList<(SecurityKey Key, int WrappingKeySize)> keysWithSizes)
+        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JsonWebToken jwtToken, IList<(SecurityKey Key, SecurityKey WrappingKey)> keysWithWrappingKeys)
         {
             return new JwtTokenDecryptionParameters
             {
@@ -414,7 +414,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 InitializationVectorBytes = jwtToken.InitializationVectorBytes,
                 MaximumDeflateSize = MaximumTokenSizeInBytes,
                 Zip = jwtToken.Zip,
-                KeysWithWrappingKeySizes = keysWithSizes,
+                KeysWithWrappingKeys = keysWithWrappingKeys,
             };
         }
 

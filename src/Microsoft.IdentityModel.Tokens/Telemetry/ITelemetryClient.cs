@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Telemetry
 {
@@ -40,8 +41,8 @@ namespace Microsoft.IdentityModel.Telemetry
         /// </summary>
         /// <param name="isSuccess">Whether the signature validation succeeded.</param>
         /// <param name="algorithm">The signature algorithm used (e.g., RS256, ES256, HS256).</param>
-        /// <param name="keySize">The size of the key in bits (e.g., 2048, 3072, 4096).</param>
-        internal void IncrementSignatureValidationCounter(bool isSuccess, string algorithm, int keySize);
+        /// <param name="key">The security key used for signature validation.</param>
+        internal void IncrementSignatureValidationCounter(bool isSuccess, string algorithm, SecurityKey key);
 
         /// <summary>
         /// Increments the token decryption counter with encryption algorithm, scheme, and key size details.
@@ -49,8 +50,8 @@ namespace Microsoft.IdentityModel.Telemetry
         /// <param name="isSuccess">Whether the token decryption succeeded.</param>
         /// <param name="encryptionAlgorithm">The key encryption algorithm used (e.g., RSA-OAEP, A256KW).</param>
         /// <param name="encryptionScheme">The content encryption scheme used (e.g., A256GCM, A128CBC-HS256).</param>
-        /// <param name="keySize">The size of the key encryption key in bits (e.g., 2048, 3072, 4096 for RSA, 128, 256 for AES).</param>
-        internal void IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, int keySize);
+        /// <param name="key">The security key used for decryption.</param>
+        internal void IncrementTokenDecryptionCounter(bool isSuccess, string encryptionAlgorithm, string encryptionScheme, SecurityKey key);
 
         [Obsolete("Use LogConfigurationRetrievalDuration(metadataAddress, operationStatus, configurationSource) instead.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]

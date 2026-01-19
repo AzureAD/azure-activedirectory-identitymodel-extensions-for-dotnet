@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             _telemetryClient.IncrementSignatureValidationCounter(
                 isSuccess: false,
                 jwtToken.Alg,
-                0);
+                key: null);
 
             // kid was NOT found, no matching keys available.
             if (string.IsNullOrEmpty(jwtToken.Kid))
@@ -237,7 +237,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 _telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     jsonWebToken.Alg,
-                    key.KeySize);
+                    key);
 
                 return new SignatureValidationError(
                     new MessageDetail(
@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     _telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: false,
                         jsonWebToken.Alg,
-                        key.KeySize);
+                        key);
 
                     return new SignatureValidationError(
                         new MessageDetail(
@@ -282,7 +282,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     _telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: true,
                         jsonWebToken.Alg,
-                        key.KeySize);
+                        key);
 
                     jsonWebToken.SigningKey = key;
                     return key;
@@ -292,7 +292,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     _telemetryClient.IncrementSignatureValidationCounter(
                         isSuccess: false,
                         jsonWebToken.Alg,
-                        key.KeySize);
+                        key);
 
                     return new SignatureValidationError(
                         new MessageDetail(
@@ -309,7 +309,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 _telemetryClient.IncrementSignatureValidationCounter(
                     isSuccess: false,
                     jsonWebToken.Alg,
-                    key.KeySize);
+                    key);
 
                 return new SignatureValidationError(
                     new MessageDetail(
