@@ -570,7 +570,7 @@ public class SignatureValidationAndDecryptionTelemetryTests
 
         // Assert
         Assert.True(result.IsValid);
-        // For key wrap scenarios, telemetry records the wrapping key size (RSA key) to monitor STS key upgrades (2048 ? 3072 ? 4096).
+        // For key wrap scenarios, telemetry records the wrapping key size (RSA key) to monitor STS key upgrades (2048 -> 3072 -> 4096).
         TelemetryAssertionHelpers.AssertTelemetryRecorded(listener, TelemetryDataRecorder.TokenDecryptionCounterName,
             new Dictionary<string, object>
             {
