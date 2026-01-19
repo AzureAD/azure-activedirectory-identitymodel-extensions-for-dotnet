@@ -58,8 +58,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void AesGcmReferenceTest()
         {
-#if NET10_0_OR_GREATER
-            // AES-GCM is now supported on all platforms in .NET 10+
+#if NET6_0_OR_GREATER
+            // AES-GCM is now supported on all platforms in .NET 6+
             var context = new CompareContext();
             var providerForDecryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(new SymmetricSecurityKey(RSAES_OAEP_KeyWrap.CEK), AES_256_GCM.Algorithm);
             var plaintext = providerForDecryption.Decrypt(AES_256_GCM.E, AES_256_GCM.A, AES_256_GCM.IV, AES_256_GCM.T);
