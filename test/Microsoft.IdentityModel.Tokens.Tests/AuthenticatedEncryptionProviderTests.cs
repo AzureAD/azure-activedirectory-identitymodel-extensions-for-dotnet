@@ -67,8 +67,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void AesGcmEncryptionOnWindows()
         {
-#if NET10_0_OR_GREATER
-            // AES-GCM is now supported on all platforms in .NET 10+
+#if NET6_0_OR_GREATER
+            // AES-GCM is now supported on all platforms in .NET 6+
             var context = new CompareContext();
             try
             {
@@ -104,8 +104,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void AesGcm_Dispose()
         {
-#if !NET10_0_OR_GREATER
-            // In .NET 9 and below, AES-GCM is only supported on Windows
+#if !NET6_0_OR_GREATER
+            // In .NET versions below .NET 6, AES-GCM is only supported on Windows
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
 #endif
