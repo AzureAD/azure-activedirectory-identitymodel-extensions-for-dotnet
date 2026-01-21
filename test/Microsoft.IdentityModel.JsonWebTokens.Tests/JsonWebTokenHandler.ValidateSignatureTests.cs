@@ -107,10 +107,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = new ValidationParameters
                         {
-                            SignatureValidator = (token, parameters, configuration, callContext) => new SignatureValidationError(
+                            SignatureValidator = SkipValidationValidators.SignatureValidatorFromDelegate((token, parameters, configuration, callContext) => new SignatureValidationError(
                                 new MessageDetail("IDX10000: NullArgument", null),
                                 ValidationFailureType.NullArgument,
-                                ValidationError.GetCurrentStackFrame())
+                                ValidationError.GetCurrentStackFrame()))
                         },
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         OperationResult = new ValidationError(
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = new ValidationParameters
                         {
-                            SignatureValidator = (token, parameters, configuration, callContext) => KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key
+                            SignatureValidator = SkipValidationValidators.SignatureValidatorFromDelegate((token, parameters, configuration, callContext) => KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key)
                         },
                         OperationResult = KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key
                     },
@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                         ValidationParameters = new ValidationParameters
                         {
-                            SignatureKeyResolver = (token, securityToken, kid, validationParameters, configuration, callContext) => KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key
+                            SignatureKeyResolver = SkipValidationValidators.SignatureKeyResolverFromDelegate((token, securityToken, kid, validationParameters, configuration, callContext) => KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key)
                         },
                         OperationResult = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key
                     },

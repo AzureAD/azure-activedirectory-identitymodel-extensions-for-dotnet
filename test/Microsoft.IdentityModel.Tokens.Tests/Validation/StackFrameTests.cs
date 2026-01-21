@@ -60,11 +60,11 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 validationParameters.ClockSkew = clockSkew.Value;
 
             // Skip all validations except lifetime
-            validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
-            validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-            validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
-            validationParameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
-            validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
+            validationParameters.AlgorithmValidator = SkipValidationValidators.SkipAlgorithmValidation;
+            validationParameters.AudienceValidator = SkipValidationValidators.SkipAudienceValidation;
+            validationParameters.IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation;
+            validationParameters.SignatureKeyValidator = SkipValidationValidators.SkipIssuerSigningKeyValidation;
+            validationParameters.SignatureValidator = SkipValidationValidators.SkipSignatureValidation;
 
             return validationParameters;
         }

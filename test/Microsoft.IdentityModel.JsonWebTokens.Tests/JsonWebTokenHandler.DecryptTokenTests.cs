@@ -173,7 +173,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
                         ValidationParameters = new ValidationParameters
                         {
-                            DecryptionKeyResolver = (tokenString, token, kid, validationParameters, callContext) => [Default.SymmetricEncryptingCredentials.Key]
+                            DecryptionKeyResolver = SkipValidationValidators.DecryptionKeyResolverFromDelegate((tokenString, token, kid, validationParameters, callContext) => [Default.SymmetricEncryptingCredentials.Key])
                         },
                         OperationResult = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
                     },

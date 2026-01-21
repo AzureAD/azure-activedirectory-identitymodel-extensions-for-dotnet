@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.AlgorithmValidator = algorithmDelegate;
+            ValidationParameters.AlgorithmValidator = SkipValidationValidators.AlgorithmValidatorFromDelegate(algorithmDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomAlgorithmValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(AlgorithmValidationError), new List<string> { "StackFramesCount" });
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.AudienceValidator = audienceValidationDelegate;
+            ValidationParameters.AudienceValidator = SkipValidationValidators.AudienceValidatorFromDelegate(audienceValidationDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomAudienceValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(AudienceValidationError), new List<string> { "StackFramesCount" });
@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.IssuerValidatorAsync = issuerValidationDelegate;
+            ValidationParameters.IssuerValidatorAsync = SkipValidationValidators.IssuerValidatorFromDelegate(issuerValidationDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomIssuerValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(IssuerValidationError), new List<string> { "StackFramesCount" });
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.SignatureKeyResolver = signtureKeyResolverDelegate;
+            ValidationParameters.SignatureKeyResolver = SkipValidationValidators.SignatureKeyResolverFromDelegate(signtureKeyResolverDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomIssuerSigningKeyValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(SignatureKeyValidationError), new List<string> { "StackFramesCount" });
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.SignatureKeyValidator = issuerSigningKeyValidationDelegate;
+            ValidationParameters.SignatureKeyValidator = SkipValidationValidators.SignatureKeyValidatorFromDelegate(issuerSigningKeyValidationDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomIssuerSigningKeyValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(SignatureKeyValidationError), new List<string> { "StackFramesCount" });
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.LifetimeValidator = lifetimeValidationDelegate;
+            ValidationParameters.LifetimeValidator = SkipValidationValidators.LifetimeValidatorFromDelegate(lifetimeValidationDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomLifetimeValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(LifetimeValidationError), new List<string> { "StackFramesCount" });
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.SignatureValidator = signatureValidationDelegate;
+            ValidationParameters.SignatureValidator = SkipValidationValidators.SignatureValidatorFromDelegate(signatureValidationDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomSignatureValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(SignatureValidationError), new List<string> { "StackFramesCount" });
@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.TokenReplayValidator = tokenReplayValidationDelegate;
+            ValidationParameters.TokenReplayValidator = SkipValidationValidators.TokenReplayValidatorFromDelegate(tokenReplayValidationDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomTokenReplayValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(TokenReplayValidationError), new List<string> { "StackFramesCount" });
@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
         {
             TokenHandler = tokenHandler;
             SecurityToken = securityToken;
-            ValidationParameters.TokenTypeValidator = tokenTypeValidationDelegate;
+            ValidationParameters.TokenTypeValidator = SkipValidationValidators.TokenTypeValidatorFromDelegate(tokenTypeValidationDelegate);
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);
             PropertiesToIgnoreWhenComparing.Add(typeof(CustomTokenTypeValidationError), new List<string> { "StackFramesCount" });
             PropertiesToIgnoreWhenComparing.Add(typeof(TokenTypeValidationError), new List<string> { "StackFramesCount" });
@@ -156,14 +156,14 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
 
         internal ValidationParameters ValidationParameters { get; } = new ValidationParameters
         {
-            AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation,
-            AudienceValidator = SkipValidationDelegates.SkipAudienceValidation,
-            SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation,
-            IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation,
-            LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation,
-            //SignatureValidator = SkipValidationDelegates.SkipSignatureValidation,
-            TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation,
-            TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation
+            AlgorithmValidator = SkipValidationValidators.SkipAlgorithmValidation,
+            AudienceValidator = SkipValidationValidators.SkipAudienceValidation,
+            SignatureKeyValidator = SkipValidationValidators.SkipIssuerSigningKeyValidation,
+            IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation,
+            LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation,
+            //SignatureValidator = SkipValidationValidators.SkipSignatureValidation,
+            TokenReplayValidator = SkipValidationValidators.SkipTokenReplayValidation,
+            TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation
         };
 
         internal ValidationError? ValidationError { get; set; }
