@@ -32,6 +32,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal async ValueTask<TokenValidationResult> ValidateJWEAsync(
             JsonWebToken jwtToken,
             TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
+        {
+            return await ValidateJWEAsync(jwtToken, validationParameters, configuration, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        internal async ValueTask<TokenValidationResult> ValidateJWEAsync(
+            JsonWebToken jwtToken,
+            TokenValidationParameters validationParameters,
             BaseConfiguration configuration,
             CancellationToken cancellationToken)
         {
@@ -71,6 +79,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jwtToken : null
                 };
             }
+        }
+
+        internal async ValueTask<TokenValidationResult> ValidateJWSAsync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
+        {
+            return await ValidateJWSAsync(jsonWebToken, validationParameters, configuration, CancellationToken.None).ConfigureAwait(false);
         }
 
         internal async ValueTask<TokenValidationResult> ValidateJWSAsync(
@@ -607,6 +623,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             return tokenValidationResult;
+        }
+
+        internal async ValueTask<TokenValidationResult> ValidateTokenPayloadAsync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
+        {
+            return await ValidateTokenPayloadAsync(jsonWebToken, validationParameters, configuration, CancellationToken.None).ConfigureAwait(false);
         }
 
         internal async ValueTask<TokenValidationResult> ValidateTokenPayloadAsync(
