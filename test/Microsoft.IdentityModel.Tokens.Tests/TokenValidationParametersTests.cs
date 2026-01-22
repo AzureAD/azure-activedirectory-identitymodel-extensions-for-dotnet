@@ -277,13 +277,21 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParametersClone = validationParameters.Clone();
             IdentityComparer.AreEqual(validationParametersClone, validationParameters, compareContext);
             if (validationParameters.IsClone)
-                compareContext.AddDiff("if (validationParameters.IsClone), IsCone should be false");
+                compareContext.AddDiff("if (validationParameters.IsClone), IsClone should be false");
 
             if (!validationParametersClone.IsClone)
-                compareContext.AddDiff("if (!validationParametersClone.IsClone), IsCone should be true");
+                compareContext.AddDiff("if (!validationParametersClone.IsClone), IsClone should be true");
 
             if (validationParametersClone.InstancePropertyBag.Count != 0)
                 compareContext.AddDiff("validationParametersClone.InstancePropertyBag.Count != 0), should be empty.");
+
+            validationParameters.AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false);
+            if (validationParameters.AlgorithmValidator.Equals(validationParametersClone.AlgorithmValidator))
+                compareContext.AddDiff("validationParameters.AlgorithmValidator.Equals(validationParametersClone.AlgorithmValidator)), should not be equal after change.");
+
+            validationParameters.AudienceValidator = ValidationDelegates.AudienceValidatorReturnsFalse;
+            if (validationParameters.AudienceValidator.Equals(validationParametersClone.AudienceValidator))
+                compareContext.AddDiff("validationParameters.AudienceValidator.Equals(validationParametersClone.AudienceValidator)), should not be equal after change.");
 
             TestUtilities.AssertFailIfErrors(compareContext);
         }
