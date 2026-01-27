@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 throw new CustomSecurityTokenInvalidIssuerException(
                     nameof(IssuerValidatorThrows),
                     new IssuerValidationError(
-                        new MessageDetail(nameof(IssuerValidatorDelegateAsync)),
+                        new MessageDetail(nameof(IssuerValidatorThrows)),
                         IssuerValidationFailure.ValidationFailed,
                         Default.GetStackFrame(),
                         issuer),

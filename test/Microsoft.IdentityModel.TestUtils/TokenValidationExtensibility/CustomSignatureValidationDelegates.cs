@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 throw new CustomSecurityTokenInvalidSignatureException(
                     nameof(SignatureValidatorThrows),
                     new SignatureValidationError(
-                        new MessageDetail(nameof(SignatureValidatorDelegate)),
+                        new MessageDetail(nameof(SignatureValidatorThrows)),
                         SignatureValidationFailure.ValidationFailed,
                         Default.GetStackFrame()),
                     null);
