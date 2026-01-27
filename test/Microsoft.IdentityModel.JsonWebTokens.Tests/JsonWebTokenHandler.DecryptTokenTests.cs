@@ -173,7 +173,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
                         ValidationParameters = new ValidationParameters
                         {
-                            DecryptionKeyResolver = SkipValidationValidators.DecryptionKeyResolverFromDelegate((tokenString, token, kid, validationParameters, callContext) => [Default.SymmetricEncryptingCredentials.Key])
+                            DecryptionKeyResolver = new DecryptionKeyResolverReturnsSymmetricKey()
                         },
                         OperationResult = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
                     },
@@ -287,6 +287,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 };
             }
         }
+
+        // Helper validator for test scenario
+#nullable enable
+        private class DecryptionKeyResolverReturnsSymmetricKey : IDecryptionKeyResolver
+        {
+            public IList<SecurityKey> ResolveDecryptionKey(
+                string token,
+                SecurityToken securityToken,
+                string kid,
+                ValidationParameters validationParameters,
+                CallContext? callContext)
+            {
+                return [Default.SymmetricEncryptingCredentials.Key];
+            }
+        }
+#nullable restore
 
         private static CustomConfiguration CreateCustomConfigurationThatThrows(SecurityKey rsaKey)
         {
