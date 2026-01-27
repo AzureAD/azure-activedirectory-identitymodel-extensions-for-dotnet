@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
@@ -12,7 +13,6 @@ using Xunit;
 
 #if NET472_OR_GREATER || NET6_0_OR_GREATER
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 #endif
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
