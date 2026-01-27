@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeyResolverUsingConfiguration = other.IssuerSigningKeyResolverUsingConfiguration;
-            IssuerSigningKeys = other.IssuerSigningKeys;
+            IssuerSigningKeys = other.IssuerSigningKeys is not null ? new List<SecurityKey>(other.IssuerSigningKeys) : null;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerSigningKeyValidatorUsingConfiguration = other.IssuerSigningKeyValidatorUsingConfiguration;
             IssuerValidator = other.IssuerValidator;
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens
             LogValidationExceptions = other.LogValidationExceptions;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
-            PropertyBag = other.PropertyBag;
+            PropertyBag = other.PropertyBag is not null ? new Dictionary<string, object>(other.PropertyBag) : null;
             TryReadJwtClaim = other.TryReadJwtClaim;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
             SignatureValidatorUsingConfiguration = other.SignatureValidatorUsingConfiguration;
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
-            TokenDecryptionKeys = other.TokenDecryptionKeys;
+            TokenDecryptionKeys = other.TokenDecryptionKeys is not null ? new List<SecurityKey>(other.TokenDecryptionKeys) : null;
             TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
@@ -105,12 +105,12 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateTokenReplay = other.ValidateTokenReplay;
             ValidateWithLKG = other.ValidateWithLKG;
-            ValidAlgorithms = other.ValidAlgorithms;
+            ValidAlgorithms = other.ValidAlgorithms is not null ? new List<string>(other.ValidAlgorithms) : null;
             ValidAudience = other.ValidAudience;
-            ValidAudiences = other.ValidAudiences;
+            ValidAudiences = other.ValidAudiences is not null ? new List<string>(other.ValidAudiences) : null;
             ValidIssuer = other.ValidIssuer;
-            ValidIssuers = other.ValidIssuers;
-            ValidTypes = other.ValidTypes;
+            ValidIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
+            ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
         }
 
         /// <summary>
@@ -204,11 +204,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns a new instance of <see cref="TokenValidationParameters"/> with values copied from this object.
         /// </summary>
-        /// <returns>A new <see cref="TokenValidationParameters"/> object copied from this object</returns>
-        /// <remarks>This is a shallow Clone.</remarks>
+        /// <returns>A new <see cref="TokenValidationParameters"/> object copied from this object.</returns>
+        /// <remarks>This is a deep Clone.</remarks>
         public virtual TokenValidationParameters Clone()
         {
-            return new(this)
+            return new TokenValidationParameters(this)
             {
                 IsClone = true
             };
