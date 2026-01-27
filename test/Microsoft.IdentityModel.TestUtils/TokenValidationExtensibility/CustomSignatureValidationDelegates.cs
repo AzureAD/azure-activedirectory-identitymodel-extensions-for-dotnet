@@ -7,82 +7,106 @@ using Microsoft.IdentityModel.Tokens.Experimental;
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
 {
-    internal class CustomSignatureValidationDelegates
+    internal class CustomSignatureValidationValidators
     {
-        internal static ValidationResult<SecurityKey, ValidationError> CustomSignatureValidationFailed
-            (
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
-            CallContext callContext)
+        internal static ISignatureValidator CustomSignatureValidationFailed = new CustomSignatureValidationFailedValidator();
+        internal static ISignatureValidator CustomSignatureValidatorCustomExceptionDelegate = new CustomSignatureValidatorCustomExceptionDelegateValidator();
+        internal static ISignatureValidator UnknownValidationFailure = new UnknownValidationFailureValidator();
+        internal static ISignatureValidator SignatureValidationFailed = new SignatureValidationFailedValidator();
+        internal static ISignatureValidator SignatureValidatorDelegate = new SignatureValidatorDelegateValidator();
+        internal static ISignatureValidator SignatureValidatorThrows = new SignatureValidatorThrowsValidator();
+
+        private class CustomSignatureValidationFailedValidator : ISignatureValidator
         {
-            return new CustomSignatureValidationError(
-                new MessageDetail(nameof(CustomSignatureValidationFailed)),
-                CustomValidationFailure.SignatureValidationFailed,
-                Default.GetStackFrame());
+            public ValidationResult<SecurityKey, ValidationError> ValidateSignature(
+                SecurityToken? securityToken,
+                ValidationParameters validationParameters,
+                BaseConfiguration? configuration,
+                CallContext callContext)
+            {
+                return new CustomSignatureValidationError(
+                    new MessageDetail(nameof(CustomSignatureValidationFailed)),
+                    CustomValidationFailure.SignatureValidationFailed,
+                    Default.GetStackFrame());
+            }
         }
 
-        internal static ValidationResult<SecurityKey, ValidationError> CustomSignatureValidatorCustomExceptionDelegate(
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
-            CallContext callContext)
+        private class CustomSignatureValidatorCustomExceptionDelegateValidator : ISignatureValidator
         {
-            return new CustomSignatureValidationError(
-                new MessageDetail(nameof(CustomSignatureValidatorCustomExceptionDelegate)),
-                SignatureValidationFailure.ValidationFailed,
-                Default.GetStackFrame());
+            public ValidationResult<SecurityKey, ValidationError> ValidateSignature(
+                SecurityToken? securityToken,
+                ValidationParameters validationParameters,
+                BaseConfiguration? configuration,
+                CallContext callContext)
+            {
+                return new CustomSignatureValidationError(
+                    new MessageDetail(nameof(CustomSignatureValidatorCustomExceptionDelegate)),
+                    SignatureValidationFailure.ValidationFailed,
+                    Default.GetStackFrame());
+            }
         }
 
-        internal static ValidationResult<SecurityKey, ValidationError> UnknownValidationFailure(
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
-            CallContext callContext)
+        private class UnknownValidationFailureValidator : ISignatureValidator
         {
-            return new CustomSignatureValidationError(
-                new MessageDetail(nameof(UnknownValidationFailure)),
-                AlgorithmValidationFailure.AlgorithmIsNotSupported,
-                Default.GetStackFrame());
+            public ValidationResult<SecurityKey, ValidationError> ValidateSignature(
+                SecurityToken? securityToken,
+                ValidationParameters validationParameters,
+                BaseConfiguration? configuration,
+                CallContext callContext)
+            {
+                return new CustomSignatureValidationError(
+                    new MessageDetail(nameof(UnknownValidationFailure)),
+                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    Default.GetStackFrame());
+            }
         }
 
-        internal static ValidationResult<SecurityKey, ValidationError> SignatureValidationFailed(
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
-            CallContext callContext)
+        private class SignatureValidationFailedValidator : ISignatureValidator
         {
-            return new CustomSignatureValidationError(
-                new MessageDetail(nameof(SignatureValidationFailed)),
-                SignatureValidationFailure.ValidationFailed,
-                Default.GetStackFrame());
+            public ValidationResult<SecurityKey, ValidationError> ValidateSignature(
+                SecurityToken? securityToken,
+                ValidationParameters validationParameters,
+                BaseConfiguration? configuration,
+                CallContext callContext)
+            {
+                return new CustomSignatureValidationError(
+                    new MessageDetail(nameof(SignatureValidationFailed)),
+                    SignatureValidationFailure.ValidationFailed,
+                    Default.GetStackFrame());
+            }
         }
 
-        internal static ValidationResult<SecurityKey, ValidationError> SignatureValidatorDelegate(
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
-            CallContext callContext)
+        private class SignatureValidatorDelegateValidator : ISignatureValidator
         {
-            return new SignatureValidationError(
-                new MessageDetail(nameof(SignatureValidatorDelegate)),
-                SignatureValidationFailure.ValidationFailed,
-                Default.GetStackFrame());
-        }
-
-        internal static ValidationResult<SecurityKey, ValidationError> SignatureValidatorThrows(
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
-            CallContext callContext)
-        {
-            throw new CustomSecurityTokenInvalidSignatureException(
-                nameof(SignatureValidatorThrows),
-                new SignatureValidationError(
+            public ValidationResult<SecurityKey, ValidationError> ValidateSignature(
+                SecurityToken? securityToken,
+                ValidationParameters validationParameters,
+                BaseConfiguration? configuration,
+                CallContext callContext)
+            {
+                return new SignatureValidationError(
                     new MessageDetail(nameof(SignatureValidatorDelegate)),
                     SignatureValidationFailure.ValidationFailed,
-                    Default.GetStackFrame()),
-                null);
+                    Default.GetStackFrame());
+            }
+        }
+
+        private class SignatureValidatorThrowsValidator : ISignatureValidator
+        {
+            public ValidationResult<SecurityKey, ValidationError> ValidateSignature(
+                SecurityToken? securityToken,
+                ValidationParameters validationParameters,
+                BaseConfiguration? configuration,
+                CallContext callContext)
+            {
+                throw new CustomSecurityTokenInvalidSignatureException(
+                    nameof(SignatureValidatorThrows),
+                    new SignatureValidationError(
+                        new MessageDetail(nameof(SignatureValidatorDelegate)),
+                        SignatureValidationFailure.ValidationFailed,
+                        Default.GetStackFrame()),
+                    null);
+            }
         }
     }
 }
