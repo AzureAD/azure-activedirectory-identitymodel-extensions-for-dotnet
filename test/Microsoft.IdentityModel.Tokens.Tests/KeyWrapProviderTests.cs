@@ -341,6 +341,117 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 WrappedKey = wrappedKey
             });
         }
+
+#if NET10_0_OR_GREATER
+        /// <summary>
+        /// Tests that WrapKey and UnwrapKey work correctly using .NET 10's default AES-KW implementation. 
+        /// Verifies round-trip encryption/decryption with various key sizes. 
+        /// </summary>
+        [Theory, MemberData(nameof(Net10KeyWrapTheoryData), DisableDiscoveryEnumeration = true)]
+        public void WrapUnwrapKey_Net10DefaultKeyWrap(KeyWrapTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.WrapUnwrapKey_Net10DefaultKeyWrap", theoryData);
+            try
+            {
+                var provider = new SymmetricKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm);
+                var wrappedKey = provider.WrapKey(theoryData.KeyToWrap);
+
+                Assert.NotNull(wrappedKey);
+                Assert.NotEqual(theoryData.KeyToWrap, wrappedKey);
+
+                byte[] unwrappedKey = provider.UnwrapKey(wrappedKey);
+
+                Assert.True(Utility.AreEqual(unwrappedKey, theoryData.KeyToWrap), "KeyToWrap != unwrappedKey after round trip");
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<KeyWrapTheoryData> Net10KeyWrapTheoryData()
+        {
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
+
+            // Test with AES-128 key
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = new byte[16],
+                WrapAlgorithm = SecurityAlgorithms.Aes128KW,
+                WrapKey = Default.SymmetricEncryptionKey128,
+                TestId = "Net10_Aes128KW_128BitKey"
+            });
+
+            // Test with AES-256 key
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = new byte[32],
+                WrapAlgorithm = SecurityAlgorithms.Aes256KW,
+                WrapKey = Default.SymmetricEncryptionKey256,
+                TestId = "Net10_Aes256KW_256BitKey"
+            });
+
+            // Test with random key using AES-128
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes128KW,
+                WrapKey = Default.SymmetricEncryptionKey128,
+                TestId = "Net10_Aes128KW_RandomKey"
+            });
+
+            // Test with random key using AES-256
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes256KW,
+                WrapKey = Default.SymmetricEncryptionKey256,
+                TestId = "Net10_Aes256KW_RandomKey"
+            });
+
+            // Test with Aes128KeyWrap algorithm name
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes128KeyWrap,
+                WrapKey = Default.SymmetricEncryptionKey128,
+                TestId = "Net10_Aes128KeyWrap_RandomKey"
+            });
+
+            // Test with Aes256KeyWrap algorithm name
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes256KeyWrap,
+                WrapKey = Default.SymmetricEncryptionKey256,
+                TestId = "Net10_Aes256KeyWrap_RandomKey"
+            });
+
+            // Test with JsonWebKey
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes128KW,
+                WrapKey = KeyingMaterial.JsonWebKeySymmetric128,
+                TestId = "Net10_Aes128KW_JsonWebKey"
+            });
+
+            theoryData.Add(new KeyWrapTheoryData
+            {
+                KeyToWrap = Guid.NewGuid().ToByteArray(),
+                WrapAlgorithm = SecurityAlgorithms.Aes256KW,
+                WrapKey = KeyingMaterial.JsonWebKeySymmetric256,
+                TestId = "Net10_Aes256KW_JsonWebKey"
+            });
+
+            return theoryData;
+        }
+#endif
+
+
     }
 }
 

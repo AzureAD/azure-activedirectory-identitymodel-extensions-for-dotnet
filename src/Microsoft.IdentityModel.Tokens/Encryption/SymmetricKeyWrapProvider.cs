@@ -221,7 +221,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
 #if NET10_0_OR_GREATER
-                return ((Aes)_symmetricAlgorithm.Value).DecryptKeyWrapPadded(keyBytes);
+                return ((Aes)_symmetricAlgorithm.Value).DecryptEcb(keyBytes, PaddingMode.None);
 #else
                 return UnwrapKeyPrivate(keyBytes, 0, keyBytes.Length);
 #endif
@@ -380,7 +380,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
 #if NET10_0_OR_GREATER
-                return ((Aes)_symmetricAlgorithm.Value).EncryptKeyWrapPadded(keyBytes);
+                return ((Aes)_symmetricAlgorithm.Value).EncryptEcb(keyBytes, PaddingMode.None);
 #else
                 return WrapKeyPrivate(keyBytes, 0, keyBytes.Length);
 #endif
