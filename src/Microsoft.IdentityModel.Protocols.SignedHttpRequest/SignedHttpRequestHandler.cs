@@ -554,7 +554,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(accessToken))
                 throw LogHelper.LogArgumentNullException(nameof(accessToken));
 
-            return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.TokenHandler.ValidateTokenAsync(accessToken, signedHttpRequestValidationContext.AccessTokenValidationParameters).ConfigureAwait(false);
+            return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.TokenHandler.ValidateTokenAsync(accessToken, signedHttpRequestValidationContext.AccessTokenValidationParameters, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
