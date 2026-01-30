@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 "IDX10234 should not be logged at Verbose level when switch is enabled for trailing slash match");
         }
 
-        // Helper class for testing - using the one from Microsoft.IdentityModel.Logging.Tests
+        // Helper class for testing logging behavior
         private class TestLogger : IIdentityLogger
         {
             readonly List<Tuple<string, EventLogLevel>> _logs = new List<Tuple<string, EventLogLevel>>();
