@@ -14,8 +14,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// Tests for verifying that success validation logs (IDX10239 and IDX10234) 
     /// are logged at the correct level based on the AppContext switch.
     /// </summary>
-    public class SuccessValidationLoggingTests
+    public class SuccessValidationLoggingTests : IDisposable
     {
+        private readonly IIdentityLogger _originalLogger;
+
+        public SuccessValidationLoggingTests()
+        {
+            // Save original logger to restore after each test
+            _originalLogger = LogHelper.Logger;
+        }
+
+        public void Dispose()
+        {
+            // Restore original logger after each test
+            LogHelper.Logger = _originalLogger;
+        }
+
         [Fact]
         [ResetAppContextSwitches]
         public void ValidateLifetime_LogsAtVerboseByDefault()
