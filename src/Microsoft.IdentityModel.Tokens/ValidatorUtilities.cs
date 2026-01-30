@@ -50,8 +50,16 @@ namespace Microsoft.IdentityModel.Tokens
                 });
 
             // if it reaches here, that means lifetime of the token is valid
-            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                LogHelper.LogInformation(LogMessages.IDX10239);
+            if (AppContextSwitches.SuccessValidationLogsAsInformation)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(LogMessages.IDX10239);
+            }
+            else
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogMessages.IDX10239);
+            }
         }
     }
 }
