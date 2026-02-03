@@ -187,11 +187,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
                 var wrappedKey = keyWrapProvider.WrapKey(testParams.KeyToWrap);
+
+#if NET10_0_OR_GREATER
+                // .NET 10 uses EncryptKeyWrapPadded (RFC 5649) which produces different output than RFC 3394.
+                byte[] unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
+                Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+
+                // Additionally verify native methods work correctly with the same key
+                var symmetricKey = testParams.Key as SymmetricSecurityKey;
+                using var aes = Aes.Create();
+                aes.Key = symmetricKey.Key;
+                var nativeWrappedKey = aes.EncryptKeyWrapPadded(testParams.KeyToWrap);
+                var nativeUnwrappedKey = aes.DecryptKeyWrapPadded(nativeWrappedKey);
+                Assert.True(Utility.AreEqual(nativeUnwrappedKey, testParams.KeyToWrap), "Native round-trip: Utility.AreEqual(nativeUnwrappedKey, testParams.KeyToWrap)");
+#else
                 Assert.True(Utility.AreEqual(wrappedKey, testParams.EncryptedKey), "Utility.AreEqual(wrappedKey, testParams.EncryptedKey)");
                 Assert.Equal(Base64UrlEncoder.Encode(wrappedKey), testParams.EncodedEncryptedKey);
 
                 byte[] unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+#endif
             }
             else if (testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.OrdinalIgnoreCase)
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase))
