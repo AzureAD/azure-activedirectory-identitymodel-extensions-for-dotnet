@@ -61,7 +61,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             // Arrange
             AppContext.SetSwitch("Switch.Microsoft.IdentityModel.SuccessValidationLogsAsInformation", true);
-            
             var logger = new TestLogger();
             LogHelper.Logger = logger;
 
@@ -113,7 +112,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             // Arrange
             AppContext.SetSwitch("Switch.Microsoft.IdentityModel.SuccessValidationLogsAsInformation", true);
-            
             var logger = new TestLogger();
             LogHelper.Logger = logger;
 
@@ -166,7 +164,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             // Arrange
             AppContext.SetSwitch("Switch.Microsoft.IdentityModel.SuccessValidationLogsAsInformation", true);
-            
             var logger = new TestLogger();
             LogHelper.Logger = logger;
 
