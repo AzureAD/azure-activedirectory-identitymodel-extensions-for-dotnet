@@ -179,7 +179,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 samlToken.Assertion.CanonicalString,
                 validationParameters,
                 configuration,
-                callContext);
+                callContext,
+                _telemetryClient);
 
             if (!signatureResult.Succeeded)
                 return signatureResult.Error!.AddCurrentStackFrame();
