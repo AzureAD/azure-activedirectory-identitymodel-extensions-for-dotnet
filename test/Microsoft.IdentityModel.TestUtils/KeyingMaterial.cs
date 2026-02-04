@@ -1167,5 +1167,26 @@ namespace Microsoft.IdentityModel.TestUtils
             securePassword.MakeReadOnly();
             return securePassword;
         }
+
+        /// <summary>
+        /// Creates an RSA instance with the specified key size.
+        /// On .NET Framework, uses RSACng for better support of larger key sizes (3072, 4096).
+        /// On other platforms, uses the default RSA.Create().
+        /// </summary>
+        /// <param name="keySize">The key size in bits (e.g., 2048, 3072, 4096).</param>
+        /// <returns>An RSA instance with the specified key size.</returns>
+        public static RSA CreateRsa(int keySize)
+        {
+#if NET462 || NET472
+            // Use RSACng on .NET Framework for better support of 3072/4096 bit keys
+            var rsa = new System.Security.Cryptography.RSACng();
+            rsa.KeySize = keySize;
+            return rsa;
+#else
+            var rsa = RSA.Create();
+            rsa.KeySize = keySize;
+            return rsa;
+#endif
+        }
     }
 }
