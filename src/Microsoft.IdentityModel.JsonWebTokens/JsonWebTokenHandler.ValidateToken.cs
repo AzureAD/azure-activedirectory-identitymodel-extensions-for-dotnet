@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <remarks>This partial class contains methods and logic related to the validation of tokens.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
-        internal Telemetry.ITelemetryClient _telemetryClient = new TelemetryClient();
+        internal readonly Telemetry.ITelemetryClient _telemetryClient = new TelemetryClient();
 
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
@@ -344,7 +344,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal static bool ValidateSignature(JsonWebToken jsonWebToken, SecurityKey key, TokenValidationParameters validationParameters)
         {
-            return ValidateSignature(jsonWebToken, key, validationParameters, new Telemetry.NullTelemetryClient());
+            return ValidateSignature(jsonWebToken, key, validationParameters, Telemetry.NullTelemetryClient.Instance);
         }
 
         private static void RecordSignatureValidationTelemetry(

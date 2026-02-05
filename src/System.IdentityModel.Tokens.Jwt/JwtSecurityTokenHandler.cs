@@ -37,7 +37,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
 
-        internal Microsoft.IdentityModel.Telemetry.ITelemetryClient TelemetryClient = new TelemetryClient();
+        internal readonly Microsoft.IdentityModel.Telemetry.ITelemetryClient _telemetryClient = new TelemetryClient();
 
         /// <summary>
         /// Default claim type mapping for inbound claims.
@@ -891,7 +891,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     // where a new valid configuration was somehow published during validation time.
                     if (currentConfiguration != null)
                     {
-                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        _telemetryClient.IncrementConfigurationRefreshRequestCounter(
                             validationParameters.ConfigurationManager.MetadataAddress,
                             TelemetryConstants.Protocols.Lkg,
                             TelemetryConstants.Protocols.ConfigurationSourceUnknown);
@@ -1427,7 +1427,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, jwtToken, validationParameters, TelemetryClient))
+                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, jwtToken, validationParameters, _telemetryClient))
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                                 LogHelper.LogInformation(TokenLogMessages.IDX10242, jwtToken);
@@ -1513,7 +1513,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             RecordSignatureValidationTelemetry(
-                    TelemetryClient,
+                    _telemetryClient,
                     TelemetryConstants.SignatureValidationErrors.SigningKeyNotFound,
                     jwtToken,
                     jwtToken.SignatureAlgorithm,

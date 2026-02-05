@@ -357,7 +357,7 @@ public class CryptoTelemetryTests
         var result = CryptoTelemetry.TrackedIssuers;
 
         // Assert
-        Assert.Equal(3, result.Length); // Only non-null/non-empty entries
+        Assert.Equal(2, result.Length); // Only non-null/non-empty/non-whitespace entries
         Assert.Contains("issuer1.com", result);
         Assert.Contains("issuer2.com", result);
     }

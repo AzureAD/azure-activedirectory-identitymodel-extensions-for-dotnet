@@ -70,7 +70,7 @@ public static class CryptoTelemetry
                 else
                 {
                     _trackedIssuers = new HashSet<string>(
-                        value.Where(h => !string.IsNullOrEmpty(h)),
+                        value.Where(h => !string.IsNullOrWhiteSpace(h)),
                         StringComparer.OrdinalIgnoreCase);
                 }
             }
