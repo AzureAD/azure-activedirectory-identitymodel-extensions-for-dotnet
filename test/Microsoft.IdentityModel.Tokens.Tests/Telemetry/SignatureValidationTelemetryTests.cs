@@ -27,8 +27,7 @@ public class SignatureValidationTelemetryTests
     const string ExpectedIssuer = "Default.Issuer.com";
     public SignatureValidationTelemetryTests()
     {
-        CryptoTelemetry.RecordSignatureValidationTelemetry = true;
-        CryptoTelemetry.TrackedIssuers = new[] { ExpectedIssuer };
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { ExpectedIssuer });
     }
 
     [Fact]

@@ -22,8 +22,7 @@ public class SamlSignatureValidationTelemetryTests
 
     public SamlSignatureValidationTelemetryTests()
     {
-        CryptoTelemetry.RecordSignatureValidationTelemetry = true;
-        CryptoTelemetry.TrackedIssuers = new string[] { ExpectedIssuer };
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { ExpectedIssuer });
     }
 
     [Fact]

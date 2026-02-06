@@ -160,7 +160,7 @@ public class CryptoTelemetryTests
     public void ExtractHostFromIssuer_VariousFormats_ReturnsCorrectHost(string issuer, string expectedHost)
     {
         // Arrange
-        CryptoTelemetry.EnableIssuerHostCaching = false;
+        CryptoTelemetry.EnableSignatureValidationTelemetry(false, false, null);
 
         // Act
         var result = CryptoTelemetry.ExtractHostFromIssuer(issuer);
@@ -207,7 +207,7 @@ public class CryptoTelemetryTests
     public void GetTrackedIssuerOrOther_TrackedIssuer_ReturnsHost()
     {
         // Arrange
-        CryptoTelemetry.TrackedIssuers = new[] { "login.microsoftonline.com", "accounts.google.com" };
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { "login.microsoftonline.com", "accounts.google.com" });
         string issuer = "https://login.microsoftonline.com/tenant/v2.0";
 
         // Act
@@ -221,7 +221,7 @@ public class CryptoTelemetryTests
     public void GetTrackedIssuerOrOther_UntrackedIssuer_ReturnsOther()
     {
         // Arrange
-        CryptoTelemetry.TrackedIssuers = new[] { "login.microsoftonline.com" };
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { "login.microsoftonline.com" });
         string issuer = "https://example.com/path";
 
         // Act
@@ -235,7 +235,7 @@ public class CryptoTelemetryTests
     public void GetTrackedIssuerOrOther_NullIssuer_ReturnsOther()
     {
         // Arrange
-        CryptoTelemetry.TrackedIssuers = new[] { "login.microsoftonline.com" };
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { "login.microsoftonline.com" });
 
         // Act
         var result = CryptoTelemetry.GetTrackedIssuerOrOther(null);
@@ -248,7 +248,7 @@ public class CryptoTelemetryTests
     public void GetTrackedIssuerOrOther_EmptyIssuer_ReturnsOther()
     {
         // Arrange
-        CryptoTelemetry.TrackedIssuers = new[] { "login.microsoftonline.com" };
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { "login.microsoftonline.com" });
 
         // Act
         var result = CryptoTelemetry.GetTrackedIssuerOrOther(string.Empty);
@@ -261,7 +261,7 @@ public class CryptoTelemetryTests
     public void GetTrackedIssuerOrOther_NoTrackedIssuers_ReturnsOther()
     {
         // Arrange
-        CryptoTelemetry.TrackedIssuers = Array.Empty<string>();
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, Array.Empty<string>());
         string issuer = "https://login.microsoftonline.com/tenant/v2.0";
 
         // Act
@@ -275,7 +275,7 @@ public class CryptoTelemetryTests
     public void GetTrackedIssuerOrOther_CaseInsensitive_ReturnsHost()
     {
         // Arrange
-        CryptoTelemetry.TrackedIssuers = new[] { "login.microsoftonline.com" };
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { "login.microsoftonline.com" });
         string issuer = "https://LOGIN.MICROSOFTONLINE.COM/tenant/v2.0";
 
         // Act
@@ -289,7 +289,7 @@ public class CryptoTelemetryTests
     public void ExtractHostFromIssuer_WithCachingEnabled_UsesCachedValue()
     {
         // Arrange
-        CryptoTelemetry.EnableIssuerHostCaching = true;
+        CryptoTelemetry.EnableSignatureValidationTelemetry(false, true, null);
         string issuer = "https://cached-example.com/path";
 
         // Act - First call should cache
@@ -301,65 +301,7 @@ public class CryptoTelemetryTests
         Assert.Equal("cached-example.com", result2);
 
         // Cleanup
-        CryptoTelemetry.EnableIssuerHostCaching = false;
-    }
-
-    [Fact]
-    public void TrackedIssuers_SetAndGet_ReturnsCorrectValues()
-    {
-        // Arrange
-        var expectedIssuers = new[] { "issuer1.com", "issuer2.com", "issuer3.com" };
-
-        // Act
-        CryptoTelemetry.TrackedIssuers = expectedIssuers;
-        var result = CryptoTelemetry.TrackedIssuers;
-
-        // Assert
-        Assert.Equal(3, result.Length);
-        Assert.Contains("issuer1.com", result);
-        Assert.Contains("issuer2.com", result);
-        Assert.Contains("issuer3.com", result);
-    }
-
-    [Fact]
-    public void TrackedIssuers_SetNull_ClearsTrackedIssuers()
-    {
-        // Arrange
-        CryptoTelemetry.TrackedIssuers = new[] { "issuer1.com" };
-
-        // Act
-        CryptoTelemetry.TrackedIssuers = null;
-        var result = CryptoTelemetry.TrackedIssuers;
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public void TrackedIssuers_SetEmptyArray_ClearsTrackedIssuers()
-    {
-        // Arrange
-        CryptoTelemetry.TrackedIssuers = new[] { "issuer1.com" };
-
-        // Act
-        CryptoTelemetry.TrackedIssuers = Array.Empty<string>();
-        var result = CryptoTelemetry.TrackedIssuers;
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public void TrackedIssuers_SetWithNullOrEmptyEntries_FiltersThemOut()
-    {
-        // Arrange & Act
-        CryptoTelemetry.TrackedIssuers = new[] { "issuer1.com", null, "", "issuer2.com", "  " };
-        var result = CryptoTelemetry.TrackedIssuers;
-
-        // Assert
-        Assert.Equal(2, result.Length); // Only non-null/non-empty/non-whitespace entries
-        Assert.Contains("issuer1.com", result);
-        Assert.Contains("issuer2.com", result);
+        CryptoTelemetry.EnableSignatureValidationTelemetry(false, false, null);
     }
 
     [Fact]
@@ -445,12 +387,12 @@ public class CryptoTelemetryTests
     public void GetTrackedIssuerOrOther_MultipleTrackedIssuers_ReturnsCorrectResult(string issuer, string trackedHost)
     {
         // Arrange
-        CryptoTelemetry.TrackedIssuers = new[]
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[]
         {
             "login.microsoftonline.com",
             "accounts.google.com",
             "example.com"
-        };
+        });
 
         // Act
         var result = CryptoTelemetry.GetTrackedIssuerOrOther(issuer);
@@ -473,20 +415,6 @@ public class CryptoTelemetryTests
         CryptoTelemetry.RecordSignatureValidationTelemetry = false;
     }
 
-    [Fact]
-    public void EnableIssuerHostCaching_Property_CanBeSetAndGet()
-    {
-        // Act
-        CryptoTelemetry.EnableIssuerHostCaching = true;
-        var enabled = CryptoTelemetry.EnableIssuerHostCaching;
-
-        // Assert
-        Assert.True(enabled);
-
-        // Cleanup
-        CryptoTelemetry.EnableIssuerHostCaching = false;
-    }
-
     [Theory]
     [InlineData("https://login.microsoftonline.com:443/tenant", "login.microsoftonline.com")]
     [InlineData("https://example.com:8080/path/to/resource", "example.com")]
@@ -495,7 +423,7 @@ public class CryptoTelemetryTests
     public void ExtractHostFromIssuer_WithPortNumber_StripsPort(string issuer, string expectedHost)
     {
         // Arrange
-        CryptoTelemetry.EnableIssuerHostCaching = false;
+        CryptoTelemetry.EnableSignatureValidationTelemetry(false, false, null);
 
         // Act
         var result = CryptoTelemetry.ExtractHostFromIssuer(issuer);

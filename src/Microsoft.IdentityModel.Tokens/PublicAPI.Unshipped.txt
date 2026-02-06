@@ -217,12 +217,7 @@ override Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey.ToStr
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.Equals(object? obj) -> bool
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.GetHashCode() -> int
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ToString() -> string!
-static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.EnableIssuerHostCaching.get -> bool
-static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.EnableIssuerHostCaching.set -> void
-static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.RecordSignatureValidationTelemetry.get -> bool
-static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.RecordSignatureValidationTelemetry.set -> void
-static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.TrackedIssuers.get -> string![]!
-static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.TrackedIssuers.set -> void
+static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.EnableSignatureValidationTelemetry(bool enable, bool cacheIssuer, string![]? trackedIssuers) -> void
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer right) -> bool
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer right) -> bool
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime right) -> bool

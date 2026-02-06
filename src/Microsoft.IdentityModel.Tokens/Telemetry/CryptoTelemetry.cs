@@ -19,25 +19,26 @@ namespace Microsoft.IdentityModel.Telemetry;
 /// </summary>
 public static class CryptoTelemetry
 {
-    /// <summary>
-    /// Gets or sets a value indicating whether telemetry data is recorded for signature validation events.
-    /// </summary>
-    /// <remarks>When set to <see langword="true"/>, telemetry related to signature validation is collected,
-    /// which can assist with monitoring and diagnostics.</remarks>
-    public static bool RecordSignatureValidationTelemetry { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether issuer host extraction results should be cached.
-    /// </summary>
-    /// <remarks>
-    /// When enabled, extracted hosts are cached to avoid repeated parsing and string allocations.
-    /// This is particularly beneficial for services with always-enabled telemetry and a limited set of issuers.
-    /// The cache is bounded to prevent unbounded memory growth.
-    /// </remarks>
-    public static bool EnableIssuerHostCaching { get; set; }
-
+    internal static bool RecordSignatureValidationTelemetry { get; set; }
+    private static bool _enableIssuerHostCaching { get; set; }
     private static volatile string[] _trackedIssuersArray = Array.Empty<string>();
     private const string OtherIssuersLabel = "other";
+
+    /// <summary>
+    /// Enables or disables telemetry for signature validation and configures related settings.
+    /// </summary>
+    /// <param name="enable">Indicates whether to enable signature validation telemetry.</param>
+    /// <param name="cacheIssuer">Indicates whether to cache issuer hosts for telemetry.</param>
+    /// <param name="trackedIssuers">An optional list of issuer hosts to track in telemetry. Issuers not in this list will be reported as "other".</param>
+    public static void EnableSignatureValidationTelemetry(
+        bool enable,
+        bool cacheIssuer,
+        string[]? trackedIssuers)
+    {
+        RecordSignatureValidationTelemetry = enable;
+        _enableIssuerHostCaching = cacheIssuer;
+        TrackedIssuers = trackedIssuers ?? Array.Empty<string>();
+    }
 
     /// <summary>
     /// Gets or sets the allowlist of issuer hosts to track in telemetry.
@@ -48,7 +49,7 @@ public static class CryptoTelemetry
     /// <para>Example: new[] { "login.microsoftonline.com", "accounts.google.com" }</para>
     /// </remarks>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Simple configuration API for setting allowlist")]
-    public static string[] TrackedIssuers
+    private static string[] TrackedIssuers
     {
         get => _trackedIssuersArray;
         set
@@ -192,13 +193,13 @@ public static class CryptoTelemetry
             return string.Empty;
 
         // Fast path: check cache if enabled
-        if (EnableIssuerHostCaching && _issuerHostCache.TryGetValue(issuer, out string? cachedHost))
+        if (_enableIssuerHostCaching && _issuerHostCache.TryGetValue(issuer, out string? cachedHost))
             return cachedHost;
 
         string host = ExtractHostFromIssuerCore(issuer);
 
         // Store in cache if enabled and not at capacity
-        if (EnableIssuerHostCaching && _issuerHostCache.Count < MaxCacheSize)
+        if (_enableIssuerHostCaching && _issuerHostCache.Count < MaxCacheSize)
             _issuerHostCache.TryAdd(issuer, host);
 
         return host;
@@ -222,10 +223,9 @@ public static class CryptoTelemetry
         if (string.IsNullOrWhiteSpace(host))
             return OtherIssuersLabel;
 
-        if (trackedIssuers.Contains(host, StringComparer.OrdinalIgnoreCase))
-            return host;
-
-        return OtherIssuersLabel;
+        return trackedIssuers.Contains(host, StringComparer.OrdinalIgnoreCase)
+            ? host
+            : OtherIssuersLabel;
     }
 
     private static string ExtractHostFromIssuerCore(string issuer)
