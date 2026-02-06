@@ -99,6 +99,14 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
+        /// When enabled, success validation logs (IDX10239 for lifetime valid and IDX10234 for audience validated) 
+        /// will be logged at Informational level instead of Verbose level. This is for backward compatibility.
+        /// </summary>
+        internal const string SuccessValidationLogsAsInformationSwitch = "Switch.Microsoft.IdentityModel.SuccessValidationLogsAsInformation";
+        private static bool? _successValidationLogsAsInformation;
+        internal static bool SuccessValidationLogsAsInformation => _successValidationLogsAsInformation ??= (AppContext.TryGetSwitch(SuccessValidationLogsAsInformationSwitch, out bool successLogsAsInfo) && successLogsAsInfo);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -123,6 +131,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
+
+            _successValidationLogsAsInformation = null;
+            AppContext.SetSwitch(SuccessValidationLogsAsInformationSwitch, false);
         }
     }
 }
