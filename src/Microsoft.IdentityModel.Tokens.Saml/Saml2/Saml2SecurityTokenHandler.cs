@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         private Saml2Serializer _serializer = new Saml2Serializer();
         private string _actorClaimName = DefaultActorClaimName;
 
-        internal readonly Telemetry.ITelemetryClient _telemetryClient = new Telemetry.TelemetryClient();
+        internal Telemetry.ITelemetryClient _telemetryClient = new Telemetry.TelemetryClient();
 
         /// <summary>
         /// Default value of the Actor Claim Name used when processing actor claims.

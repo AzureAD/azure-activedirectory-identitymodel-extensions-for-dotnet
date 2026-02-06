@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private SamlSerializer _serializer = new SamlSerializer();
 
-        internal readonly Telemetry.ITelemetryClient _telemetryClient = new Telemetry.TelemetryClient();
+        internal Telemetry.ITelemetryClient _telemetryClient = new Telemetry.TelemetryClient();
 
         #region fields
         /// <summary>

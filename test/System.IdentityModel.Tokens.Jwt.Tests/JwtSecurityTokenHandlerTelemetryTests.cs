@@ -42,7 +42,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = validationParameters.ConfigurationManager;
                 var handler = new JwtSecurityTokenHandler()
                 {
-                    TelemetryClient = testTelemetryClient
+                    _telemetryClient = testTelemetryClient
                 };
                 handler.ValidateToken(Default.AsymmetricJws, validationParameters, out _);
             }
