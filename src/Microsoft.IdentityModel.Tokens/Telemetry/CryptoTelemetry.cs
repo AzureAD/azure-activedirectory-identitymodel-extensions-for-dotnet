@@ -4,7 +4,6 @@
 #nullable enable
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -37,8 +36,7 @@ public static class CryptoTelemetry
     /// </remarks>
     public static bool EnableIssuerHostCaching { get; set; }
 
-    private static HashSet<string> _trackedIssuers = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly object _trackedIssuersLock = new();
+    private static volatile string[] _trackedIssuersArray = Array.Empty<string>();
     private const string OtherIssuersLabel = "other";
 
     /// <summary>
@@ -52,27 +50,19 @@ public static class CryptoTelemetry
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Simple configuration API for setting allowlist")]
     public static string[] TrackedIssuers
     {
-        get
-        {
-            lock (_trackedIssuersLock)
-            {
-                return _trackedIssuers.ToArray();
-            }
-        }
+        get => _trackedIssuersArray;
         set
         {
-            lock (_trackedIssuersLock)
+            if (value == null || value.Length == 0)
             {
-                if (value == null || value.Length == 0)
-                {
-                    _trackedIssuers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    _trackedIssuers = new HashSet<string>(
-                        value.Where(h => !string.IsNullOrWhiteSpace(h)),
-                        StringComparer.OrdinalIgnoreCase);
-                }
+                _trackedIssuersArray = Array.Empty<string>();
+            }
+            else
+            {
+                _trackedIssuersArray = value
+                    .Where(h => !string.IsNullOrWhiteSpace(h))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
             }
         }
     }
@@ -222,19 +212,20 @@ public static class CryptoTelemetry
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string GetTrackedIssuerOrOther(string issuer)
     {
-        if (string.IsNullOrEmpty(issuer))
+        string[] trackedIssuers = TrackedIssuers;
+
+        if (trackedIssuers.Length == 0 || string.IsNullOrWhiteSpace(issuer))
             return OtherIssuersLabel;
 
         string host = ExtractHostFromIssuer(issuer);
 
-        if (string.IsNullOrEmpty(host))
+        if (string.IsNullOrWhiteSpace(host))
             return OtherIssuersLabel;
 
-        // Check if this issuer is in the tracked list
-        lock (_trackedIssuersLock)
-        {
-            return _trackedIssuers.Contains(host) ? host : OtherIssuersLabel;
-        }
+        if (trackedIssuers.Contains(host, StringComparer.OrdinalIgnoreCase))
+            return host;
+
+        return OtherIssuersLabel;
     }
 
     private static string ExtractHostFromIssuerCore(string issuer)
