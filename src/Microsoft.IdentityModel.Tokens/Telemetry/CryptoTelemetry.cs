@@ -3,7 +3,6 @@
 
 #nullable enable
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -20,7 +19,6 @@ namespace Microsoft.IdentityModel.Telemetry;
 public static class CryptoTelemetry
 {
     internal static bool RecordSignatureValidationTelemetry { get; set; }
-    private static bool _enableIssuerHostCaching { get; set; }
     private static volatile string[] _trackedIssuersArray = Array.Empty<string>();
     private const string OtherIssuersLabel = "other";
 
@@ -28,15 +26,12 @@ public static class CryptoTelemetry
     /// Enables or disables telemetry for signature validation and configures related settings.
     /// </summary>
     /// <param name="enable">Indicates whether to enable signature validation telemetry.</param>
-    /// <param name="cacheIssuer">Indicates whether to cache issuer hosts for telemetry.</param>
     /// <param name="trackedIssuers">An optional list of issuer hosts to track in telemetry. Issuers not in this list will be reported as "other".</param>
     public static void EnableSignatureValidationTelemetry(
         bool enable,
-        bool cacheIssuer,
         string[]? trackedIssuers)
     {
         RecordSignatureValidationTelemetry = enable;
-        _enableIssuerHostCaching = cacheIssuer;
         TrackedIssuers = trackedIssuers ?? Array.Empty<string>();
     }
 
@@ -48,7 +43,6 @@ public static class CryptoTelemetry
     /// <para>When set to null or empty, all issuers will be reported as "other".</para>
     /// <para>Example: new[] { "login.microsoftonline.com", "accounts.google.com" }</para>
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Simple configuration API for setting allowlist")]
     private static string[] TrackedIssuers
     {
         get => _trackedIssuersArray;
@@ -67,9 +61,6 @@ public static class CryptoTelemetry
             }
         }
     }
-
-    private static readonly ConcurrentDictionary<string, string> _issuerHostCache = new();
-    private const int MaxCacheSize = 1000;
 
 #if NET8_0_OR_GREATER
     private static readonly SearchValues<char> _hostDelimiters = SearchValues.Create(['/', '?', ':']);
@@ -186,25 +177,6 @@ public static class CryptoTelemetry
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string ExtractHostFromIssuer(string issuer)
-    {
-        if (string.IsNullOrEmpty(issuer))
-            return string.Empty;
-
-        // Fast path: check cache if enabled
-        if (_enableIssuerHostCaching && _issuerHostCache.TryGetValue(issuer, out string? cachedHost))
-            return cachedHost;
-
-        string host = ExtractHostFromIssuerCore(issuer);
-
-        // Store in cache if enabled and not at capacity
-        if (_enableIssuerHostCaching && _issuerHostCache.Count < MaxCacheSize)
-            _issuerHostCache.TryAdd(issuer, host);
-
-        return host;
-    }
-
     /// <summary>
     /// Gets the issuer host for telemetry, returning "other" if not in the tracked issuers allowlist.
     /// </summary>
@@ -228,8 +200,11 @@ public static class CryptoTelemetry
             : OtherIssuersLabel;
     }
 
-    private static string ExtractHostFromIssuerCore(string issuer)
+    internal static string ExtractHostFromIssuer(string issuer)
     {
+        if (string.IsNullOrEmpty(issuer))
+            return string.Empty;
+
         // Skip past the scheme (e.g., "http://", "https://") if present.
 #if NET6_0_OR_GREATER
         // On .NET 6+, string literals can be implicitly converted to ReadOnlySpan<char>

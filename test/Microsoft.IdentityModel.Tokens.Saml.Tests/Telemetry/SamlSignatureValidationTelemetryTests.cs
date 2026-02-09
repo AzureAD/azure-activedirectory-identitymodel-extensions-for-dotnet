@@ -22,7 +22,7 @@ public class SamlSignatureValidationTelemetryTests
 
     public SamlSignatureValidationTelemetryTests()
     {
-        CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { ExpectedIssuer });
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { ExpectedIssuer });
     }
 
     [Fact]

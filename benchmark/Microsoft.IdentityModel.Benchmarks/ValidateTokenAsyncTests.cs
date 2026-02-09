@@ -237,7 +237,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryDisabled))]
         public void Setup_TelemetryDisabled()
         {
-            CryptoTelemetry.EnableSignatureValidationTelemetry(false, false, null);
+            CryptoTelemetry.EnableSignatureValidationTelemetry(false, null);
         }
 
         [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark(Baseline = true)]
@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledNoTracking))]
         public void Setup_TelemetryEnabledNoTracking()
         {
-            CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, null);
+            CryptoTelemetry.EnableSignatureValidationTelemetry(true, null);
         }
 
         [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark]
@@ -271,28 +271,11 @@ namespace Microsoft.IdentityModel.Benchmarks
         [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithTracking))]
         public void Setup_TelemetryEnabledWithTracking()
         {
-            CryptoTelemetry.EnableSignatureValidationTelemetry(true, false, new[] { "www.contoso.com" });
+            CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "www.contoso.com" });
         }
 
         [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithTracking()
-        {
-            TokenValidationResult result = null;
-            for (int i = 0; i < IterationCount; i++)
-            {
-                result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
-            }
-            return result;
-        }
-
-        [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithCaching))]
-        public void Setup_TelemetryEnabledWithCaching()
-        {
-            CryptoTelemetry.EnableSignatureValidationTelemetry(true, true, new[] { "www.contoso.com" });
-        }
-
-        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithCaching()
         {
             TokenValidationResult result = null;
             for (int i = 0; i < IterationCount; i++)
