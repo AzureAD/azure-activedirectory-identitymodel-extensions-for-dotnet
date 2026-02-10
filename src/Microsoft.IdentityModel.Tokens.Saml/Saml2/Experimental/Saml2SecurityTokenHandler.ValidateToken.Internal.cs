@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 validationParameters,
                 configuration,
                 callContext,
-                _telemetryClient);
+                TelemetryClient);
 
             if (!signatureResult.Succeeded)
                 return signatureResult.Error!.AddCurrentStackFrame();

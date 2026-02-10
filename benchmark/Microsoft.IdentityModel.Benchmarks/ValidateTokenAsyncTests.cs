@@ -196,15 +196,10 @@ namespace Microsoft.IdentityModel.Benchmarks
     }
 
     // ===== Telemetry Impact Benchmarks =====
-
-    public enum TelemetryConfiguration
-    {
-        Disabled,
-        EnabledNoTracking,
-        EnabledWithTracking,
-        EnabledWithCaching
-    }
-
+    // "Tracking" in this context refers to tracking signature validation for specific issuer hosts.
+    // When enabled, telemetry collects data for the configured hosts (e.g., "contoso.com").
+    // Every other host is reported as "other" to avoid excessive cardinality in telemetry.
+    // These benchmarks measure the performance impact of enabling telemetry overall, and of tracking specific hosts.
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
     public class ValidateTokenAsyncTests_TelemetryImpact
     {
@@ -240,15 +235,10 @@ namespace Microsoft.IdentityModel.Benchmarks
             CryptoTelemetry.EnableSignatureValidationTelemetry(false, null);
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark(Baseline = true)]
+        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark(Baseline = true, OperationsPerInvoke = IterationCount)]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryDisabled()
         {
-            TokenValidationResult result = null;
-            for (int i = 0; i < IterationCount; i++)
-            {
-                result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
-            }
-            return result;
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
         }
 
         [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledNoTracking))]
@@ -257,32 +247,22 @@ namespace Microsoft.IdentityModel.Benchmarks
             CryptoTelemetry.EnableSignatureValidationTelemetry(true, null);
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark]
+        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark(OperationsPerInvoke = IterationCount)]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledNoTracking()
         {
-            TokenValidationResult result = null;
-            for (int i = 0; i < IterationCount; i++)
-            {
-                result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
-            }
-            return result;
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
         }
 
         [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithTracking))]
         public void Setup_TelemetryEnabledWithTracking()
         {
-            CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "www.contoso.com" });
+            CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "contoso.com" });
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark]
+        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark(OperationsPerInvoke = IterationCount)]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithTracking()
         {
-            TokenValidationResult result = null;
-            for (int i = 0; i < IterationCount; i++)
-            {
-                result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
-            }
-            return result;
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
         }
     }
 }

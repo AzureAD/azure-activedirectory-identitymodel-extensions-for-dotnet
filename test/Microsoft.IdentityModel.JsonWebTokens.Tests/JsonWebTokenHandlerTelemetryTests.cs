@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var handler = new JsonWebTokenHandler()
                 {
-                    _telemetryClient = testTelemetryClient
+                    TelemetryClient = testTelemetryClient
                 };
                 var jwt = handler.ReadJsonWebToken(Default.AsymmetricJws);
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = validationParameters.ConfigurationManager;

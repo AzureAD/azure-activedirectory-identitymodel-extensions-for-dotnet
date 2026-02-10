@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private SamlSerializer _serializer = new SamlSerializer();
 
-        internal Telemetry.ITelemetryClient _telemetryClient = new Telemetry.TelemetryClient();
+        internal Telemetry.ITelemetryClient TelemetryClient = new Telemetry.TelemetryClient();
 
         #region fields
         /// <summary>
@@ -1096,7 +1096,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
 
                         RecordSignatureValidationTelemetry(
-                            _telemetryClient,
+                            TelemetryClient,
                             TelemetryConstants.SignatureValidationErrors.None,
                             samlToken,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
@@ -1111,7 +1111,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     catch (Exception ex)
                     {
                         RecordSignatureValidationTelemetry(
-                            _telemetryClient,
+                            TelemetryClient,
                             TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
                             samlToken,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,

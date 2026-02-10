@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <remarks>This partial class contains methods and logic related to the validation of tokens.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
-        internal Telemetry.ITelemetryClient _telemetryClient = new TelemetryClient();
+        internal Telemetry.ITelemetryClient TelemetryClient = new TelemetryClient();
 
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning disable CA1031 // Do not catch general exception types
                     try
                     {
-                        if (ValidateSignature(jwtToken, key, validationParameters, _telemetryClient))
+                        if (ValidateSignature(jwtToken, key, validationParameters, TelemetryClient))
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                                 LogHelper.LogInformation(TokenLogMessages.IDX10242, jwtToken);
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             RecordSignatureValidationTelemetry(
-                _telemetryClient,
+                TelemetryClient,
                 TelemetryConstants.SignatureValidationErrors.SigningKeyNotFound,
                 jwtToken,
                 null);
@@ -658,7 +658,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // where a new valid configuration was somehow published during validation time.
                     if (currentConfiguration != null)
                     {
-                        _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                             validationParameters.ConfigurationManager.MetadataAddress,
                             TelemetryConstants.Protocols.Lkg,
                             TelemetryConstants.Protocols.ConfigurationSourceUnknown);

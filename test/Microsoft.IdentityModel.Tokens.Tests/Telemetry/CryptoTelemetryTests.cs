@@ -76,213 +76,104 @@ public class CryptoTelemetryTests
     }
 #endif
 
-    [Fact]
-    public void GetKeyAlgorithmId_X509SecurityKey_Rsa2048_ReturnsCorrectId()
+    [Theory]
+    [MemberData(nameof(GetKeyAlgorithmId_SecurityKey_TestData))]
+    public void GetKeyAlgorithmId_SecurityKey_ReturnsCorrectId(SecurityKey key, string expectedId)
     {
-        // Arrange
-        var x509Key = KeyingMaterial.DefaultX509Key_2048;
-
         // Act
-        var result = CryptoTelemetry.GetKeyAlgorithmId(x509Key);
+        var result = CryptoTelemetry.GetKeyAlgorithmId(key);
 
         // Assert
-        Assert.Equal("RSA-2048", result);
+        Assert.Equal(expectedId, result);
     }
 
-    [Fact]
-    public void GetKeyAlgorithmId_RsaSecurityKey_4096_ReturnsCorrectId()
+    public static TheoryData<SecurityKey, string> GetKeyAlgorithmId_SecurityKey_TestData
     {
-        // Arrange
-        var rsaKey = KeyingMaterial.RsaSecurityKey_4096;
+        get
+        {
+            var data = new TheoryData<SecurityKey, string>
+            {
+                // Null key
+                { null, "NO-KEY" },
 
-        // Act
-        var result = CryptoTelemetry.GetKeyAlgorithmId(rsaKey);
+                // X509SecurityKey
+                { KeyingMaterial.DefaultX509Key_2048, "RSA-2048" },
 
-        // Assert
-        Assert.Equal("RSA-4096", result);
-    }
+                // RsaSecurityKey
+                { KeyingMaterial.RsaSecurityKey_4096, "RSA-4096" },
 
-    [Fact]
-    public void GetKeyAlgorithmId_JsonWebKey_Rsa_ReturnsCorrectId()
-    {
-        // Arrange
-        var jwk = KeyingMaterial.JsonWebKeyRsa_2048;
+                // JsonWebKey - RSA
+                { KeyingMaterial.JsonWebKeyRsa_2048, "RSA-2048" },
 
-        // Act
-        var result = CryptoTelemetry.GetKeyAlgorithmId(jwk);
+                // JsonWebKey - Symmetric
+                { KeyingMaterial.JsonWebKeySymmetric256, "SYM-256" },
 
-        // Assert
-        Assert.Equal("RSA-2048", result);
-    }
-
-    [Fact]
-    public void GetKeyAlgorithmId_JsonWebKey_Symmetric_ReturnsCorrectId()
-    {
-        // Arrange
-        var jwk = KeyingMaterial.JsonWebKeySymmetric256;
-
-        // Act
-        var result = CryptoTelemetry.GetKeyAlgorithmId(jwk);
-
-        // Assert
-        Assert.Equal("SYM-256", result);
-    }
+                // JsonWebKey with ConvertedSecurityKey
+                {
+                    new JsonWebKey
+                    {
+                        Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                        N = Base64UrlEncoder.Encode(KeyingMaterial.RsaParameters_2048.Modulus),
+                        E = Base64UrlEncoder.Encode(KeyingMaterial.RsaParameters_2048.Exponent),
+                        ConvertedSecurityKey = KeyingMaterial.RsaSecurityKey_2048
+                    },
+                    "RSA-2048"
+                }
+            };
 
 #if !NET462 && !NET472 && !NETSTANDARD2_0
-    [Fact]
-    public void GetKeyAlgorithmId_JsonWebKey_ECDSA_ReturnsCorrectId()
-    {
-        // Arrange
-        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        var ecdsaKey = new ECDsaSecurityKey(ecdsa);
-        var jwk = JsonWebKeyConverter.ConvertFromECDsaSecurityKey(ecdsaKey);
-
-        // Act
-        var result = CryptoTelemetry.GetKeyAlgorithmId(jwk);
-
-        // Assert
-        Assert.Equal("ECDSA-P256", result);
-    }
+            // JsonWebKey - ECDSA (only on supported platforms)
+            using (var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256))
+            {
+                var ecdsaKey = new ECDsaSecurityKey(ecdsa);
+                var jwk = JsonWebKeyConverter.ConvertFromECDsaSecurityKey(ecdsaKey);
+                data.Add(jwk, "ECDSA-P256");
+            }
 #endif
 
-    [Fact]
-    public void GetKeyAlgorithmId_NullKey_ReturnsNoKey()
-    {
-        // Act
-        var result = CryptoTelemetry.GetKeyAlgorithmId(null);
-
-        // Assert
-        Assert.Equal("NO-KEY", result);
+            return data;
+        }
     }
 
     [Theory]
-    [MemberData(nameof(ExtractHostFromIssuerTestData))]
-    public void ExtractHostFromIssuer_VariousFormats_ReturnsCorrectHost(string issuer, string expectedHost)
+    [MemberData(nameof(GetTrackedIssuerOrOther_BasicScenarios_TestData))]
+    public void GetTrackedIssuerOrOther_BasicScenarios_ReturnsExpectedResult(string[] trackedIssuers, string issuer, string expectedResult)
     {
         // Arrange
-        CryptoTelemetry.EnableSignatureValidationTelemetry(false, null);
-
-        // Act
-        var result = CryptoTelemetry.ExtractHostFromIssuer(issuer);
-
-        // Assert
-        Assert.Equal(expectedHost, result);
-    }
-
-    public static TheoryData<string, string> ExtractHostFromIssuerTestData => new()
-    {
-        // Standard HTTPS URLs
-        { "https://login.microsoftonline.com/tenant/v2.0", "login.microsoftonline.com" },
-        { "https://accounts.google.com", "accounts.google.com" },
-        { "https://example.com:8080/path", "example.com" },
-        { "https://example.com:443", "example.com" },
-        
-        // HTTP URLs
-        { "http://localhost:5000/api", "localhost" },
-        { "http://example.com", "example.com" },
-        
-        // Without scheme
-        { "example.com/path", "example.com" },
-        { "example.com:8080", "example.com" },
-        
-        // With query parameters
-        { "https://example.com/path?query=value", "example.com" },
-        { "https://example.com:8080?query=value", "example.com" },
-        
-        // Edge cases
-        { "", "" },
-        { "https://", "" },
-        { "://example.com", "example.com" },
-        
-        // Complex paths
-        { "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration", "login.microsoftonline.com" },
-        { "https://accounts.google.com/.well-known/openid-configuration", "accounts.google.com" },
-        
-        // With port and path
-        { "https://localhost:5001/auth/token", "localhost" },
-        { "http://example.com:8080/api/v1/token", "example.com" },
-    };
-
-    [Fact]
-    public void GetTrackedIssuerOrOther_TrackedIssuer_ReturnsHost()
-    {
-        // Arrange
-        CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "login.microsoftonline.com", "accounts.google.com" });
-        string issuer = "https://login.microsoftonline.com/tenant/v2.0";
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, trackedIssuers);
 
         // Act
         var result = CryptoTelemetry.GetTrackedIssuerOrOther(issuer);
 
         // Assert
-        Assert.Equal("login.microsoftonline.com", result);
+        Assert.Equal(expectedResult, result);
     }
 
-    [Fact]
-    public void GetTrackedIssuerOrOther_UntrackedIssuer_ReturnsOther()
+    public static TheoryData<string[], string, string> GetTrackedIssuerOrOther_BasicScenarios_TestData
     {
-        // Arrange
-        CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "login.microsoftonline.com" });
-        string issuer = "https://example.com/path";
+        get
+        {
+            return new TheoryData<string[], string, string>
+            {
+                // Tracked issuer - returns host
+                { new[] { "login.microsoftonline.com", "accounts.google.com" }, "https://login.microsoftonline.com/tenant/v2.0", "login.microsoftonline.com" },
 
-        // Act
-        var result = CryptoTelemetry.GetTrackedIssuerOrOther(issuer);
+                // Untracked issuer - returns "other"
+                { new[] { "login.microsoftonline.com" }, "https://example.com/path", "other" },
 
-        // Assert
-        Assert.Equal("other", result);
-    }
+                // Null issuer - returns "other"
+                { new[] { "login.microsoftonline.com" }, null, "other" },
 
-    [Fact]
-    public void GetTrackedIssuerOrOther_NullIssuer_ReturnsOther()
-    {
-        // Arrange
-        CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "login.microsoftonline.com" });
+                // Empty issuer - returns "other"
+                { new[] { "login.microsoftonline.com" }, string.Empty, "other" },
 
-        // Act
-        var result = CryptoTelemetry.GetTrackedIssuerOrOther(null);
+                // No tracked issuers - returns "other"
+                { Array.Empty<string>(), "https://login.microsoftonline.com/tenant/v2.0", "other" },
 
-        // Assert
-        Assert.Equal("other", result);
-    }
-
-    [Fact]
-    public void GetTrackedIssuerOrOther_EmptyIssuer_ReturnsOther()
-    {
-        // Arrange
-        CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "login.microsoftonline.com" });
-
-        // Act
-        var result = CryptoTelemetry.GetTrackedIssuerOrOther(string.Empty);
-
-        // Assert
-        Assert.Equal("other", result);
-    }
-
-    [Fact]
-    public void GetTrackedIssuerOrOther_NoTrackedIssuers_ReturnsOther()
-    {
-        // Arrange
-        CryptoTelemetry.EnableSignatureValidationTelemetry(true, Array.Empty<string>());
-        string issuer = "https://login.microsoftonline.com/tenant/v2.0";
-
-        // Act
-        var result = CryptoTelemetry.GetTrackedIssuerOrOther(issuer);
-
-        // Assert
-        Assert.Equal("other", result);
-    }
-
-    [Fact]
-    public void GetTrackedIssuerOrOther_CaseInsensitive_ReturnsHost()
-    {
-        // Arrange
-        CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "login.microsoftonline.com" });
-        string issuer = "https://LOGIN.MICROSOFTONLINE.COM/tenant/v2.0";
-
-        // Act
-        var result = CryptoTelemetry.GetTrackedIssuerOrOther(issuer);
-
-        // Assert
-        Assert.Equal("LOGIN.MICROSOFTONLINE.COM", result);
+                // Case insensitive - returns tracked issuer (lowercase from allowlist)
+                { new[] { "login.microsoftonline.com" }, "https://LOGIN.MICROSOFTONLINE.COM/tenant/v2.0", "login.microsoftonline.com" }
+            };
+        }
     }
 
     [Fact]
@@ -363,9 +254,9 @@ public class CryptoTelemetryTests
 
     [Theory]
     [InlineData("https://login.microsoftonline.com/tenant/v2.0", "login.microsoftonline.com")]
-    [InlineData("https://ACCOUNTS.GOOGLE.COM/path", "ACCOUNTS.GOOGLE.COM")]
+    [InlineData("https://ACCOUNTS.GOOGLE.COM/path", "accounts.google.com")]
     [InlineData("https://example.com:8080", "example.com")]
-    public void GetTrackedIssuerOrOther_MultipleTrackedIssuers_ReturnsCorrectResult(string issuer, string trackedHost)
+    public void GetTrackedIssuerOrOther_MultipleTrackedIssuers_ReturnsCorrectResult(string issuer, string expectedTrackedHost)
     {
         // Arrange
         CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[]
@@ -378,39 +269,82 @@ public class CryptoTelemetryTests
         // Act
         var result = CryptoTelemetry.GetTrackedIssuerOrOther(issuer);
 
-        // Assert
-        Assert.Equal(trackedHost, result);
-    }
-
-    [Fact]
-    public void RecordSignatureValidationTelemetry_Property_CanBeSetAndGet()
-    {
-        // Act
-        CryptoTelemetry.RecordSignatureValidationTelemetry = true;
-        var enabled = CryptoTelemetry.RecordSignatureValidationTelemetry;
-
-        // Assert
-        Assert.True(enabled);
-
-        // Cleanup
-        CryptoTelemetry.RecordSignatureValidationTelemetry = false;
+        // Assert - Returns the tracked host from allowlist (case preserved from allowlist)
+        Assert.Equal(expectedTrackedHost, result);
     }
 
     [Theory]
-    [InlineData("https://login.microsoftonline.com:443/tenant", "login.microsoftonline.com")]
-    [InlineData("https://example.com:8080/path/to/resource", "example.com")]
-    [InlineData("https://api.example.com:9000?query=param", "api.example.com")]
-    [InlineData("http://localhost:5000", "localhost")]
-    public void ExtractHostFromIssuer_WithPortNumber_StripsPort(string issuer, string expectedHost)
+    [InlineData("https://notexample.com/path", "example.com")] // Substring match (false positive)
+    [InlineData("https://different.com/example.com/path", "example.com")] // Match in path (false positive)
+    [InlineData("https://example.com:8080/path", "example.com")] // With port
+    public void GetTrackedIssuerOrOther_IndexOfBehavior_ReturnsFalsePositives(string issuer, string expectedResult)
     {
-        // Arrange
-        CryptoTelemetry.EnableSignatureValidationTelemetry(false, null);
+        // Arrange - Current implementation uses IndexOf which can have false positives
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "example.com" });
 
         // Act
-        var result = CryptoTelemetry.ExtractHostFromIssuer(issuer);
+        var result = CryptoTelemetry.GetTrackedIssuerOrOther(issuer);
 
-        // Assert
-        Assert.Equal(expectedHost, result);
+        // Assert - Current implementation returns match even for false positives
+        // This demonstrates potential issues with the IndexOf approach
+        Assert.Equal(expectedResult, result);
+    }
+
+    [Theory]
+    [InlineData("https://notexample.com/path", "other")]
+    [InlineData("https://different.com/example.com/path", "other")]
+    [InlineData("https://example.com:8080/path", "https://example.com")]
+    public void GetTrackedIssuerOrOther_IndexOfBehavior_AvoidsFalsePositivesByUsingScheme(string issuer, string expectedResult)
+    {
+        // Arrange - Specifying tracked issuers with scheme to avoid false positives
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "https://example.com" });
+
+        // Act
+        var result = CryptoTelemetry.GetTrackedIssuerOrOther(issuer);
+
+        Assert.Equal(expectedResult, result);
+    }
+
+    [Theory]
+    [MemberData(nameof(EnableSignatureValidationTelemetry_Filtering_TestData))]
+    public void EnableSignatureValidationTelemetry_Filtering_ValidatesCorrectly(string[] inputTrackedIssuers, string testIssuer, string expectedResult)
+    {
+        // Arrange & Act
+        CryptoTelemetry.EnableSignatureValidationTelemetry(true, inputTrackedIssuers);
+
+        // Assert - Verify filtering behavior
+        var result = CryptoTelemetry.GetTrackedIssuerOrOther(testIssuer);
+        Assert.Equal(expectedResult, result);
+    }
+
+    public static TheoryData<string[], string, string> EnableSignatureValidationTelemetry_Filtering_TestData
+    {
+        get
+        {
+            return new TheoryData<string[], string, string>
+            {
+                // Duplicates are removed (case-insensitive)
+                {
+                    new[] { "login.microsoftonline.com", "LOGIN.MICROSOFTONLINE.COM", "accounts.google.com", "accounts.google.com" },
+                    "https://login.microsoftonline.com/tenant",
+                    "login.microsoftonline.com"
+                },
+
+                // Null/empty/whitespace values are filtered out (first host)
+                {
+                    new[] { "login.microsoftonline.com", null!, "", "   ", "accounts.google.com" },
+                    "https://login.microsoftonline.com/tenant",
+                    "login.microsoftonline.com"
+                },
+
+                // Null/empty/whitespace values are filtered out (second host)
+                {
+                    new[] { "login.microsoftonline.com", null!, "", "   ", "accounts.google.com" },
+                    "https://accounts.google.com/auth",
+                    "accounts.google.com"
+                }
+            };
+        }
     }
 
     /// <summary>

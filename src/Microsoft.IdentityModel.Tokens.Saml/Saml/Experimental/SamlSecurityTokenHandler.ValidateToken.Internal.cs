@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     validationParameters,
                     configuration,
                     callContext,
-                    _telemetryClient);
+                    TelemetryClient);
 
             if (!signatureResult.Succeeded)
                 return signatureResult.Error!.AddCurrentStackFrame();

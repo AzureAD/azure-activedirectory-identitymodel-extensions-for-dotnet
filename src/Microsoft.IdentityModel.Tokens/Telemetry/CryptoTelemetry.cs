@@ -4,11 +4,7 @@
 #nullable enable
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
-#if NET8_0_OR_GREATER
-using System.Buffers;
-#endif
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Telemetry;
@@ -61,10 +57,6 @@ public static class CryptoTelemetry
             }
         }
     }
-
-#if NET8_0_OR_GREATER
-    private static readonly SearchValues<char> _hostDelimiters = SearchValues.Create(['/', '?', ':']);
-#endif
 
     private static class KeyAlgorithmIds
     {
@@ -182,106 +174,17 @@ public static class CryptoTelemetry
     /// </summary>
     /// <param name="issuer">The full issuer URI.</param>
     /// <returns>The issuer host if in the allowlist, otherwise "other".</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string GetTrackedIssuerOrOther(string issuer)
     {
-        string[] trackedIssuers = TrackedIssuers;
-
-        if (trackedIssuers.Length == 0 || string.IsNullOrWhiteSpace(issuer))
+        if (TrackedIssuers.Length == 0 || string.IsNullOrWhiteSpace(issuer))
             return OtherIssuersLabel;
 
-        string host = ExtractHostFromIssuer(issuer);
-
-        if (string.IsNullOrWhiteSpace(host))
-            return OtherIssuersLabel;
-
-        return trackedIssuers.Contains(host, StringComparer.OrdinalIgnoreCase)
-            ? host
-            : OtherIssuersLabel;
-    }
-
-    internal static string ExtractHostFromIssuer(string issuer)
-    {
-        if (string.IsNullOrEmpty(issuer))
-            return string.Empty;
-
-        // Skip past the scheme (e.g., "http://", "https://") if present.
-#if NET6_0_OR_GREATER
-        // On .NET 6+, string literals can be implicitly converted to ReadOnlySpan<char>
-        ReadOnlySpan<char> issuerSpan = issuer;
-        int schemeIndex = issuerSpan.IndexOf("://");
-#else
-        // On older frameworks, explicit conversion is required
-        ReadOnlySpan<char> issuerSpan = issuer.AsSpan();
-        int schemeIndex = issuerSpan.IndexOf("://".AsSpan());
-#endif
-        if (schemeIndex >= 0)
-            issuerSpan = issuerSpan.Slice(schemeIndex + 3);
-
-#if NET8_0_OR_GREATER
-        // On .NET 8+, use SearchValues for optimized multi-character search
-        int firstDelimiterIndex = issuerSpan.IndexOfAny(_hostDelimiters);
-
-        if (firstDelimiterIndex < 0)
+        foreach (string trackedHost in TrackedIssuers)
         {
-            // No delimiters found - entire span is the host
-            return issuerSpan.ToString();
+            if (issuer.IndexOf(trackedHost, StringComparison.OrdinalIgnoreCase) >= 0)
+                return trackedHost;
         }
 
-        // Determine what delimiter was found and extract host accordingly
-        char delimiter = issuerSpan[firstDelimiterIndex];
-
-        if (delimiter == ':')
-        {
-            // Port delimiter found - check if there's a path/query after it
-            ReadOnlySpan<char> afterColon = issuerSpan.Slice(firstDelimiterIndex + 1);
-            int pathOrQuery = afterColon.IndexOfAny(['/', '?']);
-
-            if (pathOrQuery >= 0)
-            {
-                // There's a path/query after the port - host is before the colon
-                return issuerSpan.Slice(0, firstDelimiterIndex).ToString();
-            }
-            // Port at the end - host is before the colon
-            return issuerSpan.Slice(0, firstDelimiterIndex).ToString();
-        }
-
-        // Path or query delimiter found - extract host before it, strip port if present
-        ReadOnlySpan<char> hostPart = issuerSpan.Slice(0, firstDelimiterIndex);
-        int portIndex = hostPart.IndexOf(':');
-
-        if (portIndex > 0)
-            hostPart = hostPart.Slice(0, portIndex);
-
-        return hostPart.ToString();
-#else
-        // Find the end of the host (first '/' or '?', or end of string).
-        // Optimize for the common case where a path exists.
-        int hostEnd;
-        int pathStart = issuerSpan.IndexOf('/');
-        if (pathStart >= 0)
-        {
-            // Path found - use it as host end (query would come after path if present).
-            hostEnd = pathStart;
-        }
-        else
-        {
-            // No path - check for query parameter.
-            int queryStart = issuerSpan.IndexOf('?');
-            hostEnd = queryStart >= 0 ? queryStart : issuerSpan.Length;
-        }
-
-        if (hostEnd == 0)
-            return string.Empty;
-
-        ReadOnlySpan<char> host = issuerSpan.Slice(0, hostEnd);
-
-        // Strip port number to reduce cardinality (e.g., example.com:8080 -> example.com).
-        int portIndex = host.IndexOf(':');
-        if (portIndex > 0)
-            host = host.Slice(0, portIndex);
-
-        return host.ToString();
-#endif
+        return OtherIssuersLabel;
     }
 }

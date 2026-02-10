@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         private Saml2Serializer _serializer = new Saml2Serializer();
         private string _actorClaimName = DefaultActorClaimName;
 
-        internal Telemetry.ITelemetryClient _telemetryClient = new Telemetry.TelemetryClient();
+        internal Telemetry.ITelemetryClient TelemetryClient = new Telemetry.TelemetryClient();
 
         /// <summary>
         /// Default value of the Actor Claim Name used when processing actor claims.
@@ -478,7 +478,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
 
                         RecordSignatureValidationTelemetry(
-                            _telemetryClient,
+                            TelemetryClient,
                             TelemetryConstants.SignatureValidationErrors.None,
                             samlToken,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
@@ -493,7 +493,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     catch (Exception ex)
                     {
                         RecordSignatureValidationTelemetry(
-                            _telemetryClient,
+                            TelemetryClient,
                             TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
                             samlToken,
                             samlToken.Assertion.Signature.SignedInfo.SignatureMethod,

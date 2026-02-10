@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return ValidateSignatureUsingAllKeys(jwtToken, validationParameters, configuration, callContext);
 
             RecordSignatureValidationTelemetry(
-                _telemetryClient,
+                TelemetryClient,
                 TelemetryConstants.SignatureValidationErrors.SigningKeyNotFound,
                 jwtToken,
                 key: null);
@@ -237,7 +237,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Alg, key))
             {
                 RecordSignatureValidationTelemetry(
-                    _telemetryClient,
+                    TelemetryClient,
                     TelemetryConstants.SignatureValidationErrors.AlgorithmNotSupported,
                     jsonWebToken,
                     key);
@@ -257,7 +257,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (signatureProvider == null)
                 {
                     RecordSignatureValidationTelemetry(
-                        _telemetryClient,
+                        TelemetryClient,
                         TelemetryConstants.SignatureValidationErrors.SignatureProviderCreationFailed,
                         jsonWebToken,
                         key);
@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (valid)
                 {
                     RecordSignatureValidationTelemetry(
-                        _telemetryClient,
+                        TelemetryClient,
                         TelemetryConstants.SignatureValidationErrors.None,
                         jsonWebToken,
                         key);
@@ -295,7 +295,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 else
                 {
                     RecordSignatureValidationTelemetry(
-                        _telemetryClient,
+                        TelemetryClient,
                         TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
                         jsonWebToken,
                         key);
@@ -313,7 +313,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 RecordSignatureValidationTelemetry(
-                    _telemetryClient,
+                    TelemetryClient,
                     TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
                     jsonWebToken,
                     key);
