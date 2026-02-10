@@ -150,8 +150,16 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
                     {
-                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                            LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                        if (AppContextSwitches.SuccessValidationLogsAsInformation)
+                        {
+                            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                                LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                        }
+                        else
+                        {
+                            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                                LogHelper.LogVerbose(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                        }
 
                         return true;
                     }
@@ -208,8 +216,16 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (string.CompareOrdinal(validAudience, 0, tokenAudience, 0, length) == 0)
             {
-                if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                if (AppContextSwitches.SuccessValidationLogsAsInformation)
+                {
+                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                        LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                }
+                else
+                {
+                    if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                        LogHelper.LogVerbose(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                }
 
                 return true;
             }
