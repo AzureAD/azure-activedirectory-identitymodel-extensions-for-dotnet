@@ -169,9 +169,6 @@ public class CryptoTelemetryTests
 
                 // No tracked issuers - returns "other"
                 { Array.Empty<string>(), "https://login.microsoftonline.com/tenant/v2.0", "other" },
-
-                // Case insensitive - returns tracked issuer (lowercase from allowlist)
-                { new[] { "login.microsoftonline.com" }, "https://LOGIN.MICROSOFTONLINE.COM/tenant/v2.0", "login.microsoftonline.com" }
             };
         }
     }
@@ -254,7 +251,6 @@ public class CryptoTelemetryTests
 
     [Theory]
     [InlineData("https://login.microsoftonline.com/tenant/v2.0", "login.microsoftonline.com")]
-    [InlineData("https://ACCOUNTS.GOOGLE.COM/path", "accounts.google.com")]
     [InlineData("https://example.com:8080", "example.com")]
     public void GetTrackedIssuerOrOther_MultipleTrackedIssuers_ReturnsCorrectResult(string issuer, string expectedTrackedHost)
     {

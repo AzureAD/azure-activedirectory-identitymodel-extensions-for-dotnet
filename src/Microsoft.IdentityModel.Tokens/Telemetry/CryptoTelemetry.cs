@@ -181,7 +181,7 @@ public static class CryptoTelemetry
 
         foreach (string trackedHost in TrackedIssuers)
         {
-            if (issuer.IndexOf(trackedHost, StringComparison.OrdinalIgnoreCase) >= 0)
+            if (issuer.IndexOf(trackedHost, StringComparison.Ordinal) >= 0)
                 return trackedHost;
         }
 
