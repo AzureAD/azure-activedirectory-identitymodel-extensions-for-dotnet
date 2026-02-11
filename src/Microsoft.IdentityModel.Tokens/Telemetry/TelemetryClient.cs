@@ -51,6 +51,27 @@ namespace Microsoft.IdentityModel.Telemetry
             TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
+        /// <summary>
+        /// Increments the signature validation counter with algorithm and key size details.
+        /// </summary>
+        /// <param name="errorType">The error type constant from <see cref="TelemetryConstants.SignatureValidationErrors"/>. Use <see cref="TelemetryConstants.SignatureValidationErrors.None"/> for successful validations.</param>
+        /// <param name="issuer">The token issuer.</param>
+        /// <param name="algorithm">The signature algorithm used (e.g., RS256, ES256, HS256).</param>
+        /// <param name="key">The security key used for signature validation.</param>
+        public void IncrementSignatureValidationCounter(string errorType, string issuer, string algorithm, SecurityKey key)
+        {
+            var tagList = new TagList()
+            {
+                { TelemetryConstants.IdentityModelVersionTag, ClientVer },
+                { TelemetryConstants.AlgorithmTag, algorithm },
+                { TelemetryConstants.KeyAlgorithmTag, CryptoTelemetry.GetKeyAlgorithmId(key) },
+                { TelemetryConstants.IssuerTag, CryptoTelemetry.GetTrackedIssuerOrOther(issuer) },
+                { TelemetryConstants.ErrorTag, errorType }
+            };
+
+            TelemetryDataRecorder.IncrementSignatureValidationCounter(tagList);
+        }
+
         public void LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, TimeSpan operationDuration)
         {
             var tagList = new TagList()

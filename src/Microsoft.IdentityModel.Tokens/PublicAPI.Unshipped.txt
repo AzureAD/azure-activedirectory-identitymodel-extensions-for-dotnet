@@ -1,6 +1,7 @@
 #nullable enable
 const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultAuthenticationType = "AuthenticationTypes.Federation" -> string!
 const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultMaximumTokenSizeInBytes = 256000 -> int
+Microsoft.IdentityModel.Telemetry.CryptoTelemetry
 Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationDelegate
 Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError
 Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError.AlgorithmValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailure, System.Diagnostics.StackFrame! stackFrame, string? invalidAlgorithm) -> void
@@ -216,6 +217,7 @@ override Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey.ToStr
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.Equals(object? obj) -> bool
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.GetHashCode() -> int
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ToString() -> string!
+static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.EnableSignatureValidationTelemetry(bool enable, string![]? trackedIssuers) -> void
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer right) -> bool
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer right) -> bool
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime right) -> bool

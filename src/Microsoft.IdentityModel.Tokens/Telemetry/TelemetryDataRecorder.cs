@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.IdentityModel.Telemetry
 {
@@ -33,9 +34,16 @@ namespace Microsoft.IdentityModel.Telemetry
         /// <summary>
         /// Counter to capture background refresh failures in the ConfigurationManager.
         /// </summary>
-        internal static readonly Counter<long> BackgroundConfigurationRefreshFailureCounter = IdentityModelMeter.CreateCounter<long>(BackgroundConfigurationRefreshFailureCounterName, description: BackgroundConfigurationRefreshFailureCounterDescription);
         internal const string BackgroundConfigurationRefreshFailureCounterName = "IdentityModelConfigurationManagerBackgroundRefreshFailure";
         internal const string BackgroundConfigurationRefreshFailureCounterDescription = "Counter capturing configuration manager background refresh failures.";
+        internal static readonly Counter<long> BackgroundConfigurationRefreshFailureCounter = IdentityModelMeter.CreateCounter<long>(BackgroundConfigurationRefreshFailureCounterName, description: BackgroundConfigurationRefreshFailureCounterDescription);
+
+        /// <summary>
+        /// Counter to capture signature validation results along with algorithm and key size.
+        /// </summary>
+        internal const string SignatureValidationCounterName = "IdentityModelSignatureValidation";
+        internal const string SignatureValidationCounterDescription = "Counter capturing signature validation operations with algorithm and key size details.";
+        internal static readonly Counter<long> SignatureValidationCounter = IdentityModelMeter.CreateCounter<long>(SignatureValidationCounterName, description: SignatureValidationCounterDescription);
 
         /// <summary>
         /// Histogram to capture total duration of configuration retrieval by ConfigurationManager in milliseconds.
@@ -58,6 +66,12 @@ namespace Microsoft.IdentityModel.Telemetry
         internal static void IncrementBackgroundConfigurationRefreshFailureCounter(in TagList tagList)
         {
             BackgroundConfigurationRefreshFailureCounter.Add(1, tagList);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void IncrementSignatureValidationCounter(in TagList tagList)
+        {
+            SignatureValidationCounter.Add(1, tagList);
         }
     }
 }

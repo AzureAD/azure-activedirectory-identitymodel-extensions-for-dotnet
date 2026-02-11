@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Telemetry
 {
@@ -35,6 +36,19 @@ namespace Microsoft.IdentityModel.Telemetry
             string configurationSource,
             Exception exception);
 
+        /// <summary>
+        /// Increments the signature validation counter with algorithm and key size details.
+        /// </summary>
+        /// <param name="errorType">The error type constant from <see cref="TelemetryConstants.SignatureValidationErrors"/>. Use <see cref="TelemetryConstants.SignatureValidationErrors.None"/> for successful validations.</param>
+        /// <param name="issuer">The token issuer.</param>
+        /// <param name="algorithm">The signature algorithm used (e.g., RS256, ES256, HS256).</param>
+        /// <param name="key">The security key used for signature validation.</param>
+        internal void IncrementSignatureValidationCounter(
+            string errorType,
+            string issuer,
+            string algorithm,
+            SecurityKey key);
+
         [Obsolete("Use LogConfigurationRetrievalDuration(metadataAddress, operationStatus, configurationSource) instead.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal void LogConfigurationRetrievalDuration(
@@ -66,7 +80,5 @@ namespace Microsoft.IdentityModel.Telemetry
         internal void LogBackgroundConfigurationRefreshFailure(
             string metadataAddress,
             Exception exception);
-
-
     }
 }

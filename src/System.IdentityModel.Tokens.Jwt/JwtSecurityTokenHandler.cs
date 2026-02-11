@@ -14,8 +14,8 @@ using System.Xml;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Telemetry;
+using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -1238,6 +1238,23 @@ namespace System.IdentityModel.Tokens.Jwt
                 return string.Concat(encodedHeader, ".", encodedPayload, ".", encodedSignature);
         }
 
+        private static void RecordSignatureValidationTelemetry(
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient,
+            string errorType,
+            SecurityToken securityToken,
+            string algorithm,
+            SecurityKey key)
+        {
+            if (CryptoTelemetry.RecordSignatureValidationTelemetry)
+            {
+                telemetryClient.IncrementSignatureValidationCounter(
+                    errorType,
+                    securityToken.Issuer,
+                    algorithm,
+                    key);
+            }
+        }
+
         /// <summary>
         /// Obtains a <see cref="SignatureProvider "/> and validates the signature.
         /// </summary>
@@ -1247,21 +1264,75 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="algorithm">Crypto algorithm to use.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">Priority will be given to <see cref="TokenValidationParameters.CryptoProviderFactory"/> over <see cref="SecurityKey.CryptoProviderFactory"/>.</param>
+        /// <param name="telemetryClient">The telemetry client for recording metrics.</param>
         /// <returns>'true' if signature is valid.</returns>
-        private static bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        private static bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters, Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
-            Validators.ValidateAlgorithm(algorithm, key, securityToken, validationParameters);
-
-            var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
-            var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
-            if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(
-                    new InvalidOperationException(
-                        LogHelper.FormatInvariant(TokenLogMessages.IDX10636, LogHelper.MarkAsNonPII(key == null ? "Null" : key.KeyId), LogHelper.MarkAsNonPII(algorithm))));
+            CryptoProviderFactory cryptoProviderFactory = null;
+            SignatureProvider signatureProvider = null;
 
             try
             {
-                return signatureProvider.Verify(encodedBytes, signature);
+                Validators.ValidateAlgorithm(algorithm, key, securityToken, validationParameters);
+            }
+            catch (Exception)
+            {
+                RecordSignatureValidationTelemetry(
+                    telemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.AlgorithmNotSupported,
+                    securityToken,
+                    algorithm,
+                    key);
+
+                throw;
+            }
+
+            try
+            {
+                cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+                signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
+
+                if (signatureProvider == null)
+                {
+                    throw LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(TokenLogMessages.IDX10636, LogHelper.MarkAsNonPII(key == null ? "Null" : key.KeyId), LogHelper.MarkAsNonPII(algorithm))));
+                }
+            }
+            catch (Exception)
+            {
+                RecordSignatureValidationTelemetry(
+                    telemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.SignatureProviderCreationFailed,
+                    securityToken,
+                    algorithm,
+                    key);
+                throw;
+            }
+
+            try
+            {
+                bool isValid = signatureProvider.Verify(encodedBytes, signature);
+
+                RecordSignatureValidationTelemetry(
+                    telemetryClient,
+                    isValid ? TelemetryConstants.SignatureValidationErrors.None : TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                    securityToken,
+                    algorithm,
+                    key);
+
+                return isValid;
+            }
+            catch
+            {
+                RecordSignatureValidationTelemetry(
+                    telemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                    securityToken,
+                    algorithm,
+                    key);
+
+                throw;
             }
             finally
             {
@@ -1355,7 +1426,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, jwtToken, validationParameters))
+                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, jwtToken, validationParameters, TelemetryClient))
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                                 LogHelper.LogInformation(TokenLogMessages.IDX10242, jwtToken);
@@ -1439,6 +1510,13 @@ namespace System.IdentityModel.Tokens.Jwt
                         jwtToken)));
                 }
             }
+
+            RecordSignatureValidationTelemetry(
+                    TelemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.SigningKeyNotFound,
+                    jwtToken,
+                    jwtToken.SignatureAlgorithm,
+                    null);
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
         }
@@ -1850,9 +1928,10 @@ namespace System.IdentityModel.Tokens.Jwt
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
                         unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                     }
-                    else
-#endif
+                    else if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
+#else
                     if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
+#endif
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Header.Alg);
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
