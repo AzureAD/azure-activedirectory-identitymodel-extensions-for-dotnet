@@ -39,7 +39,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (theoryData.ValidationParameters is not null && theoryData.KeyToAddToValidationParameters is not null)
                 theoryData.ValidationParameters.SigningKeys.Add(theoryData.KeyToAddToValidationParameters);
 
-            ValidationResult<SecurityKey, ValidationError> validationResult = JsonWebTokenHandler.ValidateSignature(
+            JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
+            ValidationResult<SecurityKey, ValidationError> validationResult = jsonWebTokenHandler.ValidateSignature(
                 jsonWebToken,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
