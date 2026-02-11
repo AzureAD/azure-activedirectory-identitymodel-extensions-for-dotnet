@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="algorithm">The algorithm to be validated.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
-        /// <param name="callContext"></param>
+        /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
         /// <returns>A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the algorithm.</returns>
         /// <remarks>This method is not expected to throw.</remarks>
         ValidationResult<string, ValidationError> ValidateAlgorithm(
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="tokenAudiences">The audiences found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
+        /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
         /// <returns>A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the issuer.</returns>
         /// <remarks>This method is not expected to throw.</remarks>
         ValidationResult<string, ValidationError> ValidateAudience(
@@ -62,8 +62,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="issuer">The issuer to validate.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A <see cref="ValidationResult{TResult, TError}"/> that contains the results of validating the issuer.</returns>
         /// <remarks>This method is not expected to throw.</remarks>
         Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns> A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
+        /// <returns> A <see cref="ValidationResult{TResult, TError}"/> that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
         ValidationResult<ValidatedTokenType, ValidationError> ValidateTokenType(
             string? type,
@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
         /// <remarks>This method is not expected to throw.</remarks>
-        /// <returns>The validated <see cref="SecurityToken"/>.</returns>
+        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> containing the <see cref="SecurityKey"/> used to validate the signature.</returns>
         ValidationResult<SecurityKey, ValidationError> ValidateSignature(
             SecurityToken token,
             ValidationParameters validationParameters,

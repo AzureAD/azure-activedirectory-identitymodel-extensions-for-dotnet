@@ -19,14 +19,14 @@ namespace Microsoft.IdentityModel.TestUtils
 
         private class CustomValidationFailedValidator : IIssuerValidator
         {
-            public async Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+            public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
                 SecurityToken securityToken,
                 ValidationParameters validationParameters,
                 CallContext callContext,
                 CancellationToken cancellationToken)
             {
-                return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
+                return Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                     new CustomIssuerValidationError(
                         new MessageDetail(nameof(CustomValidationFailed)),
                         CustomValidationFailure.IssuerValidationFailed,
@@ -37,14 +37,14 @@ namespace Microsoft.IdentityModel.TestUtils
 
         private class IssuerValidationFailedValidator : IIssuerValidator
         {
-            public async Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+            public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
                 SecurityToken securityToken,
                 ValidationParameters validationParameters,
                 CallContext callContext,
                 CancellationToken cancellationToken)
             {
-                return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
+                return Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                     new CustomIssuerValidationError(
                         new MessageDetail(nameof(IssuerValidationFailed)),
                         IssuerValidationFailure.ValidationFailed,
@@ -55,14 +55,14 @@ namespace Microsoft.IdentityModel.TestUtils
 
         private class UnknownValidationFailureValidator : IIssuerValidator
         {
-            public async Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+            public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
                 SecurityToken securityToken,
                 ValidationParameters validationParameters,
                 CallContext callContext,
                 CancellationToken cancellationToken)
             {
-                return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
+                return Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                     new CustomIssuerValidationError(
                         new MessageDetail(nameof(UnknownValidationFailure)),
                         AlgorithmValidationFailure.AlgorithmIsNotSupported,
@@ -73,14 +73,14 @@ namespace Microsoft.IdentityModel.TestUtils
 
         private class IssuerValidatorDelegateAsyncValidator : IIssuerValidator
         {
-            public async Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+            public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
                 SecurityToken securityToken,
                 ValidationParameters validationParameters,
                 CallContext callContext,
                 CancellationToken cancellationToken)
             {
-                return await Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
+                return Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                     new IssuerValidationError(
                         new MessageDetail(nameof(IssuerValidatorDelegateAsync)),
                         IssuerValidationFailure.ValidationFailed,
