@@ -228,11 +228,14 @@ steps:
     publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
     allowPackageConflicts: true
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish NuGet Package Artifact'
+# OneBranch: copy artifacts to ob_outputDirectory for automatic publishing
+- task: CopyFiles@2
+  displayName: 'Copy NuGet Packages to ob_outputDirectory'
   inputs:
-    PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
-    ArtifactName: '$(Build.BuildNumber)-nuget-package'
+    SourceFolder: '$(Build.SourcesDirectory)\artifacts'
+    Contents: '**'
+    TargetFolder: '$(ob_outputDirectory)\nuget-packages'
+  condition: and(succeeded(), ne(variables['ob_outputDirectory'], ''))
 
 - task: BuildQualityChecks@9
   displayName: 'Check Warnings'
