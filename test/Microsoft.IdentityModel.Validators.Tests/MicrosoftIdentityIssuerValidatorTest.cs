@@ -1164,11 +1164,11 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             Assert.False(validationResult.Succeeded);
             IdentityComparer.AreEqual(
-                string.Format(LogMessages.IDX40001, "https://sts.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/"),
+                string.Format(LogMessages.IDX40001, "https://sts.windows.net/10c419d4-4a50-45b2-aa4e-919fb84df24f/"),
                 validationResult.Error.MessageDetail.Message,
                 context);
             IdentityComparer.AreEqual(true, securityExceptionThrown, context);
-            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40001, "https://sts.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/"),
+            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40001, "https://sts.windows.net/10c419d4-4a50-45b2-aa4e-919fb84df24f/"),
                 exceptionMessage,
                 context);
 
