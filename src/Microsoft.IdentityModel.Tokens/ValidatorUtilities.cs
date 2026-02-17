@@ -27,27 +27,55 @@ namespace Microsoft.IdentityModel.Tokens
         internal static void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (!expires.HasValue && validationParameters.RequireExpirationTime)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenNoExpirationException(LogHelper.FormatInvariant(LogMessages.IDX10225, LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString()))));
+            {
+                SecurityTokenNoExpirationException ex = new SecurityTokenNoExpirationException(LogHelper.FormatInvariant(LogMessages.IDX10225, LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString())));
+
+                if (!validationParameters.LogValidationExceptions)
+                    throw ex;
+
+                throw LogHelper.LogExceptionMessage(ex);
+            }
 
             if (notBefore.HasValue && expires.HasValue && (notBefore.Value > expires.Value))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10224, LogHelper.MarkAsNonPII(notBefore.Value), LogHelper.MarkAsNonPII(expires.Value)))
+            {
+                SecurityTokenInvalidLifetimeException ex = new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10224, LogHelper.MarkAsNonPII(notBefore.Value), LogHelper.MarkAsNonPII(expires.Value)))
                 {
                     NotBefore = notBefore,
                     Expires = expires
-                });
+                };
+
+                if (!validationParameters.LogValidationExceptions)
+                    throw ex;
+
+                throw LogHelper.LogExceptionMessage(ex);
+            }
 
             DateTime utcNow = validationParameters.TimeProvider.GetUtcNow().UtcDateTime;
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenNotYetValidException(LogHelper.FormatInvariant(LogMessages.IDX10222, LogHelper.MarkAsNonPII(notBefore.Value), LogHelper.MarkAsNonPII(utcNow)))
+            {
+                SecurityTokenNotYetValidException ex = new SecurityTokenNotYetValidException(LogHelper.FormatInvariant(LogMessages.IDX10222, LogHelper.MarkAsNonPII(notBefore.Value), LogHelper.MarkAsNonPII(utcNow)))
                 {
                     NotBefore = notBefore.Value
-                });
+                };
+
+                if (!validationParameters.LogValidationExceptions)
+                    throw ex;
+
+                throw LogHelper.LogExceptionMessage(ex);
+            }
 
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenExpiredException(LogHelper.FormatInvariant(LogMessages.IDX10223, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(utcNow)))
+            {
+                SecurityTokenExpiredException ex = new SecurityTokenExpiredException(LogHelper.FormatInvariant(LogMessages.IDX10223, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(utcNow)))
                 {
                     Expires = expires.Value
-                });
+                };
+
+                if (!validationParameters.LogValidationExceptions)
+                    throw ex;
+
+                throw LogHelper.LogExceptionMessage(ex);
+            }
 
             // if it reaches here, that means lifetime of the token is valid
             if (AppContextSwitches.SuccessValidationLogsAsInformation)
