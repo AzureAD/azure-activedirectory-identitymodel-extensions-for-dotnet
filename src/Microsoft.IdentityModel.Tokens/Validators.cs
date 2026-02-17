@@ -737,7 +737,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(ex);
             }
 
-            // if it reaches here, token type was succcessfully validated.
+            // if it reaches here, token type was successfully validated.
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
 
