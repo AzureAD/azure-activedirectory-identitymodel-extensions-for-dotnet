@@ -5,14 +5,6 @@
 // MSBuild inline task (<Code Type="Fragment">). It inspects the resolved NuGet
 // package graph for Microsoft.IdentityModel.* / System.IdentityModel.* packages
 // and emits a build warning when multiple different versions are detected.
-//
-// Because this is a code fragment, the code below is placed directly inside the
-// Execute() method body. Early "return true" statements are valid and indicate
-// successful task completion (no warning needed). At the end of a fragment,
-// MSBuild auto-appends "return !Log.HasLoggedErrors;" so no explicit final
-// return is required.
-//
-// See: https://learn.microsoft.com/visualstudio/msbuild/msbuild-roslyncodetaskfactory
 
 // Explicit list of Microsoft.IdentityModel / System.IdentityModel packages
 // shipped from this repository (matching the project directories under src/).
