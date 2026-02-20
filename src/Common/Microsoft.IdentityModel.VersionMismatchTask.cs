@@ -2,14 +2,41 @@
 // Licensed under the MIT License.
 
 // This file is compiled at build-time by RoslynCodeTaskFactory and runs as an
-// MSBuild inline task. It inspects the resolved NuGet package graph for
-// Microsoft.IdentityModel.* / System.IdentityModel.* packages and emits a
-// build warning when multiple different versions are detected.
+// MSBuild inline task (<Code Type="Fragment">). It inspects the resolved NuGet
+// package graph for Microsoft.IdentityModel.* / System.IdentityModel.* packages
+// and emits a build warning when multiple different versions are detected.
+//
+// Because this is a code fragment, the code below is placed directly inside the
+// Execute() method body. Early "return true" statements are valid and indicate
+// successful task completion (no warning needed). At the end of a fragment,
+// MSBuild auto-appends "return !Log.HasLoggedErrors;" so no explicit final
+// return is required.
+//
+// See: https://learn.microsoft.com/visualstudio/msbuild/msbuild-roslyncodetaskfactory
 
-// Collect all Microsoft.IdentityModel.* and System.IdentityModel.* packages
-// from the resolved RuntimeCopyLocalItems. Each item carries NuGetPackageId and
-// NuGetPackageVersion metadata. A deduplication is performed because multiple
-// upstream dependencies can come from the same package.
+// Explicit list of Microsoft.IdentityModel / System.IdentityModel packages
+// shipped from this repository (matching the project directories under src/).
+var identityModelPackageNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "Microsoft.IdentityModel.Abstractions",
+    "Microsoft.IdentityModel.JsonWebTokens",
+    "Microsoft.IdentityModel.Logging",
+    "Microsoft.IdentityModel.LoggingExtensions",
+    "Microsoft.IdentityModel.Protocols",
+    "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+    "Microsoft.IdentityModel.Protocols.SignedHttpRequest",
+    "Microsoft.IdentityModel.Protocols.WsFederation",
+    "Microsoft.IdentityModel.TestExtensions",
+    "Microsoft.IdentityModel.Tokens",
+    "Microsoft.IdentityModel.Tokens.Saml",
+    "Microsoft.IdentityModel.Validators",
+    "Microsoft.IdentityModel.Xml",
+    "System.IdentityModel.Tokens.Jwt",
+};
+
+// Collect matching packages from the resolved RuntimeCopyLocalItems. Each item
+// carries NuGetPackageId and NuGetPackageVersion metadata. A deduplication is
+// performed because multiple upstream dependencies can come from the same package.
 var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 var identityModelPackages = new List<KeyValuePair<string, string>>();
 
@@ -25,8 +52,7 @@ if (ResolvedPackages != null)
             continue;
         }
 
-        if (packageId.StartsWith("Microsoft.IdentityModel.", StringComparison.OrdinalIgnoreCase) ||
-            packageId.StartsWith("System.IdentityModel.", StringComparison.OrdinalIgnoreCase))
+        if (identityModelPackageNames.Contains(packageId))
         {
             var key = packageId + "/" + version;
             if (seen.Add(key))
@@ -121,6 +147,15 @@ foreach (var pkgId in packagesToUpgrade)
 }
 
 sb.AppendLine("  </ItemGroup>");
+sb.AppendLine();
+sb.AppendLine("To suppress this warning, set the MSBuild property DisableIdentityModelVersionMismatchCheck to true in your project file:");
+sb.AppendLine();
+sb.AppendLine("  <PropertyGroup>");
+sb.AppendLine("    <DisableIdentityModelVersionMismatchCheck>true</DisableIdentityModelVersionMismatchCheck>");
+sb.AppendLine("  </PropertyGroup>");
+sb.AppendLine();
+sb.AppendLine("Note: Disabling this check is not recommended. Mismatched package versions can cause unexpected");
+sb.AppendLine("runtime errors such as TypeLoadException, MissingMethodException, or other hard-to-diagnose failures.");
 sb.AppendLine();
 
 Log.LogWarning(null, "IDMODEL001", null, null, 0, 0, 0, 0, sb.ToString());
