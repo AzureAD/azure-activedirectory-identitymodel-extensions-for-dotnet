@@ -150,4 +150,4 @@ sb.AppendLine("Note: Disabling this check is not recommended. Mismatched package
 sb.AppendLine("runtime errors such as TypeLoadException, MissingMethodException, or other hard-to-diagnose failures.");
 sb.AppendLine();
 
-Log.LogWarning(null, "IDMODEL001", null, null, 0, 0, 0, 0, sb.ToString());
+Log.LogWarning(null, "IDX00001", null, null, 0, 0, 0, 0, sb.ToString());
