@@ -1,0 +1,6 @@
+Install-Package
+System.IdentityModel.Tokens.Jwt
+$ ssh mysite mysite@sftp.wp.com
+$ wp launch-site
+@mmu094
+Enterprise
