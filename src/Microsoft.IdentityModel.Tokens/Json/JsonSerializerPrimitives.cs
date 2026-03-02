@@ -522,7 +522,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
         internal static long ReadLong(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
-            // The parameter 'read' can be used by callers reader position the reader to the next token.
+            // The parameter 'read' can be used by callers to position the reader to the next token.
             // This is a convenience when the reader is positioned on a JsonTokenType.PropertyName.
             // The caller does not have to make the calls: reader.Read(), JsonSerializerPrimitives.ReadBoolean.
             if (read)

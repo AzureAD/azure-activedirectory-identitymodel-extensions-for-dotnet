@@ -585,6 +585,8 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             return (runningJson.ToString(), resultObject);
         }
 
+        private const string BackwardCompatTestJson = """{"str":"value1","num":42,"bool":true,"arr":["a","b"],"str2":"value2"}""";
+
         /// <summary>
         /// Tests that Read* methods do not advance the reader after reading a value when called with read=false.
         /// This ensures backward compatibility with old code using the while(reader.Read()) pattern.
@@ -594,8 +596,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         public void ReaderPositionAfterRead_BackwardCompatibility()
         {
             // Arrange: JSON with multiple properties of different types
-            string json = """{"str":"value1","num":42,"bool":true,"arr":["a","b"],"str2":"value2"}""";
-            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(BackwardCompatTestJson);
 
             // Act & Assert: Simulate the old while(reader.Read()) calling pattern
             // Old callers do: manually advance to value, call Read*(read=false), then rely on while(reader.Read())
@@ -671,8 +672,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         public void ReaderPositionAfterRead_NewCallingPattern()
         {
             // Arrange: JSON with multiple properties
-            string json = """{"str":"value1","num":42,"bool":true,"arr":["a","b"],"str2":"value2"}""";
-            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(BackwardCompatTestJson);
 
             Utf8JsonReader reader = new(jsonBytes.AsSpan());
 
