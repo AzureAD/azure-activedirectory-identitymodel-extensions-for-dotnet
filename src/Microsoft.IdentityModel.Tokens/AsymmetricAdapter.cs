@@ -281,10 +281,20 @@ namespace Microsoft.IdentityModel.Tokens
             string algorithm,
             bool requirePrivateKey)
         {
-            if (requirePrivateKey)
+            if (x509SecurityKey.MlDsaPublicKey != null)
+            {
+                // ML-DSA certificate — extract MLDsa and initialize via ML-DSA path.
+                MLDsa mlDsa = requirePrivateKey ? x509SecurityKey.MlDsaPrivateKey : x509SecurityKey.MlDsaPublicKey;
+                InitializeUsingMlDsaSecurityKey(new MlDsaSecurityKey(mlDsa));
+            }
+            else if (requirePrivateKey)
+            {
                 InitializeUsingRsa(x509SecurityKey.PrivateKey as RSA, algorithm);
+            }
             else
+            {
                 InitializeUsingRsa(x509SecurityKey.PublicKey as RSA, algorithm);
+            }
         }
 
         private RSA RSA { get; set; }
