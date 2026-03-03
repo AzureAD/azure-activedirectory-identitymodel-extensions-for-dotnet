@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#pragma warning disable SYSLIB5006 // ML-DSA types are experimental
+
 using System;
 using System.Security;
 using System.Security.Cryptography;
@@ -1222,7 +1224,7 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 byte[] seedBytes = key.MLDsa.ExportMLDsaPrivateSeed();
                 jwk.Priv = Base64UrlEncoder.Encode(seedBytes);
-                System.Security.Cryptography.CryptographicOperations.ZeroMemory(seedBytes);
+                Array.Clear(seedBytes, 0, seedBytes.Length);
             }
 
             return jwk;

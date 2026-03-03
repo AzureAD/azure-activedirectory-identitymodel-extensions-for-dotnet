@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#pragma warning disable SYSLIB5006 // ML-DSA types are experimental
+
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -176,9 +178,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     lock (ThisLock)
                     {
-#pragma warning disable SYSLIB5006 // ML-DSA is experimental in .NET 10
                         _mlDsaPrivateKey ??= Certificate.GetMLDsaPrivateKey();
-#pragma warning restore SYSLIB5006
                     }
                 }
 
@@ -198,9 +198,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     lock (ThisLock)
                     {
-#pragma warning disable SYSLIB5006 // ML-DSA is experimental in .NET 10
                         _mlDsaPublicKey ??= Certificate.GetMLDsaPublicKey();
-#pragma warning restore SYSLIB5006
                     }
                 }
 
