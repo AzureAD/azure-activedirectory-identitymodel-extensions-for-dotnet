@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#pragma warning disable SYSLIB5006 // ML-DSA types are experimental
+#pragma warning disable SYSLIB5006 // X509 ML-DSA extension methods (GetMLDsaPublicKey/GetMLDsaPrivateKey) are experimental
 
 using System;
 using System.Security.Cryptography;
