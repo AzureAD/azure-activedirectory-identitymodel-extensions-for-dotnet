@@ -87,6 +87,8 @@ namespace Microsoft.IdentityModel.Tokens
                         InitializeUsingX509SecurityKey(x509SecurityKeyFromJsonWebKey, algorithm, requirePrivateKey);
                     else if (securityKey is ECDsaSecurityKey edcsaSecurityKeyFromJsonWebKey)
                         InitializeUsingEcdsaSecurityKey(edcsaSecurityKeyFromJsonWebKey);
+                    else if (securityKey is MlDsaSecurityKey mlDsaSecurityKeyFromJsonWebKey)
+                        InitializeUsingMlDsaSecurityKey(mlDsaSecurityKeyFromJsonWebKey);
                     else
                         throw LogHelper.LogExceptionMessage(
                             new NotSupportedException(
@@ -98,6 +100,10 @@ namespace Microsoft.IdentityModel.Tokens
             else if (key is ECDsaSecurityKey ecdsaKey)
             {
                 InitializeUsingEcdsaSecurityKey(ecdsaKey);
+            }
+            else if (key is MlDsaSecurityKey mlDsaKey)
+            {
+                InitializeUsingMlDsaSecurityKey(mlDsaKey);
             }
             else
                 throw LogHelper.LogExceptionMessage(
@@ -138,6 +144,9 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (ECDsa != null)
                             ECDsa.Dispose();
+
+                        if (MLDsa != null)
+                            MLDsa.Dispose();
 #if DESKTOP
                         if (RsaCryptoServiceProviderProxy != null)
                             RsaCryptoServiceProviderProxy.Dispose();
@@ -150,6 +159,8 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         private ECDsa ECDsa { get; set; }
+
+        private MLDsa MLDsa { get; set; }
 
         internal byte[] Encrypt(byte[] data)
         {
@@ -174,6 +185,18 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
             _verifyFunction = VerifyECDsa;
             _verifyUsingOffsetFunction = VerifyUsingOffsetECDsa;
+        }
+
+        private void InitializeUsingMlDsaSecurityKey(MlDsaSecurityKey mlDsaSecurityKey)
+        {
+            MLDsa = mlDsaSecurityKey.MLDsa;
+            _signFunction = SignMlDsa;
+            _signUsingOffsetFunction = SignUsingOffsetMlDsa;
+#if NET6_0_OR_GREATER
+            _signUsingSpanFunction = SignUsingSpanMlDsa;
+#endif
+            _verifyFunction = VerifyMlDsa;
+            _verifyUsingOffsetFunction = VerifyUsingOffsetMlDsa;
         }
 
         private void InitializeUsingRsa(RSA rsa, string algorithm)
@@ -342,6 +365,39 @@ namespace Microsoft.IdentityModel.Tokens
             return ECDsa.SignHash(HashAlgorithm.ComputeHash(bytes, offset, count));
         }
 
+        private byte[] SignMlDsa(byte[] bytes)
+        {
+            return MLDsa.SignData(bytes, context: null);
+        }
+
+#if NET6_0_OR_GREATER
+        internal bool SignUsingSpanMlDsa(
+            ReadOnlySpan<byte> data,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            if (destination.Length == 0)
+            {
+                bytesWritten = 0;
+                return false;
+            }
+
+            MLDsa.SignData(data, destination, context: default);
+            bytesWritten = MLDsa.Algorithm.SignatureSizeInBytes;
+            return destination.Length >= bytesWritten;
+        }
+#endif
+
+        private byte[] SignUsingOffsetMlDsa(byte[] bytes, int offset, int count)
+        {
+            if (offset == 0 && count == bytes.Length)
+                return MLDsa.SignData(bytes, context: null);
+
+            byte[] slice = new byte[count];
+            Buffer.BlockCopy(bytes, offset, slice, 0, count);
+            return MLDsa.SignData(slice, context: null);
+        }
+
         internal bool Verify(byte[] bytes, byte[] signature)
         {
             return _verifyFunction(bytes, signature);
@@ -380,6 +436,21 @@ namespace Microsoft.IdentityModel.Tokens
 #else
             return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes, offset, count), signature);
 #endif
+        }
+
+        private bool VerifyMlDsa(byte[] bytes, byte[] signature)
+        {
+            return MLDsa.VerifyData(bytes, signature, context: null);
+        }
+
+        private bool VerifyUsingOffsetMlDsa(byte[] bytes, int offset, int count, byte[] signature)
+        {
+            if (offset == 0 && count == bytes.Length)
+                return MLDsa.VerifyData(bytes, signature, context: null);
+
+            byte[] slice = new byte[count];
+            Buffer.BlockCopy(bytes, offset, slice, 0, count);
+            return MLDsa.VerifyData(slice, signature, context: null);
         }
 
         private byte[] DecryptWithRsa(byte[] bytes)
