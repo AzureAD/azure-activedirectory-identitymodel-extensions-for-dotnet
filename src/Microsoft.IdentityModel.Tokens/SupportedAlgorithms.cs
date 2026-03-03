@@ -244,7 +244,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (key is X509SecurityKey x509Key)
             {
-                // only RSA keys are supported
+                if (x509Key.MlDsaPublicKey != null)
+                    return IsSupportedMlDsaAlgorithm(algorithm);
+
                 if (x509Key.PublicKey as RSA == null)
                     return false;
 

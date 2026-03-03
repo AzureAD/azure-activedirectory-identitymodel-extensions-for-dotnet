@@ -116,3 +116,5 @@ static Microsoft.IdentityModel.Tokens.MlDsaAdapter.GetMLDsaAlgorithm(string algo
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedMlDsaAlgorithm(string algorithm) -> bool
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.TryGetHashAlgorithmName(string algorithm, out System.Security.Cryptography.HashAlgorithmName hashAlgorithmName) -> bool
 internal static Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.GetAlgorithmName(System.Security.Cryptography.MLDsaAlgorithm algorithm) -> string
+Microsoft.IdentityModel.Tokens.X509SecurityKey.MlDsaPrivateKey.get -> System.Security.Cryptography.MLDsa
+Microsoft.IdentityModel.Tokens.X509SecurityKey.MlDsaPublicKey.get -> System.Security.Cryptography.MLDsa
