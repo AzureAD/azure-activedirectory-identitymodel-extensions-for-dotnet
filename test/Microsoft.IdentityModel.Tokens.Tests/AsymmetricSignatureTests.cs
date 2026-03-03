@@ -258,6 +258,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     jsonKeyTuple.Item4,
                     theoryData);
 
+#if NET10_0_OR_GREATER
+                foreach (var x509MlDsaKeyTuple in AsymmetricSignatureTestData.X509MlDsaSecurityKeys)
+                    AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = x509MlDsaKeyTuple.Item1,
+                        TestId = x509MlDsaKeyTuple.Item3,
+                        VerifyKey = x509MlDsaKeyTuple.Item2
+                    },
+                    x509MlDsaKeyTuple.Item4,
+                    theoryData);
+#endif
+
                 foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonRsaSecurityKeys)
                     AsymmetricSignatureTestData.AddRsaAlgorithmVariations(new SignatureProviderTheoryData
                     {
