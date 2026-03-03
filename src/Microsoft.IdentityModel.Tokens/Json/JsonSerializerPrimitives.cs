@@ -606,8 +606,13 @@ namespace Microsoft.IdentityModel.Tokens.Json
                       || reader.TokenType == JsonTokenType.StartObject
                       || reader.TokenType == JsonTokenType.StartArray)
                 {
+                    // For StartObject/StartArray: ReadPropertyValueAsObject calls ReadJsonElement which
+                    // already advances past the complex value. For scalar types (Null, Number, String):
+                    // ReadPropertyValueAsObject leaves the reader AT the value, so we advance explicitly.
+                    bool isComplex = reader.TokenType == JsonTokenType.StartObject || reader.TokenType == JsonTokenType.StartArray;
                     objects.Add(ReadPropertyValueAsObject(ref reader, propertyName, className));
-                    reader.Read();
+                    if (!isComplex)
+                        reader.Read();
                 }
                 else if (!reader.Read())
                     break;
