@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#pragma warning disable SYSLIB5006 // ML-DSA types are experimental
-
 using System;
 #if NET6_0_OR_GREATER
 using System.Buffers;

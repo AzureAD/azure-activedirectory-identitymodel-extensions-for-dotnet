@@ -5,16 +5,16 @@
 ~const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa44 = "ML-DSA-44" -> string
 ~const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa65 = "ML-DSA-65" -> string
 ~const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa87 = "ML-DSA-87" -> string
-[SYSLIB5006]Microsoft.IdentityModel.Tokens.MlDsaSecurityKey
-~[SYSLIB5006]Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.MlDsaSecurityKey(System.Security.Cryptography.MLDsa mlDsa) -> void
-~[SYSLIB5006]Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.MLDsa.get -> System.Security.Cryptography.MLDsa
-[SYSLIB5006]override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.HasPrivateKey.get -> bool
-[SYSLIB5006]override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.PrivateKeyStatus.get -> Microsoft.IdentityModel.Tokens.PrivateKeyStatus
-[SYSLIB5006]override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.KeySize.get -> int
-[SYSLIB5006]override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.CanComputeJwkThumbprint() -> bool
-~[SYSLIB5006]override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.ComputeJwkThumbprint() -> byte[]
+Microsoft.IdentityModel.Tokens.MlDsaSecurityKey
+~Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.MlDsaSecurityKey(System.Security.Cryptography.MLDsa mlDsa) -> void
+~Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.MLDsa.get -> System.Security.Cryptography.MLDsa
+override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.HasPrivateKey.get -> bool
+override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.PrivateKeyStatus.get -> Microsoft.IdentityModel.Tokens.PrivateKeyStatus
+override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.KeySize.get -> int
+override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.CanComputeJwkThumbprint() -> bool
+~override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.ComputeJwkThumbprint() -> byte[]
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Pub.get -> string
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Pub.set -> void
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Priv.get -> string
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Priv.set -> void
-~[SYSLIB5006]static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromMlDsaSecurityKey(Microsoft.IdentityModel.Tokens.MlDsaSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
+~static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromMlDsaSecurityKey(Microsoft.IdentityModel.Tokens.MlDsaSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey

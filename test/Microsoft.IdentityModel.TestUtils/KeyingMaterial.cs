@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#pragma warning disable SYSLIB5006 // ML-DSA types are experimental
-
 using System;
 using System.Security;
 using System.Security.Cryptography;
@@ -1251,7 +1249,9 @@ namespace Microsoft.IdentityModel.TestUtils
         private static X509Certificate2 CreateMlDsaCertificate(MLDsaAlgorithm algorithm, string subjectName)
         {
             using var mlDsa = MLDsa.GenerateKey(algorithm);
+#pragma warning disable SYSLIB5006 // CertificateRequest(string, MLDsa) is experimental
             var certReq = new CertificateRequest(subjectName, mlDsa);
+#pragma warning restore SYSLIB5006
             return certReq.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
         }
 #endif

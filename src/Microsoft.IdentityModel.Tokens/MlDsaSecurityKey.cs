@@ -10,9 +10,6 @@ namespace Microsoft.IdentityModel.Tokens;
 /// <summary>
 /// Represents an ML-DSA security key.
 /// </summary>
-#if NET8_0_OR_GREATER
-[System.Diagnostics.CodeAnalysis.Experimental("SYSLIB5006", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
-#endif
 public class MlDsaSecurityKey : AsymmetricSecurityKey
 {
     private bool? _hasPrivateKey;
