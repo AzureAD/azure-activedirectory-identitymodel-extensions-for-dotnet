@@ -15,6 +15,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class AsymmetricSignatureTests
     {
+        // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
+        // Use a runtime check to skip X509 ML-DSA sign tests on unsupported platforms.
+        private static bool CanExtractMlDsaPrivateKeyFromX509()
+        {
+            try
+            {
+#pragma warning disable SYSLIB5006
+                using var key = KeyingMaterial.MlDsa44Cert.GetMLDsaPrivateKey();
+#pragma warning restore SYSLIB5006
+                return key != null;
+            }
+            catch (PlatformNotSupportedException)
+            {
+                return false;
+            }
+        }
+
         [Fact]
         public void UnsupportedRSATypes()
         {
@@ -256,17 +273,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     jsonKeyTuple.Item4,
                     theoryData);
 
-#if NET10_0_OR_GREATER
-                foreach (var x509MlDsaKeyTuple in AsymmetricSignatureTestData.X509MlDsaSecurityKeys)
-                    AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
-                    {
-                        SigningKey = x509MlDsaKeyTuple.Item1,
-                        TestId = x509MlDsaKeyTuple.Item3,
-                        VerifyKey = x509MlDsaKeyTuple.Item2
-                    },
-                    x509MlDsaKeyTuple.Item4,
-                    theoryData);
-#endif
+                // X509 ML-DSA sign/verify requires private key extraction from PFX.
+                // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
+                if (CanExtractMlDsaPrivateKeyFromX509())
+                {
+                    foreach (var x509MlDsaKeyTuple in AsymmetricSignatureTestData.X509MlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = x509MlDsaKeyTuple.Item1,
+                            TestId = x509MlDsaKeyTuple.Item3,
+                            VerifyKey = x509MlDsaKeyTuple.Item2
+                        },
+                        x509MlDsaKeyTuple.Item4,
+                        theoryData);
+                }
 
                 foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonRsaSecurityKeys)
                     AsymmetricSignatureTestData.AddRsaAlgorithmVariations(new SignatureProviderTheoryData
