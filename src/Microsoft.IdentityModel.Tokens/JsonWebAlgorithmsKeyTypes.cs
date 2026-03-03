@@ -13,6 +13,9 @@ namespace Microsoft.IdentityModel.Tokens
         public const string EllipticCurve = "EC";
         public const string RSA = "RSA";
         public const string Octet = "oct";
+
+        // See: https://datatracker.ietf.org/doc/draft-ietf-cose-dilithium/
+        public const string Akp = "AKP";
 #pragma warning restore 1591
     }
 }

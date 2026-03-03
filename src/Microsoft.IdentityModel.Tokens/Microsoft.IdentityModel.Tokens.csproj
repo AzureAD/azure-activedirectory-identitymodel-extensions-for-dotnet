@@ -78,6 +78,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="$(MicrosoftBclCryptographyVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsVersion)" />
   </ItemGroup>
 	

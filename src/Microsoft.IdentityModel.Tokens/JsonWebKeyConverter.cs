@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens
             else if (key is ECDsaSecurityKey ecdsaSecurityKey)
                 return ConvertFromECDsaSecurityKey(ecdsaSecurityKey);
 #endif
+            else if (key is MlDsaSecurityKey mlDsaSecurityKey)
+                return ConvertFromMlDsaSecurityKey(mlDsaSecurityKey);
             else
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))));
         }
@@ -259,6 +261,10 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     return TryConvertToSymmetricSecurityKey(webKey, out key);
                 }
+                else if (JsonWebAlgorithmsKeyTypes.Akp.Equals(webKey.Kty))
+                {
+                    return TryConvertToMlDsaSecurityKey(webKey, out key);
+                }
             }
             catch (Exception ex)
             {
@@ -389,6 +395,58 @@ namespace Microsoft.IdentityModel.Tokens
             catch (Exception ex)
             {
                 string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), LogHelper.MarkAsNonPII(webKey.KeyId), ex);
+                webKey.ConvertKeyInfo = convertKeyInfo;
+                if (LogHelper.IsEnabled(EventLogLevel.Error))
+                    LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Converts an <see cref="MlDsaSecurityKey"/> into a <see cref="JsonWebKey"/>.
+        /// </summary>
+        public static JsonWebKey ConvertFromMlDsaSecurityKey(MlDsaSecurityKey key)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            string algorithmName = MlDsaSecurityKey.GetAlgorithmName(key.MLDsa.Algorithm);
+            byte[] publicKey = key.MLDsa.ExportMLDsaPublicKey();
+
+            var jsonWebKey = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Alg = algorithmName,
+                Pub = Base64UrlEncoder.Encode(publicKey),
+                Kid = key.KeyId
+            };
+
+            if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
+            {
+                byte[] seed = key.MLDsa.ExportMLDsaPrivateSeed();
+                jsonWebKey.Priv = Base64UrlEncoder.Encode(seed);
+                CryptographicOperations.ZeroMemory(seed);
+            }
+
+            return jsonWebKey;
+        }
+
+        internal static bool TryConvertToMlDsaSecurityKey(JsonWebKey webKey, out SecurityKey key)
+        {
+            key = null;
+
+            if (!SupportedAlgorithms.IsSupportedMlDsaAlgorithm(webKey.Alg))
+                return false;
+
+            try
+            {
+                key = new MlDsaSecurityKey(webKey, !string.IsNullOrEmpty(webKey.Priv));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(MlDsaSecurityKey)), LogHelper.MarkAsNonPII(webKey.KeyId), ex);
                 webKey.ConvertKeyInfo = convertKeyInfo;
                 if (LogHelper.IsEnabled(EventLogLevel.Error))
                     LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
