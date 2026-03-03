@@ -117,6 +117,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Tuple.Create(KeyingMaterial.JsonWebKeyMlDsa87, KeyingMaterial.JsonWebKeyMlDsa87_Public, "JsonMlDsa87Key", SecurityAlgorithms.MlDsa87)
         };
 
+#if NET10_0_OR_GREATER
+        public static readonly List<Tuple<X509SecurityKey, X509SecurityKey, string, string>> X509MlDsaSecurityKeys = new List<Tuple<X509SecurityKey, X509SecurityKey, string, string>>
+        {
+            Tuple.Create(KeyingMaterial.X509MlDsa44Key, KeyingMaterial.X509MlDsa44Key, "X509MlDsa44Key", SecurityAlgorithms.MlDsa44),
+            Tuple.Create(KeyingMaterial.X509MlDsa65Key, KeyingMaterial.X509MlDsa65Key, "X509MlDsa65Key", SecurityAlgorithms.MlDsa65),
+            Tuple.Create(KeyingMaterial.X509MlDsa87Key, KeyingMaterial.X509MlDsa87Key, "X509MlDsa87Key", SecurityAlgorithms.MlDsa87)
+        };
+#endif
+
         public static void AddMlDsaAlgorithmVariations(SignatureProviderTheoryData theoryData, string algorithm, TheoryData<SignatureProviderTheoryData> variations)
         {
             // ML-DSA has a 1:1 mapping between key and algorithm — no algorithm variations like ECDSA.

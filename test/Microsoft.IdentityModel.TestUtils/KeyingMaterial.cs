@@ -1236,5 +1236,24 @@ namespace Microsoft.IdentityModel.TestUtils
         public static JsonWebKey JsonWebKeyMlDsa65_Public => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa65, "JsonWebKeyMlDsa65_Public", MlDsa65Key_Public);
         public static JsonWebKey JsonWebKeyMlDsa87 => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa87, "JsonWebKeyMlDsa87", MlDsa87Key);
         public static JsonWebKey JsonWebKeyMlDsa87_Public => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa87, "JsonWebKeyMlDsa87_Public", MlDsa87Key_Public);
+
+#if NET10_0_OR_GREATER
+        // ML-DSA X.509 certificates — generated at class load time.
+        // CertificateRequest(string, MLDsa) is only available in .NET 10+.
+        public static readonly X509Certificate2 MlDsa44Cert = CreateMlDsaCertificate(MLDsaAlgorithm.MLDsa44, "CN=ML-DSA-44-Test");
+        public static readonly X509Certificate2 MlDsa65Cert = CreateMlDsaCertificate(MLDsaAlgorithm.MLDsa65, "CN=ML-DSA-65-Test");
+        public static readonly X509Certificate2 MlDsa87Cert = CreateMlDsaCertificate(MLDsaAlgorithm.MLDsa87, "CN=ML-DSA-87-Test");
+
+        public static readonly X509SecurityKey X509MlDsa44Key = new X509SecurityKey(MlDsa44Cert);
+        public static readonly X509SecurityKey X509MlDsa65Key = new X509SecurityKey(MlDsa65Cert);
+        public static readonly X509SecurityKey X509MlDsa87Key = new X509SecurityKey(MlDsa87Cert);
+
+        private static X509Certificate2 CreateMlDsaCertificate(MLDsaAlgorithm algorithm, string subjectName)
+        {
+            using var mlDsa = MLDsa.GenerateKey(algorithm);
+            var certReq = new CertificateRequest(subjectName, mlDsa);
+            return certReq.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+        }
+#endif
     }
 }
