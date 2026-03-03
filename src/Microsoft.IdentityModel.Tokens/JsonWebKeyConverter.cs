@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#pragma warning disable SYSLIB5006 // ML-DSA types are experimental
+
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -406,6 +408,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Converts an <see cref="MlDsaSecurityKey"/> into a <see cref="JsonWebKey"/>.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.Experimental("SYSLIB5006", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
         public static JsonWebKey ConvertFromMlDsaSecurityKey(MlDsaSecurityKey key)
         {
             if (key == null)
