@@ -1188,5 +1188,51 @@ namespace Microsoft.IdentityModel.TestUtils
             return rsa;
 #endif
         }
+
+        // ML-DSA keys — generated at class load time since ML-DSA key material is large
+        // and not suitable for static hex literals like RSA/ECDSA parameters.
+        public static readonly MlDsaSecurityKey MlDsa44Key = new MlDsaSecurityKey(MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44));
+        public static readonly MlDsaSecurityKey MlDsa65Key = new MlDsaSecurityKey(MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa65));
+        public static readonly MlDsaSecurityKey MlDsa87Key = new MlDsaSecurityKey(MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa87));
+
+        public static MlDsaSecurityKey CreateMlDsaPublicKey(MlDsaSecurityKey privateKey)
+        {
+            byte[] publicKeyBytes = privateKey.MLDsa.ExportMLDsaPublicKey();
+            var mlDsa = MLDsa.ImportMLDsaPublicKey(privateKey.MLDsa.Algorithm, publicKeyBytes);
+            return new MlDsaSecurityKey(mlDsa);
+        }
+
+        public static readonly MlDsaSecurityKey MlDsa44Key_Public = CreateMlDsaPublicKey(MlDsa44Key);
+        public static readonly MlDsaSecurityKey MlDsa65Key_Public = CreateMlDsaPublicKey(MlDsa65Key);
+        public static readonly MlDsaSecurityKey MlDsa87Key_Public = CreateMlDsaPublicKey(MlDsa87Key);
+
+        public static JsonWebKey CreateJsonWebKeyMlDsa(string algorithm, string kid, MlDsaSecurityKey key)
+        {
+            byte[] publicKeyBytes = key.MLDsa.ExportMLDsaPublicKey();
+            var jwk = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Alg = algorithm,
+                Pub = Base64UrlEncoder.Encode(publicKeyBytes),
+                Kid = kid,
+                KeyId = kid
+            };
+
+            if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
+            {
+                byte[] seedBytes = key.MLDsa.ExportMLDsaPrivateSeed();
+                jwk.Priv = Base64UrlEncoder.Encode(seedBytes);
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(seedBytes);
+            }
+
+            return jwk;
+        }
+
+        public static JsonWebKey JsonWebKeyMlDsa44 => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa44, "JsonWebKeyMlDsa44", MlDsa44Key);
+        public static JsonWebKey JsonWebKeyMlDsa44_Public => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa44, "JsonWebKeyMlDsa44_Public", MlDsa44Key_Public);
+        public static JsonWebKey JsonWebKeyMlDsa65 => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa65, "JsonWebKeyMlDsa65", MlDsa65Key);
+        public static JsonWebKey JsonWebKeyMlDsa65_Public => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa65, "JsonWebKeyMlDsa65_Public", MlDsa65Key_Public);
+        public static JsonWebKey JsonWebKeyMlDsa87 => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa87, "JsonWebKeyMlDsa87", MlDsa87Key);
+        public static JsonWebKey JsonWebKeyMlDsa87_Public => CreateJsonWebKeyMlDsa(SecurityAlgorithms.MlDsa87, "JsonWebKeyMlDsa87_Public", MlDsa87Key_Public);
     }
 }

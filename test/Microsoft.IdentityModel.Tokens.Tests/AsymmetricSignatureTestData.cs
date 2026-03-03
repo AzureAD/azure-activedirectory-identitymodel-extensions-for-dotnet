@@ -101,6 +101,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             { KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512_Public, "X509Key3" }
         };
 
+        public static readonly List<Tuple<MlDsaSecurityKey, MlDsaSecurityKey, string, string>> MlDsaSecurityKeys = new List<Tuple<MlDsaSecurityKey, MlDsaSecurityKey, string, string>>
+        {
+            Tuple.Create(KeyingMaterial.MlDsa44Key, KeyingMaterial.MlDsa44Key_Public, "MlDsa44Key", SecurityAlgorithms.MlDsa44),
+            Tuple.Create(KeyingMaterial.MlDsa65Key, KeyingMaterial.MlDsa65Key_Public, "MlDsa65Key", SecurityAlgorithms.MlDsa65),
+            Tuple.Create(KeyingMaterial.MlDsa87Key, KeyingMaterial.MlDsa87Key_Public, "MlDsa87Key", SecurityAlgorithms.MlDsa87)
+        };
+
+        public static readonly List<Tuple<JsonWebKey, JsonWebKey, string, string>> JsonMlDsaSecurityKeys = new List<Tuple<JsonWebKey, JsonWebKey, string, string>>
+        {
+            Tuple.Create(KeyingMaterial.JsonWebKeyMlDsa44, KeyingMaterial.JsonWebKeyMlDsa44_Public, "JsonMlDsa44Key", SecurityAlgorithms.MlDsa44),
+            Tuple.Create(KeyingMaterial.JsonWebKeyMlDsa65, KeyingMaterial.JsonWebKeyMlDsa65_Public, "JsonMlDsa65Key", SecurityAlgorithms.MlDsa65),
+            Tuple.Create(KeyingMaterial.JsonWebKeyMlDsa87, KeyingMaterial.JsonWebKeyMlDsa87_Public, "JsonMlDsa87Key", SecurityAlgorithms.MlDsa87)
+        };
+
+        public static void AddMlDsaAlgorithmVariations(SignatureProviderTheoryData theoryData, string algorithm, TheoryData<SignatureProviderTheoryData> variations)
+        {
+            // ML-DSA has a 1:1 mapping between key and algorithm — no algorithm variations like ECDSA.
+            variations.Add(new SignatureProviderTheoryData
+            {
+                SigningAlgorithm = algorithm,
+                SigningKey = theoryData.SigningKey,
+                TestId = theoryData.TestId + algorithm,
+                VerifyAlgorithm = algorithm,
+                VerifyKey = theoryData.VerifyKey
+            });
+        }
+
         public static void AddECDsaAlgorithmVariations(SignatureProviderTheoryData theoryData, TheoryData<SignatureProviderTheoryData> variations)
         {
             foreach (var algorithm in ECDsaSigningAlgorithms)
