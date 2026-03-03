@@ -141,38 +141,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(originalPub, roundTrippedPub);
         }
 
-#if NET10_0_OR_GREATER
-        [Fact]
-        public void X509SecurityKey_MlDsa44_Properties()
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void X509SecurityKey_MlDsa_KeySize(string algorithm)
         {
-            var x509Key = KeyingMaterial.X509MlDsa44Key;
-            Assert.Equal(MLDsaAlgorithm.MLDsa44.PublicKeySizeInBytes * 8, x509Key.KeySize);
-#pragma warning disable CS0618
-            Assert.True(x509Key.HasPrivateKey);
-#pragma warning restore CS0618
-            Assert.Equal(PrivateKeyStatus.Exists, x509Key.PrivateKeyStatus);
-        }
-
-        [Fact]
-        public void X509SecurityKey_MlDsa65_Properties()
-        {
-            var x509Key = KeyingMaterial.X509MlDsa65Key;
-            Assert.Equal(MLDsaAlgorithm.MLDsa65.PublicKeySizeInBytes * 8, x509Key.KeySize);
-#pragma warning disable CS0618
-            Assert.True(x509Key.HasPrivateKey);
-#pragma warning restore CS0618
-            Assert.Equal(PrivateKeyStatus.Exists, x509Key.PrivateKeyStatus);
-        }
-
-        [Fact]
-        public void X509SecurityKey_MlDsa87_Properties()
-        {
-            var x509Key = KeyingMaterial.X509MlDsa87Key;
-            Assert.Equal(MLDsaAlgorithm.MLDsa87.PublicKeySizeInBytes * 8, x509Key.KeySize);
-#pragma warning disable CS0618
-            Assert.True(x509Key.HasPrivateKey);
-#pragma warning restore CS0618
-            Assert.Equal(PrivateKeyStatus.Exists, x509Key.PrivateKeyStatus);
+            var (x509Key, expectedAlg) = GetX509MlDsaKey(algorithm);
+            Assert.Equal(expectedAlg.PublicKeySizeInBytes * 8, x509Key.KeySize);
         }
 
         [Theory]
@@ -181,13 +157,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-87")]
         public void X509SecurityKey_MlDsa_CanComputeJwkThumbprint(string algorithm)
         {
-            var x509Key = algorithm switch
-            {
-                "ML-DSA-44" => KeyingMaterial.X509MlDsa44Key,
-                "ML-DSA-65" => KeyingMaterial.X509MlDsa65Key,
-                "ML-DSA-87" => KeyingMaterial.X509MlDsa87Key,
-                _ => throw new ArgumentException(algorithm)
-            };
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
 
             Assert.True(x509Key.CanComputeJwkThumbprint());
             byte[] thumbprint = x509Key.ComputeJwkThumbprint();
@@ -201,19 +171,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-87")]
         public void X509SecurityKey_MlDsa_JwkThumbprint_IsDeterministic(string algorithm)
         {
-            var x509Key = algorithm switch
-            {
-                "ML-DSA-44" => KeyingMaterial.X509MlDsa44Key,
-                "ML-DSA-65" => KeyingMaterial.X509MlDsa65Key,
-                "ML-DSA-87" => KeyingMaterial.X509MlDsa87Key,
-                _ => throw new ArgumentException(algorithm)
-            };
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
 
             byte[] thumbprint1 = x509Key.ComputeJwkThumbprint();
             byte[] thumbprint2 = x509Key.ComputeJwkThumbprint();
             Assert.Equal(thumbprint1, thumbprint2);
         }
-#endif
+
+        private static (X509SecurityKey key, MLDsaAlgorithm alg) GetX509MlDsaKey(string algorithm)
+        {
+            return algorithm switch
+            {
+                "ML-DSA-44" => (KeyingMaterial.X509MlDsa44Key, MLDsaAlgorithm.MLDsa44),
+                "ML-DSA-65" => (KeyingMaterial.X509MlDsa65Key, MLDsaAlgorithm.MLDsa65),
+                "ML-DSA-87" => (KeyingMaterial.X509MlDsa87Key, MLDsaAlgorithm.MLDsa87),
+                _ => throw new ArgumentException(algorithm)
+            };
+        }
     }
 }
 
