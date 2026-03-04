@@ -2,8 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.Json;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Json;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -188,6 +193,267 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 _ => throw new ArgumentException(algorithm)
             };
         }
+
+        #region JWK Negative Tests
+
+        [Fact]
+        public void JwkMissingAlg_FailsConversion()
+        {
+            var jwk = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(new byte[1312]) // dummy public key
+            };
+
+            Assert.False(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out _));
+        }
+
+        [Fact]
+        public void JwkMissingPub_ThrowsOnConstruction()
+        {
+            var jwk = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Alg = SecurityAlgorithms.MlDsa44
+            };
+
+            Assert.Throws<ArgumentException>(() => new MlDsaSecurityKey(jwk, false));
+        }
+
+        [Fact]
+        public void JwkInvalidAlg_FailsConversion()
+        {
+            var jwk = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Alg = "UNSUPPORTED-ALG",
+                Pub = Base64UrlEncoder.Encode(new byte[1312])
+            };
+
+            Assert.False(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out _));
+        }
+
+        #endregion
+
+        #region Algorithm Mismatch Tests
+
+        [Fact]
+        public void SignWithMismatchedAlgorithm_FailsKeySizeValidation()
+        {
+            // ML-DSA-44 key (10496 bits) is too small for ML-DSA-65 (requires 15616 bits)
+            // Key size validation is opt-in via ValidKeySize() — same pattern as RSA/ECDSA tests
+            var provider = new AsymmetricSignatureProvider(
+                KeyingMaterial.MlDsa44Key,
+                SecurityAlgorithms.MlDsa65,
+                false);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => provider.ValidKeySize());
+        }
+
+        #endregion
+
+        #region Public-Key-Only Signing Tests
+
+        [Fact]
+        public void SignWithPublicKeyOnly_Throws()
+        {
+            // Creating a signing provider with a public-only key should fail at construction
+            using var privateKey = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            byte[] publicKeyBytes = privateKey.ExportMLDsaPublicKey();
+            using var publicOnly = MLDsa.ImportMLDsaPublicKey(MLDsaAlgorithm.MLDsa44, publicKeyBytes);
+            var publicOnlyKey = new MlDsaSecurityKey(publicOnly);
+
+            Assert.Throws<InvalidOperationException>(() =>
+                new AsymmetricSignatureProvider(publicOnlyKey, SecurityAlgorithms.MlDsa44, true));
+        }
+
+        [Fact]
+        public void VerifyWithPublicKeyOnly_Succeeds()
+        {
+            // Verifying should work with a public-only key
+            byte[] data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            var signingProvider = new AsymmetricSignatureProvider(KeyingMaterial.MlDsa44Key, SecurityAlgorithms.MlDsa44, true);
+            byte[] signature = signingProvider.Sign(data);
+
+            var verifyProvider = new AsymmetricSignatureProvider(KeyingMaterial.MlDsa44Key_Public, SecurityAlgorithms.MlDsa44, false);
+            Assert.True(verifyProvider.Verify(data, signature));
+        }
+
+        #endregion
+
+        #region JWK JSON Serialization Round-Trip
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void JwkJsonSerialization_RoundTrips(string algorithm)
+        {
+            var mlDsaAlg = MlDsaAdapter.GetMLDsaAlgorithm(algorithm);
+            using var mlDsa = MLDsa.GenerateKey(mlDsaAlg);
+            var key = new MlDsaSecurityKey(mlDsa);
+
+            // Convert to JWK
+            var originalJwk = JsonWebKeyConverter.ConvertFromMlDsaSecurityKey(key);
+
+            // Serialize to JSON using the custom serializer
+            string json = JsonWebKeySerializer.Write(originalJwk);
+
+            // Deserialize back
+            var parsedJwk = new JsonWebKey(json);
+
+            // Verify all key properties survived
+            Assert.Equal(JsonWebAlgorithmsKeyTypes.Akp, parsedJwk.Kty);
+            Assert.Equal(algorithm, parsedJwk.Alg);
+            Assert.Equal(originalJwk.Pub, parsedJwk.Pub);
+            Assert.Equal(originalJwk.Priv, parsedJwk.Priv);
+            Assert.True(parsedJwk.HasPrivateKey);
+
+            // Verify the parsed JWK can create a working key
+            Assert.True(JsonWebKeyConverter.TryConvertToSecurityKey(parsedJwk, out SecurityKey roundTrippedKey));
+            var mlDsaKey = Assert.IsType<MlDsaSecurityKey>(roundTrippedKey);
+            Assert.Equal(key.KeySize, mlDsaKey.KeySize);
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void JwkJsonSerialization_PublicKeyOnly_RoundTrips(string algorithm)
+        {
+            var mlDsaAlg = MlDsaAdapter.GetMLDsaAlgorithm(algorithm);
+            using var mlDsa = MLDsa.GenerateKey(mlDsaAlg);
+            byte[] publicKeyBytes = mlDsa.ExportMLDsaPublicKey();
+            using var publicOnly = MLDsa.ImportMLDsaPublicKey(mlDsaAlg, publicKeyBytes);
+            var key = new MlDsaSecurityKey(publicOnly);
+
+            var originalJwk = JsonWebKeyConverter.ConvertFromMlDsaSecurityKey(key);
+            string json = JsonWebKeySerializer.Write(originalJwk);
+            var parsedJwk = new JsonWebKey(json);
+
+            Assert.Equal(JsonWebAlgorithmsKeyTypes.Akp, parsedJwk.Kty);
+            Assert.Equal(algorithm, parsedJwk.Alg);
+            Assert.Equal(originalJwk.Pub, parsedJwk.Pub);
+            Assert.Null(parsedJwk.Priv);
+            Assert.False(parsedJwk.HasPrivateKey);
+        }
+
+        #endregion
+
+        #region End-to-End JWT Tests
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public async System.Threading.Tasks.Task JwtCreateAndValidate_EndToEnd(string algorithm)
+        {
+            var signingKey = GetMlDsaKey(algorithm);
+            var verifyKey = GetMlDsaPublicKey(algorithm);
+
+            var handler = new JsonWebTokenHandler();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "https://test-issuer.example.com",
+                Audience = "https://test-audience.example.com",
+                SigningCredentials = new SigningCredentials(signingKey, algorithm),
+                Claims = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "sub", "test-user" },
+                    { "name", "Test User" }
+                }
+            };
+
+            string token = handler.CreateToken(descriptor);
+            Assert.False(string.IsNullOrEmpty(token));
+
+            // Validate
+            var validationParams = new TokenValidationParameters
+            {
+                ValidIssuer = "https://test-issuer.example.com",
+                ValidAudience = "https://test-audience.example.com",
+                IssuerSigningKey = verifyKey,
+                ValidateLifetime = false
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParams);
+            Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
+            Assert.Equal("test-user", result.Claims["sub"]);
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public async System.Threading.Tasks.Task JwtCreateAndValidate_WithJsonWebKey(string algorithm)
+        {
+            var signingJwk = GetMlDsaJsonWebKey(algorithm);
+            var verifyJwk = GetMlDsaJsonWebKeyPublic(algorithm);
+
+            var handler = new JsonWebTokenHandler();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "https://test-issuer.example.com",
+                Audience = "https://test-audience.example.com",
+                SigningCredentials = new SigningCredentials(signingJwk, algorithm),
+                Claims = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "sub", "jwk-test-user" }
+                }
+            };
+
+            string token = handler.CreateToken(descriptor);
+            Assert.False(string.IsNullOrEmpty(token));
+
+            var validationParams = new TokenValidationParameters
+            {
+                ValidIssuer = "https://test-issuer.example.com",
+                ValidAudience = "https://test-audience.example.com",
+                IssuerSigningKey = verifyJwk,
+                ValidateLifetime = false
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParams);
+            Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private static MlDsaSecurityKey GetMlDsaKey(string algorithm) => algorithm switch
+        {
+            "ML-DSA-44" => KeyingMaterial.MlDsa44Key,
+            "ML-DSA-65" => KeyingMaterial.MlDsa65Key,
+            "ML-DSA-87" => KeyingMaterial.MlDsa87Key,
+            _ => throw new ArgumentException(algorithm)
+        };
+
+        private static MlDsaSecurityKey GetMlDsaPublicKey(string algorithm) => algorithm switch
+        {
+            "ML-DSA-44" => KeyingMaterial.MlDsa44Key_Public,
+            "ML-DSA-65" => KeyingMaterial.MlDsa65Key_Public,
+            "ML-DSA-87" => KeyingMaterial.MlDsa87Key_Public,
+            _ => throw new ArgumentException(algorithm)
+        };
+
+        private static JsonWebKey GetMlDsaJsonWebKey(string algorithm) => algorithm switch
+        {
+            "ML-DSA-44" => KeyingMaterial.JsonWebKeyMlDsa44,
+            "ML-DSA-65" => KeyingMaterial.JsonWebKeyMlDsa65,
+            "ML-DSA-87" => KeyingMaterial.JsonWebKeyMlDsa87,
+            _ => throw new ArgumentException(algorithm)
+        };
+
+        private static JsonWebKey GetMlDsaJsonWebKeyPublic(string algorithm) => algorithm switch
+        {
+            "ML-DSA-44" => KeyingMaterial.JsonWebKeyMlDsa44_Public,
+            "ML-DSA-65" => KeyingMaterial.JsonWebKeyMlDsa65_Public,
+            "ML-DSA-87" => KeyingMaterial.JsonWebKeyMlDsa87_Public,
+            _ => throw new ArgumentException(algorithm)
+        };
+
+        #endregion
     }
 }
 
