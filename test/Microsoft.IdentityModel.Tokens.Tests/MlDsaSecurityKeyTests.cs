@@ -7,8 +7,10 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Json;
 using Xunit;
 
@@ -453,6 +455,85 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             var result = await handler.ValidateTokenAsync(token, validationParams);
             Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void JwtCreateAndValidate_WithJwtSecurityTokenHandler(string algorithm)
+        {
+            var signingKey = GetMlDsaKey(algorithm);
+            var verifyKey = GetMlDsaPublicKey(algorithm);
+
+            var handler = new JwtSecurityTokenHandler();
+            handler.InboundClaimTypeMap.Clear();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "https://test-issuer.example.com",
+                Audience = "https://test-audience.example.com",
+                SigningCredentials = new SigningCredentials(signingKey, algorithm),
+                Subject = new CaseSensitiveClaimsIdentity(new[]
+                {
+                    new Claim("sub", "jwt-handler-user")
+                })
+            };
+
+            var securityToken = handler.CreateToken(descriptor);
+            string token = handler.WriteToken(securityToken);
+            Assert.False(string.IsNullOrEmpty(token));
+
+            var validationParams = new TokenValidationParameters
+            {
+                ValidIssuer = "https://test-issuer.example.com",
+                ValidAudience = "https://test-audience.example.com",
+                IssuerSigningKey = verifyKey,
+                ValidateLifetime = false
+            };
+
+            var principal = handler.ValidateToken(token, validationParams, out SecurityToken validatedToken);
+            Assert.NotNull(principal);
+            Assert.NotNull(validatedToken);
+            Assert.Equal("jwt-handler-user", principal.FindFirst("sub")?.Value);
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public async Task JwtCreateAndValidate_WithExperimentalValidationParameters(string algorithm)
+        {
+            var signingKey = GetMlDsaKey(algorithm);
+            var verifyKey = GetMlDsaPublicKey(algorithm);
+
+            var handler = new JsonWebTokenHandler();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "https://test-issuer.example.com",
+                Audience = "https://test-audience.example.com",
+                SigningCredentials = new SigningCredentials(signingKey, algorithm),
+                Claims = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "sub", "experimental-user" }
+                }
+            };
+
+            string token = handler.CreateToken(descriptor);
+            Assert.False(string.IsNullOrEmpty(token));
+
+            var validationParameters = new ValidationParameters();
+            validationParameters.ValidIssuers.Add("https://test-issuer.example.com");
+            validationParameters.ValidAudiences.Add("https://test-audience.example.com");
+            validationParameters.SigningKeys.Add(verifyKey);
+            validationParameters.TryAllSigningKeys = true;
+            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
+            validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+
+            var result = await ((IResultBasedValidation)handler).ValidateTokenAsync(
+                token, validationParameters, new CallContext());
+
+            Assert.True(result.Succeeded, $"Validation failed: {result.Error?.Message}");
+            Assert.NotNull(result.Result);
         }
 
         #endregion
