@@ -386,26 +386,38 @@ namespace Microsoft.IdentityModel.Tokens
             Span<byte> destination,
             out int bytesWritten)
         {
-            if (destination.Length == 0)
+            int signatureSize = MLDsa.Algorithm.SignatureSizeInBytes;
+            if (destination.Length < signatureSize)
             {
                 bytesWritten = 0;
                 return false;
             }
 
-            MLDsa.SignData(data, destination, context: default);
-            bytesWritten = MLDsa.Algorithm.SignatureSizeInBytes;
-            return destination.Length >= bytesWritten;
+            // MLDsa.SignData requires destination to be exactly SignatureSizeInBytes.
+            MLDsa.SignData(data, destination.Slice(0, signatureSize), context: default);
+            bytesWritten = signatureSize;
+            return true;
         }
 #endif
 
         private byte[] SignUsingOffsetMlDsa(byte[] bytes, int offset, int count)
         {
+#if NET6_0_OR_GREATER
+            int signatureSize = MLDsa.Algorithm.SignatureSizeInBytes;
+            byte[] signature = new byte[signatureSize];
+            MLDsa.SignData(
+                new ReadOnlySpan<byte>(bytes, offset, count),
+                signature.AsSpan(),
+                context: default);
+            return signature;
+#else
             if (offset == 0 && count == bytes.Length)
                 return MLDsa.SignData(bytes, context: null);
 
             byte[] slice = new byte[count];
             Buffer.BlockCopy(bytes, offset, slice, 0, count);
             return MLDsa.SignData(slice, context: null);
+#endif
         }
 
         internal bool Verify(byte[] bytes, byte[] signature)
@@ -455,12 +467,19 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool VerifyUsingOffsetMlDsa(byte[] bytes, int offset, int count, byte[] signature)
         {
+#if NET6_0_OR_GREATER
+            return MLDsa.VerifyData(
+                new ReadOnlySpan<byte>(bytes, offset, count),
+                signature.AsSpan(),
+                context: default);
+#else
             if (offset == 0 && count == bytes.Length)
                 return MLDsa.VerifyData(bytes, signature, context: null);
 
             byte[] slice = new byte[count];
             Buffer.BlockCopy(bytes, offset, slice, 0, count);
             return MLDsa.VerifyData(slice, signature, context: null);
+#endif
         }
 
         private byte[] DecryptWithRsa(byte[] bytes)
