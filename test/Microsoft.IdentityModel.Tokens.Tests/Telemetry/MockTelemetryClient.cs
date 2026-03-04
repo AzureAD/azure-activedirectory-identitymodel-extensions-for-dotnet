@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Telemetry.Tests
 {
@@ -63,6 +64,11 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
             ExportedItems.Add(TelemetryConstants.ConfigurationSourceTag, configurationSource);
             ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
+        }
+
+        void ITelemetryClient.IncrementSignatureValidationCounter(string errorType, string issuer, string algorithm, SecurityKey key)
+        {
+            // Stub implementation for testing
         }
 
         void ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception) => throw new NotImplementedException("This method shouldn't be called. It is kept only as back-compat mechanism in case of assembly version mismatch");

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -191,6 +192,77 @@ namespace Microsoft.IdentityModel.Benchmarks
             var claimsIdentity = validationResult.Result.ClaimsIdentity;
             var claims = claimsIdentity.Claims;
             return claims.ToList();
+        }
+    }
+
+    // ===== Telemetry Impact Benchmarks =====
+    // "Tracking" in this context refers to tracking signature validation for specific issuer hosts.
+    // When enabled, telemetry collects data for the configured hosts (e.g., "contoso.com").
+    // Every other host is reported as "other" to avoid excessive cardinality in telemetry.
+    // These benchmarks measure the performance impact of enabling telemetry overall, and of tracking specific hosts.
+    [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+    public class ValidateTokenAsyncTests_TelemetryImpact
+    {
+        private const int IterationCount = 10000;
+        private JsonWebTokenHandler _jsonWebTokenHandler;
+        private string _jwsClaims;
+        private TokenValidationParameters _tokenValidationParameters;
+
+        [GlobalSetup]
+        public void GlobalSetup()
+        {
+            var tokenDescriptorClaims = new SecurityTokenDescriptor
+            {
+                Claims = BenchmarkUtils.Claims,
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
+            };
+
+            _jsonWebTokenHandler = new JsonWebTokenHandler();
+            _jwsClaims = _jsonWebTokenHandler.CreateToken(tokenDescriptorClaims);
+
+            _tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = BenchmarkUtils.Audience,
+                ValidateLifetime = true,
+                ValidIssuer = BenchmarkUtils.Issuer,
+                IssuerSigningKey = BenchmarkUtils.SigningCredentialsRsaSha256.Key,
+            };
+        }
+
+        [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryDisabled))]
+        public void Setup_TelemetryDisabled()
+        {
+            CryptoTelemetry.EnableSignatureValidationTelemetry(false, null);
+        }
+
+        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark(Baseline = true, OperationsPerInvoke = IterationCount)]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryDisabled()
+        {
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
+        }
+
+        [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledNoTracking))]
+        public void Setup_TelemetryEnabledNoTracking()
+        {
+            CryptoTelemetry.EnableSignatureValidationTelemetry(true, null);
+        }
+
+        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark(OperationsPerInvoke = IterationCount)]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledNoTracking()
+        {
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
+        }
+
+        [IterationSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithTracking))]
+        public void Setup_TelemetryEnabledWithTracking()
+        {
+            CryptoTelemetry.EnableSignatureValidationTelemetry(true, new[] { "contoso.com" });
+        }
+
+        [BenchmarkCategory("ValidateTokenAsync_TelemetryImpact"), Benchmark(OperationsPerInvoke = IterationCount)]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithTracking()
+        {
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
         }
     }
 }

@@ -1,6 +1,7 @@
 #nullable enable
 const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultAuthenticationType = "AuthenticationTypes.Federation" -> string!
 const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultMaximumTokenSizeInBytes = 256000 -> int
+Microsoft.IdentityModel.Telemetry.CryptoTelemetry
 Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationDelegate
 Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError
 Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError.AlgorithmValidationError(Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType! validationFailure, System.Diagnostics.StackFrame! stackFrame, string? invalidAlgorithm) -> void
@@ -216,6 +217,7 @@ override Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey.ToStr
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.Equals(object? obj) -> bool
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.GetHashCode() -> int
 override Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType.ToString() -> string!
+static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.EnableSignatureValidationTelemetry(bool enable, string![]? trackedIssuers) -> void
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer right) -> bool
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer right) -> bool
 static Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime.operator !=(Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime left, Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime right) -> bool
@@ -323,6 +325,10 @@ static Microsoft.IdentityModel.Tokens.Validators.ValidateTokenType(string? type,
 ~override Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.Equals(object obj) -> bool
 ~Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.Equals(Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError> other) -> bool
 ~static Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError>.operator ==(Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError> left, Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<TResult, TError> right) -> bool
+*REMOVED*static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key, bool representAsRsaKey) -> Microsoft.IdentityModel.Tokens.JsonWebKey
+~static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key, bool extractKeyMaterial) -> Microsoft.IdentityModel.Tokens.JsonWebKey
+~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
+~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.get -> int
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorClaimType.get -> string

@@ -76,5 +76,22 @@
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
-  
+
+  <!--
+    Ship version-mismatch detection targets inside every NuGet package.
+    The .targets file must be named <PackageId>.targets per NuGet convention.
+    The .cs file containing the inline task logic is placed alongside it so that
+    the Source= attribute in the .targets file resolves correctly in consumers.
+    Using buildTransitive ensures the check flows to all consuming projects,
+    even those that reference IdentityModel packages only transitively.
+  -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\src\Common\Microsoft.IdentityModel.VersionMismatch.targets"
+          Pack="true"
+          PackagePath="buildTransitive\$(PackageId).targets" />
+    <None Include="$(MSBuildThisFileDirectory)..\src\Common\Microsoft.IdentityModel.VersionMismatchTask.cs"
+          Pack="true"
+          PackagePath="buildTransitive\Microsoft.IdentityModel.VersionMismatchTask.cs" />
+  </ItemGroup>
+
 </Project>

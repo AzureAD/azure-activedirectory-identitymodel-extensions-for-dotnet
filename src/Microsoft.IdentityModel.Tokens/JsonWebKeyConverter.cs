@@ -122,18 +122,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// Converts a <see cref="X509SecurityKey"/> into a <see cref="JsonWebKey"/>.
         /// </summary>
         /// <param name="key">a <see cref="X509SecurityKey"/> to convert.</param>
-        /// <param name="representAsRsaKey">
-        /// <c>true</c> to represent the <paramref name="key"/> as an <see cref="RsaSecurityKey"/>,
+        /// <param name="extractKeyMaterial">
+        /// <c>true</c> to extract the key material (RSA or ECDsa) from the <paramref name="key"/>,
         /// <c>false</c> to represent the <paramref name="key"/> as an <see cref="X509SecurityKey"/>, using the "x5c" parameter.
         /// </param>
         /// <returns>a <see cref="JsonWebKey"/>.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
-        public static JsonWebKey ConvertFromX509SecurityKey(X509SecurityKey key, bool representAsRsaKey)
+        public static JsonWebKey ConvertFromX509SecurityKey(X509SecurityKey key, bool extractKeyMaterial)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            if (!representAsRsaKey)
+            if (!extractKeyMaterial)
                 return ConvertFromX509SecurityKey(key);
 
             if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)

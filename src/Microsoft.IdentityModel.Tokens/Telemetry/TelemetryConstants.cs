@@ -37,6 +37,41 @@ namespace Microsoft.IdentityModel.Telemetry
         /// </summary>
         public const string BlockingTypeTag = "Blocking";
 
+        /// <summary>
+        /// Telemetry tag indicating the status of an operation (success or failure).
+        /// </summary>
+        public const string StatusTag = "Status";
+
+        /// <summary>
+        /// Telemetry tag indicating the cryptographic algorithm used.
+        /// </summary>
+        public const string AlgorithmTag = "Algorithm";
+
+        /// <summary>
+        /// Telemetry tag indicating the key algorithm used.
+        /// </summary>
+        public const string KeyAlgorithmTag = "KeyAlgorithm";
+
+        /// <summary>
+        /// Telemetry tag indicating the error that occurred on failure.
+        /// </summary>
+        public const string ErrorTag = "Error";
+
+        /// <summary>
+        /// Telemetry tag indicating the token issuer.
+        /// </summary>
+        public const string IssuerTag = "Issuer";
+
+        /// <summary>
+        /// Telemetry value indicating a successful operation.
+        /// </summary>
+        public const string SuccessValue = "Success";
+
+        /// <summary>
+        /// Telemetry value indicating a failed operation.
+        /// </summary>
+        public const string FailureValue = "Failure";
+
         public static class Protocols
         {
             // Configuration manager refresh statuses
@@ -91,6 +126,44 @@ namespace Microsoft.IdentityModel.Telemetry
             /// request refresh calls on background thread are counted. Configuration source is irrelevant in these cases.
             /// </remarks>
             public const string ConfigurationSourceUnknown = "Unknown";
+        }
+
+        /// <summary>
+        /// Signature validation error constants. Kept limited to prevent cardinality explosion.
+        /// </summary>
+        public static class SignatureValidationErrors
+        {
+            /// <summary>
+            /// Signature validation succeeded.
+            /// </summary>
+            public const string None = "None";
+
+            /// <summary>
+            /// Signature validation failed after the signature provider was successfully created.
+            /// This is the primary failure case we want to track - when the key is present,
+            /// crypto provider is resolved, but signature verification fails.
+            /// </summary>
+            public const string SignatureVerificationFailed = "SignatureVerificationFailed";
+
+            /// <summary>
+            /// Algorithm not supported by the key or crypto provider.
+            /// </summary>
+            public const string AlgorithmNotSupported = "AlgorithmNotSupported";
+
+            /// <summary>
+            /// Signature provider could not be created by the crypto provider.
+            /// </summary>
+            public const string SignatureProviderCreationFailed = "SignatureProviderCreationFailed";
+
+            /// <summary>
+            /// No signing key was found or resolved.
+            /// </summary>
+            public const string SigningKeyNotFound = "SigningKeyNotFound";
+
+            /// <summary>
+            /// Other errors not covered by specific categories.
+            /// </summary>
+            public const string Other = "Other";
         }
     }
 }

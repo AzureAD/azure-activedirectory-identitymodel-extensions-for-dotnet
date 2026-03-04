@@ -1,5 +1,13 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.16.0
+====
+## New Features
+* Add telemetry around signature validation. See [PR #3415](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3415) for details.
+
+## Fundamentals
+* Fix FileVersion format to use two-digit year and day of year. See [PR #3389](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3389) for details.
+
 8.15.0
 ====
 ## New Features
