@@ -281,6 +281,43 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #endregion
 
+        #region Signature Correctness Tests
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void TamperedSignature_FailsVerification(string algorithm)
+        {
+            byte[] data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            var key = GetMlDsaKey(algorithm);
+            var signingProvider = new AsymmetricSignatureProvider(key, algorithm, true);
+            byte[] signature = signingProvider.Sign(data);
+
+            // Tamper with one byte of the signature
+            signature[0] ^= 0xFF;
+
+            var verifyProvider = new AsymmetricSignatureProvider(GetMlDsaPublicKey(algorithm), algorithm, false);
+            Assert.False(verifyProvider.Verify(data, signature));
+        }
+
+        [Fact]
+        public void CrossKeyVerification_Fails()
+        {
+            // Signature from MlDsa44 key should not verify with a different MlDsa44 key
+            byte[] data = new byte[] { 10, 20, 30, 40 };
+            var signingProvider = new AsymmetricSignatureProvider(KeyingMaterial.MlDsa44Key, SecurityAlgorithms.MlDsa44, true);
+            byte[] signature = signingProvider.Sign(data);
+
+            // Create a completely different key pair
+            using var differentMlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            var differentKey = new MlDsaSecurityKey(differentMlDsa);
+            var verifyProvider = new AsymmetricSignatureProvider(differentKey, SecurityAlgorithms.MlDsa44, false);
+            Assert.False(verifyProvider.Verify(data, signature));
+        }
+
+        #endregion
+
         #region JWK JSON Serialization Round-Trip
 
         [Theory]
