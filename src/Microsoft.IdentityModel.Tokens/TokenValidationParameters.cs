@@ -126,11 +126,8 @@ namespace Microsoft.IdentityModel.Tokens
             ValidAlgorithms = other.ValidAlgorithms is not null ? new List<string>(other.ValidAlgorithms) : null;
             ValidAudience = other.ValidAudience;
             ValidAudiences = other.ValidAudiences is not null ? new List<string>(other.ValidAudiences) : null;
-            ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
             ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
-            ValidIssuers = other.ValidIssuers;
-            ValidTypes = other.ValidTypes;
             ActClaimRetrieverDelegate = other.ActClaimRetrieverDelegate;
             MaxActorChainLength = other.MaxActorChainLength;
             ActorChainDepth = other.ActorChainDepth;
