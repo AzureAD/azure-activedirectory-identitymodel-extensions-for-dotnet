@@ -38,7 +38,14 @@ internal static class MlDsaAdapter
                         LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(nameof(JsonWebKey)), LogHelper.MarkAsNonPII(nameof(jsonWebKey.Priv)))));
 
             byte[] seed = Base64UrlEncoder.DecodeBytes(jsonWebKey.Priv);
-            return MLDsa.ImportMLDsaPrivateSeed(algorithm, seed);
+            try
+            {
+                return MLDsa.ImportMLDsaPrivateSeed(algorithm, seed);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(seed);
+            }
         }
 
         byte[] publicKey = Base64UrlEncoder.DecodeBytes(jsonWebKey.Pub);
