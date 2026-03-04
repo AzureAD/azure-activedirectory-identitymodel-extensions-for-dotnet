@@ -5,6 +5,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
@@ -452,6 +453,110 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             var result = await handler.ValidateTokenAsync(token, validationParams);
             Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
+        }
+
+        #endregion
+
+        #region X509 ML-DSA End-to-End JWT Tests
+
+        // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
+        private static bool CanExtractMlDsaPrivateKeyFromX509()
+        {
+            try
+            {
+#pragma warning disable SYSLIB5006
+                using var key = KeyingMaterial.MlDsa44Cert.GetMLDsaPrivateKey();
+#pragma warning restore SYSLIB5006
+                return key != null;
+            }
+            catch (PlatformNotSupportedException)
+            {
+                return false;
+            }
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public async System.Threading.Tasks.Task JwtCreateAndValidate_WithX509SecurityKey(string algorithm)
+        {
+            if (!CanExtractMlDsaPrivateKeyFromX509())
+                return; // skip on platforms that can't extract ML-DSA private keys from X509
+
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
+
+            var handler = new JsonWebTokenHandler();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "https://test-issuer.example.com",
+                Audience = "https://test-audience.example.com",
+                SigningCredentials = new SigningCredentials(x509Key, algorithm),
+                Claims = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "sub", "x509-test-user" }
+                }
+            };
+
+            string token = handler.CreateToken(descriptor);
+            Assert.False(string.IsNullOrEmpty(token));
+
+            // Validate using the same X509 key (public key only path)
+            var validationParams = new TokenValidationParameters
+            {
+                ValidIssuer = "https://test-issuer.example.com",
+                ValidAudience = "https://test-audience.example.com",
+                IssuerSigningKey = x509Key,
+                ValidateLifetime = false
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParams);
+            Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
+            Assert.Equal("x509-test-user", result.Claims["sub"]);
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public async System.Threading.Tasks.Task JwtCreateWithX509_ValidateWithMlDsaKey(string algorithm)
+        {
+            if (!CanExtractMlDsaPrivateKeyFromX509())
+                return; // skip on platforms that can't extract ML-DSA private keys from X509
+
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
+
+            var handler = new JsonWebTokenHandler();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "https://test-issuer.example.com",
+                Audience = "https://test-audience.example.com",
+                SigningCredentials = new SigningCredentials(x509Key, algorithm),
+                Claims = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "sub", "cross-key-user" }
+                }
+            };
+
+            string token = handler.CreateToken(descriptor);
+
+            // Validate using an MlDsaSecurityKey created from the X509 certificate's public key
+#pragma warning disable SYSLIB5006
+            using var mlDsaPub = x509Key.Certificate.GetMLDsaPublicKey();
+#pragma warning restore SYSLIB5006
+            var mlDsaKey = new MlDsaSecurityKey(mlDsaPub);
+
+            var validationParams = new TokenValidationParameters
+            {
+                ValidIssuer = "https://test-issuer.example.com",
+                ValidAudience = "https://test-audience.example.com",
+                IssuerSigningKey = mlDsaKey,
+                ValidateLifetime = false
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParams);
+            Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
+            Assert.Equal("cross-key-user", result.Claims["sub"]);
         }
 
         #endregion
