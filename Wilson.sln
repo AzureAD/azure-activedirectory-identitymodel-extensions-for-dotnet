@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.7.33711.374
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11520.95 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmark", "benchmark", "{2F79F3C4-F4E3-46DD-8B34-8EF403A6F7F5}"
 EndProject
@@ -104,6 +104,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{BC99A01F
 		build\targetsTest.props = build\targetsTest.props
 		build\version.props = build\version.props
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReproMismatchedInternals", "test\ReproMismatchedInternals\ReproMismatchedInternals.csproj", "{5AA1D99B-39CD-7F33-C62E-3B461FF97FA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -227,6 +229,10 @@ Global
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AA1D99B-39CD-7F33-C62E-3B461FF97FA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AA1D99B-39CD-7F33-C62E-3B461FF97FA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AA1D99B-39CD-7F33-C62E-3B461FF97FA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AA1D99B-39CD-7F33-C62E-3B461FF97FA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -262,6 +268,7 @@ Global
 		{EF9A4431-6D2C-4DD1-BF6B-6F2CC619DEE1} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{8105289F-3D54-4054-9738-5985F3B6CF2C} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0} = {2F79F3C4-F4E3-46DD-8B34-8EF403A6F7F5}
+		{5AA1D99B-39CD-7F33-C62E-3B461FF97FA7} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F681326-7ED4-45F6-BD1D-1119EA388F42}
