@@ -1,0 +1,6 @@
+#nullable enable
+System.Diagnostics.CodeAnalysis.ExperimentalAttribute
+System.Diagnostics.CodeAnalysis.ExperimentalAttribute.DiagnosticId.get -> string!
+System.Diagnostics.CodeAnalysis.ExperimentalAttribute.ExperimentalAttribute(string! diagnosticId) -> void
+System.Diagnostics.CodeAnalysis.ExperimentalAttribute.UrlFormat.get -> string?
+System.Diagnostics.CodeAnalysis.ExperimentalAttribute.UrlFormat.set -> void

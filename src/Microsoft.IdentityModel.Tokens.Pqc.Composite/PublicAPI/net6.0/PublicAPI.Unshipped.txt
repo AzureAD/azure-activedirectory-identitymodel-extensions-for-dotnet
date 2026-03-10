@@ -1,0 +1,8 @@
+#nullable enable
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms
+[MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa44Ed25519 = "ML-DSA-44-Ed25519" -> string!
+[MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa44Es256 = "ML-DSA-44-ES256" -> string!
+[MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa65Ed25519 = "ML-DSA-65-Ed25519" -> string!
+[MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa65Es256 = "ML-DSA-65-ES256" -> string!
+[MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa87Ed448 = "ML-DSA-87-Ed448" -> string!
+[MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa87Es384 = "ML-DSA-87-ES384" -> string!
