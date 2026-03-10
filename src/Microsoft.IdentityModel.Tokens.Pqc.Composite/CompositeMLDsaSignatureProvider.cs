@@ -55,6 +55,21 @@ public class CompositeMLDsaSignatureProvider : SignatureProvider
     }
 
     /// <inheritdoc/>
+    public override byte[] Sign(byte[] input, int offset, int count)
+    {
+        if (input is null || input.Length == 0)
+            throw LogHelper.LogArgumentNullException(nameof(input));
+
+        if (_disposed)
+            throw new ObjectDisposedException(GetType().FullName);
+
+        byte[] data = new byte[count];
+        Array.Copy(input, offset, data, 0, count);
+
+        return _compositeMLDsa.SignData(data);
+    }
+
+    /// <inheritdoc/>
     public override bool Verify(byte[] input, byte[] signature)
     {
         if (input is null || input.Length == 0)
@@ -67,6 +82,27 @@ public class CompositeMLDsaSignatureProvider : SignatureProvider
             throw new ObjectDisposedException(GetType().FullName);
 
         return _compositeMLDsa.VerifyData(input, signature);
+    }
+
+    /// <inheritdoc/>
+    public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
+    {
+        if (input is null)
+            throw LogHelper.LogArgumentNullException(nameof(input));
+
+        if (signature is null)
+            throw LogHelper.LogArgumentNullException(nameof(signature));
+
+        if (_disposed)
+            throw new ObjectDisposedException(GetType().FullName);
+
+        byte[] data = new byte[inputLength];
+        Array.Copy(input, inputOffset, data, 0, inputLength);
+
+        byte[] sig = new byte[signatureLength];
+        Array.Copy(signature, signatureOffset, sig, 0, signatureLength);
+
+        return _compositeMLDsa.VerifyData(data, sig);
     }
 
 #if NET6_0_OR_GREATER

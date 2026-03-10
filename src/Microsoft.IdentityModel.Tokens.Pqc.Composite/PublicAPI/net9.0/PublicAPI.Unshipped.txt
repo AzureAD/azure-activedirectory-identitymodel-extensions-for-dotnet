@@ -31,3 +31,5 @@
 [MSIDENT2001]static Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaJwkSerializer.FromJsonWebKey(Microsoft.IdentityModel.Tokens.JsonWebKey! jwk) -> Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey!
 [MSIDENT2001]static Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaJwkSerializer.ToJsonWebKey(Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey! key) -> Microsoft.IdentityModel.Tokens.JsonWebKey!
 [MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSignatureProvider.Sign(System.ReadOnlySpan<byte> data, System.Span<byte> destination, out int bytesWritten) -> bool
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSignatureProvider.Sign(byte[]! input, int offset, int count) -> byte[]!
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSignatureProvider.Verify(byte[]! input, int inputOffset, int inputLength, byte[]! signature, int signatureOffset, int signatureLength) -> bool

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\commonTest.props" />
+
+  <PropertyGroup>
+    <AssemblyName>Microsoft.IdentityModel.Tokens.Pqc.Composite.Tests</AssemblyName>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
+    <Description>Microsoft.IdentityModel.Tokens.Pqc.Composite.Tests</Description>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <PackageId>Microsoft.IdentityModel.Tokens.Pqc.Composite.Tests</PackageId>
+    <SignAssembly>true</SignAssembly>
+    <NoWarn>$(NoWarn);MSIDENT2001;SYSLIB5006</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Pqc.Composite\Microsoft.IdentityModel.Tokens.Pqc.Composite.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj" />
+    <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
+  </ItemGroup>
+
+</Project>
