@@ -193,6 +193,135 @@ public class CompositeMLDsaTests
         Assert.Throws<ArgumentNullException>(() => provider.Verify(new byte[1], null!));
     }
 
+    [Fact]
+    public void SignatureProvider_DisposedProvider_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        using var composite = CompositeMLDsa.GenerateKey(CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256);
+        var key = new CompositeMLDsaSecurityKey(composite);
+        var provider = new CompositeMLDsaSignatureProvider(key, CompositeMLDsaAlgorithms.MlDsa44Es256, true);
+        provider.Dispose();
+
+        // Act & Assert
+        Assert.Throws<ObjectDisposedException>(() => provider.Sign(new byte[] { 1, 2, 3 }));
+        Assert.Throws<ObjectDisposedException>(() => provider.Sign(new byte[] { 1, 2, 3 }, 0, 3));
+        Assert.Throws<ObjectDisposedException>(() => provider.Verify(new byte[] { 1, 2, 3 }, new byte[] { 1 }));
+        Assert.Throws<ObjectDisposedException>(() => provider.Verify(new byte[] { 1, 2, 3 }, 0, 3, new byte[] { 1 }, 0, 1));
+    }
+
+    [Fact]
+    public void SignatureProvider_InvalidAlgorithm_ThrowsArgumentException()
+    {
+        // Arrange
+        using var composite = CompositeMLDsa.GenerateKey(CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256);
+        var key = new CompositeMLDsaSecurityKey(composite);
+
+        // Act & Assert — non-composite algorithm
+        Assert.Throws<ArgumentException>(() =>
+            new CompositeMLDsaSignatureProvider(key, "RS256", true));
+    }
+
+    [Fact]
+    public void SignatureProvider_AlgorithmKeyMismatch_ThrowsArgumentException()
+    {
+        // Arrange — key is ML-DSA-44 with ECDSA P-256, but algorithm says ML-DSA-87 with P-384
+        using var composite = CompositeMLDsa.GenerateKey(CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256);
+        var key = new CompositeMLDsaSecurityKey(composite);
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() =>
+            new CompositeMLDsaSignatureProvider(key, CompositeMLDsaAlgorithms.MlDsa87Es384, true));
+    }
+
+    [Fact]
+    public void SignatureProvider_OffsetSign_InvalidBounds_Throws()
+    {
+        // Arrange
+        using var composite = CompositeMLDsa.GenerateKey(CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256);
+        var key = new CompositeMLDsaSecurityKey(composite);
+        using var provider = new CompositeMLDsaSignatureProvider(key, CompositeMLDsaAlgorithms.MlDsa44Es256, true);
+        byte[] data = new byte[] { 1, 2, 3, 4, 5 };
+
+        // Act & Assert
+        Assert.Throws<ArgumentOutOfRangeException>(() => provider.Sign(data, -1, 3));
+        Assert.Throws<ArgumentOutOfRangeException>(() => provider.Sign(data, 0, 0));
+        Assert.Throws<ArgumentException>(() => provider.Sign(data, 3, 5));
+    }
+
+    [Fact]
+    public void SignatureProvider_OffsetVerify_InvalidBounds_Throws()
+    {
+        // Arrange
+        using var composite = CompositeMLDsa.GenerateKey(CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256);
+        var key = new CompositeMLDsaSecurityKey(composite);
+        using var provider = new CompositeMLDsaSignatureProvider(key, CompositeMLDsaAlgorithms.MlDsa44Es256, true);
+        byte[] data = new byte[] { 1, 2, 3, 4, 5 };
+        byte[] sig = new byte[] { 1, 2, 3 };
+
+        // Act & Assert — negative input offset
+        Assert.Throws<ArgumentOutOfRangeException>(() => provider.Verify(data, -1, 3, sig, 0, 3));
+        // zero input length
+        Assert.Throws<ArgumentOutOfRangeException>(() => provider.Verify(data, 0, 0, sig, 0, 3));
+        // input overrun
+        Assert.Throws<ArgumentException>(() => provider.Verify(data, 3, 5, sig, 0, 3));
+        // negative signature offset
+        Assert.Throws<ArgumentOutOfRangeException>(() => provider.Verify(data, 0, 3, sig, -1, 3));
+        // zero signature length
+        Assert.Throws<ArgumentOutOfRangeException>(() => provider.Verify(data, 0, 3, sig, 0, 0));
+        // signature overrun
+        Assert.Throws<ArgumentException>(() => provider.Verify(data, 0, 3, sig, 1, 5));
+    }
+
+    [Theory]
+    [InlineData("ML-DSA-44-ES256")]
+    public void SignatureProvider_OffsetSignVerify_RoundTrip(string algorithm)
+    {
+        // Arrange
+        var dotNetAlg = CompositeMLDsaAlgorithms.GetCompositeMLDsaAlgorithm(algorithm);
+        using var composite = CompositeMLDsa.GenerateKey(dotNetAlg);
+        var key = new CompositeMLDsaSecurityKey(composite);
+        using var provider = new CompositeMLDsaSignatureProvider(key, algorithm, true);
+
+        // Embed data in a larger buffer to test offset handling
+        byte[] message = Encoding.UTF8.GetBytes("Test message for offset sign/verify");
+        byte[] paddedInput = new byte[10 + message.Length + 10];
+        Array.Copy(message, 0, paddedInput, 10, message.Length);
+
+        // Act
+        byte[] signature = provider.Sign(paddedInput, 10, message.Length);
+
+        // Embed signature in a larger buffer
+        byte[] paddedSig = new byte[5 + signature.Length + 5];
+        Array.Copy(signature, 0, paddedSig, 5, signature.Length);
+
+        bool isValid = provider.Verify(paddedInput, 10, message.Length, paddedSig, 5, signature.Length);
+
+        // Assert
+        Assert.True(isValid);
+    }
+
+    [Theory]
+    [InlineData("ML-DSA-44-ES256")]
+    public void SignatureProvider_DifferentKey_FailsVerification(string algorithm)
+    {
+        // Arrange — sign with one key, verify with a different key
+        var dotNetAlg = CompositeMLDsaAlgorithms.GetCompositeMLDsaAlgorithm(algorithm);
+        using var signingComposite = CompositeMLDsa.GenerateKey(dotNetAlg);
+        using var verifyingComposite = CompositeMLDsa.GenerateKey(dotNetAlg);
+        var signingKey = new CompositeMLDsaSecurityKey(signingComposite);
+        var verifyingKey = new CompositeMLDsaSecurityKey(verifyingComposite);
+        using var signingProvider = new CompositeMLDsaSignatureProvider(signingKey, algorithm, true);
+        using var verifyingProvider = new CompositeMLDsaSignatureProvider(verifyingKey, algorithm, false);
+        byte[] data = Encoding.UTF8.GetBytes("Cross-key verification test");
+
+        // Act
+        byte[] signature = signingProvider.Sign(data);
+        bool isValid = verifyingProvider.Verify(data, signature);
+
+        // Assert
+        Assert.False(isValid, "Signature should not verify with a different key");
+    }
+
     #endregion
 
     #region CryptoProvider Tests
@@ -250,6 +379,35 @@ public class CompositeMLDsaTests
         // Assert
         Assert.IsType<CompositeMLDsaSignatureProvider>(result);
         cryptoProvider.Release(result);
+    }
+
+    [Fact]
+    public void CryptoProvider_Create_MissingKey_ThrowsArgumentException()
+    {
+        // Arrange
+        var cryptoProvider = new CompositeMLDsaCryptoProvider();
+
+        // Act & Assert — no arguments
+        Assert.Throws<ArgumentException>(() => cryptoProvider.Create(CompositeMLDsaAlgorithms.MlDsa44Es256));
+
+        // Act & Assert — wrong key type
+        using var rsa = RSA.Create();
+        var rsaKey = new RsaSecurityKey(rsa);
+        Assert.Throws<ArgumentException>(() =>
+            cryptoProvider.Create(CompositeMLDsaAlgorithms.MlDsa44Es256, rsaKey, true));
+    }
+
+    [Fact]
+    public void CryptoProvider_Create_AlgorithmKeyMismatch_ThrowsArgumentException()
+    {
+        // Arrange — key is MLDsa44 with ECDSA P-256, but Create uses MLDsa87 with P-384
+        var cryptoProvider = new CompositeMLDsaCryptoProvider();
+        using var composite = CompositeMLDsa.GenerateKey(CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256);
+        var key = new CompositeMLDsaSecurityKey(composite);
+
+        // Act & Assert — the SignatureProvider constructor should reject the mismatch
+        Assert.Throws<ArgumentException>(() =>
+            cryptoProvider.Create(CompositeMLDsaAlgorithms.MlDsa87Es384, key, true));
     }
 
     #endregion

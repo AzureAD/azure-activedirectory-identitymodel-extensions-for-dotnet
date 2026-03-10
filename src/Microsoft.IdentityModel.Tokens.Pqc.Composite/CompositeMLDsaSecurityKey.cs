@@ -19,6 +19,7 @@ namespace Microsoft.IdentityModel.Tokens.Pqc.Composite;
 public class CompositeMLDsaSecurityKey : AsymmetricSecurityKey
 {
     private bool? _hasPrivateKey;
+    private int? _keySize;
 
     /// <summary>
     /// Initializes a new instance of <see cref="CompositeMLDsaSecurityKey"/>
@@ -66,11 +67,14 @@ public class CompositeMLDsaSecurityKey : AsymmetricSecurityKey
     {
         get
         {
-            byte[] spki = CompositeMLDsa.ExportSubjectPublicKeyInfo();
-            int sizeBits = spki.Length * 8;
-            Array.Clear(spki, 0, spki.Length);
+            if (_keySize is null)
+            {
+                byte[] spki = CompositeMLDsa.ExportSubjectPublicKeyInfo();
+                _keySize = spki.Length * 8;
+                Array.Clear(spki, 0, spki.Length);
+            }
 
-            return sizeBits;
+            return _keySize.Value;
         }
     }
 
@@ -83,12 +87,19 @@ public class CompositeMLDsaSecurityKey : AsymmetricSecurityKey
         string algorithmName = CompositeMLDsaAlgorithms.GetJoseAlgorithm(CompositeMLDsa.Algorithm);
         byte[] publicKey = CompositeMLDsa.ExportSubjectPublicKeyInfo();
 
-        // Canonical JWK representation per RFC 7638 — alphabetically sorted required members.
-        string canonicalJwk = $@"{{""alg"":""{algorithmName}"",""kty"":""{JsonWebAlgorithmsKeyTypes.Akp}"",""pub"":""{Base64UrlEncoder.Encode(publicKey)}""}}";
+        try
+        {
+            // Canonical JWK representation per RFC 7638 — alphabetically sorted required members.
+            string canonicalJwk = $@"{{""alg"":""{algorithmName}"",""kty"":""{JsonWebAlgorithmsKeyTypes.Akp}"",""pub"":""{Base64UrlEncoder.Encode(publicKey)}""}}";
 
-        using var sha256 = SHA256.Create();
+            using var sha256 = SHA256.Create();
 
-        return sha256.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
+            return sha256.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
+        }
+        finally
+        {
+            Array.Clear(publicKey, 0, publicKey.Length);
+        }
     }
 
     private void DetectPrivateKey()

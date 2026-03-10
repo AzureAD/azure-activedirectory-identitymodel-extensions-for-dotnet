@@ -29,6 +29,10 @@ public class CompositeMLDsaSignatureProvider : SignatureProvider
     /// <c>true</c> if this provider will be used for signing; <c>false</c> for verification.
     /// </param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is null.</exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown if <paramref name="algorithm"/> is not a recognised composite ML-DSA algorithm,
+    /// or if the algorithm does not match the key's <see cref="CompositeMLDsa.Algorithm"/>.
+    /// </exception>
     public CompositeMLDsaSignatureProvider(
         CompositeMLDsaSecurityKey key,
         string algorithm,
@@ -37,6 +41,18 @@ public class CompositeMLDsaSignatureProvider : SignatureProvider
     {
         if (key is null)
             throw LogHelper.LogArgumentNullException(nameof(key));
+
+        if (!CompositeMLDsaAlgorithms.IsCompositeAlgorithm(algorithm))
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentException($"Algorithm '{algorithm}' is not a recognised composite ML-DSA algorithm.", nameof(algorithm)));
+
+        // Validate that the JOSE algorithm matches the key's underlying algorithm.
+        CompositeMLDsaAlgorithm expectedDotNetAlg = CompositeMLDsaAlgorithms.GetCompositeMLDsaAlgorithm(algorithm);
+        if (key.CompositeMLDsa.Algorithm != expectedDotNetAlg)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentException(
+                    $"Algorithm mismatch: JOSE algorithm '{algorithm}' requires {expectedDotNetAlg} but the key uses {key.CompositeMLDsa.Algorithm}.",
+                    nameof(algorithm)));
 
         _compositeMLDsa = key.CompositeMLDsa;
         WillCreateSignatures = willCreateSignatures;
@@ -60,13 +76,31 @@ public class CompositeMLDsaSignatureProvider : SignatureProvider
         if (input is null || input.Length == 0)
             throw LogHelper.LogArgumentNullException(nameof(input));
 
+        if (offset < 0)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentOutOfRangeException(nameof(offset), offset, "Offset must be non-negative."));
+
+        if (count < 1)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentOutOfRangeException(nameof(count), count, "Count must be at least 1."));
+
+        if (offset + count > input.Length)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentException($"offset ({offset}) + count ({count}) exceeds input length ({input.Length})."));
+
         if (_disposed)
             throw new ObjectDisposedException(GetType().FullName);
 
         byte[] data = new byte[count];
-        Array.Copy(input, offset, data, 0, count);
-
-        return _compositeMLDsa.SignData(data);
+        try
+        {
+            Array.Copy(input, offset, data, 0, count);
+            return _compositeMLDsa.SignData(data);
+        }
+        finally
+        {
+            Array.Clear(data, 0, data.Length);
+        }
     }
 
     /// <inheritdoc/>
@@ -93,16 +127,46 @@ public class CompositeMLDsaSignatureProvider : SignatureProvider
         if (signature is null)
             throw LogHelper.LogArgumentNullException(nameof(signature));
 
+        if (inputOffset < 0)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentOutOfRangeException(nameof(inputOffset), inputOffset, "Input offset must be non-negative."));
+
+        if (inputLength < 1)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentOutOfRangeException(nameof(inputLength), inputLength, "Input length must be at least 1."));
+
+        if (inputOffset + inputLength > input.Length)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentException($"inputOffset ({inputOffset}) + inputLength ({inputLength}) exceeds input length ({input.Length})."));
+
+        if (signatureOffset < 0)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentOutOfRangeException(nameof(signatureOffset), signatureOffset, "Signature offset must be non-negative."));
+
+        if (signatureLength < 1)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentOutOfRangeException(nameof(signatureLength), signatureLength, "Signature length must be at least 1."));
+
+        if (signatureOffset + signatureLength > signature.Length)
+            throw LogHelper.LogExceptionMessage(
+                new ArgumentException($"signatureOffset ({signatureOffset}) + signatureLength ({signatureLength}) exceeds signature length ({signature.Length})."));
+
         if (_disposed)
             throw new ObjectDisposedException(GetType().FullName);
 
         byte[] data = new byte[inputLength];
-        Array.Copy(input, inputOffset, data, 0, inputLength);
-
         byte[] sig = new byte[signatureLength];
-        Array.Copy(signature, signatureOffset, sig, 0, signatureLength);
-
-        return _compositeMLDsa.VerifyData(data, sig);
+        try
+        {
+            Array.Copy(input, inputOffset, data, 0, inputLength);
+            Array.Copy(signature, signatureOffset, sig, 0, signatureLength);
+            return _compositeMLDsa.VerifyData(data, sig);
+        }
+        finally
+        {
+            Array.Clear(data, 0, data.Length);
+            Array.Clear(sig, 0, sig.Length);
+        }
     }
 
 #if NET6_0_OR_GREATER
@@ -113,16 +177,23 @@ public class CompositeMLDsaSignatureProvider : SignatureProvider
             throw new ObjectDisposedException(GetType().FullName);
 
         byte[] sig = _compositeMLDsa.SignData(data.ToArray());
-        if (sig.Length > destination.Length)
+        try
         {
-            bytesWritten = 0;
-            return false;
+            if (sig.Length > destination.Length)
+            {
+                bytesWritten = 0;
+                return false;
+            }
+
+            sig.CopyTo(destination);
+            bytesWritten = sig.Length;
+
+            return true;
         }
-
-        sig.CopyTo(destination);
-        bytesWritten = sig.Length;
-
-        return true;
+        finally
+        {
+            Array.Clear(sig, 0, sig.Length);
+        }
     }
 #endif
 
