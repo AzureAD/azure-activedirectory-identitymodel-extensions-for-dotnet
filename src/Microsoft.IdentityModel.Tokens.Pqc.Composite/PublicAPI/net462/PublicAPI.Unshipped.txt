@@ -6,3 +6,27 @@
 [MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa65Es256 = "ML-DSA-65-ES256" -> string!
 [MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa87Ed448 = "ML-DSA-87-Ed448" -> string!
 [MSIDENT2001]const Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.MlDsa87Es384 = "ML-DSA-87-ES384" -> string!
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaCryptoProvider
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaCryptoProvider.CompositeMLDsaCryptoProvider() -> void
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaCryptoProvider.Create(string! algorithm, params object![]! args) -> object!
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaCryptoProvider.IsSupportedAlgorithm(string! algorithm, params object![]! args) -> bool
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaCryptoProvider.Release(object! cryptoInstance) -> void
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaJwkSerializer
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey.CompositeMLDsa.get -> System.Security.Cryptography.CompositeMLDsa!
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey.CompositeMLDsaSecurityKey(System.Security.Cryptography.CompositeMLDsa! compositeMLDsa) -> void
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSignatureProvider
+[MSIDENT2001]Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSignatureProvider.CompositeMLDsaSignatureProvider(Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey! key, string! algorithm, bool willCreateSignatures) -> void
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey.CanComputeJwkThumbprint() -> bool
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey.ComputeJwkThumbprint() -> byte[]!
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey.HasPrivateKey.get -> bool
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey.KeySize.get -> int
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey.PrivateKeyStatus.get -> Microsoft.IdentityModel.Tokens.PrivateKeyStatus
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSignatureProvider.Dispose(bool disposing) -> void
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSignatureProvider.Sign(byte[]! input) -> byte[]!
+[MSIDENT2001]override Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSignatureProvider.Verify(byte[]! input, byte[]! signature) -> bool
+[MSIDENT2001]static Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.GetCompositeMLDsaAlgorithm(string! algorithm) -> System.Security.Cryptography.CompositeMLDsaAlgorithm!
+[MSIDENT2001]static Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.GetJoseAlgorithm(System.Security.Cryptography.CompositeMLDsaAlgorithm! algorithm) -> string!
+[MSIDENT2001]static Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaAlgorithms.IsCompositeAlgorithm(string! algorithm) -> bool
+[MSIDENT2001]static Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaJwkSerializer.FromJsonWebKey(Microsoft.IdentityModel.Tokens.JsonWebKey! jwk) -> Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey!
+[MSIDENT2001]static Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaJwkSerializer.ToJsonWebKey(Microsoft.IdentityModel.Tokens.Pqc.Composite.CompositeMLDsaSecurityKey! key) -> Microsoft.IdentityModel.Tokens.JsonWebKey!
