@@ -504,7 +504,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
         internal static bool ReadBoolean(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
-            // The parameter 'read' can be used by callers reader position the reader to the next token.
+            // The parameter 'read' can be used by callers to position the reader to the next token.
             // This is a convenience when the reader is positioned on a JsonTokenType.PropertyName.
             // The caller does not have to make the calls: reader.Read(), JsonSerializerPrimitives.ReadBoolean.
             if (read)
@@ -513,9 +513,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
             if (reader.TokenType == JsonTokenType.True || reader.TokenType == JsonTokenType.False)
             {
                 bool retVal = reader.GetBoolean();
-
-                // move to next token.
-                reader.Read();
                 return retVal;
             }
 
@@ -525,7 +522,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
         internal static long ReadLong(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
-            // The parameter 'read' can be used by callers reader position the reader to the next token.
+            // The parameter 'read' can be used by callers to position the reader to the next token.
             // This is a convenience when the reader is positioned on a JsonTokenType.PropertyName.
             // The caller does not have to make the calls: reader.Read(), JsonSerializerPrimitives.ReadBoolean.
             if (read)
@@ -561,8 +558,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     CreateJsonReaderException(ref reader, "JsonTokenType.Number", className, propertyName));
             }
 
-            // move to next token.
-            reader.Read();
             return retVal;
         }
 
@@ -610,7 +605,15 @@ namespace Microsoft.IdentityModel.Tokens.Json
                       || reader.TokenType == JsonTokenType.String
                       || reader.TokenType == JsonTokenType.StartObject
                       || reader.TokenType == JsonTokenType.StartArray)
+                {
+                    // For StartObject/StartArray: ReadPropertyValueAsObject calls ReadJsonElement which
+                    // already advances past the complex value. For scalar types (Null, Number, String):
+                    // ReadPropertyValueAsObject leaves the reader AT the value, so we advance explicitly.
+                    bool isComplex = reader.TokenType == JsonTokenType.StartObject || reader.TokenType == JsonTokenType.StartArray;
                     objects.Add(ReadPropertyValueAsObject(ref reader, propertyName, className));
+                    if (!isComplex)
+                        reader.Read();
+                }
                 else if (!reader.Read())
                     break;
             }
@@ -639,7 +642,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         internal static string ReadString(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
-            if (IsReaderPositionedOnNull(ref reader, read, true))
+            if (IsReaderPositionedOnNull(ref reader, read, read))
                 return null;
 
             if (!IsReaderAtTokenType(ref reader, JsonTokenType.String, false))
@@ -647,15 +650,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.String", className, propertyName));
 
             string retval = reader.GetString();
-
-            // move to next token.
-            reader.Read();
             return retval;
         }
 
         internal static string ReadStringAsBool(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
-            // The parameter 'read' can be used by callers reader position the reader to the next token.
+            // The parameter 'read' can be used by callers to position the reader to the next token.
             // This is a convenience when the reader is positioned on a JsonTokenType.PropertyName.
             // The caller does not have to make the calls: reader.Read(), JsonSerializerPrimitives.ReadBoolean.
             if (read)
@@ -667,11 +667,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             string strValue = reader.GetString();
             if (bool.TryParse(strValue, out bool boolValue))
-            {
-                // move to next token.
-                reader.Read();
                 return boolValue ? True : False;
-            }
 
             throw LogHelper.LogExceptionMessage(CreateJsonReaderException(ref reader, "JsonTokenType.Boolean", className, propertyName));
         }
@@ -687,7 +683,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         internal static string ReadStringOrNumberAsString(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
-            if (IsReaderPositionedOnNull(ref reader, read, true))
+            if (IsReaderPositionedOnNull(ref reader, read, read))
                 return null;
 
             if (reader.TokenType == JsonTokenType.Number)
@@ -698,9 +694,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     CreateJsonReaderException(ref reader, "JsonTokenType.String or JsonTokenType.Number", className, propertyName));
 
             string retVal = reader.GetString();
-
-            // move to next token.
-            reader.Read();
             return retVal;
         }
 
@@ -816,7 +809,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         internal static object ReadStringAsObject(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
-            if (IsReaderPositionedOnNull(ref reader, read, true))
+            if (IsReaderPositionedOnNull(ref reader, read, read))
                 return null;
 
             if (reader.TokenType != JsonTokenType.String)
@@ -826,10 +819,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             string originalString = reader.GetString();
 
             if (!AppContextSwitches.TryAllStringClaimsAsDateTime && IsKnownToNotBeDateTime(propertyName))
-            {
-                reader.Read();
                 return originalString;
-            }
 
 #pragma warning disable CA1031 // Do not catch general exception types
             try
@@ -847,8 +837,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
             { }
 #pragma warning restore CA1031 // Do not catch general exception types
 
-            // move to next token.
-            reader.Read();
             return originalString;
         }
 
@@ -860,7 +848,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             bool read = false)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
-            if (IsReaderPositionedOnNull(ref reader, read, true))
+            if (IsReaderPositionedOnNull(ref reader, read, read))
                 return null;
 
             // Expect the reader to be at a JsonTokenType.StartArray.
@@ -871,9 +859,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
             while (true)
             {
                 if (reader.TokenType == JsonTokenType.String)
+                {
                     strings.Add(ReadString(ref reader, propertyName, className));
-                // We read a JsonTokenType.StartArray above, exiting and positioning reader at next token.
-                else if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, true))
+                    reader.Read();
+                }
+                // We read a JsonTokenType.StartArray above, exiting and positioning reader at next token only when read=true.
+                else if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, read))
                     break;
                 else if (!reader.Read())
                     break;
@@ -890,7 +881,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             bool read = false)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
-            if (IsReaderPositionedOnNull(ref reader, read, true))
+            if (IsReaderPositionedOnNull(ref reader, read, read))
                 return null;
 
             if (!IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, true))
@@ -899,11 +890,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             while (true)
             {
-                // We read a JsonTokenType.StartArray above, exiting and positioning reader at next token.
-                if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, true))
+                // We read a JsonTokenType.StartArray above, exiting and positioning reader at next token only when read=true.
+                if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, read))
                     break;
 
                 strings.Add(ReadString(ref reader, propertyName, className));
+                reader.Read();
             }
 
             return strings;
@@ -916,7 +908,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             string propertyName,
             string className)
         {
-            if (IsReaderPositionedOnNull(ref reader, false, true))
+            if (IsReaderPositionedOnNull(ref reader, false, false))
                 return;
 
             if (!IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, true))
@@ -925,8 +917,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             while (true)
             {
-                // We read a JsonTokenType.StartArray above, exiting and positioning reader at next token.
-                if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, true))
+                // We read a JsonTokenType.StartArray above, leaving reader at EndArray (not advancing past it).
+                if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, false))
                     break;
 
                 if (reader.TokenType == JsonTokenType.Null)
@@ -937,9 +929,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 }
 
                 strings.Add(ReadString(ref reader, propertyName, className));
+                reader.Read();
             }
-
-            return;
         }
 
         /// <summary>
@@ -952,27 +943,21 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// <returns>The property value from the reader as an object.</returns>
         internal static object ReadPropertyValueAsObject(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
-            // The parameter 'read' can be used by callers reader position the reader to the next token.
+            // The parameter 'read' can be used by callers to position the reader to the next token.
             // This is a convenience when the reader is positioned on a JsonTokenType.PropertyName.
-            // The caller does not have to make the calls: reader.Read(), JsonSerializerPrimitives.ReadBoolean.
+            // The caller does not have to make the calls: reader.Read(), JsonSerializerPrimitives.ReadPropertyValueAsObject.
             if (read)
                 reader.Read();
 
             switch (reader.TokenType)
             {
                 case JsonTokenType.False:
-                    // move to next token.
-                    reader.Read();
                     return false;
                 case JsonTokenType.Number:
                     return ReadNumber(ref reader);
                 case JsonTokenType.True:
-                    // move to next token.
-                    reader.Read();
                     return true;
                 case JsonTokenType.Null:
-                    // move to next token.
-                    reader.Read();
                     return null;
                 case JsonTokenType.String:
                     return ReadStringAsObject(ref reader, propertyName, className);
@@ -982,8 +967,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     return ReadJsonElement(ref reader);
                 default:
                     // The reader is pointing at a token that we don't know how to handle.
-                    // move to next token.
-                    reader.Read();
                     return null;
             }
         }
@@ -991,47 +974,19 @@ namespace Microsoft.IdentityModel.Tokens.Json
         internal static object ReadNumber(ref Utf8JsonReader reader)
         {
             if (reader.TryGetInt32(out int i))
-            {
-                // move to next token.
-                reader.Read();
                 return i;
-            }
             else if (reader.TryGetInt64(out long l))
-            {
-                // move to next token.
-                reader.Read();
                 return l;
-            }
             else if (reader.TryGetDouble(out double d))
-            {
-                // move to next token.
-                reader.Read();
                 return d;
-            }
             else if (reader.TryGetUInt32(out uint u))
-            {
-                // move to next token.
-                reader.Read();
                 return u;
-            }
             else if (reader.TryGetUInt64(out ulong ul))
-            {
-                // move to next token.
-                reader.Read();
                 return ul;
-            }
             else if (reader.TryGetSingle(out float f))
-            {
-                // move to next token.
-                reader.Read();
                 return f;
-            }
             else if (reader.TryGetDecimal(out decimal m))
-            {
-                // move to next token.
-                reader.Read();
                 return m;
-            }
 
             Debug.Assert(false, "expected to read a number, but none of the Utf8JsonReader.TryGet... methods returned true.");
 
