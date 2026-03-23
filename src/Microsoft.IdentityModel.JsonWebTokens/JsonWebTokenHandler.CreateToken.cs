@@ -1376,12 +1376,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         }
                         else
 #endif
+#pragma warning disable IDE0055 // Fix formatting, but we want the else and if split like this
                         if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
                         {
                             var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
                             var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
                             unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                         }
+#pragma warning restore IDE0055 // Fix formatting
                     }
                     catch (Exception ex)
                     {
