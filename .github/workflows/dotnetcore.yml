@@ -5,6 +5,7 @@ permissions:
   pull-requests: write
 
 on:
+  workflow_dispatch: # Allows manual triggering of workflow
   push:
     branches:
       - dev
