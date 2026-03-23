@@ -1,6 +1,7 @@
 name: "CodeQL"
 
 on:
+  workflow_dispatch: # Allows manual triggering of workflow
   push:       
     branches: [ "dev" ]
   pull_request:
