@@ -3,8 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 8.17.0
 ====
 ## Dependencies
-* Downgrade MicrosoftExtensionsLoggingAbstractionsVersion to 8.0.0 on .NET 10 See [PR #3435](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3435)
-* Disable Format Errors in Decrypt and Create Token in Dev8x See [PR #3439] (https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3439)
+* Downgrade Microsoft.Extensions.Logging.Abstractions to 8.0.0 on .NET 10 to match the version on .NET 8 and .NET 9. See [PR #3435](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3435).
 
 8.16.0
 ====
