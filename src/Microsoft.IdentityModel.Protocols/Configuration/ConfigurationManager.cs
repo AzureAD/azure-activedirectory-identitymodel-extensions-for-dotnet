@@ -197,7 +197,27 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
             if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
-                return _currentConfiguration;
+            {
+                if (ConfigurationEventHandler != null)
+                {
+                    var handlerResult = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
+                    if (handlerResult.Configuration != null)
+                    {
+                        UpdateConfiguration(handlerResult.Configuration, handlerResult.RetrievalTime);
+                        return _currentConfiguration;
+                    }
+
+                    if (handlerResult.BypassCache)
+                        // Invalidate the cache so the blocking path also enters the refresh branch.
+                        _syncAfter = DateTimeOffset.MinValue;
+                    else
+                        return _currentConfiguration;
+                }
+                else
+                {
+                    return _currentConfiguration;
+                }
+            }
 
             if (AppContextSwitches.UpdateConfigAsBlocking)
                 return await GetConfigurationWithBlockingAsync(cancel).ConfigureAwait(false);
@@ -338,10 +358,10 @@ namespace Microsoft.IdentityModel.Protocols
             try
             {
                 // Check if event handler can provide configuration
-                // If provided configuration is valid, skip regular retriaval process and update current configuration.
+                // If provided configuration is valid, skip regular retrieval process and update current configuration.
                 if (ConfigurationEventHandler != null)
                 {
-                    var configurationRetrieved = await HandleBeforeRetrieveAsync().ConfigureAwait(false);
+                    ConfigurationEventHandlerResult<T> configurationRetrieved = await HandleBeforeRetrieveAsync().ConfigureAwait(false);
                     if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
                     {
                         UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
@@ -356,7 +376,7 @@ namespace Microsoft.IdentityModel.Protocols
                     _docRetriever,
                     CancellationToken.None).ConfigureAwait(false);
 
-                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+                TimeSpan elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
                     TelemetryConstants.Protocols.ConfigurationSourceRetriever,
@@ -522,6 +542,9 @@ namespace Microsoft.IdentityModel.Protocols
                     // No validator configured, return configuration
                     return handlerResult;
                 }
+
+                if (handlerResult != null && handlerResult.BypassCache)
+                    return handlerResult;
             }
             catch (Exception ex)
             {
