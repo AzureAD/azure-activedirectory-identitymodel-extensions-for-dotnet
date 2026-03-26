@@ -24,9 +24,25 @@ namespace Microsoft.IdentityModel.Validators
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            SignatureKeyValidationDelegate originalIssuerSigningKeyValidationDelegate = validationParameters.SignatureKeyValidator;
+            ISignatureKeyValidator originalIssuerSigningKeyValidationDelegate = validationParameters.SignatureKeyValidator;
 
-            SignatureKeyValidationDelegate cloudInstanceSigningKeyValidationDelegate = (securityKey, securityToken, validationParameters, callContext) =>
+            validationParameters.SignatureKeyValidator = new CloudInstanceSigningKeyValidator(originalIssuerSigningKeyValidationDelegate);
+        }
+
+        private class CloudInstanceSigningKeyValidator : ISignatureKeyValidator
+        {
+            private readonly ISignatureKeyValidator _originalValidator;
+
+            public CloudInstanceSigningKeyValidator(ISignatureKeyValidator originalValidator)
+            {
+                _originalValidator = originalValidator;
+            }
+
+            public ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
+                SecurityKey securityKey,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext)
             {
                 BaseConfiguration configuration = null;
                 if (validationParameters.ConfigurationManager != null)
@@ -35,13 +51,11 @@ namespace Microsoft.IdentityModel.Validators
                 ValidateSigningKeyCloudInstance(securityKey, configuration);
 
                 // preserve and run provided logic
-                if (originalIssuerSigningKeyValidationDelegate != null)
-                    return originalIssuerSigningKeyValidationDelegate(securityKey, securityToken, validationParameters, callContext);
+                if (_originalValidator != null)
+                    return _originalValidator.ValidateSignatureKey(securityKey, securityToken, validationParameters, callContext);
 
                 return new ValidatedSignatureKey(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
-            };
-
-            validationParameters.SignatureKeyValidator = cloudInstanceSigningKeyValidationDelegate;
+            }
         }
 
         /// <summary>
@@ -53,9 +67,27 @@ namespace Microsoft.IdentityModel.Validators
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            SignatureKeyValidationDelegate issuerSigningKeyValidationDelegate = validationParameters.SignatureKeyValidator;
+            ISignatureKeyValidator issuerSigningKeyValidationDelegate = validationParameters.SignatureKeyValidator;
 
-            validationParameters.SignatureKeyValidator = (securityKey, securityToken, vp, callContext) =>
+            validationParameters.SignatureKeyValidator = new AadSigningKeyIssuerValidator(issuerSigningKeyValidationDelegate, validationParameters);
+        }
+
+        private class AadSigningKeyIssuerValidator : ISignatureKeyValidator
+        {
+            private readonly ISignatureKeyValidator _originalValidator;
+            private readonly ValidationParameters _validationParameters;
+
+            public AadSigningKeyIssuerValidator(ISignatureKeyValidator originalValidator, ValidationParameters validationParameters)
+            {
+                _originalValidator = originalValidator;
+                _validationParameters = validationParameters;
+            }
+
+            public ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
+                SecurityKey securityKey,
+                SecurityToken securityToken,
+                ValidationParameters vp,
+                CallContext callContext)
             {
                 BaseConfiguration baseConfiguration = null;
                 if (vp.ConfigurationManager != null)
@@ -64,11 +96,11 @@ namespace Microsoft.IdentityModel.Validators
                 AadTokenValidationParametersExtension.ValidateIssuerSigningKey(securityKey, securityToken, baseConfiguration);
 
                 // preserve and run provided logic
-                if (issuerSigningKeyValidationDelegate != null)
-                    return issuerSigningKeyValidationDelegate(securityKey, securityToken, vp, callContext);
+                if (_originalValidator != null)
+                    return _originalValidator.ValidateSignatureKey(securityKey, securityToken, vp, callContext);
 
-                return ValidateIssuerSigningKeyCertificate(securityKey, validationParameters);
-            };
+                return ValidateIssuerSigningKeyCertificate(securityKey, _validationParameters);
+            }
         }
 
         /// <summary>

@@ -40,13 +40,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 
-            // Delegate is set by the user, we call it and return the result.
+            // Validator is set by the user, we call it and return the result.
             if (validationParameters.SignatureValidator is not null)
             {
                 try
                 {
                     ValidationResult<SecurityKey, ValidationError> signatureValidationResult =
-                        validationParameters.SignatureValidator(
+                        validationParameters.SignatureValidator.ValidateSignature(
                             jwtToken,
                             validationParameters,
                             configuration,
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             SecurityKey? key = null;
             if (validationParameters.SignatureKeyResolver is not null)
             {
-                key = validationParameters.SignatureKeyResolver(
+                key = validationParameters.SignatureKeyResolver.ResolveSignatureKey(
                     jwtToken.EncodedToken,
                     jwtToken,
                     jwtToken.Kid,

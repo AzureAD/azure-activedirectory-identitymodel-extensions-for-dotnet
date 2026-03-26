@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 ValidationResult<ValidatedSignatureKey, ValidationError> result =
-                    validationParameters.SignatureKeyValidator(
+                    validationParameters.SignatureKeyValidator.ValidateSignatureKey(
                         securityKey,
                         securityToken,
                         validationParameters,

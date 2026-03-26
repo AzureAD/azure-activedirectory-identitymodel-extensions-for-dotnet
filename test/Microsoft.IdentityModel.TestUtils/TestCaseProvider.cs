@@ -621,7 +621,7 @@ namespace Microsoft.IdentityModel.TestUtils
             tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters();
             tokenValidationParameters.RequireExpirationTime = false;
             validationParameters = ValidationUtils.CreateValidationParameters();
-            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
+            validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
             theoryData.Add(
                 new ValidateTokenTheoryData("TokenWithoutExpiration")
                 {
@@ -1022,7 +1022,7 @@ namespace Microsoft.IdentityModel.TestUtils
             tokenValidationParameters.ValidateLifetime = false;
             tokenValidationParameters.ValidateIssuerSigningKey = true;
             ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(timeProvider: futureTimeProvider);
-            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
+            validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
             theoryData.Add(
                 new ValidateTokenTheoryData("IssuerSigningKeyExpired")
                 {
@@ -1038,7 +1038,7 @@ namespace Microsoft.IdentityModel.TestUtils
             tokenValidationParameters.ValidateLifetime = false;
             tokenValidationParameters.ValidateIssuerSigningKey = true;
             validationParameters = ValidationUtils.CreateValidationParameters(timeProvider: pastTimeProvider);
-            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
+            validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
             theoryData.Add(
                 new ValidateTokenTheoryData("IssuerSigningNotYetValid")
                 {
@@ -1069,7 +1069,7 @@ namespace Microsoft.IdentityModel.TestUtils
             TokenValidationParameters tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters();
             tokenValidationParameters.ValidateIssuerSigningKey = true;
             ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters();
-            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
+            validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
             theoryData.Add(
                 new ValidateTokenTheoryData("IssuerSigningKey")
                 {
@@ -1101,7 +1101,7 @@ namespace Microsoft.IdentityModel.TestUtils
             TokenValidationParameters tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(tokenReplayCache: tokenReplayCache);
             tokenValidationParameters.ValidateLifetime = false;
             ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(tokenReplayCache: tokenReplayCache);
-            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
+            validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
 
             // TODO SAML sets an expiation time by defaault when reading conditions, we need to reason about that.
             if (tokenHandler is not SamlSecurityTestingTokenHandler)

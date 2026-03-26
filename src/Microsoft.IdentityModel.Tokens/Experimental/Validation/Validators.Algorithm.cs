@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 ValidationResult<string, ValidationError> result =
-                    validationParameters.AlgorithmValidator(
+                    validationParameters.AlgorithmValidator.ValidateAlgorithm(
                         algorithm,
                         securityToken,
                         validationParameters,

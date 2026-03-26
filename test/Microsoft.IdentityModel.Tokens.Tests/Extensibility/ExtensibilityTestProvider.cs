@@ -38,13 +38,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "CustomAlgorithmValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomAlgorithmValidationDelegates.CustomAlgorithmValidationFailed)
+                CustomAlgorithmValidationValidators.CustomAlgorithmValidationFailed)
             {
                 ExpectedException = new ExpectedException(
                     typeof(CustomSecurityTokenInvalidAlgorithmException),
-                    nameof(CustomAlgorithmValidationDelegates.CustomAlgorithmValidationFailed)),
+                    nameof(CustomAlgorithmValidationValidators.CustomAlgorithmValidationFailed)),
                 ValidationError = new CustomAlgorithmValidationError(
-                    new MessageDetail(nameof(CustomAlgorithmValidationDelegates.CustomAlgorithmValidationFailed)),
+                    new MessageDetail(nameof(CustomAlgorithmValidationValidators.CustomAlgorithmValidationFailed)),
                     CustomValidationFailure.AlgorithmValidationFailed,
                     Default.GetStackFrame(),
                     $"{algorithm}")
@@ -58,12 +58,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "AlgorithmValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomAlgorithmValidationDelegates.AlgorithmValidationFailed)
+                CustomAlgorithmValidationValidators.AlgorithmValidationFailed)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidAlgorithmException(
-                    nameof(CustomAlgorithmValidationDelegates.AlgorithmValidationFailed)),
+                    nameof(CustomAlgorithmValidationValidators.AlgorithmValidationFailed)),
                 ValidationError = new CustomAlgorithmValidationError(
-                    new MessageDetail(nameof(CustomAlgorithmValidationDelegates.AlgorithmValidationFailed)),
+                    new MessageDetail(nameof(CustomAlgorithmValidationValidators.AlgorithmValidationFailed)),
                     AlgorithmValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     $"{algorithm}"),
@@ -77,12 +77,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "AlgorithmUnknownValidationFailure",
                 tokenHandler,
                 securityToken,
-                CustomAlgorithmValidationDelegates.UnknownValidationFailure)
+                CustomAlgorithmValidationValidators.UnknownValidationFailure)
             {
                 ExpectedException = ExpectedException.SecurityTokenValidationException(
-                    nameof(CustomAlgorithmValidationDelegates.UnknownValidationFailure)),
+                    nameof(CustomAlgorithmValidationValidators.UnknownValidationFailure)),
                 ValidationError = new CustomAlgorithmValidationError(
-                    new MessageDetail(nameof(CustomAlgorithmValidationDelegates.UnknownValidationFailure)),
+                    new MessageDetail(nameof(CustomAlgorithmValidationValidators.UnknownValidationFailure)),
                     AudienceValidationFailure.AudienceDidNotMatch,
                     Default.GetStackFrame(),
                     $"{algorithm}"),
@@ -98,12 +98,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "AlgorithmValidatorDelegate",
                 tokenHandler,
                 securityToken,
-                CustomAlgorithmValidationDelegates.AlgorithmValidatorDelegate)
+                CustomAlgorithmValidationValidators.AlgorithmValidatorDelegate)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidAlgorithmException(
-                    nameof(CustomAlgorithmValidationDelegates.AlgorithmValidatorDelegate)),
+                    nameof(CustomAlgorithmValidationValidators.AlgorithmValidatorDelegate)),
                 ValidationError = new AlgorithmValidationError(
-                    new MessageDetail(nameof(CustomAlgorithmValidationDelegates.AlgorithmValidatorDelegate)),
+                    new MessageDetail(nameof(CustomAlgorithmValidationValidators.AlgorithmValidatorDelegate)),
                     AlgorithmValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     $"{algorithm}")
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "AlgorithmValidatorThrows",
                 tokenHandler,
                 securityToken,
-                CustomAlgorithmValidationDelegates.AlgorithmValidatorThrows)
+                CustomAlgorithmValidationValidators.AlgorithmValidatorThrows)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidAlgorithmException(
                     LogMessages.IDX10273,
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     AlgorithmValidationFailure.ValidatorThrew,
                     Default.GetStackFrame(),
                     $"{algorithm}",
-                    new CustomSecurityTokenInvalidAlgorithmException(nameof(CustomAlgorithmValidationDelegates.AlgorithmValidatorThrows), null)
+                    new CustomSecurityTokenInvalidAlgorithmException(nameof(CustomAlgorithmValidationValidators.AlgorithmValidatorThrows), null)
                 )
             };
 
@@ -159,13 +159,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "CustomAudiencdValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomAudienceValidationDelegates.CustomValidationFailed)
+                CustomAudienceValidationValidators.CustomValidationFailed)
             {
                 ExpectedException = new ExpectedException(
                     typeof(CustomSecurityTokenInvalidAudienceException),
-                    nameof(CustomAudienceValidationDelegates.CustomValidationFailed)),
+                    nameof(CustomAudienceValidationValidators.CustomValidationFailed)),
                 ValidationError = new CustomAudienceValidationError(
-                    new MessageDetail(nameof(CustomAudienceValidationDelegates.CustomValidationFailed)),
+                    new MessageDetail(nameof(CustomAudienceValidationValidators.CustomValidationFailed)),
                     CustomValidationFailure.AudienceValidationFailed,
                     Default.GetStackFrame(),
                     tokenAudiences,
@@ -180,12 +180,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "AudienceDidNotMatch",
                 tokenHandler,
                 securityToken,
-                CustomAudienceValidationDelegates.AudienceDidNotMatch)
+                CustomAudienceValidationValidators.AudienceDidNotMatch)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException(
-                    nameof(CustomAudienceValidationDelegates.AudienceDidNotMatch)),
+                    nameof(CustomAudienceValidationValidators.AudienceDidNotMatch)),
                 ValidationError = new CustomAudienceValidationError(
-                    new MessageDetail(nameof(CustomAudienceValidationDelegates.AudienceDidNotMatch)),
+                    new MessageDetail(nameof(CustomAudienceValidationValidators.AudienceDidNotMatch)),
                     AudienceValidationFailure.AudienceDidNotMatch,
                     Default.GetStackFrame(),
                     tokenAudiences,
@@ -200,12 +200,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "AudienceUnknownAudienceValidationFailure",
                 tokenHandler,
                 securityToken,
-                CustomAudienceValidationDelegates.UnknownValidationFailure)
+                CustomAudienceValidationValidators.UnknownValidationFailure)
             {
                 ExpectedException = ExpectedException.SecurityTokenValidationException(
-                    nameof(CustomAudienceValidationDelegates.UnknownValidationFailure)),
+                    nameof(CustomAudienceValidationValidators.UnknownValidationFailure)),
                 ValidationError = new CustomAudienceValidationError(
-                    new MessageDetail(nameof(CustomAudienceValidationDelegates.UnknownValidationFailure)),
+                    new MessageDetail(nameof(CustomAudienceValidationValidators.UnknownValidationFailure)),
                     AlgorithmValidationFailure.AlgorithmIsNotSupported,
                     Default.GetStackFrame(),
                     tokenAudiences,
@@ -222,12 +222,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "AudienceDidNotMatch",
                 tokenHandler,
                 securityToken,
-                CustomAudienceValidationDelegates.AudienceValidatorDelegate)
+                CustomAudienceValidationValidators.AudienceValidatorDelegate)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException(
-                    nameof(CustomAudienceValidationDelegates.AudienceValidatorDelegate)),
+                    nameof(CustomAudienceValidationValidators.AudienceValidatorDelegate)),
                 ValidationError = new AudienceValidationError(
-                    new MessageDetail(nameof(CustomAudienceValidationDelegates.AudienceValidatorDelegate)),
+                    new MessageDetail(nameof(CustomAudienceValidationValidators.AudienceValidatorDelegate)),
                     AudienceValidationFailure.AudienceDidNotMatch,
                     Default.GetStackFrame(),
                     tokenAudiences,
@@ -243,7 +243,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "AudienceValidatorThrows",
                 tokenHandler,
                 securityToken,
-                CustomAudienceValidationDelegates.AudienceValidatorThrows)
+                CustomAudienceValidationValidators.AudienceValidatorThrows)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException(
                     LogMessages.IDX10270,
@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     Default.GetStackFrame(),
                     tokenAudiences,
                     null,
-                    new SecurityTokenInvalidAudienceException(nameof(CustomAudienceValidationDelegates.AudienceValidatorThrows))
+                    new SecurityTokenInvalidAudienceException(nameof(CustomAudienceValidationValidators.AudienceValidatorThrows))
                 )
             };
 
@@ -285,13 +285,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "CustomIssuerValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomIssuerValidationDelegates.CustomValidationFailed)
+                CustomIssuerValidationValidators.CustomValidationFailed)
             {
                 ExpectedException = new ExpectedException(
                     typeof(CustomSecurityTokenInvalidIssuerException),
-                    nameof(CustomIssuerValidationDelegates.CustomValidationFailed)),
+                    nameof(CustomIssuerValidationValidators.CustomValidationFailed)),
                 ValidationError = new CustomIssuerValidationError(
-                    new MessageDetail(nameof(CustomIssuerValidationDelegates.CustomValidationFailed)),
+                    new MessageDetail(nameof(CustomIssuerValidationValidators.CustomValidationFailed)),
                     CustomValidationFailure.IssuerValidationFailed,
                     Default.GetStackFrame(),
                     issuerGuid)
@@ -305,12 +305,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "IssuerValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomIssuerValidationDelegates.IssuerValidationFailed)
+                CustomIssuerValidationValidators.IssuerValidationFailed)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(
-                    nameof(CustomIssuerValidationDelegates.IssuerValidationFailed)),
+                    nameof(CustomIssuerValidationValidators.IssuerValidationFailed)),
                 ValidationError = new CustomIssuerValidationError(
-                    new MessageDetail(nameof(CustomIssuerValidationDelegates.IssuerValidationFailed)),
+                    new MessageDetail(nameof(CustomIssuerValidationValidators.IssuerValidationFailed)),
                     IssuerValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     issuerGuid),
@@ -324,12 +324,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "IssuerUnknownValidationFailure",
                 tokenHandler,
                 securityToken,
-                CustomIssuerValidationDelegates.UnknownValidationFailure)
+                CustomIssuerValidationValidators.UnknownValidationFailure)
             {
                 ExpectedException = ExpectedException.SecurityTokenValidationException(
-                    nameof(CustomIssuerValidationDelegates.UnknownValidationFailure)),
+                    nameof(CustomIssuerValidationValidators.UnknownValidationFailure)),
                 ValidationError = new CustomIssuerValidationError(
-                    new MessageDetail(nameof(CustomIssuerValidationDelegates.UnknownValidationFailure)),
+                    new MessageDetail(nameof(CustomIssuerValidationValidators.UnknownValidationFailure)),
                     AlgorithmValidationFailure.AlgorithmIsNotSupported,
                     Default.GetStackFrame(),
                     issuerGuid),
@@ -345,12 +345,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "IssuerValidatorDelegate",
                 tokenHandler,
                 securityToken,
-                CustomIssuerValidationDelegates.IssuerValidatorDelegateAsync)
+                CustomIssuerValidationValidators.IssuerValidatorDelegateAsync)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(
-                    nameof(CustomIssuerValidationDelegates.IssuerValidatorDelegateAsync)),
+                    nameof(CustomIssuerValidationValidators.IssuerValidatorDelegateAsync)),
                 ValidationError = new IssuerValidationError(
-                    new MessageDetail(nameof(CustomIssuerValidationDelegates.IssuerValidatorDelegateAsync)),
+                    new MessageDetail(nameof(CustomIssuerValidationValidators.IssuerValidatorDelegateAsync)),
                     IssuerValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     issuerGuid)
@@ -365,7 +365,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "IssuerValidatorThrows",
                 tokenHandler,
                 securityToken,
-                CustomIssuerValidationDelegates.IssuerValidatorThrows)
+                CustomIssuerValidationValidators.IssuerValidatorThrows)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(
                         LogMessages.IDX10269,
@@ -404,13 +404,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "CustomIssuerSigningKeyValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomIssuerSigningKeyValidationDelegates.CustomValidationFailed)
+                CustomIssuerSigningKeyValidationValidators.CustomValidationFailed)
             {
                 ExpectedException = new ExpectedException(
                     typeof(CustomSecurityTokenInvalidSigningKeyException),
-                    nameof(CustomIssuerSigningKeyValidationDelegates.CustomValidationFailed)),
+                    nameof(CustomIssuerSigningKeyValidationValidators.CustomValidationFailed)),
                 ValidationError = new CustomIssuerSigningKeyValidationError(
-                    new MessageDetail(nameof(CustomIssuerSigningKeyValidationDelegates.CustomValidationFailed)),
+                    new MessageDetail(nameof(CustomIssuerSigningKeyValidationValidators.CustomValidationFailed)),
                     CustomValidationFailure.IssuerSigningKeyValidationFailed,
                     Default.GetStackFrame(),
                     null)
@@ -424,12 +424,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "IssuerSigningKeyValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidationFailed)
+                CustomIssuerSigningKeyValidationValidators.IssuerSigningKeyValidationFailed)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(
-                    nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidationFailed)),
+                    nameof(CustomIssuerSigningKeyValidationValidators.IssuerSigningKeyValidationFailed)),
                 ValidationError = new CustomIssuerSigningKeyValidationError(
-                    new MessageDetail(nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidationFailed)),
+                    new MessageDetail(nameof(CustomIssuerSigningKeyValidationValidators.IssuerSigningKeyValidationFailed)),
                     SignatureKeyValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     null)
@@ -443,11 +443,11 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "IssuerSigningKeyUnknownValidationFailure",
                 tokenHandler,
                 securityToken,
-                CustomIssuerSigningKeyValidationDelegates.UnknownValidationFailure)
+                CustomIssuerSigningKeyValidationValidators.UnknownValidationFailure)
             {
                 ExpectedException = ExpectedException.SecurityTokenValidationException("UnknownValidationFailure"),
                 ValidationError = new CustomIssuerSigningKeyValidationError(
-                    new MessageDetail(nameof(CustomIssuerSigningKeyValidationDelegates.UnknownValidationFailure)),
+                    new MessageDetail(nameof(CustomIssuerSigningKeyValidationValidators.UnknownValidationFailure)),
                     AlgorithmValidationFailure.AlgorithmIsNotSupported,
                     Default.GetStackFrame(),
                     null)
@@ -463,12 +463,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "IssuerSigningKeyDelegate",
                 tokenHandler,
                 securityToken,
-                CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyDelegate)
+                CustomIssuerSigningKeyValidationValidators.IssuerSigningKeyDelegate)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(
-                    nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyDelegate)),
+                    nameof(CustomIssuerSigningKeyValidationValidators.IssuerSigningKeyDelegate)),
                 ValidationError = new CustomIssuerSigningKeyValidationError(
-                    new MessageDetail(nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyDelegate)),
+                    new MessageDetail(nameof(CustomIssuerSigningKeyValidationValidators.IssuerSigningKeyDelegate)),
                     SignatureKeyValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     null),
@@ -483,7 +483,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
             "IssuerSigningKeyValidatorThrows",
             tokenHandler,
             securityToken,
-            CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidatorThrows)
+            CustomIssuerSigningKeyValidationValidators.IssuerSigningKeyValidatorThrows)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(
                     LogMessages.IDX10274,
@@ -493,7 +493,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 SignatureKeyValidationFailure.ValidatorThrew,
                 Default.GetStackFrame(),
                 null,
-                new SecurityTokenInvalidSigningKeyException(nameof(CustomIssuerSigningKeyValidationDelegates.IssuerSigningKeyValidatorThrows))
+                new SecurityTokenInvalidSigningKeyException(nameof(CustomIssuerSigningKeyValidationValidators.IssuerSigningKeyValidatorThrows))
             )
             };
 
@@ -525,14 +525,14 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "CustomLifetimeValidatorDelegate",
                 tokenHandler,
                 securityToken,
-                CustomLifetimeValidationDelegates.CustomLifetimeValidationFailed)
+                CustomLifetimeValidationValidators.CustomLifetimeValidationFailed)
             {
                 ExpectedException = new ExpectedException(
                     typeof(CustomSecurityTokenInvalidLifetimeException),
-                    nameof(CustomLifetimeValidationDelegates.CustomLifetimeValidationFailed)),
+                    nameof(CustomLifetimeValidationValidators.CustomLifetimeValidationFailed)),
                 ValidationError = new CustomLifetimeValidationError(
                     new MessageDetail(
-                        nameof(CustomLifetimeValidationDelegates.CustomLifetimeValidationFailed)),
+                        nameof(CustomLifetimeValidationValidators.CustomLifetimeValidationFailed)),
                     CustomValidationFailure.LifetimeValidationFailed,
                     Default.GetStackFrame(),
                     utcNow,
@@ -547,7 +547,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "LifetimeValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomLifetimeValidationDelegates.LifetimeValidationFailed)
+                CustomLifetimeValidationValidators.LifetimeValidationFailed)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException(
                     nameof(LifetimeValidationFailure.ValidationFailed)),
@@ -568,13 +568,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "LifetimeUnknownValidationFailure",
                 tokenHandler,
                 securityToken,
-                CustomLifetimeValidationDelegates.CustomUnknownValidationFailure)
+                CustomLifetimeValidationValidators.CustomUnknownValidationFailure)
             {
                 ExpectedException = ExpectedException.SecurityTokenValidationException(
-                        nameof(CustomLifetimeValidationDelegates.CustomUnknownValidationFailure)),
+                        nameof(CustomLifetimeValidationValidators.CustomUnknownValidationFailure)),
                 ValidationError = new CustomLifetimeValidationError(
                     new MessageDetail(
-                        nameof(CustomLifetimeValidationDelegates.CustomUnknownValidationFailure)),
+                        nameof(CustomLifetimeValidationValidators.CustomUnknownValidationFailure)),
                     AlgorithmValidationFailure.AlgorithmIsNotSupported,
                     Default.GetStackFrame(),
                     utcNow,
@@ -591,12 +591,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "LifetimeValidator",
                 tokenHandler,
                 securityToken,
-                CustomLifetimeValidationDelegates.LifetimeValidator)
+                CustomLifetimeValidationValidators.LifetimeValidator)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException(
-                    nameof(CustomLifetimeValidationDelegates.LifetimeValidator)),
+                    nameof(CustomLifetimeValidationValidators.LifetimeValidator)),
                 ValidationError = new LifetimeValidationError(
-                    new MessageDetail(nameof(CustomLifetimeValidationDelegates.LifetimeValidator)),
+                    new MessageDetail(nameof(CustomLifetimeValidationValidators.LifetimeValidator)),
                     LifetimeValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     utcNow,
@@ -612,7 +612,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "LifetimeValidatorThrows",
                 tokenHandler,
                 securityToken,
-                CustomLifetimeValidationDelegates.ValidatorThrows)
+                CustomLifetimeValidationValidators.ValidatorThrows)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException(
                     LogMessages.IDX10271,
@@ -623,7 +623,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     Default.GetStackFrame(),
                     utcNow,
                     utcPlusOneHour,
-                    new SecurityTokenInvalidLifetimeException(nameof(CustomLifetimeValidationDelegates.ValidatorThrows))
+                    new SecurityTokenInvalidLifetimeException(nameof(CustomLifetimeValidationValidators.ValidatorThrows))
                 )
             };
 
@@ -656,13 +656,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "CustomSignatureValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomSignatureValidationDelegates.CustomSignatureValidationFailed)
+                CustomSignatureValidationValidators.CustomSignatureValidationFailed)
             {
                 ExpectedException = new ExpectedException(
                     typeof(CustomSecurityTokenInvalidSignatureException),
-                    nameof(CustomSignatureValidationDelegates.CustomSignatureValidationFailed)),
+                    nameof(CustomSignatureValidationValidators.CustomSignatureValidationFailed)),
                 ValidationError = new CustomSignatureValidationError(
-                    new MessageDetail(nameof(CustomSignatureValidationDelegates.CustomSignatureValidationFailed)),
+                    new MessageDetail(nameof(CustomSignatureValidationValidators.CustomSignatureValidationFailed)),
                     CustomValidationFailure.SignatureValidationFailed,
                     Default.GetStackFrame())
             });
@@ -675,12 +675,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "SignatureValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomSignatureValidationDelegates.SignatureValidationFailed)
+                CustomSignatureValidationValidators.SignatureValidationFailed)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(
-                        nameof(CustomSignatureValidationDelegates.SignatureValidationFailed)),
+                        nameof(CustomSignatureValidationValidators.SignatureValidationFailed)),
                 ValidationError = new CustomSignatureValidationError(
-                    new MessageDetail(nameof(CustomSignatureValidationDelegates.SignatureValidationFailed)),
+                    new MessageDetail(nameof(CustomSignatureValidationValidators.SignatureValidationFailed)),
                     SignatureValidationFailure.ValidationFailed,
                     Default.GetStackFrame()),
             });
@@ -693,12 +693,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "SignatureUnknownValidationFailure",
                 tokenHandler,
                 securityToken,
-                CustomSignatureValidationDelegates.UnknownValidationFailure)
+                CustomSignatureValidationValidators.UnknownValidationFailure)
             {
                 ExpectedException = ExpectedException.SecurityTokenValidationException(
-                    nameof(CustomSignatureValidationDelegates.UnknownValidationFailure)),
+                    nameof(CustomSignatureValidationValidators.UnknownValidationFailure)),
                 ValidationError = new CustomSignatureValidationError(
-                    new MessageDetail(nameof(CustomSignatureValidationDelegates.UnknownValidationFailure)),
+                    new MessageDetail(nameof(CustomSignatureValidationValidators.UnknownValidationFailure)),
                     AlgorithmValidationFailure.AlgorithmIsNotSupported,
                     Default.GetStackFrame()),
             });
@@ -713,12 +713,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "SignatureValidatorDelegate",
                 tokenHandler,
                 securityToken,
-                CustomSignatureValidationDelegates.SignatureValidatorDelegate)
+                CustomSignatureValidationValidators.SignatureValidatorDelegate)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(
-                    nameof(CustomSignatureValidationDelegates.SignatureValidatorDelegate)),
+                    nameof(CustomSignatureValidationValidators.SignatureValidatorDelegate)),
                 ValidationError = new SignatureValidationError(
-                    new MessageDetail(nameof(CustomSignatureValidationDelegates.SignatureValidatorDelegate)),
+                    new MessageDetail(nameof(CustomSignatureValidationValidators.SignatureValidatorDelegate)),
                     SignatureValidationFailure.ValidationFailed,
                     Default.GetStackFrame())
             });
@@ -732,7 +732,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "SignatureValidatorThrows",
                 tokenHandler,
                 securityToken,
-                CustomSignatureValidationDelegates.SignatureValidatorThrows)
+                CustomSignatureValidationValidators.SignatureValidatorThrows)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(
                         LogMessages.IDX10272,
@@ -771,13 +771,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "CustomTokenReplayValidationDelegate",
                 tokenHandler,
                 securityToken,
-                CustomTokenReplayValidationDelegates.CustomTokenReplayValidationFailed)
+                CustomTokenReplayValidationValidators.CustomTokenReplayValidationFailed)
             {
                 ExpectedException = new ExpectedException(
                     typeof(CustomSecurityTokenReplayDetectedException),
-                    nameof(CustomTokenReplayValidationDelegates.CustomTokenReplayValidationFailed)),
+                    nameof(CustomTokenReplayValidationValidators.CustomTokenReplayValidationFailed)),
                 ValidationError = new CustomTokenReplayValidationError(
-                    new MessageDetail(nameof(CustomTokenReplayValidationDelegates.CustomTokenReplayValidationFailed)),
+                    new MessageDetail(nameof(CustomTokenReplayValidationValidators.CustomTokenReplayValidationFailed)),
                     CustomValidationFailure.TokenReplayValidationFailed,
                     Default.GetStackFrame(),
                     expirationTime)
@@ -791,12 +791,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "TokenReplayValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomTokenReplayValidationDelegates.TokenReplayValidationFailed)
+                CustomTokenReplayValidationValidators.TokenReplayValidationFailed)
             {
                 ExpectedException = ExpectedException.SecurityTokenReplayDetectedException(
-                    nameof(CustomTokenReplayValidationDelegates.TokenReplayValidationFailed)),
+                    nameof(CustomTokenReplayValidationValidators.TokenReplayValidationFailed)),
                 ValidationError = new CustomTokenReplayValidationError(
-                    new MessageDetail(nameof(CustomTokenReplayValidationDelegates.TokenReplayValidationFailed)),
+                    new MessageDetail(nameof(CustomTokenReplayValidationValidators.TokenReplayValidationFailed)),
                     TokenReplayValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     expirationTime),
@@ -811,12 +811,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "TokenReplayUnknownValidationFailure",
                 tokenHandler,
                 securityToken,
-                CustomTokenReplayValidationDelegates.UnknownValidationFailure)
+                CustomTokenReplayValidationValidators.UnknownValidationFailure)
             {
                 ExpectedException = ExpectedException.SecurityTokenValidationException(
-                        nameof(CustomTokenReplayValidationDelegates.UnknownValidationFailure)),
+                        nameof(CustomTokenReplayValidationValidators.UnknownValidationFailure)),
                 ValidationError = new CustomTokenReplayValidationError(
-                    new MessageDetail(nameof(CustomTokenReplayValidationDelegates.UnknownValidationFailure)),
+                    new MessageDetail(nameof(CustomTokenReplayValidationValidators.UnknownValidationFailure)),
                     AlgorithmValidationFailure.AlgorithmIsNotSupported,
                     Default.GetStackFrame(),
                     expirationTime)
@@ -832,12 +832,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "TokenReplayValidationDelegate",
                 tokenHandler,
                 securityToken,
-                CustomTokenReplayValidationDelegates.TokenReplayValidationDelegate)
+                CustomTokenReplayValidationValidators.TokenReplayValidationDelegate)
             {
                 ExpectedException = ExpectedException.SecurityTokenReplayDetectedException(
-                    nameof(CustomTokenReplayValidationDelegates.TokenReplayValidationDelegate)),
+                    nameof(CustomTokenReplayValidationValidators.TokenReplayValidationDelegate)),
                 ValidationError = new TokenReplayValidationError(
-                    new MessageDetail(nameof(CustomTokenReplayValidationDelegates.TokenReplayValidationDelegate)),
+                    new MessageDetail(nameof(CustomTokenReplayValidationValidators.TokenReplayValidationDelegate)),
                     TokenReplayValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     expirationTime)
@@ -852,7 +852,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "TokenReplayValidatorThrows",
                 tokenHandler,
                 securityToken,
-                CustomTokenReplayValidationDelegates.TokenReplayValidatorThrows)
+                CustomTokenReplayValidationValidators.TokenReplayValidatorThrows)
             {
                 ExpectedException = ExpectedException.SecurityTokenReplayDetectedException(
                     LogMessages.IDX10276,
@@ -863,9 +863,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     Default.GetStackFrame(),
                     expirationTime,
                     new CustomSecurityTokenReplayDetectedException(
-                        nameof(CustomTokenReplayValidationDelegates.TokenReplayValidatorThrows),
+                        nameof(CustomTokenReplayValidationValidators.TokenReplayValidatorThrows),
                         new TokenReplayValidationError(
-                            new MessageDetail(nameof(CustomTokenReplayValidationDelegates.TokenReplayValidatorThrows)),
+                            new MessageDetail(nameof(CustomTokenReplayValidationValidators.TokenReplayValidatorThrows)),
                             TokenReplayValidationFailure.ValidatorThrew,
                             Default.GetStackFrame(),
                             expirationTime),
@@ -902,13 +902,13 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "CustomTokenTypeValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomTokenTypeValidationDelegates.CustomTokenTypeValidationFailed)
+                CustomTokenTypeValidationValidators.CustomTokenTypeValidationFailed)
             {
                 ExpectedException = new ExpectedException(
                     typeof(CustomSecurityTokenInvalidTypeException),
-                    nameof(CustomTokenTypeValidationDelegates.CustomTokenTypeValidationFailed)),
+                    nameof(CustomTokenTypeValidationValidators.CustomTokenTypeValidationFailed)),
                 ValidationError = new CustomTokenTypeValidationError(
-                    new MessageDetail(nameof(CustomTokenTypeValidationDelegates.CustomTokenTypeValidationFailed)),
+                    new MessageDetail(nameof(CustomTokenTypeValidationValidators.CustomTokenTypeValidationFailed)),
                     CustomValidationFailure.TokenTypeValidationFailed,
                     Default.GetStackFrame(),
                     tokenType)
@@ -922,12 +922,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "TokenTypeValidationFailed",
                 tokenHandler,
                 securityToken,
-                CustomTokenTypeValidationDelegates.TokenTypeValidationFailed)
+                CustomTokenTypeValidationValidators.TokenTypeValidationFailed)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidTypeException(
-                    nameof(CustomTokenTypeValidationDelegates.TokenTypeValidationFailed)),
+                    nameof(CustomTokenTypeValidationValidators.TokenTypeValidationFailed)),
                 ValidationError = new CustomTokenTypeValidationError(
-                    new MessageDetail(nameof(CustomTokenTypeValidationDelegates.TokenTypeValidationFailed)),
+                    new MessageDetail(nameof(CustomTokenTypeValidationValidators.TokenTypeValidationFailed)),
                     TokenTypeValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     tokenType)
@@ -941,12 +941,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "TokenTypeUnknownValidationFailure",
                 tokenHandler,
                 securityToken,
-                CustomTokenTypeValidationDelegates.UnknownValidationFailure)
+                CustomTokenTypeValidationValidators.UnknownValidationFailure)
             {
                 ExpectedException = ExpectedException.SecurityTokenValidationException(
-                    nameof(CustomTokenTypeValidationDelegates.UnknownValidationFailure)),
+                    nameof(CustomTokenTypeValidationValidators.UnknownValidationFailure)),
                 ValidationError = new CustomTokenTypeValidationError(
-                    new MessageDetail(nameof(CustomTokenTypeValidationDelegates.UnknownValidationFailure)),
+                    new MessageDetail(nameof(CustomTokenTypeValidationValidators.UnknownValidationFailure)),
                     AlgorithmValidationFailure.AlgorithmIsNotSupported,
                     Default.GetStackFrame(),
                     tokenType),
@@ -962,12 +962,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "TokenTypeValidatorDelegate",
                 tokenHandler,
                 securityToken,
-                CustomTokenTypeValidationDelegates.TokenTypeValidatorDelegate)
+                CustomTokenTypeValidationValidators.TokenTypeValidatorDelegate)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidTypeException(
-                    nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorDelegate)),
+                    nameof(CustomTokenTypeValidationValidators.TokenTypeValidatorDelegate)),
                 ValidationError = new TokenTypeValidationError(
-                    new MessageDetail(nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorDelegate)),
+                    new MessageDetail(nameof(CustomTokenTypeValidationValidators.TokenTypeValidatorDelegate)),
                     TokenTypeValidationFailure.ValidationFailed,
                     Default.GetStackFrame(),
                     tokenType)
@@ -982,7 +982,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                 "TokenTypeValidatorThrows",
                 tokenHandler,
                 securityToken,
-                CustomTokenTypeValidationDelegates.TokenTypeValidatorThrows)
+                CustomTokenTypeValidationValidators.TokenTypeValidatorThrows)
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidTypeException(
                     LogMessages.IDX10275,
@@ -992,7 +992,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensibility.Tests
                     TokenTypeValidationFailure.ValidatorThrew,
                     Default.GetStackFrame(),
                     tokenType,
-                    new SecurityTokenInvalidTypeException(nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorThrows))
+                    new SecurityTokenInvalidTypeException(nameof(CustomTokenTypeValidationValidators.TokenTypeValidatorThrows))
                 )
             };
 

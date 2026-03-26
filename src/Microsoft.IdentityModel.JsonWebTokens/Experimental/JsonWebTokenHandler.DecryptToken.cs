@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // If no key found in VP, we'll check the configuration.
             if (validationParameters.DecryptionKeyResolver != null)
             {
-                keys = validationParameters.DecryptionKeyResolver(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters, callContext);
+                keys = validationParameters.DecryptionKeyResolver.ResolveDecryptionKey(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters, callContext);
             }
             else
             {
@@ -172,12 +172,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                     else
 #endif
+#pragma warning disable IDE0055 // Fix formatting, but we want the else and if split like this
                     if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
                         var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
                         unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                     }
+#pragma warning restore IDE0055 // Fix formatting
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)

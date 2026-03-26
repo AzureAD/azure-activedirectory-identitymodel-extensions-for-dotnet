@@ -64,7 +64,16 @@ namespace Microsoft.IdentityModel.Tokens
         {
             AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
 #if NET6_0_OR_GREATER
-            _aesGcm.Decrypt(nonce, ciphertext, tag, plaintext, associatedData);
+            try
+            {
+                _aesGcm.Decrypt(nonce, ciphertext, tag, plaintext, associatedData);
+            }
+            catch (Exception)
+            {
+                // prevent secrets from persisting in memory on decrypt failure
+                CryptographicOperations.ZeroMemory(plaintext);
+                throw;
+            }
 #else
             AesAead.Decrypt(_keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: true);
 #endif

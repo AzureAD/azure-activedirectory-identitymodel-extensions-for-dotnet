@@ -86,12 +86,12 @@ public class SignatureValidationTelemetryTests
         validationParameters.SigningKeys.Add(KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key);
 
         // Skip validations that require additional setup
-        validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-        validationParameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
-        validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
-        validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
-        validationParameters.TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation;
-        validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+        validationParameters.AudienceValidator = SkipValidationValidators.SkipAudienceValidation;
+        validationParameters.SignatureKeyValidator = SkipValidationValidators.SkipIssuerSigningKeyValidation;
+        validationParameters.IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation;
+        validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
+        validationParameters.TokenReplayValidator = SkipValidationValidators.SkipTokenReplayValidation;
+        validationParameters.TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation;
 
         // Act
         var result = await ((IResultBasedValidation)handler).ValidateTokenAsync(token, validationParameters, new CallContext());
@@ -506,12 +506,12 @@ public class SignatureValidationTelemetryTests
         // Don't provide any signing keys
 
         // Skip validations that require additional setup
-        validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-        validationParameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
-        validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
-        validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
-        validationParameters.TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation;
-        validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+        validationParameters.AudienceValidator = SkipValidationValidators.SkipAudienceValidation;
+        validationParameters.SignatureKeyValidator = SkipValidationValidators.SkipIssuerSigningKeyValidation;
+        validationParameters.IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation;
+        validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
+        validationParameters.TokenReplayValidator = SkipValidationValidators.SkipTokenReplayValidation;
+        validationParameters.TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation;
 
         // Act
         var result = await ((IResultBasedValidation)handler).ValidateTokenAsync(token, validationParameters, new CallContext());

@@ -584,6 +584,137 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
             return (runningJson.ToString(), resultObject);
         }
+
+        private const string BackwardCompatTestJson = """{"str":"value1","num":42,"bool":true,"arr":["a","b"],"str2":"value2"}""";
+
+        /// <summary>
+        /// Tests that Read* methods do not advance the reader after reading a value when called with read=false.
+        /// This ensures backward compatibility with old code using the while(reader.Read()) pattern.
+        /// See: https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2943
+        /// </summary>
+        [Fact]
+        public void ReaderPositionAfterRead_BackwardCompatibility()
+        {
+            // Arrange: JSON with multiple properties of different types
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(BackwardCompatTestJson);
+
+            // Act & Assert: Simulate the old while(reader.Read()) calling pattern
+            // Old callers do: manually advance to value, call Read*(read=false), then rely on while(reader.Read())
+            Utf8JsonReader reader = new(jsonBytes.AsSpan());
+
+            // Position at StartObject
+            Assert.True(JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false));
+            reader.Read(); // advance into object
+
+            // Read "str" property using old pattern
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            reader.Read(); // advance to value
+            Assert.Equal(JsonTokenType.String, reader.TokenType);
+            string strValue = JsonSerializerPrimitives.ReadString(ref reader, "str", "test");
+            Assert.Equal("value1", strValue);
+            // After ReadString(read=false): reader should still be AT String value
+            Assert.Equal(JsonTokenType.String, reader.TokenType);
+
+            // Old caller's while loop would call reader.Read() to advance to next PropertyName
+            reader.Read();
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            reader.Read(); // advance to value
+
+            // Read "num" using old pattern
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            long numValue = JsonSerializerPrimitives.ReadLong(ref reader, "num", "test");
+            Assert.Equal(42L, numValue);
+            // After ReadLong(read=false): reader should still be AT Number value
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+
+            reader.Read(); // advance to next PropertyName
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            reader.Read(); // advance to value
+
+            // Read "bool" using old pattern
+            Assert.Equal(JsonTokenType.True, reader.TokenType);
+            bool boolValue = JsonSerializerPrimitives.ReadBoolean(ref reader, "bool", "test");
+            Assert.True(boolValue);
+            // After ReadBoolean(read=false): reader should still be AT Boolean value
+            Assert.Equal(JsonTokenType.True, reader.TokenType);
+
+            reader.Read(); // advance to next PropertyName
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            reader.Read(); // advance to value (StartArray)
+
+            // Read "arr" using old pattern
+            Assert.Equal(JsonTokenType.StartArray, reader.TokenType);
+            List<string> arrValue = new();
+            JsonSerializerPrimitives.ReadStrings(ref reader, arrValue, "arr", "test", false);
+            Assert.Equal(new[] { "a", "b" }, arrValue);
+            // After ReadStrings(read=false): reader should be AT EndArray (not past it)
+            Assert.Equal(JsonTokenType.EndArray, reader.TokenType);
+
+            reader.Read(); // advance to next PropertyName
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            reader.Read(); // advance to value
+
+            // Read "str2" using old pattern
+            Assert.Equal(JsonTokenType.String, reader.TokenType);
+            string str2Value = JsonSerializerPrimitives.ReadString(ref reader, "str2", "test");
+            Assert.Equal("value2", str2Value);
+            Assert.Equal(JsonTokenType.String, reader.TokenType);
+
+            reader.Read(); // advance to EndObject
+            Assert.Equal(JsonTokenType.EndObject, reader.TokenType);
+        }
+
+        /// <summary>
+        /// Tests that Read* methods with read=true work correctly with the while(true) pattern.
+        /// See: https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2943
+        /// </summary>
+        [Fact]
+        public void ReaderPositionAfterRead_NewCallingPattern()
+        {
+            // Arrange: JSON with multiple properties
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(BackwardCompatTestJson);
+
+            Utf8JsonReader reader = new(jsonBytes.AsSpan());
+
+            // Position reader past StartObject (new pattern)
+            Assert.True(JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true));
+
+            string strResult = null;
+            long numResult = 0;
+            bool boolResult = false;
+            List<string> arrResult = new();
+            string str2Result = null;
+
+            // New while(true) calling pattern
+            while (true)
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName)
+                {
+                    if (reader.ValueTextEquals("str"))
+                        strResult = JsonSerializerPrimitives.ReadString(ref reader, "str", "test", true);
+                    else if (reader.ValueTextEquals("num"))
+                        numResult = JsonSerializerPrimitives.ReadLong(ref reader, "num", "test", true);
+                    else if (reader.ValueTextEquals("bool"))
+                        boolResult = JsonSerializerPrimitives.ReadBoolean(ref reader, "bool", "test", true);
+                    else if (reader.ValueTextEquals("arr"))
+                        JsonSerializerPrimitives.ReadStrings(ref reader, arrResult, "arr", "test", true);
+                    else if (reader.ValueTextEquals("str2"))
+                        str2Result = JsonSerializerPrimitives.ReadString(ref reader, "str2", "test", true);
+                    else if (!reader.Read())
+                        break;
+                }
+                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                    break;
+                else if (!reader.Read())
+                    break;
+            }
+
+            Assert.Equal("value1", strResult);
+            Assert.Equal(42L, numResult);
+            Assert.True(boolResult);
+            Assert.Equal(new[] { "a", "b" }, arrResult);
+            Assert.Equal("value2", str2Result);
+        }
     }
 }
 

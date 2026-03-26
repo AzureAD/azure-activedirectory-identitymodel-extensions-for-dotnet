@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.17.0
+====
+## Dependencies
+* Downgrade Microsoft.Extensions.Logging.Abstractions to 8.0.0 on .NET 10 to match the version on .NET 8 and .NET 9. See [PR #3435](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3435).
+
 8.16.0
 ====
 ## New Features
