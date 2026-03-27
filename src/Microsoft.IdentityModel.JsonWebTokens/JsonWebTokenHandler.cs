@@ -223,7 +223,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
 
-                if (claimType.Equals(validationParameters.ActorClaimType) || claimType.Equals("actort"))
+                if (claimType.Equals(validationParameters.ActorClaimType) || claimType.Equals(JwtRegisteredClaimNames.Actort))
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
@@ -677,7 +677,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="tokenValidationParameters">These parameters have details like nested actor chain length and max permissible actor length</param>
         /// <param name="issuer">The issuer for the claims.</param>
         /// <returns>A ClaimsIdentity containing claims from the JsonElement.</returns>
-        public static ClaimsIdentity CreateActorClaimsIdentityFromJsonElement(
+        internal static ClaimsIdentity CreateActorClaimsIdentityFromJsonElement(
             JsonElement jsonElement,
             TokenValidationParameters tokenValidationParameters,
             string issuer = null)
@@ -695,12 +695,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             if (jsonElement.ValueKind != JsonValueKind.Object)
-                throw LogHelper.LogExceptionMessage(new ArgumentException("Actor token must be a JSON object"));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14316));
 
             // Use CaseSensitiveClaimsIdentity for consistent behavior with the rest of the library
             var identity = new CaseSensitiveClaimsIdentity();
 
-            issuer = issuer ?? ClaimsIdentity.DefaultIssuer;
+            issuer ??= ClaimsIdentity.DefaultIssuer;
 
             foreach (var property in jsonElement.EnumerateObject())
             {

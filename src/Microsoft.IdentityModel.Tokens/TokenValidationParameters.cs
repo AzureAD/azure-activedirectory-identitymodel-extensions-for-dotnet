@@ -805,11 +805,13 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (string.IsNullOrEmpty(value) || string.Equals(value.Trim(), "actort", StringComparison.OrdinalIgnoreCase))
                     throw LogHelper.LogExceptionMessage(
-                    new ArgumentOutOfRangeException(
-                    LogHelper.FormatInvariant(
-                    LogMessages.IDX11027,
-                    LogHelper.MarkAsNonPII("ActorClaimType"))
-                    + $". ActorClaimType cannot be empty or equal to actort."));
+                        new ArgumentOutOfRangeException(
+                            nameof(value),
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX11027,
+                                LogHelper.MarkAsNonPII("ActorClaimType"),
+                                LogHelper.MarkAsNonPII("ActorClaimType cannot be empty or equal to actort."))));
+
                 actorClaimType = value;
             }
         }
@@ -876,11 +878,12 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (value < 0 || value > 4)
                     throw LogHelper.LogExceptionMessage(
-                    new ArgumentOutOfRangeException(
-                    LogHelper.FormatInvariant(
-                    LogMessages.IDX11027,
-                    LogHelper.MarkAsNonPII("MaxActorChainLength"))
-                    + ". Permissible values are integers in range 0 to 4"));
+                        new ArgumentOutOfRangeException(
+                            nameof(value),
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX11027,
+                                LogHelper.MarkAsNonPII("MaxActorChainLength"),
+                                LogHelper.MarkAsNonPII("Permissible values are integers in range 0 to 4."))));
 
                 maxActorChainLength = value;
             }

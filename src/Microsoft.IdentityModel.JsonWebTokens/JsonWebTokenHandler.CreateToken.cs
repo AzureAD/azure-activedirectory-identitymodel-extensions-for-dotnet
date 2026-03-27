@@ -760,7 +760,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
             if (isActorFound || tokenDescriptor.Subject?.Actor != null)
-                WriteActorToken(writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+                WriteActorToken(ref writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
@@ -1079,14 +1079,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
         internal static void WriteActorToken(
-            Utf8JsonWriter writer,
+            ref Utf8JsonWriter writer,
             SecurityTokenDescriptor tokenDescriptor,
             bool setDefaultTimesOnTokenCreation,
             int tokenLifetimeInMinutes)
         {
-            if (tokenDescriptor == null)
-                throw new ArgumentNullException(nameof(tokenDescriptor));
-
             var actorTokenDescriptor = CreateActorTokenDescriptor(tokenDescriptor);
             if (actorTokenDescriptor == null || actorTokenDescriptor.Subject == null)
                 return;
@@ -1119,7 +1116,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.FormatInvariant(
                             LogMessages.IDX14315,
                             LogHelper.MarkAsNonPII(tokenDescriptor.ActorClaimType),
-                            LogHelper.MarkAsNonPII(actorValue?.GetType().ToString() ?? "null"))));
+                            LogHelper.MarkAsNonPII(actorValue?.GetType().FullName ?? "null"))));
                 }
 
                 actorTokenDescriptor = new SecurityTokenDescriptor
