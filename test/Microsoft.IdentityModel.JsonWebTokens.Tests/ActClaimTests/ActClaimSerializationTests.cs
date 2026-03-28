@@ -13,9 +13,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
     public class ActClaimSerializationTests
     {
         [Fact]
-        public void ActorTokenInClaimsDictionaryShouldBeProperlySerialized()
+        public void ActorToken_InClaimsDictionary_IsCorrectlySerialized()
         {
-            var context = new CompareContext($"{this}.ActorTokenInClaimsDictionaryShouldBeProperlySerialized");
+            var context = new CompareContext($"{this}.ActorToken_InClaimsDictionary_IsCorrectlySerialized");
             string actorname = "act";
             try
             {
@@ -66,9 +66,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void ActorTokenAsSubjectShouldBeProperlySerialized()
+        public void ActorToken_AsSubject_IsCorrectlySerialized()
         {
-            var context = new CompareContext($"{this}.ActorTokenAsSubjectShouldBeProperlySerialized");
+            var context = new CompareContext($"{this}.ActorToken_AsSubject_IsCorrectlySerialized");
             try
             {
                 // Create actor identity
@@ -119,9 +119,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue()
+        public void ActorToken_InBothClaimsAndSubject_PrefersClaimsValue()
         {
-            var context = new CompareContext($"{this}.ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue");
+            var context = new CompareContext($"{this}.ActorToken_InBothClaimsAndSubject_PrefersClaimsValue");
             string actorname = "act";
 
             try
@@ -180,9 +180,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized()
+        public void NestedActorToken_InClaimsDictionary_IsCorrectlySerialized()
         {
-            var context = new CompareContext($"{this}.NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized");
+            var context = new CompareContext($"{this}.NestedActorToken_InClaimsDictionary_IsCorrectlySerialized");
 
             try
             {
@@ -246,9 +246,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void NestedActorTokenAsSubjectShouldBeProperlySerialized()
+        public void NestedActorToken_AsSubject_IsCorrectlySerialized()
         {
-            var context = new CompareContext($"{this}.NestedActorTokenAsSubjectShouldBeProperlySerialized");
+            var context = new CompareContext($"{this}.NestedActorToken_AsSubject_IsCorrectlySerialized");
 
             // Create nested actor
             var nestedActorIdentity = new CaseSensitiveClaimsIdentity("NestedActorAuth");
@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         [Fact]
         public void NestedSubjectActorTokens_ExceedingMaxDepth_ThrowsException()
         {
-            var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
+            var context = new CompareContext($"{this}.NestedSubjectActorTokens_ExceedingMaxDepth_ThrowsException");
 
             try
             {
@@ -399,9 +399,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException()
+        public void NestedActorTokens_InClaimsDictionary_ExceedingMaxDepth_ThrowsException()
         {
-            var context = new CompareContext($"{this}.NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException");
+            var context = new CompareContext($"{this}.NestedActorTokens_InClaimsDictionary_ExceedingMaxDepth_ThrowsException");
 
             try
             {
@@ -460,7 +460,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void ActorTokens_MixedSourceRespectMaxActorChainLength()
+        public void ActorTokens_MixedSource_RespectsMaxActorChainLength()
         {
             // Arrange
             var handler = new JsonWebTokenHandler();
@@ -521,9 +521,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void NestedClaimTokens_ExceedingMaxDepth_ThrowsException()
+        public void NestedActorTokens_InClaims_ExceedingMaxDepth_ThrowsException()
         {
-            var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
+            var context = new CompareContext($"{this}.NestedActorTokens_InClaims_ExceedingMaxDepth_ThrowsException");
             var actorname = "act";
             try
             {
