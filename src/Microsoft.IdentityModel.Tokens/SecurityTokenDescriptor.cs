@@ -160,11 +160,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">
         /// Thrown if the value is null or empty.
         /// </exception>
-        /// <remarks>
-        /// <para>To use the newer JSON object-based actor format, set <c>AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true)</c> 
-        /// and use "act" as the claim type.</para>
-        /// <para>To use the legacy string-based actor token format, leave the switch off and use "actort".</para>
-        /// </remarks>
         public string ActorClaimType
         {
             get => _actorClaimType;

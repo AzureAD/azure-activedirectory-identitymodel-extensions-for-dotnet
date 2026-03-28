@@ -49,7 +49,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Default for actor claim name.
         /// </summary>
-        /// <remarks>If not explicitly set the default name for actor claim is 'act'. Only needed when EnableActClaimSupportSwitch is turned on</remarks>
         private string actorClaimType = "act";
 
         /// <summary>
@@ -793,11 +792,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">
         /// Thrown if the value is null or empty.
         /// </exception>
-        /// <remarks>
-        /// <para>To use the newer JSON object-based actor format, set <c>AppContext.SetSwitch(AppContextSwitches.EnableActClaimSupportSwitch, true)</c> 
-        /// and use "act" as the claim type.</para>
-        /// <para>To use the legacy string-based actor token format, leave the switch off and use "actort".</para>
-        /// </remarks>
         public string ActorClaimType
         {
             get => actorClaimType;
