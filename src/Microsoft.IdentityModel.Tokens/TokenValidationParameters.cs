@@ -125,6 +125,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidAlgorithms = other.ValidAlgorithms is not null ? new List<string>(other.ValidAlgorithms) : null;
             ValidAudience = other.ValidAudience;
             ValidAudiences = other.ValidAudiences is not null ? new List<string>(other.ValidAudiences) : null;
+            ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
             ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
             ActClaimRetrieverDelegate = other.ActClaimRetrieverDelegate;
@@ -822,7 +823,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <para>In most scenarios, users don't need to set this property as it's managed internally 
         /// by the token validation and creation process.</para>
         /// </remarks>
-        public int ActorChainDepth
+        internal int ActorChainDepth
         {
             get => _actorClainDepth;
             set
@@ -865,7 +866,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <para>This limit applies to both token creation and validation processes.</para>
         /// </remarks>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0 or greater than 4.</exception>
-        public int MaxActorChainLength
+        internal int MaxActorChainLength
         {
             get => maxActorChainLength;
             set
