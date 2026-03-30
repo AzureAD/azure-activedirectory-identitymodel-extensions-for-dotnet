@@ -762,6 +762,139 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.NotNull(jsonResult.ClaimsIdentity.Actor);
             Assert.Equal("json-actor-id", jsonResult.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
         }
+
+        [Fact]
+        public async Task ValidateTokenAsync_MapInboundClaimsTrue_MapsMainClaimsButNotActorClaims()
+        {
+            // When MapInboundClaims is true, short claim names in the main identity are mapped to long URIs,
+            // but actor claims remain in short form because they are deserialized directly from JSON
+            var handler = new JsonWebTokenHandler();
+            handler.MapInboundClaims = true;
+
+            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+            actorIdentity.AddClaim(new Claim("email", "actor@example.com"));
+            actorIdentity.AddClaim(new Claim("given_name", "ActorFirstName"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.AddClaim(new Claim("email", "main@example.com"));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actorIdentity } },
+            };
+            string token = handler.CreateToken(tokenDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+                ActorClaimType = "act",
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParameters);
+
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+
+            // Verify main identity claims are mapped to long form
+            var mainSubClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            var mainEmailClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+            Assert.NotNull(mainSubClaim);
+            Assert.NotNull(mainEmailClaim);
+            Assert.Equal("main-subject-id", mainSubClaim.Value);
+            Assert.Equal("main@example.com", mainEmailClaim.Value);
+
+            // Actor claims remain in short form (not mapped) because they are deserialized directly from JSON
+            var actorSubClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "sub");
+            var actorEmailClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "email");
+            var actorGivenNameClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "given_name");
+            Assert.NotNull(actorSubClaim);
+            Assert.NotNull(actorEmailClaim);
+            Assert.NotNull(actorGivenNameClaim);
+            Assert.Equal("actor-subject-id", actorSubClaim.Value);
+            Assert.Equal("actor@example.com", actorEmailClaim.Value);
+            Assert.Equal("ActorFirstName", actorGivenNameClaim.Value);
+
+            // Long-form claims don't exist in actor identity
+            Assert.Null(result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier));
+            Assert.Null(result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email));
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_MapInboundClaimsFalse_KeepsActorClaimsInShortForm()
+        {
+            // When MapInboundClaims is false (default), short claim names should remain as-is
+            var handler = new JsonWebTokenHandler();
+            handler.MapInboundClaims = false;
+
+            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+            actorIdentity.AddClaim(new Claim("email", "actor@example.com"));
+            actorIdentity.AddClaim(new Claim("given_name", "ActorFirstName"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.AddClaim(new Claim("email", "main@example.com"));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actorIdentity } },
+            };
+            string token = handler.CreateToken(tokenDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+                ActorClaimType = "act",
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParameters);
+
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+
+            // Verify main identity claims remain in short form
+            var mainSubClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "sub");
+            var mainEmailClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "email");
+            Assert.NotNull(mainSubClaim);
+            Assert.NotNull(mainEmailClaim);
+            Assert.Equal("main-subject-id", mainSubClaim.Value);
+            Assert.Equal("main@example.com", mainEmailClaim.Value);
+
+            // Verify actor claims remain in short form
+            var actorSubClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "sub");
+            var actorEmailClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "email");
+            var actorGivenNameClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "given_name");
+            Assert.NotNull(actorSubClaim);
+            Assert.NotNull(actorEmailClaim);
+            Assert.NotNull(actorGivenNameClaim);
+            Assert.Equal("actor-subject-id", actorSubClaim.Value);
+            Assert.Equal("actor@example.com", actorEmailClaim.Value);
+            Assert.Equal("ActorFirstName", actorGivenNameClaim.Value);
+
+            // Verify long-form claims don't exist when mapping is disabled
+            Assert.Null(result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier));
+            Assert.Null(result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email));
+        }
     }
 }
 
