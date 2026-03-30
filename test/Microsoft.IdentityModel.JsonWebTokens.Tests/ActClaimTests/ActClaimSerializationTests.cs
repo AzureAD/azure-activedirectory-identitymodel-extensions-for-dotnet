@@ -303,285 +303,140 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void MaxActorChainLength_RejectsNegativeValues()
+        public void NestedActorTokens_ExceedingFixedMaxDepthOf4_ThrowsSecurityTokenException()
         {
-            // Arrange
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = null,
-                Issuer = "https://example.com",
-                Audience = "https://api.example.com",
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-            };
-
-            tokenDescriptor.ActorClaimType = "act"; // Set the actor claim name to "act" for testing
-            int originalValue = tokenDescriptor.MaxActorChainLength;
-            tokenDescriptor.ActorClaimType = "act"; // Set the actor claim name to "act" for testing
-            // Act & Assert - Valid value 0 should not throw
-            tokenDescriptor.MaxActorChainLength = 0;
-            Assert.Equal(0, tokenDescriptor.MaxActorChainLength);
-
-            // Act & Assert - Negative value
-            var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
-                tokenDescriptor.MaxActorChainLength = -5);
-            Assert.Contains("IDX11027", ex.Message);
-
-            // Act & Assert - Valid value 1 should not throw
-            tokenDescriptor.MaxActorChainLength = 1;
-            Assert.Equal(1, tokenDescriptor.MaxActorChainLength);
-
-            ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
-                tokenDescriptor.MaxActorChainLength = 10);
-            Assert.Contains("IDX11027", ex.Message);
-        }
-
-        [Fact]
-        public void NestedSubjectActorTokens_ExceedingMaxDepth_ThrowsException()
-        {
-            var context = new CompareContext($"{this}.NestedSubjectActorTokens_ExceedingMaxDepth_ThrowsException");
-
-            try
-            {
-                // Arrange
-                var handler = new JsonWebTokenHandler();
-
-                // Create nested actor identities (3 levels, but we'll set MaxActorChainLength to 2)
-                var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
-                level3Actor.AddClaim(new Claim("sub", "level3-actor"));
-                level3Actor.AddClaim(new Claim("name", "Level 3 Actor"));
-
-                var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
-                level2Actor.AddClaim(new Claim("sub", "level2-actor"));
-                level2Actor.AddClaim(new Claim("name", "Level 2 Actor"));
-                level2Actor.Actor = level3Actor; // This will cause exception due to MaxActorChainLength=2
-
-                var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
-                level1Actor.AddClaim(new Claim("sub", "level1-actor"));
-                level1Actor.AddClaim(new Claim("name", "Level 1 Actor"));
-                level1Actor.Actor = level2Actor;
-
-                // Create the main identity
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity.AddClaim(new Claim("name", "Main User"));
-                mainIdentity.Actor = level1Actor;
-
-                // Create token descriptor
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 2,
-                };
-
-                // Act - This should throw a SecurityTokenException
-                var token = handler.CreateToken(tokenDescriptor);
-                context.Diffs.Add("Expected exception was not thrown.");
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (SecurityTokenException ex)
-            {
-                // Assert - Verify the exception message contains the expected content
-                if (!ex.Message.Contains("IDX14313"))
-                {
-                    context.Diffs.Add($"Exception message does not contain expected content. Message: {ex.Message}");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Unexpected exception type
-                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
-            }
-        }
-
-        [Fact]
-        public void NestedActorTokens_InClaimsDictionary_ExceedingMaxDepth_ThrowsException()
-        {
-            var context = new CompareContext($"{this}.NestedActorTokens_InClaimsDictionary_ExceedingMaxDepth_ThrowsException");
-
-            try
-            {
-                // Arrange
-                var handler = new JsonWebTokenHandler();
-                string actorname = "act";
-                // Create nested actor identities
-                var nestedActorIdentity = new CaseSensitiveClaimsIdentity("NestedActorAuth");
-                nestedActorIdentity.AddClaim(new Claim("sub", "nested-actor-id"));
-                nestedActorIdentity.AddClaim(new Claim("name", "Nested Actor"));
-
-                // Create actor identity with nested actor
-                var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-                actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
-                actorIdentity.AddClaim(new Claim("name", "Actor Name"));
-                actorIdentity.Actor = nestedActorIdentity; // This should be ignored due to MaxActorChainLength
-
-                // Create the main identity
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity.AddClaim(new Claim("name", "Main User"));
-
-                // Create token with actor in Claims dictionary
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object>
-                    {
-                        { actorname, actorIdentity }
-                    },
-                    ActorClaimType = actorname,
-                    MaxActorChainLength = 1
-                };
-
-                // Act
-                var token = handler.CreateToken(tokenDescriptor);
-                context.Diffs.Add("Expected exception was not thrown.");
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (SecurityTokenException ex)
-            {
-                // Assert - Verify the exception message contains the expected content
-                if (!ex.Message.Contains("IDX14313"))
-                {
-                    context.Diffs.Add($"Exception message does not contain expected content. Message: {ex.Message}");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Unexpected exception type
-                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
-            }
-        }
-
-        [Fact]
-        public void ActorTokens_MixedSource_RespectsMaxActorChainLength()
-        {
-            // Arrange
             var handler = new JsonWebTokenHandler();
-            string actorname = "act";
-            // Create level 2 actor (will be in claims dictionary)
-            var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
-            level2Actor.AddClaim(new Claim("sub", "level2-actor"));
-            level2Actor.AddClaim(new Claim("name", "Level 2 Actor"));
 
-            // Create nested actors that should be truncated
+            var level5Actor = new CaseSensitiveClaimsIdentity("Level5Auth");
+            level5Actor.AddClaim(new Claim("sub", "level5-actor"));
+
+            var level4Actor = new CaseSensitiveClaimsIdentity("Level4Auth");
+            level4Actor.AddClaim(new Claim("sub", "level4-actor"));
+            level4Actor.Actor = level5Actor;
+
             var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
             level3Actor.AddClaim(new Claim("sub", "level3-actor"));
-            level3Actor.AddClaim(new Claim("name", "Level 3 Actor"));
+            level3Actor.Actor = level4Actor;
 
-            // Create level 1 actor with nested actor
+            var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
+            level2Actor.AddClaim(new Claim("sub", "level2-actor"));
+            level2Actor.Actor = level3Actor;
+
             var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
             level1Actor.AddClaim(new Claim("sub", "level1-actor"));
-            level1Actor.AddClaim(new Claim("name", "Level 1 Actor"));
-            level1Actor.Actor = level3Actor; // This should be ignored due to MaxActorChainLength
+            level1Actor.Actor = level2Actor;
 
-            // Create the main identity
             var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
             mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-            mainIdentity.AddClaim(new Claim("name", "Main User"));
             mainIdentity.Actor = level1Actor;
 
-            // Create a token with additional actor in Claims dictionary
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = mainIdentity,
                 Issuer = "https://example.com",
                 Audience = "https://api.example.com",
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                // Add level 2 actor in claims dictionary to replace level 1's actor
-                Claims = new Dictionary<string, object>
-                {
-                    { actorname, level2Actor }
-                },
-                ActorClaimType = actorname,
-                MaxActorChainLength = 1,
+                ActorClaimType = "act",
             };
 
-            var token = handler.CreateToken(tokenDescriptor);
-            var jwtToken = handler.ReadJsonWebToken(token);
-
-            // Assert - Check actor object structure
-            Assert.True(jwtToken.Payload.HasClaim(actorname), "JWT token should contain 'act' claim");
-            var actorObject = jwtToken.Payload.GetValue<JsonElement>(tokenDescriptor.ActorClaimType);
-
-            Assert.Equal(JsonValueKind.Object, actorObject.ValueKind);
-
-            // Verify we get the actor from Claims dictionary (should be level2Actor)
-            Assert.Equal("level2-actor", actorObject.GetProperty("sub").GetString());
-            Assert.Equal("Level 2 Actor", actorObject.GetProperty("name").GetString());
-
-            // There should be no nested actor because we're already at max depth
-            Assert.False(actorObject.TryGetProperty("act", out _), "There should be no nested actor claim due to MaxActorChainLength");
+            var exception = Assert.Throws<SecurityTokenException>(() => handler.CreateToken(tokenDescriptor));
+            Assert.Contains("IDX14313", exception.Message);
         }
 
         [Fact]
-        public void NestedActorTokens_InClaims_ExceedingMaxDepth_ThrowsException()
+        public void NestedActorTokens_InClaimsDictionary_ExceedingFixedMaxDepthOf4_ThrowsSecurityTokenException()
         {
-            var context = new CompareContext($"{this}.NestedActorTokens_InClaims_ExceedingMaxDepth_ThrowsException");
-            var actorname = "act";
-            try
+            var handler = new JsonWebTokenHandler();
+
+            var level5Actor = new CaseSensitiveClaimsIdentity("Level5Auth");
+            level5Actor.AddClaim(new Claim("sub", "level5-actor"));
+
+            var level4Actor = new CaseSensitiveClaimsIdentity("Level4Auth");
+            level4Actor.AddClaim(new Claim("sub", "level4-actor"));
+            level4Actor.Actor = level5Actor;
+
+            var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
+            level3Actor.AddClaim(new Claim("sub", "level3-actor"));
+            level3Actor.Actor = level4Actor;
+
+            var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
+            level2Actor.AddClaim(new Claim("sub", "level2-actor"));
+            level2Actor.Actor = level3Actor;
+
+            var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
+            level1Actor.AddClaim(new Claim("sub", "level1-actor"));
+            level1Actor.Actor = level2Actor;
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // Arrange
-                var handler = new JsonWebTokenHandler();
-
-                // Create nested actor identities (3 levels, but we'll set MaxActorChainLength to 2)
-                var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
-                level3Actor.AddClaim(new Claim("sub", "level3-actor"));
-                level3Actor.AddClaim(new Claim("name", "Level 3 Actor"));
-
-                var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
-                level2Actor.AddClaim(new Claim("sub", "level2-actor"));
-                level2Actor.AddClaim(new Claim("name", "Level 2 Actor"));
-                level2Actor.Actor = level3Actor; // This will cause exception due to MaxActorChainLength=2
-
-                var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
-                level1Actor.AddClaim(new Claim("sub", "level1-actor"));
-                level1Actor.AddClaim(new Claim("name", "Level 1 Actor"));
-                level1Actor.Actor = level2Actor;
-
-                // Create the main identity
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity.AddClaim(new Claim("name", "Main User"));
-                // Create token descriptor
-                var tokenDescriptor = new SecurityTokenDescriptor
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object>
                 {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object>
-                    {
-                        { "act", level1Actor }
-                    },
-                    ActorClaimType = actorname,
-                    MaxActorChainLength = 1,
-                };
+                    { "act", level1Actor }
+                },
+                ActorClaimType = "act",
+            };
 
-                // Act - This should throw a SecurityTokenException
-                var token = handler.CreateToken(tokenDescriptor);
-                context.Diffs.Add("Expected exception was not thrown.");
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (SecurityTokenException ex)
+            var exception = Assert.Throws<SecurityTokenException>(() => handler.CreateToken(tokenDescriptor));
+            Assert.Contains("IDX14313", exception.Message);
+        }
+
+        [Fact]
+        public void NestedActorTokens_AtExactlyMaxDepthOf4_Succeeds()
+        {
+            var handler = new JsonWebTokenHandler();
+
+            var level4Actor = new CaseSensitiveClaimsIdentity("Level4Auth");
+            level4Actor.AddClaim(new Claim("sub", "level4-actor"));
+
+            var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
+            level3Actor.AddClaim(new Claim("sub", "level3-actor"));
+            level3Actor.Actor = level4Actor;
+
+            var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
+            level2Actor.AddClaim(new Claim("sub", "level2-actor"));
+            level2Actor.Actor = level3Actor;
+
+            var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
+            level1Actor.AddClaim(new Claim("sub", "level1-actor"));
+            level1Actor.Actor = level2Actor;
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.Actor = level1Actor;
+
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // Assert - Verify the exception message contains the expected content
-                if (!ex.Message.Contains("IDX14313"))
-                {
-                    context.Diffs.Add($"Exception message does not contain expected content. Message: {ex.Message}");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Unexpected exception type
-                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
-            }
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                ActorClaimType = "act",
+            };
+
+            var token = handler.CreateToken(tokenDescriptor);
+            var decodedToken = handler.ReadJsonWebToken(token);
+
+            Assert.True(decodedToken.Payload.HasClaim("act"));
+            var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
+            Assert.Equal("level1-actor", actorObject.GetProperty("sub").GetString());
+
+            Assert.True(actorObject.TryGetProperty("act", out var level2));
+            Assert.Equal("level2-actor", level2.GetProperty("sub").GetString());
+
+            Assert.True(level2.TryGetProperty("act", out var level3));
+            Assert.Equal("level3-actor", level3.GetProperty("sub").GetString());
+
+            Assert.True(level3.TryGetProperty("act", out var level4));
+            Assert.Equal("level4-actor", level4.GetProperty("sub").GetString());
+
+            Assert.False(level4.TryGetProperty("act", out _));
         }
     }
 }

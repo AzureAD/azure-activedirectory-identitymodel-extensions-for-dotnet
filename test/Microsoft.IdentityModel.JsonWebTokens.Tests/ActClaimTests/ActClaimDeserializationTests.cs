@@ -339,7 +339,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     { "act", actorIdentity}
                 },
                 ActorClaimType = "act",
-                MaxActorChainLength = 4,
             };
             string token = handler.CreateToken(tokenDescriptor);
             handler.MapInboundClaims = true;
@@ -491,43 +490,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Equal("nested-actor-id", result.ClaimsIdentity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
         }
 
-        [Fact]
-        public void CreateToken_NestingBeyondMaxActorChain_ThrowsSecurityTokenException()
-        {
-            // MaxActorChainLength is enforced during token CREATION.
-            // When actor chain exceeds the limit, CreateToken throws.
 
-            var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
-            level3Actor.AddClaim(new Claim("sub", "level3-actor"));
-
-            var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
-            level2Actor.AddClaim(new Claim("sub", "level2-actor"));
-            level2Actor.Actor = level3Actor;
-
-            var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
-            level1Actor.AddClaim(new Claim("sub", "level1-actor"));
-            level1Actor.Actor = level2Actor;
-
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-
-            var handler = new JsonWebTokenHandler();
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = mainIdentity,
-                Issuer = "https://example.com",
-                Audience = "https://api.example.com",
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-                Claims = new Dictionary<string, object> { { "act", level1Actor } },
-                MaxActorChainLength = 2, // 3-level chain exceeds this limit
-            };
-
-            // Token creation fails because actor chain is too deep
-            var exception = Assert.Throws<SecurityTokenException>(() => handler.CreateToken(tokenDescriptor));
-
-            Assert.Contains("IDX14313", exception.Message);
-        }
 
         [Fact]
         public async Task ValidateTokenAsync_CustomDelegate_WhenDelegateFails_ThrowsOnClaimsIdentityAccess()
@@ -895,9 +858,83 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Null(result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier));
             Assert.Null(result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email));
         }
+
+        [Fact]
+        public void CreateActorClaimsIdentity_ExceedingFixedMaxDepthOf4_ThrowsSecurityTokenException()
+        {
+            // The MaxActorChainLength is fixed at 4 and not configurable.
+            // Create a 5-level nested actor JSON structure (exceeds the limit)
+            string actorJson = @"{
+                ""sub"": ""level1-subject"",
+                ""act"": {
+                    ""sub"": ""level2-subject"",
+                    ""act"": {
+                        ""sub"": ""level3-subject"",
+                        ""act"": {
+                            ""sub"": ""level4-subject"",
+                            ""act"": {
+                                ""sub"": ""level5-subject""
+                            }
+                        }
+                    }
+                }
+            }";
+
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ActorClaimType = "act",
+            };
+
+            var exception = Assert.Throws<SecurityTokenException>(() =>
+                JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters));
+
+            Assert.Contains("IDX14313", exception.Message);
+        }
+
+        [Fact]
+        public void CreateActorClaimsIdentity_AtExactlyMaxDepthOf4_Succeeds()
+        {
+            // The MaxActorChainLength is fixed at 4.
+            // Create exactly 4 levels of nested actors (at the limit)
+            string actorJson = @"{
+                ""sub"": ""level1-subject"",
+                ""act"": {
+                    ""sub"": ""level2-subject"",
+                    ""act"": {
+                        ""sub"": ""level3-subject"",
+                        ""act"": {
+                            ""sub"": ""level4-subject""
+                        }
+                    }
+                }
+            }";
+
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ActorClaimType = "act",
+            };
+
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement,
+                tokenValidationParameters);
+
+            Assert.NotNull(identity);
+            Assert.Equal("level1-subject", identity.Claims.First(c => c.Type == "sub").Value);
+
+            Assert.NotNull(identity.Actor);
+            Assert.Equal("level2-subject", identity.Actor.Claims.First(c => c.Type == "sub").Value);
+
+            Assert.NotNull(identity.Actor.Actor);
+            Assert.Equal("level3-subject", identity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
+
+            Assert.NotNull(identity.Actor.Actor.Actor);
+            Assert.Equal("level4-subject", identity.Actor.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
+
+            Assert.Null(identity.Actor.Actor.Actor.Actor);
+        }
     }
 }
-
-
-
-

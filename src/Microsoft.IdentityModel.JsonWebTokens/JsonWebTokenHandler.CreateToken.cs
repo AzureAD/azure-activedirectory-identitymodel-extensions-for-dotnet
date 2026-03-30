@@ -1136,7 +1136,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (actorTokenDescriptor != null)
             {
                 ValidateActorChainDepth(tokenDescriptor);
-                actorTokenDescriptor.MaxActorChainLength = tokenDescriptor.MaxActorChainLength;
                 actorTokenDescriptor.ActorClaimType = tokenDescriptor.ActorClaimType;
                 actorTokenDescriptor.ActorChainDepth = tokenDescriptor.ActorChainDepth + 1;
             }
