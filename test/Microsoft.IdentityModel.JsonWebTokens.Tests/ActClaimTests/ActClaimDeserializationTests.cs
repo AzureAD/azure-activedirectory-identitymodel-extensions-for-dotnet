@@ -3,556 +3,423 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
-using System.Threading.Tasks;
-using System.Linq;
+
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 {
     public class ActClaimDeserializationTests
     {
         [Fact]
-        public void BasicJsonElementShouldCreateClaimsIdentityCorrectly()
+        public void CreateActorClaimsIdentity_BasicJsonElement_CreatesClaimsIdentityCorrectly()
         {
-            var context = new CompareContext($"{this}.BasicJsonElementShouldCreateClaimsIdentityCorrectly");
-            try
+            // Create a simple JSON Element that represents an actor token
+            string actorJson = @"{
+                ""sub"": ""actor-subject-id"",
+                ""name"": ""Actor Name"",
+                ""role"": ""admin""
+            }";
+
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var validationParameters = new TokenValidationParameters()
             {
-                // Create a simple JSON Element that represents an actor token
-                string actorJson = @"{
-                    ""sub"": ""actor-subject-id"",
-                    ""name"": ""Actor Name"",
-                    ""role"": ""admin""
-                }";
+                ActorClaimType = "act",
+            };
 
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-                var validationParameters = new TokenValidationParameters()
-                {
-                    ActorClaimType = "act",
-                };
+            // Create ClaimsIdentity from JsonElement
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement,
+                validationParameters);
 
-                // Create ClaimsIdentity from JsonElement
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    validationParameters);
+            // Assert
+            Assert.NotNull(identity);
+            Assert.Null(identity.AuthenticationType);  // Default constructor doesn't set AuthenticationType
+            Assert.IsType<CaseSensitiveClaimsIdentity>(identity);
 
-                // Assert
-                Assert.NotNull(identity);
-                Assert.Equal("Actor", identity.AuthenticationType);
-                Assert.IsType<CaseSensitiveClaimsIdentity>(identity);
-
-                // Verify claims values
-                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
-                Assert.Equal("admin", identity.Claims.First(c => c.Type == "role").Value);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                context.Diffs.Add($"Exception: {ex}");
-            }
+            // Verify claims values
+            Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+            Assert.Equal("admin", identity.Claims.First(c => c.Type == "role").Value);
         }
 
         [Fact]
-        public void NestedActorInJsonElementShouldCreateNestedClaimsIdentity()
+        public void CreateActorClaimsIdentity_NestedActorInJsonElement_CreatesNestedClaimsIdentity()
         {
-            var context = new CompareContext($"{this}.NestedActorInJsonElementShouldCreateNestedClaimsIdentity");
-            try
-            {
-                // Create nested actor JSON structure
-                string actorJson = @"{
-                    ""sub"": ""actor-subject-id"",
-                    ""name"": ""Actor Name"",
-                    ""act"": {
-                        ""sub"": ""nested-actor-id"",
-                        ""name"": ""Nested Actor""
-                    }
-                }";
-
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-                var tokenValidationParameters = new TokenValidationParameters
-                {
-                    ActorClaimType = "act",
-                };
-
-                // Create ClaimsIdentity from JsonElement
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    tokenValidationParameters);
-
-                // Verify main identity
-                Assert.NotNull(identity);
-                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
-
-                // Verify nested actor identity
-                Assert.NotNull(identity.Actor);
-                Assert.Equal("nested-actor-id", identity.Actor.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Nested Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                context.Diffs.Add($"Exception: {ex}");
-            }
-        }
-
-        [Fact]
-        public void MultiLevelNestedActorJsonShouldHandleProperDepth()
-        {
-            var context = new CompareContext($"{this}.MultiLevelNestedActorJsonShouldHandleProperDepth");
-            try
-            {
-                // Create a three-level nested actor JSON structure
-                string actorJson = @"{
-                    ""sub"": ""level1-subject"",
-                    ""name"": ""Level 1 Actor"",
-                    ""act"": {
-                        ""sub"": ""level2-subject"",
-                        ""name"": ""Level 2 Actor"",
-                        ""act"": {
-                            ""sub"": ""level3-subject"",
-                            ""name"": ""Level 3 Actor""
-                        }
-                    }
-                }";
-
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-                var tokenValidationParameters = new TokenValidationParameters
-                {
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 3,
-                };
-
-                // Create ClaimsIdentity from JsonElement
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    tokenValidationParameters);
-
-                // Verify level 1
-                Assert.NotNull(identity);
-                Assert.Equal("level1-subject", identity.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Level 1 Actor", identity.Claims.First(c => c.Type == "name").Value);
-
-                // Verify level 2
-                Assert.NotNull(identity.Actor);
-                Assert.Equal("level2-subject", identity.Actor.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Level 2 Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
-
-                // Verify level 3
-                Assert.NotNull(identity.Actor.Actor);
-                Assert.Equal("level3-subject", identity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Level 3 Actor", identity.Actor.Actor.Claims.First(c => c.Type == "name").Value);
-
-                // No level 4
-                Assert.Null(identity.Actor.Actor.Actor);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                context.Diffs.Add($"Exception: {ex}");
-            }
-        }
-
-        [Fact]
-        public void NestedActorExceedingMaxDepth_ThrowsException()
-        {
-            var context = new CompareContext($"{this}.NestedActorExceedingMaxDepth_ThrowsException");
-            try
-            {
-                // Create a three-level nested actor but set max depth to 2
-                string actorJson = @"{
-                    ""sub"": ""level1-subject"",
-                    ""name"": ""Level 1 Actor"",
-                    ""act"": {
-                        ""sub"": ""level2-subject"",
-                        ""name"": ""Level 2 Actor"",
-                        ""act"": {
-                            ""sub"": ""level3-subject"",
-                            ""name"": ""Level 3 Actor""
-                        }
-                    }
-                }";
-
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-                var tokenValidationParameters = new TokenValidationParameters
-                {
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 2,
-                    ActorChainDepth = 1,
-                };
-
-                // Act - This should throw a SecurityTokenException
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    tokenValidationParameters);
-
-                context.Diffs.Add("Expected exception was not thrown.");
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (SecurityTokenException ex)
-            {
-                // Assert - Verify the exception message contains the expected content
-                if (!ex.Message.Contains("IDX14313"))
-                {
-                    context.Diffs.Add($"Exception message does not contain expected content. Message: {ex.Message}");
+            // Create nested actor JSON structure
+            string actorJson = @"{
+                ""sub"": ""actor-subject-id"",
+                ""name"": ""Actor Name"",
+                ""act"": {
+                    ""sub"": ""nested-actor-id"",
+                    ""name"": ""Nested Actor""
                 }
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
+            }";
+
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
             {
-                // Unexpected exception type
-                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
-                TestUtilities.AssertFailIfErrors(context);
-            }
+                ActorClaimType = "act",
+            };
+
+            // Create ClaimsIdentity from JsonElement
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement,
+                tokenValidationParameters);
+
+            // Verify main identity
+            Assert.NotNull(identity);
+            Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+
+            // Verify nested actor identity
+            Assert.NotNull(identity.Actor);
+            Assert.Equal("nested-actor-id", identity.Actor.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Nested Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
         }
 
         [Fact]
-        public void JsonElementWithArrayValuesShouldProcessCorrectly()
+        public void CreateActorClaimsIdentity_MultiLevelNestedActorJson_HandlesProperDepth()
         {
-            var context = new CompareContext($"{this}.JsonElementWithArrayValuesShouldProcessCorrectly");
-            try
-            {
-                // Create JSON with array value
-                string actorJson = @"{
-                    ""sub"": ""actor-subject-id"",
-                    ""name"": ""Actor Name"",
-                    ""roles"": [""admin"", ""user"", ""manager""]
-                }";
-
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-                var tokenValidationParameters = new TokenValidationParameters
-                {
-                    ActorClaimType = "act",
-                };
-
-                // Create ClaimsIdentity from JsonElement
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    tokenValidationParameters);
-
-                // Verify identity and simple claims
-                Assert.NotNull(identity);
-                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
-
-                // Verify array values were processed into multiple claims
-                var roleClaims = identity.Claims.Where(c => c.Type == "roles").ToList();
-                Assert.Equal(3, roleClaims.Count);
-                Assert.Contains(roleClaims, c => c.Value == "admin");
-                Assert.Contains(roleClaims, c => c.Value == "user");
-                Assert.Contains(roleClaims, c => c.Value == "manager");
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                context.Diffs.Add($"Exception: {ex}");
-            }
-        }
-
-        [Fact]
-        public void JsonElementWithComplexTypesShouldHandleCorrectly()
-        {
-            var context = new CompareContext($"{this}.JsonElementWithComplexTypesShouldHandleCorrectly");
-            try
-            {
-                // Create JSON with complex types (objects)
-                string actorJson = @"{
-                    ""sub"": ""actor-subject-id"",
-                    ""name"": ""Actor Name"",
-                    ""metadata"": {
-                        ""created"": ""2023-10-15"",
-                        ""system"": ""test-system""
-                    },
-                    ""numbers"": [1, 2, 3]
-                }";
-
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-                var tokenValidationParameters = new TokenValidationParameters
-                {
-                    ActorClaimType = "act",
-                };
-
-                // Create ClaimsIdentity from JsonElement
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    tokenValidationParameters);
-
-                // Verify identity and simple claims
-                Assert.NotNull(identity);
-                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
-
-                // Verify the JSON object was serialized to a claim
-                var metadataClaim = identity.Claims.First(c => c.Type == "metadata");
-                Assert.NotNull(metadataClaim);
-                Assert.Contains("created", metadataClaim.Value);
-                Assert.Contains("test-system", metadataClaim.Value);
-
-                // Verify number array was handled
-                var numberClaims = identity.Claims.Where(c => c.Type == "numbers").ToList();
-                Assert.Equal(3, numberClaims.Count);
-                Assert.Contains(numberClaims, c => c.Value == "1");
-                Assert.Contains(numberClaims, c => c.Value == "2");
-                Assert.Contains(numberClaims, c => c.Value == "3");
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                context.Diffs.Add($"Exception: {ex}");
-            }
-        }
-
-        [Fact]
-        public void NonObjectJsonElement_ThrowsException()
-        {
-            var context = new CompareContext($"{this}.NonObjectJsonElement_ThrowsException");
-            try
-            {
-                // Create a non-object JSON Element (string)
-                string actorJson = @"""This is just a string, not an object""";
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-
-                var tokenValidationParameters = new TokenValidationParameters
-                {
-                    ActorClaimType = "act",
-                };
-
-                // Act - This should throw an ArgumentException
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    tokenValidationParameters);
-
-                context.Diffs.Add("Expected exception was not thrown.");
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (ArgumentException ex)
-            {
-                // Expected exception type
-                Assert.Contains("Actor token must be a JSON object", ex.Message);
-            }
-            catch (Exception ex)
-            {
-                // Unexpected exception type
-                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
-                TestUtilities.AssertFailIfErrors(context);
-            }
-        }
-
-        [Fact]
-        public void NullValidationParameters_ThrowsException()
-        {
-            var context = new CompareContext($"{this}.NullValidationParameters_ThrowsException");
-            try
-            {
-                // Create a simple JSON Element
-                string actorJson = @"{ ""sub"": ""actor-subject-id"" }";
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-
-                // Act - This should throw an ArgumentNullException
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    null);  // Null validation parameters
-
-                context.Diffs.Add("Expected exception was not thrown.");
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (ArgumentNullException ex)
-            {
-                // Expected exception type
-                Assert.Equal("tokenValidationParameters", ex.ParamName);
-            }
-            catch (Exception ex)
-            {
-                // Unexpected exception type
-                context.Diffs.Add($"Unexpected exception type: {ex.GetType()}, Message: {ex.Message}");
-                TestUtilities.AssertFailIfErrors(context);
-            }
-        }
-
-        [Fact]
-        public void CustomActorClaimNameShouldBeRespected()
-        {
-            var context = new CompareContext($"{this}.CustomActorClaimNameShouldBeRespected");
-            try
-            {
-                // Create JSON with custom actor claim name
-                string actorJson = @"{
-                    ""sub"": ""actor-subject-id"",
-                    ""name"": ""Actor Name"",
-                    ""actort"": {
-                        ""sub"": ""nested-actor-id"",
-                        ""name"": ""Nested Actor""
-                    }
-                }";
-
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-                var tokenValidationParameters = new TokenValidationParameters
-                {
-                    ActorClaimType = "actort",
-                };
-
-                // Create ClaimsIdentity from JsonElement
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    tokenValidationParameters);
-
-                // Verify main identity
-                Assert.NotNull(identity);
-                Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
-
-                // Verify nested actor was found using custom claim name
-                Assert.NotNull(identity.Actor);
-                Assert.Equal("nested-actor-id", identity.Actor.Claims.First(c => c.Type == "sub").Value);
-                Assert.Equal("Nested Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                context.Diffs.Add($"Exception: {ex}");
-            }
-        }
-
-        [Fact]
-        public void ActorChainDepthShouldBeIncremented()
-        {
-            var context = new CompareContext($"{this}.ActorChainDepthShouldBeIncremented");
-            try
-            {
-                // Create actor JSON with nested actor
-                string actorJson = @"{
-                    ""sub"": ""actor-subject-id"",
-                    ""name"": ""Actor Name"",
+            // Create a three-level nested actor JSON structure
+            string actorJson = @"{
+                ""sub"": ""level1-subject"",
+                ""name"": ""Level 1 Actor"",
+                ""act"": {
+                    ""sub"": ""level2-subject"",
+                    ""name"": ""Level 2 Actor"",
                     ""act"": {
-                        ""sub"": ""nested-actor-id"",
-                        ""name"": ""Nested Actor""
+                        ""sub"": ""level3-subject"",
+                        ""name"": ""Level 3 Actor""
                     }
-                }";
+                }
+            }";
 
-                var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-                var tokenValidationParameters = new TokenValidationParameters
-                {
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 4,
-                    ActorChainDepth = 2,
-                };
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ActorClaimType = "act",
+                MaxActorChainLength = 3,
+            };
 
-                // Create ClaimsIdentity from JsonElement
-                var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+            // Create ClaimsIdentity from JsonElement
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement,
+                tokenValidationParameters);
+
+            // Verify level 1
+            Assert.NotNull(identity);
+            Assert.Equal("level1-subject", identity.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Level 1 Actor", identity.Claims.First(c => c.Type == "name").Value);
+
+            // Verify level 2
+            Assert.NotNull(identity.Actor);
+            Assert.Equal("level2-subject", identity.Actor.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Level 2 Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
+
+            // Verify level 3
+            Assert.NotNull(identity.Actor.Actor);
+            Assert.Equal("level3-subject", identity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Level 3 Actor", identity.Actor.Actor.Claims.First(c => c.Type == "name").Value);
+
+            // No level 4
+            Assert.Null(identity.Actor.Actor.Actor);
+        }
+
+        [Fact]
+        public void CreateActorClaimsIdentity_NestedActorExceedingMaxDepth_ThrowsSecurityTokenException()
+        {
+            // Create a three-level nested actor but set max depth to 2
+            string actorJson = @"{
+                ""sub"": ""level1-subject"",
+                ""name"": ""Level 1 Actor"",
+                ""act"": {
+                    ""sub"": ""level2-subject"",
+                    ""name"": ""Level 2 Actor"",
+                    ""act"": {
+                        ""sub"": ""level3-subject"",
+                        ""name"": ""Level 3 Actor""
+                    }
+                }
+            }";
+
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ActorClaimType = "act",
+                MaxActorChainLength = 2,
+                ActorChainDepth = 1,
+            };
+
+            // Act & Assert
+            var exception = Assert.Throws<SecurityTokenException>(() =>
+                JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
                     jsonElement,
-                    tokenValidationParameters);
+                    tokenValidationParameters));
 
-                // Verify depth was incremented (2 + 1 = 3)
-                Assert.Equal(3, tokenValidationParameters.ActorChainDepth);
-
-                // Verify both levels of actors exist
-                Assert.NotNull(identity);
-                Assert.NotNull(identity.Actor);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                context.Diffs.Add($"Exception: {ex}");
-            }
+            Assert.Contains("IDX14313", exception.Message);
         }
 
         [Fact]
-        public async Task ValidateTokenAsync_WithActorInToken_ProvidesActorClaimsIdentity()
+        public void CreateActorClaimsIdentity_JsonElementWithArrayValues_ProcessesCorrectly()
         {
-            var context = new CompareContext($"{this}.ValidateTokenAsync_WithActorInToken_ProvidesActorClaimsIdentity");
-            try
+            // Create JSON with array value
+            string actorJson = @"{
+                ""sub"": ""actor-subject-id"",
+                ""name"": ""Actor Name"",
+                ""roles"": [""admin"", ""user"", ""manager""]
+            }";
+
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
             {
-                // Create a token with an actor claim
-                var handler = new JsonWebTokenHandler();
+                ActorClaimType = "act",
+            };
 
-                var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-                actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
-                actorIdentity.AddClaim(new Claim("name", "Actor Name"));
-                actorIdentity.AddClaim(new Claim("role", "admin"));
+            // Create ClaimsIdentity from JsonElement
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement,
+                tokenValidationParameters);
 
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity.AddClaim(new Claim("name", "Main User"));
+            // Verify identity and simple claims
+            Assert.NotNull(identity);
+            Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
 
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object>
-                    {
-                        { "act", actorIdentity}
-                    },
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 4,
-                };
-                string token = handler.CreateToken(tokenDescriptor);
-                handler.MapInboundClaims = true;
-
-                // Validate token
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = Default.AsymmetricSigningKey,
-                    ValidateIssuerSigningKey = true,
-                    ActorClaimType = "act",
-                };
-
-                var result = await handler.ValidateTokenAsync(token, validationParameters);
-
-                // Verify validation succeeded
-                Assert.True(result.IsValid);
-                Assert.NotNull(result.SecurityToken);
-                Assert.NotNull(result.ClaimsIdentity);
-
-                // Verify main claims
-                var mainClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "name");
-                Assert.NotNull(mainClaim);
-                Assert.Equal("Main User", mainClaim.Value);
-                Console.WriteLine($"Verified main claims");
-
-                // Verify actor claims identity
-                Assert.NotNull(result.ClaimsIdentity.Actor);
-                var actorSubClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "sub");
-                var actorNameClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "name");
-                var actorRoleClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "role");
-                Assert.NotNull(actorSubClaim);
-                Assert.NotNull(actorNameClaim);
-                Assert.NotNull(actorRoleClaim);
-                Console.WriteLine($"Verified actor claim");
-
-                Assert.Equal("actor-subject-id", actorSubClaim.Value);
-                Assert.Equal("Actor Name", actorNameClaim.Value);
-                Assert.Equal("admin", actorRoleClaim.Value);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                context.Diffs.Add($"Exception: {ex}");
-                TestUtilities.AssertFailIfErrors(context);
-            }
+            // Verify array values were processed into multiple claims
+            var roleClaims = identity.Claims.Where(c => c.Type == "roles").ToList();
+            Assert.Equal(3, roleClaims.Count);
+            Assert.Contains(roleClaims, c => c.Value == "admin");
+            Assert.Contains(roleClaims, c => c.Value == "user");
+            Assert.Contains(roleClaims, c => c.Value == "manager");
         }
 
         [Fact]
-        public async Task ValidateTokenAsync_CustomDelegate_WorksWithSimpleAndNestedActors()
+        public void CreateActorClaimsIdentity_JsonElementWithComplexTypes_HandlesCorrectly()
         {
-            var context = new CompareContext($"{this}.ValidateTokenAsync_CustomDelegate_WorksWithSimpleAndNestedActors");
+            // Create JSON with complex types (objects)
+            string actorJson = @"{
+                ""sub"": ""actor-subject-id"",
+                ""name"": ""Actor Name"",
+                ""metadata"": {
+                    ""created"": ""2023-10-15"",
+                    ""system"": ""test-system""
+                },
+                ""numbers"": [1, 2, 3]
+            }";
 
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ActorClaimType = "act",
+            };
+
+            // Create ClaimsIdentity from JsonElement
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement,
+                tokenValidationParameters);
+
+            // Verify identity and simple claims
+            Assert.NotNull(identity);
+            Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+
+            // Verify the JSON object was serialized to a claim
+            var metadataClaim = identity.Claims.First(c => c.Type == "metadata");
+            Assert.NotNull(metadataClaim);
+            Assert.Contains("created", metadataClaim.Value);
+            Assert.Contains("test-system", metadataClaim.Value);
+
+            // Verify number array was handled
+            var numberClaims = identity.Claims.Where(c => c.Type == "numbers").ToList();
+            Assert.Equal(3, numberClaims.Count);
+            Assert.Contains(numberClaims, c => c.Value == "1");
+            Assert.Contains(numberClaims, c => c.Value == "2");
+            Assert.Contains(numberClaims, c => c.Value == "3");
+        }
+
+        [Fact]
+        public void CreateActorClaimsIdentity_NonObjectJsonElement_ThrowsArgumentException()
+        {
+            // Create a non-object JSON Element (string)
+            string actorJson = @"""This is just a string, not an object""";
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ActorClaimType = "act",
+            };
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentException>(() =>
+                JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    tokenValidationParameters));
+
+            Assert.Contains("Actor token must be a JSON object", exception.Message);
+        }
+
+        [Fact]
+        public void CreateActorClaimsIdentity_NullValidationParameters_ThrowsArgumentNullException()
+        {
+            // Create a simple JSON Element
+            string actorJson = @"{ ""sub"": ""actor-subject-id"" }";
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+                JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                    jsonElement,
+                    null));
+
+            Assert.Equal("tokenValidationParameters", exception.ParamName);
+        }
+
+        [Fact]
+        public void CreateActorClaimsIdentity_CustomActorClaimName_IsRespected()
+        {
+            // Create JSON with custom actor claim name
+            string actorJson = @"{
+                ""sub"": ""actor-subject-id"",
+                ""name"": ""Actor Name"",
+                ""custom_act"": {
+                    ""sub"": ""nested-actor-id"",
+                    ""name"": ""Nested Actor""
+                }
+            }";
+
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ActorClaimType = "custom_act",
+            };
+
+            // Create ClaimsIdentity from JsonElement
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement,
+                tokenValidationParameters);
+
+            // Verify main identity
+            Assert.NotNull(identity);
+            Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
+
+            // Verify nested actor was found using custom claim name
+            Assert.NotNull(identity.Actor);
+            Assert.Equal("nested-actor-id", identity.Actor.Claims.First(c => c.Type == "sub").Value);
+            Assert.Equal("Nested Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
+        }
+
+        [Fact]
+        public void CreateActorClaimsIdentity_WithNestedActor_IncrementsActorChainDepth()
+        {
+            // Create actor JSON with nested actor
+            string actorJson = @"{
+                ""sub"": ""actor-subject-id"",
+                ""name"": ""Actor Name"",
+                ""act"": {
+                    ""sub"": ""nested-actor-id"",
+                    ""name"": ""Nested Actor""
+                }
+            }";
+
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ActorClaimType = "act",
+                MaxActorChainLength = 4,
+                ActorChainDepth = 2,
+            };
+
+            // Create ClaimsIdentity from JsonElement
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement,
+                tokenValidationParameters);
+
+            // Verify depth was incremented (2 + 1 = 3)
+            Assert.Equal(3, tokenValidationParameters.ActorChainDepth);
+
+            // Verify both levels of actors exist
+            Assert.NotNull(identity);
+            Assert.NotNull(identity.Actor);
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_WithActorInToken_ReturnsActorClaimsIdentity()
+        {
+            // Create a token with an actor claim
+            var handler = new JsonWebTokenHandler();
+
+            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+            actorIdentity.AddClaim(new Claim("name", "Actor Name"));
+            actorIdentity.AddClaim(new Claim("role", "admin"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.AddClaim(new Claim("name", "Main User"));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    { "act", actorIdentity}
+                },
+                ActorClaimType = "act",
+                MaxActorChainLength = 4,
+            };
+            string token = handler.CreateToken(tokenDescriptor);
+            handler.MapInboundClaims = true;
+
+            // Validate token
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+                ActorClaimType = "act",
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParameters);
+
+            // Verify validation succeeded
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.SecurityToken);
+            Assert.NotNull(result.ClaimsIdentity);
+
+            // Verify main claims
+            var mainClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "name");
+            Assert.NotNull(mainClaim);
+            Assert.Equal("Main User", mainClaim.Value);
+
+            // Verify actor claims identity
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            var actorSubClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "sub");
+            var actorNameClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "name");
+            var actorRoleClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "role");
+            Assert.NotNull(actorSubClaim);
+            Assert.NotNull(actorNameClaim);
+            Assert.NotNull(actorRoleClaim);
+
+            Assert.Equal("actor-subject-id", actorSubClaim.Value);
+            Assert.Equal("Actor Name", actorNameClaim.Value);
+            Assert.Equal("admin", actorRoleClaim.Value);
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_CustomDelegate_ProcessesSimpleAndNestedActors()
+        {
             int delegateCallCount = 0;
             ClaimsIdentity CustomDelegate(JsonElement element, TokenValidationParameters tokenValidationParameters = null)
             {
@@ -605,20 +472,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
+
             Assert.True(result.IsValid);
             Assert.NotNull(result.ClaimsIdentity.Actor);
             Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
             Assert.NotNull(result.ClaimsIdentity.Actor.Actor);
             Assert.Equal("nested-actor-id", result.ClaimsIdentity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
             Assert.True(delegateCallCount >= 2);
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
         public async Task ValidateTokenAsync_NestedActors_DefaultDelegate_CreatesProperClaimsIdentity()
         {
-            var context = new CompareContext($"{this}.ValidateTokenAsync_NestedActors_DefaultDelegate_CreatesProperClaimsIdentity");
             var nestedActor = new CaseSensitiveClaimsIdentity("NestedActorAuth");
             nestedActor.AddClaim(new Claim("sub", "nested-actor-id"));
             nestedActor.AddClaim(new Claim("name", "Nested Actor"));
@@ -656,126 +521,106 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
+
             Assert.True(result.IsValid);
             Assert.NotNull(result.ClaimsIdentity.Actor);
             Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
             Assert.NotNull(result.ClaimsIdentity.Actor.Actor);
             Assert.Equal("nested-actor-id", result.ClaimsIdentity.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
-        public async Task ValidateTokenAsync_NestingBeyondMaxActorChain_ThrowsException()
+        public void CreateToken_NestingBeyondMaxActorChain_ThrowsSecurityTokenException()
         {
-            var context = new CompareContext($"{this}.ValidateTokenAsync_NestingBeyondMaxActorChain_ThrowsException");
+            // MaxActorChainLength is enforced during token CREATION.
+            // When actor chain exceeds the limit, CreateToken throws.
 
-            try
+            var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
+            level3Actor.AddClaim(new Claim("sub", "level3-actor"));
+
+            var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
+            level2Actor.AddClaim(new Claim("sub", "level2-actor"));
+            level2Actor.Actor = level3Actor;
+
+            var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
+            level1Actor.AddClaim(new Claim("sub", "level1-actor"));
+            level1Actor.Actor = level2Actor;
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
-                level3Actor.AddClaim(new Claim("sub", "level3-actor"));
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", level1Actor } },
+                MaxActorChainLength = 2, // 3-level chain exceeds this limit
+            };
 
-                var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
-                level2Actor.AddClaim(new Claim("sub", "level2-actor"));
-                level2Actor.Actor = level3Actor;
+            // Token creation fails because actor chain is too deep
+            var exception = Assert.Throws<SecurityTokenException>(() => handler.CreateToken(tokenDescriptor));
 
-                var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
-                level1Actor.AddClaim(new Claim("sub", "level1-actor"));
-                level1Actor.Actor = level2Actor;
-
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-
-                var handler = new JsonWebTokenHandler();
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object> { { "act", level1Actor } },
-                };
-                var token = handler.CreateToken(tokenDescriptor);
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = Default.AsymmetricSigningKey,
-                    ValidateIssuerSigningKey = true,
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 2,
-                };
-                handler.MapInboundClaims = true;
-                var result = await handler.ValidateTokenAsync(token, validationParameters);
-                Assert.Null(result.ClaimsIdentity.Actor);
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
-            {
-                Assert.Contains("IDX14313", ex.ToString());
-            }
+            Assert.Contains("IDX14313", exception.Message);
         }
 
         [Fact]
-        public async Task ValidateTokenAsync_CustomDelegate_ThrowsExceptionIfDelegateFails()
+        public async Task ValidateTokenAsync_CustomDelegate_WhenDelegateFails_ThrowsOnClaimsIdentityAccess()
         {
-            var context = new CompareContext($"{this}.ValidateTokenAsync_CustomDelegate_ThrowsIfDelegateFails");
-
+            // When a custom delegate throws an exception, validation succeeds but accessing
+            // ClaimsIdentity throws because it's lazily evaluated
             ClaimsIdentity CustomDelegate(JsonElement element, TokenValidationParameters tokenValidationParameters = null)
             {
                 throw new InvalidOperationException("Delegate failure");
             }
 
-            try
+            var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actor.AddClaim(new Claim("sub", "actor-subject-id"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
-                actor.AddClaim(new Claim("sub", "actor-subject-id"));
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actor } },
+            };
+            var token = handler.CreateToken(tokenDescriptor);
 
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-
-                var handler = new JsonWebTokenHandler();
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object> { { "act", actor } },
-                };
-                var token = handler.CreateToken(tokenDescriptor);
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = Default.AsymmetricSigningKey,
-                    ValidateIssuerSigningKey = true,
-                    ActorClaimType = "act",
-                    MaxActorChainLength = 2,
-                    ActClaimRetrieverDelegate = CustomDelegate,
-                };
-
-                var result = await handler.ValidateTokenAsync(token, validationParameters);
-                Assert.Null(result.ClaimsIdentity.Actor);
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
+            var validationParameters = new TokenValidationParameters
             {
-                Assert.Contains("IDX14314", ex.ToString());
-            }
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+                ActorClaimType = "act",
+                ActClaimRetrieverDelegate = CustomDelegate,
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParameters);
+
+            // Validation succeeds
+            Assert.True(result.IsValid);
+
+            // But accessing ClaimsIdentity throws because the delegate fails during lazy evaluation
+            var exception = Assert.Throws<SecurityTokenDecryptionFailedException>(
+                () => result.ClaimsIdentity);
+
+            Assert.Contains("IDX14314", exception.Message);
         }
 
         [Fact]
-        public async Task ValidateTokenAsync_ActorAsSubjectAndClaimsDictionary_DefaultAndCustomDelegate()
+        public async Task ValidateTokenAsync_ActorAsSubjectAndClaimsDictionary_ProcessesWithDefaultAndCustomDelegate()
         {
-            var context = new CompareContext($"{this}.ValidateTokenAsync_ActorAsSubjectAndClaimsDictionary_DefaultAndCustomDelegate");
-
             ClaimsIdentity CustomDelegate(JsonElement element, TokenValidationParameters tokenValidationParameters = null)
             {
                 var id = new CaseSensitiveClaimsIdentity("CustomActorAuth");
@@ -852,122 +697,112 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.True(result3.IsValid);
             Assert.NotNull(result3.ClaimsIdentity.Actor);
             Assert.Equal("claims-actor-id", result3.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
         public async Task ValidateTokenAsync_WithActortClaim_HandlesJwtStringNotJson()
         {
-            var context = new CompareContext($"{this}.ValidateTokenAsync_WithActortClaim_HandlesJwtStringNotJson");
-            try
+            // ARRANGE
+            // First create a JWT token to use as the actor token string
+            var innerHandler = new JsonWebTokenHandler();
+            var actorJwtIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actorJwtIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+            actorJwtIdentity.AddClaim(new Claim("name", "Actor Name"));
+
+            var actorJwtDescriptor = new SecurityTokenDescriptor
             {
-                // ARRANGE
-                // First create a JWT token to use as the actor token string
-                var innerHandler = new JsonWebTokenHandler();
-                var actorJwtIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-                actorJwtIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
-                actorJwtIdentity.AddClaim(new Claim("name", "Actor Name"));
+                Subject = actorJwtIdentity,
+                Issuer = "https://actor.example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            };
 
-                var actorJwtDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = actorJwtIdentity,
-                    Issuer = "https://actor.example.com",
-                    Audience = "https://api.example.com",
-                    SigningCredentials = Default.AsymmetricSigningCredentials
-                };
+            // Create the actor token as a JWT string
+            string actorJwtString = innerHandler.CreateToken(actorJwtDescriptor);
 
-                // Create the actor token as a JWT string
-                string actorJwtString = innerHandler.CreateToken(actorJwtDescriptor);
+            // Now create the main token with the actort claim containing the JWT string
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.AddClaim(new Claim("name", "Main User"));
 
-                // Now create the main token with the actort claim containing the JWT string
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-                mainIdentity.AddClaim(new Claim("name", "Main User"));
-
-                var handler = new JsonWebTokenHandler();
-                var mainTokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object>
-                    {
-                        // Use actort claim with JWT string
-                        { "actort", actorJwtString }
-                    }
-                };
-
-                // Create the main token
-                string mainToken = handler.CreateToken(mainTokenDescriptor);
-
-                // ACT
-                // Validate the token with actort claim type
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = Default.AsymmetricSigningKey,
-                    ValidateIssuerSigningKey = true
-                };
-
-                var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
-
-                // ASSERT
-                // Verify validation succeeded
-                Assert.True(result.IsValid);
-                Assert.NotNull(result.ClaimsIdentity);
-
-                // Verify actor is processed as a JWT
-                Assert.NotNull(result.ClaimsIdentity.Actor);
-
-                // The actor should have claims from the JWT token
-                var actorSubClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "sub");
-                var actorNameClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "name");
-
-                Assert.NotNull(actorSubClaim);
-                Assert.NotNull(actorNameClaim);
-                Assert.Equal("actor-subject-id", actorSubClaim.Value);
-                Assert.Equal("Actor Name", actorNameClaim.Value);
-
-                // For comparison, create another token with 'act' claim as JSON
-                var jsonActor = new CaseSensitiveClaimsIdentity("ActorAuth");
-                jsonActor.AddClaim(new Claim("sub", "json-actor-id"));
-                jsonActor.AddClaim(new Claim("name", "JSON Actor"));
-
-                var jsonTokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = mainIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    Claims = new Dictionary<string, object>
-                    {
-                        { "actor_claim_name", jsonActor }
-                    },
-                    ActorClaimType = "actor_claim_name",
-                };
-
-                string jsonToken = handler.CreateToken(jsonTokenDescriptor);
-                validationParameters.ActorClaimType = "actor_claim_name";
-                var jsonResult = await handler.ValidateTokenAsync(jsonToken, validationParameters);
-
-                // Verify different processing method
-                Assert.NotNull(jsonResult.ClaimsIdentity.Actor);
-                Assert.Equal("json-actor-id", jsonResult.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
-
-                TestUtilities.AssertFailIfErrors(context);
-            }
-            catch (Exception ex)
+            var handler = new JsonWebTokenHandler();
+            var mainTokenDescriptor = new SecurityTokenDescriptor
             {
-                context.Diffs.Add($"Exception: {ex}");
-                TestUtilities.AssertFailIfErrors(context);
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    // Use actort claim with JWT string
+                    { "actort", actorJwtString }
+                }
+            };
 
-            }
+            // Create the main token
+            string mainToken = handler.CreateToken(mainTokenDescriptor);
+
+            // ACT
+            // Validate the token with actort claim type
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            };
+
+            var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
+
+            // ASSERT
+            // Verify validation succeeded
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity);
+
+            // Verify actor is processed as a JWT
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+
+            // The actor should have claims from the JWT token
+            var actorSubClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "sub");
+            var actorNameClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "name");
+
+            Assert.NotNull(actorSubClaim);
+            Assert.NotNull(actorNameClaim);
+            Assert.Equal("actor-subject-id", actorSubClaim.Value);
+            Assert.Equal("Actor Name", actorNameClaim.Value);
+
+            // For comparison, create another token with 'act' claim as JSON
+            var jsonActor = new CaseSensitiveClaimsIdentity("ActorAuth");
+            jsonActor.AddClaim(new Claim("sub", "json-actor-id"));
+            jsonActor.AddClaim(new Claim("name", "JSON Actor"));
+
+            var jsonTokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    { "actor_claim_name", jsonActor }
+                },
+                ActorClaimType = "actor_claim_name",
+            };
+
+            string jsonToken = handler.CreateToken(jsonTokenDescriptor);
+            validationParameters.ActorClaimType = "actor_claim_name";
+            var jsonResult = await handler.ValidateTokenAsync(jsonToken, validationParameters);
+
+            // Verify different processing method
+            Assert.NotNull(jsonResult.ClaimsIdentity.Actor);
+            Assert.Equal("json-actor-id", jsonResult.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
         }
     }
 }
+
+
+
+
