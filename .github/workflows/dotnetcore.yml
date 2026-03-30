@@ -5,9 +5,11 @@ permissions:
   pull-requests: write
 
 on:
+  workflow_dispatch: # Allows manual triggering of workflow
   push:
     branches:
       - dev
+      - dev8x
   pull_request:
     types:
       - opened
@@ -16,6 +18,7 @@ on:
       - ready_for_review
     branches:
       - dev
+      - dev8x
 
 env:
   TargetNetNext: False
