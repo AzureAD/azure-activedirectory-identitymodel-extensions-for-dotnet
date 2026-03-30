@@ -129,7 +129,6 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
             ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
             ActClaimRetrieverDelegate = other.ActClaimRetrieverDelegate;
-            MaxActorChainLength = other.MaxActorChainLength;
             ActorChainDepth = other.ActorChainDepth;
             ActorClaimType = other.ActorClaimType;
         }
@@ -855,9 +854,8 @@ namespace Microsoft.IdentityModel.Tokens
         public ActClaimRetrieverDelegate ActClaimRetrieverDelegate { get; set; }
 
         /// <summary>
-        /// Gets or sets the maximum depth allowed when processing nested actor tokens.
+        /// Gets the maximum depth allowed when processing nested actor tokens.
         /// <para>This prevents excessive recursion when handling deeply nested actor tokens.</para>
-        /// <para>The value must be at least 0. Value 0 would mean that no actor token nesting is allowed.</para>
         /// <para>The maximum allowed value is 4 to prevent security issues with excessively deep actor chains.</para>
         /// </summary>
         /// <remarks>
@@ -865,23 +863,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <para>During token validation and creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
         /// <para>This limit applies to both token creation and validation processes.</para>
         /// </remarks>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0 or greater than 4.</exception>
-        internal int MaxActorChainLength
-        {
-            get => maxActorChainLength;
-            set
-            {
-                if (value < 0 || value > 4)
-                    throw LogHelper.LogExceptionMessage(
-                        new ArgumentOutOfRangeException(
-                            nameof(value),
-                            LogHelper.FormatInvariant(
-                                LogMessages.IDX11027,
-                                LogHelper.MarkAsNonPII("MaxActorChainLength"),
-                                LogHelper.MarkAsNonPII("Permissible values are integers in range 0 to 4."))));
-
-                maxActorChainLength = value;
-            }
-        }
+        internal int MaxActorChainLength => maxActorChainLength;
     }
 }

@@ -103,7 +103,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ActorClaimType = "act",
-                MaxActorChainLength = 3,
             };
 
             // Create ClaimsIdentity from JsonElement
@@ -128,40 +127,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
             // No level 4
             Assert.Null(identity.Actor.Actor.Actor);
-        }
-
-        [Fact]
-        public void CreateActorClaimsIdentity_NestedActorExceedingMaxDepth_ThrowsSecurityTokenException()
-        {
-            // Create a three-level nested actor but set max depth to 2
-            string actorJson = @"{
-                ""sub"": ""level1-subject"",
-                ""name"": ""Level 1 Actor"",
-                ""act"": {
-                    ""sub"": ""level2-subject"",
-                    ""name"": ""Level 2 Actor"",
-                    ""act"": {
-                        ""sub"": ""level3-subject"",
-                        ""name"": ""Level 3 Actor""
-                    }
-                }
-            }";
-
-            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ActorClaimType = "act",
-                MaxActorChainLength = 2,
-                ActorChainDepth = 1,
-            };
-
-            // Act & Assert
-            var exception = Assert.Throws<SecurityTokenException>(() =>
-                JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    tokenValidationParameters));
-
-            Assert.Contains("IDX14313", exception.Message);
         }
 
         [Fact]
@@ -331,7 +296,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ActorClaimType = "act",
-                MaxActorChainLength = 4,
                 ActorChainDepth = 2,
             };
 
@@ -467,7 +431,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
                 ActorClaimType = "act",
-                MaxActorChainLength = 3,
                 ActClaimRetrieverDelegate = CustomDelegate,
             };
 
@@ -517,7 +480,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
                 ActorClaimType = "act",
-                MaxActorChainLength = 2,
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
