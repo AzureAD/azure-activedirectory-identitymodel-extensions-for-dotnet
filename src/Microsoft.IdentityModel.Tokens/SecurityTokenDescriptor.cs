@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens
             get => _actorChainDepth;
             set
             {
-                _actorClainDepth = value;
+                _actorChainDepth = value;
             }
         }
     }
