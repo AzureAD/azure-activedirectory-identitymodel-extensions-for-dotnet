@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// This variable is used during recursion calls that are needed for deserializing act claim.
         /// </summary>
         /// <remarks>Default value is 0</remarks>
-        private int _actorClainDepth;
+        private int _actorChainDepth;
 
         /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
