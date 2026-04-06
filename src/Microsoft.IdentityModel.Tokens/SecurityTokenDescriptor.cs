@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private List<string> _audiences;
         private string _actorClaimType = "act";
-        private int _actorClainDepth;
+        private int _actorChainDepth;
         private int _maxActorChainLength = 4;
 
         /// <summary>
