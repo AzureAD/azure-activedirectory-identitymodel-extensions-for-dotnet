@@ -824,7 +824,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         internal int ActorChainDepth
         {
-            get => _actorClainDepth;
+            get => _actorChainDepth;
             set
             {
                 _actorChainDepth = value;
