@@ -468,7 +468,8 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Similar to <see cref="RepresentAsAsymmetricPublicJwk"/> but includes more fields.
+        /// Creates a minimal public JWK representation for DPoP proof headers per RFC 9449 and RFC 7638.
+        /// Only the required members for the key type are included (no alg, kid, or use).
         /// </summary>
         internal JsonObject RepresentAsAsymmetricPublicJwkForDpop()
         {
@@ -502,13 +503,9 @@ namespace Microsoft.IdentityModel.Tokens
 
                 return new JsonObject
                 {
-                    // Alg isn't always set, work around for demo
-                    [JsonWebKeyParameterNames.Alg] = "RS256",
                     [JsonWebKeyParameterNames.E] = E,
                     [JsonWebKeyParameterNames.Kty] = Kty,
-                    [JsonWebKeyParameterNames.Kid] = Kid,
                     [JsonWebKeyParameterNames.N] = N,
-                    [JsonWebKeyParameterNames.Use] = "sig",
                 };
             }
             else

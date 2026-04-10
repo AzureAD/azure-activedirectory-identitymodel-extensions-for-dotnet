@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
@@ -41,37 +40,72 @@ public class DPoPProof
     /// <returns>A JWT string representing the DPoP proof.</returns>
     public string CreateProof(string httpMethod, Uri uri, string accessToken = null, string serverProvidedNonce = null)
     {
-        if (string.IsNullOrEmpty(httpMethod))
-            throw new ArgumentNullException(nameof(httpMethod));
+        if (string.IsNullOrWhiteSpace(httpMethod))
+            throw new ArgumentException("HTTP method cannot be null, empty, or whitespace.", nameof(httpMethod));
 
         if (uri is null)
             throw new ArgumentNullException(nameof(uri));
 
-        var now = _options.TimeProvider.GetUtcNow();
+        if (!uri.IsAbsoluteUri)
+            throw new ArgumentException("URI must be absolute.", nameof(uri));
+
+        var now =
+#if NET8_0_OR_GREATER
+            _options.TimeProvider.GetUtcNow();
+#else
+            DateTimeOffset.UtcNow;
+#endif
 
         var claims = new Dictionary<string, object>
         {
             // DPoP RFC 9449 required claims
-            { "htm", httpMethod.ToUpperInvariant() },
-            { "htu", uri.GetLeftPart(UriPartial.Path) },
-            { "iat", now.ToUnixTimeSeconds() },
-            { "jti", Guid.NewGuid().ToString() }
+            { DPoPClaimTypes.Htm, httpMethod.ToUpperInvariant() },
+            { DPoPClaimTypes.Htu, uri.GetLeftPart(UriPartial.Path) },
+            { DPoPClaimTypes.Iat, now.ToUnixTimeSeconds() },
+            { DPoPClaimTypes.Jti, Guid.NewGuid().ToString() }
         };
 
         if (!string.IsNullOrEmpty(accessToken))
         {
-            var tokenBytes = Encoding.UTF8.GetBytes(accessToken);
+            // RFC 9449 §4.2: ath = base64url(SHA-256(ASCII(access_token)))
+            // Use a strict ASCII encoder that throws on non-ASCII characters rather than
+            // silently replacing them with '?' (which would produce an incorrect hash).
+            byte[] tokenBytes;
+            try
+            {
+                tokenBytes = Encoding.GetEncoding(
+                    "us-ascii",
+                    EncoderFallback.ExceptionFallback,
+                    DecoderFallback.ExceptionFallback).GetBytes(accessToken);
+            }
+            catch (EncoderFallbackException ex)
+            {
+                throw new ArgumentException(
+                    "Access token contains non-ASCII characters. " +
+                    "RFC 9449 §4.2 requires the ASCII encoding of the access token for the 'ath' claim.",
+                    nameof(accessToken),
+                    ex);
+            }
+
+#if NET6_0_OR_GREATER
             var tokenHash = SHA256.HashData(tokenBytes);
+#else
+            byte[] tokenHash;
+            using (var sha256 = SHA256.Create())
+            {
+                tokenHash = sha256.ComputeHash(tokenBytes);
+            }
+#endif
             var tokenHashBase64 = Base64UrlEncoder.Encode(tokenHash);
-            claims.Add("ath", tokenHashBase64);
+            claims.Add(DPoPClaimTypes.Ath, tokenHashBase64);
         }
 
         // Include a nonce if specified in options or provided by server
         if (_options.IncludeNonce || !string.IsNullOrEmpty(serverProvidedNonce))
         {
             string nonceValue = serverProvidedNonce ??
-                _options.Nonce ?? Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-            claims.Add("nonce", nonceValue);
+                _options.Nonce ?? GenerateRandomNonce();
+            claims.Add(DPoPClaimTypes.Nonce, nonceValue);
         }
 
         JsonObject jwk = JsonWebKeyConverter.ConvertFromSecurityKey(_options.SigningCredentials.Key).RepresentAsAsymmetricPublicJwkForDpop();
@@ -100,102 +134,18 @@ public class DPoPProof
         return token;
     }
 
-    /// <summary>
-    /// Validates a DPoP proof JWT against the specified HTTP request.
-    /// </summary>
-    /// <param name="proofToken">The DPoP proof JWT to validate.</param>
-    /// <param name="httpMethod">The HTTP method of the request.</param>
-    /// <param name="uri">The URI of the request.</param>
-    /// <param name="expectedNonce">Optional expected nonce value.</param>
-    /// <returns>A validation result indicating if the proof is valid.</returns>
-    public async Task<DPoPValidationResult> ValidateProofAsync(string proofToken, string httpMethod, Uri uri, string expectedNonce = null)
+    private static string GenerateRandomNonce()
     {
-        if (string.IsNullOrEmpty(proofToken))
-            return new DPoPValidationResult { IsValid = false, Error = "DPoP proof is null or empty" };
-
-        if (string.IsNullOrEmpty(httpMethod))
-            return new DPoPValidationResult { IsValid = false, Error = "HTTP method is null or empty" };
-
-        if (uri == null)
-            return new DPoPValidationResult { IsValid = false, Error = "URI is null" };
-
-        var handler = new JsonWebTokenHandler();
-
-        TokenValidationParameters validationParameters = _options.ValidationParameters?.Clone();
-        if (validationParameters == null)
+        var bytes = new byte[32];
+#if NET6_0_OR_GREATER
+        RandomNumberGenerator.Fill(bytes);
+#else
+        using (var rng = RandomNumberGenerator.Create())
         {
-            validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = _options.SigningCredentials.Key
-            };
+            rng.GetBytes(bytes);
         }
-
-        try
-        {
-            var jsonToken = handler.ReadJsonWebToken(proofToken);
-            var result = await handler.ValidateTokenAsync(jsonToken, validationParameters).ConfigureAwait(false);
-            if (!result.IsValid)
-                return new DPoPValidationResult { IsValid = false, Error = "Invalid token signature or format" };
-
-            var token = result.SecurityToken as JsonWebToken;
-            if (token == null)
-                return new DPoPValidationResult { IsValid = false, Error = "Token could not be parsed as JsonWebToken" };
-
-            // Validate required claims
-            if (!token.TryGetPayloadValue("htm", out string htmValue) ||
-                !httpMethod.Equals(htmValue, StringComparison.OrdinalIgnoreCase))
-                return new DPoPValidationResult { IsValid = false, Error = "htm claim missing or doesn't match HTTP method" };
-
-            if (!token.TryGetPayloadValue("htu", out string htuValue) ||
-                !uri.GetLeftPart(UriPartial.Path).Equals(htuValue, StringComparison.OrdinalIgnoreCase))
-                return new DPoPValidationResult { IsValid = false, Error = "htu claim missing or doesn't match HTTP URI" };
-
-            if (!token.TryGetPayloadValue("iat", out long iat))
-                return new DPoPValidationResult { IsValid = false, Error = "iat claim is missing" };
-
-            // Check timestamp freshness
-            var issuedAt = EpochTime.DateTime(iat);
-            var now = _options.TimeProvider.GetUtcNow();
-            if (issuedAt.Add(TimeSpan.FromSeconds(_options.MaxProofAgeInSeconds)) < now)
-                return new DPoPValidationResult { IsValid = false, Error = "DPoP proof has expired" };
-
-            // Check for JWK
-            if (!token.TryGetHeaderValue("jwk", out string jwk) || jwk == null)
-                return new DPoPValidationResult { IsValid = false, Error = "jwk claim is missing" };
-
-            // Check nonce if expected
-            if (!string.IsNullOrEmpty(expectedNonce))
-            {
-                if (!token.TryGetPayloadValue("nonce", out string nonce) || !expectedNonce.Equals(nonce, StringComparison.Ordinal))
-                    return new DPoPValidationResult { IsValid = false, Error = "nonce claim missing or doesn't match expected value" };
-            }
-
-            return new DPoPValidationResult { IsValid = true };
-        }
-#pragma warning disable CA1031 // Do not catch general exception types
-        catch (Exception ex)
-        {
-            return new DPoPValidationResult { IsValid = false, Error = $"Exception validating DPoP proof: {ex.Message}" };
-        }
-#pragma warning restore CA1031 // Do not catch general exception types
+#endif
+        return Convert.ToBase64String(bytes);
     }
 }
-
-/// <summary>
-/// Represents the result of validating a DPoP proof.
-/// </summary>
-public class DPoPValidationResult
-{
-    /// <summary>
-    /// Gets or sets a value indicating whether the DPoP proof is valid.
-    /// </summary>
-    public bool IsValid { get; set; }
-
-    /// <summary>
-    /// Gets or sets an error message if the proof is invalid.
-    /// </summary>
-    public string Error { get; set; }
-}
+

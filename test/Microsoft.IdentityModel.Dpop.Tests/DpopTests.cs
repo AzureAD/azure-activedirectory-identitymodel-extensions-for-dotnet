@@ -1,10 +1,14 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
+// net462 lacks RSA.Create(int) required by these tests.
+#if !NET462
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -40,7 +44,9 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             string dpopToken = await GetDPoPToken(httpClient, dpopProof, code: "");
 
             var boundRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:8080/someapi");
-            boundRequest.AddDPoPProof(dpopProof, dpopToken);
+            string proof = dpopProof.CreateProof(boundRequest.Method.Method, boundRequest.RequestUri, dpopToken);
+            boundRequest.Headers.Add(DPoPConstants.DPoPHeaderName, proof);
+            boundRequest.Headers.Authorization = new AuthenticationHeaderValue(DPoPConstants.DPoPTokenType, dpopToken);
 
             // Make a request to a resource server...
             var response = await httpClient.SendAsync(boundRequest);
@@ -49,7 +55,8 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         private static async Task<string> GetDPoPToken(HttpClient httpClient, DPoPProof dpopProof, string code)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, KeyCloakRealmAndClient + "protocol/openid-connect/token");
-            request.AddDPoPProof(dpopProof);
+            string tokenProof = dpopProof.CreateProof(request.Method.Method, request.RequestUri);
+            request.Headers.Add(DPoPConstants.DPoPHeaderName, tokenProof);
             request.Content = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
@@ -77,18 +84,15 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(RSA.Create(2048));
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var options = new DPoPProofOptions
-            {
-                SigningCredentials = signingCredentials,
-            };
-
-            var dpopProof = new DPoPProof(options);
+            var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
             var httpMethod = "POST";
             var uri = new Uri("https://example.com/token");
 
             // Act
             var proof = dpopProof.CreateProof(httpMethod, uri);
-            var result = await dpopProof.ValidateProofAsync(proof, httpMethod, uri);
+            var validator = new DPoPProofValidator();
+            var result = await validator.ValidateAsync(proof, httpMethod, uri, null,
+                new DPoPValidationOptions { ProofAllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
             Assert.NotNull(proof);
@@ -103,22 +107,18 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(RSA.Create(2048));
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var options = new DPoPProofOptions
-            {
-                SigningCredentials = signingCredentials
-            };
-
-            var dpopProof = new DPoPProof(options);
-            var httpMethod = "POST";
+            var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
             var uri = new Uri("https://example.com/token");
 
             // Act
-            var proof = dpopProof.CreateProof(httpMethod, uri);
-            var result = await dpopProof.ValidateProofAsync(proof, "GET", uri);  // Different HTTP method
+            var proof = dpopProof.CreateProof("POST", uri);
+            var validator = new DPoPProofValidator();
+            var result = await validator.ValidateAsync(proof, "GET", uri, null,
+                new DPoPValidationOptions { ProofAllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
             Assert.False(result.IsValid);
-            Assert.Contains("htm claim", result.Error);
+            Assert.Contains("htm", result.Error);
         }
 
         [Fact]
@@ -128,22 +128,18 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(RSA.Create(2048));
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var options = new DPoPProofOptions
-            {
-                SigningCredentials = signingCredentials
-            };
-
-            var dpopProof = new DPoPProof(options);
-            var httpMethod = "POST";
+            var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
             var uri = new Uri("https://example.com/token");
 
             // Act
-            var proof = dpopProof.CreateProof(httpMethod, uri);
-            var result = await dpopProof.ValidateProofAsync(proof, httpMethod, new Uri("https://example.com/resource"));  // Different URI
+            var proof = dpopProof.CreateProof("POST", uri);
+            var validator = new DPoPProofValidator();
+            var result = await validator.ValidateAsync(proof, "POST", new Uri("https://example.com/resource"), null,
+                new DPoPValidationOptions { ProofAllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
             Assert.False(result.IsValid);
-            Assert.Contains("htu claim", result.Error);
+            Assert.Contains("htu", result.Error);
         }
 
         [Fact]
@@ -153,27 +149,30 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(RSA.Create(2048));
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var options = new DPoPProofOptions
+            var dpopProof = new DPoPProof(new DPoPProofOptions
             {
                 SigningCredentials = signingCredentials,
                 IncludeNonce = true,
                 Nonce = "test-nonce-123"
-            };
-
-            var dpopProof = new DPoPProof(options);
-            var httpMethod = "POST";
+            });
             var uri = new Uri("https://example.com/token");
 
             // Act
-            var proof = dpopProof.CreateProof(httpMethod, uri);
-            var result = await dpopProof.ValidateProofAsync(proof, httpMethod, uri, "test-nonce-123");
+            var proof = dpopProof.CreateProof("POST", uri);
+            var validator = new DPoPProofValidator();
+            var result = await validator.ValidateAsync(proof, "POST", uri, null,
+                new DPoPValidationOptions
+                {
+                    ProofAllowedSigningAlgorithms = new HashSet<string> { "RS256" },
+                    ExpectedNonce = "test-nonce-123",
+                });
 
             // Assert
             Assert.True(result.IsValid);
         }
 
         [Fact]
-        public void AddDPoPToHttpRequest_Success()
+        public void CreateProofAndSetHeaders_Success()
         {
             // Arrange
             var rsaKey = new RsaSecurityKey(RSA.Create(2048));
@@ -187,8 +186,9 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var dpopProof = new DPoPProof(options);
             var request = new HttpRequestMessage(HttpMethod.Post, "https://example.com/token");
 
-            // Act
-            request.AddDPoPProof(dpopProof, "access_token");
+            // Act — use CreateProof directly, set headers manually
+            string proof = dpopProof.CreateProof(request.Method.Method, request.RequestUri, "access_token");
+            request.Headers.Add(DPoPConstants.DPoPHeaderName, proof);
 
             // Assert
             Assert.True(request.Headers.Contains(DPoPConstants.DPoPHeaderName));
@@ -197,7 +197,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         }
 
         [Fact]
-        public void AddDPoPBoundAccessToken_Success()
+        public void CreateProofWithBoundAccessToken_Success()
         {
             // Arrange
             var rsaKey = new RsaSecurityKey(RSA.Create(2048));
@@ -212,8 +212,10 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var request = new HttpRequestMessage(HttpMethod.Post, "https://example.com/resource");
             var accessToken = "test-access-token-123";
 
-            // Act
-            request.AddDPoPBoundAccessToken(accessToken, dpopProof);
+            // Act — use CreateProof directly, set headers manually
+            string proof = dpopProof.CreateProof(request.Method.Method, request.RequestUri, accessToken);
+            request.Headers.Add(DPoPConstants.DPoPHeaderName, proof);
+            request.Headers.Authorization = new AuthenticationHeaderValue(DPoPConstants.DPoPTokenType, accessToken);
 
             // Assert
             Assert.True(request.Headers.Contains(DPoPConstants.DPoPHeaderName));
@@ -223,3 +225,4 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         }
     }
 }
+#endif
