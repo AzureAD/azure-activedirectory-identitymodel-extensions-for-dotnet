@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// net462 lacks RSA.Create(int) required by these tests.
-#if !NET462
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +17,15 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
 {
     public class DPoPTests
     {
+        private static RSA CreateTestRsa()
+        {
+#if NET462
+            return new RSACryptoServiceProvider(2048);
+#else
+            return RSA.Create(2048);
+#endif
+        }
+
         const string KeyCloakRealmAndClient = "http://localhost:8080/realms/dpop/";
 
         /// <summary>
@@ -28,7 +34,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         [Fact(Skip = "integration test")]
         public async Task KeyCloak_IntegrationTest_RequestDpopBoundAT()
         {
-            var rsa = RSA.Create(2048);
+            var rsa = CreateTestRsa();
             var key = new RsaSecurityKey(rsa);
             var signingCredentials = new SigningCredentials(key, "RS256");
             var httpClient = new HttpClient();
@@ -81,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         public async Task CreateAndValidateProof_Success()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+            var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
             var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
@@ -104,7 +110,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         public async Task ValidateProof_InvalidHttpMethod_Fails()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+            var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
             var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
@@ -125,7 +131,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         public async Task ValidateProof_InvalidUri_Fails()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+            var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
             var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
@@ -146,7 +152,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         public async Task ValidateProof_WithNonce_Success()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+            var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
             var dpopProof = new DPoPProof(new DPoPProofOptions
@@ -175,7 +181,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         public void CreateProofAndSetHeaders_Success()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+            var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
             var options = new DPoPProofOptions
@@ -200,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         public void CreateProofWithBoundAccessToken_Success()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+            var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
             var options = new DPoPProofOptions
@@ -225,4 +231,3 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
         }
     }
 }
-#endif

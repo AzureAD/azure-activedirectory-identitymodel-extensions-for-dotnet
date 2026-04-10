@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// net462 lacks ECDsa.ExportParameters, ECCurve, and RSA.Create(int) required by these tests.
-#if !NET462
-
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -21,8 +18,18 @@ namespace Microsoft.IdentityModel.Dpop.Tests
     {
         private readonly DPoPProofValidator _validator = new();
 
+        private static RSA CreateTestRsa()
+        {
+#if NET462
+            return new RSACryptoServiceProvider(2048);
+#else
+            return RSA.Create(2048);
+#endif
+        }
+
         #region Test Helpers
 
+#if !NET462 // net462 lacks ECDsa.Create(ECCurve) and ECDsa.ExportParameters
         private static (string ProofJwt, ECDsa Key) CreateValidProof(
             string httpMethod = "GET",
             string uri = "https://resource.example.org/api",
@@ -133,6 +140,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var jwt = handler.CreateToken(descriptor);
             return (jwt, ecdsa);
         }
+#endif
 
         private const string DefaultTestNonce = "test-server-nonce";
 
@@ -147,6 +155,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         #endregion
 
+#if !NET462 // net462 lacks ECDsa.Create(ECCurve) and ECDsa.ExportParameters
         #region Happy Path
 
         [Fact]
@@ -541,6 +550,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         }
 
         #endregion
+#endif
 
         #region Private Key Detection
 
@@ -551,12 +561,14 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             Assert.True(DPoPProofValidator.ContainsPrivateKeyMaterial(jwk));
         }
 
+#if !NET462 // net462 lacks ECDsa.Create(ECCurve) and ECDsa.ExportParameters
         [Fact]
         public void ContainsPrivateKeyMaterial_EcPublic_ReturnsFalse()
         {
             var jwk = new JsonWebKey { Kty = "EC", Crv = "P-256", X = "x", Y = "y" };
             Assert.False(DPoPProofValidator.ContainsPrivateKeyMaterial(jwk));
         }
+#endif
 
         [Fact]
         public void ContainsPrivateKeyMaterial_RsaPublic_ReturnsFalse()
@@ -620,6 +632,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         #region JwkThumbprint
 
+#if !NET462 // net462 lacks ECDsa.Create(ECCurve) and ECDsa.ExportParameters
         [Fact]
         public void ComputeJwkThumbprint_EC_Deterministic()
         {
@@ -631,11 +644,12 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             Assert.Equal(t1, t2);
             Assert.False(string.IsNullOrEmpty(t1));
         }
+#endif
 
         [Fact]
         public void ComputeJwkThumbprint_RSA_Deterministic()
         {
-            var rsa = RSA.Create(2048);
+            var rsa = CreateTestRsa();
             var jwk = JsonWebKeyConverter.ConvertFromSecurityKey(new RsaSecurityKey(rsa));
 
             var t1 = DPoPProofValidator.ComputeJwkThumbprint(jwk);
@@ -685,7 +699,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_RsaKey_Succeeds()
         {
-            var rsa = RSA.Create(2048);
+            var rsa = CreateTestRsa();
             var signingCredentials = new SigningCredentials(
                 new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
 
@@ -741,4 +755,3 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         #endregion
     }
 }
-#endif
