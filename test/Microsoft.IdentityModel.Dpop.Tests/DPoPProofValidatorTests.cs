@@ -561,14 +561,12 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             Assert.True(DPoPProofValidator.ContainsPrivateKeyMaterial(jwk));
         }
 
-#if !NET462 // net462 lacks ECDsa.Create(ECCurve) and ECDsa.ExportParameters
         [Fact]
         public void ContainsPrivateKeyMaterial_EcPublic_ReturnsFalse()
         {
             var jwk = new JsonWebKey { Kty = "EC", Crv = "P-256", X = "x", Y = "y" };
             Assert.False(DPoPProofValidator.ContainsPrivateKeyMaterial(jwk));
         }
-#endif
 
         [Fact]
         public void ContainsPrivateKeyMaterial_RsaPublic_ReturnsFalse()
