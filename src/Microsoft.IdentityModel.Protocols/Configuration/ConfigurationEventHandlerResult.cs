@@ -17,29 +17,12 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         public static readonly ConfigurationEventHandlerResult<T> NoResult = new();
 
         /// <summary>
-        /// Represents a result indicating that the configuration manager's cache should be bypassed and configuration should be retrieved fresh from the metadata endpoint.
-        /// </summary>
-        /// <remarks>
-        /// Return this from <see cref="IConfigurationEventHandler{T}.BeforeRetrieveAsync"/> to force the manager to skip its current cached value
-        /// and initiate a fresh retrieval from the metadata endpoint.
-        /// </remarks>
-        public static readonly ConfigurationEventHandlerResult<T> BypassCacheResult = new(bypassCache: true);
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationEventHandlerResult{T}"/> class with no result.
         /// </summary>
         private ConfigurationEventHandlerResult()
         {
             Configuration = null;
             RetrievalTime = DateTimeOffset.MinValue;
-            BypassCache = false;
-        }
-
-        private ConfigurationEventHandlerResult(bool bypassCache)
-        {
-            Configuration = null;
-            RetrievalTime = DateTimeOffset.MinValue;
-            BypassCache = bypassCache;
         }
 
         /// <summary>
@@ -66,17 +49,8 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// Gets or sets the time when the configuration was originally retrieved in UTC.
         /// </summary>
         /// <remarks>
-        /// This property will be set to <see cref="DateTimeOffset.MinValue"/> for <see cref="NoResult"/> and <see cref="BypassCacheResult"/>.
+        /// This property will be set to <see cref="DateTimeOffset.MinValue"/> for <see cref="NoResult"/>.
         /// </remarks>
         public DateTimeOffset RetrievalTime { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the configuration manager's cache should be bypassed.
-        /// </summary>
-        /// <remarks>
-        /// When <see langword="true"/>, the manager ignores its currently cached value and initiates a fresh retrieval
-        /// from the metadata endpoint. This property is <see langword="true"/> only for <see cref="BypassCacheResult"/>.
-        /// </remarks>
-        public bool BypassCache { get; }
     }
 }
