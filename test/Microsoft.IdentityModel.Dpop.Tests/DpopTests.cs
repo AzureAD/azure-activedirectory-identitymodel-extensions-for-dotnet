@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Dpop;
 using Microsoft.IdentityModel.Tokens;
@@ -26,63 +25,6 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
 #endif
         }
 
-        const string KeyCloakRealmAndClient = "http://localhost:8080/realms/dpop/";
-
-        /// <summary>
-        /// This test is an integration test that requires a running Keycloak server.
-        /// </summary>
-        [Fact(Skip = "integration test")]
-        public async Task KeyCloak_IntegrationTest_RequestDpopBoundAT()
-        {
-            var rsa = CreateTestRsa();
-            var key = new RsaSecurityKey(rsa);
-            var signingCredentials = new SigningCredentials(key, "RS256");
-            var httpClient = new HttpClient();
-
-            var options = new DPoPProofOptions
-            {
-                SigningCredentials = signingCredentials,
-                ValidationParameters = new()
-            };
-
-            var dpopProof = new DPoPProof(options);
-            // provide the code from the authorization code flow.
-            string dpopToken = await GetDPoPToken(httpClient, dpopProof, code: "");
-
-            var boundRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:8080/someapi");
-            string proof = dpopProof.CreateProof(boundRequest.Method.Method, boundRequest.RequestUri, dpopToken);
-            boundRequest.Headers.Add(DPoPConstants.DPoPHeaderName, proof);
-            boundRequest.Headers.Authorization = new AuthenticationHeaderValue(DPoPConstants.DPoPTokenType, dpopToken);
-
-            // Make a request to a resource server...
-            var response = await httpClient.SendAsync(boundRequest);
-        }
-
-        private static async Task<string> GetDPoPToken(HttpClient httpClient, DPoPProof dpopProof, string code)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, KeyCloakRealmAndClient + "protocol/openid-connect/token");
-            string tokenProof = dpopProof.CreateProof(request.Method.Method, request.RequestUri);
-            request.Headers.Add(DPoPConstants.DPoPHeaderName, tokenProof);
-            request.Content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("code", code),
-                new KeyValuePair<string, string>("redirect_uri", "http://localhost/callback"),
-                new KeyValuePair<string, string>("client_id", "demo"),
-                // Set the client secret if required
-                new KeyValuePair<string, string>("client_secret", "")
-            });
-
-            request.Headers.TryGetValues("dpop", out var dpopValues);
-
-            var response = await httpClient.SendAsync(request);
-            var body = await response.Content.ReadAsStringAsync();
-
-            var content = JsonDocument.Parse(body);
-            var dpopToken = content.RootElement.GetProperty("access_token").GetString();
-            return dpopToken;
-        }
-
         [Fact]
         public async Task CreateAndValidateProof_Success()
         {
@@ -90,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
+            var dpopProof = new DPoPProofCreator(new DPoPProofCreatorOptions { SigningCredentials = signingCredentials });
             var httpMethod = "POST";
             var uri = new Uri("https://example.com/token");
 
@@ -113,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
+            var dpopProof = new DPoPProofCreator(new DPoPProofCreatorOptions { SigningCredentials = signingCredentials });
             var uri = new Uri("https://example.com/token");
 
             // Act
@@ -134,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var dpopProof = new DPoPProof(new DPoPProofOptions { SigningCredentials = signingCredentials });
+            var dpopProof = new DPoPProofCreator(new DPoPProofCreatorOptions { SigningCredentials = signingCredentials });
             var uri = new Uri("https://example.com/token");
 
             // Act
@@ -155,7 +97,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var dpopProof = new DPoPProof(new DPoPProofOptions
+            var dpopProof = new DPoPProofCreator(new DPoPProofCreatorOptions
             {
                 SigningCredentials = signingCredentials,
                 IncludeNonce = true,
@@ -184,12 +126,12 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var options = new DPoPProofOptions
+            var options = new DPoPProofCreatorOptions
             {
                 SigningCredentials = signingCredentials
             };
 
-            var dpopProof = new DPoPProof(options);
+            var dpopProof = new DPoPProofCreator(options);
             var request = new HttpRequestMessage(HttpMethod.Post, "https://example.com/token");
 
             // Act — use CreateProof directly, set headers manually
@@ -209,12 +151,12 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var rsaKey = new RsaSecurityKey(CreateTestRsa());
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
 
-            var options = new DPoPProofOptions
+            var options = new DPoPProofCreatorOptions
             {
                 SigningCredentials = signingCredentials
             };
 
-            var dpopProof = new DPoPProof(options);
+            var dpopProof = new DPoPProofCreator(options);
             var request = new HttpRequestMessage(HttpMethod.Post, "https://example.com/resource");
             var accessToken = "test-access-token-123";
 

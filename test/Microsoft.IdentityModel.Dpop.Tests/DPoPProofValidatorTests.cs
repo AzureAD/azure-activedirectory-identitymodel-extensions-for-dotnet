@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Dpop;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -29,60 +28,75 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         #region Test Helpers
 
-#if !NET462 // net462 lacks ECDsa.Create(ECCurve) and ECDsa.ExportParameters
-        private static (string ProofJwt, ECDsa Key) CreateValidProof(
+#if !NET462 // EC helpers for EC-specific algorithm tests only
+        private static (string ProofJwt, ECDsa Key) CreateValidEcProof(
+            string httpMethod = "GET",
+            string uri = "https://resource.example.org/api",
+            string accessToken = null,
+            string nonce = DefaultTestNonce)
+        {
+            var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            var signingCredentials = new SigningCredentials(
+                new ECDsaSecurityKey(ecdsa), SecurityAlgorithms.EcdsaSha256);
+
+            var proofOptions = new DPoPProofCreatorOptions
+            {
+                SigningCredentials = signingCredentials,
+                IncludeNonce = !string.IsNullOrEmpty(nonce),
+                Nonce = nonce,
+            };
+            var dpopProof = new DPoPProofCreator(proofOptions);
+            var jwt = dpopProof.CreateProof(httpMethod, new Uri(uri), accessToken);
+            return (jwt, ecdsa);
+        }
+#endif
+
+        /// <summary>
+        /// Creates a valid DPoP proof using RSA (works on all TFMs including net462).
+        /// For tests that don't need to tamper with individual claims.
+        /// </summary>
+        private static (string ProofJwt, RSA Key) CreateValidRsaProof(
+            string httpMethod = "GET",
+            string uri = "https://resource.example.org/api",
+            string accessToken = null,
+            string nonce = DefaultTestNonce)
+        {
+            var rsa = CreateTestRsa();
+            var signingCredentials = new SigningCredentials(
+                new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
+
+            var proofOptions = new DPoPProofCreatorOptions
+            {
+                SigningCredentials = signingCredentials,
+                IncludeNonce = !string.IsNullOrEmpty(nonce),
+                Nonce = nonce,
+            };
+            var dpopProof = new DPoPProofCreator(proofOptions);
+            var jwt = dpopProof.CreateProof(httpMethod, new Uri(uri), accessToken);
+            return (jwt, rsa);
+        }
+
+        /// <summary>
+        /// Creates a tampered DPoP proof using RSA with specific claims omitted.
+        /// Works on all TFMs including net462.
+        /// </summary>
+        private static (string ProofJwt, RSA Key) CreateTamperedRsaProof(
             string httpMethod = "GET",
             string uri = "https://resource.example.org/api",
             string accessToken = null,
             string nonce = DefaultTestNonce,
             string typ = "dpop+jwt",
-            string alg = null,
-            bool includePrivateKey = false,
             long? iatOverride = null,
             bool omitJti = false,
             bool omitHtm = false,
             bool omitHtu = false,
             bool omitIat = false,
-            ECDsa keyOverride = null)
+            bool includePrivateKey = false)
         {
-            var ecdsa = keyOverride ?? ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            var rsa = CreateTestRsa();
             var signingCredentials = new SigningCredentials(
-                new ECDsaSecurityKey(ecdsa), alg ?? SecurityAlgorithms.EcdsaSha256);
+                new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
 
-            // For standard happy-path proofs where we don't need to tamper with claims,
-            // use the public DPoPProof API.
-            if (!omitHtm && !omitHtu && !omitIat && !omitJti && iatOverride == null && typ == "dpop+jwt")
-            {
-                var proofOptions = new DPoPProofOptions
-                {
-                    SigningCredentials = signingCredentials,
-                    IncludeNonce = !string.IsNullOrEmpty(nonce),
-                    Nonce = nonce,
-                };
-                var dpopProof = new DPoPProof(proofOptions);
-                var jwt = dpopProof.CreateProof(httpMethod, new Uri(uri), accessToken);
-                return (jwt, ecdsa);
-            }
-
-            // For tests that need to tamper with specific claims, build manually
-            return CreateCustomProof(ecdsa, signingCredentials, httpMethod, uri, accessToken, nonce,
-                typ, iatOverride, omitJti, omitHtm, omitHtu, omitIat);
-        }
-
-        private static (string ProofJwt, ECDsa Key) CreateCustomProof(
-            ECDsa ecdsa,
-            SigningCredentials signingCredentials,
-            string httpMethod,
-            string uri,
-            string accessToken,
-            string nonce,
-            string typ,
-            long? iatOverride,
-            bool omitJti,
-            bool omitHtm,
-            bool omitHtu,
-            bool omitIat)
-        {
             var now = DateTimeOffset.UtcNow;
             var claims = new Dictionary<string, object>();
 
@@ -112,15 +126,20 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             if (!string.IsNullOrEmpty(nonce))
                 claims["nonce"] = nonce;
 
-            // Build minimal public JWK manually (matching what RepresentAsAsymmetricPublicJwkForDpop does)
-            var ecParams = ecdsa.ExportParameters(false);
+            // Build RSA JWK for header
+            var rsaParams = rsa.ExportParameters(includePrivateKey);
             var jwkForHeader = new System.Text.Json.Nodes.JsonObject
             {
-                ["crv"] = "P-256",
-                ["kty"] = "EC",
-                ["x"] = Base64UrlEncoder.Encode(ecParams.Q.X),
-                ["y"] = Base64UrlEncoder.Encode(ecParams.Q.Y),
+                ["e"] = Base64UrlEncoder.Encode(rsaParams.Exponent),
+                ["kty"] = "RSA",
+                ["n"] = Base64UrlEncoder.Encode(rsaParams.Modulus),
             };
+            if (includePrivateKey)
+            {
+                jwkForHeader["d"] = Base64UrlEncoder.Encode(rsaParams.D);
+                jwkForHeader["p"] = Base64UrlEncoder.Encode(rsaParams.P);
+                jwkForHeader["q"] = Base64UrlEncoder.Encode(rsaParams.Q);
+            }
 
             var headerClaims = new Dictionary<string, object>
             {
@@ -138,15 +157,14 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             var handler = new JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false };
             var jwt = handler.CreateToken(descriptor);
-            return (jwt, ecdsa);
+            return (jwt, rsa);
         }
-#endif
 
         private const string DefaultTestNonce = "test-server-nonce";
 
         private static DPoPValidationOptions DefaultOptions() => new()
         {
-            ProofAllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "ES256" },
+            ProofAllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "ES256", "RS256" },
             ProofMaxLifetimeInSeconds = 300,
             ClockSkewInSeconds = 300,
             RequireAccessTokenHash = false,
@@ -155,13 +173,12 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         #endregion
 
-#if !NET462 // net462 lacks ECDsa.Create(ECCurve) and ECDsa.ExportParameters
         #region Happy Path
 
         [Fact]
         public async Task ValidateAsync_ValidProof_Succeeds()
         {
-            var (proof, _) = CreateValidProof();
+            var (proof, _) = CreateValidRsaProof();
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -179,7 +196,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public async Task ValidateAsync_ValidProofWithAccessToken_Succeeds()
         {
             var accessToken = "test-access-token-123";
-            var (proof, _) = CreateValidProof(accessToken: accessToken);
+            var (proof, _) = CreateValidRsaProof(accessToken: accessToken);
             var options = DefaultOptions();
             options.RequireAccessTokenHash = true;
 
@@ -193,7 +210,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_ValidProofWithNonce_Succeeds()
         {
-            var (proof, _) = CreateValidProof(nonce: "server-nonce-42");
+            var (proof, _) = CreateValidRsaProof(nonce: "server-nonce-42");
             var options = DefaultOptions();
             options.ExpectedNonce = "server-nonce-42";
 
@@ -206,7 +223,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_PostMethod_Succeeds()
         {
-            var (proof, _) = CreateValidProof(httpMethod: "POST");
+            var (proof, _) = CreateValidRsaProof(httpMethod: "POST");
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -222,7 +239,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_WrongTyp_Fails()
         {
-            var (proof, _) = CreateValidProof(typ: "jwt");
+            var (proof, _) = CreateTamperedRsaProof(typ: "jwt");
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -240,7 +257,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_AlgorithmNotInAllowedSet_Fails()
         {
-            var (proof, _) = CreateValidProof();
+            var (proof, _) = CreateValidRsaProof();
             var options = DefaultOptions();
             options.ProofAllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "PS256" };
 
@@ -259,7 +276,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_HtmMismatch_Fails()
         {
-            var (proof, _) = CreateValidProof(httpMethod: "POST");
+            var (proof, _) = CreateValidRsaProof(httpMethod: "POST");
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -272,7 +289,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_MissingHtm_Fails()
         {
-            var (proof, _) = CreateValidProof(omitHtm: true);
+            var (proof, _) = CreateTamperedRsaProof(omitHtm: true);
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -289,7 +306,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_HtuMismatch_Fails()
         {
-            var (proof, _) = CreateValidProof(uri: "https://resource.example.org/api");
+            var (proof, _) = CreateValidRsaProof(uri: "https://resource.example.org/api");
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -302,7 +319,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_MissingHtu_Fails()
         {
-            var (proof, _) = CreateValidProof(omitHtu: true);
+            var (proof, _) = CreateTamperedRsaProof(omitHtu: true);
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -315,7 +332,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_HtuIgnoresQueryString_Succeeds()
         {
-            var (proof, _) = CreateValidProof(uri: "https://resource.example.org/api?foo=bar");
+            var (proof, _) = CreateValidRsaProof(uri: "https://resource.example.org/api?foo=bar");
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -332,7 +349,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public async Task ValidateAsync_ExpiredProof_Fails()
         {
             var old = DateTimeOffset.UtcNow.AddSeconds(-700).ToUnixTimeSeconds();
-            var (proof, _) = CreateValidProof(iatOverride: old);
+            var (proof, _) = CreateTamperedRsaProof(iatOverride: old);
             var options = DefaultOptions();
             options.ProofMaxLifetimeInSeconds = 60;
             options.ClockSkewInSeconds = 30;
@@ -348,7 +365,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public async Task ValidateAsync_FutureIat_Fails()
         {
             var future = DateTimeOffset.UtcNow.AddSeconds(700).ToUnixTimeSeconds();
-            var (proof, _) = CreateValidProof(iatOverride: future);
+            var (proof, _) = CreateTamperedRsaProof(iatOverride: future);
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -361,7 +378,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_MissingIat_Fails()
         {
-            var (proof, _) = CreateValidProof(omitIat: true);
+            var (proof, _) = CreateTamperedRsaProof(omitIat: true);
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -378,7 +395,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_MissingJti_Fails()
         {
-            var (proof, _) = CreateValidProof(omitJti: true);
+            var (proof, _) = CreateTamperedRsaProof(omitJti: true);
             var options = DefaultOptions();
 
             var result = await _validator.ValidateAsync(
@@ -391,7 +408,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_JtiReplayDetected_Fails()
         {
-            var (proof, _) = CreateValidProof();
+            var (proof, _) = CreateValidRsaProof();
             var cache = new TestJtiReplayCache(replayDetected: true);
             var options = DefaultOptions();
             options.JtiReplayCache = cache;
@@ -407,7 +424,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_JtiFirstUse_Succeeds()
         {
-            var (proof, _) = CreateValidProof();
+            var (proof, _) = CreateValidRsaProof();
             var cache = new TestJtiReplayCache(replayDetected: false);
             var options = DefaultOptions();
             options.JtiReplayCache = cache;
@@ -422,7 +439,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_NoCacheConfigured_SkipsJtiCheck()
         {
-            var (proof, _) = CreateValidProof();
+            var (proof, _) = CreateValidRsaProof();
             var options = DefaultOptions();
             options.JtiReplayCache = null;
 
@@ -435,7 +452,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_NeitherJtiNorNonce_StillSucceeds_IatProvidesBaseline()
         {
-            var (proof, _) = CreateValidProof(nonce: null);
+            var (proof, _) = CreateValidRsaProof(nonce: null);
             var options = DefaultOptions();
             options.JtiReplayCache = null;
             options.ExpectedNonce = null;
@@ -454,7 +471,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_NonceMissing_ReturnsNonceRequired()
         {
-            var (proof, _) = CreateValidProof(nonce: null);
+            var (proof, _) = CreateValidRsaProof(nonce: null);
             var options = DefaultOptions();
             options.ExpectedNonce = "required-nonce";
 
@@ -469,7 +486,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_NonceWrong_ReturnsNonceRequired()
         {
-            var (proof, _) = CreateValidProof(nonce: "wrong-nonce");
+            var (proof, _) = CreateValidRsaProof(nonce: "wrong-nonce");
             var options = DefaultOptions();
             options.ExpectedNonce = "expected-nonce";
 
@@ -483,7 +500,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_NonceNotRequired_JtiUsedInstead_Succeeds()
         {
-            var (proof, _) = CreateValidProof(nonce: null);
+            var (proof, _) = CreateValidRsaProof(nonce: null);
             var cache = new TestJtiReplayCache(replayDetected: false);
             var options = DefaultOptions();
             options.ExpectedNonce = null;
@@ -502,7 +519,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_AthMismatch_Fails()
         {
-            var (proof, _) = CreateValidProof(accessToken: "token-A");
+            var (proof, _) = CreateValidRsaProof(accessToken: "token-A");
             var options = DefaultOptions();
             options.RequireAccessTokenHash = true;
 
@@ -516,7 +533,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_AthMissing_Fails()
         {
-            var (proof, _) = CreateValidProof();
+            var (proof, _) = CreateValidRsaProof();
             var options = DefaultOptions();
             options.RequireAccessTokenHash = true;
 
@@ -534,7 +551,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_WrongSignatureKey_Fails()
         {
-            var (proof, originalKey) = CreateValidProof();
+            var (proof, originalKey) = CreateValidRsaProof();
 
             // Tamper: decode, modify a character, re-encode — signature no longer matches
             var parts = proof.Split('.');
@@ -550,7 +567,6 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         }
 
         #endregion
-#endif
 
         #region Private Key Detection
 
@@ -701,13 +717,13 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var signingCredentials = new SigningCredentials(
                 new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
 
-            var proofOptions = new DPoPProofOptions
+            var proofOptions = new DPoPProofCreatorOptions
             {
                 SigningCredentials = signingCredentials,
                 IncludeNonce = true,
                 Nonce = DefaultTestNonce,
             };
-            var dpopProof = new DPoPProof(proofOptions);
+            var dpopProof = new DPoPProofCreator(proofOptions);
             var proof = dpopProof.CreateProof("GET", new Uri("https://resource.example.org/api"));
 
             var options = new DPoPValidationOptions

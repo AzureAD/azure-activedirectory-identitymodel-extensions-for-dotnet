@@ -18,21 +18,6 @@ const Microsoft.IdentityModel.Dpop.DPoPErrorCodes.UseDPoPNonce = "use_dpop_nonce
 Microsoft.IdentityModel.Dpop.DPoPClaimTypes
 Microsoft.IdentityModel.Dpop.DPoPConstants
 Microsoft.IdentityModel.Dpop.DPoPErrorCodes
-Microsoft.IdentityModel.Dpop.DPoPProof
-Microsoft.IdentityModel.Dpop.DPoPProof.CreateProof(string httpMethod, System.Uri uri, string accessToken = null, string serverProvidedNonce = null) -> string
-Microsoft.IdentityModel.Dpop.DPoPProof.DPoPProof(Microsoft.IdentityModel.Dpop.DPoPProofOptions options) -> void
-Microsoft.IdentityModel.Dpop.DPoPProofOptions
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.DPoPProofOptions() -> void
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.IncludeNonce.get -> bool
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.IncludeNonce.set -> void
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.MaxProofAgeInSeconds.get -> int
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.MaxProofAgeInSeconds.set -> void
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.Nonce.get -> string
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.Nonce.set -> void
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.SigningCredentials.get -> Microsoft.IdentityModel.Tokens.SigningCredentials
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.SigningCredentials.set -> void
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.ValidationParameters.get -> Microsoft.IdentityModel.Tokens.TokenValidationParameters
-Microsoft.IdentityModel.Dpop.DPoPProofOptions.ValidationParameters.set -> void
 Microsoft.IdentityModel.Dpop.DPoPProofValidator
 Microsoft.IdentityModel.Dpop.DPoPProofValidator.DPoPProofValidator() -> void
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions

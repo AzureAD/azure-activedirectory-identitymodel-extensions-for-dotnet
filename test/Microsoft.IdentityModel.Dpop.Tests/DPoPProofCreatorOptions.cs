@@ -1,15 +1,23 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+// NOTE: This is a test-only options class for testing and demonstration purposes.
+// In a production application, use MSAL's built-in DPoP support instead.
+// See: https://learn.microsoft.com/entra/msal/dotnet/advanced/proof-of-possession
+
+#if NET8_0_OR_GREATER
 using System;
+#endif
+
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Dpop;
 
 /// <summary>
-/// Contains options for creating and validating DPoP proofs according to RFC 9449.
+/// Contains options for creating DPoP proofs according to RFC 9449.
+/// It is intended for test and sample use only.
 /// </summary>
-public class DPoPProofOptions
+internal class DPoPProofCreatorOptions
 {
     /// <summary>
     /// Gets or sets the maximum age a DPoP proof can be, measured in seconds.
