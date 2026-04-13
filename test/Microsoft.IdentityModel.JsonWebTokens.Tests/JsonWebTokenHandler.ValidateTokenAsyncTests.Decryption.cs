@@ -162,14 +162,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     validationParameters.ConfigurationManager = configurationManager;
 
                     // Skip all validations. We just want to decrypt the JWE
-                    validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
-                    validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-                    validationParameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
-                    validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
-                    validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
-                    validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
-                    validationParameters.TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation;
-                    validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+                    validationParameters.AlgorithmValidator = SkipValidationValidators.SkipAlgorithmValidation;
+                    validationParameters.AudienceValidator = SkipValidationValidators.SkipAudienceValidation;
+                    validationParameters.SignatureKeyValidator = SkipValidationValidators.SkipIssuerSigningKeyValidation;
+                    validationParameters.IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation;
+                    validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
+                    validationParameters.SignatureValidator = SkipValidationValidators.SkipSignatureValidation;
+                    validationParameters.TokenReplayValidator = SkipValidationValidators.SkipTokenReplayValidation;
+                    validationParameters.TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation;
 
                     return validationParameters;
                 }

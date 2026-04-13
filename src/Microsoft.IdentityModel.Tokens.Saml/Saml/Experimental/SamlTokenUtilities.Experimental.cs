@@ -95,12 +95,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     ValidationError.GetCurrentStackFrame());
             }
 
-            // Delegate is set by the user, we call it and return the result.
+            // Validator is set by the user, we call it and return the result.
             if (validationParameters.SignatureValidator is not null)
             {
                 try
                 {
-                    return validationParameters.SignatureValidator(
+                    return validationParameters.SignatureValidator.ValidateSignature(
                         securityToken,
                         validationParameters,
                         configuration,
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             SecurityKey key = null;
             if (validationParameters.SignatureKeyResolver is not null)
             {
-                key = validationParameters.SignatureKeyResolver(
+                key = validationParameters.SignatureKeyResolver.ResolveSignatureKey(
                     canonicalString,
                     securityToken,
                     signature.KeyInfo?.Id,

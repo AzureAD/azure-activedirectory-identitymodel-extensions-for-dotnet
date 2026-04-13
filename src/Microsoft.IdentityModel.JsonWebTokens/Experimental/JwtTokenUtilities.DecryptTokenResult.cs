@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         continue;
                     }
 
-                    ValidationResult<string, ValidationError> result = validationParameters.AlgorithmValidator(zipAlgorithm, jsonWebToken, validationParameters, callContext);
+                    ValidationResult<string, ValidationError> result = validationParameters.AlgorithmValidator.ValidateAlgorithm(zipAlgorithm, jsonWebToken, validationParameters, callContext);
                     if (!result.Succeeded)
                     {
                         (exceptionStrings ??= new StringBuilder()).AppendLine(result.Error!.MessageDetail.Message);
