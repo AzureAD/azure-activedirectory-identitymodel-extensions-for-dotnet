@@ -674,7 +674,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Creates a ClaimsIdentity from a JsonElement that represents an actor token.
         /// </summary>
         /// <param name="jsonElement">The JsonElement containing actor claims.</param>
-        /// <param name="tokenValidationParameters">These parameters have details like nested actor chain length and max permissible actor length</param>
+        /// <param name="tokenValidationParameters">These parameters have details like nested actor chain length and max permissible actor length.</param>
         /// <param name="issuer">The issuer for the claims.</param>
         /// <returns>A ClaimsIdentity containing claims from the JsonElement.</returns>
         internal static ClaimsIdentity CreateActorClaimsIdentityFromJsonElement(
