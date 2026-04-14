@@ -241,8 +241,8 @@ public class DPoPProofValidator
                 DPoPErrorCodes.InvalidDPoPProof);
         }
 
-        if (options.ProofAllowedSigningAlgorithms.Count > 0 &&
-            !options.ProofAllowedSigningAlgorithms.Contains(alg))
+        if (options.AllowedSigningAlgorithms.Count > 0 &&
+            !options.AllowedSigningAlgorithms.Contains(alg))
         {
             return DPoPValidationResult.Failed(
                 $"DPoP proof algorithm '{alg}' is not in the allowed set.",
@@ -337,7 +337,7 @@ public class DPoPProofValidator
 #else
         var now = DateTimeOffset.UtcNow;
 #endif
-        var maxAge = TimeSpan.FromSeconds(options.ProofMaxLifetimeInSeconds + options.ClockSkewInSeconds);
+        var maxAge = TimeSpan.FromSeconds(options.MaxLifetimeInSeconds + options.ClockSkewInSeconds);
 
         if (now - issuedAt > maxAge)
         {

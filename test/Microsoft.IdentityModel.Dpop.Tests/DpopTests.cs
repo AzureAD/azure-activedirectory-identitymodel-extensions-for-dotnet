@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var proof = dpopProof.CreateProof(httpMethod, uri);
             var validator = new DPoPProofValidator();
             var result = await validator.ValidateAsync(proof, httpMethod, uri, null,
-                new DPoPValidationOptions { ProofAllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
+                new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
             Assert.NotNull(proof);
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var proof = dpopProof.CreateProof("POST", uri);
             var validator = new DPoPProofValidator();
             var result = await validator.ValidateAsync(proof, "GET", uri, null,
-                new DPoPValidationOptions { ProofAllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
+                new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
             Assert.False(result.IsValid);
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var proof = dpopProof.CreateProof("POST", uri);
             var validator = new DPoPProofValidator();
             var result = await validator.ValidateAsync(proof, "POST", new Uri("https://example.com/resource"), null,
-                new DPoPValidationOptions { ProofAllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
+                new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
             Assert.False(result.IsValid);
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
             var result = await validator.ValidateAsync(proof, "POST", uri, null,
                 new DPoPValidationOptions
                 {
-                    ProofAllowedSigningAlgorithms = new HashSet<string> { "RS256" },
+                    AllowedSigningAlgorithms = new HashSet<string> { "RS256" },
                     ExpectedNonce = "test-nonce-123",
                 });
 

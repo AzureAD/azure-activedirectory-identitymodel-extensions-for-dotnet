@@ -164,8 +164,8 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         private static DPoPValidationOptions DefaultOptions() => new()
         {
-            ProofAllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "ES256", "RS256" },
-            ProofMaxLifetimeInSeconds = 300,
+            AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "ES256", "RS256" },
+            MaxLifetimeInSeconds = 300,
             ClockSkewInSeconds = 300,
             RequireAccessTokenHash = false,
             ExpectedNonce = DefaultTestNonce,
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         {
             var (proof, _) = CreateValidRsaProof();
             var options = DefaultOptions();
-            options.ProofAllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "PS256" };
+            options.AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "PS256" };
 
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), null, options);
@@ -351,7 +351,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var old = DateTimeOffset.UtcNow.AddSeconds(-700).ToUnixTimeSeconds();
             var (proof, _) = CreateTamperedRsaProof(iatOverride: old);
             var options = DefaultOptions();
-            options.ProofMaxLifetimeInSeconds = 60;
+            options.MaxLifetimeInSeconds = 60;
             options.ClockSkewInSeconds = 30;
 
             var result = await _validator.ValidateAsync(
@@ -728,7 +728,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             var options = new DPoPValidationOptions
             {
-                ProofAllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+                AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
                 RequireAccessTokenHash = false,
                 ExpectedNonce = DefaultTestNonce,
             };

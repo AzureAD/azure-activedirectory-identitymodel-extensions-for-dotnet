@@ -28,10 +28,10 @@ Microsoft.IdentityModel.Dpop.DPoPValidationOptions.ExpectedNonce.get -> string
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions.ExpectedNonce.set -> void
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions.JtiReplayCache.get -> Microsoft.IdentityModel.Dpop.IJtiReplayCache
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions.JtiReplayCache.set -> void
-Microsoft.IdentityModel.Dpop.DPoPValidationOptions.ProofAllowedSigningAlgorithms.get -> System.Collections.Generic.ISet<string>
-Microsoft.IdentityModel.Dpop.DPoPValidationOptions.ProofAllowedSigningAlgorithms.set -> void
-Microsoft.IdentityModel.Dpop.DPoPValidationOptions.ProofMaxLifetimeInSeconds.get -> int
-Microsoft.IdentityModel.Dpop.DPoPValidationOptions.ProofMaxLifetimeInSeconds.set -> void
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.AllowedSigningAlgorithms.get -> System.Collections.Generic.ISet<string>
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.AllowedSigningAlgorithms.set -> void
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MaxLifetimeInSeconds.get -> int
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MaxLifetimeInSeconds.set -> void
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions.RequireAccessTokenHash.get -> bool
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions.RequireAccessTokenHash.set -> void
 Microsoft.IdentityModel.Dpop.DPoPValidationResult

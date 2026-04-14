@@ -16,14 +16,14 @@ public class DPoPValidationOptions
     /// Only asymmetric algorithms are permitted; symmetric (HMAC) and "none" are always rejected.
     /// Default: ES256, PS256, RS256.
     /// </summary>
-    public ISet<string> ProofAllowedSigningAlgorithms { get; set; }
+    public ISet<string> AllowedSigningAlgorithms { get; set; }
         = new HashSet<string>(StringComparer.Ordinal) { "ES256", "PS256", "RS256" };
 
     /// <summary>
     /// Gets or sets the maximum proof lifetime in seconds, measured from the <c>iat</c> claim.
     /// Default: 300 (5 minutes).
     /// </summary>
-    public int ProofMaxLifetimeInSeconds { get; set; } = 300;
+    public int MaxLifetimeInSeconds { get; set; } = 300;
 
     /// <summary>
     /// Gets or sets the clock skew tolerance in seconds.
