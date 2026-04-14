@@ -8,11 +8,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Dpop;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Protocols.OAuth2.Tests
+namespace Microsoft.IdentityModel.Dpop.Tests
 {
     public class DPoPTests
     {
