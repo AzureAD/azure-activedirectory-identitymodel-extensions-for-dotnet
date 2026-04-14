@@ -85,22 +85,9 @@ public class DPoPProofValidator
         if (string.IsNullOrEmpty(accessTokenCnfJkt) || string.IsNullOrEmpty(dpopProofJwkThumbprint))
             return false;
 
-#if NET
-        return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(
+        return Utility.AreEqual(
             Encoding.UTF8.GetBytes(accessTokenCnfJkt),
             Encoding.UTF8.GetBytes(dpopProofJwkThumbprint));
-#else
-        var a = Encoding.UTF8.GetBytes(accessTokenCnfJkt);
-        var b = Encoding.UTF8.GetBytes(dpopProofJwkThumbprint);
-        if (a.Length != b.Length)
-            return false;
-
-        int result = 0;
-        for (int i = 0; i < a.Length; i++)
-            result |= a[i] ^ b[i];
-
-        return result == 0;
-#endif
     }
 
     /// <summary>
