@@ -213,7 +213,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
-
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
