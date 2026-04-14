@@ -657,7 +657,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters);
                     }
                 }
-
             }
             else
             {
