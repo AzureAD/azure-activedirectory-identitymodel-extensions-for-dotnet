@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens
         private List<string> _audiences;
         private string _actorClaimType = "act";
         private int _actorChainDepth;
-        private int _maxActorChainLength = 4;
+        private int _maxActorChainLength = 5;
 
         /// <summary>
         /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
@@ -124,20 +124,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the maximum depth allowed when processing nested actor tokens.
         /// <para>This prevents excessive recursion when handling deeply nested actor tokens.</para>
-        /// <para>The maximum allowed value is 4 to prevent security issues with excessively deep actor chains.</para>
+        /// <para>The maximum allowed value is 5 to prevent security issues with excessively deep actor chains.</para>
+        /// <para>Customers are allowed upto 4 nested actors and 1 top level actor.</para>
         /// </summary>
         /// <remarks>
-        /// <para>Default value is 4.</para>
+        /// <para>Default value is 5</para>
         /// <para>During token validation and creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
         /// <para>This limit applies to both token creation and validation processes.</para>
         /// </remarks>
         internal int MaxActorChainLength => _maxActorChainLength;
 
         /// <summary>
-        /// Gets or sets the claim type that identifies the actor claim in tokens.
-        /// <para> and "act" when the switch is on.</para>
-        /// <para>This property determines which claim in a token contains the actor information during token 
-        /// validation and creation.</para>
+        /// Gets or sets the claim type that helps identify the type of actor claim in tokens. 
+        /// <para>This property determines which claim in a token contains the actor information during token validation and creation.</para>
+        /// <para>It is "act" by default which means all the actor claims are assumed to be in the "act" claim. Claims with this name will be serialized into a JSON object by default.</para>
+        /// <para>We need to still support customers who are using "actort" which is unsigned JWT. When actor is in "actort" claim , it will be serialized into unsigned JWT by default.</para>
         /// <para>For JWT tokens, this is the claim name in the payload that holds the actor object.</para>
         /// </summary>
         /// <exception cref="ArgumentNullException">

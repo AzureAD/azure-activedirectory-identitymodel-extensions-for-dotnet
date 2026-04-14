@@ -43,8 +43,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Default for permissible max actor chain length.
         /// </summary>
-        /// <remarks>5 as max level of nesting</remarks>
-        private int maxActorChainLength = 4;
+        /// <remarks>The total number of actor claims customer might have is 5. This allows upto 4 nested actors and 1 top level actor</remarks>
+        private int maxActorChainLength = 5;
 
         /// <summary>
         /// Default for actor claim name.
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// This variable is used during recursion calls that are needed for deserializing act claim.
         /// </summary>
-        /// <remarks>Default value is 0</remarks>
+        /// <remarks>Default value is 0 and the max value is 5</remarks>
         private int _actorChainDepth;
 
         /// <summary>
@@ -784,9 +784,10 @@ namespace Microsoft.IdentityModel.Tokens
         public IEnumerable<string> ValidTypes { get; set; }
 
         /// <summary>
-        /// Gets or sets the claim type that identifies the actor claim in tokens.
-        /// <para>This property determines which claim in a token contains the actor information during token 
-        /// validation and creation.</para>
+        /// Gets or sets the claim type that helps identify the type of actor claim in tokens. 
+        /// <para>This property determines which claim in a token contains the actor information during token validation and creation.</para>
+        /// <para>It is "act" by default which means all the actor claims are assumed to be in the "act" claim. Claims with this name will be deserialized into a JSON object by default.</para>
+        /// <para>We need to still support customers who are using "actort" which is unsigned JWT. When actor is in "actort" claim , it will be deserialized into unsigned JWT by default.</para>
         /// <para>For JWT tokens, this is the claim name in the payload that holds the actor object.</para>
         /// </summary>
         /// <exception cref="ArgumentNullException">

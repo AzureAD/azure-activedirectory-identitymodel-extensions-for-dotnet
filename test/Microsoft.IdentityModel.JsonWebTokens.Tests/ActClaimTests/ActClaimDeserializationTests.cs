@@ -860,10 +860,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void CreateActorClaimsIdentity_ExceedingFixedMaxDepthOf4_ThrowsSecurityTokenException()
+        public void CreateActorClaimsIdentity_ExceedingFixedMaxDepthOf5_ThrowsSecurityTokenException()
         {
-            // The MaxActorChainLength is fixed at 4 and not configurable.
-            // Create a 5-level nested actor JSON structure (exceeds the limit)
+            // The MaxActorChainLength is fixed at 5 (1 top-level + 4 nested actors) and not configurable.
+            // Create a 6-level nested actor JSON structure (exceeds the limit)
             string actorJson = @"{
                 ""sub"": ""level1-subject"",
                 ""act"": {
@@ -873,7 +873,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                         ""act"": {
                             ""sub"": ""level4-subject"",
                             ""act"": {
-                                ""sub"": ""level5-subject""
+                                ""sub"": ""level5-subject"",
+                                ""act"": {
+                                    ""sub"": ""level6-subject""
+                                }
                             }
                         }
                     }
@@ -895,10 +898,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void CreateActorClaimsIdentity_AtExactlyMaxDepthOf4_Succeeds()
+        public void CreateActorClaimsIdentity_AtExactlyMaxDepthOf5_Succeeds()
         {
-            // The MaxActorChainLength is fixed at 4.
-            // Create exactly 4 levels of nested actors (at the limit)
+            // The MaxActorChainLength is fixed at 5 (1 top-level + 4 nested actors).
+            // Create exactly 5 levels of nested actors (at the limit)
             string actorJson = @"{
                 ""sub"": ""level1-subject"",
                 ""act"": {
@@ -906,7 +909,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                     ""act"": {
                         ""sub"": ""level3-subject"",
                         ""act"": {
-                            ""sub"": ""level4-subject""
+                            ""sub"": ""level4-subject"",
+                            ""act"": {
+                                ""sub"": ""level5-subject""
+                            }
                         }
                     }
                 }
@@ -934,7 +940,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.NotNull(identity.Actor.Actor.Actor);
             Assert.Equal("level4-subject", identity.Actor.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
 
-            Assert.Null(identity.Actor.Actor.Actor.Actor);
+            Assert.NotNull(identity.Actor.Actor.Actor.Actor);
+            Assert.Equal("level5-subject", identity.Actor.Actor.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
+
+            Assert.Null(identity.Actor.Actor.Actor.Actor.Actor);
         }
     }
 }

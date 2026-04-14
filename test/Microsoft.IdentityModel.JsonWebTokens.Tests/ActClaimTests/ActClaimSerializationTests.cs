@@ -303,12 +303,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void NestedActorTokens_ExceedingFixedMaxDepthOf4_ThrowsSecurityTokenException()
+        public void NestedActorTokens_ExceedingFixedMaxDepthOf5_ThrowsSecurityTokenException()
         {
+            // MaxActorChainLength is fixed at 5 (1 top-level + 4 nested actors).
+            // 6 actor levels (main -> level1 -> ... -> level6) should exceed the limit.
             var handler = new JsonWebTokenHandler();
+
+            var level6Actor = new CaseSensitiveClaimsIdentity("Level6Auth");
+            level6Actor.AddClaim(new Claim("sub", "level6-actor"));
 
             var level5Actor = new CaseSensitiveClaimsIdentity("Level5Auth");
             level5Actor.AddClaim(new Claim("sub", "level5-actor"));
+            level5Actor.Actor = level6Actor;
 
             var level4Actor = new CaseSensitiveClaimsIdentity("Level4Auth");
             level4Actor.AddClaim(new Claim("sub", "level4-actor"));
@@ -344,12 +350,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void NestedActorTokens_InClaimsDictionary_ExceedingFixedMaxDepthOf4_ThrowsSecurityTokenException()
+        public void NestedActorTokens_InClaimsDictionary_ExceedingFixedMaxDepthOf5_ThrowsSecurityTokenException()
         {
+            // MaxActorChainLength is fixed at 5 (1 top-level + 4 nested actors).
+            // 6 actor levels via Claims dictionary should exceed the limit.
             var handler = new JsonWebTokenHandler();
+
+            var level6Actor = new CaseSensitiveClaimsIdentity("Level6Auth");
+            level6Actor.AddClaim(new Claim("sub", "level6-actor"));
 
             var level5Actor = new CaseSensitiveClaimsIdentity("Level5Auth");
             level5Actor.AddClaim(new Claim("sub", "level5-actor"));
+            level5Actor.Actor = level6Actor;
 
             var level4Actor = new CaseSensitiveClaimsIdentity("Level4Auth");
             level4Actor.AddClaim(new Claim("sub", "level4-actor"));
@@ -388,12 +400,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void NestedActorTokens_AtExactlyMaxDepthOf4_Succeeds()
+        public void NestedActorTokens_AtExactlyMaxDepthOf5_Succeeds()
         {
+            // MaxActorChainLength is fixed at 5 (1 top-level + 4 nested actors).
+            // 5 actor levels (main -> level1 -> ... -> level5) should succeed at exactly the limit.
             var handler = new JsonWebTokenHandler();
+
+            var level5Actor = new CaseSensitiveClaimsIdentity("Level5Auth");
+            level5Actor.AddClaim(new Claim("sub", "level5-actor"));
 
             var level4Actor = new CaseSensitiveClaimsIdentity("Level4Auth");
             level4Actor.AddClaim(new Claim("sub", "level4-actor"));
+            level4Actor.Actor = level5Actor;
 
             var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
             level3Actor.AddClaim(new Claim("sub", "level3-actor"));
@@ -436,7 +454,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.True(level3.TryGetProperty("act", out var level4));
             Assert.Equal("level4-actor", level4.GetProperty("sub").GetString());
 
-            Assert.False(level4.TryGetProperty("act", out _));
+            Assert.True(level4.TryGetProperty("act", out var level5));
+            Assert.Equal("level5-actor", level5.GetProperty("sub").GetString());
+
+            Assert.False(level5.TryGetProperty("act", out _));
         }
     }
 }
