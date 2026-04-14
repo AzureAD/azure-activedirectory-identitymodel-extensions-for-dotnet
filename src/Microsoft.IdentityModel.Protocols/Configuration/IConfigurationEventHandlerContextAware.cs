@@ -23,12 +23,5 @@ public interface IConfigurationEventHandlerContextAware<T> : IConfigurationEvent
     /// </returns>
     Task<ConfigurationEventHandlerResult<T>> BeforeRetrieveAsync(string metadataAddress, ConfigurationRetrievalContext context, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Called after a configuration has been successfully retrieved in a fire-and-forget manner.
-    /// </summary>
-    /// <param name="metadataAddress">The metadata endpoint address.</param>
-    /// <param name="configuration">The retrieved configuration.</param>
-    /// <param name="context">The context for the configuration retrieval operation, providing additional information and control.</param>
-    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
-    Task AfterUpdateAsync(string metadataAddress, T configuration, ConfigurationRetrievalContext context, CancellationToken cancellationToken = default);
+    // AfterUpdateAsync does not require context, but can be added here if needed in the future.
 }

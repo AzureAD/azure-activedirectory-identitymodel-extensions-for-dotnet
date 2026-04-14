@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Protocols
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
         /// <summary>
-        /// Only used to track the type of request for telemetry.
+        /// Used to track the type of request for signaling the event handler and for telemetry.
         /// </summary>
         private bool _refreshRequested;
 
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Protocols
                         // If provided configuration is valid, skip regular retriaval process and update current configuration.
                         if (ConfigurationEventHandler != null)
                         {
-                            var configurationRetrieved = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
+                            ConfigurationEventHandlerResult<T> configurationRetrieved = await HandleBeforeRetrieveAsync(bypassCache: _refreshRequested, cancel).ConfigureAwait(false);
 
                             // replicate the behavior of successful retrieval from endpoint
                             if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
