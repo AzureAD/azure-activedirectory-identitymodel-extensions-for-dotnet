@@ -548,7 +548,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(N)))));
 
                 return $@"{kid}" +
-                        $@"{{""{JsonWebKeyParameterNames.E}"":""{E}""," +
+                        $@"""{JsonWebKeyParameterNames.E}"":""{E}""," +
                         $@"""{JsonWebKeyParameterNames.Kty}"":""{Kty}""," +
                         $@"""{JsonWebKeyParameterNames.N}"":""{N}""}}";
             }

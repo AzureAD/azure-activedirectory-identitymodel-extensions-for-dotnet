@@ -551,7 +551,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public async Task ValidateAsync_WrongSignatureKey_Fails()
         {
-            var (proof, originalKey) = CreateValidRsaProof();
+            var (proof, _) = CreateValidRsaProof();
 
             // Tamper: decode, modify a character, re-encode — signature no longer matches
             var parts = proof.Split('.');
