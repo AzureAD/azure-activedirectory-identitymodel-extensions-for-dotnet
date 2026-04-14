@@ -110,11 +110,16 @@ public class DPoPProofValidator
     /// <param name="accessToken">The raw access token string.</param>
     /// <returns>The base64url-encoded SHA-256 hash.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="accessToken"/> is null.</exception>
-    public static string ComputeAccessTokenHash(string accessToken)
+    internal static string ComputeAccessTokenHash(string accessToken)
     {
         _ = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
 
-        var tokenBytes = Encoding.ASCII.GetBytes(accessToken);
+        // Use strict ASCII encoding per RFC 9449 §4.2 — reject non-ASCII tokens
+        // rather than silently replacing with '?' (which would produce an incorrect hash).
+        var tokenBytes = Encoding.GetEncoding(
+            "us-ascii",
+            EncoderFallback.ExceptionFallback,
+            DecoderFallback.ExceptionFallback).GetBytes(accessToken);
 #if NET6_0_OR_GREATER
         var hash = SHA256.HashData(tokenBytes);
 #else
@@ -134,7 +139,7 @@ public class DPoPProofValidator
     /// <param name="jwk">The JSON Web Key to check.</param>
     /// <returns><see langword="true"/> if private key parameters are present; otherwise <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="jwk"/> is null.</exception>
-    public static bool ContainsPrivateKeyMaterial(JsonWebKey jwk)
+    internal static bool ContainsPrivateKeyMaterial(JsonWebKey jwk)
     {
         _ = jwk ?? throw new ArgumentNullException(nameof(jwk));
 
@@ -154,7 +159,7 @@ public class DPoPProofValidator
     /// <param name="jwk">The JSON Web Key.</param>
     /// <returns>The base64url-encoded thumbprint.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="jwk"/> is null.</exception>
-    public static string ComputeJwkThumbprint(JsonWebKey jwk)
+    internal static string ComputeJwkThumbprint(JsonWebKey jwk)
     {
         _ = jwk ?? throw new ArgumentNullException(nameof(jwk));
 

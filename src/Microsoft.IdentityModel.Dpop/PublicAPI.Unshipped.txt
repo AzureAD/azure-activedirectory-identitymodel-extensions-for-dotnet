@@ -43,9 +43,6 @@ Microsoft.IdentityModel.Dpop.DPoPValidationResult.JwkThumbprint.get -> string
 Microsoft.IdentityModel.Dpop.DPoPValidationResult.ProofKey.get -> Microsoft.IdentityModel.Tokens.JsonWebKey
 Microsoft.IdentityModel.Dpop.IJtiReplayCache
 Microsoft.IdentityModel.Dpop.IJtiReplayCache.TryAddAsync(string jti, System.DateTimeOffset expiration, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
-static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ComputeAccessTokenHash(string accessToken) -> string
-static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ComputeJwkThumbprint(Microsoft.IdentityModel.Tokens.JsonWebKey jwk) -> string
-static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ContainsPrivateKeyMaterial(Microsoft.IdentityModel.Tokens.JsonWebKey jwk) -> bool
 static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ValidateCnfJktBinding(string accessTokenCnfJkt, string dpopProofJwkThumbprint) -> bool
 static Microsoft.IdentityModel.Dpop.DPoPValidationResult.Failed(string error, string errorCode) -> Microsoft.IdentityModel.Dpop.DPoPValidationResult
 static Microsoft.IdentityModel.Dpop.DPoPValidationResult.NonceRequired() -> Microsoft.IdentityModel.Dpop.DPoPValidationResult
