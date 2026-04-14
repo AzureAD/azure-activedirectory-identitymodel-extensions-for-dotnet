@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Default for permissible max actor chain length.
         /// </summary>
-        /// <remarks>The total number of actor claims customer might have is 5. This allows upto 4 nested actors and 1 top level actor</remarks>
+        /// <remarks>The total number of actor claims customer might have is 5. This allows upto 4 nested actors and 1 top level actor.</remarks>
         private int maxActorChainLength = 5;
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// This variable is used during recursion calls that are needed for deserializing act claim.
         /// </summary>
-        /// <remarks>Default value is 0 and the max value is 5</remarks>
+        /// <remarks>Default value is 0 and the max permissible value is 4.</remarks>
         private int _actorChainDepth;
 
         /// <summary>

@@ -164,13 +164,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the current depth in the actor chain being processed.
         /// <para>This is used internally to track the nesting level during recursive processing 
         /// of nested actor tokens.</para>
-        /// <para>The value starts at 0 and is incremented for each level of actor nesting.</para>
+        /// <para>The value starts at 0 and is incremented for each level of actor nesting. Max permissible value is 4.</para>
         /// </summary>
         /// <remarks>
         /// <para>This value is compared against <see cref="MaxActorChainLength"/> to prevent excessive 
         /// recursion or deeply nested actor tokens.</para>
-        /// <para>In most scenarios, users don't need to set this property as it's managed internally 
-        /// by the token validation and creation process.</para>
         /// </remarks>
         internal int ActorChainDepth
         {
