@@ -215,6 +215,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
 
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
