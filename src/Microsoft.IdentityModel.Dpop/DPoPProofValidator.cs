@@ -162,49 +162,6 @@ public class DPoPProofValidator
         return Base64UrlEncoder.Encode(thumbprintBytes);
     }
 
-    /// <summary>
-    /// Validates that a DPoP-bound access token is correctly bound to a DPoP proof JWT
-    /// by comparing the access token's <c>cnf.jkt</c> claim against the JWK thumbprint
-    /// computed from the proof's <c>jwk</c> header parameter.
-    /// </summary>
-    /// <param name="accessToken">The raw access token JWT string.</param>
-    /// <param name="dpopProofJwt">The raw DPoP proof JWT string.</param>
-    /// <returns><see langword="true"/> if the access token is bound to the proof's key; otherwise <see langword="false"/>.</returns>
-    public static bool ValidateBinding(string accessToken, string dpopProofJwt)
-    {
-        if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(dpopProofJwt))
-            return false;
-
-        try
-        {
-            var handler = new JsonWebTokenHandler();
-
-            // Extract cnf.jkt from the access token payload
-            var accessJwt = handler.ReadJsonWebToken(accessToken);
-            if (!accessJwt.TryGetPayloadValue(DPoPConstants.ConfirmationClaimType, out string cnfJson) ||
-                string.IsNullOrEmpty(cnfJson))
-                return false;
-
-            var cnf = new Cnf(cnfJson);
-            if (string.IsNullOrEmpty(cnf.Jkt))
-                return false;
-
-            // Extract JWK from the DPoP proof header (not payload)
-            var proofJwt = handler.ReadJsonWebToken(dpopProofJwt);
-            if (!proofJwt.TryGetHeaderValue("jwk", out object jwkObj) || jwkObj == null)
-                return false;
-
-            var proofKey = new JsonWebKey(jwkObj.ToString());
-            var thumbprint = ComputeJwkThumbprint(proofKey);
-
-            return ValidateCnfJktBinding(cnf.Jkt, thumbprint);
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     private static async Task<DPoPValidationResult> ValidateCoreAsync(
         string dpopProofJwt,
         string httpMethod,

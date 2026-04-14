@@ -1,4 +1,4 @@
-﻿const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Ath = "ath" -> string
+const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Ath = "ath" -> string
 const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Htm = "htm" -> string
 const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Htu = "htu" -> string
 const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Iat = "iat" -> string
@@ -46,7 +46,6 @@ Microsoft.IdentityModel.Dpop.IJtiReplayCache.TryAddAsync(string jti, System.Date
 static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ComputeAccessTokenHash(string accessToken) -> string
 static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ComputeJwkThumbprint(Microsoft.IdentityModel.Tokens.JsonWebKey jwk) -> string
 static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ContainsPrivateKeyMaterial(Microsoft.IdentityModel.Tokens.JsonWebKey jwk) -> bool
-static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ValidateBinding(string accessToken, string dpopProofJwt) -> bool
 static Microsoft.IdentityModel.Dpop.DPoPProofValidator.ValidateCnfJktBinding(string accessTokenCnfJkt, string dpopProofJwkThumbprint) -> bool
 static Microsoft.IdentityModel.Dpop.DPoPValidationResult.Failed(string error, string errorCode) -> Microsoft.IdentityModel.Dpop.DPoPValidationResult
 static Microsoft.IdentityModel.Dpop.DPoPValidationResult.NonceRequired() -> Microsoft.IdentityModel.Dpop.DPoPValidationResult
