@@ -617,10 +617,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Creates a ClaimsIdentity from an actor claim string.
         /// </summary>
-        /// <param name="jwtToken">The actual JWT token parsed into JsonWebToken class</param>
+        /// <param name="jwtToken">The actual JWT token parsed into JsonWebToken class.</param>
         /// <param name="actorString">The actor claim string.</param>
         /// <param name="tokenValidationParameters">The token validation parameters.</param>
-        /// <param name="isStandardAct">This tells us if we want to deserialize it as a JWT or Json Object. If this is set to true then we deserialize as JsonObject else as JWT </param>
+        /// <param name="isStandardAct">This tells us if we want to deserialize it as a JWT or Json Object. If this is set to true then we deserialize as JsonObject else as JWT.</param>
         /// <returns>A ClaimsIdentity representing the actor.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="actorString"/> or <paramref name="tokenValidationParameters"/> is null.</exception>
         private ClaimsIdentity CreateClaimsIdentityActor(
