@@ -2,9 +2,16 @@ Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<
 Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.Configuration.get -> T
 Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.ConfigurationEventHandlerResult(T configuration, System.DateTimeOffset retrievalTime) -> void
 Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.RetrievalTime.get -> System.DateTimeOffset
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext.BypassCache.get -> bool
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext.BypassCache.set -> void
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext.ConfigurationRetrievalContext() -> void
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>.AfterUpdateAsync(string metadataAddress, T configuration, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>.BeforeRetrieveAsync(string metadataAddress, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>.AfterUpdateAsync(string metadataAddress, T configuration, Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>.BeforeRetrieveAsync(string metadataAddress, Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>>
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationEventHandler.get -> Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationEventHandler.set -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator, Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions lkgCacheOptions, Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T> configurationEventHandler) -> void
