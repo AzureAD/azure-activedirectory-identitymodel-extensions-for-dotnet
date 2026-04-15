@@ -300,9 +300,14 @@ public class DPoPProofValidator
             }
         }
 
-        // Validate nonce if expected
+        // Validate nonce if expected (null = skip nonce validation)
         if (options.ExpectedNonce != null)
         {
+            if (string.IsNullOrWhiteSpace(options.ExpectedNonce))
+            {
+                return DPoPValidationResult.Failed("Server nonce configuration error: ExpectedNonce is empty or whitespace.");
+            }
+
             if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Nonce, out string nonceValue) ||
                 string.IsNullOrEmpty(nonceValue))
             {
@@ -330,7 +335,6 @@ public class DPoPProofValidator
 
         // Compute thumbprint and validate cnf.jkt binding
         var thumbprint = ComputeJwkThumbprint(jwk);
-
         if (!ValidateCnfJktBinding(expectedCnfJkt, thumbprint))
         {
             return DPoPValidationResult.Failed("DPoP proof JWK thumbprint does not match the access token cnf.jkt claim.");
