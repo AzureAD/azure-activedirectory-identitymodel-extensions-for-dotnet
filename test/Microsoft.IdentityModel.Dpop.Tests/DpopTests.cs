@@ -135,11 +135,11 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             // Act — use CreateProof directly, set headers manually
             string proof = dpopProof.CreateProof(request.Method.Method, request.RequestUri, "access_token");
-            request.Headers.Add(DPoPConstants.DPoPHeaderName, proof);
+            request.Headers.Add(DPoPConstants.DPoPTokenType, proof);
 
             // Assert
-            Assert.True(request.Headers.Contains(DPoPConstants.DPoPHeaderName));
-            var dpopHeader = request.Headers.GetValues(DPoPConstants.DPoPHeaderName).FirstOrDefault();
+            Assert.True(request.Headers.Contains(DPoPConstants.DPoPTokenType));
+            var dpopHeader = request.Headers.GetValues(DPoPConstants.DPoPTokenType).FirstOrDefault();
             Assert.NotNull(dpopHeader);
         }
 
@@ -161,11 +161,11 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             // Act — use CreateProof directly, set headers manually
             string proof = dpopProof.CreateProof(request.Method.Method, request.RequestUri, accessToken);
-            request.Headers.Add(DPoPConstants.DPoPHeaderName, proof);
+            request.Headers.Add(DPoPConstants.DPoPTokenType, proof);
             request.Headers.Authorization = new AuthenticationHeaderValue(DPoPConstants.DPoPTokenType, accessToken);
 
             // Assert
-            Assert.True(request.Headers.Contains(DPoPConstants.DPoPHeaderName));
+            Assert.True(request.Headers.Contains(DPoPConstants.DPoPTokenType));
             Assert.NotNull(request.Headers.Authorization);
             Assert.Equal(DPoPConstants.DPoPTokenType, request.Headers.Authorization.Scheme);
             Assert.Equal(accessToken, request.Headers.Authorization.Parameter);

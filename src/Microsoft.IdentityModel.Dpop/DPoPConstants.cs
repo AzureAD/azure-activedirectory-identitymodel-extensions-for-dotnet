@@ -13,16 +13,6 @@ namespace Microsoft.IdentityModel.Dpop;
 public static class DPoPConstants
 {
     /// <summary>
-    /// The DPoP HTTP header name.
-    /// </summary>
-    public const string DPoPHeaderName = "DPoP";
-
-    /// <summary>
-    /// The DPoP HTTP WWW-Authenticate challenge parameter.
-    /// </summary>
-    public const string DPoPChallengeParameter = "DPoP";
-
-    /// <summary>
     /// The DPoP token type.
     /// </summary>
     public const string DPoPTokenType = "DPoP";
@@ -36,14 +26,4 @@ public static class DPoPConstants
     /// The DPoP nonce HTTP header name.
     /// </summary>
     public const string DPoPNonceHeaderName = "DPoP-Nonce";
-
-    /// <summary>
-    /// The key identifier for the DPoP proof confirmation claim in the access token.
-    /// </summary>
-    public const string ConfirmationClaimDPoPKeyId = "jkt";
-
-    /// <summary>
-    /// The DPoP confirmation claim name.
-    /// </summary>
-    public const string ConfirmationClaimType = "cnf";
 }

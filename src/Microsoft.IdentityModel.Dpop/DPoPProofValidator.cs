@@ -53,7 +53,7 @@ public class DPoPProofValidator
         _ = options ?? throw new ArgumentNullException(nameof(options));
 
         if (string.IsNullOrWhiteSpace(dpopProofJwt))
-            return DPoPValidationResult.Failed("DPoP proof is empty.", DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof is empty.");
 
         if (!requestUri.IsAbsoluteUri)
             throw new ArgumentException("URI must be absolute.", nameof(requestUri));
@@ -67,9 +67,7 @@ public class DPoPProofValidator
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            return DPoPValidationResult.Failed(
-                $"DPoP proof validation error: {ex.Message}",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof validation failed.", ex);
         }
     }
 
@@ -168,9 +166,7 @@ public class DPoPProofValidator
         // Validate typ == dpop+jwt
         if (!string.Equals(proofToken.Typ, DPoPConstants.DPoPProofTokenType, StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof typ must be 'dpop+jwt'.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof typ must be 'dpop+jwt'.");
         }
 
         // Validate alg is asymmetric and in allowed set
@@ -178,32 +174,24 @@ public class DPoPProofValidator
         if (string.IsNullOrEmpty(alg) ||
             string.Equals(alg, "none", StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof algorithm must not be 'none'.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof algorithm must not be 'none'.");
         }
 
         if (alg.StartsWith("HS", StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof must use an asymmetric algorithm.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof must use an asymmetric algorithm.");
         }
 
         if (options.AllowedSigningAlgorithms.Count > 0 &&
             !options.AllowedSigningAlgorithms.Contains(alg))
         {
-            return DPoPValidationResult.Failed(
-                $"DPoP proof algorithm '{alg}' is not in the allowed set.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed($"DPoP proof algorithm '{alg}' is not in the allowed set.");
         }
 
         // Extract JWK from header, verify no private key present
         if (!proofToken.TryGetHeaderValue("jwk", out object jwkObj) || jwkObj == null)
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof is missing the 'jwk' header parameter.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'jwk' header parameter.");
         }
 
         JsonWebKey jwk;
@@ -213,16 +201,12 @@ public class DPoPProofValidator
         }
         catch (Exception ex)
         {
-            return DPoPValidationResult.Failed(
-                $"DPoP proof contains an invalid 'jwk' header: {ex.Message}",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof contains an invalid 'jwk' header.", ex);
         }
 
         if (ContainsPrivateKeyMaterial(jwk))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof JWK must not contain private key material.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof JWK must not contain private key material.");
         }
 
         // Validate signature using extracted JWK
@@ -241,43 +225,33 @@ public class DPoPProofValidator
 
         if (!signatureResult.IsValid)
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof signature validation failed.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof signature validation failed.");
         }
 
         // Validate htm matches HTTP method
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Htm, out string htmValue) ||
             !string.Equals(httpMethod, htmValue, StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof 'htm' claim does not match the HTTP method.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof 'htm' claim does not match the HTTP method.");
         }
 
         // Validate htu matches request URI
         // Per RFC 9449 §4.3: compare scheme + authority + path (no query/fragment)
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Htu, out string htuValue))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof is missing the 'htu' claim.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'htu' claim.");
         }
 
         var normalizedRequestUri = requestUri.GetLeftPart(UriPartial.Path);
         if (!string.Equals(normalizedRequestUri, htuValue, StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof 'htu' claim does not match the request URI.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof 'htu' claim does not match the request URI.");
         }
 
         // Validate iat freshness
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Iat, out long iat))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof is missing the 'iat' claim.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'iat' claim.");
         }
 
         var issuedAt = DateTimeOffset.FromUnixTimeSeconds(iat);
@@ -290,17 +264,13 @@ public class DPoPProofValidator
 
         if (now - issuedAt > maxAge)
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof has expired.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof has expired.");
         }
 
         // Reject proofs issued in the future beyond clock skew
         if (issuedAt - now > TimeSpan.FromSeconds(options.ClockSkewInSeconds))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof 'iat' is too far in the future.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof 'iat' is too far in the future.");
         }
 
         // Validate jti present
@@ -309,9 +279,7 @@ public class DPoPProofValidator
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Jti, out string jtiValue) ||
             string.IsNullOrEmpty(jtiValue))
         {
-            return DPoPValidationResult.Failed(
-                "DPoP proof is missing the 'jti' claim.",
-                DPoPErrorCodes.InvalidDPoPProof);
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'jti' claim.");
         }
 
         // Replay protection
@@ -324,9 +292,7 @@ public class DPoPProofValidator
 
             if (!added)
             {
-                return DPoPValidationResult.Failed(
-                    "DPoP proof 'jti' has already been used (replay detected).",
-                    DPoPErrorCodes.InvalidDPoPProof);
+                return DPoPValidationResult.Failed("DPoP proof 'jti' has already been used (replay detected).");
             }
         }
 
@@ -351,22 +317,18 @@ public class DPoPProofValidator
             if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Ath, out string athValue) ||
                 string.IsNullOrEmpty(athValue))
             {
-                return DPoPValidationResult.Failed(
-                    "DPoP proof is missing the 'ath' claim.",
-                    DPoPErrorCodes.InvalidDPoPProof);
+                return DPoPValidationResult.Failed("DPoP proof is missing the 'ath' claim.");
             }
 
             var expectedAth = ComputeAccessTokenHash(accessToken);
             if (!string.Equals(athValue, expectedAth, StringComparison.Ordinal))
             {
-                return DPoPValidationResult.Failed(
-                    "DPoP proof 'ath' claim does not match the access token hash.",
-                    DPoPErrorCodes.InvalidDPoPProof);
+                return DPoPValidationResult.Failed("DPoP proof 'ath' claim does not match the access token hash.");
             }
         }
 
         // Compute thumbprint and return success
         var thumbprint = ComputeJwkThumbprint(jwk);
-        return DPoPValidationResult.Success(thumbprint, jwk);
+        return DPoPValidationResult.Success(thumbprint);
     }
 }

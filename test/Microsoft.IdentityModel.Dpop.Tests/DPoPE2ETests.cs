@@ -94,7 +94,6 @@ public class DPoPE2ETests
 
         Assert.True(result.IsValid, $"Proof validation failed: {result.Error}");
         Assert.NotNull(result.JwkThumbprint);
-        Assert.NotNull(result.ProofKey);
 
         // 4. Validate binding: cnf.jkt from AT matches proof key thumbprint
         var handler = new JsonWebTokenHandler();
@@ -218,7 +217,6 @@ public class DPoPE2ETests
 
         Assert.False(result.IsValid);
         Assert.True(result.IsNonceRequired);
-        Assert.Equal(DPoPErrorCodes.UseDPoPNonce, result.ErrorCode);
     }
 
     [Fact]

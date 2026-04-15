@@ -8,9 +8,6 @@ namespace Microsoft.IdentityModel.Dpop;
 /// </summary>
 public static class DPoPErrorCodes
 {
-    /// <summary>The DPoP proof is invalid or malformed.</summary>
-    public const string InvalidDPoPProof = "invalid_dpop_proof";
-
     /// <summary>The server requires a DPoP nonce.</summary>
     public const string UseDPoPNonce = "use_dpop_nonce";
 

@@ -186,9 +186,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             Assert.True(result.IsValid);
             Assert.NotNull(result.JwkThumbprint);
-            Assert.NotNull(result.ProofKey);
-            Assert.Null(result.Error);
-            Assert.Null(result.ErrorCode);
+            Assert.Null(result.Exception);
             Assert.False(result.IsNonceRequired);
         }
 
@@ -247,7 +245,6 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             Assert.False(result.IsValid);
             Assert.Contains("typ", result.Error);
-            Assert.Equal(DPoPErrorCodes.InvalidDPoPProof, result.ErrorCode);
         }
 
         #endregion
@@ -266,7 +263,6 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             Assert.False(result.IsValid);
             Assert.Contains("not in the allowed set", result.Error);
-            Assert.Equal(DPoPErrorCodes.InvalidDPoPProof, result.ErrorCode);
         }
 
         #endregion
@@ -480,7 +476,6 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             Assert.False(result.IsValid);
             Assert.True(result.IsNonceRequired);
-            Assert.Equal(DPoPErrorCodes.UseDPoPNonce, result.ErrorCode);
         }
 
         [Fact]
@@ -689,7 +684,6 @@ namespace Microsoft.IdentityModel.Dpop.Tests
                 "  ", "GET", new Uri("https://example.com"), null, DefaultOptions());
 
             Assert.False(result.IsValid);
-            Assert.Equal(DPoPErrorCodes.InvalidDPoPProof, result.ErrorCode);
         }
 
         [Fact]
