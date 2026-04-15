@@ -41,7 +41,7 @@ public class DPoPE2ETests
         var proofJwk = JsonWebKeyConverter.ConvertFromSecurityKey(new RsaSecurityKey(proofKey));
         var thumbprint = DPoPProofValidator.ComputeJwkThumbprint(proofJwk);
 
-        // Build the cnf claim as a JSON string (Wilson handles it via JsonElement)
+        // Build the cnf claim
         var cnfJson = $"{{\"jkt\":\"{thumbprint}\"}}";
 
         // Parse cnf into JsonElement for proper embedding
@@ -80,28 +80,24 @@ public class DPoPE2ETests
         var uri = new Uri("https://api.example.com/resource");
         var proofJwt = proofCreator.CreateProof(method, uri, accessToken);
 
-        // 3. Validate the proof
+        // 3. Extract cnf.jkt from AT
+        var handler = new JsonWebTokenHandler();
+        var at = handler.ReadJsonWebToken(accessToken);
+        Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
+        var jkt = cnf.GetProperty("jkt").GetString();
+
+        // 4. Validate the proof with binding
         var validator = new DPoPProofValidator();
         var options = new DPoPValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
             MaxLifetimeInSeconds = 300,
             ClockSkewInSeconds = 300,
-            RequireAccessTokenHash = true,
         };
 
-        var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, options);
+        var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
 
         Assert.True(result.IsValid, $"Proof validation failed: {result.Error}");
-        Assert.NotNull(result.JwkThumbprint);
-
-        // 4. Validate binding: cnf.jkt from AT matches proof key thumbprint
-        var handler = new JsonWebTokenHandler();
-        var at = handler.ReadJsonWebToken(accessToken);
-        Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
-        var jkt = cnf.GetProperty("jkt").GetString();
-
-        Assert.True(DPoPProofValidator.ValidateCnfJktBinding(jkt, result.JwkThumbprint));
     }
 
     [Fact]
@@ -119,23 +115,22 @@ public class DPoPE2ETests
         var uri = new Uri("https://api.example.com/resource");
         var proofJwt = proofCreator.CreateProof(method, uri, accessToken);
 
-        // Proof validates (it's well-formed and signed)
-        var validator = new DPoPProofValidator();
-        var options = new DPoPValidationOptions
-        {
-            AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
-            RequireAccessTokenHash = true,
-        };
-        var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, options);
-        Assert.True(result.IsValid);
-
-        // But binding fails — different keys
+        // Extract cnf.jkt from AT (bound to key A)
         var handler = new JsonWebTokenHandler();
         var at = handler.ReadJsonWebToken(accessToken);
         Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
         var jkt = cnf.GetProperty("jkt").GetString();
 
-        Assert.False(DPoPProofValidator.ValidateCnfJktBinding(jkt, result.JwkThumbprint));
+        // Proof validates structurally but binding fails — different keys
+        var validator = new DPoPProofValidator();
+        var options = new DPoPValidationOptions
+        {
+            AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+        };
+        var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
+
+        Assert.False(result.IsValid);
+        Assert.Contains("cnf.jkt", result.Error);
     }
 
     [Fact]
@@ -151,15 +146,20 @@ public class DPoPE2ETests
         });
         var proofJwt = proofCreator.CreateProof("GET", new Uri("https://api.example.com/resource"), tokenA);
 
+        // Extract cnf.jkt (same key, so jkt is the same for both tokens)
+        var handler = new JsonWebTokenHandler();
+        var at = handler.ReadJsonWebToken(tokenB);
+        Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
+        var jkt = cnf.GetProperty("jkt").GetString();
+
         // Validate proof against token B — ath won't match
         var validator = new DPoPProofValidator();
         var options = new DPoPValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
-            RequireAccessTokenHash = true,
         };
         var result = await validator.ValidateAsync(
-            proofJwt, "GET", new Uri("https://api.example.com/resource"), tokenB, options);
+            proofJwt, "GET", new Uri("https://api.example.com/resource"), tokenB, jkt, options);
 
         Assert.False(result.IsValid);
         Assert.Contains("ath", result.Error);
@@ -179,15 +179,20 @@ public class DPoPE2ETests
         });
         var proofJwt = proofCreator.CreateProof("POST", new Uri("https://api.example.com/data"), accessToken);
 
+        // Extract cnf.jkt
+        var handler = new JsonWebTokenHandler();
+        var at = handler.ReadJsonWebToken(accessToken);
+        Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
+        var jkt = cnf.GetProperty("jkt").GetString();
+
         var validator = new DPoPProofValidator();
         var options = new DPoPValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
-            RequireAccessTokenHash = true,
             ExpectedNonce = nonce,
         };
         var result = await validator.ValidateAsync(
-            proofJwt, "POST", new Uri("https://api.example.com/data"), accessToken, options);
+            proofJwt, "POST", new Uri("https://api.example.com/data"), accessToken, jkt, options);
 
         Assert.True(result.IsValid, $"Proof validation with nonce failed: {result.Error}");
     }
@@ -205,43 +210,22 @@ public class DPoPE2ETests
         });
         var proofJwt = proofCreator.CreateProof("GET", new Uri("https://api.example.com/resource"), accessToken);
 
+        // Extract cnf.jkt
+        var handler = new JsonWebTokenHandler();
+        var at = handler.ReadJsonWebToken(accessToken);
+        Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
+        var jkt = cnf.GetProperty("jkt").GetString();
+
         var validator = new DPoPProofValidator();
         var options = new DPoPValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
-            RequireAccessTokenHash = true,
             ExpectedNonce = "current-server-nonce",
         };
         var result = await validator.ValidateAsync(
-            proofJwt, "GET", new Uri("https://api.example.com/resource"), accessToken, options);
+            proofJwt, "GET", new Uri("https://api.example.com/resource"), accessToken, jkt, options);
 
         Assert.False(result.IsValid);
         Assert.True(result.IsNonceRequired);
-    }
-
-    [Fact]
-    public async Task E2E_TokenEndpointProof_NoAccessToken_Succeeds()
-    {
-        // Token endpoint scenario: proof is created BEFORE the AT exists (no ath claim)
-        var proofKey = CreateTestRsa();
-        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
-        {
-            SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
-        });
-
-        // No access token — this is the token request proof
-        var proofJwt = proofCreator.CreateProof("POST", new Uri("https://login.example.com/token"));
-
-        var validator = new DPoPProofValidator();
-        var options = new DPoPValidationOptions
-        {
-            AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
-            RequireAccessTokenHash = false, // No AT at token endpoint
-        };
-        var result = await validator.ValidateAsync(
-            proofJwt, "POST", new Uri("https://login.example.com/token"), null, options);
-
-        Assert.True(result.IsValid, $"Token endpoint proof failed: {result.Error}");
-        Assert.NotNull(result.JwkThumbprint);
     }
 }

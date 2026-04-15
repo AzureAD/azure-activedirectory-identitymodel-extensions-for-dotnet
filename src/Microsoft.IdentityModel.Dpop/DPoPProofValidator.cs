@@ -19,22 +19,23 @@ namespace Microsoft.IdentityModel.Dpop;
 /// </remarks>
 public class DPoPProofValidator
 {
+    private static readonly JsonWebTokenHandler s_tokenHandler = new JsonWebTokenHandler();
+
     /// <summary>
     /// Validates a DPoP proof JWT from an incoming HTTP request.
     /// </summary>
     /// <param name="dpopProofJwt">The raw DPoP proof JWT from the <c>DPoP</c> request header.</param>
     /// <param name="httpMethod">The HTTP method of the incoming request (e.g., "GET", "POST").</param>
     /// <param name="requestUri">The HTTP URI of the incoming request (absolute).</param>
-    /// <param name="accessToken">
-    /// The access token from the <c>Authorization</c> header, used for <c>ath</c> binding.
-    /// Pass null when validating a DPoP proof for a token request (no access token yet).
-    /// </param>
+    /// <param name="accessToken">The access token from the <c>Authorization</c> header, used for <c>ath</c> binding.</param>
+    /// <param name="expectedCnfJkt">The expected <c>cnf.jkt</c> thumbprint extracted from the access token, used for key binding.</param>
     /// <param name="options">Validation options controlling algorithms, lifetime, nonce, and replay detection.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A <see cref="DPoPValidationResult"/> with the validation outcome and JWK thumbprint.</returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="dpopProofJwt"/>, <paramref name="httpMethod"/>,
-    /// <paramref name="requestUri"/>, or <paramref name="options"/> is null.
+    /// <paramref name="requestUri"/>, <paramref name="accessToken"/>,
+    /// <paramref name="expectedCnfJkt"/>, or <paramref name="options"/> is null.
     /// </exception>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="requestUri"/> is not an absolute URI.
@@ -44,16 +45,25 @@ public class DPoPProofValidator
         string httpMethod,
         Uri requestUri,
         string accessToken,
+        string expectedCnfJkt,
         DPoPValidationOptions options,
         CancellationToken cancellationToken = default)
     {
         _ = dpopProofJwt ?? throw new ArgumentNullException(nameof(dpopProofJwt));
         _ = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
         _ = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+        _ = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
+        _ = expectedCnfJkt ?? throw new ArgumentNullException(nameof(expectedCnfJkt));
         _ = options ?? throw new ArgumentNullException(nameof(options));
 
         if (string.IsNullOrWhiteSpace(dpopProofJwt))
             return DPoPValidationResult.Failed("DPoP proof is empty.");
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+            return DPoPValidationResult.Failed("Access token is empty.");
+
+        if (string.IsNullOrWhiteSpace(expectedCnfJkt))
+            return DPoPValidationResult.Failed("Expected cnf.jkt is empty.");
 
         if (!requestUri.IsAbsoluteUri)
             throw new ArgumentException("URI must be absolute.", nameof(requestUri));
@@ -62,7 +72,7 @@ public class DPoPProofValidator
 
         try
         {
-            return await ValidateCoreAsync(dpopProofJwt, httpMethod, requestUri, accessToken, options, cancellationToken)
+            return await ValidateCoreAsync(dpopProofJwt, httpMethod, requestUri, accessToken, expectedCnfJkt, options, cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -75,10 +85,7 @@ public class DPoPProofValidator
     /// Validates that the <c>cnf.jkt</c> claim in an access token matches the DPoP proof's
     /// public key thumbprint, using constant-time comparison to prevent timing attacks.
     /// </summary>
-    /// <param name="accessTokenCnfJkt">The <c>jkt</c> value from the access token's <c>cnf</c> claim.</param>
-    /// <param name="dpopProofJwkThumbprint">The computed JWK SHA-256 thumbprint from the DPoP proof.</param>
-    /// <returns><see langword="true"/> if the values match; otherwise <see langword="false"/>.</returns>
-    public static bool ValidateCnfJktBinding(string accessTokenCnfJkt, string dpopProofJwkThumbprint)
+    private static bool ValidateCnfJktBinding(string accessTokenCnfJkt, string dpopProofJwkThumbprint)
     {
         if (string.IsNullOrEmpty(accessTokenCnfJkt) || string.IsNullOrEmpty(dpopProofJwkThumbprint))
             return false;
@@ -99,12 +106,9 @@ public class DPoPProofValidator
     {
         _ = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
 
-        // Use strict ASCII encoding per RFC 9449 §4.2 — reject non-ASCII tokens
-        // rather than silently replacing with '?' (which would produce an incorrect hash).
-        var tokenBytes = Encoding.GetEncoding(
-            "us-ascii",
-            EncoderFallback.ExceptionFallback,
-            DecoderFallback.ExceptionFallback).GetBytes(accessToken);
+        // Encoding.ASCII is safe here — access tokens are JWTs (base64url-encoded segments
+        // separated by dots), so every character is guaranteed ASCII.
+        var tokenBytes = Encoding.ASCII.GetBytes(accessToken);
 #if NET6_0_OR_GREATER
         var hash = SHA256.HashData(tokenBytes);
 #else
@@ -157,11 +161,11 @@ public class DPoPProofValidator
         string httpMethod,
         Uri requestUri,
         string accessToken,
+        string expectedCnfJkt,
         DPoPValidationOptions options,
         CancellationToken cancellationToken)
     {
-        var handler = new JsonWebTokenHandler();
-        var proofToken = handler.ReadJsonWebToken(dpopProofJwt);
+        var proofToken = s_tokenHandler.ReadJsonWebToken(dpopProofJwt);
 
         // Validate typ == dpop+jwt
         if (!string.Equals(proofToken.Typ, DPoPConstants.DPoPProofTokenType, StringComparison.OrdinalIgnoreCase))
@@ -219,7 +223,7 @@ public class DPoPProofValidator
             ValidAlgorithms = new string[] { alg },
         };
 
-        var signatureResult = await handler
+        var signatureResult = await s_tokenHandler
             .ValidateTokenAsync(proofToken, validationParams, cancellationToken)
             .ConfigureAwait(false);
 
@@ -307,28 +311,31 @@ public class DPoPProofValidator
 
             if (!string.Equals(options.ExpectedNonce, nonceValue, StringComparison.Ordinal))
             {
-                return DPoPValidationResult.NonceRequired();
+                return DPoPValidationResult.NonceValidationFailed();
             }
         }
 
-        // Validate ath (access token hash)
-        if (!string.IsNullOrEmpty(accessToken) && options.RequireAccessTokenHash)
+        // Validate ath (access token hash) — always required since accessToken is required
+        if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Ath, out string athValue) ||
+            string.IsNullOrEmpty(athValue))
         {
-            if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Ath, out string athValue) ||
-                string.IsNullOrEmpty(athValue))
-            {
-                return DPoPValidationResult.Failed("DPoP proof is missing the 'ath' claim.");
-            }
-
-            var expectedAth = ComputeAccessTokenHash(accessToken);
-            if (!string.Equals(athValue, expectedAth, StringComparison.Ordinal))
-            {
-                return DPoPValidationResult.Failed("DPoP proof 'ath' claim does not match the access token hash.");
-            }
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'ath' claim.");
         }
 
-        // Compute thumbprint and return success
+        var expectedAth = ComputeAccessTokenHash(accessToken);
+        if (!string.Equals(athValue, expectedAth, StringComparison.Ordinal))
+        {
+            return DPoPValidationResult.Failed("DPoP proof 'ath' claim does not match the access token hash.");
+        }
+
+        // Compute thumbprint and validate cnf.jkt binding
         var thumbprint = ComputeJwkThumbprint(jwk);
-        return DPoPValidationResult.Success(thumbprint);
+
+        if (!ValidateCnfJktBinding(expectedCnfJkt, thumbprint))
+        {
+            return DPoPValidationResult.Failed("DPoP proof JWK thumbprint does not match the access token cnf.jkt claim.");
+        }
+
+        return DPoPValidationResult.Success();
     }
 }

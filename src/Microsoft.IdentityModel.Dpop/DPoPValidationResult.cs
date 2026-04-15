@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.IdentityModel.Tokens;
-
 namespace Microsoft.IdentityModel.Dpop;
 
 /// <summary>
@@ -32,12 +30,6 @@ public sealed class DPoPValidationResult
     public System.Exception Exception { get; private set; }
 
     /// <summary>
-    /// Gets the computed base64url-encoded SHA-256 JWK thumbprint (RFC 7638) of the proof's public key.
-    /// Only set on successful validation.
-    /// </summary>
-    public string JwkThumbprint { get; private set; }
-
-    /// <summary>
     /// Gets a value indicating whether the server should issue a nonce challenge
     /// via the <c>DPoP-Nonce</c> response header.
     /// </summary>
@@ -46,11 +38,10 @@ public sealed class DPoPValidationResult
     /// <summary>
     /// Creates a successful validation result.
     /// </summary>
-    public static DPoPValidationResult Success(string jwkThumbprint) =>
+    public static DPoPValidationResult Success() =>
         new()
         {
             IsValid = true,
-            JwkThumbprint = jwkThumbprint,
         };
 
     /// <summary>
@@ -72,6 +63,17 @@ public sealed class DPoPValidationResult
         {
             IsValid = false,
             Error = "DPoP nonce is required.",
+            IsNonceRequired = true,
+        };
+
+    /// <summary>
+    /// Creates a result indicating that a server nonce is invalid.
+    /// </summary>
+    public static DPoPValidationResult NonceValidationFailed() =>
+        new()
+        {
+            IsValid = false,
+            Error = "DPoP nonce validation failed. The provided nonce did not match the expected value.",
             IsNonceRequired = true,
         };
 }

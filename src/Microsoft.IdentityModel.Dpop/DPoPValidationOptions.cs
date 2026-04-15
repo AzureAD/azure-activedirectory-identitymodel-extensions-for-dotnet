@@ -41,13 +41,6 @@ public class DPoPValidationOptions
     public string ExpectedNonce { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the <c>ath</c> (access token hash) claim is required.
-    /// When true and an access token is provided, the proof must contain a valid <c>ath</c> claim.
-    /// Default: true.
-    /// </summary>
-    public bool RequireAccessTokenHash { get; set; } = true;
-
-    /// <summary>
     /// Gets or sets the optional replay cache for <c>jti</c> (JWT ID) replay detection.
     /// When set, each proof's jti is checked against the cache to prevent reuse.
     /// When null, jti replay detection is skipped.

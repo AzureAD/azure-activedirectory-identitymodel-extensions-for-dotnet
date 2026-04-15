@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
@@ -24,21 +25,50 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 #endif
         }
 
+        private static (string AccessToken, string CnfJkt) CreateTestAccessToken(RSA proofKey)
+        {
+            var atSigningKey = CreateTestRsa();
+            var handler = new Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler();
+
+            var jwk = JsonWebKeyConverter.ConvertFromSecurityKey(new RsaSecurityKey(proofKey));
+            var thumbprint = DPoPProofValidator.ComputeJwkThumbprint(jwk);
+            var cnfJson = $"{{\"jkt\":\"{thumbprint}\"}}";
+
+            using var doc = System.Text.Json.JsonDocument.Parse(cnfJson);
+            var claims = new Dictionary<string, object>
+            {
+                { "sub", "test" },
+                { "cnf", doc.RootElement.Clone() },
+            };
+
+            var accessToken = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = "https://test-issuer.example.com",
+                Audience = "api://test",
+                Claims = claims,
+                SigningCredentials = new SigningCredentials(new RsaSecurityKey(atSigningKey), SecurityAlgorithms.RsaSha256),
+            });
+
+            return (accessToken, thumbprint);
+        }
+
         [Fact]
         public async Task CreateAndValidateProof_Success()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(CreateTestRsa());
+            var rsa = CreateTestRsa();
+            var rsaKey = new RsaSecurityKey(rsa);
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
+            var (accessToken, cnfJkt) = CreateTestAccessToken(rsa);
 
             var dpopProof = new DPoPProofCreator(new DPoPProofCreatorOptions { SigningCredentials = signingCredentials });
             var httpMethod = "POST";
             var uri = new Uri("https://example.com/token");
 
             // Act
-            var proof = dpopProof.CreateProof(httpMethod, uri);
+            var proof = dpopProof.CreateProof(httpMethod, uri, accessToken);
             var validator = new DPoPProofValidator();
-            var result = await validator.ValidateAsync(proof, httpMethod, uri, null,
+            var result = await validator.ValidateAsync(proof, httpMethod, uri, accessToken, cnfJkt,
                 new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
@@ -51,16 +81,18 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public async Task ValidateProof_InvalidHttpMethod_Fails()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(CreateTestRsa());
+            var rsa = CreateTestRsa();
+            var rsaKey = new RsaSecurityKey(rsa);
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
+            var (accessToken, cnfJkt) = CreateTestAccessToken(rsa);
 
             var dpopProof = new DPoPProofCreator(new DPoPProofCreatorOptions { SigningCredentials = signingCredentials });
             var uri = new Uri("https://example.com/token");
 
             // Act
-            var proof = dpopProof.CreateProof("POST", uri);
+            var proof = dpopProof.CreateProof("POST", uri, accessToken);
             var validator = new DPoPProofValidator();
-            var result = await validator.ValidateAsync(proof, "GET", uri, null,
+            var result = await validator.ValidateAsync(proof, "GET", uri, accessToken, cnfJkt,
                 new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
@@ -72,16 +104,18 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public async Task ValidateProof_InvalidUri_Fails()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(CreateTestRsa());
+            var rsa = CreateTestRsa();
+            var rsaKey = new RsaSecurityKey(rsa);
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
+            var (accessToken, cnfJkt) = CreateTestAccessToken(rsa);
 
             var dpopProof = new DPoPProofCreator(new DPoPProofCreatorOptions { SigningCredentials = signingCredentials });
             var uri = new Uri("https://example.com/token");
 
             // Act
-            var proof = dpopProof.CreateProof("POST", uri);
+            var proof = dpopProof.CreateProof("POST", uri, accessToken);
             var validator = new DPoPProofValidator();
-            var result = await validator.ValidateAsync(proof, "POST", new Uri("https://example.com/resource"), null,
+            var result = await validator.ValidateAsync(proof, "POST", new Uri("https://example.com/resource"), accessToken, cnfJkt,
                 new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
 
             // Assert
@@ -93,8 +127,10 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public async Task ValidateProof_WithNonce_Success()
         {
             // Arrange
-            var rsaKey = new RsaSecurityKey(CreateTestRsa());
+            var rsa = CreateTestRsa();
+            var rsaKey = new RsaSecurityKey(rsa);
             var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
+            var (accessToken, cnfJkt) = CreateTestAccessToken(rsa);
 
             var dpopProof = new DPoPProofCreator(new DPoPProofCreatorOptions
             {
@@ -105,9 +141,9 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var uri = new Uri("https://example.com/token");
 
             // Act
-            var proof = dpopProof.CreateProof("POST", uri);
+            var proof = dpopProof.CreateProof("POST", uri, accessToken);
             var validator = new DPoPProofValidator();
-            var result = await validator.ValidateAsync(proof, "POST", uri, null,
+            var result = await validator.ValidateAsync(proof, "POST", uri, accessToken, cnfJkt,
                 new DPoPValidationOptions
                 {
                     AllowedSigningAlgorithms = new HashSet<string> { "RS256" },
