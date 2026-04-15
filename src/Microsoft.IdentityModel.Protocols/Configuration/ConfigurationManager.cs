@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Protocols
                     // If provided configuration is valid, skip regular retriaval process and update current configuration.
                     if (ConfigurationEventHandler != null)
                     {
-                        var configurationRetrieved = await HandleBeforeRetrieveAsync(bypassCache: false, cancel).ConfigureAwait(false);
+                        var configurationRetrieved = await HandleBeforeRetrieveAsync(new ConfigurationRetrievalContext(), cancel).ConfigureAwait(false);
 
                         // replicate the behavior of successful retrieval from endpoint
                         if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
@@ -308,7 +308,7 @@ namespace Microsoft.IdentityModel.Protocols
                         TelemetryConstants.Protocols.Automatic,
                         TelemetryConstants.Protocols.ConfigurationSourceUnknown);
 
-                    _ = Task.Run(UpdateCurrentConfigurationAsync, CancellationToken.None);
+                    _ = Task.Run(() => UpdateCurrentConfigurationAsync(bypassCache: false), CancellationToken.None);
                 }
             }
 
@@ -331,9 +331,6 @@ namespace Microsoft.IdentityModel.Protocols
         /// The Caller should first check the state checking state using:
         ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle).
         /// </summary>
-        private async Task UpdateCurrentConfigurationAsync() =>
-            await UpdateCurrentConfigurationAsync(bypassCache: false).ConfigureAwait(false);
-
         private async Task UpdateCurrentConfigurationAsync(bool bypassCache)
         {
             long startTimestamp = TimeProvider.GetTimestamp();
@@ -344,7 +341,8 @@ namespace Microsoft.IdentityModel.Protocols
                 // If provided configuration is valid, skip regular retriaval process and update current configuration.
                 if (ConfigurationEventHandler != null)
                 {
-                    ConfigurationEventHandlerResult<T> configurationRetrieved = await HandleBeforeRetrieveAsync(bypassCache).ConfigureAwait(false);
+                    ConfigurationEventHandlerResult<T> configurationRetrieved =
+                        await HandleBeforeRetrieveAsync(new ConfigurationRetrievalContext { BypassCache = bypassCache }).ConfigureAwait(false);
                     if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
                     {
                         UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
@@ -490,7 +488,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        private async Task<ConfigurationEventHandlerResult<T>> HandleBeforeRetrieveAsync(bool bypassCache, CancellationToken cancellationToken = default)
+        private async Task<ConfigurationEventHandlerResult<T>> HandleBeforeRetrieveAsync(ConfigurationRetrievalContext context, CancellationToken cancellationToken = default)
         {
             long beforeHandlerTimestamp = TimeProvider.GetTimestamp();
 
@@ -499,7 +497,6 @@ namespace Microsoft.IdentityModel.Protocols
                 ConfigurationEventHandlerResult<T> handlerResult;
                 if (ConfigurationEventHandler is IConfigurationEventHandlerContextAware<T> contextAware)
                 {
-                    var context = new ConfigurationRetrievalContext() { BypassCache = bypassCache };
                     handlerResult = await contextAware.BeforeRetrieveAsync(
                         MetadataAddress, context, cancellationToken).ConfigureAwait(false);
                 }
@@ -538,7 +535,6 @@ namespace Microsoft.IdentityModel.Protocols
                     return handlerResult;
                 }
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
             {
                 var handlerErrorElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
@@ -556,7 +552,6 @@ namespace Microsoft.IdentityModel.Protocols
                             ex),
                         ex));
             }
-#pragma warning restore CA1031 // Do not catch general exception types
 
             return ConfigurationEventHandlerResult<T>.NoResult;
         }

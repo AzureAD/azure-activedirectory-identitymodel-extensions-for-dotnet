@@ -38,7 +38,8 @@ namespace Microsoft.IdentityModel.Protocols
                         // If provided configuration is valid, skip regular retriaval process and update current configuration.
                         if (ConfigurationEventHandler != null)
                         {
-                            ConfigurationEventHandlerResult<T> configurationRetrieved = await HandleBeforeRetrieveAsync(bypassCache: _refreshRequested, cancel).ConfigureAwait(false);
+                            ConfigurationEventHandlerResult<T> configurationRetrieved =
+                                await HandleBeforeRetrieveAsync(new ConfigurationRetrievalContext { BypassCache = _refreshRequested }, cancel).ConfigureAwait(false);
 
                             // replicate the behavior of successful retrieval from endpoint
                             if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
