@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests;
