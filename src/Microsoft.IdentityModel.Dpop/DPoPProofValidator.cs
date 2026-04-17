@@ -340,6 +340,7 @@ public class DPoPProofValidator
             return DPoPValidationResult.Failed("DPoP proof JWK thumbprint does not match the access token cnf.jkt claim.");
         }
 
-        return DPoPValidationResult.Success();
+        string proofNonceForResult = proofToken.TryGetPayloadValue(DPoPClaimTypes.Nonce, out string proofNonce) ? proofNonce : null;
+        return DPoPValidationResult.Success(proofNonceForResult);
     }
 }

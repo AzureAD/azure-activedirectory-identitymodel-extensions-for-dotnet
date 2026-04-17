@@ -333,6 +333,77 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             Assert.Contains("not in the allowed set", result.Error);
         }
 
+        [Fact]
+        public async Task ValidateAsync_AlgNone_Fails()
+        {
+            var header = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes("{\"typ\":\"dpop+jwt\",\"alg\":\"none\",\"jwk\":{\"kty\":\"RSA\",\"e\":\"AQAB\",\"n\":\"test\"}}"));
+            var payload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes("{\"htm\":\"GET\",\"htu\":\"https://example.com\",\"iat\":1704063600,\"jti\":\"test\"}"));
+            var fakeProof = $"{header}.{payload}.";
+
+            var rsa = CreateTestRsa();
+            var (accessToken, cnfJkt) = CreateSimpleAccessToken(rsa);
+
+            var result = await _validator.ValidateAsync(
+                fakeProof, "GET", new Uri("https://example.com"), accessToken, cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Contains("none", result.Error);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_SymmetricAlgorithm_Fails()
+        {
+            var header = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes("{\"typ\":\"dpop+jwt\",\"alg\":\"HS256\",\"jwk\":{\"kty\":\"RSA\",\"e\":\"AQAB\",\"n\":\"test\"}}"));
+            var payload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes("{\"htm\":\"GET\",\"htu\":\"https://example.com\",\"iat\":1704063600,\"jti\":\"test\"}"));
+            var fakeProof = $"{header}.{payload}.fakesig";
+
+            var rsa = CreateTestRsa();
+            var (accessToken, cnfJkt) = CreateSimpleAccessToken(rsa);
+
+            var result = await _validator.ValidateAsync(
+                fakeProof, "GET", new Uri("https://example.com"), accessToken, cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Contains("asymmetric", result.Error);
+        }
+
+        #endregion
+
+        #region JWK Validation
+
+        [Fact]
+        public async Task ValidateAsync_MissingJwk_Fails()
+        {
+            var rsa = CreateTestRsa();
+            var signingCredentials = new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
+
+            var handler = new JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false };
+            var jwt = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                IncludeKeyIdInHeader = false,
+                Claims = new Dictionary<string, object>
+                {
+                    { "htm", "GET" },
+                    { "htu", "https://example.com" },
+                    { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
+                    { "jti", Guid.NewGuid().ToString() },
+                },
+                AdditionalHeaderClaims = new Dictionary<string, object>
+                {
+                    { "typ", "dpop+jwt" },
+                },
+                SigningCredentials = signingCredentials,
+            });
+
+            var (accessToken, cnfJkt) = CreateSimpleAccessToken(rsa);
+
+            var result = await _validator.ValidateAsync(
+                jwt, "GET", new Uri("https://example.com"), accessToken, cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Contains("jwk", result.Error);
+        }
+
         #endregion
 
         #region Htm Validation
@@ -575,6 +646,20 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             Assert.True(result.IsValid);
         }
 
+        [Fact]
+        public async Task ValidateAsync_EmptyExpectedNonce_ReturnsInvalid()
+        {
+            var (proofJwt, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var options = DefaultOptions();
+            options.ExpectedNonce = "";
+
+            var result = await _validator.ValidateAsync(
+                proofJwt, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.False(result.IsValid);
+            Assert.Contains("ExpectedNonce", result.Error);
+        }
+
         #endregion
 
         #region Ath (Access Token Hash) Validation
@@ -811,6 +896,19 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         {
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 _validator.ValidateAsync("jwt", "GET", new Uri("/relative", UriKind.Relative), "at", "jkt", DefaultOptions()));
+        }
+
+        [Fact]
+        public async Task ValidateAsync_UnparseableProof_ReturnsInvalid()
+        {
+            var rsa = CreateTestRsa();
+            var (accessToken, cnfJkt) = CreateSimpleAccessToken(rsa);
+
+            var result = await _validator.ValidateAsync(
+                "not-a-jwt", "GET", new Uri("https://example.com/api"), accessToken, cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.NotNull(result.Exception);
         }
 
         #endregion
