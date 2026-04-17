@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         private Task UpdateCurrentConfigurationWithBypassAsync()
-            => UpdateCurrentConfigurationAsync(bypassCache: true);
+            => UpdateCurrentConfigurationAsync(bypassCache: false);
 
         private async Task<T> GetConfigurationNonBlockingAsync(CancellationToken cancel)
         {
