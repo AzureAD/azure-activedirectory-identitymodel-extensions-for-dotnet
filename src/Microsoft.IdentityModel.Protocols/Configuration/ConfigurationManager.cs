@@ -205,6 +205,9 @@ namespace Microsoft.IdentityModel.Protocols
                 return await GetConfigurationNonBlockingAsync(cancel).ConfigureAwait(false);
         }
 
+        private Task UpdateCurrentConfigurationWithBypassAsync()
+            => UpdateCurrentConfigurationAsync(bypassCache: true);
+
         private async Task<T> GetConfigurationNonBlockingAsync(CancellationToken cancel)
         {
             Exception fetchMetadataFailure = null;
@@ -308,7 +311,7 @@ namespace Microsoft.IdentityModel.Protocols
                         TelemetryConstants.Protocols.Automatic,
                         TelemetryConstants.Protocols.ConfigurationSourceUnknown);
 
-                    _ = Task.Run(() => UpdateCurrentConfigurationAsync(bypassCache: false), CancellationToken.None);
+                    _ = Task.Run(UpdateCurrentConfigurationWithBypassAsync, CancellationToken.None);
                 }
             }
 
