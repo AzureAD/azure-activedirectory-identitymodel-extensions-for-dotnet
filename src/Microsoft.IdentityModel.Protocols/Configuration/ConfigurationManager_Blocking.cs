@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (_syncAfter <= TimeProvider.GetUtcNow())
                 {
+                    var retrievalContext = new ConfigurationRetrievalContext { BypassCache = _refreshRequested };
                     try
                     {
                         // Check if event handler can provide configuration
@@ -39,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
                         if (ConfigurationEventHandler != null)
                         {
                             ConfigurationEventHandlerResult<T> configurationRetrieved =
-                                await HandleBeforeRetrieveAsync(new ConfigurationRetrievalContext { BypassCache = _refreshRequested }, cancel).ConfigureAwait(false);
+                                await HandleBeforeRetrieveAsync(retrievalContext, cancel).ConfigureAwait(false);
 
                             // replicate the behavior of successful retrieval from endpoint
                             if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
@@ -49,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols
                                 if (_refreshRequested)
                                     _refreshRequested = false;
 
-                                UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
+                                UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
 
                                 return _currentConfiguration;
                             }
@@ -79,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols
                         if (_refreshRequested)
                             _refreshRequested = false;
 
-                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow());
+                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
                     }
                     catch (Exception ex)
                     {
