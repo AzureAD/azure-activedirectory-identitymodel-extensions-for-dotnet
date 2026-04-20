@@ -15,7 +15,9 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
 {
     public bool BeforeRetrieveAsyncCalled { get; private set; }
     public bool ContextAwareBeforeRetrieveAsyncCalled { get; set; }
+    public bool ContextAwareAfterUpdateAsyncCalled { get; set; }
     public ConfigurationRetrievalContext LastContext { get; set; }
+    public ConfigurationRetrievalContext LastAfterUpdateContext { get; set; }
     public string BeforeRetrieveMetadataAddress { get; set; }
     public bool AfterUpdateAsyncCalled { get; set; }
     public string AfterUpdateMetadataAddress { get; set; }
@@ -82,9 +84,10 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         ConfigurationRetrievalContext context,
         CancellationToken cancellationToken = default)
     {
-        AfterUpdateAsyncCalled = true;
+        ContextAwareAfterUpdateAsyncCalled = true;
         AfterUpdateMetadataAddress = metadataAddress;
         AfterUpdateConfiguration = configuration;
+        LastAfterUpdateContext = context;
         return Task.CompletedTask;
     }
 }

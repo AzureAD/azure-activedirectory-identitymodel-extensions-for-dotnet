@@ -235,4 +235,113 @@ public class ConfigurationManagerEventHandlerContextAwareTests
 
         TestUtilities.AssertFailIfErrors(testContext);
     }
+
+    [Fact]
+    public async Task ContextAwareAfterUpdateAsync_Called_InsteadOfBase()
+    {
+        // Arrange
+        var testContext = new CompareContext($"{this}.ContextAwareAfterUpdateAsync_Called_InsteadOfBase");
+        var documentRetriever = new FileDocumentRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var mockEventHandler = new MockConfigurationEventHandlerContextAware();
+
+        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            "OpenIdConnectMetadata.json",
+            configurationRetriever,
+            documentRetriever)
+        {
+            ConfigurationEventHandler = mockEventHandler
+        };
+
+        // Act
+        await configurationManager.GetConfigurationAsync();
+
+        // Allow fire-and-forget AfterUpdate to complete
+        await Task.Delay(500);
+
+        // Assert — the manager should detect the context-aware interface and call its AfterUpdateAsync overload
+        if (!mockEventHandler.ContextAwareAfterUpdateAsyncCalled)
+            testContext.AddDiff("Context-aware AfterUpdateAsync should have been called.");
+
+        if (mockEventHandler.AfterUpdateAsyncCalled)
+            testContext.AddDiff("Base AfterUpdateAsync should NOT have been called when context-aware interface is implemented.");
+
+        TestUtilities.AssertFailIfErrors(testContext);
+    }
+
+    [Fact]
+    public async Task AfterUpdateAsync_BypassCache_False_OnFirstRetrieval()
+    {
+        // Arrange
+        var testContext = new CompareContext($"{this}.AfterUpdateAsync_BypassCache_False_OnFirstRetrieval");
+        var documentRetriever = new FileDocumentRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var mockEventHandler = new MockConfigurationEventHandlerContextAware();
+
+        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            "OpenIdConnectMetadata.json",
+            configurationRetriever,
+            documentRetriever)
+        {
+            ConfigurationEventHandler = mockEventHandler
+        };
+
+        // Act
+        await configurationManager.GetConfigurationAsync();
+
+        // Allow fire-and-forget AfterUpdate to complete
+        await Task.Delay(500);
+
+        // Assert
+        if (mockEventHandler.LastAfterUpdateContext == null)
+            testContext.AddDiff("Context should have been provided to AfterUpdateAsync.");
+        else if (mockEventHandler.LastAfterUpdateContext.BypassCache)
+            testContext.AddDiff("BypassCache should be false on first retrieval (no RequestRefresh called).");
+
+        TestUtilities.AssertFailIfErrors(testContext);
+    }
+
+    [Fact]
+    public async Task AfterUpdateAsync_BypassCache_True_AfterRequestRefresh()
+    {
+        // Arrange
+        var testContext = new CompareContext($"{this}.AfterUpdateAsync_BypassCache_True_AfterRequestRefresh");
+        var documentRetriever = new FileDocumentRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var mockEventHandler = new MockConfigurationEventHandlerContextAware();
+
+        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            "OpenIdConnectMetadata.json",
+            configurationRetriever,
+            documentRetriever)
+        {
+            ConfigurationEventHandler = mockEventHandler
+        };
+
+        var resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
+
+        // First retrieval to populate configuration
+        await configurationManager.GetConfigurationAsync();
+        mockEventHandler.ContextAwareAfterUpdateAsyncCalled = false;
+        mockEventHandler.LastAfterUpdateContext = null;
+
+        // Act — RequestRefresh should signal BypassCache = true
+        configurationManager.RequestRefresh();
+
+        ConfigurationManagerTests.WaitOrFail(resetEvent);
+
+        // Allow fire-and-forget AfterUpdate to complete
+        await Task.Delay(500);
+
+        // Assert
+        if (!mockEventHandler.ContextAwareAfterUpdateAsyncCalled)
+            testContext.AddDiff("Context-aware AfterUpdateAsync should have been called after RequestRefresh.");
+
+        if (mockEventHandler.LastAfterUpdateContext == null)
+            testContext.AddDiff("Context should have been provided to AfterUpdateAsync.");
+        else if (!mockEventHandler.LastAfterUpdateContext.BypassCache)
+            testContext.AddDiff("BypassCache should be true when RequestRefresh triggered the retrieval.");
+
+        TestUtilities.AssertFailIfErrors(testContext);
+    }
 }
