@@ -367,6 +367,51 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             Assert.Contains("asymmetric", result.Error);
         }
 
+        [Fact]
+        public async Task ValidateAsync_EmptyAlg_Fails()
+        {
+            var header = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes("{\"typ\":\"dpop+jwt\",\"alg\":\"\",\"jwk\":{\"kty\":\"RSA\",\"e\":\"AQAB\",\"n\":\"test\"}}"));
+            var payload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes("{\"htm\":\"GET\",\"htu\":\"https://example.com\",\"iat\":" + DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ",\"jti\":\"test\"}"));
+            var fakeProof = $"{header}.{payload}.fakesig";
+
+            var rsa = CreateTestRsa();
+            var (accessToken, cnfJkt) = CreateSimpleAccessToken(rsa);
+
+            var result = await _validator.ValidateAsync(
+                fakeProof, "GET", new Uri("https://example.com"), accessToken, cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Contains("empty", result.Error, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_NullAllowedAlgorithms_Fails()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var options = DefaultOptions();
+            options.AllowedSigningAlgorithms = null;
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.False(result.IsValid);
+            Assert.Contains("allowed algorithm", result.Error, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_EmptyAllowedAlgorithms_Fails()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var options = DefaultOptions();
+            options.AllowedSigningAlgorithms = new HashSet<string>();
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.False(result.IsValid);
+            Assert.Contains("allowed algorithm", result.Error, StringComparison.OrdinalIgnoreCase);
+        }
+
         #endregion
 
         #region JWK Validation

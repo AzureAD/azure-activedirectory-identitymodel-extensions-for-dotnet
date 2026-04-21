@@ -82,20 +82,6 @@ public class DPoPProofValidator
     }
 
     /// <summary>
-    /// Validates that the <c>cnf.jkt</c> claim in an access token matches the DPoP proof's
-    /// public key thumbprint, using constant-time comparison to prevent timing attacks.
-    /// </summary>
-    private static bool ValidateCnfJktBinding(string accessTokenCnfJkt, string dpopProofJwkThumbprint)
-    {
-        if (string.IsNullOrEmpty(accessTokenCnfJkt) || string.IsNullOrEmpty(dpopProofJwkThumbprint))
-            return false;
-
-        return Utility.AreEqual(
-            Encoding.UTF8.GetBytes(accessTokenCnfJkt),
-            Encoding.UTF8.GetBytes(dpopProofJwkThumbprint));
-    }
-
-    /// <summary>
     /// Computes the <c>ath</c> (access token hash) per RFC 9449 §4.2:
     /// base64url-encoded SHA-256 hash of the ASCII-encoded access token.
     /// </summary>
@@ -175,19 +161,27 @@ public class DPoPProofValidator
 
         // Validate alg is asymmetric and in allowed set
         var alg = proofToken.Alg;
-        if (string.IsNullOrEmpty(alg) ||
-            string.Equals(alg, "none", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(alg))
+        {
+            return DPoPValidationResult.Failed("DPoP proof algorithm must not be empty.");
+        }
+
+        if (string.Equals(alg, "none", StringComparison.OrdinalIgnoreCase))
         {
             return DPoPValidationResult.Failed("DPoP proof algorithm must not be 'none'.");
         }
 
-        if (alg.StartsWith("HS", StringComparison.OrdinalIgnoreCase))
+        if (SupportedAlgorithms.IsSupportedSymmetricAlgorithm(alg))
         {
             return DPoPValidationResult.Failed("DPoP proof must use an asymmetric algorithm.");
         }
 
-        if (options.AllowedSigningAlgorithms.Count > 0 &&
-            !options.AllowedSigningAlgorithms.Contains(alg))
+        if (options.AllowedSigningAlgorithms == null || options.AllowedSigningAlgorithms.Count <= 0)
+        {
+            return DPoPValidationResult.Failed("The allowed algorithm set cannot be null or empty.");
+        }
+
+        if (!options.AllowedSigningAlgorithms.Contains(alg))
         {
             return DPoPValidationResult.Failed($"DPoP proof algorithm '{alg}' is not in the allowed set.");
         }
@@ -233,15 +227,19 @@ public class DPoPProofValidator
         }
 
         // Validate htm matches HTTP method
-        if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Htm, out string htmValue) ||
-            !string.Equals(httpMethod, htmValue, StringComparison.OrdinalIgnoreCase))
+        if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Htm, out string htmValue) || string.IsNullOrWhiteSpace(htmValue))
+        {
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'htm' claim.");
+        }
+
+        if (!string.Equals(httpMethod, htmValue, StringComparison.OrdinalIgnoreCase))
         {
             return DPoPValidationResult.Failed("DPoP proof 'htm' claim does not match the HTTP method.");
         }
 
         // Validate htu matches request URI
         // Per RFC 9449 §4.3: compare scheme + authority + path (no query/fragment)
-        if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Htu, out string htuValue))
+        if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Htu, out string htuValue) || string.IsNullOrWhiteSpace(htuValue))
         {
             return DPoPValidationResult.Failed("DPoP proof is missing the 'htu' claim.");
         }
@@ -335,7 +333,7 @@ public class DPoPProofValidator
 
         // Compute thumbprint and validate cnf.jkt binding
         var thumbprint = ComputeJwkThumbprint(jwk);
-        if (!ValidateCnfJktBinding(expectedCnfJkt, thumbprint))
+        if (!Utility.AreEqual(Encoding.UTF8.GetBytes(expectedCnfJkt), Encoding.UTF8.GetBytes(thumbprint)))
         {
             return DPoPValidationResult.Failed("DPoP proof JWK thumbprint does not match the access token cnf.jkt claim.");
         }
