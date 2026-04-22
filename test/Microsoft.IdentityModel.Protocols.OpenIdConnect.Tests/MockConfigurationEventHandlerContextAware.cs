@@ -24,6 +24,8 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
     public OpenIdConnectConfiguration AfterUpdateConfiguration { get; set; }
     public OpenIdConnectConfiguration ConfigurationToReturn { get; set; }
     public DateTimeOffset RetrievalTimeToReturn { get; set; }
+    public bool ThrowExceptionInBeforeRetrieve { get; set; }
+    public bool ThrowExceptionInAfterUpdate { get; set; }
 
     /// <summary>
     /// The base interface method — should NOT be called when the manager detects the context-aware interface.
@@ -34,6 +36,9 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
     {
         BeforeRetrieveAsyncCalled = true;
         BeforeRetrieveMetadataAddress = metadataAddress;
+
+        if (ThrowExceptionInBeforeRetrieve)
+            throw new InvalidOperationException("Test exception from BeforeRetrieveAsync");
 
         if (ConfigurationToReturn != null)
         {
@@ -57,6 +62,9 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         LastContext = context;
         BeforeRetrieveMetadataAddress = metadataAddress;
 
+        if (ThrowExceptionInBeforeRetrieve)
+            throw new InvalidOperationException("Test exception from context-aware BeforeRetrieveAsync");
+
         if (ConfigurationToReturn != null)
         {
             return Task.FromResult(new ConfigurationEventHandlerResult<OpenIdConnectConfiguration>(
@@ -75,6 +83,10 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         AfterUpdateAsyncCalled = true;
         AfterUpdateMetadataAddress = metadataAddress;
         AfterUpdateConfiguration = configuration;
+
+        if (ThrowExceptionInAfterUpdate)
+            throw new InvalidOperationException("Test exception from AfterUpdateAsync");
+
         return Task.CompletedTask;
     }
 
@@ -88,6 +100,10 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         AfterUpdateMetadataAddress = metadataAddress;
         AfterUpdateConfiguration = configuration;
         LastAfterUpdateContext = context;
+
+        if (ThrowExceptionInAfterUpdate)
+            throw new InvalidOperationException("Test exception from context-aware AfterUpdateAsync");
+
         return Task.CompletedTask;
     }
 }
