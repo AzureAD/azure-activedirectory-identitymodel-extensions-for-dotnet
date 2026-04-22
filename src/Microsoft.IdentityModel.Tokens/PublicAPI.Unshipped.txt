@@ -329,3 +329,5 @@ Microsoft.IdentityModel.Tokens.Experimental.ITokenTypeValidator.ValidateTokenTyp
 ~static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key, bool extractKeyMaterial) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 ~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 ~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
+~const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jkt = "jkt" -> string
+~Microsoft.IdentityModel.Tokens.Cnf.Jkt.get -> string
