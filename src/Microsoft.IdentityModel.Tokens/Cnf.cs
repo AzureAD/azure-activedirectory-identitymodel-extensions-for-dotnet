@@ -75,6 +75,10 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         Jwe = JsonSerializerPrimitives.ReadString(ref reader, ConfirmationClaimTypes.Jwe, ClassName, true);
                     }
+                    else if (reader.ValueTextEquals(ConfirmationClaimTypesUtf8Bytes.Jkt))
+                    {
+                        Jkt = JsonSerializerPrimitives.ReadString(ref reader, ConfirmationClaimTypes.Jkt, ClassName, true);
+                    }
                     else
                     {
                         // this is not a property we recognize, skip it.
@@ -106,6 +110,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [JsonPropertyName("jku")]
         public string Jku { get; internal set; }
+
+        /// <summary>
+        /// The Jkt property is used for DPoP, it is the base64url encoded JWK SHA-256 thumbprint.
+        /// </summary>
+        [JsonPropertyName("jkt")]
+        public string Jkt { get; internal set; }
 
         /// <summary>
         /// The Jwk property is used to specify the public key used to verify the signature of the JWT.
