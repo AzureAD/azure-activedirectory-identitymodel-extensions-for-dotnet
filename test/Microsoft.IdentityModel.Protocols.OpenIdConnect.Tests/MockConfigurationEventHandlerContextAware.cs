@@ -58,9 +58,9 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         ConfigurationRetrievalContext context,
         CancellationToken cancellationToken = default)
     {
-        ContextAwareBeforeRetrieveAsyncCalled = true;
         LastContext = context;
         BeforeRetrieveMetadataAddress = metadataAddress;
+        ContextAwareBeforeRetrieveAsyncCalled = true;
 
         if (ThrowExceptionInBeforeRetrieve)
             throw new InvalidOperationException("Test exception from context-aware BeforeRetrieveAsync");
@@ -80,9 +80,9 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         OpenIdConnectConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        AfterUpdateAsyncCalled = true;
         AfterUpdateMetadataAddress = metadataAddress;
         AfterUpdateConfiguration = configuration;
+        AfterUpdateAsyncCalled = true;
 
         if (ThrowExceptionInAfterUpdate)
             throw new InvalidOperationException("Test exception from AfterUpdateAsync");
@@ -96,10 +96,10 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         ConfigurationRetrievalContext context,
         CancellationToken cancellationToken = default)
     {
-        ContextAwareAfterUpdateAsyncCalled = true;
         AfterUpdateMetadataAddress = metadataAddress;
         AfterUpdateConfiguration = configuration;
         LastAfterUpdateContext = context;
+        ContextAwareAfterUpdateAsyncCalled = true;
 
         if (ThrowExceptionInAfterUpdate)
             throw new InvalidOperationException("Test exception from context-aware AfterUpdateAsync");
