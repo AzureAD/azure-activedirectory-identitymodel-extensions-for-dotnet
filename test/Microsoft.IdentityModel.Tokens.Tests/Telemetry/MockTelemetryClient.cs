@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -11,8 +11,8 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
 {
     public class MockTelemetryClient : ITelemetryClient
     {
-        public Dictionary<string, object> ExportedItems = new Dictionary<string, object>();
-        public Dictionary<string, object> ExportedHistogramItems = new Dictionary<string, object>();
+        public ConcurrentDictionary<string, object> ExportedItems = new ConcurrentDictionary<string, object>();
+        public ConcurrentDictionary<string, object> ExportedHistogramItems = new ConcurrentDictionary<string, object>();
 
         internal int _requestRefreshCounter;
 
@@ -27,43 +27,43 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource)
         {
             Interlocked.Increment(ref _requestRefreshCounter);
-            ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
-            ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
-            ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
-            ExportedItems.Add(TelemetryConstants.ConfigurationSourceTag, configurationSource);
+            ExportedItems.TryAdd(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedItems.TryAdd(TelemetryConstants.MetadataAddressTag, metadataAddress);
+            ExportedItems.TryAdd(TelemetryConstants.OperationStatusTag, operationStatus);
+            ExportedItems.TryAdd(TelemetryConstants.ConfigurationSourceTag, configurationSource);
         }
 
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource, Exception exception)
         {
             Interlocked.Increment(ref _requestRefreshCounter);
-            ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
-            ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
-            ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
-            ExportedItems.Add(TelemetryConstants.ConfigurationSourceTag, configurationSource);
-            ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
+            ExportedItems.TryAdd(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedItems.TryAdd(TelemetryConstants.MetadataAddressTag, metadataAddress);
+            ExportedItems.TryAdd(TelemetryConstants.OperationStatusTag, operationStatus);
+            ExportedItems.TryAdd(TelemetryConstants.ConfigurationSourceTag, configurationSource);
+            ExportedItems.TryAdd(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
         public void LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, TimeSpan operationDuration)
         {
-            ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
-            ExportedHistogramItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
-            ExportedHistogramItems.Add(TelemetryConstants.ConfigurationSourceTag, configurationSource);
+            ExportedHistogramItems.TryAdd(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedHistogramItems.TryAdd(TelemetryConstants.MetadataAddressTag, metadataAddress);
+            ExportedHistogramItems.TryAdd(TelemetryConstants.ConfigurationSourceTag, configurationSource);
         }
 
         public void LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, TimeSpan operationDuration, Exception exception)
         {
-            ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
-            ExportedHistogramItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
-            ExportedHistogramItems.Add(TelemetryConstants.ConfigurationSourceTag, configurationSource);
-            ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
+            ExportedHistogramItems.TryAdd(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedHistogramItems.TryAdd(TelemetryConstants.MetadataAddressTag, metadataAddress);
+            ExportedHistogramItems.TryAdd(TelemetryConstants.ConfigurationSourceTag, configurationSource);
+            ExportedHistogramItems.TryAdd(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
         void ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, Exception exception)
         {
-            ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
-            ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
-            ExportedItems.Add(TelemetryConstants.ConfigurationSourceTag, configurationSource);
-            ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
+            ExportedItems.TryAdd(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedItems.TryAdd(TelemetryConstants.MetadataAddressTag, metadataAddress);
+            ExportedItems.TryAdd(TelemetryConstants.ConfigurationSourceTag, configurationSource);
+            ExportedItems.TryAdd(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
         void ITelemetryClient.IncrementSignatureValidationCounter(string errorType, string issuer, string algorithm, SecurityKey key)

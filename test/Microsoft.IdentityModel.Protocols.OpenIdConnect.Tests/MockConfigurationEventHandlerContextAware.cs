@@ -34,20 +34,7 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         string metadataAddress,
         CancellationToken cancellationToken = default)
     {
-        BeforeRetrieveAsyncCalled = true;
-        BeforeRetrieveMetadataAddress = metadataAddress;
-
-        if (ThrowExceptionInBeforeRetrieve)
-            throw new InvalidOperationException("Test exception from BeforeRetrieveAsync");
-
-        if (ConfigurationToReturn != null)
-        {
-            return Task.FromResult(new ConfigurationEventHandlerResult<OpenIdConnectConfiguration>(
-                ConfigurationToReturn,
-                RetrievalTimeToReturn));
-        }
-
-        return Task.FromResult(ConfigurationEventHandlerResult<OpenIdConnectConfiguration>.NoResult);
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -80,14 +67,7 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         OpenIdConnectConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        AfterUpdateMetadataAddress = metadataAddress;
-        AfterUpdateConfiguration = configuration;
-        AfterUpdateAsyncCalled = true;
-
-        if (ThrowExceptionInAfterUpdate)
-            throw new InvalidOperationException("Test exception from AfterUpdateAsync");
-
-        return Task.CompletedTask;
+        throw new NotImplementedException();
     }
 
     public Task AfterUpdateAsync(
