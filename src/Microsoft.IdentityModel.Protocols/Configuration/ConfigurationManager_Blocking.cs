@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Protocols
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
         /// <summary>
-        /// Only used to track the type of request for telemetry.
+        /// Used to track the type of request for signaling the event handler and for telemetry.
         /// </summary>
         private bool _refreshRequested;
 
@@ -32,13 +32,15 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (_syncAfter <= TimeProvider.GetUtcNow())
                 {
+                    var retrievalContext = new ConfigurationRetrievalContext { BypassCache = _refreshRequested };
                     try
                     {
                         // Check if event handler can provide configuration
                         // If provided configuration is valid, skip regular retriaval process and update current configuration.
                         if (ConfigurationEventHandler != null)
                         {
-                            var configurationRetrieved = await HandleBeforeRetrieveAsync(cancel).ConfigureAwait(false);
+                            ConfigurationEventHandlerResult<T> configurationRetrieved =
+                                await HandleBeforeRetrieveAsync(retrievalContext, cancel).ConfigureAwait(false);
 
                             // replicate the behavior of successful retrieval from endpoint
                             if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
@@ -48,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols
                                 if (_refreshRequested)
                                     _refreshRequested = false;
 
-                                UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime);
+                                UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
 
                                 return _currentConfiguration;
                             }
@@ -78,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols
                         if (_refreshRequested)
                             _refreshRequested = false;
 
-                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow());
+                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
                     }
                     catch (Exception ex)
                     {
