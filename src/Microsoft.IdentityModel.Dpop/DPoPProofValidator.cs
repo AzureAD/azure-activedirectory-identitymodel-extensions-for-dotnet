@@ -218,7 +218,7 @@ public class DPoPProofValidator
         };
 
         var signatureResult = await s_tokenHandler
-            .ValidateTokenAsync(proofToken, validationParams, cancellationToken)
+            .ValidateTokenAsync(proofToken, validationParams)
             .ConfigureAwait(false);
 
         if (!signatureResult.IsValid)
