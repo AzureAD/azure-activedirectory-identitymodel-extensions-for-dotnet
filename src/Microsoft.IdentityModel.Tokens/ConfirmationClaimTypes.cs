@@ -35,6 +35,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// https://datatracker.ietf.org/doc/html/rfc7800#section-6.2.2
         /// </summary>
         public const string Kid = "kid";
+
+        /// <summary>
+        /// https://datatracker.ietf.org/doc/html/rfc9449#name-jwk-thumbprint-confirmation
+        /// </summary>
+        public const string Jkt = "jkt";
     }
 
     internal static class ConfirmationClaimTypesUtf8Bytes
@@ -44,5 +49,6 @@ namespace Microsoft.IdentityModel.Tokens
         public static ReadOnlySpan<byte> Jwe => "jwe"u8;
         public static ReadOnlySpan<byte> Jku => "jku"u8;
         public static ReadOnlySpan<byte> Kid => "kid"u8;
+        public static ReadOnlySpan<byte> Jkt => "jkt"u8;
     }
 }
