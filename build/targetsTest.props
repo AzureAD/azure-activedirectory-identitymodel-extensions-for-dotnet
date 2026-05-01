@@ -9,6 +9,6 @@
     <TestTargets Condition="'$(LocalBuild)' == 'True'">net8.0;net9.0;net10.0</TestTargets>
     <TestTargets Condition="'$(TargetNetNext)'== 'True'">$(TestTargets)</TestTargets>
     <!-- Suppress NETSDK1138 ("target framework is out of support") only for net6.0 -->
-    <SuppressTfmSupportBuildWarnings Condition="'$(TargetFramework)' == 'net6.0'">true</SuppressTfmSupportBuildWarnings>
+    <CheckEolTargetFramework Condition="'$(TargetFramework)' == 'net6.0'">false</CheckEolTargetFramework>
 </PropertyGroup>
 </Project>
