@@ -103,6 +103,16 @@ namespace Microsoft.IdentityModel.Tokens
 
         // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6
         public const string EcdhEs = "ECDH-ES";
+
+        // See: https://www.rfc-editor.org/rfc/rfc9231.html#name-edwards-curve
+        public const string EddsaEd25519Signature = "http://www.w3.org/2021/04/xmldsig-more#eddsa-ed25519";
+        public const string EddsaEd25519Sha512Signature = "http://www.w3.org/2021/04/xmldsig-more#eddsa-ed25519ph";
+        public const string EddsaEd25519WithContextSignature = "http://www.w3.org/2021/04/xmldsig-more#eddsa-ed25519ctx";
+        public const string EddsaEd448Signature = "   http://www.w3.org/2021/04/xmldsig-more#eddsa-ed448";
+        public const string EddsaEd25519Shake256Signature = "http://www.w3.org/2021/04/xmldsig-more#eddsa-ed448ph";
+
+        // See: https://datatracker.ietf.org/doc/html/rfc8032
+        public const string Eddsa = "EdDSA";
 #pragma warning restore 1591
     }
 }
