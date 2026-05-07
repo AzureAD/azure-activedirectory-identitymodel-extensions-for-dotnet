@@ -114,7 +114,7 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey
     {
         string algorithmName = GetAlgorithmName(MLDsa.Algorithm);
         byte[] publicKey = MLDsa.ExportMLDsaPublicKey();
-        string canonicalJwk = $@"{{""alg"":""{algorithmName}"",""kty"":""{JsonWebAlgorithmsKeyTypes.Akp}"",""pub"":""{Base64UrlEncoder.Encode(publicKey)}""}}";
+        var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Alg}"":""{algorithmName}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.Akp}"",""{JsonWebKeyParameterNames.Pub}"":""{Base64UrlEncoder.Encode(publicKey)}""}}";
         return Utility.GenerateSha256Hash(canonicalJwk);
     }
 

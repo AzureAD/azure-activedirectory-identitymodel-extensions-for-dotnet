@@ -277,6 +277,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10718 = "IDX10718: AlgorithmToValidate is not supported: '{0}'. Algorithm '{1}'.";
         public const string IDX10719 = "IDX10719: SignatureSize (in bytes) was expected to be '{0}', was '{1}'.";
         public const string IDX10720 = "IDX10720: Unable to create KeyedHashAlgorithm for algorithm '{0}', the key size must be greater than: '{1}' bits, key has '{2}' bits.";
+        public const string IDX10721 = "IDX10721: Unable to create a key from the AKP JsonWebKey (alg: '{0}'). The required parameter '{1}' is missing or empty.";
+        public const string IDX10722 = "IDX10722: The AKP JsonWebKey (alg: '{0}') has inconsistent key material. The 'pub' parameter does not match the public key derived from 'priv'.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"

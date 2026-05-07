@@ -27,7 +27,7 @@ internal static class MlDsaAdapter
         if (string.IsNullOrEmpty(jsonWebKey.Pub))
             throw LogHelper.LogExceptionMessage(
                 new ArgumentException(
-                    LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(nameof(JsonWebKey)), LogHelper.MarkAsNonPII(nameof(jsonWebKey.Pub)))));
+                    LogHelper.FormatInvariant(LogMessages.IDX10721, LogHelper.MarkAsNonPII(jsonWebKey.Alg), LogHelper.MarkAsNonPII(nameof(jsonWebKey.Pub)))));
 
         MLDsaAlgorithm algorithm = GetMLDsaAlgorithm(jsonWebKey.Alg);
 
@@ -36,7 +36,7 @@ internal static class MlDsaAdapter
             if (string.IsNullOrEmpty(jsonWebKey.Priv))
                 throw LogHelper.LogExceptionMessage(
                     new ArgumentException(
-                        LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(nameof(JsonWebKey)), LogHelper.MarkAsNonPII(nameof(jsonWebKey.Priv)))));
+                        LogHelper.FormatInvariant(LogMessages.IDX10721, LogHelper.MarkAsNonPII(jsonWebKey.Alg), LogHelper.MarkAsNonPII(nameof(jsonWebKey.Priv)))));
 
             byte[] seed = Base64UrlEncoder.DecodeBytes(jsonWebKey.Priv);
             MLDsa key = null;
@@ -55,9 +55,8 @@ internal static class MlDsaAdapter
                     throw LogHelper.LogExceptionMessage(
                         new ArgumentException(
                             LogHelper.FormatInvariant(
-                                LogMessages.IDX10700,
-                                LogHelper.MarkAsNonPII(nameof(JsonWebKey)),
-                                LogHelper.MarkAsNonPII("pub/priv mismatch"))));
+                                LogMessages.IDX10722,
+                                LogHelper.MarkAsNonPII(jsonWebKey.Alg))));
                 }
 
                 success = true;

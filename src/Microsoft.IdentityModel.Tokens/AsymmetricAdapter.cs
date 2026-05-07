@@ -287,6 +287,13 @@ namespace Microsoft.IdentityModel.Tokens
                 // The X509SecurityKey retains ownership; _disposeCryptoOperators remains
                 // false so the adapter will not dispose it. Same pattern as RSA/ECDsa.
                 MLDsa mlDsa = requirePrivateKey ? x509SecurityKey.MlDsaPrivateKey : x509SecurityKey.MlDsaPublicKey;
+                if (mlDsa == null)
+                    throw LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX10638,
+                                LogHelper.MarkAsNonPII(algorithm))));
+
                 InitializeUsingMlDsaSecurityKey(new MlDsaSecurityKey(mlDsa));
             }
             else if (requirePrivateKey)

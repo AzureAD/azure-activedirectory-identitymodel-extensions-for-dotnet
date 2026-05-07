@@ -323,8 +323,24 @@ namespace Microsoft.IdentityModel.Tokens
                 else if (JsonWebAlgorithmsKeyTypes.Akp.Equals(webKey.Kty))
                 {
                     // AKP JWKs with x5c contain a certificate — convert to X509SecurityKey.
+                    // Validate that the alg claim matches the certificate's algorithm OID
+                    // to prevent key confusion (e.g., alg=ML-DSA-44 with an ML-DSA-87 cert).
                     if (webKey.X5c != null && webKey.X5c.Count > 0)
-                        return TryConvertToX509SecurityKey(webKey, out key);
+                    {
+                        if (!TryConvertToX509SecurityKey(webKey, out key))
+                            return false;
+
+                        if (key is X509SecurityKey x509Key
+                            && x509Key.MlDsaPublicKey != null
+                            && !string.IsNullOrEmpty(webKey.Alg)
+                            && MlDsaSecurityKey.GetAlgorithmName(x509Key.MlDsaPublicKey.Algorithm) != webKey.Alg)
+                        {
+                            key = null;
+                            return false;
+                        }
+
+                        return true;
+                    }
 
                     return TryConvertToMlDsaSecurityKey(webKey, out key);
                 }

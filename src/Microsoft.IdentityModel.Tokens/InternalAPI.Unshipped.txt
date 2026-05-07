@@ -118,3 +118,5 @@ static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.TryGetHashAlgorithmNam
 internal static Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.GetAlgorithmName(System.Security.Cryptography.MLDsaAlgorithm algorithm) -> string
 Microsoft.IdentityModel.Tokens.X509SecurityKey.MlDsaPrivateKey.get -> System.Security.Cryptography.MLDsa
 Microsoft.IdentityModel.Tokens.X509SecurityKey.MlDsaPublicKey.get -> System.Security.Cryptography.MLDsa
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10721 = "IDX10721: Unable to create a key from the AKP JsonWebKey (alg: '{0}'). The required parameter '{1}' is missing or empty." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10722 = "IDX10722: The AKP JsonWebKey (alg: '{0}') has inconsistent key material. The 'pub' parameter does not match the public key derived from 'priv'." -> string

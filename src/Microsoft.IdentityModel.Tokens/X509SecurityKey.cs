@@ -275,6 +275,13 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (_isMlDsa)
                 {
+                    // On platforms where GetMLDsaPrivateKey() throws PlatformNotSupportedException,
+                    // we return Unknown rather than DoesNotExist because the private key may exist
+                    // in the certificate but the platform cannot extract it.
+                    // Note: AsymmetricSignatureProvider only blocks signing when PrivateKeyStatus ==
+                    // DoesNotExist, so Unknown will pass the constructor guard. However, the adapter
+                    // will fail with a clear InvalidOperationException (IDX10638) when it attempts
+                    // to access the null MlDsaPrivateKey during signing initialization.
                     if (_mlDsaPrivateKeyUnsupported)
                         return PrivateKeyStatus.Unknown;
 
