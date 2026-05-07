@@ -560,6 +560,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Creates a JsonWebKey representation of an asymmetric public key.
+        /// For AKP keys, the 'alg' parameter is included as it is required by the key type specification.
         /// </summary>
         /// <returns>JsonWebKey representation of an asymmetric public key.</returns>
         /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.2</remarks>
