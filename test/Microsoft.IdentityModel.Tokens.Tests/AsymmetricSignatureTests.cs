@@ -253,29 +253,32 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-                foreach (var mlDsaKeyTuple in AsymmetricSignatureTestData.MlDsaSecurityKeys)
-                    AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
-                    {
-                        SigningKey = mlDsaKeyTuple.Item1,
-                        TestId = mlDsaKeyTuple.Item3,
-                        VerifyKey = mlDsaKeyTuple.Item2
-                    },
-                    mlDsaKeyTuple.Item4,
-                    theoryData);
+                if (MLDsa.IsSupported)
+                {
+                    foreach (var mlDsaKeyTuple in AsymmetricSignatureTestData.MlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = mlDsaKeyTuple.Item1,
+                            TestId = mlDsaKeyTuple.Item3,
+                            VerifyKey = mlDsaKeyTuple.Item2
+                        },
+                        mlDsaKeyTuple.Item4,
+                        theoryData);
 
-                foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonMlDsaSecurityKeys)
-                    AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
-                    {
-                        SigningKey = jsonKeyTuple.Item1,
-                        TestId = jsonKeyTuple.Item3,
-                        VerifyKey = jsonKeyTuple.Item2
-                    },
-                    jsonKeyTuple.Item4,
-                    theoryData);
+                    foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonMlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = jsonKeyTuple.Item1,
+                            TestId = jsonKeyTuple.Item3,
+                            VerifyKey = jsonKeyTuple.Item2
+                        },
+                        jsonKeyTuple.Item4,
+                        theoryData);
+                }
 
                 // X509 ML-DSA sign/verify requires private key extraction from PFX.
                 // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
-                if (CanExtractMlDsaPrivateKeyFromX509())
+                if (MLDsa.IsSupported && CanExtractMlDsaPrivateKeyFromX509())
                 {
                     foreach (var x509MlDsaKeyTuple in AsymmetricSignatureTestData.X509MlDsaSecurityKeys)
                         AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
@@ -469,14 +472,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             TestId = algorithm
                         });
 
-                foreach (var algorithm in SupportedAlgorithms.MlDsaSigningAlgorithms)
-                    theoryData.Add(
-                        new AsymmetricSignatureProviderTheoryData
-                        {
-                            Algorithm = algorithm,
-                            SecurityKey = MlDsaKeyingMaterial.MlDsa44Key,
-                            TestId = algorithm
-                        });
+                if (MLDsa.IsSupported)
+                {
+                    foreach (var algorithm in SupportedAlgorithms.MlDsaSigningAlgorithms)
+                        theoryData.Add(
+                            new AsymmetricSignatureProviderTheoryData
+                            {
+                                Algorithm = algorithm,
+                                SecurityKey = MlDsaKeyingMaterial.MlDsa44Key,
+                                TestId = algorithm
+                            });
+                }
 
                 return theoryData;
             }
