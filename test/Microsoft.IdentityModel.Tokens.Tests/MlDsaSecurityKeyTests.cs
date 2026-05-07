@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class MlDsaSecurityKeyTests
     {
-        [Fact]
+        [MlDsaFact]
         public void Constructor_NullMlDsa_ThrowsArgumentNullException()
         {
             var ee = ExpectedException.ArgumentNullException("mlDsa");
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact]
+        [MlDsaFact]
         public void Constructor_ValidMlDsa()
         {
             using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(key.KeySize > 0, "KeySize should be positive");
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(expectedBits, key.KeySize);
         }
 
-        [Fact]
+        [MlDsaFact]
         public void HasPrivateKey_WithPrivateKey_ReturnsTrue()
         {
             using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(PrivateKeyStatus.Exists, key.PrivateKeyStatus);
         }
 
-        [Fact]
+        [MlDsaFact]
         public void HasPrivateKey_WithPublicKeyOnly_ReturnsFalse()
         {
             using var privateKey = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
@@ -84,47 +84,47 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(PrivateKeyStatus.DoesNotExist, key.PrivateKeyStatus);
         }
 
-        [Fact]
+        [MlDsaFact]
         public void CanComputeJwkThumbprint_ReturnsTrue()
         {
-            Assert.True(KeyingMaterial.MlDsa44Key.CanComputeJwkThumbprint());
-            Assert.True(KeyingMaterial.MlDsa65Key.CanComputeJwkThumbprint());
-            Assert.True(KeyingMaterial.MlDsa87Key.CanComputeJwkThumbprint());
+            Assert.True(MlDsaKeyingMaterial.MlDsa44Key.CanComputeJwkThumbprint());
+            Assert.True(MlDsaKeyingMaterial.MlDsa65Key.CanComputeJwkThumbprint());
+            Assert.True(MlDsaKeyingMaterial.MlDsa87Key.CanComputeJwkThumbprint());
         }
 
-        [Fact]
+        [MlDsaFact]
         public void ComputeJwkThumbprint_IsDeterministic()
         {
-            byte[] thumbprint1 = KeyingMaterial.MlDsa44Key.ComputeJwkThumbprint();
-            byte[] thumbprint2 = KeyingMaterial.MlDsa44Key.ComputeJwkThumbprint();
+            byte[] thumbprint1 = MlDsaKeyingMaterial.MlDsa44Key.ComputeJwkThumbprint();
+            byte[] thumbprint2 = MlDsaKeyingMaterial.MlDsa44Key.ComputeJwkThumbprint();
 
             Assert.Equal(thumbprint1, thumbprint2);
         }
 
-        [Fact]
+        [MlDsaFact]
         public void ComputeJwkThumbprint_PublicAndPrivateKeysMatch()
         {
             // A key's thumbprint should be the same whether computed from the private or public key
             // since thumbprint only uses public key material.
-            byte[] privateThumbprint = KeyingMaterial.MlDsa44Key.ComputeJwkThumbprint();
-            byte[] publicThumbprint = KeyingMaterial.MlDsa44Key_Public.ComputeJwkThumbprint();
+            byte[] privateThumbprint = MlDsaKeyingMaterial.MlDsa44Key.ComputeJwkThumbprint();
+            byte[] publicThumbprint = MlDsaKeyingMaterial.MlDsa44Key_Public.ComputeJwkThumbprint();
 
             Assert.Equal(privateThumbprint, publicThumbprint);
         }
 
-        [Fact]
+        [MlDsaFact]
         public void ComputeJwkThumbprint_DifferentKeysProduceDifferentThumbprints()
         {
-            byte[] thumbprint44 = KeyingMaterial.MlDsa44Key.ComputeJwkThumbprint();
-            byte[] thumbprint65 = KeyingMaterial.MlDsa65Key.ComputeJwkThumbprint();
-            byte[] thumbprint87 = KeyingMaterial.MlDsa87Key.ComputeJwkThumbprint();
+            byte[] thumbprint44 = MlDsaKeyingMaterial.MlDsa44Key.ComputeJwkThumbprint();
+            byte[] thumbprint65 = MlDsaKeyingMaterial.MlDsa65Key.ComputeJwkThumbprint();
+            byte[] thumbprint87 = MlDsaKeyingMaterial.MlDsa87Key.ComputeJwkThumbprint();
 
             Assert.NotEqual(thumbprint44, thumbprint65);
             Assert.NotEqual(thumbprint44, thumbprint87);
             Assert.NotEqual(thumbprint65, thumbprint87);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(originalPub, roundTrippedPub);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(expectedAlg.PublicKeySizeInBytes * 8, x509Key.KeySize);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -172,7 +172,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(thumbprint.Length > 0);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -189,16 +189,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             return algorithm switch
             {
-                "ML-DSA-44" => (KeyingMaterial.X509MlDsa44Key, MLDsaAlgorithm.MLDsa44),
-                "ML-DSA-65" => (KeyingMaterial.X509MlDsa65Key, MLDsaAlgorithm.MLDsa65),
-                "ML-DSA-87" => (KeyingMaterial.X509MlDsa87Key, MLDsaAlgorithm.MLDsa87),
+                "ML-DSA-44" => (MlDsaKeyingMaterial.X509MlDsa44Key, MLDsaAlgorithm.MLDsa44),
+                "ML-DSA-65" => (MlDsaKeyingMaterial.X509MlDsa65Key, MLDsaAlgorithm.MLDsa65),
+                "ML-DSA-87" => (MlDsaKeyingMaterial.X509MlDsa87Key, MLDsaAlgorithm.MLDsa87),
                 _ => throw new ArgumentException(algorithm)
             };
         }
 
         #region X509-to-JWK Conversion Tests
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.IsType<X509SecurityKey>(roundTripped);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(x509Key.KeySize, mlDsaKey.KeySize);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -281,7 +281,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region JWK Negative Tests
 
-        [Fact]
+        [MlDsaFact]
         public void JwkMissingAlg_FailsConversion()
         {
             var jwk = new JsonWebKey
@@ -293,7 +293,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.False(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out _));
         }
 
-        [Fact]
+        [MlDsaFact]
         public void JwkMissingPub_ThrowsOnConstruction()
         {
             var jwk = new JsonWebKey
@@ -305,7 +305,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Throws<ArgumentException>(() => new MlDsaSecurityKey(jwk, false));
         }
 
-        [Fact]
+        [MlDsaFact]
         public void JwkInvalidAlg_FailsConversion()
         {
             var jwk = new JsonWebKey
@@ -322,7 +322,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region Pub/Priv Mismatch Tests
 
-        [Fact]
+        [MlDsaFact]
         public void JwkWithMismatchedPubPriv_FailsConversion()
         {
             // Create two different ML-DSA-44 keys
@@ -346,15 +346,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region Algorithm Mismatch Tests
 
-        [Fact]
+        [MlDsaFact]
         public void SignWithMismatchedAlgorithm_IsRejected()
         {
             // ML-DSA-44 key with ML-DSA-65 algorithm is rejected by IsSupportedAlgorithm.
             // The key's parameter set must match the requested algorithm.
-            Assert.False(SupportedAlgorithms.IsSupportedAlgorithm(SecurityAlgorithms.MlDsa65, KeyingMaterial.MlDsa44Key));
+            Assert.False(SupportedAlgorithms.IsSupportedAlgorithm(SecurityAlgorithms.MlDsa65, MlDsaKeyingMaterial.MlDsa44Key));
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44", "ML-DSA-65")]
         [InlineData("ML-DSA-44", "ML-DSA-87")]
         [InlineData("ML-DSA-65", "ML-DSA-44")]
@@ -369,7 +369,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 $"Expected {requestedAlgorithm} to be rejected for {keyAlgorithm} key");
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -381,7 +381,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 $"Expected {algorithm} to be accepted for matching key");
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44", "ML-DSA-65")]
         [InlineData("ML-DSA-65", "ML-DSA-87")]
         [InlineData("ML-DSA-87", "ML-DSA-44")]
@@ -402,7 +402,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region Public-Key-Only Signing Tests
 
-        [Fact]
+        [MlDsaFact]
         public void SignWithPublicKeyOnly_Throws()
         {
             // Creating a signing provider with a public-only key should fail at construction
@@ -415,15 +415,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new AsymmetricSignatureProvider(publicOnlyKey, SecurityAlgorithms.MlDsa44, true));
         }
 
-        [Fact]
+        [MlDsaFact]
         public void VerifyWithPublicKeyOnly_Succeeds()
         {
             // Verifying should work with a public-only key
             byte[] data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
-            var signingProvider = new AsymmetricSignatureProvider(KeyingMaterial.MlDsa44Key, SecurityAlgorithms.MlDsa44, true);
+            var signingProvider = new AsymmetricSignatureProvider(MlDsaKeyingMaterial.MlDsa44Key, SecurityAlgorithms.MlDsa44, true);
             byte[] signature = signingProvider.Sign(data);
 
-            var verifyProvider = new AsymmetricSignatureProvider(KeyingMaterial.MlDsa44Key_Public, SecurityAlgorithms.MlDsa44, false);
+            var verifyProvider = new AsymmetricSignatureProvider(MlDsaKeyingMaterial.MlDsa44Key_Public, SecurityAlgorithms.MlDsa44, false);
             Assert.True(verifyProvider.Verify(data, signature));
         }
 
@@ -431,7 +431,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region Signature Correctness Tests
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -449,12 +449,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.False(verifyProvider.Verify(data, signature));
         }
 
-        [Fact]
+        [MlDsaFact]
         public void CrossKeyVerification_Fails()
         {
             // Signature from MlDsa44 key should not verify with a different MlDsa44 key
             byte[] data = new byte[] { 10, 20, 30, 40 };
-            var signingProvider = new AsymmetricSignatureProvider(KeyingMaterial.MlDsa44Key, SecurityAlgorithms.MlDsa44, true);
+            var signingProvider = new AsymmetricSignatureProvider(MlDsaKeyingMaterial.MlDsa44Key, SecurityAlgorithms.MlDsa44, true);
             byte[] signature = signingProvider.Sign(data);
 
             // Create a completely different key pair
@@ -468,7 +468,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region JWK JSON Serialization Round-Trip
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -500,7 +500,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(key.KeySize, mlDsaKey.KeySize);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -527,7 +527,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region End-to-End JWT Tests
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -566,7 +566,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal("test-user", result.Claims["sub"]);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -602,7 +602,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -642,7 +642,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal("jwt-handler-user", principal.FindFirst("sub")?.Value);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -691,7 +691,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
 #pragma warning disable SYSLIB5006
-                using var key = KeyingMaterial.MlDsa44Cert.GetMLDsaPrivateKey();
+                using var key = MlDsaKeyingMaterial.MlDsa44Cert.GetMLDsaPrivateKey();
 #pragma warning restore SYSLIB5006
                 return key != null;
             }
@@ -712,10 +712,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 // and attempt to extract ML-DSA public key.
                 var x509Key = new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                    X509CertificateLoader.LoadCertificate(KeyingMaterial.MlDsa44Cert.RawData));
+                    X509CertificateLoader.LoadCertificate(MlDsaKeyingMaterial.MlDsa44Cert.RawData));
 #else
 #pragma warning disable SYSLIB0057
-                    new X509Certificate2(KeyingMaterial.MlDsa44Cert.RawData));
+                    new X509Certificate2(MlDsaKeyingMaterial.MlDsa44Cert.RawData));
 #pragma warning restore SYSLIB0057
 #endif
                 return x509Key.MlDsaPublicKey != null;
@@ -726,7 +726,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -766,7 +766,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal("x509-test-user", result.Claims["sub"]);
         }
 
-        [Theory]
+        [MlDsaTheory]
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
@@ -816,33 +816,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private static MlDsaSecurityKey GetMlDsaKey(string algorithm) => algorithm switch
         {
-            "ML-DSA-44" => KeyingMaterial.MlDsa44Key,
-            "ML-DSA-65" => KeyingMaterial.MlDsa65Key,
-            "ML-DSA-87" => KeyingMaterial.MlDsa87Key,
+            "ML-DSA-44" => MlDsaKeyingMaterial.MlDsa44Key,
+            "ML-DSA-65" => MlDsaKeyingMaterial.MlDsa65Key,
+            "ML-DSA-87" => MlDsaKeyingMaterial.MlDsa87Key,
             _ => throw new ArgumentException(algorithm)
         };
 
         private static MlDsaSecurityKey GetMlDsaPublicKey(string algorithm) => algorithm switch
         {
-            "ML-DSA-44" => KeyingMaterial.MlDsa44Key_Public,
-            "ML-DSA-65" => KeyingMaterial.MlDsa65Key_Public,
-            "ML-DSA-87" => KeyingMaterial.MlDsa87Key_Public,
+            "ML-DSA-44" => MlDsaKeyingMaterial.MlDsa44Key_Public,
+            "ML-DSA-65" => MlDsaKeyingMaterial.MlDsa65Key_Public,
+            "ML-DSA-87" => MlDsaKeyingMaterial.MlDsa87Key_Public,
             _ => throw new ArgumentException(algorithm)
         };
 
         private static JsonWebKey GetMlDsaJsonWebKey(string algorithm) => algorithm switch
         {
-            "ML-DSA-44" => KeyingMaterial.JsonWebKeyMlDsa44,
-            "ML-DSA-65" => KeyingMaterial.JsonWebKeyMlDsa65,
-            "ML-DSA-87" => KeyingMaterial.JsonWebKeyMlDsa87,
+            "ML-DSA-44" => MlDsaKeyingMaterial.JsonWebKeyMlDsa44,
+            "ML-DSA-65" => MlDsaKeyingMaterial.JsonWebKeyMlDsa65,
+            "ML-DSA-87" => MlDsaKeyingMaterial.JsonWebKeyMlDsa87,
             _ => throw new ArgumentException(algorithm)
         };
 
         private static JsonWebKey GetMlDsaJsonWebKeyPublic(string algorithm) => algorithm switch
         {
-            "ML-DSA-44" => KeyingMaterial.JsonWebKeyMlDsa44_Public,
-            "ML-DSA-65" => KeyingMaterial.JsonWebKeyMlDsa65_Public,
-            "ML-DSA-87" => KeyingMaterial.JsonWebKeyMlDsa87_Public,
+            "ML-DSA-44" => MlDsaKeyingMaterial.JsonWebKeyMlDsa44_Public,
+            "ML-DSA-65" => MlDsaKeyingMaterial.JsonWebKeyMlDsa65_Public,
+            "ML-DSA-87" => MlDsaKeyingMaterial.JsonWebKeyMlDsa87_Public,
             _ => throw new ArgumentException(algorithm)
         };
 

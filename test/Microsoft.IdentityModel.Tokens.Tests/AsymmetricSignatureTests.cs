@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
 #pragma warning disable SYSLIB5006
-                using var key = KeyingMaterial.MlDsa44Cert.GetMLDsaPrivateKey();
+                using var key = MlDsaKeyingMaterial.MlDsa44Cert.GetMLDsaPrivateKey();
 #pragma warning restore SYSLIB5006
                 return key != null;
             }
@@ -474,7 +474,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         new AsymmetricSignatureProviderTheoryData
                         {
                             Algorithm = algorithm,
-                            SecurityKey = KeyingMaterial.MlDsa44Key,
+                            SecurityKey = MlDsaKeyingMaterial.MlDsa44Key,
                             TestId = algorithm
                         });
 
