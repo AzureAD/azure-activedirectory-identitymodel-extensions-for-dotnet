@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets the ML-DSA public key from the certificate, or null if the certificate
-        /// does not contain an ML-DSA key.
+        /// does not contain an ML-DSA key or the platform does not support ML-DSA.
         /// </summary>
         internal MLDsa MlDsaPublicKey
         {
@@ -210,9 +210,17 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     lock (ThisLock)
                     {
+                        try
+                        {
 #pragma warning disable SYSLIB5006 // GetMLDsaPublicKey is experimental
-                        _mlDsaPublicKey ??= Certificate.GetMLDsaPublicKey();
+                            _mlDsaPublicKey ??= Certificate.GetMLDsaPublicKey();
 #pragma warning restore SYSLIB5006
+                        }
+                        catch (PlatformNotSupportedException)
+                        {
+                            // GetMLDsaPublicKey() may not be supported on all platforms.
+                            // Return null so callers can degrade gracefully.
+                        }
                     }
                 }
 

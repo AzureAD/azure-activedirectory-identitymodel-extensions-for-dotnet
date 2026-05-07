@@ -184,8 +184,14 @@ namespace Microsoft.IdentityModel.Tokens
                 if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
                 {
                     byte[] seed = mlDsa.ExportMLDsaPrivateSeed();
-                    jsonWebKey.Priv = Base64UrlEncoder.Encode(seed);
-                    CryptographicOperations.ZeroMemory(seed);
+                    try
+                    {
+                        jsonWebKey.Priv = Base64UrlEncoder.Encode(seed);
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(seed);
+                    }
                 }
 
                 return jsonWebKey;
@@ -316,6 +322,10 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 else if (JsonWebAlgorithmsKeyTypes.Akp.Equals(webKey.Kty))
                 {
+                    // AKP JWKs with x5c contain a certificate — convert to X509SecurityKey.
+                    if (webKey.X5c != null && webKey.X5c.Count > 0)
+                        return TryConvertToX509SecurityKey(webKey, out key);
+
                     return TryConvertToMlDsaSecurityKey(webKey, out key);
                 }
             }
@@ -478,8 +488,14 @@ namespace Microsoft.IdentityModel.Tokens
             if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
             {
                 byte[] seed = key.MLDsa.ExportMLDsaPrivateSeed();
-                jsonWebKey.Priv = Base64UrlEncoder.Encode(seed);
-                CryptographicOperations.ZeroMemory(seed);
+                try
+                {
+                    jsonWebKey.Priv = Base64UrlEncoder.Encode(seed);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(seed);
+                }
             }
 
             return jsonWebKey;

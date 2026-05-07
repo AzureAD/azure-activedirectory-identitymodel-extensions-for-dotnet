@@ -217,6 +217,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // x5c mode should not include key material
             Assert.Null(jwk.Pub);
             Assert.Null(jwk.Priv);
+
+            // Verify the x5c JWK can be converted back to an X509SecurityKey
+            Assert.True(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out var roundTripped));
+            Assert.IsType<X509SecurityKey>(roundTripped);
         }
 
         [Theory]

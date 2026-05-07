@@ -39,9 +39,11 @@ internal static class MlDsaAdapter
                         LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(nameof(JsonWebKey)), LogHelper.MarkAsNonPII(nameof(jsonWebKey.Priv)))));
 
             byte[] seed = Base64UrlEncoder.DecodeBytes(jsonWebKey.Priv);
+            MLDsa key = null;
+            bool success = false;
             try
             {
-                MLDsa key = MLDsa.ImportMLDsaPrivateSeed(algorithm, seed);
+                key = MLDsa.ImportMLDsaPrivateSeed(algorithm, seed);
 
                 // Verify the claimed public key matches the key derived from the seed.
                 // This prevents key identity confusion where thumbprint/kid is computed
@@ -50,7 +52,6 @@ internal static class MlDsaAdapter
                 byte[] derivedPub = key.ExportMLDsaPublicKey();
                 if (!claimedPub.SequenceEqual(derivedPub))
                 {
-                    key.Dispose();
                     throw LogHelper.LogExceptionMessage(
                         new ArgumentException(
                             LogHelper.FormatInvariant(
@@ -59,10 +60,14 @@ internal static class MlDsaAdapter
                                 LogHelper.MarkAsNonPII("pub/priv mismatch"))));
                 }
 
+                success = true;
                 return key;
             }
             finally
             {
+                if (!success)
+                    key?.Dispose();
+
                 CryptographicOperations.ZeroMemory(seed);
             }
         }
