@@ -189,7 +189,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void InitializeUsingMlDsaSecurityKey(MlDsaSecurityKey mlDsaSecurityKey)
         {
-            MLDsa = mlDsaSecurityKey.MLDsa;
+            InitializeUsingMlDsa(mlDsaSecurityKey.MLDsa);
+        }
+
+        private void InitializeUsingMlDsa(MLDsa mlDsa)
+        {
+            MLDsa = mlDsa;
             _signFunction = SignMlDsa;
             _signUsingOffsetFunction = SignUsingOffsetMlDsa;
 #if NET6_0_OR_GREATER
@@ -294,7 +299,7 @@ namespace Microsoft.IdentityModel.Tokens
                                 LogMessages.IDX10638,
                                 LogHelper.MarkAsNonPII(algorithm))));
 
-                InitializeUsingMlDsaSecurityKey(new MlDsaSecurityKey(mlDsa));
+                InitializeUsingMlDsa(mlDsa);
             }
             else if (requirePrivateKey)
             {

@@ -11,7 +11,8 @@ namespace Microsoft.IdentityModel.TestUtils
     /// <summary>
     /// ML-DSA test keying material, separated from <see cref="KeyingMaterial"/> to avoid
     /// <see cref="TypeInitializationException"/> on platforms where ML-DSA is not supported.
-    /// All members are lazily initialized and guarded by <see cref="IsSupported"/>.
+    /// All members are lazily initialized; callers must check <see cref="IsSupported"/>
+    /// before accessing key material to avoid <see cref="PlatformNotSupportedException"/>.
     /// </summary>
     public static class MlDsaKeyingMaterial
     {
@@ -19,6 +20,25 @@ namespace Microsoft.IdentityModel.TestUtils
         /// Returns true if ML-DSA is supported on the current platform.
         /// </summary>
         public static bool IsSupported => MLDsa.IsSupported;
+
+        /// <summary>
+        /// Returns true if ML-DSA private keys can be extracted from X.509 certificates.
+        /// GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
+        /// </summary>
+        public static bool CanExtractMlDsaPrivateKeyFromX509()
+        {
+            try
+            {
+#pragma warning disable SYSLIB5006
+                using var key = MlDsa44Cert.GetMLDsaPrivateKey();
+#pragma warning restore SYSLIB5006
+                return key != null;
+            }
+            catch (PlatformNotSupportedException)
+            {
+                return false;
+            }
+        }
 
         // ML-DSA keys — lazily generated since MLDsa.GenerateKey() requires
         // OS-level crypto support that may not be present on all platforms.

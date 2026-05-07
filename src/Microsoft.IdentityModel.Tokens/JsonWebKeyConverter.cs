@@ -158,12 +158,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (!extractKeyMaterial)
                 return ConvertFromX509SecurityKey(key);
 
-            // ML-DSA: extract key material directly from the X509SecurityKey's cached MLDsa instance.
-            // We intentionally duplicate the export logic from ConvertFromMlDsaSecurityKey here rather
-            // than wrapping in a temporary MlDsaSecurityKey, because MlDsaSecurityKey takes ownership
-            // of the MLDsa instance it receives. Creating a wrapper around X509SecurityKey's cached
-            // MLDsa would create ambiguous ownership — if the wrapper were ever disposed, it would
-            // dispose the MLDsa that X509SecurityKey still references.
+            // ML-DSA: extract key material directly from the X509SecurityKey's cached MLDsa
+            // instance rather than wrapping in a temporary MlDsaSecurityKey. This avoids an
+            // unnecessary allocation and keeps the data flow explicit — we only need the raw
+            // byte exports (public key, seed), not a full SecurityKey wrapper.
             if (key.MlDsaPublicKey != null)
             {
                 MLDsa mlDsa = key.PrivateKeyStatus == PrivateKeyStatus.Exists
@@ -322,6 +320,10 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 else if (JsonWebAlgorithmsKeyTypes.Akp.Equals(webKey.Kty))
                 {
+                    // alg is REQUIRED for all AKP keys per draft-ietf-cose-dilithium (RFC 9964 pending).
+                    if (string.IsNullOrEmpty(webKey.Alg))
+                        return false;
+
                     // AKP JWKs with x5c contain a certificate — convert to X509SecurityKey.
                     // Validate that the alg claim matches the certificate's algorithm OID
                     // to prevent key confusion (e.g., alg=ML-DSA-44 with an ML-DSA-87 cert).
@@ -332,7 +334,6 @@ namespace Microsoft.IdentityModel.Tokens
 
                         if (key is X509SecurityKey x509Key
                             && x509Key.MlDsaPublicKey != null
-                            && !string.IsNullOrEmpty(webKey.Alg)
                             && MlDsaSecurityKey.GetAlgorithmName(x509Key.MlDsaPublicKey.Algorithm) != webKey.Alg)
                         {
                             key = null;

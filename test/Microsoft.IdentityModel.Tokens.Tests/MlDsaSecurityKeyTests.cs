@@ -228,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-87")]
         public void ConvertFromX509SecurityKey_ExtractKeyMaterial(string algorithm)
         {
-            if (!CanExtractMlDsaPrivateKeyFromX509())
+            if (!MlDsaKeyingMaterial.CanExtractMlDsaPrivateKeyFromX509())
                 return; // skip on platforms that can't extract ML-DSA private keys
 
             var (x509Key, _) = GetX509MlDsaKey(algorithm);
@@ -769,22 +769,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region X509 ML-DSA End-to-End JWT Tests
 
-        // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
-        private static bool CanExtractMlDsaPrivateKeyFromX509()
-        {
-            try
-            {
-#pragma warning disable SYSLIB5006
-                using var key = MlDsaKeyingMaterial.MlDsa44Cert.GetMLDsaPrivateKey();
-#pragma warning restore SYSLIB5006
-                return key != null;
-            }
-            catch (PlatformNotSupportedException)
-            {
-                return false;
-            }
-        }
-
         // On .NET 6, loading an ML-DSA certificate from RawData (without private key) and then
         // calling GetMLDsaPublicKey() throws PlatformNotSupportedException, even though the same
         // call works on a PFX-loaded certificate. This guards tests that create public-only certs.
@@ -816,7 +800,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-87")]
         public async System.Threading.Tasks.Task JwtCreateAndValidate_WithX509SecurityKey(string algorithm)
         {
-            if (!CanExtractMlDsaPrivateKeyFromX509())
+            if (!MlDsaKeyingMaterial.CanExtractMlDsaPrivateKeyFromX509())
                 return; // skip on platforms that can't extract ML-DSA private keys from X509
 
             var (x509Key, _) = GetX509MlDsaKey(algorithm);
@@ -856,7 +840,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-87")]
         public async System.Threading.Tasks.Task JwtCreateWithX509_ValidateWithMlDsaKey(string algorithm)
         {
-            if (!CanExtractMlDsaPrivateKeyFromX509())
+            if (!MlDsaKeyingMaterial.CanExtractMlDsaPrivateKeyFromX509())
                 return; // skip on platforms that can't extract ML-DSA private keys from X509
 
             var (x509Key, _) = GetX509MlDsaKey(algorithm);

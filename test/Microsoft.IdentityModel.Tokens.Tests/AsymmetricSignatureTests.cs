@@ -15,23 +15,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class AsymmetricSignatureTests
     {
-        // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
-        // Use a runtime check to skip X509 ML-DSA sign tests on unsupported platforms.
-        private static bool CanExtractMlDsaPrivateKeyFromX509()
-        {
-            try
-            {
-#pragma warning disable SYSLIB5006
-                using var key = MlDsaKeyingMaterial.MlDsa44Cert.GetMLDsaPrivateKey();
-#pragma warning restore SYSLIB5006
-                return key != null;
-            }
-            catch (PlatformNotSupportedException)
-            {
-                return false;
-            }
-        }
-
         [Fact]
         public void UnsupportedRSATypes()
         {
@@ -278,7 +261,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 // X509 ML-DSA sign/verify requires private key extraction from PFX.
                 // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
-                if (MLDsa.IsSupported && CanExtractMlDsaPrivateKeyFromX509())
+                if (MLDsa.IsSupported && MlDsaKeyingMaterial.CanExtractMlDsaPrivateKeyFromX509())
                 {
                     foreach (var x509MlDsaKeyTuple in AsymmetricSignatureTestData.X509MlDsaSecurityKeys)
                         AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
