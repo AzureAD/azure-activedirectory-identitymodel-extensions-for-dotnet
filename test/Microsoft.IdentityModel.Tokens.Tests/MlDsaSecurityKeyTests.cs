@@ -197,6 +197,85 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
         }
 
+        #region X509-to-JWK Conversion Tests
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void ConvertFromX509SecurityKey_X5cMode(string algorithm)
+        {
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
+
+            var jwk = JsonWebKeyConverter.ConvertFromX509SecurityKey(x509Key);
+
+            Assert.Equal(JsonWebAlgorithmsKeyTypes.Akp, jwk.Kty);
+            Assert.Equal(algorithm, jwk.Alg);
+            Assert.Equal(x509Key.KeyId, jwk.Kid);
+            Assert.NotNull(jwk.X5t);
+            Assert.Single(jwk.X5c);
+            // x5c mode should not include key material
+            Assert.Null(jwk.Pub);
+            Assert.Null(jwk.Priv);
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void ConvertFromX509SecurityKey_ExtractKeyMaterial(string algorithm)
+        {
+            if (!CanExtractMlDsaPrivateKeyFromX509())
+                return; // skip on platforms that can't extract ML-DSA private keys
+
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
+
+            var jwk = JsonWebKeyConverter.ConvertFromX509SecurityKey(x509Key, extractKeyMaterial: true);
+
+            Assert.Equal(JsonWebAlgorithmsKeyTypes.Akp, jwk.Kty);
+            Assert.Equal(algorithm, jwk.Alg);
+            Assert.NotNull(jwk.Pub);
+            Assert.NotNull(jwk.Priv);
+            Assert.True(jwk.HasPrivateKey);
+
+            // Verify round-trip: the extracted JWK should produce a working key
+            Assert.True(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out SecurityKey roundTrippedKey));
+            var mlDsaKey = Assert.IsType<MlDsaSecurityKey>(roundTrippedKey);
+            Assert.Equal(x509Key.KeySize, mlDsaKey.KeySize);
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void ConvertFromX509SecurityKey_ExtractKeyMaterial_PublicOnly(string algorithm)
+        {
+            if (!CanExtractMlDsaPublicKeyFromX509PublicOnlyCert())
+                return; // GetMLDsaPublicKey() on public-only certs is not supported on all platforms
+
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
+
+            // Create a public-only X509SecurityKey by loading only the certificate (no private key)
+#if NET9_0_OR_GREATER
+            var publicOnlyCert = X509CertificateLoader.LoadCertificate(x509Key.Certificate.RawData);
+#else
+#pragma warning disable SYSLIB0057
+            var publicOnlyCert = new X509Certificate2(x509Key.Certificate.RawData);
+#pragma warning restore SYSLIB0057
+#endif
+            var publicOnlyKey = new X509SecurityKey(publicOnlyCert);
+
+            var jwk = JsonWebKeyConverter.ConvertFromX509SecurityKey(publicOnlyKey, extractKeyMaterial: true);
+
+            Assert.Equal(JsonWebAlgorithmsKeyTypes.Akp, jwk.Kty);
+            Assert.Equal(algorithm, jwk.Alg);
+            Assert.NotNull(jwk.Pub);
+            Assert.Null(jwk.Priv);
+            Assert.False(jwk.HasPrivateKey);
+        }
+
+        #endregion
+
         #region JWK Negative Tests
 
         [Fact]
@@ -614,6 +693,31 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return key != null;
             }
             catch (PlatformNotSupportedException)
+            {
+                return false;
+            }
+        }
+
+        // On .NET 6, loading an ML-DSA certificate from RawData (without private key) and then
+        // calling GetMLDsaPublicKey() throws PlatformNotSupportedException, even though the same
+        // call works on a PFX-loaded certificate. This guards tests that create public-only certs.
+        private static bool CanExtractMlDsaPublicKeyFromX509PublicOnlyCert()
+        {
+            try
+            {
+                // Simulate exactly what the test does: load cert from RawData (public-only)
+                // and attempt to extract ML-DSA public key.
+                var x509Key = new X509SecurityKey(
+#if NET9_0_OR_GREATER
+                    X509CertificateLoader.LoadCertificate(KeyingMaterial.MlDsa44Cert.RawData));
+#else
+#pragma warning disable SYSLIB0057
+                    new X509Certificate2(KeyingMaterial.MlDsa44Cert.RawData));
+#pragma warning restore SYSLIB0057
+#endif
+                return x509Key.MlDsaPublicKey != null;
+            }
+            catch (Exception)
             {
                 return false;
             }

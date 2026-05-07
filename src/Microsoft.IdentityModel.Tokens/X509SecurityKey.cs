@@ -176,9 +176,21 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     lock (ThisLock)
                     {
+                        try
+                        {
 #pragma warning disable SYSLIB5006 // GetMLDsaPrivateKey is experimental
-                        _mlDsaPrivateKey ??= Certificate.GetMLDsaPrivateKey();
+                            _mlDsaPrivateKey ??= Certificate.GetMLDsaPrivateKey();
 #pragma warning restore SYSLIB5006
+                        }
+                        catch (PlatformNotSupportedException)
+                        {
+                            // On .NET 6, GetMLDsaPrivateKey() from Microsoft.Bcl.Cryptography
+                            // throws PlatformNotSupportedException. ML-DSA X.509 private key
+                            // extraction requires .NET 8+. On .NET 6, ML-DSA certificates can
+                            // still be used for signature verification (public key works) but
+                            // not for signing via X509SecurityKey. Callers needing to sign on
+                            // .NET 6 should use MlDsaSecurityKey with a standalone MLDsa key.
+                        }
                     }
                 }
 

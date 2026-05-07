@@ -99,6 +99,26 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
+            // ML-DSA certificates: PublicKey (AsymmetricAlgorithm) is null because MLDsa
+            // does not inherit from AsymmetricAlgorithm. Route via MlDsaPublicKey instead.
+            if (key.MlDsaPublicKey != null)
+            {
+                string alg = MlDsaSecurityKey.GetAlgorithmName(key.MlDsaPublicKey.Algorithm);
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                    Alg = alg, // REQUIRED for AKP keys per draft-ietf-cose-dilithium (RFC 9964 pending)
+                    Kid = key.KeyId,
+                    X5t = key.X5t,
+                    ConvertedSecurityKey = key
+                };
+
+                if (key.Certificate.RawData != null)
+                    jsonWebKey.X5c.Add(Convert.ToBase64String(key.Certificate.RawData));
+
+                return jsonWebKey;
+            }
+
             var kty = key.PublicKey switch
             {
                 RSA => JsonWebAlgorithmsKeyTypes.RSA,
@@ -106,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
                 _ => throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))))
             };
 
-            var jsonWebKey = new JsonWebKey
+            var jwk = new JsonWebKey
             {
                 Kty = kty,
                 Kid = key.KeyId,
@@ -115,9 +135,9 @@ namespace Microsoft.IdentityModel.Tokens
             };
 
             if (key.Certificate.RawData != null)
-                jsonWebKey.X5c.Add(Convert.ToBase64String(key.Certificate.RawData));
+                jwk.X5c.Add(Convert.ToBase64String(key.Certificate.RawData));
 
-            return jsonWebKey;
+            return jwk;
         }
 
         /// <summary>
@@ -125,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">a <see cref="X509SecurityKey"/> to convert.</param>
         /// <param name="extractKeyMaterial">
-        /// <c>true</c> to extract the key material (RSA or ECDsa) from the <paramref name="key"/>,
+        /// <c>true</c> to extract the key material (RSA, ECDsa, or ML-DSA) from the <paramref name="key"/>,
         /// <c>false</c> to represent the <paramref name="key"/> as an <see cref="X509SecurityKey"/>, using the "x5c" parameter.
         /// </param>
         /// <returns>a <see cref="JsonWebKey"/>.</returns>
@@ -137,6 +157,39 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!extractKeyMaterial)
                 return ConvertFromX509SecurityKey(key);
+
+            // ML-DSA: extract key material directly from the X509SecurityKey's cached MLDsa instance.
+            // We intentionally duplicate the export logic from ConvertFromMlDsaSecurityKey here rather
+            // than wrapping in a temporary MlDsaSecurityKey, because MlDsaSecurityKey takes ownership
+            // of the MLDsa instance it receives. Creating a wrapper around X509SecurityKey's cached
+            // MLDsa would create ambiguous ownership — if the wrapper were ever disposed, it would
+            // dispose the MLDsa that X509SecurityKey still references.
+            if (key.MlDsaPublicKey != null)
+            {
+                MLDsa mlDsa = key.PrivateKeyStatus == PrivateKeyStatus.Exists
+                    ? key.MlDsaPrivateKey
+                    : key.MlDsaPublicKey;
+
+                string alg = MlDsaSecurityKey.GetAlgorithmName(mlDsa.Algorithm);
+                byte[] publicKey = mlDsa.ExportMLDsaPublicKey();
+
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                    Alg = alg,
+                    Pub = Base64UrlEncoder.Encode(publicKey),
+                    Kid = key.KeyId
+                };
+
+                if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
+                {
+                    byte[] seed = mlDsa.ExportMLDsaPrivateSeed();
+                    jsonWebKey.Priv = Base64UrlEncoder.Encode(seed);
+                    CryptographicOperations.ZeroMemory(seed);
+                }
+
+                return jsonWebKey;
+            }
 
             if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
             {
