@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.Tokens
                     // in the certificate but the platform cannot extract it.
                     // Note: AsymmetricSignatureProvider only blocks signing when PrivateKeyStatus ==
                     // DoesNotExist, so Unknown will pass the constructor guard. However, the adapter
-                    // will fail with a clear InvalidOperationException (IDX10638) when it attempts
+                    // will fail with a clear InvalidOperationException (IDX10723) when it attempts
                     // to access the null MlDsaPrivateKey during signing initialization.
                     if (_mlDsaPrivateKeyUnsupported)
                         return PrivateKeyStatus.Unknown;
@@ -329,7 +329,8 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(
                         new PlatformNotSupportedException(
                             LogHelper.FormatInvariant(
-                                "ML-DSA public key extraction is not supported on this platform.")));
+                                LogMessages.IDX10724,
+                                LogHelper.MarkAsNonPII(KeyId))));
 
                 return new MlDsaSecurityKey(MlDsaPublicKey).ComputeJwkThumbprint();
             }
