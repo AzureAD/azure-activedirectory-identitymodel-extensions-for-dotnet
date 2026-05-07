@@ -35,6 +35,9 @@ namespace Microsoft.IdentityModel.Tokens
         MLDsa _mlDsaPrivateKey;
         MLDsa _mlDsaPublicKey;
         bool _isMlDsa;
+        bool _mlDsaPrivateKeyInitialized;
+        bool _mlDsaPublicKeyInitialized;
+        bool _mlDsaPrivateKeyUnsupported;
 #if NET9_0_OR_GREATER
         Lock _thisLock = new();
 #else
@@ -85,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 if (_isMlDsa)
-                    return MlDsaPublicKey.Algorithm.PublicKeySizeInBytes * 8;
+                    return MlDsaPublicKey?.Algorithm.PublicKeySizeInBytes * 8 ?? 0;
 
                 return PublicKey.KeySize;
             }
@@ -172,24 +175,30 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                if (_mlDsaPrivateKey == null && _isMlDsa)
+                if (!_mlDsaPrivateKeyInitialized && _isMlDsa)
                 {
                     lock (ThisLock)
                     {
-                        try
+                        if (!_mlDsaPrivateKeyInitialized)
                         {
+                            try
+                            {
 #pragma warning disable SYSLIB5006 // GetMLDsaPrivateKey is experimental
-                            _mlDsaPrivateKey ??= Certificate.GetMLDsaPrivateKey();
+                                _mlDsaPrivateKey = Certificate.GetMLDsaPrivateKey();
 #pragma warning restore SYSLIB5006
-                        }
-                        catch (PlatformNotSupportedException)
-                        {
-                            // On .NET 6, GetMLDsaPrivateKey() from Microsoft.Bcl.Cryptography
-                            // throws PlatformNotSupportedException. ML-DSA X.509 private key
-                            // extraction requires .NET 8+. On .NET 6, ML-DSA certificates can
-                            // still be used for signature verification (public key works) but
-                            // not for signing via X509SecurityKey. Callers needing to sign on
-                            // .NET 6 should use MlDsaSecurityKey with a standalone MLDsa key.
+                            }
+                            catch (PlatformNotSupportedException)
+                            {
+                                // On .NET 6, GetMLDsaPrivateKey() from Microsoft.Bcl.Cryptography
+                                // throws PlatformNotSupportedException. ML-DSA X.509 private key
+                                // extraction requires .NET 8+. On .NET 6, ML-DSA certificates can
+                                // still be used for signature verification (public key works) but
+                                // not for signing via X509SecurityKey. Callers needing to sign on
+                                // .NET 6 should use MlDsaSecurityKey with a standalone MLDsa key.
+                                _mlDsaPrivateKeyUnsupported = true;
+                            }
+
+                            _mlDsaPrivateKeyInitialized = true;
                         }
                     }
                 }
@@ -206,20 +215,25 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                if (_mlDsaPublicKey == null && _isMlDsa)
+                if (!_mlDsaPublicKeyInitialized && _isMlDsa)
                 {
                     lock (ThisLock)
                     {
-                        try
+                        if (!_mlDsaPublicKeyInitialized)
                         {
+                            try
+                            {
 #pragma warning disable SYSLIB5006 // GetMLDsaPublicKey is experimental
-                            _mlDsaPublicKey ??= Certificate.GetMLDsaPublicKey();
+                                _mlDsaPublicKey = Certificate.GetMLDsaPublicKey();
 #pragma warning restore SYSLIB5006
-                        }
-                        catch (PlatformNotSupportedException)
-                        {
-                            // GetMLDsaPublicKey() may not be supported on all platforms.
-                            // Return null so callers can degrade gracefully.
+                            }
+                            catch (PlatformNotSupportedException)
+                            {
+                                // GetMLDsaPublicKey() may not be supported on all platforms.
+                                // Return null so callers can degrade gracefully.
+                            }
+
+                            _mlDsaPublicKeyInitialized = true;
                         }
                     }
                 }
@@ -260,7 +274,12 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 if (_isMlDsa)
+                {
+                    if (_mlDsaPrivateKeyUnsupported)
+                        return PrivateKeyStatus.Unknown;
+
                     return MlDsaPrivateKey != null ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
+                }
 
                 return PrivateKey == null ? PrivateKeyStatus.DoesNotExist : PrivateKeyStatus.Exists;
             }
@@ -298,7 +317,15 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] ComputeJwkThumbprint()
         {
             if (_isMlDsa)
+            {
+                if (MlDsaPublicKey == null)
+                    throw LogHelper.LogExceptionMessage(
+                        new PlatformNotSupportedException(
+                            LogHelper.FormatInvariant(
+                                "ML-DSA public key extraction is not supported on this platform.")));
+
                 return new MlDsaSecurityKey(MlDsaPublicKey).ComputeJwkThumbprint();
+            }
 
             return PublicKey is RSA ? new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint() : new ECDsaSecurityKey(PublicKey as ECDsa).ComputeJwkThumbprint();
         }

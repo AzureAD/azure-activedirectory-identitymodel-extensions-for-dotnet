@@ -7,6 +7,8 @@
        via the compatibility package and covered by the cross-TFM test suite.
        These overrides suppress only these specific package warnings — any new package
        that introduces TFM warnings will still surface normally.
+       Note: Condition="false" applies unconditionally, but the package .targets files
+       only fire on unsupported TFMs (net6.0), so this has no effect on net8.0+.
        Remove when net6.0 is dropped from SrcTargets. -->
   <Target Name="NETStandardCompatError_Microsoft_Bcl_Cryptography_net8_0"
           Condition="false" />

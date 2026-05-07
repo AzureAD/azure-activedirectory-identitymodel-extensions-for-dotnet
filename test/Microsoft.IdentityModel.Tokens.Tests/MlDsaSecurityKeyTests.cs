@@ -6,7 +6,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
