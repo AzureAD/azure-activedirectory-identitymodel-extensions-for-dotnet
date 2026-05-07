@@ -24,7 +24,8 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey
     /// <summary>
     /// Initializes a new instance of the <see cref="MlDsaSecurityKey"/> class.
     /// </summary>
-    /// <param name="mlDsa">The <see cref="MLDsa"/> instance. This key takes ownership of the instance.</param>
+    /// <param name="mlDsa">The <see cref="MLDsa"/> instance. The caller is responsible for the
+    /// lifetime of this instance; disposing the key does not dispose the MLDsa.</param>
     public MlDsaSecurityKey(MLDsa mlDsa)
     {
         MLDsa = mlDsa ?? throw LogHelper.LogArgumentNullException(nameof(mlDsa));

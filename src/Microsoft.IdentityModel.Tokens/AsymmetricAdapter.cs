@@ -283,7 +283,9 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (x509SecurityKey.MlDsaPublicKey != null)
             {
-                // ML-DSA certificate — extract MLDsa and initialize via ML-DSA path.
+                // ML-DSA certificate — borrow the MLDsa instance from X509SecurityKey.
+                // The X509SecurityKey retains ownership; _disposeCryptoOperators remains
+                // false so the adapter will not dispose it. Same pattern as RSA/ECDsa.
                 MLDsa mlDsa = requirePrivateKey ? x509SecurityKey.MlDsaPrivateKey : x509SecurityKey.MlDsaPublicKey;
                 InitializeUsingMlDsaSecurityKey(new MlDsaSecurityKey(mlDsa));
             }
