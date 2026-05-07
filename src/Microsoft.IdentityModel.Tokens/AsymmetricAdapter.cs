@@ -296,8 +296,9 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
                             LogHelper.FormatInvariant(
-                                LogMessages.IDX10638,
-                                LogHelper.MarkAsNonPII(algorithm))));
+                                LogMessages.IDX10723,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
 
                 InitializeUsingMlDsa(mlDsa);
             }

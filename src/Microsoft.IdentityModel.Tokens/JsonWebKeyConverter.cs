@@ -324,6 +324,10 @@ namespace Microsoft.IdentityModel.Tokens
                     if (string.IsNullOrEmpty(webKey.Alg))
                         return false;
 
+                    // Only proceed if the alg is a supported AKP algorithm.
+                    if (!SupportedAlgorithms.IsSupportedMlDsaAlgorithm(webKey.Alg))
+                        return false;
+
                     // AKP JWKs with x5c contain a certificate — convert to X509SecurityKey.
                     // Validate that the alg claim matches the certificate's algorithm OID
                     // to prevent key confusion (e.g., alg=ML-DSA-44 with an ML-DSA-87 cert).
