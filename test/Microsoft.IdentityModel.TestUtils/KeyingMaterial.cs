@@ -1188,6 +1188,5 @@ namespace Microsoft.IdentityModel.TestUtils
             return rsa;
 #endif
         }
-
     }
 }

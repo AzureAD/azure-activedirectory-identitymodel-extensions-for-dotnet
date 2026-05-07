@@ -346,14 +346,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #region Algorithm Mismatch Tests
 
-        [MlDsaFact]
-        public void SignWithMismatchedAlgorithm_IsRejected()
-        {
-            // ML-DSA-44 key with ML-DSA-65 algorithm is rejected by IsSupportedAlgorithm.
-            // The key's parameter set must match the requested algorithm.
-            Assert.False(SupportedAlgorithms.IsSupportedAlgorithm(SecurityAlgorithms.MlDsa65, MlDsaKeyingMaterial.MlDsa44Key));
-        }
-
         [MlDsaTheory]
         [InlineData("ML-DSA-44", "ML-DSA-65")]
         [InlineData("ML-DSA-44", "ML-DSA-87")]
@@ -462,6 +454,98 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var differentKey = new MlDsaSecurityKey(differentMlDsa);
             var verifyProvider = new AsymmetricSignatureProvider(differentKey, SecurityAlgorithms.MlDsa44, false);
             Assert.False(verifyProvider.Verify(data, signature));
+        }
+
+        #endregion
+
+        #region Sign/Verify Round-Trip Tests
+
+        [MlDsaTheory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void SignVerify_RoundTrip(string algorithm)
+        {
+            byte[] data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            var signingKey = GetMlDsaKey(algorithm);
+            var verifyKey = GetMlDsaPublicKey(algorithm);
+
+            var signingProvider = new AsymmetricSignatureProvider(signingKey, algorithm, true);
+            byte[] signature = signingProvider.Sign(data);
+
+            Assert.NotNull(signature);
+            Assert.True(signature.Length > 0);
+
+            var verifyProvider = new AsymmetricSignatureProvider(verifyKey, algorithm, false);
+            Assert.True(verifyProvider.Verify(data, signature));
+        }
+
+        #endregion
+
+        #region Thumbprint Consistency Tests
+
+        [MlDsaTheory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void JwkThumbprint_MatchesBetweenSecurityKeyAndJsonWebKey(string algorithm)
+        {
+            // MlDsaSecurityKey and its JWK representation should produce identical thumbprints.
+            var key = GetMlDsaKey(algorithm);
+            var jwk = JsonWebKeyConverter.ConvertFromMlDsaSecurityKey(key);
+
+            byte[] keyThumbprint = key.ComputeJwkThumbprint();
+            byte[] jwkThumbprint = jwk.ComputeJwkThumbprint();
+
+            Assert.Equal(keyThumbprint, jwkThumbprint);
+        }
+
+        [MlDsaTheory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void JwkThumbprint_X509MatchesMlDsaSecurityKey(string algorithm)
+        {
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
+
+            // Extract the public key from the X509 cert and create a standalone MlDsaSecurityKey.
+#pragma warning disable SYSLIB5006
+            using var mlDsaPub = x509Key.Certificate.GetMLDsaPublicKey();
+#pragma warning restore SYSLIB5006
+            var standaloneKey = new MlDsaSecurityKey(mlDsaPub);
+
+            byte[] x509Thumbprint = x509Key.ComputeJwkThumbprint();
+            byte[] standaloneThumbprint = standaloneKey.ComputeJwkThumbprint();
+
+            Assert.Equal(x509Thumbprint, standaloneThumbprint);
+        }
+
+        #endregion
+
+        #region X509 Algorithm Enforcement Tests
+
+        [MlDsaTheory]
+        [InlineData("ML-DSA-44", "ML-DSA-65")]
+        [InlineData("ML-DSA-44", "ML-DSA-87")]
+        [InlineData("ML-DSA-65", "ML-DSA-44")]
+        public void IsSupportedAlgorithm_RejectsX509KeyAlgorithmMismatch(string keyAlgorithm, string requestedAlgorithm)
+        {
+            var (x509Key, _) = GetX509MlDsaKey(keyAlgorithm);
+            Assert.False(
+                SupportedAlgorithms.IsSupportedAlgorithm(requestedAlgorithm, x509Key),
+                $"Expected {requestedAlgorithm} to be rejected for X509 {keyAlgorithm} key");
+        }
+
+        [MlDsaTheory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void IsSupportedAlgorithm_AcceptsMatchingX509KeyAlgorithm(string algorithm)
+        {
+            var (x509Key, _) = GetX509MlDsaKey(algorithm);
+            Assert.True(
+                SupportedAlgorithms.IsSupportedAlgorithm(algorithm, x509Key),
+                $"Expected {algorithm} to be accepted for matching X509 key");
         }
 
         #endregion
