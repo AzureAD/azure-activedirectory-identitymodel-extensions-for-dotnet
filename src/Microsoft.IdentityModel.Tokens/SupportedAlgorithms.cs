@@ -245,7 +245,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (key is X509SecurityKey x509Key)
             {
                 if (x509Key.MlDsaPublicKey != null)
-                    return IsSupportedMlDsaAlgorithm(algorithm);
+                    return MlDsaSecurityKey.GetAlgorithmName(x509Key.MlDsaPublicKey.Algorithm) == algorithm;
 
                 if (x509Key.PublicKey as RSA == null)
                     return false;
@@ -262,7 +262,7 @@ namespace Microsoft.IdentityModel.Tokens
                 else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(jsonWebKey.Kty))
                     return IsSupportedSymmetricAlgorithm(algorithm);
                 else if (JsonWebAlgorithmsKeyTypes.Akp.Equals(jsonWebKey.Kty))
-                    return IsSupportedMlDsaAlgorithm(algorithm);
+                    return IsSupportedMlDsaAlgorithm(algorithm) && algorithm == jsonWebKey.Alg;
 
                 return false;
             }
@@ -270,8 +270,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (key is ECDsaSecurityKey)
                 return IsSupportedEcdsaAlgorithm(algorithm);
 
-            if (key is MlDsaSecurityKey)
-                return IsSupportedMlDsaAlgorithm(algorithm);
+            if (key is MlDsaSecurityKey mlDsaKey)
+                return MlDsaSecurityKey.GetAlgorithmName(mlDsaKey.MLDsa.Algorithm) == algorithm;
 
             if (key as SymmetricSecurityKey != null)
                 return IsSupportedSymmetricAlgorithm(algorithm);

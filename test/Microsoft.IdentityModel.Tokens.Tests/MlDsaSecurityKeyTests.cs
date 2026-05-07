@@ -238,19 +238,82 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         #endregion
 
+        #region Pub/Priv Mismatch Tests
+
+        [Fact]
+        public void JwkWithMismatchedPubPriv_FailsConversion()
+        {
+            // Create two different ML-DSA-44 keys
+            using var keyA = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            using var keyB = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+
+            // Build a JWK with priv from keyA but pub from keyB
+            var jwk = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Alg = SecurityAlgorithms.MlDsa44,
+                Pub = Base64UrlEncoder.Encode(keyB.ExportMLDsaPublicKey()),
+                Priv = Base64UrlEncoder.Encode(keyA.ExportMLDsaPrivateSeed())
+            };
+
+            // TryConvert should fail because pub does not match the key derived from priv
+            Assert.False(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out _));
+        }
+
+        #endregion
+
         #region Algorithm Mismatch Tests
 
         [Fact]
-        public void SignWithMismatchedAlgorithm_FailsKeySizeValidation()
+        public void SignWithMismatchedAlgorithm_IsRejected()
         {
-            // ML-DSA-44 key (10496 bits) is too small for ML-DSA-65 (requires 15616 bits)
-            // Key size validation is opt-in via ValidKeySize() — same pattern as RSA/ECDSA tests
-            var provider = new AsymmetricSignatureProvider(
-                KeyingMaterial.MlDsa44Key,
-                SecurityAlgorithms.MlDsa65,
-                false);
+            // ML-DSA-44 key with ML-DSA-65 algorithm is rejected by IsSupportedAlgorithm.
+            // The key's parameter set must match the requested algorithm.
+            Assert.False(SupportedAlgorithms.IsSupportedAlgorithm(SecurityAlgorithms.MlDsa65, KeyingMaterial.MlDsa44Key));
+        }
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => provider.ValidKeySize());
+        [Theory]
+        [InlineData("ML-DSA-44", "ML-DSA-65")]
+        [InlineData("ML-DSA-44", "ML-DSA-87")]
+        [InlineData("ML-DSA-65", "ML-DSA-44")]
+        [InlineData("ML-DSA-65", "ML-DSA-87")]
+        [InlineData("ML-DSA-87", "ML-DSA-44")]
+        [InlineData("ML-DSA-87", "ML-DSA-65")]
+        public void IsSupportedAlgorithm_RejectsKeyAlgorithmMismatch(string keyAlgorithm, string requestedAlgorithm)
+        {
+            var key = GetMlDsaKey(keyAlgorithm);
+            Assert.False(
+                SupportedAlgorithms.IsSupportedAlgorithm(requestedAlgorithm, key),
+                $"Expected {requestedAlgorithm} to be rejected for {keyAlgorithm} key");
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public void IsSupportedAlgorithm_AcceptsMatchingKeyAlgorithm(string algorithm)
+        {
+            var key = GetMlDsaKey(algorithm);
+            Assert.True(
+                SupportedAlgorithms.IsSupportedAlgorithm(algorithm, key),
+                $"Expected {algorithm} to be accepted for matching key");
+        }
+
+        [Theory]
+        [InlineData("ML-DSA-44", "ML-DSA-65")]
+        [InlineData("ML-DSA-65", "ML-DSA-87")]
+        [InlineData("ML-DSA-87", "ML-DSA-44")]
+        public void IsSupportedAlgorithm_RejectsJwkAlgorithmMismatch(string jwkAlgorithm, string requestedAlgorithm)
+        {
+            var jwk = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Alg = jwkAlgorithm,
+                Pub = Base64UrlEncoder.Encode(new byte[32]) // dummy
+            };
+            Assert.False(
+                SupportedAlgorithms.IsSupportedAlgorithm(requestedAlgorithm, jwk),
+                $"Expected {requestedAlgorithm} to be rejected for JWK with alg={jwkAlgorithm}");
         }
 
         #endregion
@@ -526,8 +589,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.ValidAudiences.Add("https://test-audience.example.com");
             validationParameters.SigningKeys.Add(verifyKey);
             validationParameters.TryAllSigningKeys = true;
-            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
-            validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+            validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
+            validationParameters.TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation;
 
             var result = await ((IResultBasedValidation)handler).ValidateTokenAsync(
                 token, validationParameters, new CallContext());

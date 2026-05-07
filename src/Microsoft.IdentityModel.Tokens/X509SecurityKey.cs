@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#pragma warning disable SYSLIB5006 // X509 ML-DSA extension methods (GetMLDsaPublicKey/GetMLDsaPrivateKey) are experimental
-
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -178,7 +176,9 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     lock (ThisLock)
                     {
+#pragma warning disable SYSLIB5006 // GetMLDsaPrivateKey is experimental
                         _mlDsaPrivateKey ??= Certificate.GetMLDsaPrivateKey();
+#pragma warning restore SYSLIB5006
                     }
                 }
 
@@ -198,7 +198,9 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     lock (ThisLock)
                     {
+#pragma warning disable SYSLIB5006 // GetMLDsaPublicKey is experimental
                         _mlDsaPublicKey ??= Certificate.GetMLDsaPublicKey();
+#pragma warning restore SYSLIB5006
                     }
                 }
 

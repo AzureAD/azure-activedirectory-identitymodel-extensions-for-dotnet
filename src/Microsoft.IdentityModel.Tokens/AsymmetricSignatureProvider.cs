@@ -196,16 +196,19 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AsymmetricAdapter CreateAsymmetricAdapter()
         {
-            if (SupportedAlgorithms.TryGetHashAlgorithmName(Algorithm, out HashAlgorithmName hashAlgorithmName))
-                return new AsymmetricAdapter(
-                    Key,
-                    Algorithm,
-                    _cryptoProviderFactory.CreateHashAlgorithm(hashAlgorithmName),
-                    hashAlgorithmName,
-                    WillCreateSignatures);
-
             // ML-DSA and other pure-signing algorithms do not use an external hash.
-            return new AsymmetricAdapter(Key, Algorithm, WillCreateSignatures);
+            if (SupportedAlgorithms.IsSupportedMlDsaAlgorithm(Algorithm))
+                return new AsymmetricAdapter(Key, Algorithm, WillCreateSignatures);
+
+            // Preserve the protected virtual GetHashAlgorithmName extensibility point
+            // for hash-based algorithms (RSA, ECDSA).
+            HashAlgorithmName hashAlgorithmName = GetHashAlgorithmName(Algorithm);
+            return new AsymmetricAdapter(
+                Key,
+                Algorithm,
+                _cryptoProviderFactory.CreateHashAlgorithm(hashAlgorithmName),
+                hashAlgorithmName,
+                WillCreateSignatures);
         }
 
         internal bool ValidKeySize()
