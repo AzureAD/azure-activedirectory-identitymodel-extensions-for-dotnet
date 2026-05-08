@@ -619,7 +619,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
-        public async System.Threading.Tasks.Task JwtCreateAndValidate_EndToEnd(string algorithm)
+        public async Task JwtCreateAndValidate_EndToEnd(string algorithm)
         {
             var signingKey = GetMlDsaKey(algorithm);
             var verifyKey = GetMlDsaPublicKey(algorithm);
@@ -658,7 +658,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
-        public async System.Threading.Tasks.Task JwtCreateAndValidate_WithJsonWebKey(string algorithm)
+        public async Task JwtCreateAndValidate_WithJsonWebKey(string algorithm)
         {
             var signingJwk = GetMlDsaJsonWebKey(algorithm);
             var verifyJwk = GetMlDsaJsonWebKeyPublic(algorithm);
@@ -802,7 +802,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
-        public async System.Threading.Tasks.Task JwtCreateAndValidate_WithX509SecurityKey(string algorithm)
+        public async Task JwtCreateAndValidate_WithX509SecurityKey(string algorithm)
         {
             if (!MlDsaKeyingMaterial.CanExtractMlDsaPrivateKeyFromX509())
                 return; // skip on platforms that can't extract ML-DSA private keys from X509
@@ -842,7 +842,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("ML-DSA-44")]
         [InlineData("ML-DSA-65")]
         [InlineData("ML-DSA-87")]
-        public async System.Threading.Tasks.Task JwtCreateWithX509_ValidateWithMlDsaKey(string algorithm)
+        public async Task JwtCreateWithX509_ValidateWithMlDsaKey(string algorithm)
         {
             if (!MlDsaKeyingMaterial.CanExtractMlDsaPrivateKeyFromX509())
                 return; // skip on platforms that can't extract ML-DSA private keys from X509

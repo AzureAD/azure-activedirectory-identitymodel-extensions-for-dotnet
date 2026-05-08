@@ -294,11 +294,13 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 InitializeUsingX509Rsa(x509SecurityKey, algorithm, requirePrivateKey);
             }
+            else if (x509SecurityKey.PublicKey is ECDsa ecDsa)
+            {
+                InitializeUsingEcdsaSecurityKey(new ECDsaSecurityKey(ecDsa));
+            }
             else
             {
-                // Certificate key type is not supported (not RSA, ECDSA, or ML-DSA).
-                // ECDSA X509 certs are routed through InitializeUsingEcdsaSecurityKey
-                // by the constructor and do not reach here.
+                // Certificate key type is not recognized (not RSA, ECDSA, or ML-DSA).
                 throw LogHelper.LogExceptionMessage(
                     new NotSupportedException(
                         LogHelper.FormatInvariant(

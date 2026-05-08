@@ -57,6 +57,11 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey
                 {
                     _hasPrivateKey = false;
                 }
+                catch (Exception)
+                {
+                    // Cannot determine private key status (e.g., platform limitation).
+                    _hasPrivateKey = false;
+                }
             }
 
             return _hasPrivateKey.Value;
@@ -86,6 +91,11 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey
                 catch (CryptographicException)
                 {
                     _hasPrivateKey = false;
+                }
+                catch (Exception)
+                {
+                    // Cannot determine private key status (e.g., platform limitation).
+                    return PrivateKeyStatus.Unknown;
                 }
             }
 
