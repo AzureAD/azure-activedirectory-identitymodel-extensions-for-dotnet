@@ -340,6 +340,7 @@ namespace Microsoft.IdentityModel.Tokens
                             || MlDsaSecurityKey.GetAlgorithmName(x509Key.MlDsaPublicKey.Algorithm) != webKey.Alg)
                         {
                             key = null;
+                            webKey.ConvertedSecurityKey = null;
                             return false;
                         }
 
