@@ -35,8 +35,8 @@ namespace Microsoft.IdentityModel.Tokens
         MLDsa _mlDsaPrivateKey;
         MLDsa _mlDsaPublicKey;
         bool _isMlDsa;
-        bool _mlDsaPrivateKeyInitialized;
-        bool _mlDsaPublicKeyInitialized;
+        volatile bool _mlDsaPrivateKeyInitialized;
+        volatile bool _mlDsaPublicKeyInitialized;
         bool _mlDsaPrivateKeyUnsupported;
 #if NET9_0_OR_GREATER
         Lock _thisLock = new();

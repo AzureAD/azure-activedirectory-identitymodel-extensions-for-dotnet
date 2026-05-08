@@ -302,8 +302,28 @@ namespace Microsoft.IdentityModel.Tokens
 
                 InitializeUsingMlDsa(mlDsa);
             }
+            else if (x509SecurityKey.PublicKey == null)
+            {
+                // Certificate contains neither a supported classical key (RSA/ECDSA) nor
+                // an extractable ML-DSA key. This occurs when the certificate uses a key
+                // type that the platform cannot extract (e.g., ML-DSA on older OS versions).
+                throw LogHelper.LogExceptionMessage(
+                    new NotSupportedException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10725,
+                            LogHelper.MarkAsNonPII(algorithm),
+                            LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
+            }
             else if (requirePrivateKey)
             {
+                if (x509SecurityKey.PrivateKey == null)
+                    throw LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX10723,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
+
                 InitializeUsingRsa(x509SecurityKey.PrivateKey as RSA, algorithm);
             }
             else
