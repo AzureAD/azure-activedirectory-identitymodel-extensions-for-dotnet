@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         bool _isMlDsa;
         volatile bool _mlDsaPrivateKeyInitialized;
         volatile bool _mlDsaPublicKeyInitialized;
-        bool _mlDsaPrivateKeyUnsupported;
+        volatile bool _mlDsaPrivateKeyUnsupported;
 #if NET9_0_OR_GREATER
         Lock _thisLock = new();
 #else
@@ -282,10 +282,12 @@ namespace Microsoft.IdentityModel.Tokens
                     // DoesNotExist, so Unknown will pass the constructor guard. However, the adapter
                     // will fail with a clear InvalidOperationException (IDX10723) when it attempts
                     // to access the null MlDsaPrivateKey during signing initialization.
+                    MLDsa mlDsaPrivateKey = MlDsaPrivateKey;
+
                     if (_mlDsaPrivateKeyUnsupported)
                         return PrivateKeyStatus.Unknown;
 
-                    return MlDsaPrivateKey != null ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
+                    return mlDsaPrivateKey != null ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
                 }
 
                 return PrivateKey == null ? PrivateKeyStatus.DoesNotExist : PrivateKeyStatus.Exists;
