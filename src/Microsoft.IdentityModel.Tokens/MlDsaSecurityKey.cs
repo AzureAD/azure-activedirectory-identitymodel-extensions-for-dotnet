@@ -60,7 +60,8 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey
                 catch (Exception)
                 {
                     // Cannot determine private key status (e.g., platform limitation).
-                    _hasPrivateKey = false;
+                    // Do not cache — let PrivateKeyStatus determine independently.
+                    return false;
                 }
             }
 

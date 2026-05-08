@@ -374,7 +374,7 @@ namespace Microsoft.IdentityModel.Tokens
                 else if (Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
                     return D != null;
                 else if (Kty == JsonWebAlgorithmsKeyTypes.Akp)
-                    return Priv != null;
+                    return !string.IsNullOrEmpty(Priv);
                 else
                     return false;
             }
