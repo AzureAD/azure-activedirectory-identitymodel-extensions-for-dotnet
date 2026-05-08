@@ -264,10 +264,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // Create a public-only X509SecurityKey by loading only the certificate (no private key)
 #if NET9_0_OR_GREATER
-            var publicOnlyCert = X509CertificateLoader.LoadCertificate(x509Key.Certificate.RawData);
+            using var publicOnlyCert = X509CertificateLoader.LoadCertificate(x509Key.Certificate.RawData);
 #else
 #pragma warning disable SYSLIB0057
-            var publicOnlyCert = new X509Certificate2(x509Key.Certificate.RawData);
+            using var publicOnlyCert = new X509Certificate2(x509Key.Certificate.RawData);
 #pragma warning restore SYSLIB0057
 #endif
             var publicOnlyKey = new X509SecurityKey(publicOnlyCert);
@@ -782,14 +782,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 // Simulate exactly what the test does: load cert from RawData (public-only)
                 // and attempt to extract ML-DSA public key.
-                var x509Key = new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                    X509CertificateLoader.LoadCertificate(MlDsaKeyingMaterial.MlDsa44Cert.RawData));
+                using var cert = X509CertificateLoader.LoadCertificate(MlDsaKeyingMaterial.MlDsa44Cert.RawData);
 #else
 #pragma warning disable SYSLIB0057
-                    new X509Certificate2(MlDsaKeyingMaterial.MlDsa44Cert.RawData));
+                using var cert = new X509Certificate2(MlDsaKeyingMaterial.MlDsa44Cert.RawData);
 #pragma warning restore SYSLIB0057
 #endif
+                var x509Key = new X509SecurityKey(cert);
                 return x509Key.MlDsaPublicKey != null;
             }
             catch (Exception)
