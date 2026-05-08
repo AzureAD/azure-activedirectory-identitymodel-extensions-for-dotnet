@@ -218,8 +218,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Null(jwk.Priv);
 
             // Verify the x5c JWK can be converted back to an X509SecurityKey
-            Assert.True(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out var roundTripped));
-            Assert.IsType<X509SecurityKey>(roundTripped);
+            // (requires ML-DSA public key extraction from a cert loaded via x5c)
+            if (CanExtractMlDsaPublicKeyFromX509PublicOnlyCert())
+            {
+                Assert.True(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out var roundTripped));
+                Assert.IsType<X509SecurityKey>(roundTripped);
+            }
         }
 
         [MlDsaTheory]
