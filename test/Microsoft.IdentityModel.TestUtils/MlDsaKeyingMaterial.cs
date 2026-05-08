@@ -114,7 +114,11 @@ namespace Microsoft.IdentityModel.TestUtils
         private static X509Certificate2 LoadMlDsaCert(string pfxBase64)
         {
 #if NET9_0_OR_GREATER
-            return X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(pfxBase64), MlDsaCertPassword, X509KeyStorageFlags.Exportable);
+            return X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(pfxBase64), MlDsaCertPassword, X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.Exportable);
+#elif NET6_0_OR_GREATER
+#pragma warning disable SYSLIB0057
+            return new X509Certificate2(Convert.FromBase64String(pfxBase64), MlDsaCertPassword, X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.Exportable);
+#pragma warning restore SYSLIB0057
 #else
 #pragma warning disable SYSLIB0057
             return new X509Certificate2(Convert.FromBase64String(pfxBase64), MlDsaCertPassword, X509KeyStorageFlags.Exportable);

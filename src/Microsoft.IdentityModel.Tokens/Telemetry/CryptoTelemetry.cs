@@ -118,20 +118,7 @@ public static class CryptoTelemetry
                 _ => KeyAlgorithmIds.SymmetricUnknown
             },
 
-            X509SecurityKey x509 => x509.KeySize switch
-            {
-                2048 => KeyAlgorithmIds.Rsa2048,
-                3072 => KeyAlgorithmIds.Rsa3072,
-                4096 => KeyAlgorithmIds.Rsa4096,
-                256 => KeyAlgorithmIds.EcdsaP256,
-                384 => KeyAlgorithmIds.EcdsaP384,
-                521 => KeyAlgorithmIds.EcdsaP521,
-                _ => x509.PublicKey is RSA
-                    ? KeyAlgorithmIds.RsaUnknown
-                    : x509.PublicKey is ECDsa
-                        ? KeyAlgorithmIds.EcdsaUnknown
-                        : KeyAlgorithmIds.Unknown
-            },
+            X509SecurityKey x509 => GetX509KeyAlgorithmId(x509),
 
             JsonWebKey jwk => GetJsonWebKeyAlgorithmId(jwk),
 
@@ -145,6 +132,35 @@ public static class CryptoTelemetry
 
             // EdDSA and other key types can be added here when needed.
             _ => KeyAlgorithmIds.Unknown
+        };
+    }
+
+    private static string GetX509KeyAlgorithmId(X509SecurityKey x509)
+    {
+        if (x509.MlDsaPublicKey != null)
+        {
+            return x509.MlDsaPublicKey.Algorithm.Name switch
+            {
+                "ML-DSA-44" => KeyAlgorithmIds.MlDsa44,
+                "ML-DSA-65" => KeyAlgorithmIds.MlDsa65,
+                "ML-DSA-87" => KeyAlgorithmIds.MlDsa87,
+                _ => KeyAlgorithmIds.MlDsaUnknown
+            };
+        }
+
+        return x509.KeySize switch
+        {
+            2048 => KeyAlgorithmIds.Rsa2048,
+            3072 => KeyAlgorithmIds.Rsa3072,
+            4096 => KeyAlgorithmIds.Rsa4096,
+            256 => KeyAlgorithmIds.EcdsaP256,
+            384 => KeyAlgorithmIds.EcdsaP384,
+            521 => KeyAlgorithmIds.EcdsaP521,
+            _ => x509.PublicKey is RSA
+                ? KeyAlgorithmIds.RsaUnknown
+                : x509.PublicKey is ECDsa
+                    ? KeyAlgorithmIds.EcdsaUnknown
+                    : KeyAlgorithmIds.Unknown
         };
     }
 

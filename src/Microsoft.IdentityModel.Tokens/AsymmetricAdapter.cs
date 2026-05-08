@@ -288,25 +288,17 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (x509SecurityKey.MlDsaPublicKey != null)
             {
-                // ML-DSA certificate — borrow the MLDsa instance from X509SecurityKey.
-                // The X509SecurityKey retains ownership; _disposeCryptoOperators remains
-                // false so the adapter will not dispose it. Same pattern as RSA/ECDsa.
-                MLDsa mlDsa = requirePrivateKey ? x509SecurityKey.MlDsaPrivateKey : x509SecurityKey.MlDsaPublicKey;
-                if (mlDsa == null)
-                    throw LogHelper.LogExceptionMessage(
-                        new InvalidOperationException(
-                            LogHelper.FormatInvariant(
-                                LogMessages.IDX10723,
-                                LogHelper.MarkAsNonPII(algorithm),
-                                LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
-
-                InitializeUsingMlDsa(mlDsa);
+                InitializeUsingX509MlDsa(x509SecurityKey, algorithm, requirePrivateKey);
             }
-            else if (x509SecurityKey.PublicKey == null)
+            else if (x509SecurityKey.PublicKey is RSA)
             {
-                // Certificate contains neither a supported classical key (RSA/ECDSA) nor
-                // an extractable ML-DSA key. This occurs when the certificate uses a key
-                // type that the platform cannot extract (e.g., ML-DSA on older OS versions).
+                InitializeUsingX509Rsa(x509SecurityKey, algorithm, requirePrivateKey);
+            }
+            else
+            {
+                // Certificate key type is not supported (not RSA, ECDSA, or ML-DSA).
+                // ECDSA X509 certs are routed through InitializeUsingEcdsaSecurityKey
+                // by the constructor and do not reach here.
                 throw LogHelper.LogExceptionMessage(
                     new NotSupportedException(
                         LogHelper.FormatInvariant(
@@ -314,14 +306,40 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.MarkAsNonPII(algorithm),
                             LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
             }
-            else if (requirePrivateKey)
+        }
+
+        private void InitializeUsingX509MlDsa(
+            X509SecurityKey x509SecurityKey,
+            string algorithm,
+            bool requirePrivateKey)
+        {
+            // Borrow the MLDsa instance from X509SecurityKey.
+            // The X509SecurityKey retains ownership; _disposeCryptoOperators remains
+            // false so the adapter will not dispose it. Same pattern as RSA/ECDsa.
+            MLDsa mlDsa = requirePrivateKey ? x509SecurityKey.MlDsaPrivateKey : x509SecurityKey.MlDsaPublicKey;
+            if (mlDsa == null)
+                throw LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10723,
+                            LogHelper.MarkAsNonPII(algorithm),
+                            LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
+
+            InitializeUsingMlDsa(mlDsa);
+        }
+
+        private void InitializeUsingX509Rsa(
+            X509SecurityKey x509SecurityKey,
+            string algorithm,
+            bool requirePrivateKey)
+        {
+            if (requirePrivateKey)
             {
                 if (x509SecurityKey.PrivateKey == null)
                     throw LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
                             LogHelper.FormatInvariant(
-                                LogMessages.IDX10723,
-                                LogHelper.MarkAsNonPII(algorithm),
+                                LogMessages.IDX10638,
                                 LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
 
                 InitializeUsingRsa(x509SecurityKey.PrivateKey as RSA, algorithm);
