@@ -77,6 +77,11 @@ public static class CryptoTelemetry
         public const string Symmetric512 = "SYM-512";
         public const string SymmetricUnknown = "SYM-UNKNOWN";
 
+        public const string MlDsa44 = "MLDSA-44";
+        public const string MlDsa65 = "MLDSA-65";
+        public const string MlDsa87 = "MLDSA-87";
+        public const string MlDsaUnknown = "MLDSA-UNKNOWN";
+
         public const string Unknown = "UNKNOWN"; // Key type is not recognized.
         public const string NoKey = "NO-KEY"; // Used when no key is found or provided to differentiate from unknown key types
     }
@@ -130,7 +135,15 @@ public static class CryptoTelemetry
 
             JsonWebKey jwk => GetJsonWebKeyAlgorithmId(jwk),
 
-            // EdDSA, MLDSA and other key types can be added here when needed.
+            MlDsaSecurityKey mlDsa => mlDsa.MLDsa.Algorithm.Name switch
+            {
+                "ML-DSA-44" => KeyAlgorithmIds.MlDsa44,
+                "ML-DSA-65" => KeyAlgorithmIds.MlDsa65,
+                "ML-DSA-87" => KeyAlgorithmIds.MlDsa87,
+                _ => KeyAlgorithmIds.MlDsaUnknown
+            },
+
+            // EdDSA and other key types can be added here when needed.
             _ => KeyAlgorithmIds.Unknown
         };
     }
@@ -164,6 +177,13 @@ public static class CryptoTelemetry
                 384 => KeyAlgorithmIds.Symmetric384,
                 512 => KeyAlgorithmIds.Symmetric512,
                 _ => KeyAlgorithmIds.SymmetricUnknown
+            },
+            JsonWebAlgorithmsKeyTypes.Akp => jwk.Alg switch
+            {
+                SecurityAlgorithms.MlDsa44 => KeyAlgorithmIds.MlDsa44,
+                SecurityAlgorithms.MlDsa65 => KeyAlgorithmIds.MlDsa65,
+                SecurityAlgorithms.MlDsa87 => KeyAlgorithmIds.MlDsa87,
+                _ => KeyAlgorithmIds.MlDsaUnknown
             },
             _ => KeyAlgorithmIds.Unknown
         };
