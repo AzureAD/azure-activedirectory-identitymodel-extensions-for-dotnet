@@ -79,7 +79,6 @@ namespace Microsoft.IdentityModel.Tokens
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 
-            // TODO error message IDX10253 is not correct and needs adjusting.
             if (securityKey == null)
                 return new SignatureKeyValidationError(
                     new MessageDetail(LogMessages.IDX10253, nameof(securityKey)),
