@@ -60,7 +60,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 return new TheoryData<SigningKeyValidationTheoryData>
                 {
-                    // TODO Error message IDX10253 message is not accurate.
                     new SigningKeyValidationTheoryData("SecurityKeyIsNull")
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10253:"),
