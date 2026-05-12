@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         validationParameters,
                         configuration).ConfigureAwait(false);
 
-                    Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, validatedToken, validationParameters);
+                    Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, validatedToken, validationParameters, configuration);
                 }
                 else
                 {
