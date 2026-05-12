@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
-    <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
+    <CoverletCollectorVersion>6.0.4</CoverletCollectorVersion>
     <BannedApiAnalyzersVersion>4.14.0</BannedApiAnalyzersVersion>
     <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>3.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
-    <MicrosoftNETTestSdkVersion>17.11.1</MicrosoftNETTestSdkVersion>
+    <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
     <!--
     Locking the Moq version similar to https://github.com/Azure/azure-sdk-for-net/pull/38113/.
     This version should not be changed without team discussion.
@@ -13,23 +13,26 @@
     <MoqVersion>[4.16.1]</MoqVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
-    <OpenTelemetryVersion>1.6.0</OpenTelemetryVersion>
+    <OpenTelemetryVersion>1.15.3</OpenTelemetryVersion>
     <SystemNetHttp>4.3.4</SystemNetHttp>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
-    <SystemTextJson>8.0.5</SystemTextJson>
+    <SystemTextJsonVersion>8.0.5</SystemTextJsonVersion>
     <SystemTextRegularExpressions>4.3.1</SystemTextRegularExpressions>
     <XunitRunnerConsoleVersion>2.9.2</XunitRunnerConsoleVersion>
     <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
     <XunitVersion>2.9.2</XunitVersion>
     <MicrosoftRestClientRuntimeVersion>2.3.24</MicrosoftRestClientRuntimeVersion>
   </PropertyGroup>
+
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
     <XunitRunnerVisualStudioVersion>3.0.0-pre.49</XunitRunnerVisualStudioVersion>
   </PropertyGroup>
+  
   <!-- MicrosoftExtensionsTimeProviderTesting 8.x has a 6.0.0 target, 9.x does not. -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'net6.0'">
     <MicrosoftExtensionsTimeProviderTestingVersion>9.0.0</MicrosoftExtensionsTimeProviderTestingVersion>
   </PropertyGroup>
+  
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <MicrosoftExtensionsTimeProviderTestingVersion>8.10.0</MicrosoftExtensionsTimeProviderTestingVersion>
   </PropertyGroup>

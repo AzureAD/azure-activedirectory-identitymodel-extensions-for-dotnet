@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -24,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static OperationResult<string, ValidationError> ValidateAudienceInternal(
+        internal static ValidationResult<string, ValidationError> ValidateAudienceInternal(
             IList<string> audiences,
 #pragma warning disable CA1801
             SecurityToken? securityToken,
@@ -41,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                OperationResult<string, ValidationError> result = validationParameters.AudienceValidator(
+                ValidationResult<string, ValidationError> result = validationParameters.AudienceValidator.ValidateAudience(
                     audiences,
                     securityToken,
                     validationParameters,
@@ -74,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
         /// <remarks>An EXACT match is required.</remarks>
-        public static OperationResult<string, ValidationError> ValidateAudience(
+        public static ValidationResult<string, ValidationError> ValidateAudience(
             IList<string> tokenAudiences,
 #pragma warning disable CA1801
             SecurityToken? securityToken,
@@ -162,8 +161,16 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (AudienceMatches(ignoreTrailingSlashWhenValidatingAudience, tokenAudiences[i], validAudiences[j]))
                     {
-                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                            LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudiences[i]));
+                        if (AppContextSwitches.SuccessValidationLogsAsInformation)
+                        {
+                            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                                LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudiences[i]));
+                        }
+                        else
+                        {
+                            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                                LogHelper.LogVerbose(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudiences[i]));
+                        }
 
                         return tokenAudiences[i];
                     }
@@ -198,8 +205,16 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (string.CompareOrdinal(validAudience, 0, tokenAudience, 0, length) == 0)
             {
-                if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                if (AppContextSwitches.SuccessValidationLogsAsInformation)
+                {
+                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                        LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                }
+                else
+                {
+                    if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                        LogHelper.LogVerbose(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                }
 
                 return true;
             }

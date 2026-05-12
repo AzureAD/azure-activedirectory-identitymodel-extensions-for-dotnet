@@ -1,15 +1,16 @@
 name: "CodeQL"
 
 on:
+  workflow_dispatch: # Allows manual triggering of workflow
   push:       
-    branches: [ "dev" ]
+    branches: [ "dev", "dev8x" ]
   pull_request:
     types:
       - opened
       - synchronize
       - reopened
       - ready_for_review
-    branches: [ "dev" ]
+    branches: [ "dev", "dev8x" ]
 
 jobs:
   analyze:
@@ -22,12 +23,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 2
 
     - name: Setup .NET SDK from global.json
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         global-json-file: ./global.json        
 

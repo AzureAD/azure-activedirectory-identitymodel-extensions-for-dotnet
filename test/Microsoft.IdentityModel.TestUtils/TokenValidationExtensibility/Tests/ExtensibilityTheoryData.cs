@@ -21,14 +21,14 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
             SecurityToken = securityToken;
             ValidationParameters = new ValidationParameters
             {
-                AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation,
-                AudienceValidator = SkipValidationDelegates.SkipAudienceValidation,
-                SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation,
-                IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation,
-                LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation,
-                //SignatureValidator = SkipValidationDelegates.SkipSignatureValidation,
-                TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation,
-                TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation
+                AlgorithmValidator = SkipValidationValidators.SkipAlgorithmValidation,
+                AudienceValidator = SkipValidationValidators.SkipAudienceValidation,
+                SignatureKeyValidator = SkipValidationValidators.SkipIssuerSigningKeyValidation,
+                IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation,
+                LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation,
+                //SignatureValidator = SkipValidationValidators.SkipSignatureValidation,
+                TokenReplayValidator = SkipValidationValidators.SkipTokenReplayValidation,
+                TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation
             };
 
             ValidationParameters.SigningKeys.Add(Default.SigningCredentials.Key);

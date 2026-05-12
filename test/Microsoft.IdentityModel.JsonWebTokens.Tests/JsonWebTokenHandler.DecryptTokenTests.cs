@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt.Tests;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.TestUtils;
@@ -13,7 +13,6 @@ using Xunit;
 
 #if NET472_OR_GREATER || NET6_0_OR_GREATER
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 #endif
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -38,16 +37,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerDecryptTokenTests", theoryData);
-            OperationResult<string, ValidationError> operationResult = jsonWebTokenHandler.DecryptToken(
+            ValidationResult<string, ValidationError> validationResult = jsonWebTokenHandler.DecryptToken(
                 theoryData.Token,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
                 theoryData.CallContext);
 
-            if (operationResult.Succeeded)
+            if (validationResult.Succeeded)
             {
                 IdentityComparer.AreStringsEqual(
-                    operationResult.Result,
+                    validationResult.Result,
                     theoryData.OperationResult.Result,
                     context);
 
@@ -55,7 +54,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             else
             {
-                ValidationError validationError = operationResult.Error;
+                ValidationError validationError = validationResult.Error;
                 IdentityComparer.AreStringsEqual(
                     validationError.FailureType.Name,
                     theoryData.OperationResult.Error.FailureType.Name,
@@ -72,7 +71,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void DecryptToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
-            OperationResult<string, ValidationError> tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
+            ValidationResult<string, ValidationError> tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
                 null,
                 null,
                 null,
@@ -174,7 +173,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
                         ValidationParameters = new ValidationParameters
                         {
-                            DecryptionKeyResolver = (tokenString, token, kid, validationParameters, callContext) => [Default.SymmetricEncryptingCredentials.Key]
+                            DecryptionKeyResolver = new DecryptionKeyResolverReturnsSymmetricKey()
                         },
                         OperationResult = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
                     },
@@ -289,6 +288,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        // Helper validator for test scenario
+#nullable enable
+        private class DecryptionKeyResolverReturnsSymmetricKey : IDecryptionKeyResolver
+        {
+            public IList<SecurityKey> ResolveDecryptionKey(
+                string token,
+                SecurityToken securityToken,
+                string kid,
+                ValidationParameters validationParameters,
+                CallContext? callContext)
+            {
+                return [Default.SymmetricEncryptingCredentials.Key];
+            }
+        }
+#nullable restore
+
         private static CustomConfiguration CreateCustomConfigurationThatThrows(SecurityKey rsaKey)
         {
             var customCryptoProviderFactory = new DerivedCryptoProviderFactory
@@ -311,7 +326,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     {
         public TokenDecryptingTheoryData(string testId) : base(testId) { }
         public JsonWebToken Token { get; set; }
-        internal OperationResult<string, ValidationError> OperationResult { get; set; }
+        internal ValidationResult<string, ValidationError> OperationResult { get; set; }
         public BaseConfiguration Configuration { get; internal set; }
         public SecurityTokenDescriptor SecurityTokenDescriptor { get; internal set; }
         public string TokenString { get; internal set; }

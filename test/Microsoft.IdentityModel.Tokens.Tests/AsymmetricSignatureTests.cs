@@ -21,9 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext("UnsupportedRSATypes");
             TestUtilities.WriteHeader($"{this}.UnsupportedRSATypes");
 
-#if NET462 || NET472 || NET_CORE
             var expectedException = ExpectedException.NoExceptionExpected;
-#endif
             try
             {
                 new AsymmetricAdapter(new RsaSecurityKey(new DerivedRsa(2048)), SecurityAlgorithms.RsaSha256, false);
@@ -34,9 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 expectedException.ProcessException(ex, context);
             }
 
-#if NET462 || NET472 || NET_CORE
             expectedException = ExpectedException.NoExceptionExpected;
-#endif
 
             try
             {
@@ -107,7 +103,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-#if NET462 || NET472 || NET_CORE
                 theoryData.Add(new SignatureProviderTheoryData()
                 {
                     SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
@@ -153,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NET_CORE
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -167,7 +162,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey()),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NET_CORE
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -181,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NET_CORE
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -222,7 +217,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = x509KeyTuple.Item2
                     },
                     theoryData);
-#endif
 
                 foreach (var ecdsaKeyTuple in AsymmetricSignatureTestData.ECDsaSecurityKeys)
                     AsymmetricSignatureTestData.AddECDsaAlgorithmVariations(new SignatureProviderTheoryData

@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Xml;
 
@@ -55,13 +55,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return obj.GetType().ToString();
         }
 
-        internal static OperationResult<SecurityKey, ValidationError> ValidateSignature(
+        private static void RecordSignatureValidationTelemetry(
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient,
+            string errorType,
+            SecurityToken securityToken,
+            string algorithm,
+            SecurityKey key)
+        {
+            if (CryptoTelemetry.RecordSignatureValidationTelemetry)
+            {
+                telemetryClient.IncrementSignatureValidationCounter(
+                    errorType,
+                    securityToken.Issuer,
+                    algorithm,
+                    key);
+            }
+        }
+
+        internal static ValidationResult<SecurityKey, ValidationError> ValidateSignature(
             SecurityToken securityToken,
             Signature signature,
             string canonicalString,
             ValidationParameters validationParameters,
             BaseConfiguration configuration,
-            CallContext callContext)
+            CallContext callContext,
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
             if (securityToken is null)
             {
@@ -77,12 +95,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     ValidationError.GetCurrentStackFrame());
             }
 
-            // Delegate is set by the user, we call it and return the result.
+            // Validator is set by the user, we call it and return the result.
             if (validationParameters.SignatureValidator is not null)
             {
                 try
                 {
-                    return validationParameters.SignatureValidator(
+                    return validationParameters.SignatureValidator.ValidateSignature(
                         securityToken,
                         validationParameters,
                         configuration,
@@ -114,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             SecurityKey key = null;
             if (validationParameters.SignatureKeyResolver is not null)
             {
-                key = validationParameters.SignatureKeyResolver(
+                key = validationParameters.SignatureKeyResolver.ResolveSignatureKey(
                     canonicalString,
                     securityToken,
                     signature.KeyInfo?.Id,
@@ -143,7 +161,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         signature,
                         validationParameters,
                         key,
-                        callContext);
+                        callContext,
+                        telemetryClient);
 
                 }
                 else if (validationParameters.TryAllSigningKeys)
@@ -155,7 +174,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         canonicalString,
                         validationParameters,
                         configuration,
-                        callContext);
+                        callContext,
+                        telemetryClient);
             }
 
             if (signature.KeyInfo == null)
@@ -182,7 +202,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static OperationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
+        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureWithKey(
             byte[] signatureBytes,
             byte[] canonicalBytes,
             SecurityToken securityToken,
@@ -190,8 +210,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ValidationParameters validationParameters,
             SecurityKey key,
 #pragma warning disable CA1801 // Review unused parameters
-            CallContext callContext)
+            CallContext callContext,
 #pragma warning restore CA1801 // Review unused parameters
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
             // TODO - this is not an AlgorithmValidationFailure, but a CryptoProviderFactory failure.
             // TODO we need tests across token handlers
@@ -220,19 +241,42 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         ValidationError.GetCurrentStackFrame());
 
                 if (!signatureProvider.Verify(canonicalBytes, signatureBytes))
+                {
+                    RecordSignatureValidationTelemetry(
+                        telemetryClient,
+                        TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                        securityToken,
+                        signature.SignedInfo.SignatureMethod,
+                        key);
+
                     return new SignatureValidationError(
                         new MessageDetail(
                             Tokens.LogMessages.IDX10520,
                             LogHelper.MarkAsNonPII(key.ToString())),
                         SignatureValidationFailure.ValidationFailed,
                         ValidationError.GetCurrentStackFrame());
+                }
 
                 var result = signature.SignedInfo.Verify(cryptoProviderFactory, callContext);
                 if (result == null)
                 {
+                    RecordSignatureValidationTelemetry(
+                        telemetryClient,
+                        TelemetryConstants.SignatureValidationErrors.None,
+                        securityToken,
+                        signature.SignedInfo.SignatureMethod,
+                        key);
+
                     securityToken.SigningKey = key;
                     return key;
                 }
+
+                RecordSignatureValidationTelemetry(
+                    telemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                    securityToken,
+                    signature.SignedInfo.SignatureMethod,
+                    key);
 
                 return result;
             }
@@ -240,6 +284,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
+                RecordSignatureValidationTelemetry(
+                    telemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                    securityToken,
+                    signature.SignedInfo.SignatureMethod,
+                    key);
+
                 return new SignatureValidationError(
                     new MessageDetail(
                         Tokens.LogMessages.IDX10521,
@@ -255,7 +306,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        private static OperationResult<SecurityKey, ValidationError> ValidateSignatureUsingAllKeys(
+        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureUsingAllKeys(
             byte[] signatureValueBytes,
             byte[] canonicalBytes,
             SecurityToken securityToken,
@@ -263,7 +314,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string canonicalString,
             ValidationParameters validationParameters,
             BaseConfiguration configuration,
-            CallContext callContext)
+            CallContext callContext,
+            Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
             bool keysTried = false;
             bool kidExists = !string.IsNullOrEmpty(signature?.KeyInfo?.Id);
@@ -279,14 +331,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 keysTried = true;
 
-                OperationResult<SecurityKey, ValidationError> result = ValidateSignatureWithKey(
+                ValidationResult<SecurityKey, ValidationError> result = ValidateSignatureWithKey(
                     signatureValueBytes,
                     canonicalBytes,
                     securityToken,
                     signature,
                     validationParameters,
                     key,
-                    callContext);
+                    callContext,
+                    telemetryClient);
 
                 if (result.Succeeded)
                 {

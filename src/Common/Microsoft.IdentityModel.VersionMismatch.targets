@@ -1,0 +1,57 @@
+<!--
+  Microsoft.IdentityModel Version Mismatch Detection
+
+  This MSBuild targets file is shipped inside every Microsoft.IdentityModel.* and
+  System.IdentityModel.* NuGet package under the buildTransitive/ folder. It runs
+  after NuGet package resolution and warns when the resolved package versions are
+  not all the same — a common source of hard-to-diagnose runtime failures.
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    Allow consumers to opt out of the check by setting
+    DisableIdentityModelVersionMismatchCheck=true in their project file.
+  -->
+  <PropertyGroup Condition="'$(_IdentityModelVersionCheckImported)' == ''">
+    <_IdentityModelVersionCheckImported>true</_IdentityModelVersionCheckImported>
+    <DisableIdentityModelVersionMismatchCheck Condition="'$(DisableIdentityModelVersionMismatchCheck)' == ''">false</DisableIdentityModelVersionMismatchCheck>
+  </PropertyGroup>
+
+  <!--
+    The target hooks into ResolvePackageAssets. There is used @(RuntimeCopyLocalItems)
+    where each item carries NuGetPackageId and NuGetPackageVersion metadata,
+    which allow detecting all resolved IdentityModel packages and their versions.
+    The guard condition '_IdentityModelVersionCheckExecuted' prevents running more
+    than once when multiple IdentityModel packages are referenced.
+  -->
+  <Target Name="_CheckIdentityModelVersions"
+          AfterTargets="ResolvePackageAssets"
+          Condition="'$(DisableIdentityModelVersionMismatchCheck)' != 'true' and '$(DesignTimeBuild)' != 'true' and '$(_IdentityModelVersionCheckExecuted)' != 'true'">
+
+    <PropertyGroup>
+      <_IdentityModelVersionCheckExecuted>true</_IdentityModelVersionCheckExecuted>
+    </PropertyGroup>
+
+    <_IdentityModelVersionMismatchTask ResolvedPackages="@(RuntimeCopyLocalItems)" />
+  </Target>
+
+  <!--
+    Inline task: the C# implementation is kept in a separate file for easier
+    maintenance and testing. RoslynCodeTaskFactory compiles it on first use.
+  -->
+  <UsingTask TaskName="_IdentityModelVersionMismatchTask"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ResolvedPackages ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.Collections.Generic" />
+      <Using Namespace="System.Linq" />
+      <Code Type="Fragment" Language="cs"
+            Source="$(MSBuildThisFileDirectory)Microsoft.IdentityModel.VersionMismatchTask.cs" />
+    </Task>
+  </UsingTask>
+
+</Project>

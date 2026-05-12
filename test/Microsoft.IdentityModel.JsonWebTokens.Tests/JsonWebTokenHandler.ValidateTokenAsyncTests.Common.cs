@@ -7,7 +7,6 @@ using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
-using Microsoft.Identity.Abstractions;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -25,7 +24,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
 
             // Validate the token using ValidationParameters
-            OperationResult<ValidatedToken, ValidationError> operationResult =
+            ValidationResult<ValidatedToken, ValidationError> validationResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     jwtString, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
 
@@ -33,21 +32,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (legacyTokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
-            if (operationResult.Succeeded != theoryData.ExpectedIsValid)
-                context.AddDiff($"operationResult.Succeeded != theoryData.ExpectedIsValid");
+            if (validationResult.Succeeded != theoryData.ExpectedIsValid)
+                context.AddDiff($"validationResult.Succeeded != theoryData.ExpectedIsValid");
 
             if (theoryData.ExpectedIsValid &&
                 legacyTokenValidationParametersResult.IsValid &&
-                operationResult.Succeeded)
+                validationResult.Succeeded)
             {
                 // Compare the ClaimsPrincipal and ClaimsIdentity from one result against the other
                 IdentityComparer.AreEqual(
                     legacyTokenValidationParametersResult.ClaimsIdentity,
-                    operationResult.Result!.ClaimsIdentity,
+                    validationResult.Result!.ClaimsIdentity,
                     context);
                 IdentityComparer.AreEqual(
                     legacyTokenValidationParametersResult.Claims,
-                    operationResult.Result!.Claims,
+                    validationResult.Result!.Claims,
                     context);
             }
             else
@@ -55,24 +54,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 // Verify the exception provided by the TokenValidationParameters path
                 theoryData.ExpectedException.ProcessException(legacyTokenValidationParametersResult.Exception, context);
 
-                if (!operationResult.Succeeded)
+                if (!validationResult.Succeeded)
                 {
                     // Verify the exception provided by the ValidationParameters path
                     if (theoryData.ExpectedExceptionValidationParameters is not null)
                     {
                         // If there is a special case for the ValidationParameters path, use that.
                         theoryData.ExpectedExceptionValidationParameters
-                            .ProcessException(operationResult.Error!.GetException(), context);
+                            .ProcessException(validationResult.Error!.GetException(), context);
                     }
                     else
                     {
                         theoryData.ExpectedException
-                            .ProcessException(operationResult.Error!.GetException(), context);
+                            .ProcessException(validationResult.Error!.GetException(), context);
 
                         // If the expected exception is the same in both paths, verify the message matches
                         IdentityComparer.AreStringsEqual(
                             legacyTokenValidationParametersResult.Exception.Message,
-                            operationResult.Error!.GetException().Message,
+                            validationResult.Error!.GetException().Message,
                             context);
                     }
                 }
@@ -80,7 +79,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 // Verify that the exceptions are of the same type.
                 IdentityComparer.AreEqual(
                     legacyTokenValidationParametersResult.Exception.GetType(),
-                    operationResult.Error!.GetException().GetType(),
+                    validationResult.Error!.GetException().GetType(),
                     context);
 
                 if (legacyTokenValidationParametersResult.Exception is SecurityTokenException)
@@ -88,7 +87,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     // Verify that the custom properties are the same.
                     IdentityComparer.AreSecurityTokenExceptionsEqual(
                         legacyTokenValidationParametersResult.Exception,
-                        operationResult.Error!.GetException(),
+                        validationResult.Error!.GetException(),
                         context);
                 }
             }
@@ -105,7 +104,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     theoryData.TokenValidationParameters);
 
             // Validate the token using ValidationParameters.
-            OperationResult<ValidatedToken, ValidationError> operationResult =
+            ValidationResult<ValidatedToken, ValidationError> validationResult =
                 await theoryData.TokenHandler.ValidateTokenAsync(
                     theoryData.Token,
                     theoryData.ValidationParameters!,
@@ -113,13 +112,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     CancellationToken.None);
 
             // Ensure the validity of the results match the expected result.
-            if (tokenValidationResult.IsValid != operationResult.Succeeded)
-                context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != OperationResult.Succeeded: '{operationResult.Succeeded}'");
+            if (tokenValidationResult.IsValid != validationResult.Succeeded)
+                context.AddDiff($"tokenValidationResult.IsValid: '{tokenValidationResult.IsValid}' != OperationResult.Succeeded: '{validationResult.Succeeded}'");
 
-            if (!operationResult.Succeeded)
+            if (!validationResult.Succeeded)
                 context.AddDiff($"Expected test to succeed, test failed: {theoryData.TestId}");
 
-            ValidatedToken validatedToken = operationResult.Result!;
+            ValidatedToken validatedToken = validationResult.Result!;
             IdentityComparer.AreEqual(validatedToken.SecurityToken, tokenValidationResult.SecurityToken, context);
 
             TestUtilities.AssertFailIfErrors(context);

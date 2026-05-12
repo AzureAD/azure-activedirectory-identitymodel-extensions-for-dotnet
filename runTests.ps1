@@ -31,6 +31,18 @@ function WriteSectionFooter($sectionName)
 ################################################# Functions ############################################################
 
 WriteSectionHeader("runTests.ps1");
+
+if (Test-Path $env:TargetNetNext)
+{
+    Write-Host "using TargetNetNext from env:"  $env:TargetNetNext
+}
+else 
+{
+    Write-Host "using TargetNetNext as false"
+    $env:TargetNetNext = "False"
+}
+
+
 Write-Host "buildType:       " $buildType;
 Write-Host "dotnetDir:       " $dotnetDir
 Write-Host "root:            " $root;
@@ -42,6 +54,7 @@ $runSettingsPath = $PSScriptRoot + "\build\CodeCoverage.runsettings"
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $dotnetexe = "$dotnetDir\dotnet.exe";
 $startTime = Get-Date
+
 Write-Host "Start Time:     " $startTime
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "dotnetexe:      " $dotnetexe;

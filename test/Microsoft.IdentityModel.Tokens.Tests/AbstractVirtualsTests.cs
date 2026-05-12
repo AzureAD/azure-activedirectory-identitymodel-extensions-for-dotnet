@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch (Exception ex)
             {
                 Assert.Contains("IDX10267: 'public virtual Task<TokenValidationResult> " +
-                    "ValidateTokenAsync(string token, TokenValidationParameters validationParameters)'",
+                    "ValidateTokenAsync(string token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)'",
                     ex.Message);
 
                 Assert.IsAssignableFrom<NotImplementedException>(ex);
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch (Exception ex)
             {
                 Assert.Contains("IDX10267: 'public virtual Task<TokenValidationResult> " +
-                    "ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)'",
+                    "ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)'",
                     ex.Message);
 
                 Assert.IsAssignableFrom<NotImplementedException>(ex);

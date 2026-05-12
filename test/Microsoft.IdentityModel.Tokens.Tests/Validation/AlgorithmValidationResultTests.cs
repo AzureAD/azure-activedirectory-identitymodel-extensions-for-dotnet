@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Logging;
 using Xunit;
 using System;
 using Microsoft.IdentityModel.Tokens.Experimental;
-using Microsoft.Identity.Abstractions;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
@@ -19,20 +18,20 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<string, ValidationError> operationResult =
+                ValidationResult<string, ValidationError> validationResult =
                     Validators.ValidateAlgorithm(
                         theoryData.Algorithm,
                         theoryData.SecurityToken,
                         theoryData.ValidationParameters,
                         theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
-                    context.AddDiff($"Expected operationResult to succeed, but it failed with: {operationResult.Error}.");
+                    context.AddDiff($"Expected validationResult to succeed, but it failed with: {validationResult.Error}.");
                 }
                 else
                 {
-                    ValidationError validationError = operationResult.Error;
+                    ValidationError validationError = validationResult.Error;
                     IdentityComparer.AreStringsEqual(
                         validationError.FailureType.Name,
                         theoryData.OperationResult.Error.FailureType.Name,
@@ -101,23 +100,23 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             try
             {
-                OperationResult<string, ValidationError> operationResult =
+                ValidationResult<string, ValidationError> validationResult =
                     Validators.ValidateAlgorithm(
                         theoryData.Algorithm,
                         theoryData.SecurityToken,
                         theoryData.ValidationParameters,
                         theoryData.CallContext);
 
-                if (operationResult.Succeeded)
+                if (validationResult.Succeeded)
                 {
                     IdentityComparer.AreStringsEqual(
-                        operationResult.Result,
+                        validationResult.Result,
                         theoryData.OperationResult.Result,
                         context);
                 }
                 else
                 {
-                    context.AddDiff($"Expected operationResult to succeed, but it failed with: {operationResult.Error}.");
+                    context.AddDiff($"Expected validationResult to succeed, but it failed with: {validationResult.Error}.");
                 }
             }
             catch (Exception ex)
@@ -169,7 +168,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             internal ValidationParameters ValidationParameters { get; set; }
 
-            internal OperationResult<string, AlgorithmValidationError> OperationResult { get; set; }
+            internal ValidationResult<string, AlgorithmValidationError> OperationResult { get; set; }
         }
     }
 }

@@ -3,7 +3,6 @@
   <PropertyGroup>
     <AspNetCoreMinSupportedVersion>2.1.1</AspNetCoreMinSupportedVersion>
     <BannedApiAnalyzersVersion>4.14.0</BannedApiAnalyzersVersion>
-    <MicrosoftIdentityAbstractionsVersion>9.2.0</MicrosoftIdentityAbstractionsVersion>
     <MicrosoftBclTimeProviderVersion>8.0.1</MicrosoftBclTimeProviderVersion>
     <MicrosoftCSharpVersion>4.5.0</MicrosoftCSharpVersion>
     <MicrosoftSourceLinkGitHubVersion>1.0.0</MicrosoftSourceLinkGitHubVersion>
@@ -12,11 +11,24 @@
     <SystemDiagnosticSourceVersion>6.0.2</SystemDiagnosticSourceVersion>
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
-    <SystemTextJson>8.0.5</SystemTextJson>
+    <SystemTextJsonVersion>8.0.5</SystemTextJsonVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetNetNext)' == 'True'">
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+    <!-- NU5104 prevents us from packing release packages with prerelease dependencies. But we want to do that so customers can get a preview of running with .NET 10. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1510;NU5104</WarningsNotAsErrors>
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
+  </PropertyGroup>
 
-<PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <!--
+      Keep at 8.x for compatibility for upstream users
+    -->
+    <MicrosoftExtensionsLoggingAbstractionsVersion>8.0.0</MicrosoftExtensionsLoggingAbstractionsVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <!--
       Do not bump to 9.0. complicated reasons due to some runtime incompatibilities if 
       CoreWCF compiles against an older version but then run with a newer version in a related package.

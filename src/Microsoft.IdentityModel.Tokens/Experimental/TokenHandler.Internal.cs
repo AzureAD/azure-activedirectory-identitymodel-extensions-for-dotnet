@@ -5,7 +5,6 @@ using System;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -24,9 +23,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>An <see cref="OperationResult{ValidatedToken, ValidationError}"/> with either a <see cref="ValidatedToken"/>
+        /// <returns>An <see cref="ValidationResult{ValidatedToken, ValidationError}"/> with either a <see cref="ValidatedToken"/>
         /// if the token was validated or a <see cref="ValidationError"/> containing the failure information.</returns>
-        internal virtual Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -49,9 +48,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>An <see cref="OperationResult{ValidatedToken, ValidationError}"/> with either a <see cref="ValidatedToken"/>
+        /// <returns>An <see cref="ValidationResult{ValidatedToken, ValidationError}"/> with either a <see cref="ValidatedToken"/>
         /// if the token was validated or a <see cref="ValidationError"/> containing the failure information.</returns>
-        internal virtual Task<OperationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,

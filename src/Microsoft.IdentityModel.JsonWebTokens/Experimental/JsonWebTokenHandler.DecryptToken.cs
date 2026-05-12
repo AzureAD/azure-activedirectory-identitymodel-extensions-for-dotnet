@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -23,8 +22,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>An <see cref="OperationResult{TResult, TError}"/> with OperationResult.Result containing the clear text or a <see cref="ValidationError"/>.</returns>
-        internal OperationResult<string, ValidationError> DecryptToken(
+        /// <returns>An <see cref="ValidationResult{TResult, TError}"/> with ValidationResult.Result containing the clear text or a <see cref="ValidationError"/>.</returns>
+        internal ValidationResult<string, ValidationError> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -90,7 +89,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // If no key found in VP, we'll check the configuration.
             if (validationParameters.DecryptionKeyResolver != null)
             {
-                keys = validationParameters.DecryptionKeyResolver(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters, callContext);
+                keys = validationParameters.DecryptionKeyResolver.ResolveDecryptionKey(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters, callContext);
             }
             else
             {
@@ -173,12 +172,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                     else
 #endif
+#pragma warning disable IDE0055 // Fix formatting, but we want the else and if split like this
                     if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
                         var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
                         unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                     }
+#pragma warning restore IDE0055 // Fix formatting
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)

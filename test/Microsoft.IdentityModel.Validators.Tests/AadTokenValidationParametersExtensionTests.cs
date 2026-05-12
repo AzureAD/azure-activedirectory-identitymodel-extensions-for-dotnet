@@ -7,7 +7,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -31,31 +30,23 @@ namespace Microsoft.IdentityModel.Validators.Tests
             {
 
                 ValidationParameters validationParameters = TestUtilities.CreateFromTokenValidationParameters(theoryData.TokenValidationParameters);
-                validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-                validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
+                validationParameters.AudienceValidator = SkipValidationValidators.SkipAudienceValidation;
+                validationParameters.IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation;
 
                 // set delegates
-                bool validationParametersDelegateSet = false;
                 bool delegateSet = false;
+                var flagHolder = new FlagHolder();
 
                 if (theoryData.SetDelegateUsingConfig)
                 {
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) => { delegateSet = true; return true; };
-                    validationParameters.SignatureKeyValidator = (securityKey, securityToken, validationParameters, callContext) =>
-                    {
-                        validationParametersDelegateSet = true;
-                        return new ValidatedSignatureKey(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
-                    };
+                    validationParameters.SignatureKeyValidator = new SignatureKeyValidatorSetsFlag(flagHolder);
                 }
                 else if (theoryData.SetDelegateWithoutConfig)
                 {
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = null;
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidator = (securityKey, securityToken, tvp) => { delegateSet = true; return true; };
-                    validationParameters.SignatureKeyValidator = (securityKey, securityToken, validationParameters, callContext) =>
-                    {
-                        validationParametersDelegateSet = true;
-                        return new ValidatedSignatureKey(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
-                    };
+                    validationParameters.SignatureKeyValidator = new SignatureKeyValidatorSetsFlag(flagHolder);
                 }
 
                 var handler = new JsonWebTokenHandler();
@@ -63,7 +54,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.TokenValidationParameters.EnableEntraIdSigningKeyCloudInstanceValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.TokenValidationParameters);
-                OperationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(theoryData.Token, validationParameters, new CallContext(), CancellationToken.None);
+                ValidationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(theoryData.Token, validationParameters, new CallContext(), CancellationToken.None);
 
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);
@@ -73,7 +64,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 if (theoryData.ExpectedValidationResult && (theoryData.SetDelegateUsingConfig || theoryData.SetDelegateWithoutConfig))
                 {
                     Assert.True(delegateSet);
-                    Assert.True(validationParametersDelegateSet);
+                    Assert.True(flagHolder.WasCalled);
                 }
             }
             catch (Exception ex)
@@ -183,30 +174,23 @@ namespace Microsoft.IdentityModel.Validators.Tests
             try
             {
                 ValidationParameters validationParameters = TestUtilities.CreateFromTokenValidationParameters(theoryData.TokenValidationParameters);
-                validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-                validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
+                validationParameters.AudienceValidator = SkipValidationValidators.SkipAudienceValidation;
+                validationParameters.IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation;
 
                 // set delegates
                 bool delegateSet = false;
-                bool validationParametersDelegateSet = false;
+                var flagHolder = new FlagHolder();
+
                 if (theoryData.SetDelegateUsingConfig)
                 {
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) => { delegateSet = true; return true; };
-                    validationParameters.SignatureKeyValidator = (securityKey, securityToken, validationParameters, callContext) =>
-                    {
-                        validationParametersDelegateSet = true;
-                        return new ValidatedSignatureKey(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
-                    };
+                    validationParameters.SignatureKeyValidator = new SignatureKeyValidatorSetsFlag(flagHolder);
                 }
                 else if (theoryData.SetDelegateWithoutConfig)
                 {
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = null;
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidator = (securityKey, securityToken, tvp) => { delegateSet = true; return true; };
-                    validationParameters.SignatureKeyValidator = (securityKey, securityToken, validationParameters, callContext) =>
-                    {
-                        validationParametersDelegateSet = true;
-                        return new ValidatedSignatureKey(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
-                    };
+                    validationParameters.SignatureKeyValidator = new SignatureKeyValidatorSetsFlag(flagHolder);
 
                 }
 
@@ -216,7 +200,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.TokenValidationParameters.EnableAadSigningKeyIssuerValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.TokenValidationParameters);
-                OperationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(jwt, validationParameters, new CallContext(), CancellationToken.None);
+                ValidationResult<ValidatedToken, ValidationError> validatedToken = await handler.ValidateTokenAsync(jwt, validationParameters, new CallContext(), CancellationToken.None);
                 theoryData.ExpectedException.ProcessNoException(context);
 
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);
@@ -226,7 +210,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 if (theoryData.SetDelegateUsingConfig || theoryData.SetDelegateWithoutConfig)
                 {
                     Assert.True(delegateSet);
-                    Assert.True(validationParametersDelegateSet);
+                    Assert.True(flagHolder.WasCalled);
                 }
             }
             catch (Exception ex)
@@ -672,6 +656,32 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 ValidateAudience = false,
                 ValidateLifetime = false
             };
+        }
+
+        // Helper classes for test scenarios
+        private class FlagHolder
+        {
+            public bool WasCalled { get; set; }
+        }
+
+        private class SignatureKeyValidatorSetsFlag : ISignatureKeyValidator
+        {
+            private readonly FlagHolder _flagHolder;
+
+            public SignatureKeyValidatorSetsFlag(FlagHolder flagHolder)
+            {
+                _flagHolder = flagHolder;
+            }
+
+            public ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
+                SecurityKey securityKey,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext)
+            {
+                _flagHolder.WasCalled = true;
+                return new ValidatedSignatureKey(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
+            }
         }
 
         public class EnableEntraIdSigningKeyValidationTheoryData : TheoryDataBase
