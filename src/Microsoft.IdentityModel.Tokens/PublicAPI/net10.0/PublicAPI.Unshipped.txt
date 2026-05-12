@@ -1,1 +1,5 @@
 ~Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> void
+Microsoft.IdentityModel.Tokens.SignatureValidatorWithToken
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.SignatureValidatorWithToken.get -> Microsoft.IdentityModel.Tokens.SignatureValidatorWithToken
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.SignatureValidatorWithToken.set -> void
+~virtual Microsoft.IdentityModel.Tokens.SignatureValidatorWithToken.Invoke(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> Microsoft.IdentityModel.Tokens.SecurityToken

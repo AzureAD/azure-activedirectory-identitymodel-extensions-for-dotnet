@@ -137,6 +137,15 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate SecurityToken SignatureValidatorUsingConfiguration(string token, TokenValidationParameters validationParameters, BaseConfiguration configuration);
 
     /// <summary>
+    /// Validates the signature of an already-parsed token using additional configuration.
+    /// </summary>
+    /// <param name="token">The parsed <see cref="SecurityToken"/>.</param>
+    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+    /// <param name="configuration">The configuration required for validation.</param>
+    /// <returns>The validated <see cref="SecurityToken"/>.</returns>
+    public delegate SecurityToken SignatureValidatorWithToken(SecurityToken token, TokenValidationParameters validationParameters, BaseConfiguration configuration);
+
+    /// <summary>
     /// Reads the security token.
     /// </summary>
     /// <param name="token">The security token.</param>

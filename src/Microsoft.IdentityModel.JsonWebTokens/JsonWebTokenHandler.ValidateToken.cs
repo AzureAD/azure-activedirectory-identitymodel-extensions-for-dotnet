@@ -82,9 +82,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (validationParameters.TransformBeforeSignatureValidation != null)
                     jsonWebToken = validationParameters.TransformBeforeSignatureValidation(jsonWebToken, validationParameters) as JsonWebToken;
 
-                if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
+                if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null || validationParameters.SignatureValidatorWithToken != null)
                 {
-                    var validatedToken = ValidateSignatureUsingDelegates(jsonWebToken, validationParameters);
+                    var validatedToken = ValidateSignatureUsingDelegates(jsonWebToken, validationParameters, configuration);
                     tokenValidationResult = await ValidateTokenPayloadAsync(
                         validatedToken,
                         validationParameters,
@@ -325,6 +325,45 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return ValidateSignature(jsonWebToken, key, validationParameters, Telemetry.NullTelemetryClient.Instance);
         }
 
+        /// <summary>
+        /// Validates the signature of a <see cref="JsonWebToken"/> using a single specified
+        /// <see cref="SecurityKey"/>.
+        /// </summary>
+        /// <param name="jsonWebToken">The <see cref="JsonWebToken"/> whose signature is to be validated.</param>
+        /// <param name="key">The <see cref="SecurityKey"/> to use for signature verification.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> containing
+        /// validation configuration, including the <see cref="CryptoProviderFactory"/> and algorithm
+        /// restrictions.</param>
+        /// <returns><see langword="true"/> if the signature is valid for the specified key;
+        /// otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// This method is intended for use within a
+        /// <see cref="TokenValidationParameters.SignatureValidatorUsingConfiguration"/> delegate,
+        /// enabling the delegate to call back into the handler's signature validation logic for
+        /// algorithms it does not handle directly.
+        /// This method validates a single key — the caller is responsible for key resolution.
+        /// </remarks>
+        /// <exception cref="SecurityTokenInvalidAlgorithmException">Thrown if the token's algorithm
+        /// fails algorithm validation.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if a <see cref="SignatureProvider"/>
+        /// cannot be created for the key/algorithm pair.</exception>
+        public bool TryValidateSignature(
+            JsonWebToken jsonWebToken,
+            SecurityKey key,
+            TokenValidationParameters validationParameters)
+        {
+            if (jsonWebToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jsonWebToken));
+
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            return ValidateSignature(jsonWebToken, key, validationParameters, TelemetryClient);
+        }
+
         private static void RecordSignatureValidationTelemetry(
             Telemetry.ITelemetryClient telemetryClient,
             string errorType,
@@ -436,12 +475,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private static JsonWebToken ValidateSignatureUsingDelegates(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters)
+        private static JsonWebToken ValidateSignatureUsingDelegates(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            if (validationParameters.SignatureValidatorUsingConfiguration != null)
+            if (validationParameters.SignatureValidatorWithToken != null)
             {
-                // TODO - get configuration from validationParameters
-                BaseConfiguration configuration = null;
+                var validatedToken = validationParameters.SignatureValidatorWithToken(jsonWebToken, validationParameters, configuration);
+                if (validatedToken == null)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, jsonWebToken)));
+
+                if (!(validatedToken is JsonWebToken validatedJsonWebToken))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, LogHelper.MarkAsNonPII(typeof(JsonWebToken)), LogHelper.MarkAsNonPII(validatedToken.GetType()), jsonWebToken)));
+
+                return validatedJsonWebToken;
+            }
+            else if (validationParameters.SignatureValidatorUsingConfiguration != null)
+            {
                 var validatedToken = validationParameters.SignatureValidatorUsingConfiguration(jsonWebToken.EncodedToken, validationParameters, configuration);
                 if (validatedToken == null)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, jsonWebToken)));

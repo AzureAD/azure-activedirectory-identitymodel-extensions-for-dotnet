@@ -84,6 +84,7 @@ namespace Microsoft.IdentityModel.Tokens
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
             SignatureValidatorUsingConfiguration = other.SignatureValidatorUsingConfiguration;
+            SignatureValidatorWithToken = other.SignatureValidatorWithToken;
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
@@ -555,6 +556,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
         public SignatureValidatorUsingConfiguration SignatureValidatorUsingConfiguration { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the signature of an already-parsed token,
+        /// using the <see cref="TokenValidationParameters"/> and the <see cref="BaseConfiguration"/>.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate takes priority over <see cref="SignatureValidatorUsingConfiguration"/>
+        /// and <see cref="SignatureValidator"/>. Unlike those delegates, this one receives the parsed
+        /// <see cref="SecurityToken"/> directly, avoiding the need to re-parse the token string.
+        /// This delegate is only supported by <c>JsonWebTokenHandler</c>.
+        /// </remarks>
+        public SignatureValidatorWithToken SignatureValidatorWithToken { get; set; }
 
         /// <summary>
         /// Gets or sets the time provider.
