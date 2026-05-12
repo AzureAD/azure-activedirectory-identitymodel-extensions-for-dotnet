@@ -3,6 +3,8 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -207,6 +209,95 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var result = await handler.ValidateTokenAsync(tokenString, tvp);
             Assert.True(result.IsValid, $"Validation failed: {result.Exception?.Message}");
+        }
+
+        [Fact]
+        public async Task SignatureValidatorWithToken_ReceivesResolvedBaseConfiguration()
+        {
+            var handler = new JsonWebTokenHandler();
+            var signingKey = KeyingMaterial.RsaSecurityKey_2048;
+
+            var tokenString = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256),
+                Issuer = "https://test-issuer.example.com",
+                Audience = "https://test-audience.example.com"
+            });
+
+            BaseConfiguration capturedConfiguration = null;
+
+            var tvp = new TokenValidationParameters
+            {
+                ValidIssuer = "https://test-issuer.example.com",
+                ValidAudience = "https://test-audience.example.com",
+                IssuerSigningKey = signingKey,
+                ValidateLifetime = false,
+                SignatureValidatorWithToken = (token, validationParameters, configuration) =>
+                {
+                    capturedConfiguration = configuration;
+                    var jwt = (JsonWebToken)token;
+                    jwt.SigningKey = validationParameters.IssuerSigningKey;
+                    return jwt;
+                }
+            };
+
+            // Arrange — set a BaseConfiguration via ConfigurationManager simulation
+            var expectedConfiguration = new OpenIdConnectConfiguration
+            {
+                Issuer = "https://test-issuer.example.com"
+            };
+            expectedConfiguration.SigningKeys.Add(signingKey);
+
+            // Use the ConfigurationManager property to provide configuration
+            tvp.ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(expectedConfiguration);
+
+            var result = await handler.ValidateTokenAsync(tokenString, tvp);
+            Assert.True(result.IsValid, $"Validation failed: {result.Exception?.Message}");
+            Assert.NotNull(capturedConfiguration);
+            Assert.Same(expectedConfiguration, capturedConfiguration);
+        }
+
+        [Fact]
+        public async Task SignatureValidatorUsingConfiguration_ReceivesResolvedBaseConfiguration()
+        {
+            var handler = new JsonWebTokenHandler();
+            var signingKey = KeyingMaterial.RsaSecurityKey_2048;
+
+            var tokenString = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256),
+                Issuer = "https://test-issuer.example.com",
+                Audience = "https://test-audience.example.com"
+            });
+
+            BaseConfiguration capturedConfiguration = null;
+
+            var expectedConfiguration = new OpenIdConnectConfiguration
+            {
+                Issuer = "https://test-issuer.example.com"
+            };
+            expectedConfiguration.SigningKeys.Add(signingKey);
+
+            var tvp = new TokenValidationParameters
+            {
+                ValidIssuer = "https://test-issuer.example.com",
+                ValidAudience = "https://test-audience.example.com",
+                IssuerSigningKey = signingKey,
+                ValidateLifetime = false,
+                ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(expectedConfiguration),
+                SignatureValidatorUsingConfiguration = (token, validationParameters, configuration) =>
+                {
+                    capturedConfiguration = configuration;
+                    var jwt = new JsonWebToken(token);
+                    jwt.SigningKey = validationParameters.IssuerSigningKey;
+                    return jwt;
+                }
+            };
+
+            var result = await handler.ValidateTokenAsync(tokenString, tvp);
+            Assert.True(result.IsValid, $"Validation failed: {result.Exception?.Message}");
+            Assert.NotNull(capturedConfiguration);
+            Assert.Same(expectedConfiguration, capturedConfiguration);
         }
     }
 }

@@ -338,10 +338,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// otherwise, <see langword="false"/>.</returns>
         /// <remarks>
         /// This method is intended for use within a
+        /// <see cref="TokenValidationParameters.SignatureValidatorWithToken"/> or
         /// <see cref="TokenValidationParameters.SignatureValidatorUsingConfiguration"/> delegate,
         /// enabling the delegate to call back into the handler's signature validation logic for
         /// algorithms it does not handle directly.
         /// This method validates a single key — the caller is responsible for key resolution.
+        /// Argument validation errors (<see langword="null"/> parameters) throw immediately.
+        /// Algorithm or provider failures throw <see cref="SecurityTokenInvalidAlgorithmException"/>
+        /// or <see cref="InvalidOperationException"/>. A return value of <see langword="false"/>
+        /// indicates the cryptographic signature did not match.
         /// </remarks>
         /// <exception cref="SecurityTokenInvalidAlgorithmException">Thrown if the token's algorithm
         /// fails algorithm validation.</exception>
