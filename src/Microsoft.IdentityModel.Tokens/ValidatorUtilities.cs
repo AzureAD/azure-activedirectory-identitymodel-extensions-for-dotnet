@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+#if NET6_0_OR_GREATER
+using Microsoft.Extensions.Logging;
+#endif
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Abstractions;
 
@@ -81,13 +84,27 @@ namespace Microsoft.IdentityModel.Tokens
             // if it reaches here, that means lifetime of the token is valid
             if (AppContextSwitches.SuccessValidationLogsAsInformation)
             {
+#if NET6_0_OR_GREATER
+                if (callContext?.Logger is ILogger ilogger)
+                    HighPerformanceLogMessages.LogLifetimeValidated(ilogger);
+                else if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(LogMessages.IDX10239, callContext);
+#else
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
                     LogHelper.LogInformation(LogMessages.IDX10239, callContext);
+#endif
             }
             else
             {
+#if NET6_0_OR_GREATER
+                if (callContext?.Logger is ILogger ilogger2)
+                    HighPerformanceLogMessages.LogLifetimeValidatedVerbose(ilogger2);
+                else if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogMessages.IDX10239, callContext);
+#else
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
                     LogHelper.LogVerbose(LogMessages.IDX10239, callContext);
+#endif
             }
         }
     }

@@ -105,13 +105,27 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateAudience)
             {
+#if NET6_0_OR_GREATER
+                if (callContext?.Logger is ILogger ilogger)
+                    HighPerformanceLogMessages.LogAudienceValidationSkipped(ilogger);
+                else
+                    LogHelper.LogWarning(LogMessages.IDX10233, callContext);
+#else
                 LogHelper.LogWarning(LogMessages.IDX10233, callContext);
+#endif
                 return;
             }
 
             if (!validationParameters.RequireAudience && !audiences.Any())
             {
+#if NET6_0_OR_GREATER
+                if (callContext?.Logger is ILogger ilogger2)
+                    HighPerformanceLogMessages.LogAudienceNotRequired(ilogger2);
+                else
+                    LogHelper.LogWarning(LogMessages.IDX10277, callContext);
+#else
                 LogHelper.LogWarning(LogMessages.IDX10277, callContext);
+#endif
                 return;
             }
 
@@ -364,7 +378,14 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateIssuer)
             {
+#if NET6_0_OR_GREATER
+                if (callContext?.Logger is ILogger ilogger)
+                    HighPerformanceLogMessages.LogIssuerValidationSkipped(ilogger);
+                else
+                    LogHelper.LogWarning(LogMessages.IDX10235, callContext);
+#else
                 LogHelper.LogWarning(LogMessages.IDX10235, callContext);
+#endif
                 return issuer;
             }
 
@@ -614,7 +635,14 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateLifetime)
             {
+#if NET6_0_OR_GREATER
+                if (callContext?.Logger is ILogger ilogger)
+                    HighPerformanceLogMessages.LogLifetimeValidationSkipped(ilogger);
+                else
+                    LogHelper.LogWarning(LogMessages.IDX10238, callContext);
+#else
                 LogHelper.LogWarning(LogMessages.IDX10238, callContext);
+#endif
                 return;
             }
 
