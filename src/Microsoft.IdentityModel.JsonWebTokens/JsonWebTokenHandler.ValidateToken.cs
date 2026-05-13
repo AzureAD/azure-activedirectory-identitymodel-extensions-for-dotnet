@@ -84,13 +84,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
                 {
-                    var validatedToken = ValidateSignatureUsingDelegates(jsonWebToken, validationParameters);
+                    var validatedToken = ValidateSignatureUsingDelegates(jsonWebToken, validationParameters, configuration);
                     tokenValidationResult = await ValidateTokenPayloadAsync(
                         validatedToken,
                         validationParameters,
                         configuration).ConfigureAwait(false);
 
-                    Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, validatedToken, validationParameters);
+                    Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, validatedToken, validationParameters, configuration);
+                }
+                else if (validationParameters.SignatureValidatorWithToken != null
+                    && ValidateSignatureUsingTokenDelegate(jsonWebToken, validationParameters, configuration) is { } delegateValidatedToken)
+                {
+                    tokenValidationResult = await ValidateTokenPayloadAsync(
+                        delegateValidatedToken,
+                        validationParameters,
+                        configuration).ConfigureAwait(false);
+
+                    Validators.ValidateIssuerSecurityKey(delegateValidatedToken.SigningKey, delegateValidatedToken, validationParameters, configuration);
                 }
                 else
                 {
@@ -436,12 +446,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private static JsonWebToken ValidateSignatureUsingDelegates(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters)
+        private static JsonWebToken ValidateSignatureUsingDelegates(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             if (validationParameters.SignatureValidatorUsingConfiguration != null)
             {
-                // TODO - get configuration from validationParameters
-                BaseConfiguration configuration = null;
                 var validatedToken = validationParameters.SignatureValidatorUsingConfiguration(jsonWebToken.EncodedToken, validationParameters, configuration);
                 if (validatedToken == null)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, jsonWebToken)));
@@ -464,6 +472,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, jsonWebToken)));
+        }
+
+        /// <summary>
+        /// Invokes the <see cref="TokenValidationParameters.SignatureValidatorWithToken"/> delegate
+        /// and returns the validated token if the delegate handled the signature, or <see langword="null"/>
+        /// if the delegate declined.
+        /// </summary>
+        private JsonWebToken ValidateSignatureUsingTokenDelegate(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        {
+            try
+            {
+                var delegateResult = validationParameters.SignatureValidatorWithToken(jsonWebToken, validationParameters, configuration);
+
+                if (!delegateResult.Handled)
+                    return null;
+
+                if (delegateResult.Token is not JsonWebToken validatedJsonWebToken)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, LogHelper.MarkAsNonPII(typeof(JsonWebToken)), LogHelper.MarkAsNonPII(delegateResult.Token?.GetType()), jsonWebToken)));
+
+                RecordSignatureValidationTelemetry(
+                    TelemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.None,
+                    jsonWebToken,
+                    validatedJsonWebToken.SigningKey);
+
+                return validatedJsonWebToken;
+            }
+            catch
+            {
+                RecordSignatureValidationTelemetry(
+                    TelemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                    jsonWebToken,
+                    jsonWebToken.SigningKey);
+
+                throw;
+            }
         }
 
         /// <summary>

@@ -1,1 +1,16 @@
 ~Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> void
+Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult
+Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.Handled.get -> bool
+Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.SignatureValidationDelegateResult() -> void
+Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.Token.get -> Microsoft.IdentityModel.Tokens.SecurityToken?
+static Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.NotHandled.get -> Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult
+static Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.Success(Microsoft.IdentityModel.Tokens.SecurityToken token) -> Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult
+Microsoft.IdentityModel.Tokens.SignatureValidatorWithToken
+~virtual Microsoft.IdentityModel.Tokens.SignatureValidatorWithToken.Invoke(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.SignatureValidatorWithToken.get -> Microsoft.IdentityModel.Tokens.SignatureValidatorWithToken
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.SignatureValidatorWithToken.set -> void
+Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.Equals(Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult other) -> bool
+override Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.Equals(object obj) -> bool
+override Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.GetHashCode() -> int
+static Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.operator ==(Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult left, Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult right) -> bool
+static Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult.operator !=(Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult left, Microsoft.IdentityModel.Tokens.SignatureValidationDelegateResult right) -> bool

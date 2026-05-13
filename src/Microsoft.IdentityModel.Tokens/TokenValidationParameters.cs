@@ -84,6 +84,7 @@ namespace Microsoft.IdentityModel.Tokens
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
             SignatureValidatorUsingConfiguration = other.SignatureValidatorUsingConfiguration;
+            SignatureValidatorWithToken = other.SignatureValidatorWithToken;
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
@@ -555,6 +556,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
         public SignatureValidatorUsingConfiguration SignatureValidatorUsingConfiguration { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the signature of an already-parsed token.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This delegate is evaluated only when <see cref="SignatureValidator"/> and
+        /// <see cref="SignatureValidatorUsingConfiguration"/> are not set. Unlike those delegates,
+        /// this one receives the already-parsed <see cref="SecurityToken"/> and can decline to handle
+        /// the signature by returning <see cref="SignatureValidationDelegateResult.NotHandled"/>,
+        /// allowing the handler to validate the signature using its built-in logic.
+        /// </para>
+        /// <para>
+        /// When the delegate handles the signature, it should set <see cref="SecurityToken.SigningKey"/>
+        /// on the token and return <see cref="SignatureValidationDelegateResult.Success"/>.
+        /// If the signature is invalid, the delegate should throw an appropriate exception.
+        /// </para>
+        /// </remarks>
+        public SignatureValidatorWithToken SignatureValidatorWithToken { get; set; }
 
         /// <summary>
         /// Gets or sets the time provider.

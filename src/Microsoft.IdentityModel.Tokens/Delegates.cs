@@ -137,6 +137,28 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate SecurityToken SignatureValidatorUsingConfiguration(string token, TokenValidationParameters validationParameters, BaseConfiguration configuration);
 
     /// <summary>
+    /// Validates the signature of an already-parsed token, with the ability to decline handling.
+    /// </summary>
+    /// <param name="token">The parsed <see cref="SecurityToken"/>.</param>
+    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+    /// <param name="configuration">The configuration required for validation.</param>
+    /// <returns>
+    /// A <see cref="SignatureValidationDelegateResult"/> indicating whether the delegate handled the
+    /// signature validation. Return <see cref="SignatureValidationDelegateResult.Success"/> with the
+    /// validated token (and <see cref="SecurityToken.SigningKey"/> set) when the delegate validates
+    /// the signature. Return <see cref="SignatureValidationDelegateResult.NotHandled"/> to let the
+    /// handler fall through to its default signature validation logic. Throw an appropriate exception
+    /// (e.g., <see cref="SecurityTokenInvalidSignatureException"/>) if the signature is invalid.
+    /// </returns>
+    /// <remarks>
+    /// This delegate is evaluated only when <see cref="TokenValidationParameters.SignatureValidator"/>
+    /// and <see cref="TokenValidationParameters.SignatureValidatorUsingConfiguration"/> are not set.
+    /// Unlike those delegates, this one receives the already-parsed <see cref="SecurityToken"/> and
+    /// can decline to handle the signature, allowing the handler to validate it using its built-in logic.
+    /// </remarks>
+    public delegate SignatureValidationDelegateResult SignatureValidatorWithToken(SecurityToken token, TokenValidationParameters validationParameters, BaseConfiguration configuration);
+
+    /// <summary>
     /// Reads the security token.
     /// </summary>
     /// <param name="token">The security token.</param>
