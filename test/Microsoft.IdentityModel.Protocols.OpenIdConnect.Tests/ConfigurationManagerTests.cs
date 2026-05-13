@@ -187,6 +187,98 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             await FetchMetadataFailureTestBody();
         }
 
+        // Reproduces a bug in the blocking path (Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking).
+        // When a fetch fails and a subsequent call arrives within the backoff window (i.e. _syncAfter > now),
+        // GetConfigurationWithBlockingAsync skips the fetch entirely and throws IDX20803 with a null
+        // InnerException because _fetchMetadataFailure is declared as a local variable (reset to null on
+        // every invocation) rather than persisted between calls. This loses the original IOException
+        // (and the HttpDocumentRetriever.StatusCode / ResponseContent it carries in Data), preventing
+        // callers from distinguishing client errors (4xx -> misconfigured tenant) from server errors
+        // (5xx -> transient).
+        [Fact]
+        public async Task FetchMetadataFailure_Blocking_PreservesInnerExceptionDuringBackoffWindow()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+
+            var context = new CompareContext($"{this}.{nameof(FetchMetadataFailure_Blocking_PreservesInnerExceptionDuringBackoffWindow)}");
+
+            var documentRetriever = new HttpDocumentRetriever(
+                HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "https://example.invalid/.well-known/openid-configuration",
+                new OpenIdConnectConfigurationRetriever(),
+                documentRetriever);
+
+            // First call: fetch is attempted and fails. The thrown InvalidOperationException should
+            // wrap the original IOException carrying the HTTP status code in its Data dictionary.
+            Exception firstException = null;
+            try
+            {
+                _ = await configManager.GetConfigurationAsync(CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                firstException = ex;
+            }
+
+            if (firstException == null)
+                context.AddDiff("Expected first GetConfigurationAsync call to throw.");
+            else
+            {
+                if (firstException.InnerException == null)
+                    context.AddDiff("Expected first call's InvalidOperationException to wrap the underlying IOException.");
+                else if (!ExceptionChainContainsStatusCode(firstException))
+                    context.AddDiff("Expected first call's exception chain to contain HttpDocumentRetriever.StatusCode in Data.");
+            }
+
+            // Force the backoff window: ensure _syncAfter is in the future so the next call skips the fetch
+            // and goes through the "stale metadata is better than no metadata" path. _currentConfiguration
+            // is still null (bootstrap never succeeded), so the manager re-throws IDX20803.
+            TestUtilities.SetField(configManager, "_syncAfter", DateTimeOffset.UtcNow.AddHours(1));
+
+            Exception secondException = null;
+            try
+            {
+                _ = await configManager.GetConfigurationAsync(CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                secondException = ex;
+            }
+
+            if (secondException == null)
+                context.AddDiff("Expected second GetConfigurationAsync call (within backoff window) to throw.");
+            else
+            {
+                // The bug: second call throws IDX20803 with InnerException == null, losing the HTTP
+                // status code that callers use to classify the error (401 vs 503).
+                if (secondException.InnerException == null)
+                {
+                    context.AddDiff(
+                        "BUG: Second call within backoff window threw IDX20803 with a null InnerException. " +
+                        "The original IOException (with HttpDocumentRetriever.StatusCode in Data) was lost " +
+                        "because _fetchMetadataFailure is a local variable in GetConfigurationWithBlockingAsync.");
+                }
+                else if (!ExceptionChainContainsStatusCode(secondException))
+                {
+                    context.AddDiff("Expected second call's exception chain to contain HttpDocumentRetriever.StatusCode in Data.");
+                }
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        private static bool ExceptionChainContainsStatusCode(Exception exception)
+        {
+            for (Exception current = exception; current != null; current = current.InnerException)
+            {
+                if (current.Data.Contains(HttpDocumentRetriever.StatusCode))
+                    return true;
+            }
+
+            return false;
+        }
+
         private async ValueTask FetchMetadataFailureTestBody()
         {
             var context = new CompareContext($"{this}.FetchMetadataFailureTest");
