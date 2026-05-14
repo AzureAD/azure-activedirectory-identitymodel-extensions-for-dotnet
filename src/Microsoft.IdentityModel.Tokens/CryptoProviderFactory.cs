@@ -92,6 +92,7 @@ namespace Microsoft.IdentityModel.Tokens
             CryptoProviderCache = new InMemoryCryptoProviderCache() { CryptoProviderFactory = this };
             CustomCryptoProvider = other.CustomCryptoProvider;
             CacheSignatureProviders = other.CacheSignatureProviders;
+            CacheCustomProviders = other.CacheCustomProviders;
             SignatureProviderObjectPoolCacheSize = other.SignatureProviderObjectPoolCacheSize;
         }
 
@@ -114,6 +115,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public bool CacheSignatureProviders { get; set; } = DefaultCacheSignatureProviders;
+
+        /// <summary>
+        /// Gets or sets a bool controlling if <see cref="SignatureProvider"/> instances created by <see cref="CustomCryptoProvider"/>
+        /// should be cached. Default is <see langword="false"/>.
+        /// </summary>
+        /// <remarks>
+        /// When <see langword="true"/>, signature providers returned by <see cref="ICryptoProvider.Create(string, object[])"/>
+        /// are cached using the same <see cref="CryptoProviderCache"/> used for built-in providers. This avoids
+        /// repeated provider creation and key materialisation on every signature validation.
+        /// </remarks>
+        [DefaultValue(false)]
+        public bool CacheCustomProviders { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum size of the object pool used by the SignatureProvider that are used for crypto objects.
@@ -607,6 +620,28 @@ namespace Microsoft.IdentityModel.Tokens
                                 LogHelper.MarkAsNonPII(algorithm),
                                 LogHelper.MarkAsNonPII(key.KeyId),
                                 LogHelper.MarkAsNonPII(typeof(SignatureProvider)))));
+
+                if (CacheCustomProviders && CacheSignatureProviders && cacheProvider)
+                {
+                    // Check if an equivalent provider was already cached (race with another thread).
+                    string providerType = signatureProvider.GetType().ToString();
+                    if (CryptoProviderCache.TryGetSignatureProvider(
+                        key,
+                        algorithm,
+                        providerType,
+                        willCreateSignatures,
+                        out SignatureProvider cachedProvider))
+                    {
+                        // A cached provider exists — use it, release the one we just created.
+                        cachedProvider.AddRef();
+                        signatureProvider.Release();
+                        CustomCryptoProvider.Release(signatureProvider);
+                        return cachedProvider;
+                    }
+
+                    if (ShouldCacheSignatureProvider(signatureProvider))
+                        signatureProvider.IsCached = CryptoProviderCache.TryAdd(signatureProvider);
+                }
 
                 return signatureProvider;
             }

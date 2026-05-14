@@ -1,1 +1,3 @@
 ~Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> void
+Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.get -> bool
+Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.set -> void
