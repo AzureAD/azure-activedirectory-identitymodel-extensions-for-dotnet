@@ -23,7 +23,6 @@ namespace Microsoft.IdentityModel.Protocols
 
         private async Task<T> GetConfigurationWithBlockingAsync(CancellationToken cancel)
         {
-            Exception _fetchMetadataFailure = null;
             await _refreshLock.WaitAsync(cancel).ConfigureAwait(false);
 
             long startTimestamp = TimeProvider.GetTimestamp();
@@ -51,6 +50,8 @@ namespace Microsoft.IdentityModel.Protocols
                                     _refreshRequested = false;
 
                                 UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
+
+                                _fetchMetadataFailure = null;
 
                                 return _currentConfiguration;
                             }
@@ -81,6 +82,8 @@ namespace Microsoft.IdentityModel.Protocols
                             _refreshRequested = false;
 
                         UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
+
+                        _fetchMetadataFailure = null;
                     }
                     catch (Exception ex)
                     {
