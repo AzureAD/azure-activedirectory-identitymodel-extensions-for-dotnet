@@ -59,6 +59,15 @@ const Microsoft.IdentityModel.Xml.WsAddressing.PreferredPrefix = "wsa" -> string
 const Microsoft.IdentityModel.Xml.WsPolicy.Elements.AppliesTo = "AppliesTo" -> string
 const Microsoft.IdentityModel.Xml.WsPolicy.Namespace = "http://schemas.xmlsoap.org/ws/2004/09/policy" -> string
 const Microsoft.IdentityModel.Xml.WsPolicy.PreferredPrefix = "wsp" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_1_3.Actions.Issue = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_1_3.Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_1_3.PreferredPrefix = "t" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_1_4.Actions.Issue = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_1_4.Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200802" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_1_4.PreferredPrefix = "t" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_2005.Actions.Issue = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_2005.Namespace = "http://schemas.xmlsoap.org/ws/2005/02/trust" -> string
+const Microsoft.IdentityModel.Xml.WsTrustConstants_2005.PreferredPrefix = "trust" -> string
 const Microsoft.IdentityModel.Xml.WsTrustConstants.Elements.KeyType = "KeyType" -> string
 const Microsoft.IdentityModel.Xml.WsTrustConstants.Elements.Lifetime = "Lifetime" -> string
 const Microsoft.IdentityModel.Xml.WsTrustConstants.Elements.RequestedAttachedReference = "RequestedAttachedReference" -> string
@@ -72,15 +81,6 @@ const Microsoft.IdentityModel.Xml.WsTrustConstants.Elements.TokenType = "TokenTy
 const Microsoft.IdentityModel.Xml.WsTrustConstants.Namespaces.WsTrust1_3 = "http://docs.oasis-open.org/ws-sx/ws-trust/200512" -> string
 const Microsoft.IdentityModel.Xml.WsTrustConstants.Namespaces.WsTrust1_4 = "http://docs.oasis-open.org/ws-sx/ws-trust/200802" -> string
 const Microsoft.IdentityModel.Xml.WsTrustConstants.Namespaces.WsTrust2005 = "http://schemas.xmlsoap.org/ws/2005/02/trust" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_1_3.Actions.Issue = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_1_3.Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_1_3.PreferredPrefix = "t" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_1_4.Actions.Issue = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_1_4.Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200802" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_1_4.PreferredPrefix = "t" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_2005.Actions.Issue = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_2005.Namespace = "http://schemas.xmlsoap.org/ws/2005/02/trust" -> string
-const Microsoft.IdentityModel.Xml.WsTrustConstants_2005.PreferredPrefix = "trust" -> string
 const Microsoft.IdentityModel.Xml.WsUtility.Elements.Created = "Created" -> string
 const Microsoft.IdentityModel.Xml.WsUtility.Elements.Expires = "Expires" -> string
 const Microsoft.IdentityModel.Xml.WsUtility.Namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" -> string
@@ -117,8 +117,8 @@ Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.WsFederatio
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.WsFederationParameterNames
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException.WsFederationException() -> void
-Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException.WsFederationException(string message) -> void
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException.WsFederationException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException.WsFederationException(string message) -> void
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException.WsFederationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.CreateSignInUrl() -> string
@@ -176,22 +176,22 @@ Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.Wr
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.WsFederationMetadataSerializer() -> void
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException.WsFederationReadException() -> void
-Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException.WsFederationReadException(string message) -> void
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException.WsFederationReadException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException.WsFederationReadException(string message) -> void
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException.WsFederationReadException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Xml.WsAddressing
 Microsoft.IdentityModel.Xml.WsAddressing.Elements
 Microsoft.IdentityModel.Xml.WsPolicy
 Microsoft.IdentityModel.Xml.WsPolicy.Elements
 Microsoft.IdentityModel.Xml.WsTrustConstants
-Microsoft.IdentityModel.Xml.WsTrustConstants.Elements
-Microsoft.IdentityModel.Xml.WsTrustConstants.Namespaces
 Microsoft.IdentityModel.Xml.WsTrustConstants_1_3
 Microsoft.IdentityModel.Xml.WsTrustConstants_1_3.Actions
 Microsoft.IdentityModel.Xml.WsTrustConstants_1_4
 Microsoft.IdentityModel.Xml.WsTrustConstants_1_4.Actions
 Microsoft.IdentityModel.Xml.WsTrustConstants_2005
 Microsoft.IdentityModel.Xml.WsTrustConstants_2005.Actions
+Microsoft.IdentityModel.Xml.WsTrustConstants.Elements
+Microsoft.IdentityModel.Xml.WsTrustConstants.Namespaces
 Microsoft.IdentityModel.Xml.WsUtility
 Microsoft.IdentityModel.Xml.WsUtility.Elements
 static Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfigurationRetriever.GetAsync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration>
