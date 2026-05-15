@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             SignatureKeyResolver = other.SignatureKeyResolver;
-            _signingKeys = other.SigningKeys;
+            _signingKeys = other.SigningKeys is not null ? new List<SecurityKey>(other.SigningKeys) : null;
             SignatureKeyValidator = other.SignatureKeyValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
             LifetimeValidator = other.LifetimeValidator;
@@ -94,16 +94,16 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             TimeProvider = other.TimeProvider;
             TryAllDecryptionKeys = other.TryAllDecryptionKeys;
             DecryptionKeyResolver = other.DecryptionKeyResolver;
-            _decryptionKeys = other.DecryptionKeys;
+            _decryptionKeys = other.DecryptionKeys is not null ? new List<SecurityKey>(other.DecryptionKeys) : null;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
             TokenTypeValidator = other.TokenTypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateWithLKG = other.ValidateWithLKG;
-            _validIssuers = other.ValidIssuers;
-            _validAudiences = other.ValidAudiences;
-            _validAlgorithms = other.ValidAlgorithms;
-            _validTokenTypes = other.ValidTypes;
+            _validIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
+            _validAudiences = other.ValidAudiences is not null ? new List<string>(other.ValidAudiences) : null;
+            _validAlgorithms = other.ValidAlgorithms is not null ? new List<string>(other.ValidAlgorithms) : null;
+            _validTokenTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
         }
 
         /// <summary>
