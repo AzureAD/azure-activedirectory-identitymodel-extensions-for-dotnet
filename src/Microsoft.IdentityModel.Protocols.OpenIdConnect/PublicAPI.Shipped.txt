@@ -383,28 +383,28 @@ Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectParameterNames
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectPrompt
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolException
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolException.OpenIdConnectProtocolException() -> void
-Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolException.OpenIdConnectProtocolException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolException.OpenIdConnectProtocolException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolException.OpenIdConnectProtocolException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolException.OpenIdConnectProtocolException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidAtHashException
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidAtHashException.OpenIdConnectProtocolInvalidAtHashException() -> void
-Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidAtHashException.OpenIdConnectProtocolInvalidAtHashException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidAtHashException.OpenIdConnectProtocolInvalidAtHashException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidAtHashException.OpenIdConnectProtocolInvalidAtHashException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidAtHashException.OpenIdConnectProtocolInvalidAtHashException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidCHashException
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidCHashException.OpenIdConnectProtocolInvalidCHashException() -> void
-Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidCHashException.OpenIdConnectProtocolInvalidCHashException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidCHashException.OpenIdConnectProtocolInvalidCHashException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidCHashException.OpenIdConnectProtocolInvalidCHashException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidCHashException.OpenIdConnectProtocolInvalidCHashException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidNonceException
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidNonceException.OpenIdConnectProtocolInvalidNonceException() -> void
-Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidNonceException.OpenIdConnectProtocolInvalidNonceException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidNonceException.OpenIdConnectProtocolInvalidNonceException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidNonceException.OpenIdConnectProtocolInvalidNonceException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidNonceException.OpenIdConnectProtocolInvalidNonceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidStateException
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidStateException.OpenIdConnectProtocolInvalidStateException() -> void
-Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidStateException.OpenIdConnectProtocolInvalidStateException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidStateException.OpenIdConnectProtocolInvalidStateException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidStateException.OpenIdConnectProtocolInvalidStateException(string message) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolInvalidStateException.OpenIdConnectProtocolInvalidStateException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidationContext
 Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidationContext.ClientId.get -> string
@@ -464,8 +464,8 @@ override Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfigurat
 override Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration.TokenEndpoint.get -> string
 override Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration.TokenEndpoint.set -> void
 static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration.Create(string json) -> Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration
-static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration.Write(Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration configuration) -> string
 static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration.Write(Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration configuration, System.IO.Stream stream) -> void
+static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration.Write(Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration configuration) -> string
 static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfigurationRetriever.GetAsync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration>
 static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfigurationRetriever.GetAsync(string address, System.Net.Http.HttpClient httpClient, System.Threading.CancellationToken cancel) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration>
 static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfigurationRetriever.GetAsync(string address, System.Threading.CancellationToken cancel) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration>
@@ -474,6 +474,7 @@ static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage.Enab
 static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidator.RequireSubByDefault.get -> bool
 static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidator.RequireSubByDefault.set -> void
 static readonly Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidator.DefaultNonceLifetime -> System.TimeSpan
+virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.IdTokenValidator.Invoke(System.IdentityModel.Tokens.Jwt.JwtSecurityToken idToken, Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidationContext context) -> void
 virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage.Clone() -> Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage
 virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage.CreateAuthenticationRequestUrl() -> string
 virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage.CreateLogoutRequestUrl() -> string
@@ -487,4 +488,3 @@ virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolVal
 virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidator.ValidateState(Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidationContext validationContext) -> void
 virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidator.ValidateTokenResponse(Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidationContext validationContext) -> void
 virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidator.ValidateUserInfoResponse(Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidationContext validationContext) -> void
-virtual Microsoft.IdentityModel.Protocols.OpenIdConnect.IdTokenValidator.Invoke(System.IdentityModel.Tokens.Jwt.JwtSecurityToken idToken, Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectProtocolValidationContext context) -> void
