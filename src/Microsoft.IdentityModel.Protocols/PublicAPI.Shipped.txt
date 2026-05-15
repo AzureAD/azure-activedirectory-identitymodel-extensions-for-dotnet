@@ -14,20 +14,37 @@ Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.ScriptButtonText
 Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.ScriptDisabledText.get -> string
 Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.ScriptDisabledText.set -> void
 Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.SetParameter(string parameter, string value) -> void
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.Configuration.get -> T
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.ConfigurationEventHandlerResult(T configuration, System.DateTimeOffset retrievalTime) -> void
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.RetrievalTime.get -> System.DateTimeOffset
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext.BypassCache.get -> bool
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext.BypassCache.set -> void
+Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext.ConfigurationRetrievalContext() -> void
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>.AfterUpdateAsync(string metadataAddress, T configuration, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>.BeforeRetrieveAsync(string metadataAddress, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>.AfterUpdateAsync(string metadataAddress, T configuration, Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>.BeforeRetrieveAsync(string metadataAddress, Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>>
 Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException
 Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException() -> void
-Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException(string message) -> void
 Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException(string message) -> void
 Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions
 Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions.LastKnownGoodConfigurationCacheOptions() -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever) -> void
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationEventHandler.get -> Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationEventHandler.set -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions lkgCacheOptions) -> void
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator, Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions lkgCacheOptions, Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T> configurationEventHandler) -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator, Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions lkgCacheOptions) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever) -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, System.Net.Http.HttpClient httpClient) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever) -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetConfigurationAsync() -> System.Threading.Tasks.Task<T>
 Microsoft.IdentityModel.Protocols.ConfigurationValidationResult
 Microsoft.IdentityModel.Protocols.ConfigurationValidationResult.ConfigurationValidationResult() -> void
@@ -82,6 +99,7 @@ override Microsoft.IdentityModel.Protocols.StaticConfigurationManager<T>.GetBase
 override Microsoft.IdentityModel.Protocols.StaticConfigurationManager<T>.RequestRefresh() -> void
 static Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.DefaultSendAdditionalHeaderData.get -> bool
 static Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.DefaultSendAdditionalHeaderData.set -> void
+static readonly Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.NoResult -> Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
 static readonly Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions.DefaultLastKnownGoodConfigurationSizeLimit -> int
 static readonly Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.DefaultAutomaticRefreshInterval -> System.TimeSpan
 static readonly Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.DefaultRefreshInterval -> System.TimeSpan
