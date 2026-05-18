@@ -1411,6 +1411,57 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             public void Release(object cryptoInstance) { }
         }
+
+        [Fact]
+        public void CacheCustomProviders_ConcurrentAccess_AllThreadsGetSameProvider()
+        {
+            // Arrange
+            var signingKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
+            {
+                KeyId = "concurrent-test-kid"
+            };
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            int createCount = 0;
+            var customCrypto = new CountingCryptoProvider(algorithm, () =>
+            {
+                Interlocked.Increment(ref createCount);
+                return new SymmetricSignatureProvider(signingKey, algorithm, false);
+            });
+
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CustomCryptoProvider = customCrypto,
+                CacheCustomProviders = true,
+                CacheSignatureProviders = true
+            };
+
+            // Warm the cache with an initial call so the provider type is known
+            // and the provider is in the cache.
+            var warmup = factory.CreateForVerifying(signingKey, algorithm);
+            Assert.True(warmup.IsCached, "Warmup provider should be cached.");
+            int warmupCreateCount = createCount;
+
+            // Act — launch many concurrent calls
+            int threadCount = 20;
+            var providers = new SignatureProvider[threadCount];
+            var barrier = new System.Threading.Barrier(threadCount);
+
+            Parallel.For(0, threadCount, i =>
+            {
+                barrier.SignalAndWait(); // synchronize start
+                providers[i] = factory.CreateForVerifying(signingKey, algorithm);
+            });
+
+            // Assert — all threads should get the same cached instance
+            for (int i = 0; i < threadCount; i++)
+            {
+                Assert.Same(warmup, providers[i]);
+            }
+
+            // Create should not have been called again after warmup (all cache hits)
+            Assert.Equal(warmupCreateCount, createCount);
+        }
     }
 }
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
