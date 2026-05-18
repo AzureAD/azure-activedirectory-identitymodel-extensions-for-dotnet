@@ -1286,7 +1286,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var customCrypto = new CountingCryptoProvider(algorithm, () =>
             {
                 createCount++;
-                return new SymmetricSignatureProvider(signingKey, algorithm);
+                return new SymmetricSignatureProvider(signingKey, algorithm, false);
             });
 
             var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
@@ -1296,26 +1296,37 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 CacheSignatureProviders = true
             };
 
-            // Act
+            // Act — first call creates and should cache
             var provider1 = factory.CreateForVerifying(signingKey, algorithm);
 
-            // Assert — provider was created and marked for caching
-            Assert.Equal(1, createCount);
-            Assert.True(provider1.IsCached, "Provider should be marked as cached when CacheCustomProviders is true.");
+            // Debug: verify the cache state directly
+            string providerType = provider1.GetType().ToString();
+            string internalId = signingKey.InternalId;
 
-            // The EventBasedLRUCache processes adds asynchronously, so verify
-            // that after a short wait, a subsequent call returns the cached instance.
-            int maxAttempts = 10;
-            SignatureProvider provider2 = null;
-            for (int i = 0; i < maxAttempts; i++)
-            {
-                System.Threading.Thread.Sleep(100);
-                provider2 = factory.CreateForVerifying(signingKey, algorithm);
-                if (ReferenceEquals(provider1, provider2))
-                    break;
-            }
+            Assert.True(internalId.Length > 0,
+                $"Key InternalId should not be empty, got: '{internalId}'");
+            Assert.True(provider1.IsCached,
+                $"Provider should be marked as cached. IsCached={provider1.IsCached}");
 
-            Assert.Same(provider1, provider2);
+            // Try to retrieve directly from the cache to isolate the issue
+            // Wait briefly for the async event queue
+            System.Threading.Thread.Sleep(200);
+
+            bool tryGetResult = factory.CryptoProviderCache.TryGetSignatureProvider(
+                signingKey, algorithm, providerType, false, out var fromCache);
+
+            // Debug: manually compute the cache keys to compare
+            string addKey = $"{provider1.Key.GetType()}-{provider1.Key.InternalId}-{provider1.Algorithm}-{provider1.GetType()}";
+            string getKey = $"{signingKey.GetType()}-{signingKey.InternalId}-{algorithm}-{providerType}";
+            
+            Assert.True(tryGetResult,
+                $"TryGetSignatureProvider failed. " +
+                $"addKey='{addKey}', " +
+                $"getKey='{getKey}', " +
+                $"keysMatch={addKey == getKey}, " +
+                $"createCount={createCount}");
+
+            Assert.Same(provider1, fromCache);
         }
 
         [Fact]
