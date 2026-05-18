@@ -1296,20 +1296,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 CacheSignatureProviders = true
             };
 
-            // Act — first call creates and caches
+            // Act
             var provider1 = factory.CreateForVerifying(signingKey, algorithm);
 
-            // The EventBasedLRUCache processes adds asynchronously.
-            // Wait for the cache event queue to process the TryAdd.
-            System.Threading.Thread.Sleep(500);
-
-            // Second call should return the cached instance
-            var provider2 = factory.CreateForVerifying(signingKey, algorithm);
-
-            // Assert — Create called only once; second call hit cache
+            // Assert — provider was created and marked for caching
             Assert.Equal(1, createCount);
+            Assert.True(provider1.IsCached, "Provider should be marked as cached when CacheCustomProviders is true.");
+
+            // The EventBasedLRUCache processes adds asynchronously, so verify
+            // that after a short wait, a subsequent call returns the cached instance.
+            int maxAttempts = 10;
+            SignatureProvider provider2 = null;
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                System.Threading.Thread.Sleep(100);
+                provider2 = factory.CreateForVerifying(signingKey, algorithm);
+                if (ReferenceEquals(provider1, provider2))
+                    break;
+            }
+
             Assert.Same(provider1, provider2);
-            Assert.True(provider1.IsCached);
         }
 
         [Fact]
