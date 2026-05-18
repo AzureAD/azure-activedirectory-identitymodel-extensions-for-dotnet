@@ -16,6 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private static CryptoProviderFactory _default;
         private static readonly ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string> _customProviderTypeCache = new ConcurrentDictionary<string, string>();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
         private static string _typeofAsymmetricSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
         private static string _typeofSymmetricSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
@@ -611,6 +612,23 @@ namespace Microsoft.IdentityModel.Tokens
             SignatureProvider signatureProvider;
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willCreateSignatures))
             {
+                if (CacheCustomProviders && CacheSignatureProviders && cacheProvider)
+                {
+                    // Try cache lookup first using the remembered provider type from a previous Create call.
+                    string cacheTypeKey = CustomCryptoProvider.GetType().ToString() + "-" + algorithm;
+                    if (_customProviderTypeCache.TryGetValue(cacheTypeKey, out string providerType)
+                        && CryptoProviderCache.TryGetSignatureProvider(
+                            key,
+                            algorithm,
+                            providerType,
+                            willCreateSignatures,
+                            out SignatureProvider cachedProvider))
+                    {
+                        cachedProvider.AddRef();
+                        return cachedProvider;
+                    }
+                }
+
                 signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SignatureProvider;
                 if (signatureProvider == null)
                     throw LogHelper.LogExceptionMessage(
@@ -623,21 +641,10 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (CacheCustomProviders && CacheSignatureProviders && cacheProvider)
                 {
-                    // Check if an equivalent provider was already cached (race with another thread).
+                    // Remember the provider type for future cache lookups.
+                    string cacheTypeKey = CustomCryptoProvider.GetType().ToString() + "-" + algorithm;
                     string providerType = signatureProvider.GetType().ToString();
-                    if (CryptoProviderCache.TryGetSignatureProvider(
-                        key,
-                        algorithm,
-                        providerType,
-                        willCreateSignatures,
-                        out SignatureProvider cachedProvider))
-                    {
-                        // A cached provider exists — use it, release the one we just created.
-                        cachedProvider.AddRef();
-                        signatureProvider.Release();
-                        CustomCryptoProvider.Release(signatureProvider);
-                        return cachedProvider;
-                    }
+                    _customProviderTypeCache.TryAdd(cacheTypeKey, providerType);
 
                     if (ShouldCacheSignatureProvider(signatureProvider))
                         signatureProvider.IsCached = CryptoProviderCache.TryAdd(signatureProvider);

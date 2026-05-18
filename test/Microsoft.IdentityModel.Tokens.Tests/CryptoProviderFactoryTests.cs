@@ -1271,6 +1271,129 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private static bool GetSignatureProviderIsDisposedByReflect(SignatureProvider signatureProvider) =>
             (bool)signatureProvider.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(signatureProvider);
+
+        [Fact]
+        public void CacheCustomProviders_WhenEnabled_CachesProviderFromCustomCryptoProvider()
+        {
+            // Arrange
+            var signingKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
+            {
+                KeyId = "test-cache-kid"
+            };
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            int createCount = 0;
+            var customCrypto = new CountingCryptoProvider(algorithm, () =>
+            {
+                createCount++;
+                return new SymmetricSignatureProvider(signingKey, algorithm);
+            });
+
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CustomCryptoProvider = customCrypto,
+                CacheCustomProviders = true,
+                CacheSignatureProviders = true
+            };
+
+            // Act — first call creates and caches
+            var provider1 = factory.CreateForVerifying(signingKey, algorithm);
+
+            // The EventBasedLRUCache processes adds asynchronously.
+            // Wait for the cache event queue to process the TryAdd.
+            System.Threading.Thread.Sleep(500);
+
+            // Second call should return the cached instance
+            var provider2 = factory.CreateForVerifying(signingKey, algorithm);
+
+            // Assert — Create called only once; second call hit cache
+            Assert.Equal(1, createCount);
+            Assert.Same(provider1, provider2);
+            Assert.True(provider1.IsCached);
+        }
+
+        [Fact]
+        public void CacheCustomProviders_WhenDisabled_CreatesNewProviderEachTime()
+        {
+            // Arrange
+            var signingKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key;
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            int createCount = 0;
+            var customCrypto = new CountingCryptoProvider(algorithm, () =>
+            {
+                createCount++;
+                return new SymmetricSignatureProvider(signingKey, algorithm);
+            });
+
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CustomCryptoProvider = customCrypto,
+                CacheCustomProviders = false, // default
+                CacheSignatureProviders = true
+            };
+
+            // Act
+            var provider1 = factory.CreateForVerifying(signingKey, algorithm);
+            var provider2 = factory.CreateForVerifying(signingKey, algorithm);
+
+            // Assert — Create called each time, providers are not the same
+            Assert.Equal(2, createCount);
+            Assert.NotSame(provider1, provider2);
+        }
+
+        [Fact]
+        public void CacheCustomProviders_WhenCacheSignatureProvidersDisabled_DoesNotCache()
+        {
+            // Arrange — CacheCustomProviders = true but CacheSignatureProviders = false
+            // The master switch overrides the sub-switch.
+            var signingKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key;
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            int createCount = 0;
+            var customCrypto = new CountingCryptoProvider(algorithm, () =>
+            {
+                createCount++;
+                return new SymmetricSignatureProvider(signingKey, algorithm);
+            });
+
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CustomCryptoProvider = customCrypto,
+                CacheCustomProviders = true,
+                CacheSignatureProviders = false // master switch off
+            };
+
+            // Act
+            var provider1 = factory.CreateForVerifying(signingKey, algorithm);
+            var provider2 = factory.CreateForVerifying(signingKey, algorithm);
+
+            // Assert — Create called each time despite CacheCustomProviders = true
+            Assert.Equal(2, createCount);
+        }
+
+        /// <summary>
+        /// A custom crypto provider that counts how many times Create is called.
+        /// </summary>
+        private class CountingCryptoProvider : ICryptoProvider
+        {
+            private readonly string _algorithm;
+            private readonly Func<SignatureProvider> _factory;
+
+            public CountingCryptoProvider(string algorithm, Func<SignatureProvider> factory)
+            {
+                _algorithm = algorithm;
+                _factory = factory;
+            }
+
+            public bool IsSupportedAlgorithm(string algorithm, params object[] args) =>
+                algorithm == _algorithm;
+
+            public object Create(string algorithm, params object[] args) =>
+                _factory();
+
+            public void Release(object cryptoInstance) { }
+        }
     }
 }
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
