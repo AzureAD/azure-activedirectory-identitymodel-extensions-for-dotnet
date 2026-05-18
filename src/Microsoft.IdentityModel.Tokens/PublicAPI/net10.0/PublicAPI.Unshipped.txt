@@ -1,4 +1,3 @@
-~Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> void
 ~const Microsoft.IdentityModel.Tokens.JsonWebAlgorithmsKeyTypes.Akp = "AKP" -> string
 ~const Microsoft.IdentityModel.Tokens.JsonWebKeyParameterNames.Priv = "priv" -> string
 ~const Microsoft.IdentityModel.Tokens.JsonWebKeyParameterNames.Pub = "pub" -> string
