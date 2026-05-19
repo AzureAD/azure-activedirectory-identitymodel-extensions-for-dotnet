@@ -377,8 +377,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2)");
 
             // get configuration from http address, should throw
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever());
-            var ee = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(ArgumentException));
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("http://nonexistent.test", new OpenIdConnectConfigurationRetriever(), new ExceptionThrowingDocumentRetriever(new IOException("simulated network error")));
+            var ee = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException));
             try
             {
                 configuration = configManager.GetConfigurationAsync().Result;
@@ -397,7 +397,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             // get configuration from https address, should throw
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("https://someaddress.com", new OpenIdConnectConfigurationRetriever());
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("https://nonexistent.test", new OpenIdConnectConfigurationRetriever(), new ExceptionThrowingDocumentRetriever(new IOException("simulated network error")));
             ee = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException));
             try
             {
@@ -416,8 +416,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 });
             }
 
-            // get configuration with unsuccessful HTTP response status code
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("https://httpstat.us/429", new OpenIdConnectConfigurationRetriever());
+            // get configuration with unsuccessful retrieval
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("https://nonexistent.test/429", new OpenIdConnectConfigurationRetriever(), new ExceptionThrowingDocumentRetriever(new IOException("simulated HTTP 429")));
             ee = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException));
             try
             {
@@ -704,6 +704,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 return $"{TestId}, {MetadataAddress}, {ExpectedException}";
             }
+        }
+    }
+
+    internal class ExceptionThrowingDocumentRetriever : IDocumentRetriever
+    {
+        private readonly Exception _exception;
+
+        public ExceptionThrowingDocumentRetriever(Exception exception)
+        {
+            _exception = exception;
+        }
+
+        public Task<string> GetDocumentAsync(string address, CancellationToken cancel)
+        {
+            throw _exception;
         }
     }
 }
