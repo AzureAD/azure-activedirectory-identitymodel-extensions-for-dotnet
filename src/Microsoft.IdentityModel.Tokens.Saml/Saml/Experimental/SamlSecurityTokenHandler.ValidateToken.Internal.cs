@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public partial class SamlSecurityTokenHandler : SecurityTokenHandler, IResultBasedValidation
     {
         /// <inheritdoc/>
-        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <inheritdoc/>
-        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
