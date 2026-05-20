@@ -781,7 +781,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 {
                     IssuerSigningKey = Default.AsymmetricSigningKey,
                     ValidAudience = Default.Audience,
-                    ValidIssuer = Default.Issuer
+                    ValidIssuer = Default.Issuer,
+                    ValidateLifetime = false
                 };
             }
         }

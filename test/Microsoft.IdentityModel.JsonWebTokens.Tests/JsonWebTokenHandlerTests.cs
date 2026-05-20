@@ -278,7 +278,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -298,7 +299,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerValidator = ValidationDelegates.IssuerValidatorReturnsDifferentIssuer,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     }
                 };
@@ -384,7 +386,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -403,7 +406,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -417,7 +421,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         },
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
                     },
@@ -447,7 +452,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidateIssuer = false
+                            ValidateIssuer = false,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -477,6 +483,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
                             ValidateIssuer = false,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -497,6 +504,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
                             RequireSignedTokens = false,
+                            ValidateLifetime = false,
                         },
                     },
                     new CreateTokenTheoryData
@@ -516,6 +524,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         },
                         IsValid = false
                     },
@@ -531,7 +540,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.Aud, "Audience" },
                             { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2025-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2040-03-17T18:33:37.080Z")) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -542,7 +551,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             Audience = "Audience",
                             IssuedAt = DateTime.Parse("2018-03-17T18:33:37.080Z"),
                             NotBefore = DateTime.Parse("2018-03-17T18:33:37.080Z"),
-                            Expires = DateTime.Parse("2025-03-17T18:33:37.080Z")
+                            Expires = DateTime.Parse("2040-03-17T18:33:37.080Z")
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         ValidationParameters = new TokenValidationParameters
@@ -550,7 +559,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = "Audience",
-                            ValidIssuer = "Issuer"
+                            ValidIssuer = "Issuer",
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -570,7 +580,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -590,7 +601,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -610,7 +622,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         },
                         ExpectedException = ExpectedException.SecurityTokenException("IDX14116:")
                     },
@@ -631,7 +644,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         },
                         ExpectedException = ExpectedException.SecurityTokenException("IDX14116:")
                     }
@@ -701,7 +715,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -720,7 +735,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             IssuerValidator = ValidationDelegates.IssuerValidatorReturnsDifferentIssuer,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -738,7 +754,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = signingCredentialsNoKeyId.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     }
                 };
@@ -877,7 +894,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
-                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens
+                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens,
+                            ValidateLifetime = false,
                         },
                         JwtToken = ReferenceTokens.JWEDirectEcryptionWithAdditionalHeaderClaims
                     },
@@ -897,7 +915,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
-                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens
+                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens,
+                            ValidateLifetime = false,
                         },
                         JwtToken = ReferenceTokens.JWEDirectEcryptionWithDifferentTyp
                     },
@@ -917,7 +936,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
-                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens
+                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens,
+                           ValidateLifetime = false,
                        },
                        JwtToken = ReferenceTokens.JWEKeyWrappingWithAdditionalHeaderClaims
                     },
@@ -937,7 +957,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
-                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens
+                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens,
+                           ValidateLifetime = false,
                        },
                        JwtToken = ReferenceTokens.JWEKeyWrappingWithDifferentTyp
                     },
@@ -956,7 +977,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
                             RequireSignedTokens = false,
-                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens
+                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens,
+                           ValidateLifetime = false,
                        },
                        JwtToken = ReferenceTokens.JWEKeyWrappingUnsignedInnerJWTWithAdditionalHeaderClaims
                     },
@@ -975,7 +997,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
                             RequireSignedTokens = false,
-                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens
+                            ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens,
+                            ValidateLifetime = false,
                         },
                         JwtToken = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims
                     }
@@ -1052,7 +1075,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -1069,7 +1093,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -1086,7 +1111,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -1099,7 +1125,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         },
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
                     },
@@ -1127,7 +1154,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidateIssuer = false
+                            ValidateIssuer = false,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -1154,7 +1182,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidateIssuer = false
+                            ValidateIssuer = false,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -1172,7 +1201,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
-                            RequireSignedTokens = false
+                            RequireSignedTokens = false,
+                            ValidateLifetime = false,
                         },
                     },
                     new CreateTokenTheoryData
@@ -1190,6 +1220,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         },
                         IsValid = false
                     },
@@ -1205,7 +1236,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.Aud, "Audience" },
                             { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2025-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2040-03-17T18:33:37.080Z")) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -1215,14 +1246,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             Audience = "Audience",
                             IssuedAt = DateTime.Parse("2018-03-17T18:33:37.080Z"),
                             NotBefore = DateTime.Parse("2018-03-17T18:33:37.080Z"),
-                            Expires = DateTime.Parse("2025-03-17T18:33:37.080Z")
+                            Expires = DateTime.Parse("2040-03-17T18:33:37.080Z")
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = "Audience",
-                            ValidIssuer = "Issuer"
+                            ValidIssuer = "Issuer",
+                            ValidateLifetime = false,
                         }
                     },
                     // Test checks that the values in SecurityTokenDescriptor.Subject.Claims
@@ -1275,6 +1307,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audiences.First(),
                             ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -1292,7 +1325,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -1310,7 +1344,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -1328,7 +1363,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         },
                         ExpectedException = ExpectedException.SecurityTokenException("IDX14116:")
                     },
@@ -1348,7 +1384,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            ValidateLifetime = false,
                         },
                         ExpectedException = ExpectedException.SecurityTokenException("IDX14116:")
                     },
@@ -1459,6 +1496,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 ValidAudience = Default.Audience,
                 ValidIssuer = Default.Issuer,
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                ValidateLifetime = false,
             };
 
             string jwtString = tokenHandler.CreateToken(Default.PayloadString, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
@@ -1549,7 +1587,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         First = true,
                         TestId = "RoundTripJWEValid",
-                        ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
+                        ValidationParameters = Default.SymmetricEncryptSignInfiniteLifetimeTokenValidationParameters,
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials
@@ -1562,6 +1600,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = NotDefault.SymmetricSigningKey256,
                             TokenDecryptionKey = Default.SymmetricEncryptionKey256,
+                            ValidateLifetime = false,
                         },
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
@@ -1576,6 +1615,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = Default.SymmetricSigningKey256,
                             TokenDecryptionKey = NotDefault.SymmetricEncryptionKey,
+                            ValidateLifetime = false,
                         },
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
@@ -1659,13 +1699,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             get
             {
+                TokenValidationParameters CreateTokenValidationParameters(SecurityKey encryptionKey, SecurityKey signingKey)
+                {
+                    var validationParameters = Default.TokenValidationParameters(encryptionKey, signingKey);
+                    validationParameters.ValidateLifetime = false;
+                    return validationParameters;
+                }
+
                 return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData()
                     {
                         First = true,
                         TestId = "RsaPKCS1-Aes128CbcHmacSha256",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256)
@@ -1673,7 +1720,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaPKCS1-Aes192CbcHmacSha384",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes192CbcHmacSha384)
@@ -1681,7 +1728,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaPKCS1-Aes256CbcHmacSha512",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512)
@@ -1689,7 +1736,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOAEP-Aes128CbcHmacSha256",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256)
@@ -1697,7 +1744,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOAEP-Aes192CbcHmacSha384",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes192CbcHmacSha384)
@@ -1705,7 +1752,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOAEP-Aes256CbcHmacSha512",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes256CbcHmacSha512)
@@ -1713,7 +1760,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOaepKeyWrap-Aes128CbcHmacSha256",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256)
@@ -1721,7 +1768,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOaepKeyWrap-Aes192CbcHmacSha384",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
@@ -1729,7 +1776,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOaepKeyWrap-Aes256CbcHmacSha512",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes256CbcHmacSha512)
@@ -1737,7 +1784,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "SymmetricSecurityKey2_128-Aes128KW-Aes128CbcHmacSha256",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.SymmetricSecurityKey2_128, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.SymmetricSecurityKey2_128, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_128, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256)
@@ -1745,7 +1792,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "SymmetricEncryptionKey256-Aes256KW-Aes128CbcHmacSha256",
-                        ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
+                        ValidationParameters = CreateTokenValidationParameters(Default.SymmetricEncryptionKey256, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes128CbcHmacSha256)
@@ -1753,7 +1800,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOaepKeyWrap-Aes192CbcHmacSha384",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        ValidationParameters = CreateTokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
@@ -1807,7 +1854,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 ValidAudience = "http://Default.Audience.com",
                 ValidIssuer = "http://Default.Issuer.com",
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens
+                ClockSkew = ClockSkewToEnableTestsWithHardcodedTokens,
+                ValidateLifetime = false,
             };
             var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
             var jsonWebToken = tokenValidationResult.SecurityToken as JsonWebToken;
