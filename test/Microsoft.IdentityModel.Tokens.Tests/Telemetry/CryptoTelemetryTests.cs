@@ -343,6 +343,83 @@ public class CryptoTelemetryTests
         }
     }
 
+    [Theory]
+    [InlineData("RS256", "RSA")]
+    [InlineData("RS384", "RSA")]
+    [InlineData("RS512", "RSA")]
+    [InlineData("PS256", "RSA-PSS")]
+    [InlineData("PS384", "RSA-PSS")]
+    [InlineData("PS512", "RSA-PSS")]
+    [InlineData("ES256", "ECDSA")]
+    [InlineData("ES384", "ECDSA")]
+    [InlineData("ES512", "ECDSA")]
+    [InlineData("HS256", "HMAC")]
+    [InlineData("HS384", "HMAC")]
+    [InlineData("HS512", "HMAC")]
+    public void GetKnownAlgorithmFamilyOrOther_JwtAlgorithms_ReturnsCorrectFamily(string algorithm, string expectedFamily)
+    {
+        // Act
+        var result = CryptoTelemetry.GetKnownAlgorithmFamilyOrOther(algorithm);
+
+        // Assert
+        Assert.Equal(expectedFamily, result);
+    }
+
+    [Theory]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", "RSA")]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#rsa-sha384", "RSA")]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512", "RSA")]
+    [InlineData("http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1", "RSA-PSS")]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", "ECDSA")]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384", "ECDSA")]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512", "ECDSA")]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HMAC")]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HMAC")]
+    [InlineData("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HMAC")]
+    public void GetKnownAlgorithmFamilyOrOther_XmlAlgorithms_ReturnsCorrectFamily(string algorithm, string expectedFamily)
+    {
+        // Act
+        var result = CryptoTelemetry.GetKnownAlgorithmFamilyOrOther(algorithm);
+
+        // Assert
+        Assert.Equal(expectedFamily, result);
+    }
+
+    [Theory]
+    [InlineData("CUSTOM-ALG")]
+    [InlineData("unknown-algorithm")]
+    [InlineData("EdDSA")]
+    [InlineData("some-random-string-12345")]
+    public void GetKnownAlgorithmFamilyOrOther_UnknownAlgorithms_ReturnsOther(string algorithm)
+    {
+        // Act
+        var result = CryptoTelemetry.GetKnownAlgorithmFamilyOrOther(algorithm);
+
+        // Assert
+        Assert.Equal("other", result);
+    }
+
+    [Theory]
+    [InlineData(null, "none")]
+    [InlineData("", "none")]
+    public void GetKnownAlgorithmFamilyOrOther_NullOrEmpty_ReturnsNone(string algorithm, string expected)
+    {
+        // Act
+        var result = CryptoTelemetry.GetKnownAlgorithmFamilyOrOther(algorithm);
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void GetKnownAlgorithmFamilyOrOther_NoneAlgorithm_ReturnsNone()
+    {
+        // Act & Assert - "none" is a valid JWT alg value meaning unsigned
+        Assert.Equal("none", CryptoTelemetry.GetKnownAlgorithmFamilyOrOther("none"));
+        Assert.Equal("none", CryptoTelemetry.GetKnownAlgorithmFamilyOrOther("NONE"));
+        Assert.Equal("none", CryptoTelemetry.GetKnownAlgorithmFamilyOrOther("None"));
+    }
+
     /// <summary>
     /// Custom security key for testing unknown key type scenario
     /// </summary>
