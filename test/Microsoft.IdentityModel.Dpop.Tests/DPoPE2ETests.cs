@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -227,5 +228,189 @@ public class DPoPE2ETests
 
         Assert.False(result.IsValid);
         Assert.True(result.IsNonceRequired);
+    }
+
+    [Fact]
+    public async Task E2E_JwkWithMismatchedX5cAndBareKey_BindingFails()
+    {
+        var (accessToken, originalProofKey, _) = CreateAccessTokenWithCnfJkt();
+        var nonce = "server-provided-nonce-xyz789";
+        var method = "POST";
+        var uri = new Uri("https://api.example.com/data");
+
+        var handler = new JsonWebTokenHandler();
+        var at = handler.ReadJsonWebToken(accessToken);
+        Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
+        var jkt = cnf.GetProperty("jkt").GetString();
+
+        var validator = new DPoPProofValidator();
+        var options = new DPoPValidationOptions
+        {
+            AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+            ExpectedNonce = nonce,
+        };
+
+        var otherKey = CreateTestRsa();
+        var x5cValue = Convert.ToBase64String(new byte[] { 0x30, 0x82, 0x01, 0x00 });
+
+        byte[] athHash;
+        using (var sha = SHA256.Create())
+            athHash = sha.ComputeHash(Encoding.ASCII.GetBytes(accessToken));
+        var athValue = Base64UrlEncoder.Encode(athHash);
+
+        var originalJwk = JsonWebKeyConverter.ConvertFromSecurityKey(new RsaSecurityKey(originalProofKey));
+        var htu = uri.GetLeftPart(UriPartial.Path);
+        var iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var jti = Guid.NewGuid().ToString();
+
+        var headerJson =
+            "{\"typ\":\"dpop+jwt\",\"alg\":\"RS256\",\"jwk\":{" +
+            "\"kty\":\"" + originalJwk.Kty + "\"," +
+            "\"e\":\"" + originalJwk.E + "\"," +
+            "\"n\":\"" + originalJwk.N + "\"," +
+            "\"x5c\":[\"" + x5cValue + "\"]" +
+            "}}";
+
+        var payloadJson =
+            "{\"htm\":\"" + method + "\"," +
+            "\"htu\":\"" + htu + "\"," +
+            "\"iat\":" + iat + "," +
+            "\"jti\":\"" + jti + "\"," +
+            "\"ath\":\"" + athValue + "\"," +
+            "\"nonce\":\"" + nonce + "\"}";
+
+        var encodedHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(headerJson));
+        var encodedPayload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payloadJson));
+        var signingInput = encodedHeader + "." + encodedPayload;
+        var signature = otherKey.SignData(
+            Encoding.ASCII.GetBytes(signingInput),
+            HashAlgorithmName.SHA256,
+            RSASignaturePadding.Pkcs1);
+        var mismatchedProofJwt = signingInput + "." + Base64UrlEncoder.Encode(signature);
+
+        var mismatchedResult = await validator.ValidateAsync(
+            mismatchedProofJwt, method, uri, accessToken, jkt, options);
+
+        Assert.False(
+            mismatchedResult.IsValid,
+            $"Proof should be rejected. Error was: {mismatchedResult.Error ?? "<none>"}");
+
+        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        {
+            SigningCredentials = new SigningCredentials(new RsaSecurityKey(originalProofKey), SecurityAlgorithms.RsaSha256),
+            IncludeNonce = true,
+            Nonce = nonce,
+        });
+        var wellFormedProofJwt = proofCreator.CreateProof(method, uri, accessToken);
+        var wellFormedResult = await validator.ValidateAsync(
+            wellFormedProofJwt, method, uri, accessToken, jkt, options);
+        Assert.True(wellFormedResult.IsValid, $"Well-formed proof should validate: {wellFormedResult.Error}");
+    }
+
+    [Fact]
+    public async Task E2E_ValidateProof_DoesNotCacheSignatureProvider()
+    {
+        var (accessToken, proofKey, _) = CreateAccessTokenWithCnfJkt();
+        var nonce = "nonce-cache-single";
+        var method = "GET";
+        var uri = new Uri("https://api.example.com/cache-single");
+
+        var handler = new JsonWebTokenHandler();
+        var at = handler.ReadJsonWebToken(accessToken);
+        Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
+        var jkt = cnf.GetProperty("jkt").GetString();
+
+        var options = new DPoPValidationOptions
+        {
+            AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+            ExpectedNonce = nonce,
+        };
+
+        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        {
+            SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
+            IncludeNonce = true,
+            Nonce = nonce,
+        });
+        var proofJwt = proofCreator.CreateProof(method, uri, accessToken);
+
+        var probeKey = new RsaSecurityKey(proofKey);
+        var providerTypeName = typeof(AsymmetricSignatureProvider).ToString();
+        Assert.False(
+            CryptoProviderFactory.Default.CryptoProviderCache.TryGetSignatureProvider(
+                probeKey, SecurityAlgorithms.RsaSha256, providerTypeName, willCreateSignatures: false, out _),
+            "Pre-validation: the verifying SignatureProvider should not already be cached.");
+
+        var validator = new DPoPProofValidator();
+        var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
+        Assert.True(result.IsValid, $"Proof should validate: {result.Error}");
+
+        Assert.False(
+            CryptoProviderFactory.Default.CryptoProviderCache.TryGetSignatureProvider(
+                probeKey, SecurityAlgorithms.RsaSha256, providerTypeName, willCreateSignatures: false, out _),
+            "Post-validation: validating a DPoP proof must not add the verifying SignatureProvider to the cache.");
+    }
+
+    [Fact]
+    public async Task E2E_ValidateManyProofs_DoesNotPopulateCacheWithEphemeralKeys()
+    {
+        const int proofCount = 25;
+        var validator = new DPoPProofValidator();
+        var providerTypeName = typeof(AsymmetricSignatureProvider).ToString();
+        var proofKeys = new List<RSA>();
+
+        try
+        {
+            for (int i = 0; i < proofCount; i++)
+            {
+                var (accessToken, proofKey, _) = CreateAccessTokenWithCnfJkt();
+                proofKeys.Add(proofKey);
+
+                var nonce = "nonce-cache-many-" + i;
+                var method = "POST";
+                var uri = new Uri("https://api.example.com/cache-many-" + i);
+
+                var handler = new JsonWebTokenHandler();
+                var at = handler.ReadJsonWebToken(accessToken);
+                Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
+                var jkt = cnf.GetProperty("jkt").GetString();
+
+                var options = new DPoPValidationOptions
+                {
+                    AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+                    ExpectedNonce = nonce,
+                };
+
+                var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+                {
+                    SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
+                    IncludeNonce = true,
+                    Nonce = nonce,
+                });
+                var proofJwt = proofCreator.CreateProof(method, uri, accessToken);
+
+                var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
+                Assert.True(result.IsValid, $"Proof #{i} should validate: {result.Error}");
+            }
+
+            int cachedCount = 0;
+            foreach (var key in proofKeys)
+            {
+                var probeKey = new RsaSecurityKey(key);
+                if (CryptoProviderFactory.Default.CryptoProviderCache.TryGetSignatureProvider(
+                        probeKey, SecurityAlgorithms.RsaSha256, providerTypeName,
+                        willCreateSignatures: false, out _))
+                {
+                    cachedCount++;
+                }
+            }
+
+            Assert.Equal(0, cachedCount);
+        }
+        finally
+        {
+            foreach (var key in proofKeys)
+                key.Dispose();
+        }
     }
 }

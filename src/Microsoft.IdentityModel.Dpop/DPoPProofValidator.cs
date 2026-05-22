@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -59,6 +60,9 @@ public class DPoPProofValidator
         if (string.IsNullOrWhiteSpace(dpopProofJwt))
             return DPoPValidationResult.Failed("DPoP proof is empty.");
 
+        if (dpopProofJwt.Length > options.MaxProofTokenSizeInBytes)
+            return DPoPValidationResult.Failed("DPoP proof exceeds the maximum allowed size.");
+
         if (string.IsNullOrWhiteSpace(accessToken))
             return DPoPValidationResult.Failed("Access token is empty.");
 
@@ -92,9 +96,23 @@ public class DPoPProofValidator
     {
         _ = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
 
-        // Encoding.ASCII is safe here — access tokens are JWTs (base64url-encoded segments
-        // separated by dots), so every character is guaranteed ASCII.
-        var tokenBytes = Encoding.ASCII.GetBytes(accessToken);
+#if NET6_0_OR_GREATER
+        // Typical access tokens (1-2 KB) hash without any heap allocation on the input side;
+        // larger tokens fall through to the heap path below. 1 KB cap keeps the stack budget
+        // safe for use under deep ASP.NET pipelines.
+        const int StackAllocThreshold = 1024;
+        int maxBytes = Encoding.UTF8.GetMaxByteCount(accessToken.Length);
+        if (maxBytes <= StackAllocThreshold)
+        {
+            Span<byte> tokenSpan = stackalloc byte[StackAllocThreshold];
+            int written = Encoding.UTF8.GetBytes(accessToken, tokenSpan);
+            Span<byte> hashSpan = stackalloc byte[32];
+            SHA256.HashData(tokenSpan.Slice(0, written), hashSpan);
+            return Base64UrlEncoder.Encode(hashSpan.ToArray());
+        }
+#endif
+
+        var tokenBytes = Encoding.UTF8.GetBytes(accessToken);
 #if NET6_0_OR_GREATER
         var hash = SHA256.HashData(tokenBytes);
 #else
@@ -126,6 +144,142 @@ public class DPoPProofValidator
                !string.IsNullOrEmpty(jwk.DP) ||
                !string.IsNullOrEmpty(jwk.DQ) ||
                !string.IsNullOrEmpty(jwk.QI);
+    }
+
+    /// <summary>
+    /// Converts a <see cref="JsonWebKey"/> to an asymmetric <see cref="SecurityKey"/> from its
+    /// public key parameters (n/e for RSA, crv/x/y for EC).
+    /// </summary>
+    internal static bool TryConvertToAsymmetricKeyFromBareParameters(JsonWebKey jwk, out SecurityKey key)
+    {
+        _ = jwk ?? throw new ArgumentNullException(nameof(jwk));
+
+        key = null;
+
+        if (JsonWebAlgorithmsKeyTypes.RSA.Equals(jwk.Kty))
+        {
+            return JsonWebKeyConverter.TryCreateToRsaSecurityKey(jwk, out key);
+        }
+        else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(jwk.Kty))
+        {
+            return JsonWebKeyConverter.TryConvertToECDsaSecurityKey(jwk, out key);
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Verifies the DPoP proof signature using a pooled buffer for the signing input.
+    /// </summary>
+    private static bool VerifyProofSignature(JsonWebToken proofToken, SignatureProvider signatureProvider)
+    {
+        string encodedToken = proofToken.EncodedToken;
+        string encodedSignature = proofToken.EncodedSignature;
+        // JWS signing input is "header.payload"; subtract the signature length plus 1 for the '.' separator that precedes it.
+        int signingInputLength = encodedToken.Length - encodedSignature.Length - 1;
+        if (signingInputLength <= 0)
+        {
+            // Defensive: JsonWebToken parsing should already guarantee header.payload.signature shape,
+            // but bail out before Rent(negative) would throw if a malformed token ever reached us.
+            return false;
+        }
+
+        byte[] messageBuffer = ArrayPool<byte>.Shared.Rent(signingInputLength);
+        try
+        {
+            Encoding.ASCII.GetBytes(encodedToken, 0, signingInputLength, messageBuffer, 0);
+            byte[] signatureBytes = Base64UrlEncoder.DecodeBytes(encodedSignature);
+            return signatureProvider.Verify(messageBuffer, 0, signingInputLength, signatureBytes, 0, signatureBytes.Length);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(messageBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Constant-time UTF-8 comparison of two strings. On TFMs that support span-based encoding the
+    /// UTF-8 bytes are produced into stack-allocated buffers so the hot comparison paths
+    /// (ath, nonce, cnf.jkt) avoid heap allocations entirely. Larger inputs and older TFMs fall back
+    /// to the allocating <see cref="Utility.AreEqual(byte[], byte[])"/> helper.
+    /// </summary>
+    private static bool AreEqualUtf8(string a, string b)
+    {
+        if (a == null || b == null)
+        {
+            return false;
+        }
+
+#if NET6_0_OR_GREATER
+        // 256 bytes covers ath (~43), nonce (typically ≤ 128), and cnf.jkt (~43) with headroom.
+        const int StackAllocThreshold = 256;
+        int maxBytesA = Encoding.UTF8.GetMaxByteCount(a.Length);
+        int maxBytesB = Encoding.UTF8.GetMaxByteCount(b.Length);
+        if (maxBytesA <= StackAllocThreshold && maxBytesB <= StackAllocThreshold)
+        {
+            Span<byte> bufA = stackalloc byte[StackAllocThreshold];
+            Span<byte> bufB = stackalloc byte[StackAllocThreshold];
+            int lenA = Encoding.UTF8.GetBytes(a, bufA);
+            int lenB = Encoding.UTF8.GetBytes(b, bufB);
+            return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(bufA.Slice(0, lenA), bufB.Slice(0, lenB));
+        }
+#endif
+        return Utility.AreEqual(Encoding.UTF8.GetBytes(a), Encoding.UTF8.GetBytes(b));
+    }
+
+    /// <summary>
+    /// Validates that the JWK is acceptable for the given algorithm — kty/alg/crv consistency
+    /// plus configured RSA modulus bounds. Returns a human-readable reason on rejection, or null on success.
+    /// </summary>
+    private static string ValidateJwkForAlgorithm(string alg, JsonWebKey jwk, DPoPValidationOptions options)
+    {
+        if (jwk.Kty != JsonWebAlgorithmsKeyTypes.RSA && jwk.Kty != JsonWebAlgorithmsKeyTypes.EllipticCurve)
+            return $"DPoP proof JWK 'kty' '{jwk.Kty}' is not supported; expected 'RSA' or 'EC'.";
+
+        if (!jwk.IsSupportedAlgorithm(alg))
+            return $"DPoP proof algorithm '{alg}' is not supported by the JWK (kty '{jwk.Kty}').";
+
+        if (jwk.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+        {
+            if (jwk.N == null)
+                return "DPoP proof RSA JWK is missing the 'n' parameter.";
+
+            // Bound the RSA modulus size without decoding base64url. Each base64url character carries
+            // 6 bits of payload, so N.Length * 6 is an upper bound on the encoded modulus bit length
+            // (the true value is within 8 bits of this ceiling because the final base64url char may
+            // contribute fewer than 6 significant bits and the decoded byte string can include a leading
+            // 0x00). We add 8 to the maximum to avoid rejecting keys at the boundary, and compare the
+            // ceiling directly to the minimum so we only reject when even the most generous interpretation
+            // is below the floor. Runs before key import to bound DoS cost on client-controlled keys.
+            int encodedBitCeiling = jwk.N.Length * 6;
+            if (encodedBitCeiling > options.MaxRsaKeySizeInBits + 8)
+                return "DPoP proof RSA key exceeds the maximum allowed size.";
+
+            if (encodedBitCeiling < options.MinRsaKeySizeInBits)
+                return "DPoP proof RSA key is below the minimum allowed size.";
+
+            return null;
+        }
+
+        // EC: pin curve to alg.
+        string expectedCrv = alg switch
+        {
+            SecurityAlgorithms.EcdsaSha256 or SecurityAlgorithms.EcdsaSha256Signature => JsonWebKeyECTypes.P256,
+            SecurityAlgorithms.EcdsaSha384 or SecurityAlgorithms.EcdsaSha384Signature => JsonWebKeyECTypes.P384,
+            SecurityAlgorithms.EcdsaSha512 or SecurityAlgorithms.EcdsaSha512Signature => JsonWebKeyECTypes.P521,
+            _ => null,
+        };
+
+        if (expectedCrv == null)
+            return $"DPoP proof algorithm '{alg}' has no curve binding defined for EC keys.";
+
+        bool crvMatches = jwk.Crv == expectedCrv
+            || (expectedCrv == JsonWebKeyECTypes.P521 && jwk.Crv == JsonWebKeyECTypes.P512);
+
+        if (!crvMatches)
+            return $"DPoP proof algorithm '{alg}' requires curve '{expectedCrv}' but JWK 'crv' is '{jwk.Crv}'.";
+
+        return null;
     }
 
     /// <summary>
@@ -207,23 +361,37 @@ public class DPoPProofValidator
             return DPoPValidationResult.Failed("DPoP proof JWK must not contain private key material.");
         }
 
-        // Validate signature using extracted JWK
-        var validationParams = new TokenValidationParameters
+        string jwkRejectReason = ValidateJwkForAlgorithm(alg, jwk, options);
+        if (jwkRejectReason != null)
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = false,
-            IssuerSigningKey = jwk,
-            ValidAlgorithms = new string[] { alg },
-        };
+            return DPoPValidationResult.Failed(jwkRejectReason);
+        }
 
-        var signatureResult = await s_tokenHandler
-            .ValidateTokenAsync(proofToken, validationParams, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (!signatureResult.IsValid)
+        // Convert the JWK to a SecurityKey from its public key parameters.
+        if (!TryConvertToAsymmetricKeyFromBareParameters(jwk, out SecurityKey signingKey))
         {
-            return DPoPValidationResult.Failed("DPoP proof signature validation failed.");
+            return DPoPValidationResult.Failed("DPoP proof JWK could not be converted to a supported asymmetric key.");
+        }
+
+        // Verify the proof signature without caching the SignatureProvider.
+        CryptoProviderFactory cryptoProviderFactory = signingKey.CryptoProviderFactory ?? CryptoProviderFactory.Default;
+        SignatureProvider signatureProvider = null;
+        try
+        {
+            signatureProvider = cryptoProviderFactory.CreateForVerifying(signingKey, alg, cacheProvider: false);
+            if (!VerifyProofSignature(proofToken, signatureProvider))
+            {
+                return DPoPValidationResult.Failed("DPoP proof signature validation failed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return DPoPValidationResult.Failed("DPoP proof signature validation failed.", ex);
+        }
+        finally
+        {
+            if (signatureProvider != null)
+                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
         }
 
         // Validate htm matches HTTP method
@@ -284,20 +452,6 @@ public class DPoPProofValidator
             return DPoPValidationResult.Failed("DPoP proof is missing the 'jti' claim.");
         }
 
-        // Replay protection
-        if (options.JtiReplayCache != null)
-        {
-            var jtiExpiration = issuedAt.Add(maxAge);
-            bool added = await options.JtiReplayCache
-                .TryAddAsync(jtiValue, jtiExpiration, cancellationToken)
-                .ConfigureAwait(false);
-
-            if (!added)
-            {
-                return DPoPValidationResult.Failed("DPoP proof 'jti' has already been used (replay detected).");
-            }
-        }
-
         // Validate nonce if expected (null = skip nonce validation)
         if (options.ExpectedNonce != null)
         {
@@ -312,7 +466,7 @@ public class DPoPProofValidator
                 return DPoPValidationResult.NonceRequired();
             }
 
-            if (!string.Equals(options.ExpectedNonce, nonceValue, StringComparison.Ordinal))
+            if (!AreEqualUtf8(options.ExpectedNonce, nonceValue))
             {
                 return DPoPValidationResult.NonceValidationFailed();
             }
@@ -326,16 +480,30 @@ public class DPoPProofValidator
         }
 
         var expectedAth = ComputeAccessTokenHash(accessToken);
-        if (!string.Equals(athValue, expectedAth, StringComparison.Ordinal))
+        if (!AreEqualUtf8(athValue, expectedAth))
         {
             return DPoPValidationResult.Failed("DPoP proof 'ath' claim does not match the access token hash.");
         }
 
         // Compute thumbprint and validate cnf.jkt binding
         var thumbprint = ComputeJwkThumbprint(jwk);
-        if (!Utility.AreEqual(Encoding.UTF8.GetBytes(expectedCnfJkt), Encoding.UTF8.GetBytes(thumbprint)))
+        if (!AreEqualUtf8(expectedCnfJkt, thumbprint))
         {
             return DPoPValidationResult.Failed("DPoP proof JWK thumbprint does not match the access token cnf.jkt claim.");
+        }
+
+        // Replay protection
+        if (options.JtiReplayCache != null)
+        {
+            var jtiExpiration = issuedAt.Add(maxAge);
+            bool added = await options.JtiReplayCache
+                .TryAddAsync(jtiValue, jtiExpiration, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (!added)
+            {
+                return DPoPValidationResult.Failed("DPoP proof 'jti' has already been used (replay detected).");
+            }
         }
 
         string proofNonceForResult = proofToken.TryGetPayloadValue(DPoPClaimTypes.Nonce, out string proofNonce) ? proofNonce : null;

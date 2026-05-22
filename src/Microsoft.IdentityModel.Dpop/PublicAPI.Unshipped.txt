@@ -4,6 +4,11 @@ const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Htu = "htu" -> string
 const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Iat = "iat" -> string
 const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Jti = "jti" -> string
 const Microsoft.IdentityModel.Dpop.DPoPClaimTypes.Nonce = "nonce" -> string
+const Microsoft.IdentityModel.Dpop.DPoPConstants.DefaultClockSkewInSeconds = 300 -> int
+const Microsoft.IdentityModel.Dpop.DPoPConstants.DefaultMaxLifetimeInSeconds = 300 -> int
+const Microsoft.IdentityModel.Dpop.DPoPConstants.DefaultMaxProofTokenSizeInBytes = 8192 -> int
+const Microsoft.IdentityModel.Dpop.DPoPConstants.DefaultMaxRsaKeySizeInBits = 4096 -> int
+const Microsoft.IdentityModel.Dpop.DPoPConstants.DefaultMinRsaKeySizeInBits = 2048 -> int
 const Microsoft.IdentityModel.Dpop.DPoPConstants.DPoPNonceHeaderName = "DPoP-Nonce" -> string
 const Microsoft.IdentityModel.Dpop.DPoPConstants.DPoPProofTokenType = "dpop+jwt" -> string
 const Microsoft.IdentityModel.Dpop.DPoPConstants.DPoPTokenType = "DPoP" -> string
@@ -27,6 +32,12 @@ Microsoft.IdentityModel.Dpop.DPoPValidationOptions.JtiReplayCache.get -> Microso
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions.JtiReplayCache.set -> void
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MaxLifetimeInSeconds.get -> int
 Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MaxLifetimeInSeconds.set -> void
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MaxProofTokenSizeInBytes.get -> int
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MaxProofTokenSizeInBytes.set -> void
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MaxRsaKeySizeInBits.get -> int
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MaxRsaKeySizeInBits.set -> void
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MinRsaKeySizeInBits.get -> int
+Microsoft.IdentityModel.Dpop.DPoPValidationOptions.MinRsaKeySizeInBits.set -> void
 Microsoft.IdentityModel.Dpop.DPoPValidationResult
 Microsoft.IdentityModel.Dpop.DPoPValidationResult.Error.get -> string
 Microsoft.IdentityModel.Dpop.DPoPValidationResult.ErrorCode.get -> string
