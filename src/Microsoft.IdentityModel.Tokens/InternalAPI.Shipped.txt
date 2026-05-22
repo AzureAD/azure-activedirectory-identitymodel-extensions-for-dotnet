@@ -1,19 +1,38 @@
 ~virtual Microsoft.IdentityModel.Tokens.IssuerValidatorAsync.Invoke(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Threading.Tasks.ValueTask<string>
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.AlgorithmTag = "Algorithm" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.BlockingTypeTag = "Blocking" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.ConfigurationSourceTag = "ConfigurationSource" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.ErrorTag = "Error" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.ExceptionTypeTag = "ExceptionType" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.FailureValue = "Failure" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.IdentityModelVersionTag = "IdentityModelVersion" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.IssuerTag = "Issuer" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.KeyAlgorithmTag = "KeyAlgorithm" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.MetadataAddressTag = "MetadataAddress" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.OperationStatusTag = "OperationStatus" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.Automatic = "Automatic" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.ConfigurationInvalid = "ConfigurationInvalid" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.ConfigurationRetrievalFailed = "ConfigurationRetrievalFailed" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.ConfigurationSourceHandler = "Handler" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.ConfigurationSourceRetriever = "Retriever" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.ConfigurationSourceUnknown = "Unknown" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.FirstRefresh = "FirstRefresh" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.Lkg = "LastKnownGood" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols.Manual = "Manual" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.SignatureValidationErrors.AlgorithmNotSupported = "AlgorithmNotSupported" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.SignatureValidationErrors.None = "None" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.SignatureValidationErrors.Other = "Other" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.SignatureValidationErrors.SignatureProviderCreationFailed = "SignatureProviderCreationFailed" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed = "SignatureVerificationFailed" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.SignatureValidationErrors.SigningKeyNotFound = "SigningKeyNotFound" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.StatusTag = "Status" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryConstants.SuccessValue = "Success" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.BackgroundConfigurationRefreshFailureCounterDescription = "Counter capturing configuration manager background refresh failures." -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.BackgroundConfigurationRefreshFailureCounterName = "IdentityModelConfigurationManagerBackgroundRefreshFailure" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.IdentityModelConfigurationManagerCounterDescription = "Counter capturing configuration manager operations." -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.IdentityModelConfigurationManagerCounterName = "IdentityModelConfigurationManager" -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.SignatureValidationCounterDescription = "Counter capturing signature validation operations with algorithm and key size details." -> string
+const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.SignatureValidationCounterName = "IdentityModelSignatureValidation" -> string
 const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.TotalDurationHistogramName = "IdentityModelConfigurationRequestTotalDurationInMS" -> string
 const Microsoft.IdentityModel.Tokens.AesGcm.NonceSize = 12 -> int
 const Microsoft.IdentityModel.Tokens.AesGcm.TagSize = 16 -> int
@@ -47,7 +66,9 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10206 = "IDX10206: Unable to
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10207 = "IDX10207: Unable to validate audience. The 'audiences' parameter is null." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10208 = "IDX10208: Unable to validate audience. validationParameters.ValidAudience is null or whitespace and validationParameters.ValidAudiences is null." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10209 = "IDX10209: Token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10211 = "IDX10211: Issuer validation failed. Unable to validate issuer. The 'issuer' parameter is null or whitespace." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10212 = "IDX10212: Issuer validation failed. Issuer: '{0}'. Did not match any of: validationParameters.ValidIssuers: '{1}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{2}'.\nFor more details, see https://aka.ms/IdentityModel/issuer-validation." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10212 = "IDX10212: Issuer validation failed. Issuer: '{0}'. Did not match any: validationParameters.ValidIssuers: '{1}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{2}'. For more details, see https://aka.ms/IdentityModel/issuer-validation. " -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10214S = "IDX10214: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches" -> string
@@ -109,9 +130,11 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10401 = "IDX10401: Invalid r
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10502 = "IDX10502: Signature validation failed. The token's kid is: '{0}', but did not match any keys in ValidationParameters or Configuration and TryAllIssuerSigningKeys is false. Number of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10503 = "IDX10503: Signature validation failed. The token's kid is: '{0}', but did not match any keys in TokenValidationParameters or Configuration. Keys tried: '{1}'. Number of keys in TokenValidationParameters: '{2}'. \nNumber of keys in Configuration: '{3}'. \nExceptions caught:\n '{4}'.\ntoken: '{5}'. See https://aka.ms/IDX10503 for details." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10503 = "IDX10503: Signature validation failed. The token's kid is: '{0}', but did not match any keys in TokenValidationParameters or Configuration. Keys tried: '{1}'.\nNumber of keys in TokenValidationParameters: '{2}'. \nNumber of keys in Configuration: '{3}'.\nExceptions caught:\n '{4}'.\ntoken: '{5}'. See https://aka.ms/IDX10503 for details." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'. If you are using ASP.NET Core 8 or later, see https://learn.microsoft.com/en-us/dotnet/core/compatibility/aspnet-core/8.0/securitytoken-events for more details." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'.\nIf you are using ASP.NET Core 8 or later, see https://learn.microsoft.com/en-us/dotnet/core/compatibility/aspnet-core/8.0/securitytoken-events for more details." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10508 = "IDX10508: Signature validation failed. Signature is improperly formatted." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10509 = "IDX10509: Token validation failed. The user defined 'Delegate' set on TokenValidationParameters.TokenReader did not return a '{0}', but returned a '{1}' when reading token: '{2}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10510 = "IDX10510: Token validation failed. The user defined 'Delegate' set on TokenValidationParameters.TokenReader returned null when reading token: '{0}'." -> string
@@ -119,10 +142,18 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10511 = "IDX10511: Signature
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10512 = "IDX10512: Signature validation failed. Token does not have KeyInfo. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10514 = "IDX10514: Signature validation failed. Keys tried: '{0}'. \nKeyInfo: '{1}'. \nExceptions caught:\n '{2}'.\ntoken: '{3}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10517 = "IDX10517: Signature validation failed. The token's kid is missing. Keys tried: '{0}'. Number of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10517 = "IDX10517: Signature validation failed. The token's kid is missing. Keys tried: '{0}'.\nNumber of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10518 = "IDX10518: Signature validation failed. Algorithm validation failed with error: '{0}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10519 = "IDX10519: Signature validation failed. The token's kid is missing and ValidationParameters.TryAllIssuerSigningKeys is set to false." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10520 = "IDX10520: Signature validation failed. The key provided could not validate the signature. Key tried: '{0}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10521 = "IDX10521: Signature validation failed. An exception was thrown when trying to validate the signature. Key tried: '{0}'. Exception: '{1}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10521 = "IDX10521: Signature validation failed.An exception was thrown when trying to validate the signature. Key tried: '{0}'. Exception: '{1}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10522 = "IDX10522: Signature validation failed. The token's kid: '{0}' did not match any keys in ValidationParameters or Configuration.\nAll keys in ValidationParameters and Configuration were tried. \nNumber of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10523 = "IDX10523: Signature validation failed. The token's kid is empty.\nAll keys in ValidationParameters and Configuration were tried. \nNumber of keys in ValidationParameters: '{0}'. \nNumber of keys in Configuration: '{1}'.\ntoken: '{2}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10524 = "IDX10524: Signature validation failed. The token's kid: '{0}' did not match any keys in ValidationParameters or Configuration.\nAll keys in ValidationParameters and Configuration were tried. No non-null keys were found. \nNumber of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10525 = "IDX10525: Signature validation failed. The token's kid is missing.\nAll keys in ValidationParameters and Configuration were tried. No non-null keys were found. \nNumber of keys in ValidationParameters: '{0}'. \nNumber of keys in Configuration: '{1}'.\ntoken: '{2}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10526 = "IDX10526: Signature validation failed. The token's kid is missing.\nValidationParameters.TryAllIssuerSigningKeys is set to false. All keys will not be tried. \nNumber of keys in ValidationParameters: '{0}'. \nNumber of keys in Configuration: '{1}'.\ntoken: '{2}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10527 = "IDX10527: Signature validation failed. The token's kid is: '{0}', but did not match any keys in ValidationParameters or Configuration and TryAllIssuerSigningKeys is false.\nNumber of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10603 = "IDX10603: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'" -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10607 = "IDX10607: Decryption skipping key: '{0}', both validationParameters.CryptoProviderFactory and key.CryptoProviderFactory are null." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10609 = "IDX10609: Decryption failed. No Keys tried: token: '{0}'." -> string
@@ -247,18 +278,22 @@ Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefresh
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus) -> void
+Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementSignatureValidationCounter(string errorType, string issuer, string algorithm, Microsoft.IdentityModel.Tokens.SecurityKey key) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Telemetry.NullTelemetryClient
+Microsoft.IdentityModel.Telemetry.NullTelemetryClient.NullTelemetryClient() -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient
 Microsoft.IdentityModel.Telemetry.TelemetryClient.ClientVer -> string
 Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus) -> void
+Microsoft.IdentityModel.Telemetry.TelemetryClient.IncrementSignatureValidationCounter(string errorType, string issuer, string algorithm, Microsoft.IdentityModel.Tokens.SecurityKey key) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, string configurationSource, System.TimeSpan operationDuration, System.Exception exception) -> void
@@ -268,6 +303,7 @@ Microsoft.IdentityModel.Telemetry.TelemetryClient.LogConfigurationRetrievalDurat
 Microsoft.IdentityModel.Telemetry.TelemetryClient.TelemetryClient() -> void
 Microsoft.IdentityModel.Telemetry.TelemetryConstants
 Microsoft.IdentityModel.Telemetry.TelemetryConstants.Protocols
+Microsoft.IdentityModel.Telemetry.TelemetryConstants.SignatureValidationErrors
 Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder
 Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.TelemetryDataRecorder() -> void
 Microsoft.IdentityModel.Tokens.AesAead
@@ -323,6 +359,7 @@ Microsoft.IdentityModel.Tokens.CertificateHelper
 Microsoft.IdentityModel.Tokens.CertificateHelper.CertificateHelper() -> void
 Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory
 Microsoft.IdentityModel.Tokens.Cnf.ClassName.get -> string
+Microsoft.IdentityModel.Tokens.Cnf.Jkt.set -> void
 Microsoft.IdentityModel.Tokens.Cnf.Jku.set -> void
 Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.set -> void
 Microsoft.IdentityModel.Tokens.Cnf.Jwe.set -> void
@@ -399,13 +436,16 @@ Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.TryGetValue(TKey
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.TryRemove(TKey key, out TValue value) -> bool
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.TryRemove(TKey key) -> bool
 Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.WaitForProcessing() -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey.ValidatedSignatureKey(System.DateTime? validFrom, System.DateTime? validTo, System.DateTime? validationTime) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedSigningKeyLifetime.ValidatedSigningKeyLifetime(System.DateTime? validFrom, System.DateTime? validTo, System.DateTime? validationTime) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ActorValidationResult.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ClaimsIdentityNoLocking.get -> System.Security.Claims.ClaimsIdentity
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ClaimsIdentityNoLocking.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedAlgorithm.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedAudience.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedIssuer.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedLifetime.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedSignatureKey.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedSigningKey.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedSigningKeyLifetime.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenReplayExpirationTime.set -> void
@@ -413,6 +453,9 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenType.se
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.CreateException(System.Type exceptionType, System.Exception innerException) -> System.Exception
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.MessageDetail.get -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail
 Microsoft.IdentityModel.Tokens.Experimental.ValidationFailure.Name.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.Name.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DecryptionKeyResolver.get -> Microsoft.IdentityModel.Tokens.Experimental.DecryptionKeyResolverDelegate
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DecryptionKeyResolver.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerSigningKeys.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TimeProvider.get -> System.TimeProvider
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TimeProvider.set -> void
@@ -464,6 +507,7 @@ Microsoft.IdentityModel.Tokens.JsonWebKey.ConvertKeyInfo.get -> string
 Microsoft.IdentityModel.Tokens.JsonWebKey.ConvertKeyInfo.set -> void
 Microsoft.IdentityModel.Tokens.JsonWebKey.CreateRsaParameters() -> System.Security.Cryptography.RSAParameters
 Microsoft.IdentityModel.Tokens.JsonWebKey.RepresentAsAsymmetricPublicJwk() -> string
+Microsoft.IdentityModel.Tokens.JsonWebKey.RepresentAsAsymmetricPublicJwkForDpop() -> System.Text.Json.Nodes.JsonObject
 Microsoft.IdentityModel.Tokens.JsonWebKeyParameterUtf8Bytes
 Microsoft.IdentityModel.Tokens.JsonWebKeyParameterUtf8Bytes.JsonWebKeyParameterUtf8Bytes() -> void
 Microsoft.IdentityModel.Tokens.JsonWebKeySet.JsonData.get -> string
@@ -516,15 +560,45 @@ Microsoft.IdentityModel.Tokens.SecurityTokenArgumentNullException.SecurityTokenA
 Microsoft.IdentityModel.Tokens.SecurityTokenArgumentNullException.SecurityTokenArgumentNullException(string paramName) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenArgumentNullException.SetValidationError(Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenArgumentNullException.SetValidationError(Microsoft.IdentityModel.Tokens.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenDecryptionFailedException.SecurityTokenDecryptionFailedException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenDecryptionFailedException.SecurityTokenDecryptionFailedException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SetValidationError(Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SetValidationError(Microsoft.IdentityModel.Tokens.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenException.ValidationError.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError
 Microsoft.IdentityModel.Tokens.SecurityTokenException.ValidationError.get -> Microsoft.IdentityModel.Tokens.ValidationError
 Microsoft.IdentityModel.Tokens.SecurityTokenException.ValidationError.set -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.SecurityTokenInvalidAlgorithmException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.SecurityTokenInvalidAlgorithmException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException.SecurityTokenInvalidOperationException() -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException.SecurityTokenInvalidOperationException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException.SecurityTokenInvalidOperationException(string message, System.Exception innerException, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException.SecurityTokenInvalidOperationException(string message, System.Exception innerException) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException.SecurityTokenInvalidOperationException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException.SecurityTokenInvalidOperationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException.ValidationError.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException.SecurityTokenInvalidSignatureException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException.SecurityTokenInvalidSignatureException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SecurityTokenInvalidSigningKeyException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SecurityTokenInvalidSigningKeyException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.SecurityTokenInvalidTypeException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.SecurityTokenInvalidTypeException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenKeyWrapException.SecurityTokenKeyWrapException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenKeyWrapException.SecurityTokenKeyWrapException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenReplayDetectedException.SecurityTokenReplayDetectedException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenReplayDetectedException.SecurityTokenReplayDetectedException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.SecurityTokenSignatureKeyNotFoundException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.SecurityTokenSignatureKeyNotFoundException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException(string message, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.SignatureProvider.AddRef() -> int
 Microsoft.IdentityModel.Tokens.SignatureProvider.IsCached.get -> bool
 Microsoft.IdentityModel.Tokens.SignatureProvider.IsCached.set -> void
@@ -561,6 +635,7 @@ Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenOnFailedValidation.set
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenHandler tokenHandler, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, string issuer, System.Collections.Generic.List<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken> validationResults, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenHandler tokenHandler, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters, string issuer, System.Collections.Generic.List<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken> validationResults) -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenHandler tokenHandler, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters, string issuer, System.Collections.Generic.List<Microsoft.IdentityModel.Tokens.ValidatedToken> validationResults) -> void
+Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenHandler tokenHandler, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters, string issuer) -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenHandler tokenHandler, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, string issuer, System.Collections.Generic.List<Microsoft.IdentityModel.Tokens.ValidatedToken> validationResults, Microsoft.IdentityModel.Tokens.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult(Microsoft.IdentityModel.Tokens.TokenHandler tokenHandler, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult(Microsoft.IdentityModel.Tokens.TokenHandler tokenHandler, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.ValidationError validationError) -> void
@@ -780,8 +855,13 @@ static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateSignatu
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.DecryptJwtToken(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jsonWebToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters decryptionParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.TokenDecryptionResult
 static Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult.NullParameterFailure(string parameterName) -> Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult
 static Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult.Success() -> Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult
+static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.GetKeyAlgorithmId(Microsoft.IdentityModel.Tokens.SecurityKey key) -> string
+static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.GetTrackedIssuerOrOther(string issuer) -> string
+static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.RecordSignatureValidationTelemetry.get -> bool
+static Microsoft.IdentityModel.Telemetry.CryptoTelemetry.RecordSignatureValidationTelemetry.set -> void
 static Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.IncrementBackgroundConfigurationRefreshFailureCounter(in System.Diagnostics.TagList tagList) -> void
 static Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(in System.Diagnostics.TagList tagList) -> void
+static Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.IncrementSignatureValidationCounter(in System.Diagnostics.TagList tagList) -> void
 static Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.RecordConfigurationRetrievalDurationHistogram(long requestDurationInMs, in System.Diagnostics.TagList tagList) -> void
 static Microsoft.IdentityModel.Tokens.AesAead.CheckArgumentsForNull(byte[] nonce, byte[] plaintext, byte[] ciphertext, byte[] tag) -> void
 static Microsoft.IdentityModel.Tokens.AesAead.Decrypt(Microsoft.IdentityModel.Tokens.SafeKeyHandle keyHandle, byte[] nonce, byte[] associatedData, byte[] ciphertext, byte[] tag, byte[] plaintext, bool clearPlaintextOnFailure) -> void
@@ -799,6 +879,7 @@ static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseRfcDefinitionOfEpkAn
 static Microsoft.IdentityModel.Tokens.AsymmetricAdapter.DecryptFunctionNotFound(byte[] _) -> byte[]
 static Microsoft.IdentityModel.Tokens.AsymmetricAdapter.EncryptFunctionNotFound(byte[] _) -> byte[]
 static Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.Transform(System.Security.Cryptography.ICryptoTransform transform, byte[] input, int inputOffset, int inputLength) -> byte[]
+static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan, System.Span<byte> output) -> void
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan) -> byte[]
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode(string input, int offset, int length) -> byte[]
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode(string inputString) -> byte[]
@@ -817,6 +898,7 @@ static Microsoft.IdentityModel.Tokens.Cng.BCryptOpenAlgorithmProvider(string psz
 static Microsoft.IdentityModel.Tokens.Cng.SetCipherMode(this Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle hAlg, string cipherMode) -> void
 static Microsoft.IdentityModel.Tokens.CollectionUtilities.IsNullOrEmpty<T>(this System.Collections.Generic.IEnumerable<T> enumerable) -> bool
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
+static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jkt.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System.ReadOnlySpan<byte>
@@ -924,13 +1006,16 @@ static Microsoft.IdentityModel.Tokens.TokenTypeValidationError.NullParameter(str
 static Microsoft.IdentityModel.Tokens.TokenUtilities.CreateDictionaryFromClaims(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor, bool audienceSet, bool issuerSet) -> System.Collections.Generic.Dictionary<string, object>
 static Microsoft.IdentityModel.Tokens.TokenUtilities.CreateDictionaryFromClaims(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims) -> System.Collections.Generic.Dictionary<string, object>
 static Microsoft.IdentityModel.Tokens.TokenUtilities.GetAllSigningKeys(Microsoft.IdentityModel.Tokens.BaseConfiguration configuration = null, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters = null) -> System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.SecurityKey>
+static Microsoft.IdentityModel.Tokens.TokenUtilities.GetAllSigningKeys(Microsoft.IdentityModel.Tokens.BaseConfiguration configuration, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.SecurityKey>
 static Microsoft.IdentityModel.Tokens.TokenUtilities.GetClaimValueUsingValueType(System.Security.Claims.Claim claim) -> object
 static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableConfiguration(string kid, Microsoft.IdentityModel.Tokens.BaseConfiguration currentConfiguration, Microsoft.IdentityModel.Tokens.BaseConfiguration lkgConfiguration, System.Exception currentException) -> bool
+static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableConfigurationAndExceptionType(string kid, Microsoft.IdentityModel.Tokens.BaseConfiguration currentConfiguration, Microsoft.IdentityModel.Tokens.BaseConfiguration lkgConfiguration, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType failureType) -> bool
 static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableConfigurationAndExceptionType(string kid, Microsoft.IdentityModel.Tokens.BaseConfiguration currentConfiguration, Microsoft.IdentityModel.Tokens.BaseConfiguration lkgConfiguration, System.Type currentExceptionType) -> bool
 static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableException(System.Exception exception, bool configContainsDecryptionKeys) -> bool
 static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableException(System.Exception exception) -> bool
 static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableExceptionType(System.Type exceptionType, bool configContainsDecryptionKeys) -> bool
 static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableExceptionType(System.Type exceptionType) -> bool
+static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableFailureType(Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType failureType, bool configContainsDecryptionKeys) -> bool
 static Microsoft.IdentityModel.Tokens.TokenUtilities.MergeClaims(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> subjectClaims) -> System.Collections.Generic.IEnumerable<System.Security.Claims.Claim>
 static Microsoft.IdentityModel.Tokens.Utility.AreEqual(System.ReadOnlySpan<byte> a, System.ReadOnlySpan<byte> b, int length) -> bool
 static Microsoft.IdentityModel.Tokens.Utility.ConvertToBigEndian(long i) -> byte[]
@@ -949,9 +1034,12 @@ static Microsoft.IdentityModel.Tokens.ValidatedTokenType.operator !=(Microsoft.I
 static Microsoft.IdentityModel.Tokens.ValidatedTokenType.operator ==(Microsoft.IdentityModel.Tokens.ValidatedTokenType left, Microsoft.IdentityModel.Tokens.ValidatedTokenType right) -> bool
 static Microsoft.IdentityModel.Tokens.ValidationError.GetCurrentStackFrame(string filePath = "", int lineNumber = 0, int skipFrames = 1) -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.ValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.ValidationError
+static Microsoft.IdentityModel.Tokens.Validators.ValidateAlgorithmInternal(string algorithm, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<string, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateAudienceInternal(System.Collections.Generic.IList<string> audiences, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<string, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
 static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuer(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> string
 static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerAsync(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> System.Threading.Tasks.ValueTask<string>
 static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerAsync(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedIssuer>>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerInternalAsync(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedIssuer, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
 static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerSecurityKey(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> void
 static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerSigningKey(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedSigningKeyLifetime>
 static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerSigningKey(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedSigningKeyLifetime>
@@ -959,11 +1047,18 @@ static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerSigningKeyLifeTim
 static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerSigningKeyLifeTime(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> void
 static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerSigningKeyLifeTime(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedSigningKeyLifetime>
 static Microsoft.IdentityModel.Tokens.Validators.ValidateLifetime(System.DateTime? notBefore, System.DateTime? expires, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedLifetime>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateLifetimeInternal(System.DateTime? notBefore, System.DateTime? expires, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedLifetime, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateSignatureKey(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateSignatureKeyInternal(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
 static Microsoft.IdentityModel.Tokens.Validators.ValidateTokenReplay(System.DateTime? expirationTime, string securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationResult<System.DateTime?>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateTokenReplayInternal(System.DateTime? expires, string securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<System.DateTime?, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
 static Microsoft.IdentityModel.Tokens.Validators.ValidateTokenType(string type, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedTokenType>
+static Microsoft.IdentityModel.Tokens.Validators.ValidateTokenTypeInternal(string type, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
 static Microsoft.IdentityModel.Tokens.ValidatorUtilities.ValidateLifetime(System.DateTime? notBefore, System.DateTime? expires, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> void
+static readonly Microsoft.IdentityModel.Telemetry.NullTelemetryClient.Instance -> Microsoft.IdentityModel.Telemetry.NullTelemetryClient
 static readonly Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.BackgroundConfigurationRefreshFailureCounter -> System.Diagnostics.Metrics.Counter<long>
 static readonly Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.ConfigurationManagerCounter -> System.Diagnostics.Metrics.Counter<long>
+static readonly Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.SignatureValidationCounter -> System.Diagnostics.Metrics.Counter<long>
 static readonly Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.TotalDurationHistogram -> System.Diagnostics.Metrics.Histogram<long>
 static readonly Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerMatchedConfiguration -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
 static readonly Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerMatchedValidationParameters -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
@@ -1048,9 +1143,22 @@ virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateClaimsId
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateClaimsIdentity(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters) -> System.Security.Claims.ClaimsIdentity
 virtual Microsoft.IdentityModel.Tokens.AesGcm.Dispose(bool disposing) -> void
 virtual Microsoft.IdentityModel.Tokens.AsymmetricAdapter.Dispose(bool disposing) -> void
+virtual Microsoft.IdentityModel.Tokens.CreateECDsaDelegate.Invoke(Microsoft.IdentityModel.Tokens.JsonWebKey jsonWebKey, bool usePrivateKey) -> System.Security.Cryptography.ECDsa
+virtual Microsoft.IdentityModel.Tokens.DecryptDelegate.Invoke(byte[] bytes) -> byte[]
+virtual Microsoft.IdentityModel.Tokens.DecryptionDelegate.Invoke(byte[] cipherText, byte[] authenticatedData, byte[] iv, byte[] authenticationTag) -> byte[]
+virtual Microsoft.IdentityModel.Tokens.EncryptDelegate.Invoke(byte[] bytes) -> byte[]
+virtual Microsoft.IdentityModel.Tokens.EncryptionDelegate.Invoke(byte[] plaintText, byte[] authenticatedData, byte[] iv) -> Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionResult
+virtual Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.ItemCompacted.Invoke(TValue Value) -> void
+virtual Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.ItemExpired.Invoke(TValue Value) -> void
+virtual Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.ItemRemoved.Invoke(TValue Value) -> void
+virtual Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.ShouldRemove.Invoke(TValue Value) -> bool
+virtual Microsoft.IdentityModel.Tokens.IssuerValidatorAsync.Invoke(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Threading.Tasks.ValueTask<string>
 virtual Microsoft.IdentityModel.Tokens.SecurityKey.InternalId.get -> string
 virtual Microsoft.IdentityModel.Tokens.SecurityToken.CreateClaims(string issuer) -> System.Collections.Generic.IEnumerable<System.Security.Claims.Claim>
 virtual Microsoft.IdentityModel.Tokens.SignatureProvider.ObjectPoolSize.get -> int
+virtual Microsoft.IdentityModel.Tokens.SignDelegate.Invoke(byte[] bytes) -> byte[]
+virtual Microsoft.IdentityModel.Tokens.SignUsingOffsetDelegate.Invoke(byte[] bytes, int offset, int count) -> byte[]
+virtual Microsoft.IdentityModel.Tokens.SignUsingSpanDelegate.Invoke(System.ReadOnlySpan<byte> bytes, System.Span<byte> signature, out int bytesWritten) -> bool
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.CreateClaimsIdentityInternal(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, string issuer) -> System.Security.Claims.ClaimsIdentity
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.CreateClaimsIdentityInternal(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters, string issuer) -> System.Security.Claims.ClaimsIdentity
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.CreateClaimsIdentityInternal(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, string issuer) -> System.Security.Claims.ClaimsIdentity
@@ -1063,3 +1171,5 @@ virtual Microsoft.IdentityModel.Tokens.ValidationError.CreateException() -> Syst
 virtual Microsoft.IdentityModel.Tokens.ValidationError.GetException() -> System.Exception
 virtual Microsoft.IdentityModel.Tokens.ValidationParameters.Clone() -> Microsoft.IdentityModel.Tokens.ValidationParameters
 virtual Microsoft.IdentityModel.Tokens.ValidationParameters.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, string issuer) -> System.Security.Claims.ClaimsIdentity
+virtual Microsoft.IdentityModel.Tokens.VerifyDelegate.Invoke(byte[] bytes, byte[] signature) -> bool
+virtual Microsoft.IdentityModel.Tokens.VerifyUsingOffsetDelegate.Invoke(byte[] bytes, int offset, int count, byte[] signature) -> bool
