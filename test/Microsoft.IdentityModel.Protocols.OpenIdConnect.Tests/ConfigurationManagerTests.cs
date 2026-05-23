@@ -175,6 +175,139 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
+        public async Task ConcurrentColdFetches_SuccessfulPath_CoalescesIntoSingleRetrieverCall()
+        {
+            // Verifies the cold-fetch coalescing behavior added to ConfigurationManager: N
+            // concurrent callers arriving at a cold ConfigurationManager should all share a
+            // SINGLE invocation of IConfigurationRetriever.GetConfigurationAsync rather than
+            // each triggering its own (which was the pre-fix behavior — each caller that found
+            // _currentConfiguration null would acquire the semaphore in turn and start a fresh
+            // fetch).
+
+            var retrieverCallCount = 0;
+            var docRetriever = InMemoryDocumentRetriever;
+            var countingConfigRetriever = new CountingConfigurationRetriever(
+                "AADCommonV2Json",
+                () => { Interlocked.Increment(ref retrieverCallCount); });
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "AADCommonV2Json",
+                countingConfigRetriever,
+                docRetriever);
+
+            const int concurrentCallers = 20;
+            var tasks = new Task<OpenIdConnectConfiguration>[concurrentCallers];
+            for (int i = 0; i < concurrentCallers; i++)
+                tasks[i] = Task.Run(() => configManager.GetConfigurationAsync(CancellationToken.None));
+
+            var configs = await Task.WhenAll(tasks);
+
+            Assert.All(configs, c => Assert.NotNull(c));
+            Assert.Equal(1, retrieverCallCount);
+        }
+
+        [Fact]
+        public async Task ConcurrentColdFetches_FailurePath_CoalescesIntoSingleRetrieverCall()
+        {
+            // Same shape but the retriever fails. Pre-fix: each concurrent caller would start
+            // its own fetch (since _currentConfiguration stayed null after the first failure),
+            // amplifying ESTS load by N. Post-fix: only one fetch happens; all N callers see
+            // the same exception via the shared in-flight task.
+            var retrieverCallCount = 0;
+            var docRetriever = InMemoryDocumentRetriever;
+            var failingConfigRetriever = new CountingConfigurationRetriever(
+                "AADCommonV2Json",
+                () => { Interlocked.Increment(ref retrieverCallCount); throw new IOException("simulated metadata fetch failure"); });
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "AADCommonV2Json",
+                failingConfigRetriever,
+                docRetriever);
+
+            const int concurrentCallers = 20;
+            var tasks = new Task<OpenIdConnectConfiguration>[concurrentCallers];
+            for (int i = 0; i < concurrentCallers; i++)
+                tasks[i] = Task.Run(async () =>
+                {
+                    try { return await configManager.GetConfigurationAsync(CancellationToken.None); }
+                    catch (InvalidOperationException) { return null; }
+                });
+
+            var results = await Task.WhenAll(tasks);
+
+            Assert.All(results, r => Assert.Null(r));   // every concurrent caller observed the failure
+            Assert.Equal(1, retrieverCallCount);        // but only one actual fetch
+        }
+
+        [Fact]
+        public async Task ConcurrentColdFetches_FailedThenRetried_AllowsFreshAttempt()
+        {
+            // After a coalesced failure completes, the in-flight task should be cleared so a
+            // SUBSEQUENT caller can start a fresh fetch. This protects against the
+            // "transient failure leaves the system stuck" failure mode and matches the
+            // pre-fix behavior of allowing the next-arriving caller to retry.
+            var retrieverCallCount = 0;
+            var docRetriever = InMemoryDocumentRetriever;
+            var configRetriever = new CountingConfigurationRetriever(
+                "AADCommonV2Json",
+                () =>
+                {
+                    var n = Interlocked.Increment(ref retrieverCallCount);
+                    if (n == 1)
+                        throw new IOException("first attempt fails to simulate transient");
+                    // second attempt succeeds
+                });
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "AADCommonV2Json",
+                configRetriever,
+                docRetriever);
+
+            // First wave: 5 concurrent → coalesced into 1 failed fetch.
+            var wave1 = new Task[5];
+            for (int i = 0; i < wave1.Length; i++)
+            {
+                wave1[i] = Task.Run(async () =>
+                {
+                    try { await configManager.GetConfigurationAsync(CancellationToken.None); }
+                    catch (InvalidOperationException) { /* expected */ }
+                });
+            }
+            await Task.WhenAll(wave1);
+            Assert.Equal(1, retrieverCallCount);
+
+            // Second wave: 5 concurrent → in-flight is cleared, fresh fetch starts and succeeds.
+            var wave2 = new Task<OpenIdConnectConfiguration>[5];
+            for (int i = 0; i < wave2.Length; i++)
+                wave2[i] = Task.Run(() => configManager.GetConfigurationAsync(CancellationToken.None));
+            var wave2Results = await Task.WhenAll(wave2);
+            Assert.All(wave2Results, c => Assert.NotNull(c));
+            Assert.Equal(2, retrieverCallCount);
+        }
+
+        /// <summary>
+        /// Test-only <see cref="IConfigurationRetriever{T}"/> that counts invocations via a
+        /// caller-supplied callback and otherwise delegates to the standard OIDC retriever.
+        /// Used by the coalescing tests above.
+        /// </summary>
+        private sealed class CountingConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
+        {
+            private readonly string _expectedAddress;
+            private readonly Action _onCall;
+            private readonly OpenIdConnectConfigurationRetriever _delegate = new OpenIdConnectConfigurationRetriever();
+
+            public CountingConfigurationRetriever(string expectedAddress, Action onCall)
+            {
+                _expectedAddress = expectedAddress;
+                _onCall = onCall;
+            }
+
+            public async Task<OpenIdConnectConfiguration> GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+            {
+                _onCall();
+                return await ((IConfigurationRetriever<OpenIdConnectConfiguration>)_delegate)
+                    .GetConfigurationAsync(address, retriever, cancel).ConfigureAwait(false);
+            }
+        }
+
+        [Fact]
         public async Task FetchMetadataFailureTest()
         {
             await FetchMetadataFailureTestBody();

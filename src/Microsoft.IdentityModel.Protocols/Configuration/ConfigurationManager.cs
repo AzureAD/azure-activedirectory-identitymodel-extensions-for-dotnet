@@ -31,6 +31,13 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
 
+        // Shared in-flight fetch task — when set, concurrent callers that find _currentConfiguration
+        // null will await this task instead of starting their own fetch. After the task completes
+        // (success or failure), it is cleared so subsequent callers start a fresh attempt. This
+        // coalesces concurrent cold-fetch requests so a single ESTS outage produces O(1) HTTP
+        // attempts per fetch window instead of O(N concurrent callers) attempts.
+        private Task<T> _inFlightInitialFetch;
+
         // task states are used to ensure the call to 'update config' (UpdateCurrentConfiguration) is a singleton. Uses Interlocked.CompareExchange.
         // metadata is not being obtained
         private const int ConfigurationRetrieverIdle = 0;
@@ -224,88 +231,69 @@ namespace Microsoft.IdentityModel.Protocols
             //   else kick off task to update current configuration
             if (_currentConfiguration == null)
             {
-                await _configurationNullLock.WaitAsync(cancel).ConfigureAwait(false);
-                if (_currentConfiguration != null)
-                {
-                    _configurationNullLock.Release();
-                    return _currentConfiguration;
-                }
+                // Coalesce concurrent cold fetches. The first caller to acquire the lock
+                // publishes a TaskCompletionSource-backed Task and becomes the fetch owner.
+                // All other concurrent callers ride that Task and observe the same outcome.
+                // The TCS is published BEFORE the actual fetch starts, so synchronous throws
+                // inside the fetch don't bypass the coalescing window.
+                TaskCompletionSource<T> ownerTcs = null;
+                Task<T> sharedFetch;
 
+                await _configurationNullLock.WaitAsync(cancel).ConfigureAwait(false);
                 try
                 {
-                    var retrievalContext = new ConfigurationRetrievalContext { BypassCache = false };
+                    if (_currentConfiguration != null)
+                        return _currentConfiguration;
 
-                    // Check if event handler can provide configuration.
-                    // If provided configuration is valid, skip regular retriaval process and update current configuration.
-                    if (ConfigurationEventHandler != null)
+                    sharedFetch = Volatile.Read(ref _inFlightInitialFetch);
+                    if (sharedFetch == null)
                     {
-                        var configurationRetrieved = await HandleBeforeRetrieveAsync(retrievalContext, cancel).ConfigureAwait(false);
-
-                        // replicate the behavior of successful retrieval from endpoint
-                        if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
-                        {
-                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                                MetadataAddress,
-                                TelemetryConstants.Protocols.FirstRefresh,
-                                TelemetryConstants.Protocols.ConfigurationSourceHandler);
-
-                            UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
-                            return _currentConfiguration;
-                        }
+                        // We are the fetch owner. Publish a TCS-backed task BEFORE starting
+                        // the actual work — that way late-arriving concurrent callers always
+                        // see something to ride, even if our fetch throws synchronously.
+                        ownerTcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+                        sharedFetch = ownerTcs.Task;
+                        Volatile.Write(ref _inFlightInitialFetch, sharedFetch);
                     }
+                }
+                finally
+                {
+                    _configurationNullLock.Release();
+                }
 
-                    // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
-                    // The transport should have its own timeouts, etc.
-                    T configuration = await _configRetriever.GetConfigurationAsync(
-                        MetadataAddress,
-                        _docRetriever,
-                        CancellationToken.None).ConfigureAwait(false);
-
-                    if (_configValidator != null)
+                if (ownerTcs != null)
+                {
+                    // Owner path: run the fetch, complete the TCS, clear the in-flight slot.
+                    try
                     {
-                        ConfigurationValidationResult result = _configValidator.Validate(configuration);
-                        // in this case we have never had a valid configuration, so we will throw an exception if the validation fails
-                        if (!result.Succeeded)
-                        {
-                            var ex = new InvalidConfigurationException(
-                                LogHelper.FormatInvariant(
-                                    LogMessages.IDX20810,
-                                    result.ErrorMessage));
-
-                            throw LogHelper.LogExceptionMessage(ex);
-                        }
+                        T config = await ExecuteInitialFetchAsync().ConfigureAwait(false);
+                        ownerTcs.SetResult(config);
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
+                    catch (Exception ex)
+                    {
+                        ownerTcs.SetException(ex);
+                    }
+#pragma warning restore CA1031
+                    finally
+                    {
+                        // Atomically clear only if the field still points to our task. After
+                        // this clear, subsequent callers will see null and start a fresh fetch.
+                        _ = Interlocked.CompareExchange(ref _inFlightInitialFetch, null, sharedFetch);
+                    }
+                }
 
-                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                        MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh,
-                        TelemetryConstants.Protocols.ConfigurationSourceRetriever);
-
-                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
+                // All callers (owner and waiters) observe the shared task's outcome.
+                try
+                {
+                    _ = await sharedFetch.ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
                 {
                     fetchMetadataFailure = ex;
-                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                        MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh,
-                        TelemetryConstants.Protocols.ConfigurationSourceRetriever,
-                        ex);
-
-                    LogHelper.LogExceptionMessage(
-                        new InvalidOperationException(
-                             LogHelper.FormatInvariant(
-                                LogMessages.IDX20806,
-                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                LogHelper.MarkAsNonPII(ex)),
-                            ex));
                 }
-#pragma warning restore CA1031 // Do not catch general exception types
-                finally
-                {
-                    _configurationNullLock.Release();
-                }
+#pragma warning restore CA1031
             }
             else
             {
@@ -332,6 +320,89 @@ namespace Microsoft.IdentityModel.Protocols
                         LogHelper.MarkAsNonPII(_syncAfter),
                         LogHelper.MarkAsNonPII(fetchMetadataFailure)),
                     fetchMetadataFailure));
+        }
+
+        /// <summary>
+        /// Runs the actual initial fetch (event handler, document retriever, validator) and
+        /// updates <c>_currentConfiguration</c> on success. Concurrent callers that find
+        /// <c>_inFlightInitialFetch</c> already set will await this task, so a single fetch
+        /// covers all of them. This method does NOT clear <c>_inFlightInitialFetch</c>; the
+        /// owning caller clears it in their own <c>finally</c> after their await completes,
+        /// so all currently-awaiting waiters have observed the outcome first.
+        /// </summary>
+        private async Task<T> ExecuteInitialFetchAsync()
+        {
+            try
+            {
+                var retrievalContext = new ConfigurationRetrievalContext { BypassCache = false };
+
+                // Event handler shortcut, replicates the behavior of successful retrieval.
+                if (ConfigurationEventHandler != null)
+                {
+                    var configurationRetrieved = await HandleBeforeRetrieveAsync(retrievalContext, CancellationToken.None).ConfigureAwait(false);
+                    if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
+                    {
+                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                            MetadataAddress,
+                            TelemetryConstants.Protocols.FirstRefresh,
+                            TelemetryConstants.Protocols.ConfigurationSourceHandler);
+
+                        UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
+                        return _currentConfiguration;
+                    }
+                }
+
+                // Don't use the individual CT here, this is a shared operation that shouldn't
+                // be affected by an individual's cancellation. The transport should have its
+                // own timeouts, etc.
+                T configuration = await _configRetriever.GetConfigurationAsync(
+                    MetadataAddress,
+                    _docRetriever,
+                    CancellationToken.None).ConfigureAwait(false);
+
+                if (_configValidator != null)
+                {
+                    ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                    if (!result.Succeeded)
+                    {
+                        var ex = new InvalidConfigurationException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX20810,
+                                result.ErrorMessage));
+
+                        throw LogHelper.LogExceptionMessage(ex);
+                    }
+                }
+
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.FirstRefresh,
+                    TelemetryConstants.Protocols.ConfigurationSourceRetriever);
+
+                UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
+                return _currentConfiguration;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+            {
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.FirstRefresh,
+                    TelemetryConstants.Protocols.ConfigurationSourceRetriever,
+                    ex);
+
+                LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                         LogHelper.FormatInvariant(
+                            LogMessages.IDX20806,
+                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                            LogHelper.MarkAsNonPII(ex)),
+                        ex));
+
+                // Re-throw so awaiters of the published task observe the failure.
+                throw;
+            }
+#pragma warning restore CA1031
         }
 
         /// <summary>
