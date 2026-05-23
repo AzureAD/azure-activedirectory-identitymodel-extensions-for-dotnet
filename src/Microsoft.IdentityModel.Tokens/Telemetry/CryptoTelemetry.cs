@@ -206,6 +206,35 @@ public static class CryptoTelemetry
     }
 
     /// <summary>
+    /// Maps a raw algorithm string to a known algorithm family or "other" to prevent cardinality explosion.
+    /// </summary>
+    /// <param name="algorithm">The raw algorithm identifier (e.g., RS256, ES512, hmac-sha256).</param>
+    /// <returns>A bounded algorithm family string: RSA, RSA-PSS, ECDSA, HMAC, none, or other.</returns>
+    internal static string GetKnownAlgorithmFamilyOrOther(string algorithm)
+    {
+        if (string.IsNullOrEmpty(algorithm))
+            return TelemetryConstants.AlgorithmFamilies.None;
+
+        // JWT short-form and XML long-form algorithm identifiers
+        if (algorithm.StartsWith("RS", StringComparison.Ordinal) ||
+            algorithm.IndexOf("rsa-sha", StringComparison.OrdinalIgnoreCase) >= 0)
+            return TelemetryConstants.AlgorithmFamilies.RSA;
+        if (algorithm.StartsWith("PS", StringComparison.Ordinal) ||
+            algorithm.IndexOf("rsa-MGF1", StringComparison.OrdinalIgnoreCase) >= 0)
+            return TelemetryConstants.AlgorithmFamilies.RSAPSS;
+        if (algorithm.StartsWith("ES", StringComparison.Ordinal) ||
+            algorithm.IndexOf("ecdsa", StringComparison.OrdinalIgnoreCase) >= 0)
+            return TelemetryConstants.AlgorithmFamilies.ECDSA;
+        if (algorithm.StartsWith("HS", StringComparison.Ordinal) ||
+            algorithm.IndexOf("hmac", StringComparison.OrdinalIgnoreCase) >= 0)
+            return TelemetryConstants.AlgorithmFamilies.HMAC;
+        if (algorithm.Equals("none", StringComparison.OrdinalIgnoreCase))
+            return TelemetryConstants.AlgorithmFamilies.None;
+
+        return TelemetryConstants.AlgorithmFamilies.Other;
+    }
+
+    /// <summary>
     /// Gets the issuer host for telemetry, returning "other" if not in the tracked issuers allowlist.
     /// </summary>
     /// <param name="issuer">The full issuer URI.</param>
