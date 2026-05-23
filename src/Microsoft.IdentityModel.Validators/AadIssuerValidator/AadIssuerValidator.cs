@@ -195,23 +195,25 @@ namespace Microsoft.IdentityModel.Validators
 
         /// <summary>
         /// Validate the issuer for single and multi-tenant applications of various audiences (Work and School accounts, or Work and School accounts +
-        /// Personal accounts) and the various clouds.
+        /// Personal accounts) and the various clouds. Asynchronous overload of <see cref="Validate(string, SecurityToken, TokenValidationParameters)"/>
+        /// suitable for use as <see cref="TokenValidationParameters.IssuerValidatorAsync"/>.
         /// </summary>
         /// <param name="issuer">Issuer to validate (will be tenanted).</param>
         /// <param name="securityToken">Received security token.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <example><code>
         /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient);
-        /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;
+        /// TokenValidationParameters.IssuerValidatorAsync = aadIssuerValidator.ValidateAsync;
         /// </code></example>
         /// <remarks>The issuer is considered as valid if it has the same HTTP scheme and authority as the
         /// authority from the configuration file, has a tenant ID, and optionally v2.0 (if this web API
-        /// accepts both V1 and V2 tokens).</remarks>
+        /// accepts both V1 and V2 tokens). Prefer this overload over the synchronous <see cref="Validate"/>
+        /// for high-throughput services so the calling thread is released during metadata fetches.</remarks>
         /// <returns>The <c>issuer</c> if it's valid, or otherwise <c>SecurityTokenInvalidIssuerException</c> is thrown.</returns>
         /// <exception cref="ArgumentNullException"> if <paramref name="securityToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException"> if <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">if the issuer is invalid or if there is a network issue. </exception>
-        internal async ValueTask<string> ValidateAsync(
+        public async ValueTask<string> ValidateAsync(
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)

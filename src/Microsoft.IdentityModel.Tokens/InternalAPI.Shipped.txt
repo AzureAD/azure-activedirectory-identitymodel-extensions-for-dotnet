@@ -415,7 +415,6 @@ Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerIsConfigurationIssue
 Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerValidationSource(string name) -> void
 Microsoft.IdentityModel.Tokens.IssuerValidationSource.Name.get -> string
 Microsoft.IdentityModel.Tokens.IssuerValidationSource.NotValidated = 0 -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
-Microsoft.IdentityModel.Tokens.IssuerValidatorAsync
 Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives
 Microsoft.IdentityModel.Tokens.Json.JsonWebKeySerializer
 Microsoft.IdentityModel.Tokens.Json.JsonWebKeySetSerializer
@@ -506,8 +505,6 @@ Microsoft.IdentityModel.Tokens.TokenTypeValidationError.InvalidTokenType.get -> 
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError.TokenTypeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailure validationFailure, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidTokenType, System.Exception innerException = null) -> void
 Microsoft.IdentityModel.Tokens.TokenUtilities
 Microsoft.IdentityModel.Tokens.TokenUtilities.TokenUtilities() -> void
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.IssuerValidatorAsync.get -> Microsoft.IdentityModel.Tokens.IssuerValidatorAsync
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.IssuerValidatorAsync.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.get -> System.TimeProvider
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.ClaimsIdentityNoLocking.get -> System.Security.Claims.ClaimsIdentity

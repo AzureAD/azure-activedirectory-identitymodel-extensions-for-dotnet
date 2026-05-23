@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <returns>A task that represents the asynchronous operation, containing the validated issuer to use when creating claims.</returns>
     /// <remarks>The delegate should return a non-null string that represents the issuer. If null, a default value will be used. <see cref="IssuerValidatorAsync"/> will be called before <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> or <see cref="IssuerSigningKeyValidator"/> if set.</remarks>
-    internal delegate ValueTask<string> IssuerValidatorAsync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
+    public delegate ValueTask<string> IssuerValidatorAsync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Validates the lifetime of the security token.

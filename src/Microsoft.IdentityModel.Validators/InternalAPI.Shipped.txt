@@ -41,7 +41,6 @@ Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV11.ge
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV11.set -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV2.get -> Microsoft.IdentityModel.Tokens.BaseConfigurationManager
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV2.set -> void
-Microsoft.IdentityModel.Validators.AadIssuerValidator.ValidateAsync(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Threading.Tasks.ValueTask<string>
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ValidateIssuerAsync(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedIssuer>>
 Microsoft.IdentityModel.Validators.AadIssuerValidatorConstants
 Microsoft.IdentityModel.Validators.AadIssuerValidatorConstants.AadIssuerValidatorConstants() -> void

@@ -372,7 +372,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
         /// IssuerValidatorAsync takes precedence over <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/>.
         /// </remarks>
-        internal IssuerValidatorAsync IssuerValidatorAsync { get; set; }
+        public IssuerValidatorAsync IssuerValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
