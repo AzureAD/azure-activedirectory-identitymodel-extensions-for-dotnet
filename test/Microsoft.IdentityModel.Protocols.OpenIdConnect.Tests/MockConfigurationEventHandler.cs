@@ -27,8 +27,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             string metadataAddress,
             CancellationToken cancellationToken = default)
         {
-            BeforeRetrieveAsyncCalled = true;
             BeforeRetrieveMetadataAddress = metadataAddress;
+            BeforeRetrieveAsyncCalled = true;
 
             if (ThrowExceptionInBeforeRetrieve)
                 throw new InvalidOperationException("Test exception from BeforeRetrieveAsync");
@@ -48,9 +48,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration,
             CancellationToken cancellationToken = default)
         {
-            AfterUpdateAsyncCalled = true;
             AfterUpdateMetadataAddress = metadataAddress;
             AfterUpdateConfiguration = configuration;
+            AfterUpdateAsyncCalled = true;
 
             if (ThrowExceptionInAfterUpdate)
                 throw new InvalidOperationException("Test exception from AfterUpdateAsync");

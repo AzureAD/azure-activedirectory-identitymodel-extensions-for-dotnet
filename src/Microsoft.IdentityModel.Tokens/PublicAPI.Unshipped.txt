@@ -337,3 +337,5 @@ Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetrieverDelega
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorClaimType.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorClaimType.set -> void
 ~virtual Microsoft.IdentityModel.Tokens.ActClaimRetrieverDelegate.Invoke(System.Text.Json.JsonElement actClaim, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters = null) -> System.Security.Claims.ClaimsIdentity
+~const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jkt = "jkt" -> string
+~Microsoft.IdentityModel.Tokens.Cnf.Jkt.get -> string
