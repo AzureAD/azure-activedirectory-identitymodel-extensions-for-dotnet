@@ -13,7 +13,7 @@
     <MoqVersion>[4.16.1]</MoqVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
-    <OpenTelemetryVersion>1.6.0</OpenTelemetryVersion>
+    <OpenTelemetryVersion>1.15.3</OpenTelemetryVersion>
     <SystemNetHttp>4.3.4</SystemNetHttp>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemTextJsonVersion>8.0.5</SystemTextJsonVersion>

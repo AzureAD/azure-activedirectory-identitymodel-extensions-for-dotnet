@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
@@ -464,6 +465,52 @@ namespace Microsoft.IdentityModel.Tokens
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{Crv}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.X}"":""{X}"",""{JsonWebKeyParameterNames.Y}"":""{Y}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
+        }
+
+        /// <summary>
+        /// Creates a minimal public JWK representation for DPoP proof headers per RFC 9449 and RFC 7638.
+        /// Only the required members for the key type are included (no alg, kid, or use).
+        /// </summary>
+        internal JsonObject RepresentAsAsymmetricPublicJwkForDpop()
+        {
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
+            {
+                if (string.IsNullOrEmpty(Crv))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(Crv)))));
+
+                if (string.IsNullOrEmpty(X))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(X)))));
+
+                if (string.IsNullOrEmpty(Y))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(Y)))));
+
+                return new JsonObject
+                {
+                    [JsonWebKeyParameterNames.Crv] = Crv,
+                    [JsonWebKeyParameterNames.Kty] = Kty,
+                    [JsonWebKeyParameterNames.X] = X,
+                    [JsonWebKeyParameterNames.Y] = Y,
+                };
+            }
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA))
+            {
+                if (string.IsNullOrEmpty(E))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(E)))));
+
+                if (string.IsNullOrEmpty(N))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(N)))));
+
+
+                return new JsonObject
+                {
+                    [JsonWebKeyParameterNames.E] = E,
+                    [JsonWebKeyParameterNames.Kty] = Kty,
+                    [JsonWebKeyParameterNames.N] = N,
+                };
+            }
+            else
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10707, LogHelper.MarkAsNonPII(nameof(Kty)), LogHelper.MarkAsNonPII(string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA)), LogHelper.MarkAsNonPII(nameof(Kty)))));
+
         }
 
         /// <summary>

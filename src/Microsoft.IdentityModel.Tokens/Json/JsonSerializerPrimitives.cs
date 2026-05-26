@@ -11,6 +11,7 @@ using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens.Json
@@ -1091,6 +1092,11 @@ namespace Microsoft.IdentityModel.Tokens.Json
             {
                 writer.WritePropertyName(key);
                 j.WriteTo(writer);
+            }
+            else if (obj is JsonNode jn)
+            {
+                writer.WritePropertyName(key);
+                jn.WriteTo(writer);
             }
             else if (obj is double dub)
                 // Below net6.0, we have to convert the double to a decimal otherwise values like 1.11 will be serailized as 1.1100000000000001
