@@ -26,4 +26,32 @@ public static class DPoPConstants
     /// The DPoP nonce HTTP header name.
     /// </summary>
     public const string DPoPNonceHeaderName = "DPoP-Nonce";
+
+    /// <summary>
+    /// The default maximum DPoP proof lifetime in seconds, measured from the <c>iat</c> claim (5 minutes).
+    /// </summary>
+    public const int DefaultMaxLifetimeInSeconds = 300;
+
+    /// <summary>
+    /// The default clock skew tolerance in seconds applied to DPoP proof timestamp validation (5 minutes).
+    /// </summary>
+    public const int DefaultClockSkewInSeconds = 300;
+
+    /// <summary>
+    /// The default maximum DPoP proof JWT size in bytes (8 KiB).
+    /// Realistic proofs are well under 2 KiB; the cap bounds parse work for malformed input.
+    /// </summary>
+    public const int DefaultMaxProofTokenSizeInBytes = 8 * 1024;
+
+    /// <summary>
+    /// The default maximum RSA modulus size in bits permitted for DPoP proof signing keys.
+    /// Bounds the cost of verifying client-controlled keys (verification cost is super-linear in modulus size).
+    /// </summary>
+    public const int DefaultMaxRsaKeySizeInBits = 4096;
+
+    /// <summary>
+    /// The default minimum RSA modulus size in bits permitted for DPoP proof signing keys.
+    /// Matches NIST SP 800-131A guidance for asymmetric signature verification beyond 2030.
+    /// </summary>
+    public const int DefaultMinRsaKeySizeInBits = 2048;
 }

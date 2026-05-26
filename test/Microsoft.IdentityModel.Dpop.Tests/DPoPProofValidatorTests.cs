@@ -991,6 +991,197 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         #endregion
 
+        #region Size Limits & Granular Errors
+
+        [Fact]
+        public async Task ValidateAsync_ProofExceedsMaxSize_ReturnsInvalid()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var options = DefaultOptions();
+            options.MaxProofTokenSizeInBytes = 16;
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.False(result.IsValid);
+            Assert.Contains("maximum allowed size", result.Error);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_ProofUnderMaxSize_Succeeds()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var options = DefaultOptions();
+            options.MaxProofTokenSizeInBytes = proof.Length + 1;
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_RsaModulusBelowMin_ReturnsInvalid()
+        {
+            // 2048-bit key + an artificially high minimum to trigger the floor.
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var options = DefaultOptions();
+            options.MinRsaKeySizeInBits = 4096;
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.False(result.IsValid);
+            Assert.Contains("below the minimum allowed size", result.Error);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_RsaModulusAboveMax_ReturnsInvalid()
+        {
+            // 2048-bit key + an artificially low maximum to trigger the ceiling.
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var options = DefaultOptions();
+            options.MaxRsaKeySizeInBits = 1024;
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.False(result.IsValid);
+            Assert.Contains("exceeds the maximum allowed size", result.Error);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_RsaModulusWithinBounds_Succeeds()
+        {
+            // 2048-bit key with defaults (Min=2048, Max=4096) should succeed.
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var options = DefaultOptions();
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.True(result.IsValid);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void MaxLifetimeInSeconds_InvalidValue_Throws(int value)
+        {
+            var options = new DPoPValidationOptions();
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.MaxLifetimeInSeconds = value);
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(-300)]
+        public void ClockSkewInSeconds_NegativeValue_Throws(int value)
+        {
+            var options = new DPoPValidationOptions();
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.ClockSkewInSeconds = value);
+        }
+
+        [Fact]
+        public void Defaults_MatchConstants()
+        {
+            var options = new DPoPValidationOptions();
+            Assert.Equal(DPoPConstants.DefaultMaxLifetimeInSeconds, options.MaxLifetimeInSeconds);
+            Assert.Equal(DPoPConstants.DefaultClockSkewInSeconds, options.ClockSkewInSeconds);
+            Assert.Equal(DPoPConstants.DefaultMaxProofTokenSizeInBytes, options.MaxProofTokenSizeInBytes);
+            Assert.Equal(DPoPConstants.DefaultMaxRsaKeySizeInBits, options.MaxRsaKeySizeInBits);
+            Assert.Equal(DPoPConstants.DefaultMinRsaKeySizeInBits, options.MinRsaKeySizeInBits);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void MaxProofTokenSizeInBytes_InvalidValue_Throws(int value)
+        {
+            var options = new DPoPValidationOptions();
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.MaxProofTokenSizeInBytes = value);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void MaxRsaKeySizeInBits_InvalidValue_Throws(int value)
+        {
+            var options = new DPoPValidationOptions();
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.MaxRsaKeySizeInBits = value);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void MinRsaKeySizeInBits_InvalidValue_Throws(int value)
+        {
+            var options = new DPoPValidationOptions();
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.MinRsaKeySizeInBits = value);
+        }
+
+#if !NET462
+        [Fact]
+        public async Task ValidateAsync_EcAlgWithMismatchedCurve_ReturnsCurveSpecificError()
+        {
+            // Sign with ES256 (requires P-256) but advertise a P-384 JWK in the header.
+            var p256 = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            var p384 = ECDsa.Create(ECCurve.NamedCurves.nistP384);
+            var (accessToken, cnfJkt) = CreateSimpleAccessToken(CreateTestRsa());
+
+            var signingCredentials = new SigningCredentials(
+                new ECDsaSecurityKey(p256), SecurityAlgorithms.EcdsaSha256);
+
+            var p384Params = p384.ExportParameters(false);
+            var jwkForHeader = new System.Text.Json.Nodes.JsonObject
+            {
+                ["kty"] = "EC",
+                ["crv"] = "P-384",
+                ["x"] = Base64UrlEncoder.Encode(p384Params.Q.X),
+                ["y"] = Base64UrlEncoder.Encode(p384Params.Q.Y),
+            };
+
+            var now = DateTimeOffset.UtcNow;
+            var claims = new Dictionary<string, object>
+            {
+                ["htm"] = "GET",
+                ["htu"] = "https://resource.example.org/api",
+                ["iat"] = now.ToUnixTimeSeconds(),
+                ["jti"] = Guid.NewGuid().ToString(),
+                ["nonce"] = DefaultTestNonce,
+            };
+
+            var descriptor = new SecurityTokenDescriptor
+            {
+                IncludeKeyIdInHeader = false,
+                Claims = claims,
+                AdditionalHeaderClaims = new Dictionary<string, object>
+                {
+                    { "typ", "dpop+jwt" },
+                    { "jwk", jwkForHeader },
+                },
+                SigningCredentials = signingCredentials,
+            };
+            var handler = new JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false };
+            var proof = handler.CreateToken(descriptor);
+
+            var options = new DPoPValidationOptions
+            {
+                AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "ES256" },
+                ExpectedNonce = DefaultTestNonce,
+            };
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.False(result.IsValid);
+            Assert.Contains("requires curve", result.Error);
+        }
+#endif
+
+        #endregion
+
+
+
         #region Test Doubles
 
         /// <summary>
