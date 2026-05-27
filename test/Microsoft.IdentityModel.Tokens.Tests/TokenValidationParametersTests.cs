@@ -277,13 +277,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParametersClone = validationParameters.Clone();
             IdentityComparer.AreEqual(validationParametersClone, validationParameters, compareContext);
             if (validationParameters.IsClone)
-                compareContext.AddDiff("if (validationParameters.IsClone), IsCone should be false");
+                compareContext.AddDiff("if (validationParameters.IsClone), IsClone should be false");
 
             if (!validationParametersClone.IsClone)
-                compareContext.AddDiff("if (!validationParametersClone.IsClone), IsCone should be true");
+                compareContext.AddDiff("if (!validationParametersClone.IsClone), IsClone should be true");
 
             if (validationParametersClone.InstancePropertyBag.Count != 0)
                 compareContext.AddDiff("validationParametersClone.InstancePropertyBag.Count != 0), should be empty.");
+
+            // Ensure Clone() makes independent copies of mutable collections.
+            if (object.ReferenceEquals(validationParameters.IssuerSigningKeys, validationParametersClone.IssuerSigningKeys))
+                compareContext.AddDiff("IssuerSigningKeys should not be the same reference after Clone().");
+
+            int issuerSigningKeysCloneCount = ((ICollection<SecurityKey>)validationParametersClone.IssuerSigningKeys).Count;
+            ((List<SecurityKey>)validationParameters.IssuerSigningKeys).Add(KeyingMaterial.RsaSecurityKey_1024);
+            if (((ICollection<SecurityKey>)validationParametersClone.IssuerSigningKeys).Count != issuerSigningKeysCloneCount)
+                compareContext.AddDiff("IssuerSigningKeys in the clone should not change when the original collection is mutated.");
+
+            if (object.ReferenceEquals(validationParameters.PropertyBag, validationParametersClone.PropertyBag))
+                compareContext.AddDiff("PropertyBag should not be the same reference after Clone().");
+
+            validationParameters.PropertyBag["NewKey"] = obj;
+            if (validationParametersClone.PropertyBag.ContainsKey("NewKey"))
+                compareContext.AddDiff("PropertyBag in the clone should not change when the original dictionary is mutated.");
 
             TestUtilities.AssertFailIfErrors(compareContext);
         }
