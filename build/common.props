@@ -2,6 +2,7 @@
 
   <Import Project="dependencies.props" />
   <Import Project="targets.props" />
+  <Import Project="version.props" />
 
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
@@ -28,19 +29,6 @@
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(SrcStandardTargets)</TargetFrameworks>
     <NetStandardImplicitPackageVersion>$(NetStandardVersion)</NetStandardImplicitPackageVersion>
     <LangVersion>12</LangVersion>
-  </PropertyGroup>
-
-  <!-- Wilson version  -->
-  <PropertyGroup>
-    <WilsonCurrentVersion>7.6.1</WilsonCurrentVersion>
-
-    <PreviewVersionSuffix Condition="'$(PreviewVersionSuffix)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">preview-$([System.DateTime]::Now.AddYears(-2019).Year)$([System.DateTime]::Now.ToString("MMddHHmmss"))</PreviewVersionSuffix>
-    <!--VS re-evaluates the variables, so having seconds or minutes creates an infinite loop of package updates-->
-    <PreviewVersionSuffix Condition="'$(PreviewVersionSuffix)' == '' and '$(BuildingInsideVisualStudio)' == 'true'">preview-$([System.DateTime]::Now.AddYears(-2019).Year)$([System.DateTime]::Now.ToString("MMddHH"))</PreviewVersionSuffix>
-    <IsCustomPreview>$(WilsonVersion.Contains("-"))</IsCustomPreview>
-    <Version Condition="'$(WilsonVersion)' != ''">$(WilsonVersion)</Version>
-    <VersionSuffix Condition="'$(WilsonVersion)' == ''">$(PreviewVersionSuffix)</VersionSuffix>
-    <VersionPrefix Condition="'$(WilsonVersion)' == ''">$(WilsonCurrentVersion)</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup>
