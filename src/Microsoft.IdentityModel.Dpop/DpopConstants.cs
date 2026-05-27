@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 namespace Microsoft.IdentityModel.Dpop;
@@ -7,25 +7,25 @@ namespace Microsoft.IdentityModel.Dpop;
 /// Constants for DPoP (Demonstrating Proof-of-Possession at the Application Layer) per RFC 9449.
 /// </summary>
 /// <remarks>
-/// Claim types are in <see cref="DPoPClaimTypes"/>.
-/// Error codes are in <see cref="DPoPErrorCodes"/>.
+/// Claim types are in <see cref="DpopClaimTypes"/>.
+/// Error codes are in <see cref="DpopErrorCodes"/>.
 /// </remarks>
-public static class DPoPConstants
+public static class DpopConstants
 {
     /// <summary>
     /// The DPoP token type.
     /// </summary>
-    public const string DPoPTokenType = "DPoP";
+    public const string DpopTokenType = "DPoP";
 
     /// <summary>
     /// The required <c>typ</c> header value for DPoP proof JWTs.
     /// </summary>
-    public const string DPoPProofTokenType = "dpop+jwt";
+    public const string DpopProofTokenType = "dpop+jwt";
 
     /// <summary>
     /// The DPoP nonce HTTP header name.
     /// </summary>
-    public const string DPoPNonceHeaderName = "DPoP-Nonce";
+    public const string DpopNonceHeaderName = "DPoP-Nonce";
 
     /// <summary>
     /// The default maximum DPoP proof lifetime in seconds, measured from the <c>iat</c> claim (5 minutes).

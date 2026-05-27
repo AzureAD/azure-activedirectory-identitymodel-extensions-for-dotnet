@@ -13,9 +13,9 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Dpop.Tests
 {
-    public class DPoPProofValidatorTests
+    public class DpopProofValidatorTests
     {
-        private readonly DPoPProofValidator _validator = new();
+        private readonly DpopProofValidator _validator = new();
 
         private static RSA CreateTestRsa()
         {
@@ -39,13 +39,13 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var signingCredentials = new SigningCredentials(
                 new ECDsaSecurityKey(ecdsa), SecurityAlgorithms.EcdsaSha256);
 
-            var proofOptions = new DPoPProofCreatorOptions
+            var proofOptions = new DpopProofCreatorOptions
             {
                 SigningCredentials = signingCredentials,
                 IncludeNonce = !string.IsNullOrEmpty(nonce),
                 Nonce = nonce,
             };
-            var dpopProof = new DPoPProofCreator(proofOptions);
+            var dpopProof = new DpopProofCreator(proofOptions);
             var jwt = dpopProof.CreateProof(httpMethod, new Uri(uri), accessToken);
             return (jwt, ecdsa);
         }
@@ -66,13 +66,13 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var signingCredentials = new SigningCredentials(
                 new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
 
-            var proofOptions = new DPoPProofCreatorOptions
+            var proofOptions = new DpopProofCreatorOptions
             {
                 SigningCredentials = signingCredentials,
                 IncludeNonce = !string.IsNullOrEmpty(nonce),
                 Nonce = nonce,
             };
-            var dpopProof = new DPoPProofCreator(proofOptions);
+            var dpopProof = new DpopProofCreator(proofOptions);
             var jwt = dpopProof.CreateProof(httpMethod, new Uri(uri), accessToken);
             return (jwt, rsa);
         }
@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         private const string DefaultTestNonce = "test-server-nonce";
 
-        private static DPoPValidationOptions DefaultOptions() => new()
+        private static DpopValidationOptions DefaultOptions() => new()
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "ES256", "RS256" },
             MaxLifetimeInSeconds = 300,
@@ -182,7 +182,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var handler = new JsonWebTokenHandler();
 
             var jwk = JsonWebKeyConverter.ConvertFromSecurityKey(new RsaSecurityKey(proofKey));
-            var thumbprint = DPoPProofValidator.ComputeJwkThumbprint(jwk);
+            var thumbprint = DpopProofValidator.ComputeJwkThumbprint(jwk);
             var cnfJson = $"{{\"jkt\":\"{thumbprint}\"}}";
 
             using var doc = System.Text.Json.JsonDocument.Parse(cnfJson);
@@ -646,7 +646,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
 
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.ReplayProtectionNotConfigured, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.ReplayProtectionNotConfigured, result.Error.FailureType);
             Assert.Contains("replay protection is not configured", result.Error.Message, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -844,28 +844,28 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public void ContainsPrivateKeyMaterial_RsaPrivate_ReturnsTrue()
         {
             var jwk = new JsonWebKey { D = "secret", Kty = "RSA" };
-            Assert.True(DPoPProofValidator.ContainsPrivateKeyMaterial(jwk));
+            Assert.True(DpopProofValidator.ContainsPrivateKeyMaterial(jwk));
         }
 
         [Fact]
         public void ContainsPrivateKeyMaterial_EcPublic_ReturnsFalse()
         {
             var jwk = new JsonWebKey { Kty = "EC", Crv = "P-256", X = "x", Y = "y" };
-            Assert.False(DPoPProofValidator.ContainsPrivateKeyMaterial(jwk));
+            Assert.False(DpopProofValidator.ContainsPrivateKeyMaterial(jwk));
         }
 
         [Fact]
         public void ContainsPrivateKeyMaterial_RsaPublic_ReturnsFalse()
         {
             var jwk = new JsonWebKey { Kty = "RSA", E = "AQAB", N = "n" };
-            Assert.False(DPoPProofValidator.ContainsPrivateKeyMaterial(jwk));
+            Assert.False(DpopProofValidator.ContainsPrivateKeyMaterial(jwk));
         }
 
         [Fact]
         public void ContainsPrivateKeyMaterial_WithDP_ReturnsTrue()
         {
             var jwk = new JsonWebKey { DP = "dp" };
-            Assert.True(DPoPProofValidator.ContainsPrivateKeyMaterial(jwk));
+            Assert.True(DpopProofValidator.ContainsPrivateKeyMaterial(jwk));
         }
 
         #endregion
@@ -917,16 +917,16 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [Fact]
         public void ComputeAccessTokenHash_Deterministic()
         {
-            var hash1 = DPoPProofValidator.ComputeAccessTokenHash("my-token");
-            var hash2 = DPoPProofValidator.ComputeAccessTokenHash("my-token");
+            var hash1 = DpopProofValidator.ComputeAccessTokenHash("my-token");
+            var hash2 = DpopProofValidator.ComputeAccessTokenHash("my-token");
             Assert.Equal(hash1, hash2);
         }
 
         [Fact]
         public void ComputeAccessTokenHash_DifferentTokens_DifferentHash()
         {
-            var hash1 = DPoPProofValidator.ComputeAccessTokenHash("token-A");
-            var hash2 = DPoPProofValidator.ComputeAccessTokenHash("token-B");
+            var hash1 = DpopProofValidator.ComputeAccessTokenHash("token-A");
+            var hash2 = DpopProofValidator.ComputeAccessTokenHash("token-B");
             Assert.NotEqual(hash1, hash2);
         }
 
@@ -941,8 +941,8 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             var jwk = JsonWebKeyConverter.ConvertFromSecurityKey(new ECDsaSecurityKey(ecdsa));
 
-            var t1 = DPoPProofValidator.ComputeJwkThumbprint(jwk);
-            var t2 = DPoPProofValidator.ComputeJwkThumbprint(jwk);
+            var t1 = DpopProofValidator.ComputeJwkThumbprint(jwk);
+            var t2 = DpopProofValidator.ComputeJwkThumbprint(jwk);
             Assert.Equal(t1, t2);
             Assert.False(string.IsNullOrEmpty(t1));
         }
@@ -954,8 +954,8 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var rsa = CreateTestRsa();
             var jwk = JsonWebKeyConverter.ConvertFromSecurityKey(new RsaSecurityKey(rsa));
 
-            var t1 = DPoPProofValidator.ComputeJwkThumbprint(jwk);
-            var t2 = DPoPProofValidator.ComputeJwkThumbprint(jwk);
+            var t1 = DpopProofValidator.ComputeJwkThumbprint(jwk);
+            var t2 = DpopProofValidator.ComputeJwkThumbprint(jwk);
             Assert.Equal(t1, t2);
         }
 
@@ -1042,16 +1042,16 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var signingCredentials = new SigningCredentials(
                 new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
 
-            var proofOptions = new DPoPProofCreatorOptions
+            var proofOptions = new DpopProofCreatorOptions
             {
                 SigningCredentials = signingCredentials,
                 IncludeNonce = true,
                 Nonce = DefaultTestNonce,
             };
-            var dpopProof = new DPoPProofCreator(proofOptions);
+            var dpopProof = new DpopProofCreator(proofOptions);
             var proof = dpopProof.CreateProof("GET", new Uri("https://resource.example.org/api"), accessToken);
 
-            var options = new DPoPValidationOptions
+            var options = new DpopValidationOptions
             {
                 AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
                 ExpectedNonce = DefaultTestNonce,
@@ -1142,7 +1142,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [InlineData(-1)]
         public void MaxLifetimeInSeconds_InvalidValue_Throws(int value)
         {
-            var options = new DPoPValidationOptions();
+            var options = new DpopValidationOptions();
             Assert.Throws<ArgumentOutOfRangeException>(() => options.MaxLifetimeInSeconds = value);
         }
 
@@ -1151,19 +1151,19 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [InlineData(-300)]
         public void ClockSkewInSeconds_NegativeValue_Throws(int value)
         {
-            var options = new DPoPValidationOptions();
+            var options = new DpopValidationOptions();
             Assert.Throws<ArgumentOutOfRangeException>(() => options.ClockSkewInSeconds = value);
         }
 
         [Fact]
         public void Defaults_MatchConstants()
         {
-            var options = new DPoPValidationOptions();
-            Assert.Equal(DPoPConstants.DefaultMaxLifetimeInSeconds, options.MaxLifetimeInSeconds);
-            Assert.Equal(DPoPConstants.DefaultClockSkewInSeconds, options.ClockSkewInSeconds);
-            Assert.Equal(DPoPConstants.DefaultMaxProofTokenSizeInBytes, options.MaxProofTokenSizeInBytes);
-            Assert.Equal(DPoPConstants.DefaultMaxRsaKeySizeInBits, options.MaxRsaKeySizeInBits);
-            Assert.Equal(DPoPConstants.DefaultMinRsaKeySizeInBits, options.MinRsaKeySizeInBits);
+            var options = new DpopValidationOptions();
+            Assert.Equal(DpopConstants.DefaultMaxLifetimeInSeconds, options.MaxLifetimeInSeconds);
+            Assert.Equal(DpopConstants.DefaultClockSkewInSeconds, options.ClockSkewInSeconds);
+            Assert.Equal(DpopConstants.DefaultMaxProofTokenSizeInBytes, options.MaxProofTokenSizeInBytes);
+            Assert.Equal(DpopConstants.DefaultMaxRsaKeySizeInBits, options.MaxRsaKeySizeInBits);
+            Assert.Equal(DpopConstants.DefaultMinRsaKeySizeInBits, options.MinRsaKeySizeInBits);
         }
 
         [Theory]
@@ -1171,7 +1171,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [InlineData(-1)]
         public void MaxProofTokenSizeInBytes_InvalidValue_Throws(int value)
         {
-            var options = new DPoPValidationOptions();
+            var options = new DpopValidationOptions();
             Assert.Throws<ArgumentOutOfRangeException>(() => options.MaxProofTokenSizeInBytes = value);
         }
 
@@ -1180,7 +1180,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [InlineData(-1)]
         public void MaxRsaKeySizeInBits_InvalidValue_Throws(int value)
         {
-            var options = new DPoPValidationOptions();
+            var options = new DpopValidationOptions();
             Assert.Throws<ArgumentOutOfRangeException>(() => options.MaxRsaKeySizeInBits = value);
         }
 
@@ -1189,7 +1189,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [InlineData(-1)]
         public void MinRsaKeySizeInBits_InvalidValue_Throws(int value)
         {
-            var options = new DPoPValidationOptions();
+            var options = new DpopValidationOptions();
             Assert.Throws<ArgumentOutOfRangeException>(() => options.MinRsaKeySizeInBits = value);
         }
 
@@ -1238,7 +1238,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var handler = new JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false };
             var proof = handler.CreateToken(descriptor);
 
-            var options = new DPoPValidationOptions
+            var options = new DpopValidationOptions
             {
                 AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "ES256" },
                 ExpectedNonce = DefaultTestNonce,
@@ -1284,7 +1284,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         #region FailureType Coverage
 
-        // Every failure path in DPoPProofValidator must return a result with a populated FailureType
+        // Every failure path in DpopProofValidator must return a result with a populated FailureType
         // on the inner Error object. These tests pin the contract so refactors don't drop the category.
 
         [Fact]
@@ -1294,7 +1294,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 "", "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.ProofMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.ProofMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1306,7 +1306,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 new string('a', 100), "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.ProofExceedsMaxSize, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.ProofExceedsMaxSize, result.Error.FailureType);
         }
 
         [Fact]
@@ -1316,7 +1316,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), "", cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.AccessTokenMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.AccessTokenMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1326,7 +1326,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, "", DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.CnfJktMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.CnfJktMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1339,7 +1339,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.ReplayProtectionNotConfigured, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.ReplayProtectionNotConfigured, result.Error.FailureType);
         }
 
         [Fact]
@@ -1349,7 +1349,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.TokenTypeInvalid, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.TokenTypeInvalid, result.Error.FailureType);
         }
 
         [Fact]
@@ -1361,7 +1361,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.AlgorithmDisallowed, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.AlgorithmDisallowed, result.Error.FailureType);
         }
 
         [Fact]
@@ -1373,7 +1373,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.InvalidConfiguration, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.InvalidConfiguration, result.Error.FailureType);
         }
 
         [Fact]
@@ -1385,7 +1385,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.InvalidConfiguration, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.InvalidConfiguration, result.Error.FailureType);
         }
 
         [Fact]
@@ -1395,7 +1395,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.JwkInvalid, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.JwkInvalid, result.Error.FailureType);
         }
 
         [Fact]
@@ -1405,7 +1405,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "POST", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.HtmMismatch, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.HtmMismatch, result.Error.FailureType);
         }
 
         [Fact]
@@ -1415,7 +1415,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.HtmMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.HtmMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1425,7 +1425,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://b.example.org/y"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.HtuMismatch, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.HtuMismatch, result.Error.FailureType);
         }
 
         [Fact]
@@ -1435,7 +1435,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.HtuMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.HtuMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1445,7 +1445,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.IatMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.IatMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1456,7 +1456,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.ProofExpired, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.ProofExpired, result.Error.FailureType);
         }
 
         [Fact]
@@ -1467,7 +1467,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.ProofIssuedInFuture, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.ProofIssuedInFuture, result.Error.FailureType);
         }
 
         [Fact]
@@ -1477,7 +1477,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.JtiMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.JtiMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1487,7 +1487,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.AthMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.AthMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1498,7 +1498,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proofA, "GET", new Uri("https://resource.example.org/api"), accessTokenB, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.AthMismatch, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.AthMismatch, result.Error.FailureType);
         }
 
         [Fact]
@@ -1509,7 +1509,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, wrongCnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.CnfJktMismatch, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.CnfJktMismatch, result.Error.FailureType);
         }
 
         [Fact]
@@ -1522,7 +1522,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.JtiReplayDetected, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.JtiReplayDetected, result.Error.FailureType);
         }
 
         [Fact]
@@ -1535,7 +1535,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
             Assert.False(result.IsValid);
             Assert.True(result.IsNonceRequired);
-            Assert.Same(DPoPValidationFailureType.NonceRequired, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.NonceRequired, result.Error.FailureType);
         }
 
         [Fact]
@@ -1548,7 +1548,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
                 proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
             Assert.False(result.IsValid);
             Assert.True(result.IsNonceRequired);
-            Assert.Same(DPoPValidationFailureType.NonceMismatch, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.NonceMismatch, result.Error.FailureType);
         }
 
         [Fact]
@@ -1579,7 +1579,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 jwt, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.JwkMissing, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.JwkMissing, result.Error.FailureType);
         }
 
         [Fact]
@@ -1611,7 +1611,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 jwt, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.ProofParseFailure, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.ProofParseFailure, result.Error.FailureType);
         }
 
         [Fact]
@@ -1630,7 +1630,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 tamperedProof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.SignatureInvalid, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.SignatureInvalid, result.Error.FailureType);
         }
 
         [Fact]
@@ -1642,7 +1642,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var result = await _validator.ValidateAsync(
                 "this-is-not-a-jwt", "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
             Assert.False(result.IsValid);
-            Assert.Same(DPoPValidationFailureType.UnexpectedError, result.Error.FailureType);
+            Assert.Same(DpopValidationFailureType.UnexpectedError, result.Error.FailureType);
             Assert.NotNull(result.Error.Exception);
         }
 
@@ -1650,33 +1650,33 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public void FailureType_NamesAreStable()
         {
             // Names are surfaced for telemetry / SIEM. Pin them so a rename can't ship silently.
-            Assert.Equal("ReplayProtectionNotConfigured", DPoPValidationFailureType.ReplayProtectionNotConfigured.Name);
-            Assert.Equal("InvalidConfiguration", DPoPValidationFailureType.InvalidConfiguration.Name);
-            Assert.Equal("ProofMissing", DPoPValidationFailureType.ProofMissing.Name);
-            Assert.Equal("ProofExceedsMaxSize", DPoPValidationFailureType.ProofExceedsMaxSize.Name);
-            Assert.Equal("AccessTokenMissing", DPoPValidationFailureType.AccessTokenMissing.Name);
-            Assert.Equal("CnfJktMissing", DPoPValidationFailureType.CnfJktMissing.Name);
-            Assert.Equal("UnexpectedError", DPoPValidationFailureType.UnexpectedError.Name);
-            Assert.Equal("ProofParseFailure", DPoPValidationFailureType.ProofParseFailure.Name);
-            Assert.Equal("TokenTypeInvalid", DPoPValidationFailureType.TokenTypeInvalid.Name);
-            Assert.Equal("AlgorithmDisallowed", DPoPValidationFailureType.AlgorithmDisallowed.Name);
-            Assert.Equal("JwkMissing", DPoPValidationFailureType.JwkMissing.Name);
-            Assert.Equal("JwkInvalid", DPoPValidationFailureType.JwkInvalid.Name);
-            Assert.Equal("SignatureInvalid", DPoPValidationFailureType.SignatureInvalid.Name);
-            Assert.Equal("HtmMissing", DPoPValidationFailureType.HtmMissing.Name);
-            Assert.Equal("HtmMismatch", DPoPValidationFailureType.HtmMismatch.Name);
-            Assert.Equal("HtuMissing", DPoPValidationFailureType.HtuMissing.Name);
-            Assert.Equal("HtuMismatch", DPoPValidationFailureType.HtuMismatch.Name);
-            Assert.Equal("IatMissing", DPoPValidationFailureType.IatMissing.Name);
-            Assert.Equal("ProofExpired", DPoPValidationFailureType.ProofExpired.Name);
-            Assert.Equal("ProofIssuedInFuture", DPoPValidationFailureType.ProofIssuedInFuture.Name);
-            Assert.Equal("JtiMissing", DPoPValidationFailureType.JtiMissing.Name);
-            Assert.Equal("JtiReplayDetected", DPoPValidationFailureType.JtiReplayDetected.Name);
-            Assert.Equal("AthMissing", DPoPValidationFailureType.AthMissing.Name);
-            Assert.Equal("AthMismatch", DPoPValidationFailureType.AthMismatch.Name);
-            Assert.Equal("CnfJktMismatch", DPoPValidationFailureType.CnfJktMismatch.Name);
-            Assert.Equal("NonceRequired", DPoPValidationFailureType.NonceRequired.Name);
-            Assert.Equal("NonceMismatch", DPoPValidationFailureType.NonceMismatch.Name);
+            Assert.Equal("ReplayProtectionNotConfigured", DpopValidationFailureType.ReplayProtectionNotConfigured.Name);
+            Assert.Equal("InvalidConfiguration", DpopValidationFailureType.InvalidConfiguration.Name);
+            Assert.Equal("ProofMissing", DpopValidationFailureType.ProofMissing.Name);
+            Assert.Equal("ProofExceedsMaxSize", DpopValidationFailureType.ProofExceedsMaxSize.Name);
+            Assert.Equal("AccessTokenMissing", DpopValidationFailureType.AccessTokenMissing.Name);
+            Assert.Equal("CnfJktMissing", DpopValidationFailureType.CnfJktMissing.Name);
+            Assert.Equal("UnexpectedError", DpopValidationFailureType.UnexpectedError.Name);
+            Assert.Equal("ProofParseFailure", DpopValidationFailureType.ProofParseFailure.Name);
+            Assert.Equal("TokenTypeInvalid", DpopValidationFailureType.TokenTypeInvalid.Name);
+            Assert.Equal("AlgorithmDisallowed", DpopValidationFailureType.AlgorithmDisallowed.Name);
+            Assert.Equal("JwkMissing", DpopValidationFailureType.JwkMissing.Name);
+            Assert.Equal("JwkInvalid", DpopValidationFailureType.JwkInvalid.Name);
+            Assert.Equal("SignatureInvalid", DpopValidationFailureType.SignatureInvalid.Name);
+            Assert.Equal("HtmMissing", DpopValidationFailureType.HtmMissing.Name);
+            Assert.Equal("HtmMismatch", DpopValidationFailureType.HtmMismatch.Name);
+            Assert.Equal("HtuMissing", DpopValidationFailureType.HtuMissing.Name);
+            Assert.Equal("HtuMismatch", DpopValidationFailureType.HtuMismatch.Name);
+            Assert.Equal("IatMissing", DpopValidationFailureType.IatMissing.Name);
+            Assert.Equal("ProofExpired", DpopValidationFailureType.ProofExpired.Name);
+            Assert.Equal("ProofIssuedInFuture", DpopValidationFailureType.ProofIssuedInFuture.Name);
+            Assert.Equal("JtiMissing", DpopValidationFailureType.JtiMissing.Name);
+            Assert.Equal("JtiReplayDetected", DpopValidationFailureType.JtiReplayDetected.Name);
+            Assert.Equal("AthMissing", DpopValidationFailureType.AthMissing.Name);
+            Assert.Equal("AthMismatch", DpopValidationFailureType.AthMismatch.Name);
+            Assert.Equal("CnfJktMismatch", DpopValidationFailureType.CnfJktMismatch.Name);
+            Assert.Equal("NonceRequired", DpopValidationFailureType.NonceRequired.Name);
+            Assert.Equal("NonceMismatch", DpopValidationFailureType.NonceMismatch.Name);
         }
 
         #endregion
