@@ -36,14 +36,21 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         };
 
         private readonly Uri _baseUriHelper = new Uri("http://localhost", UriKind.Absolute);
-        internal readonly HttpClient _defaultHttpClient = new HttpClient();
+
+        // Redirects are disabled on the default client. Consumers who need
+        // different behaviour can supply their own client via
+        // SignedHttpRequestValidationParameters.HttpClientProvider.
+        internal readonly HttpClient _defaultHttpClient = new HttpClient(
+            new HttpClientHandler { AllowAutoRedirect = false })
+        {
+            Timeout = TimeSpan.FromSeconds(10)
+        };
 
         /// <summary>
         /// Initializes a new instance of <see cref="SignedHttpRequestHandler"/>.
         /// </summary>
         public SignedHttpRequestHandler()
         {
-            _defaultHttpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
         #region SignedHttpRequest creation
@@ -1311,7 +1318,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 return false;
 
             var uri = new Uri(jkuSetUrl, UriKind.RelativeOrAbsolute);
-            return signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AllowedDomainsForJkuRetrieval.Any(domain => uri.Host.EndsWith(domain, StringComparison.OrdinalIgnoreCase));
+            return signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AllowedDomainsForJkuRetrieval.Any(domain =>
+                uri.Host.Equals(domain, StringComparison.OrdinalIgnoreCase) ||
+                uri.Host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
