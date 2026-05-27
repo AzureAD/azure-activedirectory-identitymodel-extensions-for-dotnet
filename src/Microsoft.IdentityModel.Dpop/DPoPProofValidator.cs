@@ -16,7 +16,20 @@ namespace Microsoft.IdentityModel.Dpop;
 /// Validates DPoP proof JWTs on the server side per RFC 9449 §4.3.
 /// </summary>
 /// <remarks>
+/// <para>
 /// This class is stateless and thread-safe. A single instance may be reused across requests.
+/// </para>
+/// <para>
+/// <strong>Configuring replay protection.</strong> RFC 9449 §4.3 requires servers to prevent DPoP
+/// proof replay. Wilson surfaces two mechanisms on <see cref="DPoPValidationOptions"/> —
+/// <see cref="DPoPValidationOptions.ExpectedNonce"/> and
+/// <see cref="DPoPValidationOptions.JtiReplayCache"/>. At least one MUST be configured, OR the
+/// caller MUST set <see cref="DPoPValidationOptions.ReplayProtectionHandledExternally"/> to
+/// <see langword="true"/> to indicate that replay protection is enforced by a higher-layer
+/// framework. With neither configured and the flag unset,
+/// <see cref="ValidateAsync"/> fails closed with
+/// <see cref="DPoPValidationFailureType.ReplayProtectionNotConfigured"/>.
+/// </para>
 /// </remarks>
 public class DPoPProofValidator
 {
@@ -58,19 +71,36 @@ public class DPoPProofValidator
         _ = options ?? throw new ArgumentNullException(nameof(options));
 
         if (string.IsNullOrWhiteSpace(dpopProofJwt))
-            return DPoPValidationResult.Failed("DPoP proof is empty.");
+            return DPoPValidationResult.Failed("DPoP proof is empty.", DPoPValidationFailureType.ProofMissing);
 
         if (dpopProofJwt.Length > options.MaxProofTokenSizeInBytes)
-            return DPoPValidationResult.Failed("DPoP proof exceeds the maximum allowed size.");
+            return DPoPValidationResult.Failed("DPoP proof exceeds the maximum allowed size.", DPoPValidationFailureType.ProofExceedsMaxSize);
 
         if (string.IsNullOrWhiteSpace(accessToken))
-            return DPoPValidationResult.Failed("Access token is empty.");
+            return DPoPValidationResult.Failed("Access token is empty.", DPoPValidationFailureType.AccessTokenMissing);
 
         if (string.IsNullOrWhiteSpace(expectedCnfJkt))
-            return DPoPValidationResult.Failed("Expected cnf.jkt is empty.");
+            return DPoPValidationResult.Failed("Expected cnf.jkt is empty.", DPoPValidationFailureType.CnfJktMissing);
 
         if (!requestUri.IsAbsoluteUri)
             throw new ArgumentException("URI must be absolute.", nameof(requestUri));
+
+        // Replay-protection configuration gate (RFC 9449 §4.3).
+        //
+        // Wilson exposes two in-process mechanisms — ExpectedNonce and JtiReplayCache —
+        // and treats "both null" as a configuration error unless the caller has explicitly
+        // declared that replay protection is handled at a higher layer. Fail closed here
+        // to prevent a silent loss of §4.3 protection.
+        if (options.ExpectedNonce == null
+            && options.JtiReplayCache == null
+            && !options.ReplayProtectionHandledExternally)
+        {
+            return DPoPValidationResult.Failed(
+                "DPoP replay protection is not configured. Set DPoPValidationOptions.ExpectedNonce or "
+                + "DPoPValidationOptions.JtiReplayCache, or set DPoPValidationOptions.ReplayProtectionHandledExternally "
+                + "to true if replay protection is enforced by a higher-layer framework.",
+                DPoPValidationFailureType.ReplayProtectionNotConfigured);
+        }
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -81,7 +111,7 @@ public class DPoPProofValidator
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            return DPoPValidationResult.Failed("DPoP proof validation failed.", ex);
+            return DPoPValidationResult.Failed("DPoP proof validation failed.", DPoPValidationFailureType.UnexpectedError, ex);
         }
     }
 
@@ -310,40 +340,40 @@ public class DPoPProofValidator
         // Validate typ == dpop+jwt
         if (!string.Equals(proofToken.Typ, DPoPConstants.DPoPProofTokenType, StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed("DPoP proof typ must be 'dpop+jwt'.");
+            return DPoPValidationResult.Failed("DPoP proof typ must be 'dpop+jwt'.", DPoPValidationFailureType.TokenTypeInvalid);
         }
 
         // Validate alg is asymmetric and in allowed set
         var alg = proofToken.Alg;
         if (string.IsNullOrEmpty(alg))
         {
-            return DPoPValidationResult.Failed("DPoP proof algorithm must not be empty.");
+            return DPoPValidationResult.Failed("DPoP proof algorithm must not be empty.", DPoPValidationFailureType.AlgorithmDisallowed);
         }
 
         if (string.Equals(alg, "none", StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed("DPoP proof algorithm must not be 'none'.");
+            return DPoPValidationResult.Failed("DPoP proof algorithm must not be 'none'.", DPoPValidationFailureType.AlgorithmDisallowed);
         }
 
         if (SupportedAlgorithms.IsSupportedSymmetricAlgorithm(alg))
         {
-            return DPoPValidationResult.Failed("DPoP proof must use an asymmetric algorithm.");
+            return DPoPValidationResult.Failed("DPoP proof must use an asymmetric algorithm.", DPoPValidationFailureType.AlgorithmDisallowed);
         }
 
         if (options.AllowedSigningAlgorithms == null || options.AllowedSigningAlgorithms.Count <= 0)
         {
-            return DPoPValidationResult.Failed("The allowed algorithm set cannot be null or empty.");
+            return DPoPValidationResult.Failed("The allowed algorithm set cannot be null or empty.", DPoPValidationFailureType.InvalidConfiguration);
         }
 
         if (!options.AllowedSigningAlgorithms.Contains(alg))
         {
-            return DPoPValidationResult.Failed($"DPoP proof algorithm '{alg}' is not in the allowed set.");
+            return DPoPValidationResult.Failed($"DPoP proof algorithm '{alg}' is not in the allowed set.", DPoPValidationFailureType.AlgorithmDisallowed);
         }
 
         // Extract JWK from header, verify no private key present
         if (!proofToken.TryGetHeaderValue("jwk", out object jwkObj) || jwkObj == null)
         {
-            return DPoPValidationResult.Failed("DPoP proof is missing the 'jwk' header parameter.");
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'jwk' header parameter.", DPoPValidationFailureType.JwkMissing);
         }
 
         JsonWebKey jwk;
@@ -353,24 +383,24 @@ public class DPoPProofValidator
         }
         catch (Exception ex)
         {
-            return DPoPValidationResult.Failed("DPoP proof contains an invalid 'jwk' header.", ex);
+            return DPoPValidationResult.Failed("DPoP proof contains an invalid 'jwk' header.", DPoPValidationFailureType.ProofParseFailure, ex);
         }
 
         if (ContainsPrivateKeyMaterial(jwk))
         {
-            return DPoPValidationResult.Failed("DPoP proof JWK must not contain private key material.");
+            return DPoPValidationResult.Failed("DPoP proof JWK must not contain private key material.", DPoPValidationFailureType.JwkInvalid);
         }
 
         string jwkRejectReason = ValidateJwkForAlgorithm(alg, jwk, options);
         if (jwkRejectReason != null)
         {
-            return DPoPValidationResult.Failed(jwkRejectReason);
+            return DPoPValidationResult.Failed(jwkRejectReason, DPoPValidationFailureType.JwkInvalid);
         }
 
         // Convert the JWK to a SecurityKey from its public key parameters.
         if (!TryConvertToAsymmetricKeyFromBareParameters(jwk, out SecurityKey signingKey))
         {
-            return DPoPValidationResult.Failed("DPoP proof JWK could not be converted to a supported asymmetric key.");
+            return DPoPValidationResult.Failed("DPoP proof JWK could not be converted to a supported asymmetric key.", DPoPValidationFailureType.JwkInvalid);
         }
 
         // Verify the proof signature without caching the SignatureProvider.
@@ -381,12 +411,12 @@ public class DPoPProofValidator
             signatureProvider = cryptoProviderFactory.CreateForVerifying(signingKey, alg, cacheProvider: false);
             if (!VerifyProofSignature(proofToken, signatureProvider))
             {
-                return DPoPValidationResult.Failed("DPoP proof signature validation failed.");
+                return DPoPValidationResult.Failed("DPoP proof signature validation failed.", DPoPValidationFailureType.SignatureInvalid);
             }
         }
         catch (Exception ex)
         {
-            return DPoPValidationResult.Failed("DPoP proof signature validation failed.", ex);
+            return DPoPValidationResult.Failed("DPoP proof signature validation failed.", DPoPValidationFailureType.SignatureInvalid, ex);
         }
         finally
         {
@@ -397,31 +427,31 @@ public class DPoPProofValidator
         // Validate htm matches HTTP method
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Htm, out string htmValue) || string.IsNullOrWhiteSpace(htmValue))
         {
-            return DPoPValidationResult.Failed("DPoP proof is missing the 'htm' claim.");
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'htm' claim.", DPoPValidationFailureType.HtmMissing);
         }
 
         if (!string.Equals(httpMethod, htmValue, StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed("DPoP proof 'htm' claim does not match the HTTP method.");
+            return DPoPValidationResult.Failed("DPoP proof 'htm' claim does not match the HTTP method.", DPoPValidationFailureType.HtmMismatch);
         }
 
         // Validate htu matches request URI
         // Per RFC 9449 §4.3: compare scheme + authority + path (no query/fragment)
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Htu, out string htuValue) || string.IsNullOrWhiteSpace(htuValue))
         {
-            return DPoPValidationResult.Failed("DPoP proof is missing the 'htu' claim.");
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'htu' claim.", DPoPValidationFailureType.HtuMissing);
         }
 
         var normalizedRequestUri = requestUri.GetLeftPart(UriPartial.Path);
         if (!string.Equals(normalizedRequestUri, htuValue, StringComparison.OrdinalIgnoreCase))
         {
-            return DPoPValidationResult.Failed("DPoP proof 'htu' claim does not match the request URI.");
+            return DPoPValidationResult.Failed("DPoP proof 'htu' claim does not match the request URI.", DPoPValidationFailureType.HtuMismatch);
         }
 
         // Validate iat freshness
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Iat, out long iat))
         {
-            return DPoPValidationResult.Failed("DPoP proof is missing the 'iat' claim.");
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'iat' claim.", DPoPValidationFailureType.IatMissing);
         }
 
         var issuedAt = DateTimeOffset.FromUnixTimeSeconds(iat);
@@ -434,13 +464,13 @@ public class DPoPProofValidator
 
         if (now - issuedAt > maxAge)
         {
-            return DPoPValidationResult.Failed("DPoP proof has expired.");
+            return DPoPValidationResult.Failed("DPoP proof has expired.", DPoPValidationFailureType.ProofExpired);
         }
 
         // Reject proofs issued in the future beyond clock skew
         if (issuedAt - now > TimeSpan.FromSeconds(options.ClockSkewInSeconds))
         {
-            return DPoPValidationResult.Failed("DPoP proof 'iat' is too far in the future.");
+            return DPoPValidationResult.Failed("DPoP proof 'iat' is too far in the future.", DPoPValidationFailureType.ProofIssuedInFuture);
         }
 
         // Validate jti present
@@ -449,7 +479,7 @@ public class DPoPProofValidator
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Jti, out string jtiValue) ||
             string.IsNullOrEmpty(jtiValue))
         {
-            return DPoPValidationResult.Failed("DPoP proof is missing the 'jti' claim.");
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'jti' claim.", DPoPValidationFailureType.JtiMissing);
         }
 
         // Validate nonce if expected (null = skip nonce validation)
@@ -457,7 +487,7 @@ public class DPoPProofValidator
         {
             if (string.IsNullOrWhiteSpace(options.ExpectedNonce))
             {
-                return DPoPValidationResult.Failed("Server nonce configuration error: ExpectedNonce is empty or whitespace.");
+                return DPoPValidationResult.Failed("Server nonce configuration error: ExpectedNonce is empty or whitespace.", DPoPValidationFailureType.InvalidConfiguration);
             }
 
             if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Nonce, out string nonceValue) ||
@@ -476,20 +506,20 @@ public class DPoPProofValidator
         if (!proofToken.TryGetPayloadValue(DPoPClaimTypes.Ath, out string athValue) ||
             string.IsNullOrEmpty(athValue))
         {
-            return DPoPValidationResult.Failed("DPoP proof is missing the 'ath' claim.");
+            return DPoPValidationResult.Failed("DPoP proof is missing the 'ath' claim.", DPoPValidationFailureType.AthMissing);
         }
 
         var expectedAth = ComputeAccessTokenHash(accessToken);
         if (!AreEqualUtf8(athValue, expectedAth))
         {
-            return DPoPValidationResult.Failed("DPoP proof 'ath' claim does not match the access token hash.");
+            return DPoPValidationResult.Failed("DPoP proof 'ath' claim does not match the access token hash.", DPoPValidationFailureType.AthMismatch);
         }
 
         // Compute thumbprint and validate cnf.jkt binding
         var thumbprint = ComputeJwkThumbprint(jwk);
         if (!AreEqualUtf8(expectedCnfJkt, thumbprint))
         {
-            return DPoPValidationResult.Failed("DPoP proof JWK thumbprint does not match the access token cnf.jkt claim.");
+            return DPoPValidationResult.Failed("DPoP proof JWK thumbprint does not match the access token cnf.jkt claim.", DPoPValidationFailureType.CnfJktMismatch);
         }
 
         // Replay protection
@@ -502,7 +532,7 @@ public class DPoPProofValidator
 
             if (!added)
             {
-                return DPoPValidationResult.Failed("DPoP proof 'jti' has already been used (replay detected).");
+                return DPoPValidationResult.Failed("DPoP proof 'jti' has already been used (replay detected).", DPoPValidationFailureType.JtiReplayDetected);
             }
         }
 

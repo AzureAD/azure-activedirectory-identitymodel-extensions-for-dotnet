@@ -94,6 +94,7 @@ public class DPoPE2ETests
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
             MaxLifetimeInSeconds = 300,
             ClockSkewInSeconds = 300,
+            ReplayProtectionHandledExternally = true,
         };
 
         var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
@@ -127,11 +128,12 @@ public class DPoPE2ETests
         var options = new DPoPValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+            ReplayProtectionHandledExternally = true,
         };
         var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
 
         Assert.False(result.IsValid);
-        Assert.Contains("cnf.jkt", result.Error);
+        Assert.Contains("cnf.jkt", result.Error.Message);
     }
 
     [Fact]
@@ -158,12 +160,13 @@ public class DPoPE2ETests
         var options = new DPoPValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+            ReplayProtectionHandledExternally = true,
         };
         var result = await validator.ValidateAsync(
             proofJwt, "GET", new Uri("https://api.example.com/resource"), tokenB, jkt, options);
 
         Assert.False(result.IsValid);
-        Assert.Contains("ath", result.Error);
+        Assert.Contains("ath", result.Error.Message);
     }
 
     [Fact]
@@ -293,7 +296,7 @@ public class DPoPE2ETests
 
         Assert.False(
             mismatchedResult.IsValid,
-            $"Proof should be rejected. Error was: {mismatchedResult.Error ?? "<none>"}");
+            $"Proof should be rejected. Error was: {mismatchedResult.Error?.Message ?? "<none>"}");
 
         var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
         {
@@ -304,7 +307,7 @@ public class DPoPE2ETests
         var wellFormedProofJwt = proofCreator.CreateProof(method, uri, accessToken);
         var wellFormedResult = await validator.ValidateAsync(
             wellFormedProofJwt, method, uri, accessToken, jkt, options);
-        Assert.True(wellFormedResult.IsValid, $"Well-formed proof should validate: {wellFormedResult.Error}");
+        Assert.True(wellFormedResult.IsValid, $"Well-formed proof should validate: {wellFormedResult.Error?.Message}");
     }
 
     [Fact]

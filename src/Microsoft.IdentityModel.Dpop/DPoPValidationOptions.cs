@@ -96,18 +96,66 @@ public class DPoPValidationOptions
     /// <summary>
     /// Gets or sets the expected nonce value (RP-provided).
     /// When non-null, the DPoP proof must contain a matching <c>nonce</c> claim.
-    /// When null, nonce validation is skipped.
-    /// Default: null.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is one of the two replay-protection mechanisms surfaced by Wilson. When
+    /// <see langword="null"/>, nonce validation is not performed by Wilson.
+    /// </para>
+    /// <para>
+    /// <strong>Security:</strong> If this is <see langword="null"/> and
+    /// <see cref="JtiReplayCache"/> is also <see langword="null"/>, the validator fails
+    /// closed unless <see cref="ReplayProtectionHandledExternally"/> is set to
+    /// <see langword="true"/>. See <see cref="ReplayProtectionHandledExternally"/> for
+    /// the layered-architecture rationale.
+    /// </para>
+    /// </remarks>
     public string ExpectedNonce { get; set; }
 
     /// <summary>
     /// Gets or sets the optional replay cache for <c>jti</c> (JWT ID) replay detection.
     /// When set, each proof's jti is checked against the cache to prevent reuse.
-    /// When null, jti replay detection is skipped.
-    /// Default: null.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is one of the two replay-protection mechanisms surfaced by Wilson. When
+    /// <see langword="null"/>, jti-based replay detection is not performed by Wilson.
+    /// </para>
+    /// <para>
+    /// <strong>Security:</strong> If this is <see langword="null"/> and
+    /// <see cref="ExpectedNonce"/> is also <see langword="null"/>, the validator fails
+    /// closed unless <see cref="ReplayProtectionHandledExternally"/> is set to
+    /// <see langword="true"/>. See <see cref="ReplayProtectionHandledExternally"/> for
+    /// the layered-architecture rationale.
+    /// </para>
+    /// </remarks>
     public IJtiReplayCache JtiReplayCache { get; set; }
+
+    /// <summary>
+    /// Indicates that DPoP proof replay protection is handled outside this validator
+    /// (typically by a higher-layer caller such as RP server-nonce, independently of Wilson).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// RFC 9449 §4.3 requires servers to prevent DPoP proof replay. Wilson offers two
+    /// in-process mechanisms for this — <see cref="ExpectedNonce"/> and
+    /// <see cref="JtiReplayCache"/> — and treats both being <see langword="null"/> as a
+    /// configuration error: <see cref="DPoPProofValidator.ValidateAsync"/> fails closed
+    /// with <see cref="DPoPValidationFailureType.ReplayProtectionNotConfigured"/> to
+    /// prevent a silent loss of §4.3 protection.
+    /// </para>
+    /// <para>
+    /// Set this property to <see langword="true"/> to acknowledge that replay protection
+    /// is provided by a higher layer. Wilson then skips its built-in checks (still no-op
+    /// when both properties above are <see langword="null"/>) without raising the
+    /// configuration error. This preserves the layered-architecture contract for
+    /// consumers that own replay protection themselves.
+    /// </para>
+    /// <para>
+    /// Default: <see langword="false"/>.
+    /// </para>
+    /// </remarks>
+    public bool ReplayProtectionHandledExternally { get; set; }
 
 #if NET8_0_OR_GREATER
     /// <summary>

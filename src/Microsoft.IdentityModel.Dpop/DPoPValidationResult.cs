@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.IdentityModel.Dpop;
 
 /// <summary>
@@ -24,15 +26,10 @@ public sealed class DPoPValidationResult
     public string Nonce { get; private set; }
 
     /// <summary>
-    /// Gets the human-readable error description if the proof is invalid.
+    /// Gets the per-call failure detail (category, message, exception) when
+    /// <see cref="IsValid"/> is <see langword="false"/>. <see langword="null"/> on success.
     /// </summary>
-    public string Error { get; private set; }
-
-    /// <summary>
-    /// Gets the exception that caused the validation failure, if any.
-    /// Only set when an unexpected exception occurs during validation.
-    /// </summary>
-    public System.Exception Exception { get; private set; }
+    public DPoPValidationError Error { get; private set; }
 
     /// <summary>
     /// Gets the RFC 9449 §7.1 error code for use in the <c>WWW-Authenticate</c> response header.
@@ -57,30 +54,37 @@ public sealed class DPoPValidationResult
         new()
         {
             IsValid = true,
-            Nonce = nonce
+            Nonce = nonce,
         };
 
     /// <summary>
-    /// Creates a failed validation result with the <c>invalid_token</c> error code.
+    /// Creates a failed validation result with the <c>invalid_token</c> RFC 9449 §7.1 wire code
+    /// and an explicit categorical failure reason.
     /// </summary>
-    public static DPoPValidationResult Failed(string error, System.Exception exception = null) =>
+    /// <param name="message">Human-readable error description.</param>
+    /// <param name="failureType">The categorical failure reason.</param>
+    /// <param name="exception">Optional inner exception.</param>
+    public static DPoPValidationResult Failed(
+        string message,
+        DPoPValidationFailureType failureType,
+        Exception exception = null) =>
         new()
         {
             IsValid = false,
-            Error = error,
+            Error = new DPoPValidationError(failureType, message, exception),
             ErrorCode = DPoPErrorCodes.InvalidToken,
-            Exception = exception,
         };
 
     /// <summary>
     /// Creates a result indicating that a server nonce is required.
-    /// Uses the <c>use_dpop_nonce</c> error code per RFC 9449 §7.1.
+    /// Uses the <c>use_dpop_nonce</c> error code per RFC 9449 §7.1 and sets
+    /// <see cref="IsNonceRequired"/> so the caller knows to issue a fresh <c>DPoP-Nonce</c> header.
     /// </summary>
     public static DPoPValidationResult NonceRequired() =>
         new()
         {
             IsValid = false,
-            Error = "DPoP nonce is required.",
+            Error = new DPoPValidationError(DPoPValidationFailureType.NonceRequired, "DPoP nonce is required."),
             ErrorCode = DPoPErrorCodes.UseDPoPNonce,
             IsNonceRequired = true,
         };
@@ -94,7 +98,7 @@ public sealed class DPoPValidationResult
         new()
         {
             IsValid = false,
-            Error = "DPoP nonce validation failed.",
+            Error = new DPoPValidationError(DPoPValidationFailureType.NonceMismatch, "DPoP nonce validation failed."),
             ErrorCode = DPoPErrorCodes.UseDPoPNonce,
             IsNonceRequired = true,
         };

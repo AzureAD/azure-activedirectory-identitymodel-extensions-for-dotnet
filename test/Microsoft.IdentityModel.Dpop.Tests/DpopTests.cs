@@ -69,7 +69,11 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var proof = dpopProof.CreateProof(httpMethod, uri, accessToken);
             var validator = new DPoPProofValidator();
             var result = await validator.ValidateAsync(proof, httpMethod, uri, accessToken, cnfJkt,
-                new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
+                new DPoPValidationOptions
+                {
+                    AllowedSigningAlgorithms = new HashSet<string> { "RS256" },
+                    ReplayProtectionHandledExternally = true,
+                });
 
             // Assert
             Assert.NotNull(proof);
@@ -93,11 +97,15 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var proof = dpopProof.CreateProof("POST", uri, accessToken);
             var validator = new DPoPProofValidator();
             var result = await validator.ValidateAsync(proof, "GET", uri, accessToken, cnfJkt,
-                new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
+                new DPoPValidationOptions
+                {
+                    AllowedSigningAlgorithms = new HashSet<string> { "RS256" },
+                    ReplayProtectionHandledExternally = true,
+                });
 
             // Assert
             Assert.False(result.IsValid);
-            Assert.Contains("htm", result.Error);
+            Assert.Contains("htm", result.Error.Message);
         }
 
         [Fact]
@@ -116,11 +124,15 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             var proof = dpopProof.CreateProof("POST", uri, accessToken);
             var validator = new DPoPProofValidator();
             var result = await validator.ValidateAsync(proof, "POST", new Uri("https://example.com/resource"), accessToken, cnfJkt,
-                new DPoPValidationOptions { AllowedSigningAlgorithms = new HashSet<string> { "RS256" } });
+                new DPoPValidationOptions
+                {
+                    AllowedSigningAlgorithms = new HashSet<string> { "RS256" },
+                    ReplayProtectionHandledExternally = true,
+                });
 
             // Assert
             Assert.False(result.IsValid);
-            Assert.Contains("htu", result.Error);
+            Assert.Contains("htu", result.Error.Message);
         }
 
         [Fact]
