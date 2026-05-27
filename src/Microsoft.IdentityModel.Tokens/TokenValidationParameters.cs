@@ -72,7 +72,12 @@ namespace Microsoft.IdentityModel.Tokens
             LogValidationExceptions = other.LogValidationExceptions;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
-            PropertyBag = other.PropertyBag is not null ? new Dictionary<string, object>(other.PropertyBag) : null;
+            PropertyBag = other.PropertyBag switch
+            {
+                null => null,
+                Dictionary<string, object> dictionary => new Dictionary<string, object>(dictionary, dictionary.Comparer),
+                _ => new Dictionary<string, object>(other.PropertyBag)
+            };
             TryReadJwtClaim = other.TryReadJwtClaim;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
@@ -205,7 +210,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Returns a new instance of <see cref="TokenValidationParameters"/> with values copied from this object.
         /// </summary>
         /// <returns>A new <see cref="TokenValidationParameters"/> object copied from this object.</returns>
-        /// <remarks>This is a deep Clone.</remarks>
+        /// <remarks>This clone creates new instances for collection/dictionary properties but does not deep-clone referenced objects (for example, <see cref="SecurityKey"/> instances) or delegates.</remarks>
         public virtual TokenValidationParameters Clone()
         {
             return new TokenValidationParameters(this)
