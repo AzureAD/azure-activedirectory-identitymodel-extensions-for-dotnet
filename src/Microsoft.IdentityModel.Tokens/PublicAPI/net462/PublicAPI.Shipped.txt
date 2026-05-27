@@ -1,3 +1,4 @@
+~Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> void
 Microsoft.IdentityModel.Tokens.RSACryptoServiceProviderProxy
 Microsoft.IdentityModel.Tokens.RSACryptoServiceProviderProxy.Decrypt(byte[] input, bool fOAEP) -> byte[]
 Microsoft.IdentityModel.Tokens.RSACryptoServiceProviderProxy.Encrypt(byte[] input, bool fOAEP) -> byte[]
