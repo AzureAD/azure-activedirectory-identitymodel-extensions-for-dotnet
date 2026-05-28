@@ -490,17 +490,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        CallContext = new CallContext()
-                        {
-                            PropertyBag = new Dictionary<string, object>()
-                            {
-                                // to simulate http call and satisfy test requirements
-                                {"mockGetPopKeysFromJkuAsync_return1Key", null }
-                            }
-                        },
+                        // TLD-only entries should NOT match arbitrary domains (security fix)
                         JkuSetUrl = "https://www.contoso.com",
                         SignedHttpRequestValidationParameters = { AllowResolvingPopKeyFromJku = true, AllowedDomainsForJkuRetrieval = { ".com" }},
-                        TestId = "JkuTurnedOnTopLevelDomainMatch"
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), string.Format(LogMessages.IDX23038, "https://www.contoso.com", ".com")),
+                        TestId = "JkuTurnedOnTopLevelDomainNoMatch"
                     },
                     new ResolvePopKeyTheoryData
                     {
@@ -557,6 +551,59 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         JkuSetUrl = "https://localhost/keys",
                         SignedHttpRequestValidationParameters = { AllowResolvingPopKeyFromJku = true, AllowedDomainsForJkuRetrieval = { "localhost" }},
                         TestId = "JkuTurnedOnLocalUrl"
+                    },
+                    // Security fix: Malicious domain suffix bypass attempts should fail
+                    new ResolvePopKeyTheoryData
+                    {
+                        // evilcontoso.com should NOT match allowlist entry "contoso.com"
+                        JkuSetUrl = "https://evilcontoso.com/jwks",
+                        SignedHttpRequestValidationParameters = { AllowResolvingPopKeyFromJku = true, AllowedDomainsForJkuRetrieval = { "contoso.com" }},
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), string.Format(LogMessages.IDX23038, "https://evilcontoso.com/jwks", "contoso.com")),
+                        TestId = "JkuDomainBypassAttempt_SuffixWithoutDot_ShouldFail"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        // evil-contoso.com should NOT match allowlist entry "contoso.com"
+                        JkuSetUrl = "https://evil-contoso.com/jwks",
+                        SignedHttpRequestValidationParameters = { AllowResolvingPopKeyFromJku = true, AllowedDomainsForJkuRetrieval = { "contoso.com" }},
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), string.Format(LogMessages.IDX23038, "https://evil-contoso.com/jwks", "contoso.com")),
+                        TestId = "JkuDomainBypassAttempt_HyphenatedSuffix_ShouldFail"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        // notcontoso.com should NOT match allowlist entry "contoso.com"
+                        JkuSetUrl = "https://notcontoso.com/jwks",
+                        SignedHttpRequestValidationParameters = { AllowResolvingPopKeyFromJku = true, AllowedDomainsForJkuRetrieval = { "contoso.com" }},
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), string.Format(LogMessages.IDX23038, "https://notcontoso.com/jwks", "contoso.com")),
+                        TestId = "JkuDomainBypassAttempt_PrefixedSuffix_ShouldFail"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_return1Key", null }
+                            }
+                        },
+                        // Legitimate subdomain keys.contoso.com SHOULD match allowlist entry "contoso.com"
+                        JkuSetUrl = "https://keys.contoso.com/jwks",
+                        SignedHttpRequestValidationParameters = { AllowResolvingPopKeyFromJku = true, AllowedDomainsForJkuRetrieval = { "contoso.com" }},
+                        TestId = "JkuLegitimateSubdomain_ShouldPass"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_return1Key", null }
+                            }
+                        },
+                        // Exact domain match contoso.com SHOULD match allowlist entry "contoso.com"
+                        JkuSetUrl = "https://contoso.com/jwks",
+                        SignedHttpRequestValidationParameters = { AllowResolvingPopKeyFromJku = true, AllowedDomainsForJkuRetrieval = { "contoso.com" }},
+                        TestId = "JkuExactDomainMatch_ShouldPass"
                     }
                 };
             }
