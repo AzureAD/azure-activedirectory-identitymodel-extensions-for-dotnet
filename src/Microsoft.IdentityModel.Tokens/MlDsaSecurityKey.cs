@@ -72,33 +72,7 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey, IDisposable
     /// </summary>
     /// <return><see langword="true"/> if it has a private key; otherwise, <see langword="false"/>.</return>
     [Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus instead.")]
-    public override bool HasPrivateKey
-    {
-        get
-        {
-            if (_hasPrivateKey == null)
-            {
-                try
-                {
-                    byte[] seed = MLDsa.ExportMLDsaPrivateSeed();
-                    CryptographicOperations.ZeroMemory(seed);
-                    _hasPrivateKey = true;
-                }
-                catch (CryptographicException)
-                {
-                    _hasPrivateKey = false;
-                }
-                catch (Exception)
-                {
-                    // Cannot determine private key status (e.g., platform limitation).
-                    // Do not cache — let PrivateKeyStatus determine independently.
-                    return false;
-                }
-            }
-
-            return _hasPrivateKey.Value;
-        }
-    }
+    public override bool HasPrivateKey => PrivateKeyStatus == PrivateKeyStatus.Exists;
 
     /// <summary>
     /// Gets a value indicating the existence of the private key.
@@ -116,8 +90,12 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey, IDisposable
             {
                 try
                 {
-                    byte[] seed = MLDsa.ExportMLDsaPrivateSeed();
-                    CryptographicOperations.ZeroMemory(seed);
+                    // Try signing to detect private key — this is the most reliable
+                    // check because keys imported from expanded private key material
+                    // (not seed) can sign but cannot export the seed.
+                    byte[] dummy = new byte[1];
+                    byte[] sig = MLDsa.SignData(dummy, context: null);
+                    CryptographicOperations.ZeroMemory(sig);
                     _hasPrivateKey = true;
                 }
                 catch (CryptographicException)

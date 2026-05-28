@@ -437,7 +437,6 @@ namespace Microsoft.IdentityModel.Tokens
             return MLDsa.SignData(bytes, context: null);
         }
 
-#if NET6_0_OR_GREATER
         internal bool SignUsingSpanMlDsa(
             ReadOnlySpan<byte> data,
             Span<byte> destination,
@@ -455,11 +454,9 @@ namespace Microsoft.IdentityModel.Tokens
             bytesWritten = signatureSize;
             return true;
         }
-#endif
 
         private byte[] SignUsingOffsetMlDsa(byte[] bytes, int offset, int count)
         {
-#if NET6_0_OR_GREATER
             int signatureSize = MLDsa.Algorithm.SignatureSizeInBytes;
             byte[] signature = new byte[signatureSize];
             MLDsa.SignData(
@@ -467,14 +464,6 @@ namespace Microsoft.IdentityModel.Tokens
                 signature.AsSpan(),
                 context: default);
             return signature;
-#else
-            if (offset == 0 && count == bytes.Length)
-                return MLDsa.SignData(bytes, context: null);
-
-            byte[] slice = new byte[count];
-            Buffer.BlockCopy(bytes, offset, slice, 0, count);
-            return MLDsa.SignData(slice, context: null);
-#endif
         }
 
         internal bool Verify(byte[] bytes, byte[] signature)
@@ -524,19 +513,10 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool VerifyUsingOffsetMlDsa(byte[] bytes, int offset, int count, byte[] signature)
         {
-#if NET6_0_OR_GREATER
             return MLDsa.VerifyData(
                 new ReadOnlySpan<byte>(bytes, offset, count),
                 signature.AsSpan(),
                 context: default);
-#else
-            if (offset == 0 && count == bytes.Length)
-                return MLDsa.VerifyData(bytes, signature, context: null);
-
-            byte[] slice = new byte[count];
-            Buffer.BlockCopy(bytes, offset, slice, 0, count);
-            return MLDsa.VerifyData(slice, signature, context: null);
-#endif
         }
 
         private byte[] DecryptWithRsa(byte[] bytes)
