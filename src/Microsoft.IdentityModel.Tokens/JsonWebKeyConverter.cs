@@ -339,6 +339,11 @@ namespace Microsoft.IdentityModel.Tokens
                             || x509Key.MlDsaPublicKey == null
                             || MlDsaSecurityKey.GetAlgorithmName(x509Key.MlDsaPublicKey.Algorithm) != webKey.Alg)
                         {
+                            // Dispose the materialized MLDsa handle to avoid leaking
+                            // the native SymCrypt handle to the finalizer queue.
+                            if (key is X509SecurityKey rejectedKey)
+                                rejectedKey.MlDsaPublicKey?.Dispose();
+
                             key = null;
                             webKey.ConvertedSecurityKey = null;
                             return false;

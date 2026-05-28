@@ -12,6 +12,8 @@ override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.PrivateKeyStatus.get ->
 override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.KeySize.get -> int
 override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.CanComputeJwkThumbprint() -> bool
 ~override Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.ComputeJwkThumbprint() -> byte[]
+Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.Dispose() -> void
+virtual Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.Dispose(bool disposing) -> void
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Pub.get -> string
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Pub.set -> void
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Priv.get -> string

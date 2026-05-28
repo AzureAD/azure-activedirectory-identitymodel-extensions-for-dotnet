@@ -10,14 +10,17 @@ namespace Microsoft.IdentityModel.Tokens;
 /// <summary>
 /// Represents an ML-DSA security key.
 /// </summary>
-public class MlDsaSecurityKey : AsymmetricSecurityKey
+public class MlDsaSecurityKey : AsymmetricSecurityKey, IDisposable
 {
     private bool? _hasPrivateKey;
+    private bool _disposed;
+    private readonly bool _ownsMlDsa;
 
     internal MlDsaSecurityKey(JsonWebKey webKey, bool usePrivateKey)
         : base(webKey)
     {
         MLDsa = MlDsaAdapter.CreateMlDsa(webKey, usePrivateKey);
+        _ownsMlDsa = true;
         webKey.ConvertedSecurityKey = this;
     }
 
@@ -35,6 +38,34 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey
     /// The <see cref="MLDsa"/> instance used to initialize the key.
     /// </summary>
     public MLDsa MLDsa { get; private set; }
+
+    /// <summary>
+    /// Releases resources held by this instance.
+    /// Only disposes the <see cref="MLDsa"/> if this key owns the instance
+    /// (i.e., the instance was created internally from a <see cref="JsonWebKey"/>).
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases unmanaged and, optionally, managed resources.
+    /// </summary>
+    /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources;
+    /// <see langword="false"/> to release only unmanaged resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            _disposed = true;
+            if (disposing && _ownsMlDsa)
+            {
+                MLDsa?.Dispose();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets a bool indicating if a private key exists.
