@@ -88,4 +88,35 @@ internal static class MlDsaAdapter
             _ => throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10652, algorithm)
         };
     }
+
+    /// <summary>
+    /// Creates an independent clone of an <see cref="MLDsa"/> instance by re-importing key material.
+    /// The clone is fully independent and safe for concurrent use on a separate thread.
+    /// </summary>
+    /// <param name="source">The source <see cref="MLDsa"/> to clone.</param>
+    /// <param name="includePrivateKey">Whether to include the private key in the clone.</param>
+    /// <returns>A new <see cref="MLDsa"/> instance with the same key material.</returns>
+    internal static MLDsa CloneMlDsa(MLDsa source, bool includePrivateKey)
+    {
+        if (source == null)
+            throw LogHelper.LogArgumentNullException(nameof(source));
+
+        MLDsaAlgorithm algorithm = source.Algorithm;
+
+        if (includePrivateKey)
+        {
+            byte[] seed = source.ExportMLDsaPrivateSeed();
+            try
+            {
+                return MLDsa.ImportMLDsaPrivateSeed(algorithm, seed);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(seed);
+            }
+        }
+
+        byte[] publicKey = source.ExportMLDsaPublicKey();
+        return MLDsa.ImportMLDsaPublicKey(algorithm, publicKey);
+    }
 }

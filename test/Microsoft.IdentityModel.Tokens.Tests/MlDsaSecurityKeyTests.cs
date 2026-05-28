@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
@@ -880,6 +881,231 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var result = await handler.ValidateTokenAsync(token, validationParams);
             Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
             Assert.Equal("cross-key-user", result.Claims["sub"]);
+        }
+
+        #endregion
+
+        #region Clone and Dispose Tests
+
+        [MlDsaFact]
+        public void CloneMlDsa_PublicKeyOnly_ProducesIndependentInstance()
+        {
+            // Arrange
+            using var original = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            byte[] data = new byte[] { 1, 2, 3, 4, 5 };
+
+            // Act
+            using var clone = MlDsaAdapter.CloneMlDsa(original, includePrivateKey: false);
+
+            // Assert — clone can verify signatures produced by original
+            byte[] signature = original.SignData(data, context: null);
+            Assert.True(clone.VerifyData(data, signature, context: null));
+
+            // Clone should NOT be able to sign (public-key only)
+            Assert.Throws<CryptographicException>(() => clone.SignData(data, context: null));
+        }
+
+        [MlDsaFact]
+        public void CloneMlDsa_WithPrivateKey_ProducesSigningCapableInstance()
+        {
+            // Arrange
+            using var original = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa65);
+            byte[] data = new byte[] { 10, 20, 30, 40, 50 };
+
+            // Act
+            using var clone = MlDsaAdapter.CloneMlDsa(original, includePrivateKey: true);
+
+            // Assert — clone can sign and original can verify
+            byte[] signature = clone.SignData(data, context: null);
+            Assert.True(original.VerifyData(data, signature, context: null));
+        }
+
+        [MlDsaFact]
+        public void CloneMlDsa_IsIndependent_DisposingCloneDoesNotAffectOriginal()
+        {
+            // Arrange
+            using var original = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            byte[] data = new byte[] { 1, 2, 3 };
+
+            // Act — create and immediately dispose the clone
+            var clone = MlDsaAdapter.CloneMlDsa(original, includePrivateKey: true);
+            clone.Dispose();
+
+            // Assert — original still works
+            byte[] signature = original.SignData(data, context: null);
+            Assert.NotNull(signature);
+            Assert.True(original.VerifyData(data, signature, context: null));
+        }
+
+        [MlDsaFact]
+        public void Dispose_OwnedKey_DisposesMLDsa()
+        {
+            // Arrange — internal constructor owns the MLDsa
+            using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            var jwk = JsonWebKeyConverter.ConvertFromMlDsaSecurityKey(new MlDsaSecurityKey(mlDsa));
+            var key = new MlDsaSecurityKey(jwk, usePrivateKey: false);
+
+            // Act
+            key.Dispose();
+
+            // Assert — the owned MLDsa should be disposed (accessing it should throw)
+            Assert.Throws<ObjectDisposedException>(() => key.MLDsa.ExportMLDsaPublicKey());
+        }
+
+        [MlDsaFact]
+        public void Dispose_BorrowedKey_DoesNotDisposeMLDsa()
+        {
+            // Arrange — public constructor does not own the MLDsa
+            using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            var key = new MlDsaSecurityKey(mlDsa);
+
+            // Act
+            key.Dispose();
+
+            // Assert — the borrowed MLDsa should still be usable
+            byte[] exported = mlDsa.ExportMLDsaPublicKey();
+            Assert.NotNull(exported);
+        }
+
+        #endregion
+
+        #region Concurrency Tests
+
+        [MlDsaTheory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public async Task ConcurrentSign_WithSharedProvider_ProducesValidSignatures(string algorithm)
+        {
+            // Arrange
+            var signingKey = GetMlDsaKey(algorithm);
+            var verifyKey = GetMlDsaPublicKey(algorithm);
+            var signingProvider = new AsymmetricSignatureProvider(signingKey, algorithm, true);
+            var verifyProvider = new AsymmetricSignatureProvider(verifyKey, algorithm, false);
+            int taskCount = 100;
+            using var barrier = new CountdownEvent(taskCount);
+
+            // Act — sign 100 different payloads concurrently on the same provider
+            var tasks = new Task<(byte[] data, byte[] signature)>[taskCount];
+            for (int i = 0; i < taskCount; i++)
+            {
+                int index = i;
+                tasks[i] = Task.Run(() =>
+                {
+                    byte[] data = new byte[32];
+                    byte[] indexBytes = BitConverter.GetBytes(index);
+                    Buffer.BlockCopy(indexBytes, 0, data, 0, indexBytes.Length);
+
+                    // Wait until all tasks are ready before signing concurrently.
+                    barrier.Signal();
+                    barrier.Wait();
+
+                    byte[] signature = signingProvider.Sign(data);
+                    return (data, signature);
+                });
+            }
+
+            var results = await Task.WhenAll(tasks);
+
+            // Assert — every signature must be valid
+            foreach (var (data, signature) in results)
+            {
+                Assert.NotNull(signature);
+                Assert.True(signature.Length > 0, "Signature should not be empty");
+                Assert.True(verifyProvider.Verify(data, signature),
+                    "Concurrent signature failed verification");
+            }
+        }
+
+        [MlDsaTheory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public async Task ConcurrentVerify_WithSharedProvider_AllSucceed(string algorithm)
+        {
+            // Arrange — create a signature to verify
+            byte[] data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            var signingKey = GetMlDsaKey(algorithm);
+            var verifyKey = GetMlDsaPublicKey(algorithm);
+            var signingProvider = new AsymmetricSignatureProvider(signingKey, algorithm, true);
+            byte[] signature = signingProvider.Sign(data);
+            var verifyProvider = new AsymmetricSignatureProvider(verifyKey, algorithm, false);
+            int taskCount = 100;
+            using var barrier = new CountdownEvent(taskCount);
+
+            // Act — verify the same signature concurrently on the same provider
+            var tasks = new Task<bool>[taskCount];
+            for (int i = 0; i < taskCount; i++)
+            {
+                tasks[i] = Task.Run(() =>
+                {
+                    barrier.Signal();
+                    barrier.Wait();
+                    return verifyProvider.Verify(data, signature);
+                });
+            }
+
+            var results = await Task.WhenAll(tasks);
+
+            // Assert
+            Assert.All(results, result => Assert.True(result,
+                "Concurrent verification returned false"));
+        }
+
+        [MlDsaTheory]
+        [InlineData("ML-DSA-44")]
+        [InlineData("ML-DSA-65")]
+        [InlineData("ML-DSA-87")]
+        public async Task ConcurrentSignAndVerify_WithSharedKey_ProducesCorrectResults(string algorithm)
+        {
+            // Arrange — use the same key for both sign and verify concurrently
+            var signingKey = GetMlDsaKey(algorithm);
+            var verifyKey = GetMlDsaPublicKey(algorithm);
+            var signingProvider = new AsymmetricSignatureProvider(signingKey, algorithm, true);
+            var verifyProvider = new AsymmetricSignatureProvider(verifyKey, algorithm, false);
+            int taskCount = 50;
+            using var signBarrier = new CountdownEvent(taskCount);
+
+            // Act — sign all payloads concurrently
+            var signTasks = new Task<(byte[] data, byte[] signature)>[taskCount];
+            for (int i = 0; i < taskCount; i++)
+            {
+                int index = i;
+                signTasks[i] = Task.Run(() =>
+                {
+                    byte[] data = new byte[64];
+                    byte[] indexBytes = BitConverter.GetBytes(index);
+                    Buffer.BlockCopy(indexBytes, 0, data, 0, indexBytes.Length);
+
+                    signBarrier.Signal();
+                    signBarrier.Wait();
+
+                    byte[] signature = signingProvider.Sign(data);
+                    return (data, signature);
+                });
+            }
+
+            var signResults = await Task.WhenAll(signTasks);
+
+            // Now verify all signatures concurrently
+            using var verifyBarrier = new CountdownEvent(taskCount);
+            var verifyTasks = new Task<bool>[taskCount];
+            for (int i = 0; i < taskCount; i++)
+            {
+                var (data, sig) = signResults[i];
+                verifyTasks[i] = Task.Run(() =>
+                {
+                    verifyBarrier.Signal();
+                    verifyBarrier.Wait();
+                    return verifyProvider.Verify(data, sig);
+                });
+            }
+
+            var verifyResults = await Task.WhenAll(verifyTasks);
+
+            // Assert
+            Assert.All(verifyResults, result => Assert.True(result,
+                "Signature produced under concurrency failed verification"));
         }
 
         #endregion

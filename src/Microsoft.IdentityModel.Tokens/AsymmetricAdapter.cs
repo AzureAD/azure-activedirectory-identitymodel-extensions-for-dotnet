@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
                     else if (securityKey is ECDsaSecurityKey edcsaSecurityKeyFromJsonWebKey)
                         InitializeUsingEcdsaSecurityKey(edcsaSecurityKeyFromJsonWebKey);
                     else if (securityKey is MlDsaSecurityKey mlDsaSecurityKeyFromJsonWebKey)
-                        InitializeUsingMlDsaSecurityKey(mlDsaSecurityKeyFromJsonWebKey);
+                        InitializeUsingMlDsaSecurityKey(mlDsaSecurityKeyFromJsonWebKey, requirePrivateKey);
                     else
                         throw LogHelper.LogExceptionMessage(
                             new NotSupportedException(
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (key is MlDsaSecurityKey mlDsaKey)
             {
-                InitializeUsingMlDsaSecurityKey(mlDsaKey);
+                InitializeUsingMlDsaSecurityKey(mlDsaKey, requirePrivateKey);
             }
             else
                 throw LogHelper.LogExceptionMessage(
@@ -187,14 +187,19 @@ namespace Microsoft.IdentityModel.Tokens
             _verifyUsingOffsetFunction = VerifyUsingOffsetECDsa;
         }
 
-        private void InitializeUsingMlDsaSecurityKey(MlDsaSecurityKey mlDsaSecurityKey)
+        private void InitializeUsingMlDsaSecurityKey(MlDsaSecurityKey mlDsaSecurityKey, bool requirePrivateKey)
         {
-            InitializeUsingMlDsa(mlDsaSecurityKey.MLDsa);
+            InitializeUsingMlDsa(mlDsaSecurityKey.MLDsa, requirePrivateKey);
         }
 
-        private void InitializeUsingMlDsa(MLDsa mlDsa)
+        private void InitializeUsingMlDsa(MLDsa mlDsa, bool includePrivateKey)
         {
-            MLDsa = mlDsa;
+            // Clone the MLDsa instance so each adapter holds an independent copy.
+            // MLDsa instance methods are not guaranteed thread-safe, and multiple
+            // adapters from the object pool may reference the same source key.
+            // Cloning ensures each adapter can be used concurrently without races.
+            MLDsa = MlDsaAdapter.CloneMlDsa(mlDsa, includePrivateKey);
+            _disposeCryptoOperators = true;
             _signFunction = SignMlDsa;
             _signUsingOffsetFunction = SignUsingOffsetMlDsa;
 #if NET6_0_OR_GREATER
@@ -315,9 +320,6 @@ namespace Microsoft.IdentityModel.Tokens
             string algorithm,
             bool requirePrivateKey)
         {
-            // Borrow the MLDsa instance from X509SecurityKey.
-            // The X509SecurityKey retains ownership; _disposeCryptoOperators remains
-            // false so the adapter will not dispose it. Same pattern as RSA/ECDsa.
             MLDsa mlDsa = requirePrivateKey ? x509SecurityKey.MlDsaPrivateKey : x509SecurityKey.MlDsaPublicKey;
             if (mlDsa == null)
                 throw LogHelper.LogExceptionMessage(
@@ -327,7 +329,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.MarkAsNonPII(algorithm),
                             LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
 
-            InitializeUsingMlDsa(mlDsa);
+            InitializeUsingMlDsa(mlDsa, requirePrivateKey);
         }
 
         private void InitializeUsingX509Rsa(
