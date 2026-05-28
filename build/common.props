@@ -36,13 +36,18 @@
     <PackageValidationBaselineVersion>7.0.0</PackageValidationBaselineVersion>
   </PropertyGroup>
 
+  <!-- Suppress NETSDK1138, NETSDK1202 ("target framework is out of support") -->
+  <PropertyGroup>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>$(NoWarn);SYSLIB0050</NoWarn>
-    <NoWarn>$(NoWarn);SYSLIB0051</NoWarn>
+    <NoWarn>$(NoWarn);SYSLIB0050;SYSLIB0051;NETSDK1138</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
