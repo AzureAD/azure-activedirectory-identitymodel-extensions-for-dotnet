@@ -95,28 +95,66 @@ internal static class MlDsaAdapter
     /// </summary>
     /// <param name="source">The source <see cref="MLDsa"/> to clone.</param>
     /// <param name="includePrivateKey">Whether to include the private key in the clone.</param>
-    /// <returns>A new <see cref="MLDsa"/> instance with the same key material.</returns>
+    /// <returns>
+    /// A new <see cref="MLDsa"/> instance with the same key material, or <see langword="null"/>
+    /// if the key material cannot be exported (e.g., HSM-backed non-exportable keys).
+    /// </returns>
     internal static MLDsa CloneMlDsa(MLDsa source, bool includePrivateKey)
     {
-        if (source == null)
+        if (source is null)
             throw LogHelper.LogArgumentNullException(nameof(source));
 
         MLDsaAlgorithm algorithm = source.Algorithm;
 
         if (includePrivateKey)
         {
-            byte[] seed = source.ExportMLDsaPrivateSeed();
+            // Try seed first (smallest representation), then expanded private key.
+            // Either may fail for keys that don't know the seed (imported from
+            // expanded key) or are non-exportable (HSM/CNG-backed).
             try
             {
-                return MLDsa.ImportMLDsaPrivateSeed(algorithm, seed);
+                byte[] seed = source.ExportMLDsaPrivateSeed();
+                try
+                {
+                    return MLDsa.ImportMLDsaPrivateSeed(algorithm, seed);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(seed);
+                }
             }
-            finally
+            catch (CryptographicException)
             {
-                CryptographicOperations.ZeroMemory(seed);
+            }
+
+            try
+            {
+                byte[] expandedKey = source.ExportMLDsaPrivateKey();
+                try
+                {
+                    return MLDsa.ImportMLDsaPrivateKey(algorithm, expandedKey);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(expandedKey);
+                }
+            }
+            catch (CryptographicException)
+            {
+                // Key is non-exportable — caller must fall back to
+                // using the original instance with synchronization.
+                return null;
             }
         }
 
-        byte[] publicKey = source.ExportMLDsaPublicKey();
-        return MLDsa.ImportMLDsaPublicKey(algorithm, publicKey);
+        try
+        {
+            byte[] publicKey = source.ExportMLDsaPublicKey();
+            return MLDsa.ImportMLDsaPublicKey(algorithm, publicKey);
+        }
+        catch (CryptographicException)
+        {
+            return null;
+        }
     }
 }

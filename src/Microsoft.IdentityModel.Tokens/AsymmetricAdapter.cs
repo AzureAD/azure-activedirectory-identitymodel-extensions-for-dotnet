@@ -31,6 +31,7 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
         private bool _disposeCryptoOperators;
         private bool _disposed;
+        private object _mlDsaSyncLock;
         private DecryptDelegate _decryptFunction = DecryptFunctionNotFound;
         private EncryptDelegate _encryptFunction = EncryptFunctionNotFound;
         private SignDelegate _signFunction = SignFunctionNotFound;
@@ -197,9 +198,22 @@ namespace Microsoft.IdentityModel.Tokens
             // Clone the MLDsa instance so each adapter holds an independent copy.
             // MLDsa instance methods are not guaranteed thread-safe, and multiple
             // adapters from the object pool may reference the same source key.
-            // Cloning ensures each adapter can be used concurrently without races.
-            MLDsa = MlDsaAdapter.CloneMlDsa(mlDsa, includePrivateKey);
-            _disposeCryptoOperators = true;
+            MLDsa clone = MlDsaAdapter.CloneMlDsa(mlDsa, includePrivateKey);
+
+            if (clone is not null)
+            {
+                // Clone succeeded — each adapter owns its independent instance.
+                MLDsa = clone;
+                _disposeCryptoOperators = true;
+            }
+            else
+            {
+                // Key is non-exportable (e.g., HSM-backed) — share the original
+                // instance and serialize access with a lock.
+                MLDsa = mlDsa;
+                _mlDsaSyncLock = new object();
+            }
+
             _signFunction = SignMlDsa;
             _signUsingOffsetFunction = SignUsingOffsetMlDsa;
 #if NET6_0_OR_GREATER
@@ -434,6 +448,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         private byte[] SignMlDsa(byte[] bytes)
         {
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    return MLDsa.SignData(bytes, context: null);
+            }
+
             return MLDsa.SignData(bytes, context: null);
         }
 
@@ -450,7 +470,16 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             // MLDsa.SignData requires destination to be exactly SignatureSizeInBytes.
-            MLDsa.SignData(data, destination.Slice(0, signatureSize), context: default);
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    MLDsa.SignData(data, destination.Slice(0, signatureSize), context: default);
+            }
+            else
+            {
+                MLDsa.SignData(data, destination.Slice(0, signatureSize), context: default);
+            }
+
             bytesWritten = signatureSize;
             return true;
         }
@@ -459,10 +488,23 @@ namespace Microsoft.IdentityModel.Tokens
         {
             int signatureSize = MLDsa.Algorithm.SignatureSizeInBytes;
             byte[] signature = new byte[signatureSize];
-            MLDsa.SignData(
-                new ReadOnlySpan<byte>(bytes, offset, count),
-                signature.AsSpan(),
-                context: default);
+
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    MLDsa.SignData(
+                        new ReadOnlySpan<byte>(bytes, offset, count),
+                        signature.AsSpan(),
+                        context: default);
+            }
+            else
+            {
+                MLDsa.SignData(
+                    new ReadOnlySpan<byte>(bytes, offset, count),
+                    signature.AsSpan(),
+                    context: default);
+            }
+
             return signature;
         }
 
@@ -508,11 +550,26 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool VerifyMlDsa(byte[] bytes, byte[] signature)
         {
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    return MLDsa.VerifyData(bytes, signature, context: null);
+            }
+
             return MLDsa.VerifyData(bytes, signature, context: null);
         }
 
         private bool VerifyUsingOffsetMlDsa(byte[] bytes, int offset, int count, byte[] signature)
         {
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    return MLDsa.VerifyData(
+                        new ReadOnlySpan<byte>(bytes, offset, count),
+                        signature.AsSpan(),
+                        context: default);
+            }
+
             return MLDsa.VerifyData(
                 new ReadOnlySpan<byte>(bytes, offset, count),
                 signature.AsSpan(),
