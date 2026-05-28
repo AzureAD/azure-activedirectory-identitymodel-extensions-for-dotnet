@@ -334,7 +334,8 @@ namespace Microsoft.IdentityModel.Tokens
                                 LogMessages.IDX10724,
                                 LogHelper.MarkAsNonPII(KeyId))));
 
-                return new MlDsaSecurityKey(MlDsaPublicKey).ComputeJwkThumbprint();
+                using var mlDsaKey = new MlDsaSecurityKey(MlDsaPublicKey);
+                return mlDsaKey.ComputeJwkThumbprint();
             }
 
             return PublicKey is RSA ? new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint() : new ECDsaSecurityKey(PublicKey as ECDsa).ComputeJwkThumbprint();
