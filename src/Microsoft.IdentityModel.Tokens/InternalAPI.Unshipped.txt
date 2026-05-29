@@ -114,7 +114,7 @@ virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string to
 virtual Microsoft.IdentityModel.Tokens.ValidationError.CreateException() -> System.Exception
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.get -> int
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.set -> void
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.MaxActorChainLength.get -> int
+const Microsoft.IdentityModel.Tokens.TokenValidationParameters.MaxActorChainLength = 5 -> int
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorChainDepth.get -> int
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorChainDepth.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.MaxActorChainLength.get -> int

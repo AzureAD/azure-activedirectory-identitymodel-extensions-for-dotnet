@@ -686,13 +686,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            if (currentDepth >= tokenValidationParameters.MaxActorChainLength)
+            if (currentDepth >= TokenValidationParameters.MaxActorChainLength)
             {
                 throw LogHelper.LogExceptionMessage(
                     new SecurityTokenException(LogHelper.FormatInvariant(
                     LogMessages.IDX14313,
                     LogHelper.MarkAsNonPII(currentDepth),
-                    LogHelper.MarkAsNonPII(tokenValidationParameters.MaxActorChainLength))));
+                    LogHelper.MarkAsNonPII(TokenValidationParameters.MaxActorChainLength))));
             }
 
             if (jsonElement.ValueKind != JsonValueKind.Object)

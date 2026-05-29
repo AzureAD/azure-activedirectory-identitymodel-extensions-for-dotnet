@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Default for permissible max actor chain length.
         /// </summary>
         /// <remarks>The total number of actor claims customer might have is 5. This allows upto 4 nested actors and 1 top level actor.</remarks>
-        private int maxActorChainLength = 5;
+        internal const int MaxActorChainLength = 5;
 
         /// <summary>
         /// Default for actor claim name.
@@ -854,16 +854,5 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         public ActClaimRetriever ActClaimRetriever { get; set; }
 
-        /// <summary>
-        /// Gets the maximum depth allowed when processing nested actor tokens.
-        /// <para>This prevents excessive recursion when handling deeply nested actor tokens.</para>
-        /// <para>The maximum allowed value is 4 to prevent security issues with excessively deep actor chains.</para>
-        /// </summary>
-        /// <remarks>
-        /// <para>Default value is 4.</para>
-        /// <para>During token validation and creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
-        /// <para>This limit applies to both token creation and validation processes.</para>
-        /// </remarks>
-        internal int MaxActorChainLength => maxActorChainLength;
     }
 }
