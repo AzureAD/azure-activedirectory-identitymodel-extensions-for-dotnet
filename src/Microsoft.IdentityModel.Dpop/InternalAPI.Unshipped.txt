@@ -3,4 +3,4 @@ static Microsoft.IdentityModel.Dpop.DpopProofValidator.ComputeJwkThumbprint(Micr
 static Microsoft.IdentityModel.Dpop.DpopProofValidator.ContainsPrivateKeyMaterial(Microsoft.IdentityModel.Tokens.JsonWebKey jwk) -> bool
 static Microsoft.IdentityModel.Dpop.DpopProofValidator.TryConvertToAsymmetricKeyFromBareParameters(Microsoft.IdentityModel.Tokens.JsonWebKey jwk, out Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
 Microsoft.IdentityModel.Dpop.UriComparer
-static Microsoft.IdentityModel.Dpop.UriComparer.AreEquivalent(System.Uri uri, System.Uri uriToCompareTo) -> bool
+static Microsoft.IdentityModel.Dpop.UriComparer.AreEquivalent(System.Uri uri, string uriToCompareTo) -> bool

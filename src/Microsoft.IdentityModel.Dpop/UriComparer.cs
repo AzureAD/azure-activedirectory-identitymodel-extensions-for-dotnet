@@ -26,30 +26,34 @@ namespace Microsoft.IdentityModel.Dpop;
 internal static class UriComparer
 {
     /// <summary>
-    /// Returns <see langword="true"/> when both URIs are equivalent under the comparison
-    /// rules described in the type-level remarks (scheme, host, port, and path; query and
-    /// fragment ignored).
+    /// Returns <see langword="true"/> when <paramref name="uri"/> is equivalent to
+    /// <paramref name="uriToCompareTo"/> under the comparison rules described in the
+    /// type-level remarks (scheme, host, port, and path; query and fragment ignored).
     /// </summary>
     /// <param name="uri">The first URI. Must be non-null and absolute.</param>
-    /// <param name="uriToCompareTo">The URI to compare against. Must be non-null and absolute.</param>
+    /// <param name="uriToCompareTo">The URI string to compare against. Must parse as an absolute URI.</param>
     /// <returns>
     /// <see langword="true"/> when both URIs are absolute and equivalent;
-    /// <see langword="false"/> when either is null, either is not absolute, or any
-    /// compared component (scheme, host, port, path) differs.
+    /// <see langword="false"/> when <paramref name="uri"/> is null or not absolute, when
+    /// <paramref name="uriToCompareTo"/> is null, empty, or cannot be parsed as an
+    /// absolute URI, or when any compared component (scheme, host, port, path) differs.
     /// </returns>
-    internal static bool AreEquivalent(Uri uri, Uri uriToCompareTo)
+    internal static bool AreEquivalent(Uri uri, string uriToCompareTo)
     {
         if (uri is null || !uri.IsAbsoluteUri)
             return false;
 
-        if (uriToCompareTo is null || !uriToCompareTo.IsAbsoluteUri)
+        if (string.IsNullOrEmpty(uriToCompareTo))
+            return false;
+
+        if (!Uri.TryCreate(uriToCompareTo, UriKind.Absolute, out Uri parsed))
             return false;
 
         // Scheme + authority (host:port) — case-insensitive per RFC 3986 §6.2.2.1,
         // default-port-aware per §3.2.3, IDN-normalized via .NET's Uri.
         if (Uri.Compare(
                 uri,
-                uriToCompareTo,
+                parsed,
                 UriComponents.SchemeAndServer,
                 UriFormat.SafeUnescaped,
                 StringComparison.OrdinalIgnoreCase) != 0)
@@ -61,7 +65,7 @@ internal static class UriComparer
         // SafeUnescaped normalizes percent-encoding of unreserved chars per §6.2.2.2.
         if (Uri.Compare(
                 uri,
-                uriToCompareTo,
+                parsed,
                 UriComponents.Path,
                 UriFormat.SafeUnescaped,
                 StringComparison.Ordinal) != 0)
