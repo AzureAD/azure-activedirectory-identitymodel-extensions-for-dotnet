@@ -900,9 +900,14 @@ namespace Microsoft.IdentityModel.Tokens
 
             signatureProvider.Release();
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(signatureProvider.Algorithm))
-                CustomCryptoProvider.Release(signatureProvider);
+            {
+                if (!signatureProvider.IsCached)
+                    CustomCryptoProvider.Release(signatureProvider);
+            }
             else if (signatureProvider.CryptoProviderCache == null && signatureProvider.RefCount == 0 && !signatureProvider.IsCached)
+            {
                 signatureProvider.Dispose();
+            }
         }
     }
 }

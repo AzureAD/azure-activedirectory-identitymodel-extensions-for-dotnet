@@ -1390,7 +1390,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         /// <summary>
-        /// A custom crypto provider that counts how many times Create is called.
+        /// A custom crypto provider that counts how many times Create and Release are called.
         /// </summary>
         private class CountingCryptoProvider : ICryptoProvider
         {
@@ -1403,13 +1403,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 _factory = factory;
             }
 
+            public int ReleaseCount;
+
             public bool IsSupportedAlgorithm(string algorithm, params object[] args) =>
                 algorithm == _algorithm;
 
             public object Create(string algorithm, params object[] args) =>
                 _factory();
 
-            public void Release(object cryptoInstance) { }
+            public void Release(object cryptoInstance)
+            {
+                Interlocked.Increment(ref ReleaseCount);
+            }
         }
 
         [Fact]
@@ -1461,6 +1466,76 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // Create should not have been called again after warmup (all cache hits)
             Assert.Equal(warmupCreateCount, createCount);
+        }
+
+        [Fact]
+        public void ReleaseSignatureProvider_CachedCustomProvider_DoesNotCallCustomRelease()
+        {
+            // Arrange — create a cached custom provider, then release it.
+            // CustomCryptoProvider.Release should NOT be called because the provider is still in the cache.
+            var signingKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
+            {
+                KeyId = "release-cached-kid"
+            };
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            int createCount = 0;
+            var customCrypto = new CountingCryptoProvider(algorithm, () =>
+            {
+                Interlocked.Increment(ref createCount);
+                return new SymmetricSignatureProvider(signingKey, algorithm, false);
+            });
+
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CustomCryptoProvider = customCrypto,
+                CacheCustomProviders = true,
+                CacheSignatureProviders = true
+            };
+
+            // Act
+            var provider = factory.CreateForVerifying(signingKey, algorithm);
+            Assert.True(provider.IsCached, "Provider should be cached.");
+
+            factory.ReleaseSignatureProvider(provider);
+
+            // Assert — Release should NOT have been called on the custom crypto provider
+            Assert.Equal(0, customCrypto.ReleaseCount);
+        }
+
+        [Fact]
+        public void ReleaseSignatureProvider_NonCachedCustomProvider_CallsCustomRelease()
+        {
+            // Arrange — create a non-cached custom provider, then release it.
+            // CustomCryptoProvider.Release SHOULD be called because the provider is not in the cache.
+            var signingKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
+            {
+                KeyId = "release-noncached-kid"
+            };
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            int createCount = 0;
+            var customCrypto = new CountingCryptoProvider(algorithm, () =>
+            {
+                Interlocked.Increment(ref createCount);
+                return new SymmetricSignatureProvider(signingKey, algorithm, false);
+            });
+
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CustomCryptoProvider = customCrypto,
+                CacheCustomProviders = false, // not caching
+                CacheSignatureProviders = true
+            };
+
+            // Act
+            var provider = factory.CreateForVerifying(signingKey, algorithm);
+            Assert.False(provider.IsCached, "Provider should NOT be cached.");
+
+            factory.ReleaseSignatureProvider(provider);
+
+            // Assert — Release SHOULD have been called on the custom crypto provider
+            Assert.Equal(1, customCrypto.ReleaseCount);
         }
     }
 }
