@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Dpop;
 /// Contains options for creating DPoP proofs according to RFC 9449.
 /// It is intended for test and sample use only.
 /// </summary>
-internal class DPoPProofCreatorOptions
+internal class DpopProofCreatorOptions
 {
     /// <summary>
     /// Gets or sets the maximum age a DPoP proof can be, measured in seconds.
