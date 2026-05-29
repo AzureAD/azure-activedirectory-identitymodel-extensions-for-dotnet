@@ -202,5 +202,5 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="actClaim">The JSON element representing the 'act' claim.</param>
     /// <param name="tokenValidationParameters"> Opitonal validation parameters if needed</param>
     /// <returns>A ClaimsIdentity representing the actor.</returns>
-    public delegate ClaimsIdentity ActClaimRetrieverDelegate(JsonElement actClaim, TokenValidationParameters tokenValidationParameters = null);
+    public delegate ClaimsIdentity ActClaimRetriever(JsonElement actClaim, TokenValidationParameters tokenValidationParameters = null);
 }

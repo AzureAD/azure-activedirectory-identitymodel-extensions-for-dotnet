@@ -1113,17 +1113,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (actorValue is not ClaimsIdentity actor)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(
-                        LogHelper.FormatInvariant(
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(
                             LogMessages.IDX14315,
                             LogHelper.MarkAsNonPII(tokenDescriptor.ActorClaimType),
-                            LogHelper.MarkAsNonPII(actorValue?.GetType().FullName ?? "null"))));
+                            LogHelper.MarkAsNonPII(actorValue?.GetType().FullName ?? "null")));
                 }
-
-                actorTokenDescriptor = new SecurityTokenDescriptor
+                else
                 {
-                    Subject = actor,
-                };
+                    actorTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = actor,
+                    };
+                }
 
             }
             // Then check for actor in subject

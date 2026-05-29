@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
             ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
-            ActClaimRetrieverDelegate = other.ActClaimRetrieverDelegate;
+            ActClaimRetriever = other.ActClaimRetriever;
             ActorChainDepth = other.ActorChainDepth;
             ActorClaimType = other.ActorClaimType;
         }
@@ -843,7 +843,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <para>This is useful for custom actor claim formats or when special processing is needed for the actor claims.</para>
         /// <para>The delegate can also handle nested actors by recursively creating actor identities and setting the Actor property.</para>
         /// <code>
-        /// validationParameters.ActClaimRetrieverDelegate = (JsonElement element,TokenValidationParameters tokenValidationParameters) => {
+        /// validationParameters.ActClaimRetriever = (JsonElement element,TokenValidationParameters tokenValidationParameters) => {
         ///     var identity = new ClaimsIdentity("CustomActor");
         ///     // Extract claims from the JsonElement
         ///     if (element.TryGetProperty("sub", out var sub))
@@ -852,7 +852,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// };
         /// </code>
         /// </remarks>
-        public ActClaimRetrieverDelegate ActClaimRetrieverDelegate { get; set; }
+        public ActClaimRetriever ActClaimRetriever { get; set; }
 
         /// <summary>
         /// Gets the maximum depth allowed when processing nested actor tokens.

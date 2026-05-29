@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -223,14 +223,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
 
-                if (claimType.Equals(validationParameters.ActorClaimType) || claimType.Equals(JwtRegisteredClaimNames.Actort))
+                if (jwtClaim.Type.Equals(validationParameters.ActorClaimType) || jwtClaim.Type.Equals(JwtRegisteredClaimNames.Actort))
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
                                     LogMessages.IDX14112,
-                                    LogHelper.MarkAsNonPII(claimType),
+                                    LogHelper.MarkAsNonPII(jwtClaim.Type),
                                     jwtClaim.Value)));
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, claimType.Equals(validationParameters.ActorClaimType));
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, jwtClaim.Type.Equals(validationParameters.ActorClaimType));
                 }
 
                 if (wasMapped)
@@ -638,15 +638,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (jwtToken.TryGetPayloadValue<JsonElement>(tokenValidationParameters.ActorClaimType, out JsonElement actClaim))
                 {
-                    if (tokenValidationParameters.ActClaimRetrieverDelegate != null)
+                    if (tokenValidationParameters.ActClaimRetriever != null)
                     {
                         try
                         {
-                            return tokenValidationParameters.ActClaimRetrieverDelegate(actClaim, tokenValidationParameters);
+                            return tokenValidationParameters.ActClaimRetriever(actClaim, tokenValidationParameters);
                         }
                         catch (Exception ex)
                         {
-                            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(
                                 LogMessages.IDX14314,
                                 LogHelper.MarkAsNonPII(ex.ToString()))));
                         }
@@ -675,21 +675,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="jsonElement">The JsonElement containing actor claims.</param>
         /// <param name="tokenValidationParameters">These parameters have details like nested actor chain length and max permissible actor length.</param>
         /// <param name="issuer">The issuer for the claims.</param>
+        /// <param name="currentDepth">The current recursion depth for nested actor processing.</param>
         /// <returns>A ClaimsIdentity containing claims from the JsonElement.</returns>
         internal static ClaimsIdentity CreateActorClaimsIdentityFromJsonElement(
             JsonElement jsonElement,
             TokenValidationParameters tokenValidationParameters,
-            string issuer = null)
+            string issuer = null,
+            int currentDepth = 0)
         {
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            if (tokenValidationParameters.ActorChainDepth >= tokenValidationParameters.MaxActorChainLength)
+            if (currentDepth >= tokenValidationParameters.MaxActorChainLength)
             {
                 throw LogHelper.LogExceptionMessage(
                     new SecurityTokenException(LogHelper.FormatInvariant(
                     LogMessages.IDX14313,
-                    LogHelper.MarkAsNonPII(tokenValidationParameters.ActorChainDepth),
+                    LogHelper.MarkAsNonPII(currentDepth),
                     LogHelper.MarkAsNonPII(tokenValidationParameters.MaxActorChainLength))));
             }
 
@@ -711,10 +713,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     if (value.ValueKind == JsonValueKind.Object)
                     {
-                        tokenValidationParameters.ActorChainDepth++;
-                        // Recursively create nested actor identity
+                        // Recursively create nested actor identity with incremented depth
                         identity.Actor = CreateActorClaimsIdentityFromJsonElement(
-                            value, tokenValidationParameters, issuer);
+                            value, tokenValidationParameters, issuer, currentDepth + 1);
                     }
                     continue;
                 }

@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.TransformBeforeSignatureValidation = ValidationDelegates.TransformBeforeSignatureValidation;
             validationParameters.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParameters.TypeValidator = ValidationDelegates.TypeValidator;
-            validationParameters.ActClaimRetrieverDelegate = ValidationDelegates.ActClaimRetrieverDelegate;
+            validationParameters.ActClaimRetriever = ValidationDelegates.ActClaimRetriever;
 
             validationParameters.ActorValidationParameters = new TokenValidationParameters();
             validationParameters.ClockSkew = TimeSpan.FromSeconds(42);

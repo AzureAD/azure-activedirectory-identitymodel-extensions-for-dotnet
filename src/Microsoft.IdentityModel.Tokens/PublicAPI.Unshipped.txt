@@ -331,11 +331,11 @@ Microsoft.IdentityModel.Tokens.Experimental.ITokenTypeValidator.ValidateTokenTyp
 ~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorClaimType.get -> string
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorClaimType.set -> void
-Microsoft.IdentityModel.Tokens.ActClaimRetrieverDelegate
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetrieverDelegate.get -> Microsoft.IdentityModel.Tokens.ActClaimRetrieverDelegate
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetrieverDelegate.set -> void
+Microsoft.IdentityModel.Tokens.ActClaimRetriever
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetriever.get -> Microsoft.IdentityModel.Tokens.ActClaimRetriever
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetriever.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorClaimType.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorClaimType.set -> void
-~virtual Microsoft.IdentityModel.Tokens.ActClaimRetrieverDelegate.Invoke(System.Text.Json.JsonElement actClaim, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters = null) -> System.Security.Claims.ClaimsIdentity
+~virtual Microsoft.IdentityModel.Tokens.ActClaimRetriever.Invoke(System.Text.Json.JsonElement actClaim, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters = null) -> System.Security.Claims.ClaimsIdentity
 ~const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jkt = "jkt" -> string
 ~Microsoft.IdentityModel.Tokens.Cnf.Jkt.get -> string

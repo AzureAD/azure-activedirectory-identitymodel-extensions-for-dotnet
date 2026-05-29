@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void CreateActorClaimsIdentity_WithNestedActor_IncrementsActorChainDepth()
+        public void CreateActorClaimsIdentity_WithNestedActor_DoesNotMutateTokenValidationParameters()
         {
             // Create actor JSON with nested actor
             string actorJson = @"{
@@ -296,7 +296,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ActorClaimType = "act",
-                ActorChainDepth = 2,
             };
 
             // Create ClaimsIdentity from JsonElement
@@ -304,8 +303,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 jsonElement,
                 tokenValidationParameters);
 
-            // Verify depth was incremented (2 + 1 = 3)
-            Assert.Equal(3, tokenValidationParameters.ActorChainDepth);
+            // Verify TVP.ActorChainDepth is NOT mutated (stays at default 0)
+            Assert.Equal(0, tokenValidationParameters.ActorChainDepth);
 
             // Verify both levels of actors exist
             Assert.NotNull(identity);
@@ -430,7 +429,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
                 ActorClaimType = "act",
-                ActClaimRetrieverDelegate = CustomDelegate,
+                ActClaimRetriever = CustomDelegate,
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -528,7 +527,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
                 ActorClaimType = "act",
-                ActClaimRetrieverDelegate = CustomDelegate,
+                ActClaimRetriever = CustomDelegate,
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -537,7 +536,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.True(result.IsValid);
 
             // But accessing ClaimsIdentity throws because the delegate fails during lazy evaluation
-            var exception = Assert.Throws<SecurityTokenDecryptionFailedException>(
+            var exception = Assert.Throws<SecurityTokenException>(
                 () => result.ClaimsIdentity);
 
             Assert.Contains("IDX14314", exception.Message);
@@ -590,7 +589,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
 
             // Custom delegate
-            validationParameters.ActClaimRetrieverDelegate = CustomDelegate;
+            validationParameters.ActClaimRetriever = CustomDelegate;
             var result2 = await handler.ValidateTokenAsync(token, validationParameters);
             Assert.True(result2.IsValid);
             Assert.NotNull(result2.ClaimsIdentity.Actor);
@@ -857,6 +856,58 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             // Verify long-form claims don't exist when mapping is disabled
             Assert.Null(result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier));
             Assert.Null(result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email));
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_MapInboundClaimsTrue_WithActortClaim_DetectsActorCorrectly()
+        {
+            // When MapInboundClaims is true, "actort" gets mapped to the long URI ClaimTypes.Actor.
+            // The actor detection must use the raw claim type (not mapped) to correctly identify actor claims.
+            var handler = new JsonWebTokenHandler();
+            handler.MapInboundClaims = true;
+
+            // Create a token with "actort" claim (legacy unsigned JWT format)
+            var innerHandler = new JsonWebTokenHandler();
+            var actorDescriptor = new SecurityTokenDescriptor
+            {
+                Claims = new Dictionary<string, object>
+                {
+                    { "sub", "actor-subject-id" },
+                    { "name", "Actor Name" },
+                },
+            };
+            // Create unsigned actor JWT (actort is a JWT string)
+            string actorJwt = innerHandler.CreateToken(actorDescriptor);
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            // Put "actort" in the claims dictionary as a raw JWT string
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "actort", actorJwt } },
+            };
+            string token = handler.CreateToken(tokenDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+            };
+
+            var result = await handler.ValidateTokenAsync(token, validationParameters);
+
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
         }
 
         [Fact]

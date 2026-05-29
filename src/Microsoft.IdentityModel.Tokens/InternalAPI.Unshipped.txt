@@ -1,6 +1,5 @@
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr" -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX11027 = "IDX11027: Invalid JsonWebToken handler configuration parameter value provided for {0}. {1}" -> string
-static Microsoft.IdentityModel.Tokens.AppContextSwitches.EnableActClaimSupport.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttr.get -> bool
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10278 = "IDX10278: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token decryption in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}. See https://aka.ms/validate-using-configuration-manager for additional information." -> string
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttr.get -> bool
@@ -116,7 +115,6 @@ virtual Microsoft.IdentityModel.Tokens.ValidationError.CreateException() -> Syst
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.get -> int
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActorChainDepth.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.MaxActorChainLength.get -> int
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.MaxActorChainLength.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorChainDepth.get -> int
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorChainDepth.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.MaxActorChainLength.get -> int
