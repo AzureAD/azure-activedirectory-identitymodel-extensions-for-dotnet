@@ -1537,6 +1537,77 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // Assert — Release SHOULD have been called on the custom crypto provider
             Assert.Equal(1, customCrypto.ReleaseCount);
         }
+
+        [Fact]
+        public void CacheCustomProviders_CreateForSigning_CachesAndReturnsFromCache()
+        {
+            // Arrange — verify the CreateForSigning path also uses the cache
+            // (all other tests use CreateForVerifying). Also verifies that calling
+            // the factory a second time returns the same cached instance (suggestion 2).
+            var signingKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
+            {
+                KeyId = "signing-cache-kid"
+            };
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            int createCount = 0;
+            var customCrypto = new CountingCryptoProvider(algorithm, () =>
+            {
+                Interlocked.Increment(ref createCount);
+                return new SymmetricSignatureProvider(signingKey, algorithm, true);
+            });
+
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CustomCryptoProvider = customCrypto,
+                CacheCustomProviders = true,
+                CacheSignatureProviders = true
+            };
+
+            // Act — first call creates and caches; second call should hit the cache
+            var provider1 = factory.CreateForSigning(signingKey, algorithm);
+            var provider2 = factory.CreateForSigning(signingKey, algorithm);
+
+            // Assert — same instance returned, Create called only once
+            Assert.True(provider1.IsCached, "Provider should be cached.");
+            Assert.Same(provider1, provider2);
+            Assert.Equal(1, createCount);
+        }
+
+        [Fact]
+        public void CacheCustomProviders_WhenCacheProviderParamFalse_DoesNotCache()
+        {
+            // Arrange — CacheCustomProviders = true but the overload is called
+            // with cacheProvider = false, so the provider should NOT be cached.
+            var signingKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
+            {
+                KeyId = "nocache-param-kid"
+            };
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            int createCount = 0;
+            var customCrypto = new CountingCryptoProvider(algorithm, () =>
+            {
+                Interlocked.Increment(ref createCount);
+                return new SymmetricSignatureProvider(signingKey, algorithm, false);
+            });
+
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CustomCryptoProvider = customCrypto,
+                CacheCustomProviders = true,
+                CacheSignatureProviders = true
+            };
+
+            // Act — pass cacheProvider: false explicitly
+            var provider1 = factory.CreateForVerifying(signingKey, algorithm, cacheProvider: false);
+            var provider2 = factory.CreateForVerifying(signingKey, algorithm, cacheProvider: false);
+
+            // Assert — provider is NOT cached, Create called each time
+            Assert.False(provider1.IsCached, "Provider should NOT be cached when cacheProvider=false.");
+            Assert.NotSame(provider1, provider2);
+            Assert.Equal(2, createCount);
+        }
     }
 }
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
