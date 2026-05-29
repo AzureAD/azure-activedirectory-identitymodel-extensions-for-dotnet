@@ -436,14 +436,12 @@ public class DpopProofValidator
         }
 
         // Validate htu matches request URI
-        // Per RFC 9449 §4.3: compare scheme + authority + path (no query/fragment)
         if (!proofToken.TryGetPayloadValue(DpopClaimTypes.Htu, out string htuValue) || string.IsNullOrWhiteSpace(htuValue))
         {
             return DpopValidationResult.Failed("DPoP proof is missing the 'htu' claim.", DpopValidationFailureType.HtuMissing);
         }
 
-        var normalizedRequestUri = requestUri.GetLeftPart(UriPartial.Path);
-        if (!string.Equals(normalizedRequestUri, htuValue, StringComparison.OrdinalIgnoreCase))
+        if (!UriComparer.AreEquivalent(requestUri, htuValue))
         {
             return DpopValidationResult.Failed("DPoP proof 'htu' claim does not match the request URI.", DpopValidationFailureType.HtuMismatch);
         }
