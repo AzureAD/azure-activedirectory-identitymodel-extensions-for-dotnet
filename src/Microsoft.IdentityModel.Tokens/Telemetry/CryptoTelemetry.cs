@@ -77,6 +77,11 @@ public static class CryptoTelemetry
         public const string Symmetric512 = "SYM-512";
         public const string SymmetricUnknown = "SYM-UNKNOWN";
 
+        public const string MlDsa44 = "MLDSA-44";
+        public const string MlDsa65 = "MLDSA-65";
+        public const string MlDsa87 = "MLDSA-87";
+        public const string MlDsaUnknown = "MLDSA-UNKNOWN";
+
         public const string Unknown = "UNKNOWN"; // Key type is not recognized.
         public const string NoKey = "NO-KEY"; // Used when no key is found or provided to differentiate from unknown key types
     }
@@ -113,25 +118,49 @@ public static class CryptoTelemetry
                 _ => KeyAlgorithmIds.SymmetricUnknown
             },
 
-            X509SecurityKey x509 => x509.KeySize switch
-            {
-                2048 => KeyAlgorithmIds.Rsa2048,
-                3072 => KeyAlgorithmIds.Rsa3072,
-                4096 => KeyAlgorithmIds.Rsa4096,
-                256 => KeyAlgorithmIds.EcdsaP256,
-                384 => KeyAlgorithmIds.EcdsaP384,
-                521 => KeyAlgorithmIds.EcdsaP521,
-                _ => x509.PublicKey is RSA
-                    ? KeyAlgorithmIds.RsaUnknown
-                    : x509.PublicKey is ECDsa
-                        ? KeyAlgorithmIds.EcdsaUnknown
-                        : KeyAlgorithmIds.Unknown
-            },
+            X509SecurityKey x509 => GetX509KeyAlgorithmId(x509),
 
             JsonWebKey jwk => GetJsonWebKeyAlgorithmId(jwk),
 
-            // EdDSA, MLDSA and other key types can be added here when needed.
+            MlDsaSecurityKey mlDsa => mlDsa.MLDsa.Algorithm.Name switch
+            {
+                "ML-DSA-44" => KeyAlgorithmIds.MlDsa44,
+                "ML-DSA-65" => KeyAlgorithmIds.MlDsa65,
+                "ML-DSA-87" => KeyAlgorithmIds.MlDsa87,
+                _ => KeyAlgorithmIds.MlDsaUnknown
+            },
+
+            // EdDSA and other key types can be added here when needed.
             _ => KeyAlgorithmIds.Unknown
+        };
+    }
+
+    private static string GetX509KeyAlgorithmId(X509SecurityKey x509)
+    {
+        if (x509.MlDsaPublicKey != null)
+        {
+            return x509.MlDsaPublicKey.Algorithm.Name switch
+            {
+                "ML-DSA-44" => KeyAlgorithmIds.MlDsa44,
+                "ML-DSA-65" => KeyAlgorithmIds.MlDsa65,
+                "ML-DSA-87" => KeyAlgorithmIds.MlDsa87,
+                _ => KeyAlgorithmIds.MlDsaUnknown
+            };
+        }
+
+        return x509.KeySize switch
+        {
+            2048 => KeyAlgorithmIds.Rsa2048,
+            3072 => KeyAlgorithmIds.Rsa3072,
+            4096 => KeyAlgorithmIds.Rsa4096,
+            256 => KeyAlgorithmIds.EcdsaP256,
+            384 => KeyAlgorithmIds.EcdsaP384,
+            521 => KeyAlgorithmIds.EcdsaP521,
+            _ => x509.PublicKey is RSA
+                ? KeyAlgorithmIds.RsaUnknown
+                : x509.PublicKey is ECDsa
+                    ? KeyAlgorithmIds.EcdsaUnknown
+                    : KeyAlgorithmIds.Unknown
         };
     }
 
@@ -164,6 +193,13 @@ public static class CryptoTelemetry
                 384 => KeyAlgorithmIds.Symmetric384,
                 512 => KeyAlgorithmIds.Symmetric512,
                 _ => KeyAlgorithmIds.SymmetricUnknown
+            },
+            JsonWebAlgorithmsKeyTypes.Akp => jwk.Alg switch
+            {
+                SecurityAlgorithms.MlDsa44 => KeyAlgorithmIds.MlDsa44,
+                SecurityAlgorithms.MlDsa65 => KeyAlgorithmIds.MlDsa65,
+                SecurityAlgorithms.MlDsa87 => KeyAlgorithmIds.MlDsa87,
+                _ => KeyAlgorithmIds.MlDsaUnknown
             },
             _ => KeyAlgorithmIds.Unknown
         };
