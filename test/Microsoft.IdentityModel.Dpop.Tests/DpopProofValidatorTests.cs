@@ -523,7 +523,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         // RFC 9449 §4.3 + RFC 3986 §6.2.2: htu comparison must normalize scheme/host
         // case-insensitively but keep path comparison case-sensitive. Each case below pins
-        // a specific contract; see PopUriComparer for the full contract documentation.
+        // a specific contract; see DpopUriComparer for the full contract documentation.
         [Theory]
         [InlineData("https://resource.example.org/admin", "https://resource.example.org/admin", true,  "identity")]
         [InlineData("https://Resource.Example.ORG/admin", "https://resource.example.org/admin", true,  "host case-insensitive (RFC 3986 §6.2.2.1)")]
@@ -535,6 +535,11 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         [InlineData("https://resource.example.org:8443/admin", "https://resource.example.org/admin", false, "explicit non-default port matters")]
         [InlineData("https://resource.example.org/a%41", "https://resource.example.org/aA", true,  "percent-encoding of unreserved chars normalizes (RFC 3986 §6.2.2.2)")]
         [InlineData("https://resource.example.org/admin#frag", "https://resource.example.org/admin", true, "fragment ignored (RFC 9449 §4.3)")]
+        [InlineData("https://resource.example.org/admin", "https://resource.example.org/admin?q=1", true, "query string in actual URI ignored (RFC 9449 §4.3)")]
+        [InlineData("http://resource.example.org:80/admin", "http://resource.example.org/admin", true, "HTTP default port equivalence (RFC 3986 §3.2.3)")]
+        [InlineData("https://resource.example.org/a/../admin", "https://resource.example.org/admin", true, "dot-segment removal per RFC 3986 §6.2.2.3")]
+        [InlineData("https://resource.example.org/%2F", "https://resource.example.org//", false, "%2F (reserved /) stays encoded — flip side of unreserved decoding")]
+        [InlineData("https://resource.example.org", "https://resource.example.org/", true, "empty path equivalent to /")]
         public async Task ValidateAsync_HtuComparison_AppliesRfcStrictRules(
             string htuClaim,
             string actualRequestUri,

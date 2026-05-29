@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Dpop;
 /// fragment are excluded per RFC 9449 §4.3.
 /// </para>
 /// </remarks>
-internal static class PopUriComparer
+internal static class DpopUriComparer
 {
     /// <summary>
     /// Returns <see langword="true"/> when the actual request URI is equivalent to the
