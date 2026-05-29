@@ -19,15 +19,15 @@ namespace Microsoft.IdentityModel.Dpop;
 /// This class creates DPoP proof JWTs according to RFC 9449.
 /// It is intended for test and sample use only.
 /// </summary>
-internal class DPoPProofCreator
+internal class DpopProofCreator
 {
-    private readonly DPoPProofCreatorOptions _options;
+    private readonly DpopProofCreatorOptions _options;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DPoPProofCreator"/> class.
+    /// Initializes a new instance of the <see cref="DpopProofCreator"/> class.
     /// </summary>
     /// <param name="options">The options for creating DPoP proofs.</param>
-    public DPoPProofCreator(DPoPProofCreatorOptions options)
+    public DpopProofCreator(DpopProofCreatorOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
 
@@ -64,10 +64,10 @@ internal class DPoPProofCreator
         var claims = new Dictionary<string, object>
         {
             // DPoP RFC 9449 required claims
-            { DPoPClaimTypes.Htm, httpMethod.ToUpperInvariant() },
-            { DPoPClaimTypes.Htu, uri.GetLeftPart(UriPartial.Path) },
-            { DPoPClaimTypes.Iat, now.ToUnixTimeSeconds() },
-            { DPoPClaimTypes.Jti, Guid.NewGuid().ToString() }
+            { DpopClaimTypes.Htm, httpMethod.ToUpperInvariant() },
+            { DpopClaimTypes.Htu, uri.GetLeftPart(UriPartial.Path) },
+            { DpopClaimTypes.Iat, now.ToUnixTimeSeconds() },
+            { DpopClaimTypes.Jti, Guid.NewGuid().ToString() }
         };
 
         if (!string.IsNullOrEmpty(accessToken))
@@ -102,7 +102,7 @@ internal class DPoPProofCreator
             }
 #endif
             var tokenHashBase64 = Base64UrlEncoder.Encode(tokenHash);
-            claims.Add(DPoPClaimTypes.Ath, tokenHashBase64);
+            claims.Add(DpopClaimTypes.Ath, tokenHashBase64);
         }
 
         // Include a nonce if specified in options or provided by server
@@ -110,7 +110,7 @@ internal class DPoPProofCreator
         {
             string nonceValue = serverProvidedNonce ??
                 _options.Nonce ?? GenerateRandomNonce();
-            claims.Add(DPoPClaimTypes.Nonce, nonceValue);
+            claims.Add(DpopClaimTypes.Nonce, nonceValue);
         }
 
         JsonObject jwk = GetAsymmetricPublicJwk(
