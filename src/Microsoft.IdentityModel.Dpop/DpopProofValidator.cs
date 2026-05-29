@@ -441,7 +441,7 @@ public class DpopProofValidator
             return DpopValidationResult.Failed("DPoP proof is missing the 'htu' claim.", DpopValidationFailureType.HtuMissing);
         }
 
-        if (!DpopUriComparer.AreEquivalent(requestUri, htuValue))
+        if (!Uri.TryCreate(htuValue, UriKind.Absolute, out Uri htuUri) || !UriComparer.AreEquivalent(requestUri, htuUri))
         {
             return DpopValidationResult.Failed("DPoP proof 'htu' claim does not match the request URI.", DpopValidationFailureType.HtuMismatch);
         }

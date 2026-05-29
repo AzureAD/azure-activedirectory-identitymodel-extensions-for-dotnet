@@ -523,7 +523,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
         // RFC 9449 §4.3 + RFC 3986 §6.2.2: htu comparison must normalize scheme/host
         // case-insensitively but keep path comparison case-sensitive. Each case below pins
-        // a specific contract; see DpopUriComparer for the full contract documentation.
+        // a specific contract; see UriComparer for the full contract documentation.
         [Theory]
         [InlineData("https://resource.example.org/admin", "https://resource.example.org/admin", true,  "identity")]
         [InlineData("https://Resource.Example.ORG/admin", "https://resource.example.org/admin", true,  "host case-insensitive (RFC 3986 §6.2.2.1)")]
