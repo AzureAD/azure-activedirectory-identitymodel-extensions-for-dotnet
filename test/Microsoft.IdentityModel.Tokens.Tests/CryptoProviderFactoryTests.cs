@@ -1309,9 +1309,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 $"Provider should be marked as cached. IsCached={provider1.IsCached}");
 
             // Try to retrieve directly from the cache to isolate the issue
-            // Wait briefly for the async event queue
-            System.Threading.Thread.Sleep(200);
-
             bool tryGetResult = factory.CryptoProviderCache.TryGetSignatureProvider(
                 signingKey, algorithm, providerType, false, out var fromCache);
 
