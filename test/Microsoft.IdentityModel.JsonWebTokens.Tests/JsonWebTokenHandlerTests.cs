@@ -4649,6 +4649,70 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
             };
         }
+        [Theory]
+        [MemberData(nameof(BootstrapContextTestData),
+    DisableDiscoveryEnumeration = true)]
+        public async Task BootstrapContext_JsonWebTokenHandler(
+    BootstrapContextTheoryData theoryData)
+        {
+            var handler = new JsonWebTokenHandler();
+
+            var result = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters);
+
+            Assert.True(result.IsValid, $"Validation failed: {result.Exception?.Message}");
+
+            var bootstrapContext = result.ClaimsIdentity.BootstrapContext as string;
+
+            if (theoryData.SaveSigninToken)
+            {
+                Assert.NotNull(bootstrapContext);
+                var result2 = await handler.ValidateTokenAsync(bootstrapContext, theoryData.ValidationParameters);
+                Assert.True(result2.IsValid, $"Re-validation failed: {result2.Exception?.Message}");
+            }
+            else
+            {
+                Assert.Null(bootstrapContext);
+            }
+        }
+
+        public static TheoryData<BootstrapContextTheoryData> BootstrapContextTestData
+        {
+            get
+            {
+                var theoryData = new TheoryData<BootstrapContextTheoryData>();
+
+                // SaveSigninToken = true — BootstrapContext should be set
+                var validationParametersWithSave = Default.AsymmetricSignTokenValidationParameters.Clone();
+                validationParametersWithSave.SaveSigninToken = true;
+                theoryData.Add(new BootstrapContextTheoryData
+                {
+                    TestId = "SaveSigninToken_True",
+                    Token = Default.AsymmetricJwt,
+                    ValidationParameters = validationParametersWithSave,
+                    SaveSigninToken = true
+                });
+
+                // SaveSigninToken = false — BootstrapContext should be null
+                var validationParametersWithoutSave = Default.AsymmetricSignTokenValidationParameters.Clone();
+                validationParametersWithoutSave.SaveSigninToken = false;
+                theoryData.Add(new BootstrapContextTheoryData
+                {
+                    TestId = "SaveSigninToken_False",
+                    Token = Default.AsymmetricJwt,
+                    ValidationParameters = validationParametersWithoutSave,
+                    SaveSigninToken = false
+                });
+
+                return theoryData;
+            }
+        }
+
+        public class BootstrapContextTheoryData : TheoryDataBase
+        {
+            public string Token { get; set; }
+            public TokenValidationParameters ValidationParameters { get; set; }
+            public bool SaveSigninToken { get; set; }
+        }
 
         [Theory, MemberData(nameof(ReadJsonWebTokenSpanTheoryData))]
         public void ReadJsonWebToken_Span(JwtTheoryData theoryData)
