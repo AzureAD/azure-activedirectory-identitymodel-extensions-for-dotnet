@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private static CryptoProviderFactory _default;
         private static readonly ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
-        private static readonly ConcurrentDictionary<string, string> _customProviderTypeCache = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _customProviderTypeCache = new ConcurrentDictionary<string, string>();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
         private static string _typeofAsymmetricSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
         private static string _typeofSymmetricSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
