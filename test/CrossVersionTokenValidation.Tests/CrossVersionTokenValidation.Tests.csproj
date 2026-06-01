@@ -9,6 +9,7 @@
     <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation />
     <DefineConstants>CrossVersionTokenValidation</DefineConstants>
+    <NoWarn>$(NoWarn);NU1902</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Microsoft.IdentityModel.TestUtils\ClaimSets.cs" Link="ClaimSets.cs" />

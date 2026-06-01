@@ -7,7 +7,7 @@
     <MicrosoftIdentityModelProtocolExtensionsVersion>1.0.4.403061554</MicrosoftIdentityModelProtocolExtensionsVersion>
     <MicrosoftNETTestSdkVersion>15.9.0</MicrosoftNETTestSdkVersion>
     <SystemIdentityModelTokensJwtVersion4x>4.0.4.403061554</SystemIdentityModelTokensJwtVersion4x>
-    <SystemNetHttpVersion>4.3.2</SystemNetHttpVersion>
+    <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
     <XunitVersion>2.4.0</XunitVersion>
   </PropertyGroup>
 </Project>
