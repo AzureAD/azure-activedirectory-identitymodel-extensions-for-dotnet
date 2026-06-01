@@ -129,8 +129,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             Type type = typeof(CryptoProviderFactory);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 7)
-                Assert.Fail("Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 8)
+                Assert.Fail("Number of public fields has changed from 8 to: " + properties.Length + ", adjust tests");
 
             CustomCryptoProvider customCryptoProvider = new CustomCryptoProvider();
             GetSetContext getSetContext =
