@@ -32,6 +32,12 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
 
+  <!-- Suppress NETSDK1138, NETSDK1202 ("target framework is out of support") -->
+  <PropertyGroup>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
