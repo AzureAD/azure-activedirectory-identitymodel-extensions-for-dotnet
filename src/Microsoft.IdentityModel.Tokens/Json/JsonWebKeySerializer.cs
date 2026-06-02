@@ -45,6 +45,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
             "N",
             "OTH",
             "P",
+            "PRIV",
+            "PUB",
             "Q",
             "QI",
             "USE",
@@ -162,6 +164,10 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.Oth, JsonWebKeyParameterNames.Oth, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.P))
                         jsonWebKey.P = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.P, JsonWebKey.ClassName, true);
+                    else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Priv))
+                        jsonWebKey.Priv = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Priv, JsonWebKey.ClassName, true);
+                    else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Pub))
+                        jsonWebKey.Pub = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Pub, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Q))
                         jsonWebKey.Q = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Q, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.QI))
@@ -376,6 +382,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             if (!string.IsNullOrEmpty(jsonWebKey.P))
                 writer.WriteString(JsonWebKeyParameterUtf8Bytes.P, jsonWebKey.P);
+
+            if (!string.IsNullOrEmpty(jsonWebKey.Priv))
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Priv, jsonWebKey.Priv);
+
+            if (!string.IsNullOrEmpty(jsonWebKey.Pub))
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Pub, jsonWebKey.Pub);
 
             if (!string.IsNullOrEmpty(jsonWebKey.Q))
                 writer.WriteString(JsonWebKeyParameterUtf8Bytes.Q, jsonWebKey.Q);
