@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.19.1
+====
+## Bug Fixes
+- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` toi take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
+
 8.19.0
 ====
 ## New Features
