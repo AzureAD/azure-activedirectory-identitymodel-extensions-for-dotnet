@@ -3,7 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 7.7.2
 ====
 ## Bug Fixes
-- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` toi take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
+- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` to take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
 - Improve validation of `jku` claim. See [PR #3480](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3480).
 
 ## Dependency Updates
@@ -12,7 +12,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 8.19.1
 ====
 ## Bug Fixes
-- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` toi take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
+- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` to take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
 
 8.19.0
 ====
