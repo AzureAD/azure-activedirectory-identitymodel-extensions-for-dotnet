@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests;
 /// <summary>
 /// End-to-end round-trip tests: mint access token with cnf.jkt → create proof → validate proof → verify binding.
 /// </summary>
-public class DPoPE2ETests
+public class DpopE2ETests
 {
     private static RSA CreateTestRsa()
     {
@@ -40,7 +40,7 @@ public class DPoPE2ETests
 
         // Compute the JWK thumbprint of the proof key
         var proofJwk = JsonWebKeyConverter.ConvertFromSecurityKey(new RsaSecurityKey(proofKey));
-        var thumbprint = DPoPProofValidator.ComputeJwkThumbprint(proofJwk);
+        var thumbprint = DpopProofValidator.ComputeJwkThumbprint(proofJwk);
 
         // Build the cnf claim
         var cnfJson = $"{{\"jkt\":\"{thumbprint}\"}}";
@@ -73,7 +73,7 @@ public class DPoPE2ETests
         var (accessToken, proofKey, _) = CreateAccessTokenWithCnfJkt();
 
         // 2. Create a DPoP proof using the same key
-        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        var proofCreator = new DpopProofCreator(new DpopProofCreatorOptions
         {
             SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
         });
@@ -88,12 +88,13 @@ public class DPoPE2ETests
         var jkt = cnf.GetProperty("jkt").GetString();
 
         // 4. Validate the proof with binding
-        var validator = new DPoPProofValidator();
-        var options = new DPoPValidationOptions
+        var validator = new DpopProofValidator();
+        var options = new DpopValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
             MaxLifetimeInSeconds = 300,
             ClockSkewInSeconds = 300,
+            ReplayProtectionHandledExternally = true,
         };
 
         var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
@@ -108,7 +109,7 @@ public class DPoPE2ETests
         var (accessToken, _, _) = CreateAccessTokenWithCnfJkt();
         var differentKey = CreateTestRsa();
 
-        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        var proofCreator = new DpopProofCreator(new DpopProofCreatorOptions
         {
             SigningCredentials = new SigningCredentials(new RsaSecurityKey(differentKey), SecurityAlgorithms.RsaSha256),
         });
@@ -123,15 +124,16 @@ public class DPoPE2ETests
         var jkt = cnf.GetProperty("jkt").GetString();
 
         // Proof validates structurally but binding fails — different keys
-        var validator = new DPoPProofValidator();
-        var options = new DPoPValidationOptions
+        var validator = new DpopProofValidator();
+        var options = new DpopValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+            ReplayProtectionHandledExternally = true,
         };
         var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
 
         Assert.False(result.IsValid);
-        Assert.Contains("cnf.jkt", result.Error);
+        Assert.Contains("cnf.jkt", result.Error.Message);
     }
 
     [Fact]
@@ -141,7 +143,7 @@ public class DPoPE2ETests
         var (tokenA, proofKey, _) = CreateAccessTokenWithCnfJkt();
         var (tokenB, _, _) = CreateAccessTokenWithCnfJkt(proofKeyOverride: proofKey);
 
-        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        var proofCreator = new DpopProofCreator(new DpopProofCreatorOptions
         {
             SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
         });
@@ -154,16 +156,17 @@ public class DPoPE2ETests
         var jkt = cnf.GetProperty("jkt").GetString();
 
         // Validate proof against token B — ath won't match
-        var validator = new DPoPProofValidator();
-        var options = new DPoPValidationOptions
+        var validator = new DpopProofValidator();
+        var options = new DpopValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
+            ReplayProtectionHandledExternally = true,
         };
         var result = await validator.ValidateAsync(
             proofJwt, "GET", new Uri("https://api.example.com/resource"), tokenB, jkt, options);
 
         Assert.False(result.IsValid);
-        Assert.Contains("ath", result.Error);
+        Assert.Contains("ath", result.Error.Message);
     }
 
     [Fact]
@@ -172,7 +175,7 @@ public class DPoPE2ETests
         var (accessToken, proofKey, _) = CreateAccessTokenWithCnfJkt();
         var nonce = "server-provided-nonce-abc123";
 
-        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        var proofCreator = new DpopProofCreator(new DpopProofCreatorOptions
         {
             SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
             IncludeNonce = true,
@@ -186,8 +189,8 @@ public class DPoPE2ETests
         Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
         var jkt = cnf.GetProperty("jkt").GetString();
 
-        var validator = new DPoPProofValidator();
-        var options = new DPoPValidationOptions
+        var validator = new DpopProofValidator();
+        var options = new DpopValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
             ExpectedNonce = nonce,
@@ -203,7 +206,7 @@ public class DPoPE2ETests
     {
         var (accessToken, proofKey, _) = CreateAccessTokenWithCnfJkt();
 
-        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        var proofCreator = new DpopProofCreator(new DpopProofCreatorOptions
         {
             SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
             IncludeNonce = true,
@@ -217,8 +220,8 @@ public class DPoPE2ETests
         Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
         var jkt = cnf.GetProperty("jkt").GetString();
 
-        var validator = new DPoPProofValidator();
-        var options = new DPoPValidationOptions
+        var validator = new DpopProofValidator();
+        var options = new DpopValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
             ExpectedNonce = "current-server-nonce",
@@ -243,8 +246,8 @@ public class DPoPE2ETests
         Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
         var jkt = cnf.GetProperty("jkt").GetString();
 
-        var validator = new DPoPProofValidator();
-        var options = new DPoPValidationOptions
+        var validator = new DpopProofValidator();
+        var options = new DpopValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
             ExpectedNonce = nonce,
@@ -293,9 +296,9 @@ public class DPoPE2ETests
 
         Assert.False(
             mismatchedResult.IsValid,
-            $"Proof should be rejected. Error was: {mismatchedResult.Error ?? "<none>"}");
+            $"Proof should be rejected. Error was: {mismatchedResult.Error?.Message ?? "<none>"}");
 
-        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        var proofCreator = new DpopProofCreator(new DpopProofCreatorOptions
         {
             SigningCredentials = new SigningCredentials(new RsaSecurityKey(originalProofKey), SecurityAlgorithms.RsaSha256),
             IncludeNonce = true,
@@ -304,7 +307,7 @@ public class DPoPE2ETests
         var wellFormedProofJwt = proofCreator.CreateProof(method, uri, accessToken);
         var wellFormedResult = await validator.ValidateAsync(
             wellFormedProofJwt, method, uri, accessToken, jkt, options);
-        Assert.True(wellFormedResult.IsValid, $"Well-formed proof should validate: {wellFormedResult.Error}");
+        Assert.True(wellFormedResult.IsValid, $"Well-formed proof should validate: {wellFormedResult.Error?.Message}");
     }
 
     [Fact]
@@ -320,13 +323,13 @@ public class DPoPE2ETests
         Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
         var jkt = cnf.GetProperty("jkt").GetString();
 
-        var options = new DPoPValidationOptions
+        var options = new DpopValidationOptions
         {
             AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
             ExpectedNonce = nonce,
         };
 
-        var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+        var proofCreator = new DpopProofCreator(new DpopProofCreatorOptions
         {
             SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
             IncludeNonce = true,
@@ -341,7 +344,7 @@ public class DPoPE2ETests
                 probeKey, SecurityAlgorithms.RsaSha256, providerTypeName, willCreateSignatures: false, out _),
             "Pre-validation: the verifying SignatureProvider should not already be cached.");
 
-        var validator = new DPoPProofValidator();
+        var validator = new DpopProofValidator();
         var result = await validator.ValidateAsync(proofJwt, method, uri, accessToken, jkt, options);
         Assert.True(result.IsValid, $"Proof should validate: {result.Error}");
 
@@ -355,7 +358,7 @@ public class DPoPE2ETests
     public async Task E2E_ValidateManyProofs_DoesNotPopulateCacheWithEphemeralKeys()
     {
         const int proofCount = 25;
-        var validator = new DPoPProofValidator();
+        var validator = new DpopProofValidator();
         var providerTypeName = typeof(AsymmetricSignatureProvider).ToString();
         var proofKeys = new List<RSA>();
 
@@ -375,13 +378,13 @@ public class DPoPE2ETests
                 Assert.True(at.TryGetPayloadValue("cnf", out System.Text.Json.JsonElement cnf));
                 var jkt = cnf.GetProperty("jkt").GetString();
 
-                var options = new DPoPValidationOptions
+                var options = new DpopValidationOptions
                 {
                     AllowedSigningAlgorithms = new HashSet<string>(StringComparer.Ordinal) { "RS256" },
                     ExpectedNonce = nonce,
                 };
 
-                var proofCreator = new DPoPProofCreator(new DPoPProofCreatorOptions
+                var proofCreator = new DpopProofCreator(new DpopProofCreatorOptions
                 {
                     SigningCredentials = new SigningCredentials(new RsaSecurityKey(proofKey), SecurityAlgorithms.RsaSha256),
                     IncludeNonce = true,
