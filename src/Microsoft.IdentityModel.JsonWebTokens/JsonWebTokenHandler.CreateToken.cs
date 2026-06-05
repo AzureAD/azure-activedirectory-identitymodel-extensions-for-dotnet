@@ -674,7 +674,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal))
+                    // Only divert the actor claim to the dedicated actor-serialization path when the value
+                    // is a ClaimsIdentity (the only type that path can serialize). Any other value
+                    // (e.g. a pre-serialized JSON object or string) is written verbatim below, preserving
+                    // the pre-existing behavior and avoiding silent data loss.
+                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal)
+                        && kvp.Value is ClaimsIdentity)
                     {
                         isActorFound = true;
                         continue;

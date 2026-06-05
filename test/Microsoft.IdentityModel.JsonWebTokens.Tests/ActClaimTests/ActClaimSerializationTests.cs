@@ -180,6 +180,74 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
+        public void ActorToken_InClaimsDictionary_AsNonClaimsIdentity_IsNotDropped()
+        {
+            // Regression test: a value placed under the actor claim type that is NOT a ClaimsIdentity
+            // (e.g. a pre-serialized JSON object) must be serialized verbatim, not silently dropped.
+            // Before the fix the write loop skipped the claim and CreateActorTokenDescriptor refused
+            // to emit a non-ClaimsIdentity value, so the 'act' claim vanished with only an IDX14315 warning.
+            var actorValue = new Dictionary<string, object>
+            {
+                { "sub", "actor-subject-id" },
+                { "name", "Actor Name" }
+            };
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            var tokenHandler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actorValue } },
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
+
+            Assert.True(decodedToken.Payload.HasClaim("act"), "The 'act' claim was dropped from the serialized token.");
+
+            var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
+            Assert.Equal(JsonValueKind.Object, actorObject.ValueKind);
+            Assert.Equal("actor-subject-id", actorObject.GetProperty("sub").GetString());
+            Assert.Equal("Actor Name", actorObject.GetProperty("name").GetString());
+        }
+
+        [Fact]
+        public void ActorToken_NonClaimsIdentityInClaims_WithSubjectActor_DoesNotLoseActClaim()
+        {
+            var actorValue = new Dictionary<string, object> { { "sub", "claims-actor-id" } };
+
+            var subjectActor = new CaseSensitiveClaimsIdentity("SubjectActorAuth");
+            subjectActor.AddClaim(new Claim("sub", "subject-actor-id"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.Actor = subjectActor;
+
+            var tokenHandler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actorValue } },
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
+
+            Assert.True(decodedToken.Payload.HasClaim("act"));
+            var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
+            Assert.Equal("claims-actor-id", actorObject.GetProperty("sub").GetString());
+        }
+
+        [Fact]
         public void NestedActorToken_InClaimsDictionary_IsCorrectlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorToken_InClaimsDictionary_IsCorrectlySerialized");
