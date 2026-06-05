@@ -123,14 +123,11 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets the maximum depth allowed when processing nested actor tokens.
-        /// <para>This prevents excessive recursion when handling deeply nested actor tokens.</para>
-        /// <para>The maximum allowed value is 5 to prevent security issues with excessively deep actor chains.</para>
-        /// <para>Customers are allowed upto 4 nested actors and 1 top level actor.</para>
+        /// <para>This is a fixed value of 5, representing 1 top-level actor and up to 4 nested actors.</para>
+        /// <para>This value is not configurable to prevent security issues with excessively deep actor chains.</para>
         /// </summary>
         /// <remarks>
-        /// <para>Default value is 5</para>
-        /// <para>During token validation and creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
-        /// <para>This limit applies to both token creation and validation processes.</para>
+        /// <para>During token creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
         /// </remarks>
         internal int MaxActorChainLength => _maxActorChainLength;
 
@@ -161,14 +158,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the current depth in the actor chain being processed.
+        /// Gets or sets the current depth in the actor chain during token creation.
         /// <para>This is used internally to track the nesting level during recursive processing 
-        /// of nested actor tokens.</para>
-        /// <para>The value starts at 0 and is incremented for each level of actor nesting. Max permissible value is 4.</para>
+        /// of nested actor tokens during serialization.</para>
+        /// <para>The value starts at 0 and is incremented for each level of actor nesting. The maximum permissible value is 4 (i.e., 5 total levels).</para>
         /// </summary>
         /// <remarks>
         /// <para>This value is compared against <see cref="MaxActorChainLength"/> to prevent excessive 
-        /// recursion or deeply nested actor tokens.</para>
+        /// recursion or deeply nested actor tokens during token creation.</para>
         /// </remarks>
         internal int ActorChainDepth
         {

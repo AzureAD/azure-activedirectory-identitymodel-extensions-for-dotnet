@@ -996,5 +996,150 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
             Assert.Null(identity.Actor.Actor.Actor.Actor.Actor);
         }
+
+        [Fact]
+        public async Task LegacyActort_NestedJwtChain_ExceedingMaxDepth_ThrowsSecurityTokenException()
+        {
+            // Validates that legacy "actort" JWT-string actor chains are depth-limited
+            // during token validation, preventing stack overflow from deeply nested tokens.
+            var handler = new JsonWebTokenHandler();
+            var signingCredentials = Default.AsymmetricSigningCredentials;
+
+            // Build a chain of nested actort JWTs exceeding MaxActorChainLength (5).
+            // Create the innermost actor JWT first, then wrap each level.
+            string currentActorToken = null;
+
+            // Create 6 levels of nested actort tokens (exceeds limit of 5)
+            for (int i = 6; i >= 1; i--)
+            {
+                var actorIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                actorIdentity.AddClaim(new Claim("sub", $"level{i}-actor"));
+
+                var descriptor = new SecurityTokenDescriptor
+                {
+                    Subject = actorIdentity,
+                    Issuer = "https://example.com",
+                    Audience = "https://api.example.com",
+                    SigningCredentials = signingCredentials,
+                };
+
+                if (currentActorToken != null)
+                {
+                    descriptor.Claims = new Dictionary<string, object>
+                    {
+                        { "actort", currentActorToken }
+                    };
+                }
+
+                currentActorToken = handler.CreateToken(descriptor);
+            }
+
+            // Create the main token with the deeply nested actort chain
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            var mainDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = signingCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    { "actort", currentActorToken }
+                },
+            };
+
+            var mainToken = handler.CreateToken(mainDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+            };
+
+            var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
+            Assert.True(result.IsValid);
+
+            // ClaimsIdentity is lazily created — accessing it triggers actor chain processing
+            var exception = Assert.Throws<SecurityTokenException>(() => result.ClaimsIdentity);
+            Assert.Contains("IDX14313", exception.Message);
+        }
+
+        [Fact]
+        public async Task LegacyActort_NestedJwtChain_WithinMaxDepth_Succeeds()
+        {
+            // Validates that legacy "actort" JWT-string actor chains within the depth limit
+            // are processed successfully during token validation.
+            var handler = new JsonWebTokenHandler();
+            var signingCredentials = Default.AsymmetricSigningCredentials;
+
+            // Build a chain of 4 nested actort JWTs (within limit of 5).
+            string currentActorToken = null;
+
+            for (int i = 4; i >= 1; i--)
+            {
+                var actorIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                actorIdentity.AddClaim(new Claim("sub", $"level{i}-actor"));
+
+                var descriptor = new SecurityTokenDescriptor
+                {
+                    Subject = actorIdentity,
+                    Issuer = "https://example.com",
+                    Audience = "https://api.example.com",
+                    SigningCredentials = signingCredentials,
+                };
+
+                if (currentActorToken != null)
+                {
+                    descriptor.Claims = new Dictionary<string, object>
+                    {
+                        { "actort", currentActorToken }
+                    };
+                }
+
+                currentActorToken = handler.CreateToken(descriptor);
+            }
+
+            // Create the main token with nested actort chain
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            var mainDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = signingCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    { "actort", currentActorToken }
+                },
+            };
+
+            var mainToken = handler.CreateToken(mainDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+            };
+
+            var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
+            Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
+
+            // ClaimsIdentity is lazily created — accessing it triggers actor chain processing
+            var identity = result.ClaimsIdentity;
+
+            // Verify the actor chain was created
+            Assert.NotNull(identity.Actor);
+            Assert.Equal("level1-actor", identity.Actor.FindFirst("sub")?.Value);
+            Assert.NotNull(identity.Actor.Actor);
+            Assert.Equal("level2-actor", identity.Actor.Actor.FindFirst("sub")?.Value);
+        }
     }
 }

@@ -211,7 +211,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreateClaimsIdentityPrivate(jwtToken, validationParameters, issuer);
         }
 
-        private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer, int currentActorDepth = 0)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
@@ -230,7 +230,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                                     LogMessages.IDX14112,
                                     LogHelper.MarkAsNonPII(jwtClaim.Type),
                                     jwtClaim.Value)));
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, jwtClaim.Type.Equals(validationParameters.ActorClaimType));
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, jwtClaim.Type.Equals(validationParameters.ActorClaimType), currentActorDepth);
                 }
 
                 if (wasMapped)
@@ -275,7 +275,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return actualIssuer;
         }
 
-        private ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        private ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer, int currentActorDepth = 0)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
@@ -287,7 +287,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     if (identity.Actor != null)
                         throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(claimType), jwtClaim.Value)));
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, claimType.Equals(validationParameters.ActorClaimType));
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, claimType.Equals(validationParameters.ActorClaimType), currentActorDepth);
                 }
 
                 if (jwtClaim.Properties.Count == 0)
@@ -620,19 +620,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="actorString">The actor claim string.</param>
         /// <param name="tokenValidationParameters">The token validation parameters.</param>
         /// <param name="isStandardAct">This tells us if we want to deserialize it as a JWT or Json Object. If this is set to true then we deserialize as JsonObject else as JWT.</param>
+        /// <param name="currentActorDepth">The current recursion depth for nested actor processing.</param>
         /// <returns>A ClaimsIdentity representing the actor.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="actorString"/> or <paramref name="tokenValidationParameters"/> is null.</exception>
         private ClaimsIdentity CreateClaimsIdentityActor(
             JsonWebToken jwtToken,
             string actorString,
             TokenValidationParameters tokenValidationParameters,
-            bool isStandardAct = false)
+            bool isStandardAct = false,
+            int currentActorDepth = 0)
         {
             if (string.IsNullOrEmpty(actorString))
                 throw LogHelper.LogArgumentNullException(nameof(actorString));
 
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
+
+            if (currentActorDepth >= TokenValidationParameters.MaxActorChainLength)
+            {
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenException(LogHelper.FormatInvariant(
+                    LogMessages.IDX14313,
+                    LogHelper.MarkAsNonPII(currentActorDepth),
+                    LogHelper.MarkAsNonPII(TokenValidationParameters.MaxActorChainLength))));
+            }
 
             if (isStandardAct)
             {
@@ -653,7 +664,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                     else
                     {
-                        return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters);
+                        return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters, currentDepth: currentActorDepth);
                     }
                 }
             }
@@ -662,7 +673,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (CanReadToken(actorString))
                 {
                     JsonWebToken actor = ReadToken(actorString) as JsonWebToken;
-                    return CreateClaimsIdentity(actor, tokenValidationParameters);
+                    return CreateClaimsIdentityPrivate(actor, tokenValidationParameters, GetActualIssuer(actor), currentActorDepth + 1);
                 }
             }
 
