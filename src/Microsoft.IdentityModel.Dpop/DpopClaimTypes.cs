@@ -6,7 +6,7 @@ namespace Microsoft.IdentityModel.Dpop;
 /// <summary>
 /// DPoP-specific JWT claim type names per RFC 9449.
 /// </summary>
-public static class DPoPClaimTypes
+public static class DpopClaimTypes
 {
     /// <summary>The HTTP method claim.</summary>
     public const string Htm = "htm";

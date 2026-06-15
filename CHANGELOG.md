@@ -1,17 +1,54 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.7.2
+====
+## Bug Fixes
+- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` to take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
+- Improve validation of `jku` claim. See [PR #3480](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3480).
+
+## Dependency Updates
+- Update System.Text.Json to 8.0.5 on all target frameworks except .NET 461. See [PR #3499](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3499).
+
+8.19.1
+====
+## Bug Fixes
+- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` to take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
+
+8.19.0
+====
+## New Features
+- Add ML-DSA (FIPS 204) post-quantum signature support. See [PR #3479](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3479).
+- Cache custom crypto providers in CryptoProviderFactory. See [PR #3489](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3489).
+
+## Bug Fixes
+- Disable automatic redirects on default HttpClient for JKU retrieval. See [PR #3494](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3494).
+- Adjust rented buffer handling in claim set parsing. See [PR #3493](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3493).
+- Tidy null handling in SAML conditions validation. See [PR #3491](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3491).
+- Improve validation of `jku` claim. See [PR #3481](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3481).
+- Limit telemetry algorithm dimension cardinality. See [PR #3490](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3490).
+- Add defensive copy of collections in ValidationParameters. See [PR #3492](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3492).
+- Update TokenValidationParameter copy constructor to make a deep copy. See [PR #3488](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3488).
+- Update to fail-closed when replay protection isn't configured and other DPoP hardening. See [PR #3505](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3505).
+- Apply RFC 3986 section 6.2.2 normalization to DPoP `htu` comparison. See [PR #3509](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3509).
+
+8.18.0
+====
+## New Features
+- Introduced a new interface `IConfigurationEventHandlerContextAware<T>` that provides context to the configuration event handler implementation, allowing it to optionally bypass a cache lookup. See [PR #3444](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3444).
+- Added Microsoft.IdentityModel.Dpop — a new package implementing DPoP (Demonstrating Proof-of-Possession) per RFC 9449. Provides both client-side and server-side proof validation with no System.Net.Http dependency. See [PR #3443](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3443).
+
 8.17.0
 ====
 ## Dependencies
-* Downgrade Microsoft.Extensions.Logging.Abstractions to 8.0.0 on .NET 10 to match the version on .NET 8 and .NET 9. See [PR #3435](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3435).
+- Downgrade Microsoft.Extensions.Logging.Abstractions to 8.0.0 on .NET 10 to match the version on .NET 8 and .NET 9. See [PR #3435](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3435).
 
 8.16.0
 ====
 ## New Features
-* Add telemetry around signature validation. See [PR #3415](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3415) for details.
+- Add telemetry around signature validation. See [PR #3415](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3415) for details.
 
 ## Fundamentals
-* Fix FileVersion format to use two-digit year and day of year. See [PR #3389](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3389) for details.
+- Fix FileVersion format to use two-digit year and day of year. See [PR #3389](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3389) for details.
 
 8.15.0
 ====
