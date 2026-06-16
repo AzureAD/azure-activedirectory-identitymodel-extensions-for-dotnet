@@ -407,6 +407,22 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
+                        // URI path components are case-sensitive per RFC 3986 section 3.3; a proof for "/Path1" must not validate against request path "/path1".
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/Path1")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidCaseMismatch",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        // Symmetric direction of InvalidCaseMismatch: a proof for "/path1" must not validate against request path "/Path1".
+                        HttpRequestUri = new Uri("https://www.contoso.com/Path1"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/path1")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidCaseMismatchReversed",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
                         HttpRequestUri = null,
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, null)),
                         ExpectedException = ExpectedException.ArgumentNullException(),

@@ -822,7 +822,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             pClaimValue = pClaimValue.Trim('/');
             var expectedPClaimValue = httpRequestUri.AbsolutePath.Trim('/');
 
-            if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase))
+            // URI path components are case-sensitive per RFC 3986 section 3.3, so the comparison must be ordinal (case-sensitive).
+            if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.Ordinal))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P), expectedPClaimValue, pClaimValue)));
         }
 
