@@ -674,7 +674,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal))
+                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal) && kvp.Value is ClaimsIdentity)
                     {
                         isActorFound = true;
                         continue;
@@ -1111,22 +1111,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.Claims?.TryGetValue(tokenDescriptor.ActorClaimType, out object actorValue) == true)
             {
-                if (actorValue is not ClaimsIdentity actor)
+                actorTokenDescriptor = new SecurityTokenDescriptor
                 {
-                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        LogHelper.LogWarning(LogHelper.FormatInvariant(
-                            LogMessages.IDX14315,
-                            LogHelper.MarkAsNonPII(tokenDescriptor.ActorClaimType),
-                            LogHelper.MarkAsNonPII(actorValue?.GetType().FullName ?? "null")));
-                }
-                else
-                {
-                    actorTokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Subject = actor,
-                    };
-                }
-
+                    Subject = actorValue as ClaimsIdentity,
+                };
             }
             // Then check for actor in subject
             else if (tokenDescriptor.Subject?.Actor != null)
