@@ -107,6 +107,20 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool SuccessValidationLogsAsInformation => _successValidationLogsAsInformation ??= (AppContext.TryGetSwitch(SuccessValidationLogsAsInformationSwitch, out bool successLogsAsInfo) && successLogsAsInfo);
 
         /// <summary>
+        /// Controls whether the Signed HTTP Request 'p' (path) claim is compared case-sensitively (ordinal) per RFC 3986 section 3.3.
+        /// On this line the comparison is case-sensitive by default; set the switch to <c>false</c> to restore the legacy case-insensitive (OrdinalIgnoreCase) comparison.
+        /// </summary>
+        internal const string UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison";
+
+        // Single source of truth for the default, referenced by both the property below and ResetAllSwitches() so they cannot diverge.
+        // 9.x (this line): true (secure, case-sensitive). 8.x servicing backport: false (legacy, case-insensitive).
+        internal const bool UseCaseSensitivePClaimComparisonDefault = true;
+
+        private static bool? _useCaseSensitivePClaimComparison;
+
+        internal static bool UseCaseSensitivePClaimComparison => _useCaseSensitivePClaimComparison ??= (AppContext.TryGetSwitch(UseCaseSensitivePClaimComparisonSwitch, out bool useCaseSensitivePClaimComparison) ? useCaseSensitivePClaimComparison : UseCaseSensitivePClaimComparisonDefault);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -134,6 +148,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             _successValidationLogsAsInformation = null;
             AppContext.SetSwitch(SuccessValidationLogsAsInformationSwitch, false);
+
+            // Opt-out switch (default true on this line). Reset to the declared default rather than a hardcoded false,
+            // because AppContext cannot truly un-set a switch and writing false would select the legacy behavior.
+            _useCaseSensitivePClaimComparison = null;
+            AppContext.SetSwitch(UseCaseSensitivePClaimComparisonSwitch, UseCaseSensitivePClaimComparisonDefault);
         }
     }
 }

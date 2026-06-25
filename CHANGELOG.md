@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+9.0.0
+====
+## Bug Fixes
+- Make Signed HTTP Request `p` (path) claim comparison case-sensitive per RFC 3986 section 3.3, behind an AppContext switch. Previously `/Admin/resource` matched `/admin/resource`. See [PR #3526](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3526).
+
 7.7.2
 ====
 ## Bug Fixes
