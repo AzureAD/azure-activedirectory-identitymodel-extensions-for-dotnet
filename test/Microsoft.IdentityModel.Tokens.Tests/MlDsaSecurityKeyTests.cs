@@ -238,7 +238,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             var (x509Key, _) = GetX509MlDsaKey(algorithm);
 
-            var jwk = JsonWebKeyConverter.ConvertFromX509SecurityKey(x509Key, representAsRsaKey: true);
+            var jwk = JsonWebKeyConverter.ConvertFromX509SecurityKey(x509Key, extractKeyMaterial: true);
 
             Assert.Equal(JsonWebAlgorithmsKeyTypes.Akp, jwk.Kty);
             Assert.Equal(algorithm, jwk.Alg);
@@ -273,7 +273,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
             var publicOnlyKey = new X509SecurityKey(publicOnlyCert);
 
-            var jwk = JsonWebKeyConverter.ConvertFromX509SecurityKey(publicOnlyKey, representAsRsaKey: true);
+            var jwk = JsonWebKeyConverter.ConvertFromX509SecurityKey(publicOnlyKey, extractKeyMaterial: true);
 
             Assert.Equal(JsonWebAlgorithmsKeyTypes.Akp, jwk.Kty);
             Assert.Equal(algorithm, jwk.Alg);
@@ -760,8 +760,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.ValidAudiences.Add("https://test-audience.example.com");
             validationParameters.SigningKeys.Add(verifyKey);
             validationParameters.TryAllSigningKeys = true;
-            validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
-            validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+            validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
+            validationParameters.TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation;
 
             var result = await ((IResultBasedValidation)handler).ValidateTokenAsync(
                 token, validationParameters, new CallContext());

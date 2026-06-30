@@ -323,6 +323,14 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// </summary>
         public static readonly SignatureValidationFailure ReferenceDigestValidationFailed = new ReferenceDigestValidationFailedType("ReferenceDigestValidationFailed");
         private class ReferenceDigestValidationFailedType : SignatureValidationFailure { internal ReferenceDigestValidationFailedType(string name) : base(name) { } }
+
+        /// <summary>
+        /// Creating the <see cref="SignatureProvider"/> threw an exception. This happens when the platform
+        /// cannot create a provider for the key and algorithm at runtime, for example an ML-DSA key on a
+        /// platform without post-quantum support.
+        /// </summary>
+        public static readonly SignatureValidationFailure SignatureProviderCreationFailed = new SignatureProviderCreationFailedType("SignatureProviderCreationFailed");
+        private class SignatureProviderCreationFailedType : SignatureValidationFailure { internal SignatureProviderCreationFailedType(string name) : base(name) { } }
     }
 
     /// <summary>

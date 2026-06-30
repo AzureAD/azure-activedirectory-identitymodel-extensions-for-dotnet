@@ -323,6 +323,9 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX11025 = "IDX11025: Cannot serialize object of type: '{0}' into property: '{1}'.";
         public const string IDX11026 = "IDX11026: Unable to get claim value as a string from claim type:'{0}', value type was:'{1}'. Acceptable types are String, IList<String>, and System.Text.Json.JsonElement.";
 
+        // SignatureProvider creation (continued from IDX10630-10638; appended here as IDX1063x slots are retired numbers)
+        public const string IDX11028 = "IDX11028: CryptoProviderFactory.CreateForVerifying threw an exception for key: '{0}', signatureAlgorithm: '{1}'. The platform may not support the algorithm or extracting the key material for it (for example, ML-DSA on a platform without post-quantum support). See the inner exception for details.";
+
 #pragma warning restore 1591
     }
 }

@@ -246,6 +246,7 @@ static readonly Microsoft.IdentityModel.Tokens.Experimental.SignatureKeyValidati
 static readonly Microsoft.IdentityModel.Tokens.Experimental.SignatureKeyValidationFailure.ValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.SignatureKeyValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure.AlgorithmValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure.ReferenceDigestValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure.SignatureProviderCreationFailed -> Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure.SigningKeyNotFound -> Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure.TokenIsNotSigned -> Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure.ValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.SignatureValidationFailure!
