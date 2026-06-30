@@ -30,6 +30,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class JsonWebTokenHandlerTests
     {
         [Fact]
+        public void CreateToken_RsaJsonWebKeyWithPrivateKeyAndX5c_Signs()
+        {
+            // Regression: signing with a JWK that carries both private RSA parameters and x5c
+            // threw a NullReferenceException, because the key was converted to an X509SecurityKey
+            // from the public-only x5c[0] and the private key was null at sign time.
+            // See https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3260.
+            var signingKey = KeyingMaterial.JsonWebKeyX509_2048_As_RSA;
+            signingKey.X5c.Add(Convert.ToBase64String(KeyingMaterial.DefaultCert_2048.RawData));
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "issuer",
+                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256),
+            };
+
+            var jwt = handler.CreateToken(tokenDescriptor);
+
+            Assert.Equal(3, jwt.Split('.').Length);
+        }
+
+        [Fact]
         public void JsonWebTokenHandler_CreateToken_SameTypeMultipleValues()
         {
             var identity = new CaseSensitiveClaimsIdentity("Test");

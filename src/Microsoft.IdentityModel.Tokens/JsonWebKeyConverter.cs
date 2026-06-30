@@ -304,10 +304,15 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (JsonWebAlgorithmsKeyTypes.RSA.Equals(webKey.Kty))
                 {
-                    if (TryConvertToX509SecurityKey(webKey, out key))
+                    // Prefer RSA over X509: a JWK carrying RSA key material (and especially the
+                    // private parameters) must convert to an RsaSecurityKey. Converting to an
+                    // X509SecurityKey from x5c[0] yields a public-only certificate, which silently
+                    // discards the private key and throws a NullReferenceException when signing.
+                    // See https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3260.
+                    if (TryCreateToRsaSecurityKey(webKey, out key))
                         return true;
 
-                    if (TryCreateToRsaSecurityKey(webKey, out key))
+                    if (TryConvertToX509SecurityKey(webKey, out key))
                         return true;
                 }
                 else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty))
