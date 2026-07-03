@@ -251,7 +251,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
-            SignatureProvider signatureProvider = cryptoProviderFactory.CreateForVerifying(key, jsonWebToken.Alg);
+            SignatureProvider signatureProvider;
+            try
+            {
+                signatureProvider = cryptoProviderFactory.CreateForVerifying(key, jsonWebToken.Alg);
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                RecordSignatureValidationTelemetry(
+                    TelemetryClient,
+                    TelemetryConstants.SignatureValidationErrors.SignatureProviderCreationFailed,
+                    jsonWebToken,
+                    key);
+
+                return new SignatureValidationError(
+                    new MessageDetail(
+                        TokenLogMessages.IDX11028,
+                        LogHelper.MarkAsNonPII(key?.KeyId ?? "Null"),
+                        LogHelper.MarkAsNonPII(jsonWebToken.Alg)),
+                    SignatureValidationFailure.SignatureProviderCreationFailed,
+                    ValidationError.GetCurrentStackFrame(),
+                    ex);
+            }
+
             try
             {
                 if (signatureProvider == null)

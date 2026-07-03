@@ -277,6 +277,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10718 = "IDX10718: AlgorithmToValidate is not supported: '{0}'. Algorithm '{1}'.";
         public const string IDX10719 = "IDX10719: SignatureSize (in bytes) was expected to be '{0}', was '{1}'.";
         public const string IDX10720 = "IDX10720: Unable to create KeyedHashAlgorithm for algorithm '{0}', the key size must be greater than: '{1}' bits, key has '{2}' bits.";
+        public const string IDX10721 = "IDX10721: Unable to create a key from the AKP JsonWebKey (alg: '{0}'). The required parameter '{1}' is missing or empty.";
+        public const string IDX10722 = "IDX10722: The AKP JsonWebKey (alg: '{0}') has inconsistent key material. The 'pub' parameter does not match the public key derived from 'priv'.";
+        public const string IDX10723 = "IDX10723: Unable to extract the private key from the X.509 certificate for algorithm '{0}' (Key: '{1}'). Private key extraction may not be supported on this platform.";
+        public const string IDX10724 = "IDX10724: Unable to compute a JWK thumbprint, public key extraction from the X.509 certificate is not supported on this platform (Key: '{0}').";
+        public const string IDX10725 = "IDX10725: Unable to create a SignatureProvider for algorithm '{0}' (Key: '{1}'). The X.509 certificate key could not be extracted. This may indicate the platform does not support the certificate's key type.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
@@ -317,6 +322,9 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX11023 = "IDX11023: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}', Position: '{3}', CurrentDepth: '{4}', BytesConsumed: '{5}'.";
         public const string IDX11025 = "IDX11025: Cannot serialize object of type: '{0}' into property: '{1}'.";
         public const string IDX11026 = "IDX11026: Unable to get claim value as a string from claim type:'{0}', value type was:'{1}'. Acceptable types are String, IList<String>, and System.Text.Json.JsonElement.";
+
+        // SignatureProvider creation (continued from IDX10630-10638; appended here as IDX1063x slots are retired numbers)
+        public const string IDX11028 = "IDX11028: CryptoProviderFactory.CreateForVerifying threw an exception for key: '{0}', signatureAlgorithm: '{1}'. The platform may not support the algorithm or extracting the key material for it (for example, ML-DSA on a platform without post-quantum support). See the inner exception for details.";
 
 #pragma warning restore 1591
     }

@@ -57,6 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             if (FailureType == SignatureValidationFailure.ValidationFailed
                 || FailureType == SignatureValidationFailure.TokenIsNotSigned
                 || FailureType == SignatureValidationFailure.ReferenceDigestValidationFailed
+                || FailureType == SignatureValidationFailure.SignatureProviderCreationFailed
                 || FailureType == SignatureValidationFailure.ValidatorThrew)
             {
                 Exception = new SecurityTokenInvalidSignatureException(MessageDetail.Message, this, InnerException);
