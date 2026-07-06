@@ -471,6 +471,18 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <param name="cancel">CancellationToken</param>
+        /// <returns>Configuration of type BaseConfiguration.</returns>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        public override BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
+        {
+            T obj = GetConfigurationWithBlockingSync(cancel);
+            return obj as BaseConfiguration;
+        }
+
+        /// <summary>
         /// Triggers updating metadata when:
         /// <para>1. Called the first time.</para>
         /// <para>2. The time between when this method was called and DateTimeOffset.Now is greater than <see cref="BaseConfigurationManager.RefreshInterval"/>.</para>
@@ -574,6 +586,75 @@ namespace Microsoft.IdentityModel.Protocols
                         ex));
             }
 
+            return ConfigurationEventHandlerResult<T>.NoResult;
+        }
+
+        private ConfigurationEventHandlerResult<T> HandleBeforeRetrieveSync(ConfigurationRetrievalContext context, CancellationToken cancellationToken = default)
+        {
+            long beforeHandlerTimestamp = TimeProvider.GetTimestamp();
+
+            try
+            {
+                ConfigurationEventHandlerResult<T> handlerResult;
+                if (ConfigurationEventHandler is IConfigurationEventHandlerContextAware<T> contextAware)
+                {
+                    handlerResult = contextAware.BeforeRetrieve(
+                        MetadataAddress, context, cancellationToken);
+                }
+                else
+                {
+                    handlerResult = ConfigurationEventHandler.BeforeRetrieve(
+                        MetadataAddress, cancellationToken);
+                }
+
+                if (handlerResult != null && handlerResult.Configuration != null)
+                {
+                    var handlerElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
+                    TelemetryClient.LogConfigurationRetrievalDuration(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.ConfigurationSourceHandler,
+                        handlerElapsedTime);
+
+                    // Validate configuration from handler
+                    if (_configValidator != null)
+                    {
+                        ConfigurationValidationResult result = _configValidator.Validate(handlerResult.Configuration);
+                        if (!result.Succeeded)
+                        {
+                            // Just log the error and proceed to fetch from endpoint
+                            LogHelper.LogExceptionMessage(
+                                new InvalidConfigurationException(
+                                    LogHelper.FormatInvariant(
+                                        LogMessages.IDX20812,
+                                        result.ErrorMessage)));
+
+                            return ConfigurationEventHandlerResult<T>.NoResult;
+                        }
+                    }
+
+                    // No validator configured, return configuration
+                    return handlerResult;
+                }
+            }
+#pragma warning disable CA1031
+            catch (Exception ex)
+            {
+                var handlerErrorElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.ConfigurationSourceHandler,
+                    handlerErrorElapsedTime,
+                    ex);
+
+                LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20811,
+                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                            ex),
+                        ex));
+            }
+#pragma warning restore CA1031
             return ConfigurationEventHandlerResult<T>.NoResult;
         }
 

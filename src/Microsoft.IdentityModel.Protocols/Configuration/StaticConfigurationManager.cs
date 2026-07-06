@@ -51,6 +51,16 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>Configuration of type T.</returns>
+        public override BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
+        {
+            return _configuration as BaseConfiguration;
+        }
+
+        /// <summary>
         /// For the this type, this is a no-op
         /// </summary>
         public override void RequestRefresh()

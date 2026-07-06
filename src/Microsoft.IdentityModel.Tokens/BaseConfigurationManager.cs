@@ -96,6 +96,24 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
+        /// This method may return a cached version of the configuration.
+        /// </summary>
+        /// <param name="cancel">A cancellation token that can be used to cancel the synchronous operation.</param>
+        /// <returns>Configuration of type Configuration.</returns>
+        /// <remarks>This method on the base class throws a <see cref="NotImplementedException"/>
+        /// as it is meant to be overridden by the class that extends it.</remarks>
+        public virtual BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
+        {
+            throw LogHelper.LogExceptionMessage(
+                new NotImplementedException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10267,
+                        LogHelper.MarkAsNonPII("public virtual BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)"),
+                        LogHelper.MarkAsNonPII(GetType().FullName))));
+        }
+
+        /// <summary>
         /// Gets all valid last known good configurations.
         /// </summary>
         /// <returns>A collection of all valid last known good configurations.</returns>

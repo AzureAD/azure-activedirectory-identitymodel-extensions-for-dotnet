@@ -1,0 +1,1 @@
+static Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfigurationRetriever.GetSync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration

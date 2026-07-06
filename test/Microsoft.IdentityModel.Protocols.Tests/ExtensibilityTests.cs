@@ -33,6 +33,13 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             IssuerMetadata issuerMetadata = JsonConvert.DeserializeObject<IssuerMetadata>(doc);
             return issuerMetadata;
         }
+
+        public IssuerMetadata GetConfigurationSync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+        {
+            string doc = ((ISyncDocumentRetriever)retriever).GetDocumentSync(address, cancel);
+            IssuerMetadata issuerMetadata = JsonConvert.DeserializeObject<IssuerMetadata>(doc);
+            return issuerMetadata;
+        }
     }
 
     /// <summary>

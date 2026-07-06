@@ -58,6 +58,17 @@ namespace Microsoft.IdentityModel.TestUtils
                 return Task.FromResult(new ValidationResult<ValidatedIssuer, ValidationError>(
                     new ValidatedIssuer(issuer, IssuerValidationSource.NotValidated)));
             }
+
+            public ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerSync(
+                string issuer,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext,
+                CancellationToken cancellationToken)
+            {
+                return new ValidationResult<ValidatedIssuer, ValidationError>(
+                    new ValidatedIssuer(issuer, IssuerValidationSource.NotValidated));
+            }
         }
 
         private class SignatureKeyValidator : ISignatureKeyValidator
