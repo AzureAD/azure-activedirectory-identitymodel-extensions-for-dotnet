@@ -155,6 +155,140 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
+        private T GetConfigurationWithBlockingSync(CancellationToken cancel)
+        {
+            _refreshLock.Wait(cancel);
+
+            long startTimestamp = TimeProvider.GetTimestamp();
+
+            try
+            {
+                if (_syncAfter <= TimeProvider.GetUtcNow())
+                {
+                    var retrievalContext = new ConfigurationRetrievalContext { BypassCache = _refreshRequested };
+                    try
+                    {
+                        // Check if event handler can provide configuration
+                        // If provided configuration is valid, skip regular retriaval process and update current configuration.
+                        if (ConfigurationEventHandler != null)
+                        {
+                            ConfigurationEventHandlerResult<T> configurationRetrieved =
+                                HandleBeforeRetrieveSync(retrievalContext, cancel);
+
+                            // replicate the behavior of successful retrieval from endpoint
+                            if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
+                            {
+                                TelemetryForUpdateBlocking(TelemetryConstants.Protocols.ConfigurationSourceHandler);
+
+                                if (_refreshRequested)
+                                    _refreshRequested = false;
+
+                                UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
+
+                                _fetchMetadataFailure = null;
+
+                                return _currentConfiguration;
+                            }
+                        }
+
+                        // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
+                        // The transport should have it's own timeouts, etc..
+                        var configuration = _configRetriever.GetConfigurationSync(MetadataAddress, _docRetriever, CancellationToken.None);
+
+                        var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+                        TelemetryClient.LogConfigurationRetrievalDuration(
+                            MetadataAddress,
+                            TelemetryConstants.Protocols.ConfigurationSourceRetriever,
+                            elapsedTime);
+
+                        if (_configValidator != null)
+                        {
+                            ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                            if (!result.Succeeded)
+                                throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
+                        }
+
+                        _lastRequestRefresh = TimeProvider.GetUtcNow().UtcDateTime;
+
+                        TelemetryForUpdateBlocking(TelemetryConstants.Protocols.ConfigurationSourceRetriever);
+
+                        if (_refreshRequested)
+                            _refreshRequested = false;
+
+                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
+
+                        _fetchMetadataFailure = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        _fetchMetadataFailure = ex;
+
+                        if (_currentConfiguration == null)
+                        {
+                            if (_bootstrapRefreshInterval < RefreshInterval)
+                            {
+                                // Adopt exponential backoff for bootstrap refresh interval with a decorrelated jitter if it is not longer than the refresh interval.
+                                TimeSpan _bootstrapRefreshIntervalWithJitter = TimeSpan.FromSeconds(new Random().Next((int)_bootstrapRefreshInterval.TotalSeconds));
+                                _bootstrapRefreshInterval += _bootstrapRefreshInterval;
+                                _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, _bootstrapRefreshIntervalWithJitter);
+                            }
+                            else
+                            {
+                                _syncAfter = DateTimeUtil.Add(
+                                    TimeProvider.GetUtcNow().UtcDateTime,
+                                    AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                            }
+
+                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.FirstRefresh,
+                                TelemetryConstants.Protocols.ConfigurationSourceRetriever,
+                                ex);
+
+                            throw LogHelper.LogExceptionMessage(
+                                new InvalidOperationException(
+                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_syncAfter), LogHelper.MarkAsNonPII(ex)), ex));
+                        }
+                        else
+                        {
+                            _syncAfter = DateTimeUtil.Add(
+                                TimeProvider.GetUtcNow().UtcDateTime,
+                                AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+
+                            var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+
+                            TelemetryClient.LogConfigurationRetrievalDuration(
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.ConfigurationSourceRetriever,
+                                elapsedTime,
+                                ex);
+
+                            LogHelper.LogExceptionMessage(
+                                new InvalidOperationException(
+                                    LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
+                        }
+                    }
+                }
+
+                // Stale metadata is better than no metadata
+                if (_currentConfiguration != null)
+                    return _currentConfiguration;
+                else
+                    throw LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX20803,
+                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                LogHelper.MarkAsNonPII(_syncAfter),
+                                LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
+                            _fetchMetadataFailure));
+            }
+            finally
+            {
+                _refreshLock.Release();
+            }
+        }
+
         private void RequestRefreshBlocking()
         {
             DateTime now = TimeProvider.GetUtcNow().UtcDateTime;

@@ -59,6 +59,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             return GetAsync(address, retriever, cancel);
         }
 
+        /// <inheritdoc/>
+        public WsFederationConfiguration GetConfigurationSync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+        {
+            return GetSync(address, retriever, cancel);
+        }
+
         /// <summary>
         /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address and an <see cref="IDocumentRetriever"/>.
         /// </summary>
@@ -77,6 +83,31 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 throw LogArgumentNullException(nameof(retriever));
 
             string document = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
+
+            using (var metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
+            {
+                return (new WsFederationMetadataSerializer()).ReadMetadata(metaDataReader);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address and an <see cref="IDocumentRetriever"/>.
+        /// </summary>
+        /// <param name="address">address of the metadata document.</param>
+        /// <param name="retriever">the <see cref="IDocumentRetriever"/> to use to read the metadata document</param>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="retriever"/> is null.</exception>
+        public static WsFederationConfiguration GetSync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+        {
+            if (string.IsNullOrEmpty(address))
+                throw LogArgumentNullException(nameof(address));
+
+            if (retriever == null)
+                throw LogArgumentNullException(nameof(retriever));
+
+            string document = ((ISyncDocumentRetriever)retriever).GetDocumentSync(address, cancel);
 
             using (var metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
             {

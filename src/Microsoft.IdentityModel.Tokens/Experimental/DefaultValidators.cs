@@ -56,6 +56,17 @@ internal sealed class DefaultIssuerValidator : IIssuerValidator
     {
         return Validators.ValidateIssuerAsync(issuer, securityToken, validationParameters, callContext, cancellationToken);
     }
+
+    /// <inheritdoc/>
+    public ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerSync(
+        string issuer,
+        SecurityToken securityToken,
+        ValidationParameters validationParameters,
+        CallContext callContext,
+        CancellationToken cancellationToken)
+    {
+        return Validators.ValidateIssuerSync(issuer, securityToken, validationParameters, callContext, cancellationToken);
+    }
 }
 
 /// <summary>

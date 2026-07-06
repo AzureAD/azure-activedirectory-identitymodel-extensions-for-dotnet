@@ -38,6 +38,16 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
     }
 
     /// <summary>
+    /// The base interface sync method — should NOT be called when the manager detects the context-aware interface.
+    /// </summary>
+    public ConfigurationEventHandlerResult<OpenIdConnectConfiguration> BeforeRetrieve(
+        string metadataAddress,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// The context-aware method — should be called when the manager detects this interface.
     /// </summary>
     public Task<ConfigurationEventHandlerResult<OpenIdConnectConfiguration>> BeforeRetrieveAsync(
@@ -60,6 +70,31 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         }
 
         return Task.FromResult(ConfigurationEventHandlerResult<OpenIdConnectConfiguration>.NoResult);
+    }
+
+    /// <summary>
+    /// The context-aware sync method — should be called when the manager detects this interface.
+    /// </summary>
+    public ConfigurationEventHandlerResult<OpenIdConnectConfiguration> BeforeRetrieve(
+        string metadataAddress,
+        ConfigurationRetrievalContext context,
+        CancellationToken cancellationToken = default)
+    {
+        LastContext = context;
+        BeforeRetrieveMetadataAddress = metadataAddress;
+        ContextAwareBeforeRetrieveAsyncCalled = true;
+
+        if (ThrowExceptionInBeforeRetrieve)
+            throw new InvalidOperationException("Test exception from context-aware BeforeRetrieve");
+
+        if (ConfigurationToReturn != null)
+        {
+            return new ConfigurationEventHandlerResult<OpenIdConnectConfiguration>(
+                ConfigurationToReturn,
+                RetrievalTimeToReturn);
+        }
+
+        return ConfigurationEventHandlerResult<OpenIdConnectConfiguration>.NoResult;
     }
 
     public Task AfterUpdateAsync(

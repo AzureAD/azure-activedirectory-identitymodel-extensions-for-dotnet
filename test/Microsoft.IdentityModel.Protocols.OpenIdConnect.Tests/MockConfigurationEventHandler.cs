@@ -43,6 +43,26 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return Task.FromResult(ConfigurationEventHandlerResult<OpenIdConnectConfiguration>.NoResult);
         }
 
+        public ConfigurationEventHandlerResult<OpenIdConnectConfiguration> BeforeRetrieve(
+            string metadataAddress,
+            CancellationToken cancellationToken = default)
+        {
+            BeforeRetrieveMetadataAddress = metadataAddress;
+            BeforeRetrieveAsyncCalled = true;
+
+            if (ThrowExceptionInBeforeRetrieve)
+                throw new InvalidOperationException("Test exception from BeforeRetrieve");
+
+            if (ConfigurationToReturn != null)
+            {
+                return new ConfigurationEventHandlerResult<OpenIdConnectConfiguration>(
+                    ConfigurationToReturn,
+                    RetrievalTimeToReturn);
+            }
+
+            return ConfigurationEventHandlerResult<OpenIdConnectConfiguration>.NoResult;
+        }
+
         public Task AfterUpdateAsync(
             string metadataAddress,
             OpenIdConnectConfiguration configuration,

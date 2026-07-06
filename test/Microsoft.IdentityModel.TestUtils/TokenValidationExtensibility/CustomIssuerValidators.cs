@@ -33,6 +33,21 @@ namespace Microsoft.IdentityModel.TestUtils
                         Default.GetStackFrame(),
                         issuer)));
             }
+
+            public ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerSync(
+                string issuer,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext,
+                CancellationToken cancellationToken)
+            {
+                return new ValidationResult<ValidatedIssuer, ValidationError>(
+                    new CustomIssuerValidationError(
+                        new MessageDetail(nameof(CustomValidationFailed)),
+                        CustomValidationFailure.IssuerValidationFailed,
+                        Default.GetStackFrame(),
+                        issuer));
+            }
         }
 
         private class IssuerValidationFailedValidator : IIssuerValidator
@@ -50,6 +65,21 @@ namespace Microsoft.IdentityModel.TestUtils
                         IssuerValidationFailure.ValidationFailed,
                         Default.GetStackFrame(),
                         issuer)));
+            }
+
+            public ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerSync(
+                string issuer,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext,
+                CancellationToken cancellationToken)
+            {
+                return new ValidationResult<ValidatedIssuer, ValidationError>(
+                    new CustomIssuerValidationError(
+                        new MessageDetail(nameof(IssuerValidationFailed)),
+                        IssuerValidationFailure.ValidationFailed,
+                        Default.GetStackFrame(),
+                        issuer));
             }
         }
 
@@ -69,6 +99,21 @@ namespace Microsoft.IdentityModel.TestUtils
                         Default.GetStackFrame(),
                         issuer)));
             }
+
+            public ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerSync(
+                string issuer,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext,
+                CancellationToken cancellationToken)
+            {
+                return new ValidationResult<ValidatedIssuer, ValidationError>(
+                    new CustomIssuerValidationError(
+                        new MessageDetail(nameof(UnknownValidationFailure)),
+                        AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                        Default.GetStackFrame(),
+                        issuer));
+            }
         }
 
         private class IssuerValidatorDelegateAsyncValidator : IIssuerValidator
@@ -87,11 +132,43 @@ namespace Microsoft.IdentityModel.TestUtils
                         Default.GetStackFrame(),
                         issuer)));
             }
+
+            public ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerSync(
+                string issuer,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext,
+                CancellationToken cancellationToken)
+            {
+                return new ValidationResult<ValidatedIssuer, ValidationError>(
+                    new IssuerValidationError(
+                        new MessageDetail(nameof(IssuerValidatorDelegateAsync)),
+                        IssuerValidationFailure.ValidationFailed,
+                        Default.GetStackFrame(),
+                        issuer));
+            }
         }
 
         private class IssuerValidatorThrowsValidator : IIssuerValidator
         {
             public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+                string issuer,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext,
+                CancellationToken cancellationToken)
+            {
+                throw new CustomSecurityTokenInvalidIssuerException(
+                    nameof(IssuerValidatorThrows),
+                    new IssuerValidationError(
+                        new MessageDetail(nameof(IssuerValidatorThrows)),
+                        IssuerValidationFailure.ValidationFailed,
+                        Default.GetStackFrame(),
+                        issuer),
+                    null);
+            }
+
+            public ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerSync(
                 string issuer,
                 SecurityToken securityToken,
                 ValidationParameters validationParameters,
