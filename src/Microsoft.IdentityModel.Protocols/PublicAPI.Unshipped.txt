@@ -17,9 +17,12 @@ Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContex
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationEventHandler.get -> Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationEventHandler.set -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator, Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions lkgCacheOptions, Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T> configurationEventHandler) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetConfigurationSync() -> T
+Microsoft.IdentityModel.Protocols.FileDocumentRetriever.GetDocumentSync(string address, System.Threading.CancellationToken cancel) -> string
 Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T>.GetConfigurationSync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> T
 Microsoft.IdentityModel.Protocols.ISyncDocumentRetriever
 Microsoft.IdentityModel.Protocols.ISyncDocumentRetriever.GetDocumentSync(string address, System.Threading.CancellationToken cancel) -> string
 override Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetBaseConfigurationSync(System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Tokens.BaseConfiguration
 override Microsoft.IdentityModel.Protocols.StaticConfigurationManager<T>.GetBaseConfigurationSync(System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Tokens.BaseConfiguration
 static readonly Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.NoResult -> Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
+virtual Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetConfigurationSync(System.Threading.CancellationToken cancel) -> T

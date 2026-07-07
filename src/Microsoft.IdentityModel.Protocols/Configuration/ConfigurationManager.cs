@@ -217,6 +217,34 @@ namespace Microsoft.IdentityModel.Protocols
                 return await GetConfigurationNonBlockingAsync(cancel).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationSync"/> is not called and the current Configuration is returned.</remarks>
+        public T GetConfigurationSync()
+        {
+            return GetConfigurationSync(CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <param name="cancel">CancellationToken</param>
+        /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
+        /// <remarks>
+        /// If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/>
+        /// then <see cref="IConfigurationRetriever{T}.GetConfigurationSync"/> is not called and the current Configuration is returned.
+        /// This method blocks until the configuration is retrieved.
+        /// </remarks>
+        public virtual T GetConfigurationSync(CancellationToken cancel)
+        {
+            if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
+                return _currentConfiguration;
+
+            return GetConfigurationWithBlockingSync(cancel);
+        }
+
         private async Task<T> GetConfigurationNonBlockingAsync(CancellationToken cancel)
         {
             Exception fetchMetadataFailure = null;
@@ -478,7 +506,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public override BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
         {
-            T obj = GetConfigurationWithBlockingSync(cancel);
+            T obj = GetConfigurationSync(cancel);
             return obj as BaseConfiguration;
         }
 

@@ -111,6 +111,46 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public void ConfigurationManagerUsingCustomClassSync()
+        {
+            var docRetriever = new FileDocumentRetriever();
+            var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
+            var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
+
+            var configuration = configManager.GetConfigurationSync(CancellationToken.None);
+            configManager.MetadataAddress = "IssuerMetadata.json";
+            var configuration2 = configManager.GetConfigurationSync(CancellationToken.None);
+            if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer, context))
+                context.Diffs.Add("!IdentityComparer.AreEqual(configuration, configuration2)");
+
+            // AutomaticRefreshInterval should pick up new bits.
+            configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
+            configManager.RequestRefresh();
+            configuration = configManager.GetConfigurationSync(CancellationToken.None);
+            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            configManager.MetadataAddress = "IssuerMetadata2.json";
+
+            // Wait for the refresh to complete.
+            Thread.Sleep(500);
+
+            for (int i = 0; i < 5; i++)
+            {
+                configManager.RequestRefresh();
+                configuration2 = configManager.GetConfigurationSync(CancellationToken.None);
+
+                if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                    Thread.Sleep(1000);
+                else
+                    break;
+            }
+
+            if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                context.Diffs.Add($"Expected: {configuration.Issuer}, to be different from: {configuration2.Issuer}");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<DocumentRetrieverTheoryData> GetMetadataTheoryData
         {
             get
