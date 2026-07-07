@@ -32,6 +32,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.IsAssignableFrom<NotImplementedException>(ex);
             }
         }
+
+        [Fact]
+        public void BaseConfigurationManager_GetBaseConfigurationSync()
+        {
+            TestUtilities.WriteHeader($"{this}.BaseConfigurationManager_GetBaseConfigurationSync");
+
+            try
+            {
+                new DerivedBaseConfigurationManager().GetBaseConfigurationSync(default);
+            }
+            catch (Exception ex)
+            {
+                Assert.Contains("IDX10267: 'public virtual BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)'", ex.Message);
+
+                Assert.IsAssignableFrom<NotImplementedException>(ex);
+            }
+        }
         #endregion
 
         #region SignatureProvider
