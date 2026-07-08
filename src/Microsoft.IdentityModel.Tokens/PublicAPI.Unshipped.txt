@@ -353,3 +353,5 @@ virtual Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.Dispose(bool disposing) 
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Priv.get -> string
 ~Microsoft.IdentityModel.Tokens.JsonWebKey.Priv.set -> void
 ~static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromMlDsaSecurityKey(Microsoft.IdentityModel.Tokens.MlDsaSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
+Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.get -> bool
+Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.set -> void
