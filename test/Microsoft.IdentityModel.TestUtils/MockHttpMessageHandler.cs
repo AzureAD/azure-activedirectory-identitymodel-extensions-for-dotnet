@@ -55,5 +55,24 @@ namespace Microsoft.IdentityModel.TestUtils
             _firstSend = false;
             return await Task.FromResult(_errorHttpResponseMessageOnFirstSend).ConfigureAwait(false);
         }
+
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Mocks <see cref="HttpMessageHandler.Send(HttpRequestMessage, CancellationToken)"/>.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (!_firstSend || _errorHttpResponseMessageOnFirstSend == null)
+            {
+                return _httpResponseMessage;
+            }
+
+            _firstSend = false;
+            return _errorHttpResponseMessageOnFirstSend;
+        }
+#endif
     }
 }
