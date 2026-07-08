@@ -319,6 +319,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Theory, MemberData(nameof(ValidatePClaimTheoryData), DisableDiscoveryEnumeration = true)]
+        [ResetAppContextSwitches]
         public void ValidatePClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidatePClaim", theoryData);
