@@ -31,6 +31,7 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
         private bool _disposeCryptoOperators;
         private bool _disposed;
+        private object _mlDsaSyncLock;
         private DecryptDelegate _decryptFunction = DecryptFunctionNotFound;
         private EncryptDelegate _encryptFunction = EncryptFunctionNotFound;
         private SignDelegate _signFunction = SignFunctionNotFound;
@@ -87,6 +88,8 @@ namespace Microsoft.IdentityModel.Tokens
                         InitializeUsingX509SecurityKey(x509SecurityKeyFromJsonWebKey, algorithm, requirePrivateKey);
                     else if (securityKey is ECDsaSecurityKey edcsaSecurityKeyFromJsonWebKey)
                         InitializeUsingEcdsaSecurityKey(edcsaSecurityKeyFromJsonWebKey);
+                    else if (securityKey is MlDsaSecurityKey mlDsaSecurityKeyFromJsonWebKey)
+                        InitializeUsingMlDsaSecurityKey(mlDsaSecurityKeyFromJsonWebKey, requirePrivateKey);
                     else
                         throw LogHelper.LogExceptionMessage(
                             new NotSupportedException(
@@ -98,6 +101,10 @@ namespace Microsoft.IdentityModel.Tokens
             else if (key is ECDsaSecurityKey ecdsaKey)
             {
                 InitializeUsingEcdsaSecurityKey(ecdsaKey);
+            }
+            else if (key is MlDsaSecurityKey mlDsaKey)
+            {
+                InitializeUsingMlDsaSecurityKey(mlDsaKey, requirePrivateKey);
             }
             else
                 throw LogHelper.LogExceptionMessage(
@@ -138,6 +145,9 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (ECDsa != null)
                             ECDsa.Dispose();
+
+                        if (MLDsa != null)
+                            MLDsa.Dispose();
 #if DESKTOP
                         if (RsaCryptoServiceProviderProxy != null)
                             RsaCryptoServiceProviderProxy.Dispose();
@@ -150,6 +160,8 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         private ECDsa ECDsa { get; set; }
+
+        private MLDsa MLDsa { get; set; }
 
         internal byte[] Encrypt(byte[] data)
         {
@@ -174,6 +186,41 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
             _verifyFunction = VerifyECDsa;
             _verifyUsingOffsetFunction = VerifyUsingOffsetECDsa;
+        }
+
+        private void InitializeUsingMlDsaSecurityKey(MlDsaSecurityKey mlDsaSecurityKey, bool requirePrivateKey)
+        {
+            InitializeUsingMlDsa(mlDsaSecurityKey.MLDsa, requirePrivateKey);
+        }
+
+        private void InitializeUsingMlDsa(MLDsa mlDsa, bool includePrivateKey)
+        {
+            // Clone the MLDsa instance so each adapter holds an independent copy.
+            // MLDsa instance methods are not guaranteed thread-safe, and multiple
+            // adapters from the object pool may reference the same source key.
+            MLDsa clone = MlDsaAdapter.CloneMlDsa(mlDsa, includePrivateKey);
+
+            if (clone is not null)
+            {
+                // Clone succeeded — each adapter owns its independent instance.
+                MLDsa = clone;
+                _disposeCryptoOperators = true;
+            }
+            else
+            {
+                // Key is non-exportable (e.g., HSM-backed) — share the original
+                // instance and serialize access with a lock.
+                MLDsa = mlDsa;
+                _mlDsaSyncLock = new object();
+            }
+
+            _signFunction = SignMlDsa;
+            _signUsingOffsetFunction = SignUsingOffsetMlDsa;
+#if NET6_0_OR_GREATER
+            _signUsingSpanFunction = SignUsingSpanMlDsa;
+#endif
+            _verifyFunction = VerifyMlDsa;
+            _verifyUsingOffsetFunction = VerifyUsingOffsetMlDsa;
         }
 
         private void InitializeUsingRsa(RSA rsa, string algorithm)
@@ -258,10 +305,67 @@ namespace Microsoft.IdentityModel.Tokens
             string algorithm,
             bool requirePrivateKey)
         {
-            if (requirePrivateKey)
-                InitializeUsingRsa(x509SecurityKey.PrivateKey as RSA, algorithm);
+            if (x509SecurityKey.MlDsaPublicKey != null)
+            {
+                InitializeUsingX509MlDsa(x509SecurityKey, algorithm, requirePrivateKey);
+            }
+            else if (x509SecurityKey.PublicKey is RSA)
+            {
+                InitializeUsingX509Rsa(x509SecurityKey, algorithm, requirePrivateKey);
+            }
+            else if (x509SecurityKey.PublicKey is ECDsa ecDsa)
+            {
+                InitializeUsingEcdsaSecurityKey(new ECDsaSecurityKey(ecDsa));
+            }
             else
+            {
+                // Certificate key type is not recognized (not RSA, ECDSA, or ML-DSA).
+                throw LogHelper.LogExceptionMessage(
+                    new NotSupportedException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10725,
+                            LogHelper.MarkAsNonPII(algorithm),
+                            LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
+            }
+        }
+
+        private void InitializeUsingX509MlDsa(
+            X509SecurityKey x509SecurityKey,
+            string algorithm,
+            bool requirePrivateKey)
+        {
+            MLDsa mlDsa = requirePrivateKey ? x509SecurityKey.MlDsaPrivateKey : x509SecurityKey.MlDsaPublicKey;
+            if (mlDsa == null)
+                throw LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10723,
+                            LogHelper.MarkAsNonPII(algorithm),
+                            LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
+
+            InitializeUsingMlDsa(mlDsa, requirePrivateKey);
+        }
+
+        private void InitializeUsingX509Rsa(
+            X509SecurityKey x509SecurityKey,
+            string algorithm,
+            bool requirePrivateKey)
+        {
+            if (requirePrivateKey)
+            {
+                if (x509SecurityKey.PrivateKey == null)
+                    throw LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX10638,
+                                LogHelper.MarkAsNonPII(x509SecurityKey.KeyId))));
+
+                InitializeUsingRsa(x509SecurityKey.PrivateKey as RSA, algorithm);
+            }
+            else
+            {
                 InitializeUsingRsa(x509SecurityKey.PublicKey as RSA, algorithm);
+            }
         }
 
         private RSA RSA { get; set; }
@@ -342,6 +446,68 @@ namespace Microsoft.IdentityModel.Tokens
             return ECDsa.SignHash(HashAlgorithm.ComputeHash(bytes, offset, count));
         }
 
+        private byte[] SignMlDsa(byte[] bytes)
+        {
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    return MLDsa.SignData(bytes, context: null);
+            }
+
+            return MLDsa.SignData(bytes, context: null);
+        }
+
+        internal bool SignUsingSpanMlDsa(
+            ReadOnlySpan<byte> data,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            int signatureSize = MLDsa.Algorithm.SignatureSizeInBytes;
+            if (destination.Length < signatureSize)
+            {
+                bytesWritten = 0;
+                return false;
+            }
+
+            // MLDsa.SignData requires destination to be exactly SignatureSizeInBytes.
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    MLDsa.SignData(data, destination.Slice(0, signatureSize), context: default);
+            }
+            else
+            {
+                MLDsa.SignData(data, destination.Slice(0, signatureSize), context: default);
+            }
+
+            bytesWritten = signatureSize;
+            return true;
+        }
+
+        private byte[] SignUsingOffsetMlDsa(byte[] bytes, int offset, int count)
+        {
+            int signatureSize = MLDsa.Algorithm.SignatureSizeInBytes;
+            byte[] signature = new byte[signatureSize];
+
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    MLDsa.SignData(
+                        new ReadOnlySpan<byte>(bytes, offset, count),
+                        signature.AsSpan(),
+                        context: default);
+            }
+            else
+            {
+                MLDsa.SignData(
+                    new ReadOnlySpan<byte>(bytes, offset, count),
+                    signature.AsSpan(),
+                    context: default);
+            }
+
+            return signature;
+        }
+
         internal bool Verify(byte[] bytes, byte[] signature)
         {
             return _verifyFunction(bytes, signature);
@@ -380,6 +546,34 @@ namespace Microsoft.IdentityModel.Tokens
 #else
             return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes, offset, count), signature);
 #endif
+        }
+
+        private bool VerifyMlDsa(byte[] bytes, byte[] signature)
+        {
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    return MLDsa.VerifyData(bytes, signature, context: null);
+            }
+
+            return MLDsa.VerifyData(bytes, signature, context: null);
+        }
+
+        private bool VerifyUsingOffsetMlDsa(byte[] bytes, int offset, int count, byte[] signature)
+        {
+            if (_mlDsaSyncLock is not null)
+            {
+                lock (_mlDsaSyncLock)
+                    return MLDsa.VerifyData(
+                        new ReadOnlySpan<byte>(bytes, offset, count),
+                        signature.AsSpan(),
+                        context: default);
+            }
+
+            return MLDsa.VerifyData(
+                new ReadOnlySpan<byte>(bytes, offset, count),
+                signature.AsSpan(),
+                context: default);
         }
 
         private byte[] DecryptWithRsa(byte[] bytes)

@@ -9,6 +9,7 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10519 = "IDX10519: Signature
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10520 = "IDX10520: Signature validation failed. The key provided could not validate the signature. Key tried: '{0}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10521 = "IDX10521: Signature validation failed. An exception was thrown when trying to validate the signature. Key tried: '{0}'. Exception: '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10620 = "IDX10620: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CryptoProviderFactory are null." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX11028 = "IDX11028: CryptoProviderFactory.CreateForVerifying threw an exception for key: '{0}', signatureAlgorithm: '{1}'. The platform may not support the algorithm or extracting the key material for it (for example, ML-DSA on a platform without post-quantum support). See the inner exception for details." -> string
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, string configurationSource, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, string configurationSource, System.Exception exception) -> void
@@ -110,6 +111,20 @@ virtual Microsoft.IdentityModel.Tokens.TokenHandler.CreateClaimsIdentityInternal
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
 virtual Microsoft.IdentityModel.Tokens.ValidationError.CreateException() -> System.Exception
+
+~Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.MlDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, bool usePrivateKey) -> void
+static Microsoft.IdentityModel.Tokens.MlDsaAdapter.CreateMlDsa(Microsoft.IdentityModel.Tokens.JsonWebKey jsonWebKey, bool usePrivateKey) -> System.Security.Cryptography.MLDsa
+static Microsoft.IdentityModel.Tokens.MlDsaAdapter.GetMLDsaAlgorithm(string algorithm) -> System.Security.Cryptography.MLDsaAlgorithm
+static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedMlDsaAlgorithm(string algorithm) -> bool
+static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.TryGetHashAlgorithmName(string algorithm, out System.Security.Cryptography.HashAlgorithmName hashAlgorithmName) -> bool
+internal static Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.GetAlgorithmName(System.Security.Cryptography.MLDsaAlgorithm algorithm) -> string
+Microsoft.IdentityModel.Tokens.X509SecurityKey.MlDsaPrivateKey.get -> System.Security.Cryptography.MLDsa
+Microsoft.IdentityModel.Tokens.X509SecurityKey.MlDsaPublicKey.get -> System.Security.Cryptography.MLDsa
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10721 = "IDX10721: Unable to create a key from the AKP JsonWebKey (alg: '{0}'). The required parameter '{1}' is missing or empty." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10722 = "IDX10722: The AKP JsonWebKey (alg: '{0}') has inconsistent key material. The 'pub' parameter does not match the public key derived from 'priv'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10723 = "IDX10723: Unable to extract the private key from the X.509 certificate for algorithm '{0}' (Key: '{1}'). Private key extraction may not be supported on this platform." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10724 = "IDX10724: Unable to compute a JWK thumbprint, public key extraction from the X.509 certificate is not supported on this platform (Key: '{0}')." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10725 = "IDX10725: Unable to create a SignatureProvider for algorithm '{0}' (Key: '{1}'). The X.509 certificate key could not be extracted. This may indicate the platform does not support the certificate's key type." -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonDefault = true -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparison.get -> bool

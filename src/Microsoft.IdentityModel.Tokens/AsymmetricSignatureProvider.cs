@@ -41,7 +41,10 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSsaPssSha512, 1040 },
             { SecurityAlgorithms.RsaSsaPssSha256Signature, 528 },
             { SecurityAlgorithms.RsaSsaPssSha384Signature, 784 },
-            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 }
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 },
+            { SecurityAlgorithms.MlDsa44, 10496 },
+            { SecurityAlgorithms.MlDsa65, 15616 },
+            { SecurityAlgorithms.MlDsa87, 20736 }
         };
 
         /// <summary>
@@ -66,7 +69,10 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSsaPssSha512, 1040 },
             { SecurityAlgorithms.RsaSsaPssSha256Signature, 528 },
             { SecurityAlgorithms.RsaSsaPssSha384Signature, 784 },
-            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 }
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 },
+            { SecurityAlgorithms.MlDsa44, 10496 },
+            { SecurityAlgorithms.MlDsa65, 15616 },
+            { SecurityAlgorithms.MlDsa87, 20736 }
         };
 
         internal AsymmetricSignatureProvider(
@@ -190,6 +196,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AsymmetricAdapter CreateAsymmetricAdapter()
         {
+            // ML-DSA and other pure-signing algorithms do not use an external hash.
+            if (SupportedAlgorithms.IsSupportedMlDsaAlgorithm(Algorithm))
+                return new AsymmetricAdapter(Key, Algorithm, WillCreateSignatures);
+
+            // Preserve the protected virtual GetHashAlgorithmName extensibility point
+            // for hash-based algorithms (RSA, ECDSA).
             HashAlgorithmName hashAlgorithmName = GetHashAlgorithmName(Algorithm);
             return new AsymmetricAdapter(
                 Key,
