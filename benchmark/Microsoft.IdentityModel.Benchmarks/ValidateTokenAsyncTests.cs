@@ -110,6 +110,15 @@ namespace Microsoft.IdentityModel.Benchmarks
             return validationResult.Succeeded;
         }
 
+        [BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
+        public bool JsonWebTokenHandler_ValidateTokenWithVP()
+        {
+            // Synchronous result-based fast path (issue #3459). With no ConfigurationManager set on the
+            // ValidationParameters, ValidateToken runs fully synchronously (no per-call Task, no config await).
+            ValidationResult<ValidatedToken, ValidationError> validationResult = _jsonWebTokenHandler.ValidateToken(_jwsExtendedClaims, _validationParameters, _callContext);
+            return validationResult.Succeeded;
+        }
+
         [BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark(Baseline = true)]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVP_SucceedOnThirdAttempt()
         {
@@ -189,6 +198,16 @@ namespace Microsoft.IdentityModel.Benchmarks
         public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims()
         {
             ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            var claimsIdentity = validationResult.Result.ClaimsIdentity;
+            var claims = claimsIdentity.Claims;
+            return claims.ToList();
+        }
+
+        [BenchmarkCategory("ValidateTokenAsyncClaimAccess"), Benchmark]
+        public List<Claim> JsonWebTokenHandler_ValidateTokenWithVP_CreateClaims()
+        {
+            // Synchronous result-based fast path (issue #3459) with claim materialization.
+            ValidationResult<ValidatedToken, ValidationError> validationResult = _jsonWebTokenHandler.ValidateToken(_jwsExtendedClaims, _validationParameters, _callContext);
             var claimsIdentity = validationResult.Result.ClaimsIdentity;
             var claims = claimsIdentity.Claims;
             return claims.ToList();

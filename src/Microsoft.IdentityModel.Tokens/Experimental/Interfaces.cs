@@ -75,6 +75,35 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     }
 
     /// <summary>
+    /// Interface for validating token issuers synchronously against already-resolved configuration.
+    /// </summary>
+    /// <remarks>
+    /// This is the synchronous companion to <see cref="IIssuerValidator"/>. It is a separate interface (rather than a new
+    /// member on <see cref="IIssuerValidator"/>) so existing implementers are not broken and so the surface compiles on all
+    /// target frameworks, including those without default-interface-method support (net462, net472, netstandard2.0). A
+    /// validator may implement both interfaces.
+    /// </remarks>
+    public interface ISynchronousIssuerValidator
+    {
+        /// <summary>
+        /// Validates the issuer value in a token synchronously, using the already-resolved <paramref name="configuration"/>.
+        /// </summary>
+        /// <param name="issuer">The issuer to validate.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="configuration">The already-resolved <see cref="BaseConfiguration"/> (peeked from the cache), or <see langword="null"/> when no configuration is available.</param>
+        /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
+        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> that contains the results of validating the issuer.</returns>
+        /// <remarks>This method is not expected to throw. Unlike <see cref="IIssuerValidator.ValidateIssuerAsync"/> it accepts the peeked configuration and never fetches it.</remarks>
+        ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuer(
+            string issuer,
+            SecurityToken securityToken,
+            ValidationParameters validationParameters,
+            BaseConfiguration? configuration,
+            CallContext callContext);
+    }
+
+    /// <summary>
     /// Interface for validating signature keys.
     /// </summary>
     public interface ISignatureKeyValidator

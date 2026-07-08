@@ -44,7 +44,7 @@ internal sealed class DefaultAudienceValidator : IAudienceValidator
 /// <summary>
 /// Default implementation of <see cref="IIssuerValidator"/> that uses the static Validators.ValidateIssuerAsync method.
 /// </summary>
-internal sealed class DefaultIssuerValidator : IIssuerValidator
+internal sealed class DefaultIssuerValidator : IIssuerValidator, ISynchronousIssuerValidator
 {
     /// <inheritdoc/>
     public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
@@ -55,6 +55,17 @@ internal sealed class DefaultIssuerValidator : IIssuerValidator
         CancellationToken cancellationToken)
     {
         return Validators.ValidateIssuerAsync(issuer, securityToken, validationParameters, callContext, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuer(
+        string issuer,
+        SecurityToken securityToken,
+        ValidationParameters validationParameters,
+        BaseConfiguration? configuration,
+        CallContext callContext)
+    {
+        return Validators.ValidateIssuer(issuer, securityToken, validationParameters, configuration, callContext);
     }
 }
 
