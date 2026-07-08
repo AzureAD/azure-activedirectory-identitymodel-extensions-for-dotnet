@@ -242,7 +242,11 @@ namespace Microsoft.IdentityModel.Protocols
             if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
                 return _currentConfiguration;
 
-            return GetConfigurationWithBlockingSync(cancel);
+            if (AppContextSwitches.UpdateConfigAsBlocking)
+                return GetConfigurationWithBlockingSync(cancel);
+            else
+                return GetConfigurationNonBlockingSync(cancel);
+
         }
 
         private async Task<T> GetConfigurationNonBlockingAsync(CancellationToken cancel)
@@ -368,6 +372,128 @@ namespace Microsoft.IdentityModel.Protocols
                     fetchMetadataFailure));
         }
 
+        private T GetConfigurationNonBlockingSync(CancellationToken cancel)
+        {
+            Exception fetchMetadataFailure = null;
+
+            // LOGIC
+            // if configuration == null => configuration has never been retrieved.
+            //   reach out to the metadata endpoint. Since multiple threads could be calling this method
+            //   we need to ensure that only one thread is actually fetching the metadata.
+            // else
+            //   if task is running, return the current configuration
+            //   else kick off task to update current configuration
+            if (_currentConfiguration == null)
+            {
+                _configurationNullLock.Wait(cancel);
+                if (_currentConfiguration != null)
+                {
+                    _configurationNullLock.Release();
+                    return _currentConfiguration;
+                }
+
+                try
+                {
+                    var retrievalContext = new ConfigurationRetrievalContext { BypassCache = false };
+
+                    // Check if event handler can provide configuration.
+                    // If provided configuration is valid, skip regular retriaval process and update current configuration.
+                    if (ConfigurationEventHandler != null)
+                    {
+                        var configurationRetrieved = HandleBeforeRetrieveSync(retrievalContext, cancel);
+
+                        // replicate the behavior of successful retrieval from endpoint
+                        if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
+                        {
+                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.FirstRefresh,
+                                TelemetryConstants.Protocols.ConfigurationSourceHandler);
+
+                            UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
+                            return _currentConfiguration;
+                        }
+                    }
+
+                    // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
+                    // The transport should have its own timeouts, etc.
+                    T configuration = _configRetriever.GetConfigurationSync(
+                        MetadataAddress,
+                        _docRetriever,
+                        CancellationToken.None);
+
+                    if (_configValidator != null)
+                    {
+                        ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                        // in this case we have never had a valid configuration, so we will throw an exception if the validation fails
+                        if (!result.Succeeded)
+                        {
+                            var ex = new InvalidConfigurationException(
+                                LogHelper.FormatInvariant(
+                                    LogMessages.IDX20810,
+                                    result.ErrorMessage));
+
+                            throw LogHelper.LogExceptionMessage(ex);
+                        }
+                    }
+
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.FirstRefresh,
+                        TelemetryConstants.Protocols.ConfigurationSourceRetriever);
+
+                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+                {
+                    fetchMetadataFailure = ex;
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.FirstRefresh,
+                        TelemetryConstants.Protocols.ConfigurationSourceRetriever,
+                        ex);
+
+                    LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                             LogHelper.FormatInvariant(
+                                LogMessages.IDX20806,
+                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                LogHelper.MarkAsNonPII(ex)),
+                            ex));
+                }
+#pragma warning restore CA1031 // Do not catch general exception types
+                finally
+                {
+                    _configurationNullLock.Release();
+                }
+            }
+            else
+            {
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
+                {
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.Automatic,
+                        TelemetryConstants.Protocols.ConfigurationSourceUnknown);
+
+                    _ = Task.Run(_updateCurrentConfigurationWithoutBypassAsync, CancellationToken.None);
+                }
+            }
+
+            // If metadata exists return it.
+            if (_currentConfiguration != null)
+                return _currentConfiguration;
+
+            throw LogHelper.LogExceptionMessage(
+                new InvalidOperationException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX20803,
+                        LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                        LogHelper.MarkAsNonPII(_syncAfter),
+                        LogHelper.MarkAsNonPII(fetchMetadataFailure)),
+                    fetchMetadataFailure));
+        }
         /// <summary>
         /// This should be called when the configuration needs to be updated either from RequestRefresh or AutomaticRefresh
         /// The Caller should first check the state checking state using:
