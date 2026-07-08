@@ -16,6 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private static CryptoProviderFactory _default;
         private static readonly ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _customProviderTypeCache = new ConcurrentDictionary<string, string>();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
         private static string _typeofAsymmetricSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
         private static string _typeofSymmetricSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
@@ -92,6 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
             CryptoProviderCache = new InMemoryCryptoProviderCache() { CryptoProviderFactory = this };
             CustomCryptoProvider = other.CustomCryptoProvider;
             CacheSignatureProviders = other.CacheSignatureProviders;
+            CacheCustomProviders = other.CacheCustomProviders;
             SignatureProviderObjectPoolCacheSize = other.SignatureProviderObjectPoolCacheSize;
         }
 
@@ -114,6 +116,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public bool CacheSignatureProviders { get; set; } = DefaultCacheSignatureProviders;
+
+        /// <summary>
+        /// Gets or sets a bool controlling if <see cref="SignatureProvider"/> instances created by <see cref="CustomCryptoProvider"/>
+        /// should be cached. Default is <see langword="false"/>.
+        /// </summary>
+        /// <remarks>
+        /// When <see langword="true"/>, signature providers returned by <see cref="ICryptoProvider.Create(string, object[])"/>
+        /// are cached using the same <see cref="CryptoProviderCache"/> used for built-in providers. This avoids
+        /// repeated provider creation and key materialisation on every signature validation.
+        /// </remarks>
+        [DefaultValue(false)]
+        public bool CacheCustomProviders { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum size of the object pool used by the SignatureProvider that are used for crypto objects.
@@ -598,6 +612,23 @@ namespace Microsoft.IdentityModel.Tokens
             SignatureProvider signatureProvider;
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willCreateSignatures))
             {
+                if (CacheCustomProviders && CacheSignatureProviders && cacheProvider)
+                {
+                    // Try cache lookup first using the remembered provider type from a previous Create call.
+                    string cacheTypeKey = CustomCryptoProvider.GetType().ToString() + "-" + algorithm;
+                    if (_customProviderTypeCache.TryGetValue(cacheTypeKey, out string providerType)
+                        && CryptoProviderCache.TryGetSignatureProvider(
+                            key,
+                            algorithm,
+                            providerType,
+                            willCreateSignatures,
+                            out SignatureProvider cachedProvider))
+                    {
+                        cachedProvider.AddRef();
+                        return cachedProvider;
+                    }
+                }
+
                 signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SignatureProvider;
                 if (signatureProvider == null)
                     throw LogHelper.LogExceptionMessage(
@@ -607,6 +638,17 @@ namespace Microsoft.IdentityModel.Tokens
                                 LogHelper.MarkAsNonPII(algorithm),
                                 LogHelper.MarkAsNonPII(key.KeyId),
                                 LogHelper.MarkAsNonPII(typeof(SignatureProvider)))));
+
+                if (CacheCustomProviders && CacheSignatureProviders && cacheProvider)
+                {
+                    // Remember the provider type for future cache lookups.
+                    string cacheTypeKey = CustomCryptoProvider.GetType().ToString() + "-" + algorithm;
+                    string providerType = signatureProvider.GetType().ToString();
+                    _customProviderTypeCache.TryAdd(cacheTypeKey, providerType);
+
+                    if (ShouldCacheSignatureProvider(signatureProvider))
+                        signatureProvider.IsCached = CryptoProviderCache.TryAdd(signatureProvider);
+                }
 
                 return signatureProvider;
             }
@@ -858,9 +900,14 @@ namespace Microsoft.IdentityModel.Tokens
 
             signatureProvider.Release();
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(signatureProvider.Algorithm))
-                CustomCryptoProvider.Release(signatureProvider);
+            {
+                if (!signatureProvider.IsCached)
+                    CustomCryptoProvider.Release(signatureProvider);
+            }
             else if (signatureProvider.CryptoProviderCache == null && signatureProvider.RefCount == 0 && !signatureProvider.IsCached)
+            {
                 signatureProvider.Dispose();
+            }
         }
     }
 }

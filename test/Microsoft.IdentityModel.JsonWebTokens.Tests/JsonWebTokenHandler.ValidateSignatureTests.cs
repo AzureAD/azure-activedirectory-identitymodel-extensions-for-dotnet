@@ -200,6 +200,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(TokenLogMessages.IDX10500),
                             SignatureValidationFailure.SigningKeyNotFound,
                             null)
+                    },
+                    new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_SignatureProviderCreationThrows")
+                    {
+                        SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                        ValidationParameters = new ValidationParameters
+                        {
+                            CryptoProviderFactory = new ThrowingCryptoProviderFactory()
+                        },
+                        KeyToAddToValidationParameters = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11028:", typeof(NotSupportedException)),
+                        OperationResult = new ValidationError(
+                            new MessageDetail(TokenLogMessages.IDX11028),
+                            SignatureValidationFailure.SignatureProviderCreationFailed,
+                            null)
                     }
                 };
             }
@@ -246,6 +260,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 return KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key;
             }
+        }
+
+        // Reports the algorithm as supported but throws when asked to create the verifying provider,
+        // simulating an algorithm (such as ML-DSA on a platform without post-quantum support) whose
+        // SignatureProvider creation fails at runtime.
+        private class ThrowingCryptoProviderFactory : CryptoProviderFactory
+        {
+            public override bool IsSupportedAlgorithm(string algorithm, SecurityKey key) => true;
+
+            public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm) =>
+                throw new NotSupportedException("Simulated SignatureProvider creation failure.");
         }
 #nullable restore
     }

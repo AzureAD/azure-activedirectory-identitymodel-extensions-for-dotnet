@@ -236,6 +236,44 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
+                if (MLDsa.IsSupported)
+                {
+                    foreach (var mlDsaKeyTuple in AsymmetricSignatureTestData.MlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = mlDsaKeyTuple.Item1,
+                            TestId = mlDsaKeyTuple.Item3,
+                            VerifyKey = mlDsaKeyTuple.Item2
+                        },
+                        mlDsaKeyTuple.Item4,
+                        theoryData);
+
+                    foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonMlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = jsonKeyTuple.Item1,
+                            TestId = jsonKeyTuple.Item3,
+                            VerifyKey = jsonKeyTuple.Item2
+                        },
+                        jsonKeyTuple.Item4,
+                        theoryData);
+                }
+
+                // X509 ML-DSA sign/verify requires private key extraction from PFX.
+                // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
+                if (MLDsa.IsSupported && MlDsaKeyingMaterial.CanExtractMlDsaPrivateKeyFromX509())
+                {
+                    foreach (var x509MlDsaKeyTuple in AsymmetricSignatureTestData.X509MlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = x509MlDsaKeyTuple.Item1,
+                            TestId = x509MlDsaKeyTuple.Item3,
+                            VerifyKey = x509MlDsaKeyTuple.Item2
+                        },
+                        x509MlDsaKeyTuple.Item4,
+                        theoryData);
+                }
+
                 foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonRsaSecurityKeys)
                     AsymmetricSignatureTestData.AddRsaAlgorithmVariations(new SignatureProviderTheoryData
                     {
@@ -417,6 +455,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             TestId = algorithm
                         });
 
+                if (MLDsa.IsSupported)
+                {
+                    foreach (var algorithm in SupportedAlgorithms.MlDsaSigningAlgorithms)
+                        theoryData.Add(
+                            new AsymmetricSignatureProviderTheoryData
+                            {
+                                Algorithm = algorithm,
+                                SecurityKey = MlDsaKeyingMaterial.MlDsa44Key,
+                                TestId = algorithm
+                            });
+                }
+
                 return theoryData;
             }
         }
@@ -435,16 +485,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.VerifyDefaultMinimumAsymmetricKeySizeAreSupported", theoryData);
 
             foreach (var algorithm in AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForSigningMap.Keys)
-                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm)))
+                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.MlDsaSigningAlgorithms.Contains(algorithm)))
                 {
-                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForSigningMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms.");
+                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForSigningMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms || SupportedAlgorithms.MlDsaSigningAlgorithms.");
                     context.AddDiff($"seems like algorithm was added somewhere: '{algorithm}'.");
                 }
 
             foreach (var algorithm in AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap.Keys)
-                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm)))
+                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.MlDsaSigningAlgorithms.Contains(algorithm)))
                 {
-                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms");
+                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms || SupportedAlgorithms.MlDsaSigningAlgorithms");
                     context.AddDiff($"seems like algorithm was added somewhere: '{algorithm}'.");
                 }
 

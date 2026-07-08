@@ -24,8 +24,20 @@ namespace Microsoft.IdentityModel.Tokens
         // <see href="https://datatracker.ietf.org/doc/html/rfc3279#section-2.3.5"/> and <see href="https://datatracker.ietf.org/doc/html/rfc5480"/>
         const string ECDsaOid = "1.2.840.10045.2.1";
 
+        // OIDs for ML-DSA (FIPS 204)
+        // <see href="https://datatracker.ietf.org/doc/rfc9881"/>
+        const string MlDsa44Oid = "2.16.840.1.101.3.4.3.17";
+        const string MlDsa65Oid = "2.16.840.1.101.3.4.3.18";
+        const string MlDsa87Oid = "2.16.840.1.101.3.4.3.19";
+
         AsymmetricAlgorithm _privateKey;
         AsymmetricAlgorithm _publicKey;
+        MLDsa _mlDsaPrivateKey;
+        MLDsa _mlDsaPublicKey;
+        bool _isMlDsa;
+        volatile bool _mlDsaPrivateKeyInitialized;
+        volatile bool _mlDsaPublicKeyInitialized;
+        volatile bool _mlDsaPrivateKeyUnsupported;
 #if NET9_0_OR_GREATER
         Lock _thisLock = new();
 #else
@@ -36,6 +48,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             Certificate = CertificateHelper.LoadX509Certificate(webKey.X5c[0]);
             X5t = Base64UrlEncoder.Encode(Certificate.GetCertHash());
+            _isMlDsa = IsMlDsaOid(Certificate.PublicKey.Oid.Value);
             webKey.ConvertedSecurityKey = this;
         }
 
@@ -49,6 +62,7 @@ namespace Microsoft.IdentityModel.Tokens
             Certificate = certificate ?? throw LogHelper.LogArgumentNullException(nameof(certificate));
             KeyId = certificate.Thumbprint;
             X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
+            _isMlDsa = IsMlDsaOid(certificate.PublicKey.Oid.Value);
         }
 
         /// <summary>
@@ -63,6 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
             Certificate = certificate ?? throw LogHelper.LogArgumentNullException(nameof(certificate));
             KeyId = string.IsNullOrEmpty(keyId) ? throw LogHelper.LogArgumentNullException(nameof(keyId)) : keyId;
             X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
+            _isMlDsa = IsMlDsaOid(certificate.PublicKey.Oid.Value);
         }
 
         /// <summary>
@@ -70,7 +85,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public override int KeySize
         {
-            get => PublicKey.KeySize;
+            get
+            {
+                if (_isMlDsa)
+                    return MlDsaPublicKey?.Algorithm.PublicKeySizeInBytes * 8 ?? 0;
+
+                return PublicKey.KeySize;
+            }
         }
 
         /// <summary>
@@ -145,6 +166,81 @@ namespace Microsoft.IdentityModel.Tokens
                 return _publicKey;
             }
         }
+
+        /// <summary>
+        /// Gets the ML-DSA private key from the certificate, or null if the certificate
+        /// does not contain an ML-DSA key or does not have a private key.
+        /// </summary>
+        internal MLDsa MlDsaPrivateKey
+        {
+            get
+            {
+                if (!_mlDsaPrivateKeyInitialized && _isMlDsa)
+                {
+                    lock (ThisLock)
+                    {
+                        if (!_mlDsaPrivateKeyInitialized)
+                        {
+                            try
+                            {
+#pragma warning disable SYSLIB5006 // GetMLDsaPrivateKey is experimental
+                                _mlDsaPrivateKey = Certificate.GetMLDsaPrivateKey();
+#pragma warning restore SYSLIB5006
+                            }
+                            catch (PlatformNotSupportedException)
+                            {
+                                // On .NET 6, GetMLDsaPrivateKey() from Microsoft.Bcl.Cryptography
+                                // throws PlatformNotSupportedException. ML-DSA X.509 private key
+                                // extraction requires .NET 8+. On .NET 6, ML-DSA certificates can
+                                // still be used for signature verification (public key works) but
+                                // not for signing via X509SecurityKey. Callers needing to sign on
+                                // .NET 6 should use MlDsaSecurityKey with a standalone MLDsa key.
+                                _mlDsaPrivateKeyUnsupported = true;
+                            }
+
+                            _mlDsaPrivateKeyInitialized = true;
+                        }
+                    }
+                }
+
+                return _mlDsaPrivateKey;
+            }
+        }
+
+        /// <summary>
+        /// Gets the ML-DSA public key from the certificate, or null if the certificate
+        /// does not contain an ML-DSA key or the platform does not support ML-DSA.
+        /// </summary>
+        internal MLDsa MlDsaPublicKey
+        {
+            get
+            {
+                if (!_mlDsaPublicKeyInitialized && _isMlDsa)
+                {
+                    lock (ThisLock)
+                    {
+                        if (!_mlDsaPublicKeyInitialized)
+                        {
+                            try
+                            {
+#pragma warning disable SYSLIB5006 // GetMLDsaPublicKey is experimental
+                                _mlDsaPublicKey = Certificate.GetMLDsaPublicKey();
+#pragma warning restore SYSLIB5006
+                            }
+                            catch (PlatformNotSupportedException)
+                            {
+                                // GetMLDsaPublicKey() may not be supported on all platforms.
+                                // Return null so callers can degrade gracefully.
+                            }
+
+                            _mlDsaPublicKeyInitialized = true;
+                        }
+                    }
+                }
+
+                return _mlDsaPublicKey;
+            }
+        }
 #if NET9_0_OR_GREATER
         Lock ThisLock => _thisLock;
 #else
@@ -160,7 +256,13 @@ namespace Microsoft.IdentityModel.Tokens
         [Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus.")]
         public override bool HasPrivateKey
         {
-            get { return PrivateKey != null; }
+            get
+            {
+                if (_isMlDsa)
+                    return MlDsaPrivateKey != null;
+
+                return PrivateKey != null;
+            }
         }
 
         /// <summary>
@@ -171,6 +273,23 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
+                if (_isMlDsa)
+                {
+                    // On platforms where GetMLDsaPrivateKey() throws PlatformNotSupportedException,
+                    // we return Unknown rather than DoesNotExist because the private key may exist
+                    // in the certificate but the platform cannot extract it.
+                    // Note: AsymmetricSignatureProvider only blocks signing when PrivateKeyStatus ==
+                    // DoesNotExist, so Unknown will pass the constructor guard. However, the adapter
+                    // will fail with a clear InvalidOperationException (IDX10723) when it attempts
+                    // to access the null MlDsaPrivateKey during signing initialization.
+                    MLDsa mlDsaPrivateKey = MlDsaPrivateKey;
+
+                    if (_mlDsaPrivateKeyUnsupported)
+                        return PrivateKeyStatus.Unknown;
+
+                    return mlDsaPrivateKey != null ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
+                }
+
                 return PrivateKey == null ? PrivateKeyStatus.DoesNotExist : PrivateKeyStatus.Exists;
             }
         }
@@ -193,6 +312,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>See: <see href="https://datatracker.ietf.org/doc/html/rfc7638"/></remarks>
         public override bool CanComputeJwkThumbprint()
         {
+            if (_isMlDsa)
+                return MlDsaPublicKey != null;
+
             return PublicKey is RSA || PublicKey is ECDsa;
         }
 
@@ -203,6 +325,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>See: <see href="https://datatracker.ietf.org/doc/html/rfc7638"/></remarks>
         public override byte[] ComputeJwkThumbprint()
         {
+            if (_isMlDsa)
+            {
+                if (MlDsaPublicKey == null)
+                    throw LogHelper.LogExceptionMessage(
+                        new PlatformNotSupportedException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX10724,
+                                LogHelper.MarkAsNonPII(KeyId))));
+
+                using var mlDsaKey = new MlDsaSecurityKey(MlDsaPublicKey);
+                return mlDsaKey.ComputeJwkThumbprint();
+            }
+
             return PublicKey is RSA ? new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint() : new ECDsaSecurityKey(PublicKey as ECDsa).ComputeJwkThumbprint();
         }
 
@@ -225,6 +360,11 @@ namespace Microsoft.IdentityModel.Tokens
         public override int GetHashCode()
         {
             return Certificate.GetHashCode();
+        }
+
+        private static bool IsMlDsaOid(string oid)
+        {
+            return oid == MlDsa44Oid || oid == MlDsa65Oid || oid == MlDsa87Oid;
         }
     }
 }
