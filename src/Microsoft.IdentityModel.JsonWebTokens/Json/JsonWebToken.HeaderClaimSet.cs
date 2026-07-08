@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            Dictionary<string, object> claims = new();
+            Dictionary<string, object> claims = new(byteSpan.Length / AverageJsonClaimLengthInBytes);
             while (true)
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)

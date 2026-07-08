@@ -12,6 +12,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 {
     public partial class JsonWebToken
     {
+        // Average number of UTF-8 bytes per JSON claim (property name + value + structural
+        // characters) observed in typical JWTs. Used only to seed the initial capacity of the
+        // claims dictionary so it can be sized close to what it would grow to anyway, avoiding
+        // the intermediate reallocations/rehashes of the default 0 -> 3 -> 7 -> 17 growth path.
+        internal const int AverageJsonClaimLengthInBytes = 32;
+
         internal JsonClaimSet CreatePayloadClaimSet(byte[] bytes, int length)
         {
             return CreatePayloadClaimSet(bytes.AsSpan(0, length));
@@ -35,7 +41,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            Dictionary<string, object> claims = [];
+            Dictionary<string, object> claims = new(byteSpan.Length / AverageJsonClaimLengthInBytes);
             while (true)
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
