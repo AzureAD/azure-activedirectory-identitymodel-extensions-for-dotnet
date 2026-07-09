@@ -294,7 +294,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             JsonWebToken original = new JsonWebToken(jwtString);
 
             // Act
-            JsonWebToken swapped = new JsonWebToken(original, original.EncodedHeader);
+            JsonWebToken swapped = handler.ReplaceTokenHeader(original, original.EncodedHeader);
 
             // Assert
             Assert.Equal(original.EncodedToken, swapped.EncodedToken);
@@ -322,7 +322,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             string newEncodedHeader = Base64UrlEncoder.Encode(@"{""alg"":""HS256"",""typ"":""JWT"",""nonce"":""abc123""}");
 
             // Act
-            JsonWebToken swapped = new JsonWebToken(original, newEncodedHeader);
+            JsonWebToken swapped = handler.ReplaceTokenHeader(original, newEncodedHeader);
 
             // Assert
             Assert.Equal(newEncodedHeader, swapped.EncodedHeader);
@@ -350,7 +350,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             string newEncodedHeader = Base64UrlEncoder.Encode(@"{""alg"":""HS256"",""typ"":""JWT"",""nonce"":""xyz""}");
 
             // Act
-            JsonWebToken swapped = new JsonWebToken(original, newEncodedHeader);
+            JsonWebToken swapped = handler.ReplaceTokenHeader(original, newEncodedHeader);
             JsonWebToken reparsed = new JsonWebToken(newEncodedHeader + "." + original.EncodedPayload + "." + original.EncodedSignature);
 
             // Assert
@@ -378,7 +378,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             string jwtString = handler.CreateToken(Default.PayloadString, signingCredentials);
             JsonWebToken original = new JsonWebToken(jwtString);
-            JsonWebToken swapped = new JsonWebToken(original, original.EncodedHeader);
+            JsonWebToken swapped = handler.ReplaceTokenHeader(original, original.EncodedHeader);
             var validationParameters = new TokenValidationParameters
             {
                 IssuerSigningKey = key,
@@ -398,10 +398,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void JsonWebToken_ReplaceHeader_NullJsonWebToken_Throws()
         {
             // Arrange
+            var handler = new JsonWebTokenHandler();
             string encodedHeader = Base64UrlEncoder.Encode(@"{""alg"":""none""}");
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => new JsonWebToken((JsonWebToken)null, encodedHeader));
+            var exception = Assert.Throws<ArgumentNullException>(() => handler.ReplaceTokenHeader(null, encodedHeader));
             Assert.Equal("jsonWebToken", exception.ParamName);
         }
 
@@ -416,7 +417,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             JsonWebToken jsonWebToken = new JsonWebToken(handler.CreateToken(Default.PayloadString, signingCredentials));
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => new JsonWebToken(jsonWebToken, encodedHeader));
+            var exception = Assert.Throws<ArgumentNullException>(() => handler.ReplaceTokenHeader(jsonWebToken, encodedHeader));
             Assert.Equal("encodedHeader", exception.ParamName);
         }
 
@@ -438,7 +439,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             string encodedHeader = Base64UrlEncoder.Encode(@"{""alg"":""none""}");
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => new JsonWebToken(jwe, encodedHeader));
+            var exception = Assert.Throws<ArgumentException>(() => handler.ReplaceTokenHeader(jwe, encodedHeader));
             Assert.Contains("IDX14117", exception.Message);
         }
 
