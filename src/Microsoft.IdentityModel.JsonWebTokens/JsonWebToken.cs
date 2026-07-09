@@ -262,7 +262,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             string encodedPayload = jsonWebToken.EncodedPayload;
             string encodedSignature = jsonWebToken.EncodedSignature;
+
+#if NET6_0_OR_GREATER
+            int totalLength = encodedHeader.Length + 1 + encodedPayload.Length + 1 + encodedSignature.Length;
+            string encodedToken = string.Create(
+                totalLength,
+                (encodedHeader, encodedPayload, encodedSignature),
+                static (span, state) =>
+                {
+                    var (header, payload, signature) = state;
+                    header.AsSpan().CopyTo(span);
+                    int pos = header.Length;
+                    span[pos++] = '.';
+                    payload.AsSpan().CopyTo(span.Slice(pos));
+                    pos += payload.Length;
+                    span[pos++] = '.';
+                    signature.AsSpan().CopyTo(span.Slice(pos));
+                });
+#else
             string encodedToken = encodedHeader + "." + encodedPayload + "." + encodedSignature;
+#endif
 
             Dot1 = encodedHeader.Length;
             Dot2 = Dot1 + 1 + encodedPayload.Length;
