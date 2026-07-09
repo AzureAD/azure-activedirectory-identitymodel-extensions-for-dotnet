@@ -23,6 +23,8 @@ namespace Microsoft.IdentityModel.Benchmarks
         private const int SmallExtraClaims = 50;
         private const int TypicalExtraClaims = 125;
 
+        private readonly JsonWebTokenHandler _handler = new JsonWebTokenHandler();
+
         private JsonWebToken _minimalSource;
         private string _minimalHeader;
         private string _minimalReassembled;
@@ -38,11 +40,9 @@ namespace Microsoft.IdentityModel.Benchmarks
         [GlobalSetup]
         public void Setup()
         {
-            var handler = new JsonWebTokenHandler();
-
-            (_minimalSource, _minimalHeader, _minimalReassembled) = BuildCase(handler, 0);
-            (_smallSource, _smallHeader, _smallReassembled) = BuildCase(handler, SmallExtraClaims);
-            (_typicalSource, _typicalHeader, _typicalReassembled) = BuildCase(handler, TypicalExtraClaims);
+            (_minimalSource, _minimalHeader, _minimalReassembled) = BuildCase(_handler, 0);
+            (_smallSource, _smallHeader, _smallReassembled) = BuildCase(_handler, SmallExtraClaims);
+            (_typicalSource, _typicalHeader, _typicalReassembled) = BuildCase(_handler, TypicalExtraClaims);
         }
 
         private static (JsonWebToken source, string header, string reassembled) BuildCase(JsonWebTokenHandler handler, int extraClaims)
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [Benchmark]
         public JsonWebToken ReuseParsedPayload_Minimal()
         {
-            return new JsonWebToken(_minimalSource, _minimalHeader);
+            return _handler.ReplaceTokenHeader(_minimalSource, _minimalHeader);
         }
 
         [Benchmark]
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [Benchmark]
         public JsonWebToken ReuseParsedPayload_Small()
         {
-            return new JsonWebToken(_smallSource, _smallHeader);
+            return _handler.ReplaceTokenHeader(_smallSource, _smallHeader);
         }
 
         [Benchmark]
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [Benchmark]
         public JsonWebToken ReuseParsedPayload_Typical()
         {
-            return new JsonWebToken(_typicalSource, _typicalHeader);
+            return _handler.ReplaceTokenHeader(_typicalSource, _typicalHeader);
         }
     }
 }

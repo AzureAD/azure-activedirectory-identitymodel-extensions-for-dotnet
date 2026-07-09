@@ -239,8 +239,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="jsonWebToken">The <see cref="JsonWebToken"/> whose payload and signature are reused. Must be a JWS, not a JWE.</param>
         /// <param name="encodedHeader">The Base64UrlEncoded header that replaces the header of <paramref name="jsonWebToken"/>.</param>
         /// <remarks>
+        /// This is the implementation behind <see cref="JsonWebTokenHandler.ReplaceTokenHeader"/>; use that method to perform a header replacement.
         /// The new token is formed as 'encodedHeader.EncodedPayload.EncodedSignature' using the <see cref="EncodedPayload"/> and <see cref="EncodedSignature"/> from <paramref name="jsonWebToken"/>.
         /// The already parsed payload of <paramref name="jsonWebToken"/> is reused, so the payload is not decoded or parsed again; only the replacement header is decoded and parsed.
+        /// The signature is reused verbatim, so it only remains valid when <paramref name="encodedHeader"/> reconstructs the originally signed header.
         /// <para>
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
         /// </para>
@@ -248,7 +250,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="jsonWebToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="encodedHeader"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="jsonWebToken"/> is an encrypted token (JWE), as its payload cannot be reused.</exception>
-        public JsonWebToken(JsonWebToken jsonWebToken, string encodedHeader)
+        internal JsonWebToken(JsonWebToken jsonWebToken, string encodedHeader)
         {
             _ = jsonWebToken ?? throw LogHelper.LogArgumentNullException(nameof(jsonWebToken));
 
