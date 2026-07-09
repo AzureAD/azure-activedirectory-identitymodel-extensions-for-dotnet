@@ -57,6 +57,47 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory, MemberData(nameof(InvalidIssuerTestCases), DisableDiscoveryEnumeration = true)]
+        public void InvalidIssuersSync(IssuerValidationTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.InvalidIssuers", theoryData);
+
+            if (theoryData.ValidIssuerToAdd != null)
+                theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
+
+            try
+            {
+                ValidationResult<ValidatedIssuer, ValidationError> validationResult =
+                    Validators.ValidateIssuerSync(
+                        theoryData.Issuer,
+                        theoryData.SecurityToken,
+                        theoryData.ValidationParameters,
+                        theoryData.CallContext,
+                        CancellationToken.None);
+
+                if (validationResult.Succeeded)
+                {
+                    context.AddDiff($"Expected validationResult to fail, but it succeeded with: {validationResult.Result}.");
+                }
+                else
+                {
+                    ValidationError validationError = validationResult.Error;
+                    IdentityComparer.AreStringsEqual(
+                        validationError.FailureType.Name,
+                        theoryData.OperationResult.Error.FailureType.Name,
+                        context);
+
+                    theoryData.ExpectedException.ProcessException(validationError.GetException(), context);
+                }
+            }
+            catch (Exception ex)
+            {
+                context.AddDiff($"Did not expect an exception: {ex}.");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<IssuerValidationTheoryData> InvalidIssuerTestCases
         {
             get
@@ -159,6 +200,45 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
+
+        [Theory, MemberData(nameof(ValidIssuerTestCases), DisableDiscoveryEnumeration = true)]
+        public void ValidIssuersSync(IssuerValidationTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.ValidIssuers", theoryData);
+
+            if (theoryData.ValidIssuerToAdd != null)
+                theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
+
+            ValidationResult<ValidatedIssuer, ValidationError> validationResult =
+                Validators.ValidateIssuerSync(
+                    theoryData.Issuer,
+                    theoryData.SecurityToken,
+                    theoryData.ValidationParameters,
+                    theoryData.CallContext,
+                    CancellationToken.None);
+
+            try
+            {
+                if (validationResult.Succeeded)
+                {
+                    IdentityComparer.AreValidatedIssuersEqual(
+                        theoryData.OperationResult.Result,
+                        validationResult.Result,
+                        context);
+                }
+                else
+                {
+                    context.AddDiff($"Expected validationResult to succeed, but it failed with: {validationResult.Error}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                context.AddDiff($"Did not expect an exception: {ex}.");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
 
         public static TheoryData<IssuerValidationTheoryData> ValidIssuerTestCases
         {
