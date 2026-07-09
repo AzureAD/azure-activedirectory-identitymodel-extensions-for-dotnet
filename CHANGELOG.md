@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.19.2
+====
+## Bug Fixes
+- Align Signed HTTP Request `p` (path) claim comparison with RFC 3986 section 3.3. Case-sensitive comparison is opt-in on the 8.x line via the `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext switch (default off, non-breaking). Backport of PR #3539.
+
 8.15.0
 ====
 ## New Features
