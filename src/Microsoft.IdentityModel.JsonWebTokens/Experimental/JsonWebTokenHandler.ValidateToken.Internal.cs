@@ -22,6 +22,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+#if NET5_0_OR_GREATER
             if (string.IsNullOrEmpty(token))
             {
                 return ValidationError.NullParameter(
@@ -63,6 +64,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             return readResult.Error!.AddCurrentStackFrame();
+#else
+            // Synchronous document retrieval is not supported before .NET 5.0
+            // (HttpDocumentRetriever does not implement ISyncDocumentRetriever), so run
+            // the asynchronous validation path synchronously (sync-over-async).
+            return ValidateTokenAsync(token, validationParameters, callContext, cancellationToken)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+#endif
         }
 
         /// <inheritdoc/>
@@ -72,6 +80,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+#if NET5_0_OR_GREATER
             if (token is null)
             {
                 return ValidationError.NullParameter(
@@ -172,6 +181,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             // If we reach this point, the token validation failed and we should return the error.
             return result.Error!.AddCurrentStackFrame();
+#else
+            // Synchronous document retrieval is not supported before .NET 5.0
+            // (HttpDocumentRetriever does not implement ISyncDocumentRetriever), so run
+            // the asynchronous validation path synchronously (sync-over-async).
+            return ValidateTokenAsync(token, validationParameters, callContext, cancellationToken)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+#endif
         }
 
         private ValidationResult<ValidatedToken, ValidationError> ValidateJWESync(
