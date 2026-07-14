@@ -2859,9 +2859,35 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 var encryptionKeysFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.GetContentEncryptionKeys(jwtTokenFromJwtHandlerWithNoKid, theoryData.ValidationParameters);
 
-                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, theoryData.ExpectedDecryptionKeys);
-                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithNoKid, theoryData.ExpectedDecryptionKeys);
-                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, encryptionKeysFromJwtHandlerWithNoKid, context);
+                var actualKeysWithKid = encryptionKeysFromJwtHandlerWithKid.ToList();
+                var actualKeysWithNoKid = encryptionKeysFromJwtHandlerWithNoKid.ToList();
+
+                foreach (var expectedKey in theoryData.ExpectedDecryptionKeys)
+                {
+                    if (theoryData.Algorithm != null
+                        && (theoryData.Algorithm.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
+                            || theoryData.Algorithm.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal)))
+                    {
+                        Assert.Contains(expectedKey, actualKeysWithKid);
+                        Assert.Contains(expectedKey, actualKeysWithNoKid);
+                    }
+                    else
+                    {
+                        if (expectedKey.CryptoProviderFactory.IsSupportedAlgorithm(jwtTokenFromJwtHandlerWithKid.Header.Alg, expectedKey))
+                        {
+                            var kwp = expectedKey.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(expectedKey, jwtTokenFromJwtHandlerWithKid.Header.Alg);
+                            var expectedCekBytes = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtTokenFromJwtHandlerWithKid.RawEncryptedKey));
+                            Assert.Single(actualKeysWithKid.Where(k => k is SymmetricSecurityKey sk && sk.Key.SequenceEqual(expectedCekBytes)));
+
+                            var kwp2 = expectedKey.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(expectedKey, jwtTokenFromJwtHandlerWithNoKid.Header.Alg);
+                            var expectedCekBytes2 = kwp2.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtTokenFromJwtHandlerWithNoKid.RawEncryptedKey));
+                            Assert.Single(actualKeysWithNoKid.Where(k => k is SymmetricSecurityKey sk && sk.Key.SequenceEqual(expectedCekBytes2)));
+                        }
+                    }
+                }
+                
+                if (theoryData.ExpectedDecryptionKeys.Count() > 0)
+                    IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, encryptionKeysFromJwtHandlerWithNoKid, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -2910,7 +2936,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         TestId = "AlgorithmMisMatch",
                         Payload = Default.PayloadString,
-                        ExpectedException = ExpectedException.KeyWrapException("IDX10618:"),
+                        ExpectedDecryptionKeys = new List<SecurityKey>(),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
