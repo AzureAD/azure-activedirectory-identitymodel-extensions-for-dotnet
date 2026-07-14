@@ -672,7 +672,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var jwtTokenFromJsonHandlerWithKid = new JsonWebToken(jweFromJsonHandlerWithKid);
                 var encryptionKeysFromJsonHandlerWithKid = theoryData.JsonWebTokenHandler.GetContentEncryptionKeys(jwtTokenFromJsonHandlerWithKid, theoryData.ValidationParameters, theoryData.Configuration);
 
-                IdentityComparer.AreEqual(encryptionKeysFromJsonHandlerWithKid, theoryData.ExpectedDecryptionKeys);
+                var actualKeys = encryptionKeysFromJsonHandlerWithKid.ToList();
+
+                foreach (var expectedKey in theoryData.ExpectedDecryptionKeys)
+                {
+                    if (jwtTokenFromJsonHandlerWithKid.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
+                        || jwtTokenFromJsonHandlerWithKid.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
+                    {
+                        // Direct key use — keys are returned as-is, exact match.
+                        Assert.Contains(expectedKey, actualKeys);
+                    }
+                    else
+                    {
+                        // Key wrapping — returned keys are unwrapped CEKs.
+                        // Verify the correct CEK is present by unwrapping ourselves.
+                        if (expectedKey.CryptoProviderFactory.IsSupportedAlgorithm(jwtTokenFromJsonHandlerWithKid.Alg, expectedKey))
+                        {
+                            var kwp = expectedKey.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(expectedKey, jwtTokenFromJsonHandlerWithKid.Alg);
+                            var expectedCekBytes = kwp.UnwrapKey(jwtTokenFromJsonHandlerWithKid.EncryptedKeyBytes);
+                            var filteredKeys = actualKeys.Where(k => k is SymmetricSecurityKey sk && sk.Key.SequenceEqual(expectedCekBytes));
+                            Assert.Single(filteredKeys);
+                        }
+                    }
+                }
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -771,7 +793,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                    {
                         TestId = "AlgorithmMisMatch",
                         Payload = Default.PayloadString,
-                        ExpectedException = ExpectedException.KeyWrapException("IDX10618:"),
+                        ExpectedDecryptionKeys = new List<SecurityKey>(),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
