@@ -739,7 +739,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
-            return ReadSamlToken(XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max));
+            return ReadSamlToken(XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), BoundedXmlDictionaryReaderQuotas.Quotas));
         }
 
         /// <summary>
@@ -845,7 +845,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 if (attributeValue != null && attributeValue.Length > 0)
                 {
-                    using (var xmlReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(attributeValue), XmlDictionaryReaderQuotas.Max))
+                    using (var xmlReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(attributeValue), BoundedXmlDictionaryReaderQuotas.Quotas))
                     {
                         xmlReader.MoveToContent();
                         xmlReader.ReadStartElement(Actor);

@@ -39,6 +39,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public class SamlSerializer
     {
+        private const int MaxDepth = 8;
+        [ThreadStatic]
+        private static int t_currentDepth;
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private string _prefix = SamlConstants.Prefix;
 
@@ -222,8 +225,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Assertion, SamlConstants.Namespace);
 
+            t_currentDepth++;
             try
             {
+                if (t_currentDepth >= MaxDepth)
+                    throw LogReadException(
+                        LogMessages.IDX11138,
+                        t_currentDepth,
+                        MaxDepth);
+
                 var envelopeReader = new EnvelopedSignatureReader(reader) { Serializer = DSigSerializer };
 
                 // @xsi:type
@@ -315,6 +325,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     throw;
 
                 throw LogReadException(LogMessages.IDX11122, ex, SamlConstants.Elements.Assertion, ex);
+            }
+            finally
+            {
+                t_currentDepth--;
             }
         }
 
