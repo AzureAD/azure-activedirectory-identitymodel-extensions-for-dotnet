@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             try
             {
-                using (var reader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max))
+                using (var reader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), Saml.BoundedXmlDictionaryReaderQuotas.Quotas))
                 {
                     return ReadSaml2Token(reader);
                 }
