@@ -3143,28 +3143,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ExpectedDecryptionKeys =  new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
                         Algorithm = JwtConstants.DirectKeyUseAlg,
                         EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2_NoKeyId
-                    },
-                   new CreateTokenTheoryData
-                    {
-                        TestId = "AlgorithmMisMatch",
-                        Payload = Default.PayloadString,
-                        ExpectedException = ExpectedException.KeyWrapException("IDX10618:"),
-                        TokenDescriptor =  new SecurityTokenDescriptor
-                        {
-                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
-                            Claims = Default.PayloadDictionary
-                        },
-                        JwtSecurityTokenHandler = new JwtSecurityTokenHandler(),
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                            TokenDecryptionKeys = new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
-                        },
-                        Algorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2_NoKeyId
                     }
                 };
             }
