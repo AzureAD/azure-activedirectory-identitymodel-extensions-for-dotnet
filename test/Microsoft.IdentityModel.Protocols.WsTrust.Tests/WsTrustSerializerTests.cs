@@ -72,6 +72,21 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public void ReadBinarySecrect_EmptyElement_ReturnsNull()
+        {
+            // Arrange
+            // Act
+            // Assert
+            var xml = $"<wst:{WsTrustElements.BinarySecret} Type=\"{WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey}\" xmlns:wst=\"{WsTrustConstants.Trust13.Namespace}\"/>";
+            var reader = XmlUtilities.CreateDictionaryReader(xml);
+            var context = new WsSerializationContext(WsTrustVersion.Trust13);
+
+            var binarySecret = WsTrustSerializer.ReadBinarySecrect(reader, context);
+
+            Assert.Null(binarySecret);
+        }
+
         public static TheoryData<WsTrustTheoryData> ReadBinarySecrectTestCases
         {
             get

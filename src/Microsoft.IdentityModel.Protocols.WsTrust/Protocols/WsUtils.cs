@@ -16,6 +16,21 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     internal static class WsUtils
     {
         /// <summary>
+        /// <see cref="XmlDictionaryReaderQuotas"/> with a bounded <see cref="XmlDictionaryReaderQuotas.MaxDepth"/>
+        /// (32) used when materializing buffered XML. All other limits stay at their maximum so large but
+        /// shallow WS-Trust messages are unaffected. Keeps element nesting within a sane bound, consistent
+        /// with the reader quotas used elsewhere in the stack.
+        /// </summary>
+        internal static readonly XmlDictionaryReaderQuotas BoundedReaderQuotas = new XmlDictionaryReaderQuotas
+        {
+            MaxArrayLength = int.MaxValue,
+            MaxBytesPerRead = int.MaxValue,
+            MaxDepth = 32,
+            MaxNameTableCharCount = int.MaxValue,
+            MaxStringContentLength = int.MaxValue,
+        };
+
+        /// <summary>
         /// Assumes the xmlreader is positioned on a start element.
         /// </summary>
         /// <param name="reader"></param>
@@ -35,11 +50,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ms.Length == 0)
                     return null;
 
-                using (var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null))
+                using (var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, BoundedReaderQuotas, null))
                 {
                     XmlDocument dom = new XmlDocument
                     {
-                        PreserveWhitespace = true
+                        PreserveWhitespace = true,
+                        XmlResolver = null
                     };
 
                     dom.Load(memoryReader);
@@ -154,5 +170,57 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (!reader.IsStartElement(element, serializationContext.TrustConstants.Namespace))
                 throw XmlUtil.LogReadException(LogMessages.IDX15011, serializationContext.TrustConstants.Namespace, element, reader.NamespaceURI, reader.LocalName);
         }
+    }
+
+    /// <summary>
+    /// Wraps an <see cref="XmlReader"/> and throws <see cref="System.Xml.XmlException"/> if element
+    /// nesting depth exceeds the configured maximum. Does not buffer and does not own (dispose)
+    /// the inner reader.
+    /// </summary>
+    internal sealed class DepthLimitingXmlReader : XmlReader
+    {
+        private readonly XmlReader _inner;
+        private readonly int _maxDepth;
+
+        internal DepthLimitingXmlReader(XmlReader inner, int maxDepth)
+        {
+            _inner = inner ?? throw LogHelper.LogArgumentNullException(nameof(inner));
+            _maxDepth = maxDepth;
+        }
+
+        public override bool Read()
+        {
+            bool result = _inner.Read();
+            if (_inner.Depth > _maxDepth)
+                throw LogHelper.LogExceptionMessage(
+                    new System.Xml.XmlException(LogHelper.FormatInvariant(LogMessages.IDX15025, _maxDepth)));
+
+            return result;
+        }
+
+        public override int AttributeCount => _inner.AttributeCount;
+        public override string BaseURI => _inner.BaseURI;
+        public override int Depth => _inner.Depth;
+        public override bool EOF => _inner.EOF;
+        public override bool IsEmptyElement => _inner.IsEmptyElement;
+        public override string LocalName => _inner.LocalName;
+        public override string NamespaceURI => _inner.NamespaceURI;
+        public override XmlNameTable NameTable => _inner.NameTable;
+        public override XmlNodeType NodeType => _inner.NodeType;
+        public override string Prefix => _inner.Prefix;
+        public override ReadState ReadState => _inner.ReadState;
+        public override string Value => _inner.Value;
+
+        public override string GetAttribute(int i) => _inner.GetAttribute(i);
+        public override string GetAttribute(string name) => _inner.GetAttribute(name);
+        public override string GetAttribute(string name, string namespaceURI) => _inner.GetAttribute(name, namespaceURI);
+        public override string LookupNamespace(string prefix) => _inner.LookupNamespace(prefix);
+        public override bool MoveToAttribute(string name) => _inner.MoveToAttribute(name);
+        public override bool MoveToAttribute(string name, string ns) => _inner.MoveToAttribute(name, ns);
+        public override bool MoveToElement() => _inner.MoveToElement();
+        public override bool MoveToFirstAttribute() => _inner.MoveToFirstAttribute();
+        public override bool MoveToNextAttribute() => _inner.MoveToNextAttribute();
+        public override bool ReadAttributeValue() => _inner.ReadAttributeValue();
+        public override void ResolveEntity() => _inner.ResolveEntity();
     }
 }

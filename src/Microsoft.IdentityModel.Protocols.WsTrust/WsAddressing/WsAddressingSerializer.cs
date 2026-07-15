@@ -44,13 +44,14 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                     while (reader.IsStartElement())
                     {
                         bool isInnerEmptyElement = reader.IsEmptyElement;
-                        XmlReader subtreeReader = reader.ReadSubtree();
                         var doc = new XmlDocument
                         {
-                            PreserveWhitespace = true
+                            PreserveWhitespace = true,
+                            XmlResolver = null
                         };
 
-                        doc.Load(subtreeReader);
+                        using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth))
+                            doc.Load(depthLimitingReader);
                         endpointReference.AdditionalXmlElements.Add(doc.DocumentElement);
                         if (!isInnerEmptyElement)
                             reader.ReadEndElement();

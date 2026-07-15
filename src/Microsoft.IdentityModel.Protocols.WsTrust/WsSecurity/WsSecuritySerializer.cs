@@ -36,12 +36,13 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
                     stream.Seek(0, SeekOrigin.Begin);
                     var dom = new XmlDocument
                     {
-                        PreserveWhitespace = true
+                        PreserveWhitespace = true,
+                        XmlResolver = null
                     };
 
-                    using (var textReader = new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit })
+                    using (var dictReader = XmlDictionaryReader.CreateTextReader(stream, XmlDictionaryReaderQuotas.Max))
                     {
-                        dom.Load(textReader);
+                        dom.Load(dictReader);
                         return dom.DocumentElement;
                     }
                 }

@@ -6,6 +6,7 @@ const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15016 = "IDX15016
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15017 = "IDX15017: Exception thrown while reading '{0}'. Caught exception: '{1}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15022 = "IDX15022: Unable to read XML. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15024 = "IDX15024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15025 = "IDX15025: Unable to read XML. The element nesting depth exceeds the maximum supported depth of '{0}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15101 = "IDX15101: Unable to read OnBehalfOf Element. Unable to read token: '{0}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15407 = "IDX15407: Exception caught while writing: '{0}'. Caught exception: '{1}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15500 = "IDX15500: Lifetime constructed with expires <= created." -> string
@@ -165,7 +166,34 @@ static Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionDataTypes.XmlEnc11.
 static Microsoft.IdentityModel.Xml.XmlAttributeHolder.EmptyArray -> Microsoft.IdentityModel.Xml.XmlAttributeHolder[]
 static Microsoft.IdentityModel.Xml.XmlAttributeHolder.GetAttribute(Microsoft.IdentityModel.Xml.XmlAttributeHolder[] attributes, string localName, string ns) -> string
 static Microsoft.IdentityModel.Xml.XmlAttributeHolder.ReadAttributes(System.Xml.XmlDictionaryReader reader) -> Microsoft.IdentityModel.Xml.XmlAttributeHolder[]
+static readonly Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.BoundedReaderQuotas -> System.Xml.XmlDictionaryReaderQuotas
 static readonly Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionConstants.KnownNamespaces -> System.Collections.Generic.IList<string>
+Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader
+Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.DepthLimitingXmlReader(System.Xml.XmlReader inner, int maxDepth) -> void
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.AttributeCount.get -> int
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.BaseURI.get -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Depth.get -> int
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.EOF.get -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.GetAttribute(int i) -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.GetAttribute(string name) -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.GetAttribute(string name, string namespaceURI) -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.IsEmptyElement.get -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.LocalName.get -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.LookupNamespace(string prefix) -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToAttribute(string name) -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToAttribute(string name, string ns) -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToElement() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToFirstAttribute() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToNextAttribute() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.NamespaceURI.get -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.NameTable.get -> System.Xml.XmlNameTable
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.NodeType.get -> System.Xml.XmlNodeType
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Prefix.get -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Read() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.ReadAttributeValue() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.ReadState.get -> System.Xml.ReadState
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.ResolveEntity() -> void
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Value.get -> string
 System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute
 System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.DynamicallyAccessedMembersAttribute(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes memberTypes) -> void
 System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.MemberTypes.get -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes

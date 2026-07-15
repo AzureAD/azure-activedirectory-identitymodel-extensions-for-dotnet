@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         static byte[] GetKeyBytesFromProtectedKey(ProtectedKey protectedKey)
         {
             if (protectedKey == null)
-                LogHelper.LogArgumentNullException(nameof(protectedKey));
+                throw LogHelper.LogArgumentNullException(nameof(protectedKey));
 
             return protectedKey.Secret;
         }
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         static EncryptingCredentials GetWrappingCredentialsFromProtectedKey(ProtectedKey protectedKey)
         {
             if (protectedKey == null)
-                LogHelper.LogArgumentNullException(nameof(protectedKey));
+                throw LogHelper.LogArgumentNullException(nameof(protectedKey));
 
             return protectedKey.WrappingCredentials;
         }

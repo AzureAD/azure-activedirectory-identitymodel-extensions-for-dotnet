@@ -4,10 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -28,16 +25,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// </summary>
     public class WsTrustSerializer
     {
-        private const BindingFlags getPropertyFlags = BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-        private const BindingFlags invokeMethodFlags = BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic;
-
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-        private static Type _saml2AssertionType = typeof(Saml2Assertion);
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-        private static Type _samlAssertionType = typeof(SamlAssertion);
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-        private static Type _xmlTokenStreamType;
-
         private readonly WsFedSerializer _wsFedSerializer = new WsFedSerializer();
         private readonly WsPolicySerializer _wsPolicySerializer = new WsPolicySerializer();
 
@@ -77,19 +64,24 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             try
             {
                 var binarySecret = new BinarySecret();
+                XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
+                string encodingType = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace);
+                if (!string.IsNullOrEmpty(encodingType))
+                    binarySecret.EncodingType = encodingType;
+
                 if (!reader.IsEmptyElement)
                 {
-                    XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
-                    string encodingType = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace);
-                    if (!string.IsNullOrEmpty(encodingType))
-                        binarySecret.EncodingType = encodingType;
-
                     reader.ReadStartElement();
                     byte[] data = reader.ReadContentAsBase64();
                     if (data != null)
                         binarySecret.Data = data;
 
                     reader.ReadEndElement();
+                }
+                else
+                {
+                    reader.Read();
+                    return null;
                 }
 
                 return binarySecret;
@@ -295,7 +287,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.OnBehalfOf, ex);
             }
 
-            throw XmlUtil.LogReadException(LogMessages.IDX15101, reader.ReadOuterXml());
+            throw XmlUtil.LogReadException(LogMessages.IDX15101, reader.LocalName);
         }
 
         private static SecurityTokenReference ReadReference(XmlDictionaryReader reader, string elementName)
@@ -365,8 +357,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (!string.IsNullOrEmpty(context))
                     trustRequest.Context = context;
 
-                // remember all attributes
-                var doc = new XmlDocument();
+                var doc = new XmlDocument { XmlResolver = null };
                 foreach (XmlAttributeHolder attribute in xmlAttributes)
                     trustRequest.AdditionalXmlAttributes.Add(doc.CreateAttribute(attribute.Prefix, attribute.LocalName, attribute.NamespaceUri));
 
@@ -686,11 +677,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 }
 
                 ms.Seek(0, SeekOrigin.Begin);
-                using (XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null))
+                using (XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, WsUtils.BoundedReaderQuotas, null))
                 {
                     XmlDocument dom = new XmlDocument
                     {
-                        PreserveWhitespace = true
+                        PreserveWhitespace = true,
+                        XmlResolver = null
                     };
 
                     dom.Load(memoryReader);
@@ -869,14 +861,18 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <param name="trustRequest"></param>
         private static void ReadUnknownElement(XmlDictionaryReader reader, WsTrustRequest trustRequest)
         {
+            // Capture the (open-content / extension) unknown element into a DOM. The subtree is read
+            // through a streaming DepthLimitingXmlReader that caps element nesting depth; it is a
+            // pass-through on typical input and only signals when the configured depth is exceeded.
             bool isEmptyElement = reader.IsEmptyElement;
-            var doc = new XmlDocument();
-            doc.Load(reader.ReadSubtree());
+            var doc = new XmlDocument { XmlResolver = null };
+            using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth))
+                doc.Load(depthLimitingReader);
             trustRequest.AdditionalXmlElements.Add(doc.DocumentElement);
 
             if (isEmptyElement)
             {
-                // ReadSubTree will advance the reader to the current element's end element. If the reader is at
+                // ReadSubtree will advance the reader to the current element's end element. If the reader is at
                 // an empty element, it won't advance and the deserializer will be stuck on the empty unknown element.
                 reader.Read();
             }
@@ -1128,9 +1124,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 {
                     bool tryWriteSucceeded = false;
                     if (onBehalfOf.SecurityToken is Saml2SecurityToken saml2SecurityToken)
-                        tryWriteSucceeded = TryWriteSourceData(writer, saml2SecurityToken.Assertion, _saml2AssertionType);
+                        tryWriteSucceeded = TryWriteSourceData(writer, saml2SecurityToken.Assertion);
                     else if (onBehalfOf.SecurityToken is SamlSecurityToken samlSecurityToken)
-                        tryWriteSucceeded = TryWriteSourceData(writer, samlSecurityToken.Assertion, _samlAssertionType);
+                        tryWriteSucceeded = TryWriteSourceData(writer, samlSecurityToken.Assertion);
 
                     if (!tryWriteSucceeded)
                         foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
@@ -1155,35 +1151,22 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// A method like this should be added to the tokenhandlers, when the original data is needed.
+        /// Writes the original XML source data from an assertion's XmlTokenStream, preserving the original bytes.
+        /// Falls back to false if the assertion has no captured token stream.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="assertion"></param>
-        /// <param name="assertionType"></param>
-        /// <returns></returns>
-        private static bool TryWriteSourceData(XmlDictionaryWriter writer, object assertion, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type assertionType)
+        private static bool TryWriteSourceData(XmlDictionaryWriter writer, object assertion)
         {
-            try
-            {
-                object xmlTokenStream = assertionType.InvokeMember("XmlTokenStream", getPropertyFlags, null, assertion, null, CultureInfo.InvariantCulture);
-                if (xmlTokenStream == null)
-                    return false;
+            XmlTokenStream xmlTokenStream = null;
+            if (assertion is Saml2Assertion saml2)
+                xmlTokenStream = saml2.XmlTokenStream;
+            else if (assertion is SamlAssertion saml)
+                xmlTokenStream = saml.XmlTokenStream;
 
-                if (_xmlTokenStreamType == null)
-                {
-#pragma warning disable IL2074 // The return value of GetType() cannot carry DynamicallyAccessedMembers annotations
-                    _xmlTokenStreamType = xmlTokenStream.GetType();
-#pragma warning restore IL2074
-                }
+            if (xmlTokenStream == null)
+                return false;
 
-                _xmlTokenStreamType.InvokeMember("WriteTo", invokeMethodFlags, null, xmlTokenStream, new object[] { writer }, CultureInfo.InvariantCulture);
-                return true;
-            }
-            catch (Exception)
-            {
-            }
-
-            return false;
+            xmlTokenStream.WriteTo(writer);
+            return true;
         }
 
         /// <summary>

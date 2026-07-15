@@ -75,6 +75,93 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // An open-content element nested beyond the supported depth is rejected with a catchable
+        // exception, while a shallow open-content element round-trips normally.
+        [Theory]
+        [InlineData(8, false)]    // shallow element: accepted
+        [InlineData(200, true)]   // deeply nested element: rejected (exceeds max depth)
+        public void ReadRequest_OpenContentElement_EnforcesMaxNestingDepth(int depth, bool expectThrow)
+        {
+            const string trustNs = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
+            var sb = new StringBuilder();
+            sb.Append($"<RequestSecurityToken Context=\"ctx\" xmlns=\"{trustNs}\">");
+            sb.Append("<Extension xmlns=\"urn:wstrust-depth-test\">");
+            for (int i = 0; i < depth; i++)
+                sb.Append("<a>");
+            sb.Append('x');
+            for (int i = 0; i < depth; i++)
+                sb.Append("</a>");
+            sb.Append("</Extension>");
+            sb.Append("</RequestSecurityToken>");
+
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            var serializer = new WsTrustSerializer();
+
+            if (expectThrow)
+            {
+                Assert.ThrowsAny<Exception>(() =>
+                {
+                    var reader = XmlDictionaryReader.CreateTextReader(bytes, XmlDictionaryReaderQuotas.Max);
+                    serializer.ReadRequest(reader);
+                });
+            }
+            else
+            {
+                var reader = XmlDictionaryReader.CreateTextReader(bytes, XmlDictionaryReaderQuotas.Max);
+                var request = serializer.ReadRequest(reader);
+                Assert.NotNull(request);
+                Assert.NotEmpty(request.AdditionalXmlElements);
+            }
+        }
+
+        // An EndpointReference additional element nested beyond the supported depth is rejected,
+        // while a shallow one round-trips normally.
+        [Theory]
+        [InlineData(8, false)]    // shallow element: accepted
+        [InlineData(200, true)]   // deeply nested element: rejected (exceeds max depth)
+        public void ReadRequest_EndpointReferenceAdditionalElement_EnforcesMaxNestingDepth(int depth, bool expectThrow)
+        {
+            const string trustNs = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
+            const string policyNs = "http://schemas.xmlsoap.org/ws/2004/09/policy";
+            const string addressingNs = "http://www.w3.org/2005/08/addressing";
+
+            var sb = new StringBuilder();
+            sb.Append($"<RequestSecurityToken Context=\"ctx\" xmlns=\"{trustNs}\">");
+            sb.Append($"<AppliesTo xmlns=\"{policyNs}\">");
+            sb.Append($"<EndpointReference xmlns=\"{addressingNs}\">");
+            sb.Append("<Address>https://example.com</Address>");
+            sb.Append("<Extension xmlns=\"urn:wstrust-depth-test\">");
+            for (int i = 0; i < depth; i++)
+                sb.Append("<a>");
+            sb.Append('x');
+            for (int i = 0; i < depth; i++)
+                sb.Append("</a>");
+            sb.Append("</Extension>");
+            sb.Append("</EndpointReference>");
+            sb.Append("</AppliesTo>");
+            sb.Append("</RequestSecurityToken>");
+
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            var serializer = new WsTrustSerializer();
+
+            if (expectThrow)
+            {
+                Assert.ThrowsAny<Exception>(() =>
+                {
+                    var reader = XmlDictionaryReader.CreateTextReader(bytes, XmlDictionaryReaderQuotas.Max);
+                    serializer.ReadRequest(reader);
+                });
+            }
+            else
+            {
+                var reader = XmlDictionaryReader.CreateTextReader(bytes, XmlDictionaryReaderQuotas.Max);
+                var request = serializer.ReadRequest(reader);
+                Assert.NotNull(request.AppliesTo);
+                Assert.NotEmpty(request.AppliesTo.EndpointReference.AdditionalXmlElements);
+            }
+        }
+
+
         public static TheoryData<WsTrustTheoryData> ReadAndWriteRequestTestCases
         {
             get

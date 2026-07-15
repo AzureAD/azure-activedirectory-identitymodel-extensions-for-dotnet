@@ -38,10 +38,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX15852, keySizeInBits, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(keySizeInBits)));
 
             if ((issuerEntropy.Length * 8 < s_minKeySizeInBits) || (issuerEntropy.Length * 8 > s_maxKeySizeInBits))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogHelper.FormatInvariant(LogMessages.IDX15853, issuerEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(issuerEntropy))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX15853, issuerEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(issuerEntropy)));
 
             if ((requestorEntropy.Length * 8 < s_minKeySizeInBits) || (requestorEntropy.Length * 8 > s_maxKeySizeInBits))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogHelper.FormatInvariant(LogMessages.IDX15854, requestorEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(requestorEntropy))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX15854, requestorEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(requestorEntropy)));
 
             int keySizeInBytes = ValidateKeySizeInBytes(keySizeInBits);
 
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public static void FillRandomBytes(byte[] buffer)
         {
             if (buffer == null)
-                LogHelper.LogArgumentNullException(nameof(buffer));
+                throw LogHelper.LogArgumentNullException(nameof(buffer));
 
             RandomNumberGenerator.GetBytes(buffer);
         }
