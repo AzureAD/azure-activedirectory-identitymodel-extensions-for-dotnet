@@ -53,4 +53,4 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
     }
 }
 
-#pragma warning restore CS3016 // Arrays as attribute arguments is nEndoot CLS-compliant
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

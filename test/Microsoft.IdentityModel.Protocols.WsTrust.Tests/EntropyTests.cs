@@ -68,7 +68,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             try
             {
                 WsTrustSerializer.WriteEntropy(theoryData.Writer, theoryData.WsSerializationContext, theoryData.Entropy);
-                //IdentityComparer.AreEqual(entropy, theoryData.Entropy, context);
             }
             catch (Exception ex)
             {

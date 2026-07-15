@@ -20,8 +20,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// Computes the session key based on PSHA1 algorithm.
         /// </summary>
-        /// <param name="requestorEntropy">The entropy from the requestor side.</param>
         /// <param name="issuerEntropy">The entropy from the token issuer side.</param>
+        /// <param name="requestorEntropy">The entropy from the requestor side.</param>
         /// <param name="keySizeInBits">The desired key size in bits.</param>
         /// <returns>The computed session key.</returns>
         /// 
@@ -166,7 +166,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             int keySizeInBytes = ValidateKeySizeInBytes(keySizeInBits);
             receiverEntropy = new byte[keySizeInBytes];
             _random.GetNonZeroBytes(receiverEntropy);
-            return ComputeCombinedKey(senderEntropy, receiverEntropy, keySizeInBits);
+            return ComputeCombinedKey(receiverEntropy, senderEntropy, keySizeInBits);
         }
 
         /// <summary>

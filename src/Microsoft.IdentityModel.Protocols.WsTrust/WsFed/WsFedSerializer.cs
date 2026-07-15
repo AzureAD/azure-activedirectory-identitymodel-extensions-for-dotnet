@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
             XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
             string uri = XmlAttributeHolder.GetAttribute(attributes, WsFedAttributes.Uri, @namespace);
             if (string.IsNullOrEmpty(uri))
-                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15013, WsFedElements.ContextItem, WsFedAttributes.Name)));
+                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15013, WsFedElements.ClaimType, WsFedAttributes.Uri)));
 
             string optionalAttribute = XmlAttributeHolder.GetAttribute(attributes, WsFedAttributes.Optional, @namespace);
             bool? optional = null;

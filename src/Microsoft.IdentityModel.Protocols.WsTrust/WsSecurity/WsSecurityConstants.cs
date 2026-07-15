@@ -16,15 +16,18 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
         /// </summary>
         public static readonly IList<string> KnownNamespaces = new List<string> { "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" };
 
+        private static readonly WsSecurity10Constants _wsSecurity10 = new WsSecurity10Constants();
+        private static readonly WsSecurity11Constants _wsSecurity11 = new WsSecurity11Constants();
+
         /// <summary>
         /// Gets constants for WS-Security 1.0.
         /// </summary>
-        public static WsSecurity10Constants WsSecurity10 => new WsSecurity10Constants();
+        public static WsSecurity10Constants WsSecurity10 => _wsSecurity10;
 
         /// <summary>
         /// Gets constants for WS-Security 1.1.
         /// </summary>
-        public static WsSecurity11Constants WsSecurity11 => new WsSecurity11Constants();
+        public static WsSecurity11Constants WsSecurity11 => _wsSecurity11;
 
         /// <summary>
         /// Gets FragmentBaseAddress for WS-Security.

@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public WsTrustResponse(RequestSecurityTokenResponse requestSecurityTokenResponse)
         {
             if (requestSecurityTokenResponse == null)
-                LogHelper.LogArgumentNullException(nameof(requestSecurityTokenResponse));
+                throw LogHelper.LogArgumentNullException(nameof(requestSecurityTokenResponse));
 
             RequestSecurityTokenResponseCollection.Add(requestSecurityTokenResponse);
         }

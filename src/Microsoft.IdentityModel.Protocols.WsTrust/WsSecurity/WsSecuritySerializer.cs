@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             XmlAttributeHolder[] xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
             var securityTokenReference = new SecurityTokenReference();
 
-            string id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsSecurityConstants.WsSecurity10.Namespace);
+            string id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace);
             string tokenType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.TokenType, WsSecurityConstants.WsSecurity11.Namespace);
             string usage = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.Usage, WsSecurityConstants.WsSecurity10.Namespace);
 
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             var xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
 
             var keyIdentifier = new KeyIdentifier();
-            string id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsSecurityConstants.WsSecurity10.Namespace);
+            string id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace);
             string encodingType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.EncodingType, WsSecurityConstants.WsSecurity10.Namespace);
             string valueType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.ValueType, WsSecurityConstants.WsSecurity10.Namespace);
 
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             writer.WriteStartElement(WsSecurityConstants.WsSecurity10.Prefix, WsSecurityElements.KeyIdentifier, WsSecurityConstants.WsSecurity10.Namespace);
 
             if (!string.IsNullOrEmpty(keyIdentifier.Id))
-                writer.WriteAttributeString(WsUtilityAttributes.Id, keyIdentifier.Id);
+                writer.WriteAttributeString(WsUtilityConstants.WsUtility10.Prefix, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace, keyIdentifier.Id);
 
             if (!string.IsNullOrEmpty(keyIdentifier.ValueType))
                 writer.WriteAttributeString(WsSecurityAttributes.ValueType, keyIdentifier.ValueType);
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
                 writer.WriteAttributeString(WsSecurityAttributes.TokenType, WsSecurityConstants.WsSecurity11.Namespace, securityTokenReference.TokenType);
 
             if (!string.IsNullOrEmpty(securityTokenReference.Id))
-                writer.WriteAttributeString(WsUtilityAttributes.Id, securityTokenReference.Id);
+                writer.WriteAttributeString(WsUtilityConstants.WsUtility10.Prefix, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace, securityTokenReference.Id);
 
             if (securityTokenReference.KeyIdentifier != null)
                 WriteKeyIdentifier(writer, securityTokenReference.KeyIdentifier);

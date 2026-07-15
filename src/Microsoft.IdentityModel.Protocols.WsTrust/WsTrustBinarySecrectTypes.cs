@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         {
             AsymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/AsymmetricKey";
             Nonce = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Nonce";
-            SymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey"; ;
+            SymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey";
         }
     }
 
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         public WsTrust14BinarySecretTypes()
         {
-            AsymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer";
+            AsymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200802/AsymmetricKey";
             Nonce = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Nonce";
             SymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey";
         }
