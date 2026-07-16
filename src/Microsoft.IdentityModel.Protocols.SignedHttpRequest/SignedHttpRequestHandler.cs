@@ -1345,20 +1345,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             var queryParamKeyValuePairs = queryString.Split('&');
             foreach (var queryParamValuePair in queryParamKeyValuePairs)
             {
-                var queryParamKeyValuePairArray = queryParamValuePair.Split('=');
-                if (queryParamKeyValuePairArray.Length == 2)
+                // Split on the first '=' only so that values containing '=' (e.g. base64-padded
+                // strings like "sig=YWJjZA==") are parsed consistently with how resource servers
+                // parse them, rather than being silently discarded.
+                int separatorIndex = queryParamValuePair.IndexOf('=');
+                if (separatorIndex > 0)
                 {
-                    var queryParamName = queryParamKeyValuePairArray[0];
-                    var queryParamValue = queryParamKeyValuePairArray[1];
-                    if (!string.IsNullOrEmpty(queryParamName))
-                    {
-                        // if sanitizedQueryParams already contains the query parameter name it means that the queryParamName is repeated.
-                        // in that case queryParamName should not be added, and the existing entry in sanitizedQueryParams should be removed.
-                        if (sanitizedQueryParams.ContainsKey(queryParamName))
-                            repeatedQueryParams.Add(queryParamName);
-                        else if (!string.IsNullOrEmpty(queryParamValue))
-                            sanitizedQueryParams.Add(queryParamName, queryParamValue);
-                    }
+                    var queryParamName = queryParamValuePair.Substring(0, separatorIndex);
+                    var queryParamValue = queryParamValuePair.Substring(separatorIndex + 1);
+                    // if sanitizedQueryParams already contains the query parameter name it means that the queryParamName is repeated.
+                    // in that case queryParamName should not be added, and the existing entry in sanitizedQueryParams should be removed.
+                    if (sanitizedQueryParams.ContainsKey(queryParamName))
+                        repeatedQueryParams.Add(queryParamName);
+                    else
+                        sanitizedQueryParams.Add(queryParamName, queryParamValue);
                 }
             }
 

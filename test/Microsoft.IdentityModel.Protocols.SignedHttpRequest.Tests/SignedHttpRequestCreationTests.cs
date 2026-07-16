@@ -536,7 +536,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         ExpectedClaim = SignedHttpRequestClaimTypes.Q,
                         ExpectedClaimValue = $"{{\"q\":[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]}}",
-                        HttpRequestUri = new Uri("https://www.contoso.com/path1?&queryParam1=value1&query=Param2=value2")
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1")
                     },
                     new CreateSignedHttpRequestTheoryData("ValidNoQueryParams1")
                     {

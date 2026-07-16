@@ -851,6 +851,28 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
+                        // A query parameter whose value contains '=' (e.g. a base64-padded signature)
+                        // must be parsed and covered correctly, not silently discarded.
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?sig=YWJjZA=="),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"sig\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("sig=YWJjZA==")}\"]"))),
+                        TestId = "ValidBase64PaddedQueryParam",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        // A malformed query parameter (e.g. "admin=true=1") must be parsed as
+                        // name="admin", value="true=1" and treated as an unsigned extra when
+                        // AcceptUnsignedQueryParameters=false — it must not be silently discarded.
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&admin=true=1"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23029"),
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            AcceptUnsignedQueryParameters = false,
+                        },
+                        TestId = "InvalidMalformedQueryParamBypassRejected",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1"),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[\"queryParam1\"]"))),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23024", null, true),
