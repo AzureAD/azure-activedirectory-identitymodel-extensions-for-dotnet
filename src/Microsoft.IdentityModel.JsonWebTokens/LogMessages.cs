@@ -28,6 +28,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14114 = "IDX14114: Both '{0}.{1}' and '{0}.{2}' are null or empty.";
         // internal const string IDX14115 = "IDX14115:";
         internal const string IDX14116 = "IDX14116: '{0}' cannot contain the following claims: '{1}'. These values are added by default (if necessary) during security token creation.";
+        internal const string IDX14117 = "IDX14117: Cannot create a 'JsonWebToken' with a replaced header from an encrypted (JWE) token. The provided token must be a JWS so that its decoded payload can be reused.";
         // number of sections 'dots' is not correct
         internal const string IDX14120 = "IDX14120: JWT is not well formed, there is only one dot (.).\nThe token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EncodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.";
         internal const string IDX14121 = "IDX14121: JWT is not a well formed JWE, there must be four dots (.).\nThe token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EncodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.";
