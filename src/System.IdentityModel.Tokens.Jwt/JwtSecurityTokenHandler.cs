@@ -1888,6 +1888,8 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg))
                 return keys;
 
+            Validators.ValidateAlgorithm(jwtToken.Header.Alg, null, jwtToken, validationParameters);
+
             var unwrappedKeys = new List<SecurityKey>();
 
             // Pre-generate a placeholder key used as a fallback when an unwrap call

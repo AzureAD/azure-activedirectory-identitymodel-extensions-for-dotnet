@@ -137,6 +137,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (keys is null)
                 return (keys, null); // Cannot iterate over null.
 
+            ValidationResult<string, ValidationError> algResult =
+                Validators.ValidateAlgorithmInternal(jwtToken.Alg, jwtToken, validationParameters, callContext ?? new CallContext());
+            if (!algResult.Succeeded)
+                return (null, algResult.Error!.AddCurrentStackFrame());
+
             var unwrappedKeys = new List<SecurityKey>();
 
             // Pre-generate a placeholder key used as a fallback when an unwrap call

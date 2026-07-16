@@ -197,6 +197,71 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.True(result.IsValid, $"Token validation should succeed when one of the supplied keys matches. Exception: {result.Exception}");
         }
 
+        /// <summary>
+        /// A JWE whose key-management algorithm is excluded by the caller's
+        /// <see cref="TokenValidationParameters.ValidAlgorithms"/> list must be rejected
+        /// before any unwrap is attempted, surfacing as an invalid-algorithm exception.
+        /// </summary>
+        [Fact]
+        public async Task KeyManagementAlgExcludedByPolicy_SurfacesAsInvalidAlgorithmException()
+        {
+            var handler = new JsonWebTokenHandler();
+
+            // Produce a JWE with RSA-PKCS1 (RSA1_5) key management.
+            var encryptingCredentials = new EncryptingCredentials(
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaPKCS1,
+                SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            string jwe = handler.CreateToken(
+                Default.PayloadString,
+                Default.SymmetricSigningCredentials,
+                encryptingCredentials);
+
+            // Restrict to RSA-OAEP only — RSA-PKCS1 is excluded.
+            var tvp = Default.TokenValidationParameters(
+                KeyingMaterial.RsaSecurityKey_2048,
+                Default.SymmetricSigningKey256);
+            tvp.ValidateLifetime = false;
+            tvp.ValidAlgorithms = new[] { SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256 };
+
+            var result = await handler.ValidateTokenAsync(jwe, tvp);
+
+            Assert.False(result.IsValid, "Validation must fail when the key-management alg is excluded by ValidAlgorithms.");
+            Assert.NotNull(result.Exception);
+            Assert.IsType<SecurityTokenInvalidAlgorithmException>(result.Exception);
+        }
+
+        /// <summary>
+        /// A JWE whose key-management algorithm is allowed by the caller's
+        /// <see cref="TokenValidationParameters.ValidAlgorithms"/> list must decrypt successfully.
+        /// </summary>
+        [Fact]
+        public async Task KeyManagementAlgAllowedByPolicy_DecryptsSuccessfully()
+        {
+            var handler = new JsonWebTokenHandler();
+
+            var encryptingCredentials = new EncryptingCredentials(
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaOAEP,
+                SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            string jwe = handler.CreateToken(
+                Default.PayloadString,
+                Default.SymmetricSigningCredentials,
+                encryptingCredentials);
+
+            var tvp = Default.TokenValidationParameters(
+                KeyingMaterial.RsaSecurityKey_2048,
+                Default.SymmetricSigningKey256);
+            tvp.ValidateLifetime = false;
+            tvp.ValidAlgorithms = new[] { SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256 };
+
+            var result = await handler.ValidateTokenAsync(jwe, tvp);
+
+            Assert.True(result.IsValid, $"Token validation must succeed when the key-management alg is on the allowlist. Exception: {result.Exception}");
+        }
+
         private static string AlterJweEncryptedKey(string jwe, int charactersToFlip)
         {
             string[] parts = jwe.Split('.');

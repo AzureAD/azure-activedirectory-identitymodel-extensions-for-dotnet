@@ -1786,7 +1786,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateLifetime = false,
                             AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false)
                         },
-                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10697"),
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAlgorithmException), "IDX10697"),
                     },
                 };
             }
