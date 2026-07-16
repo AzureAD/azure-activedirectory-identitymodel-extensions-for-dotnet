@@ -1,0 +1,26 @@
+const Microsoft.IdentityModel.Dpop.DpopClaimTypes.Ath = "ath" -> string
+const Microsoft.IdentityModel.Dpop.DpopClaimTypes.Htm = "htm" -> string
+const Microsoft.IdentityModel.Dpop.DpopClaimTypes.Htu = "htu" -> string
+const Microsoft.IdentityModel.Dpop.DpopClaimTypes.Iat = "iat" -> string
+const Microsoft.IdentityModel.Dpop.DpopClaimTypes.Jti = "jti" -> string
+const Microsoft.IdentityModel.Dpop.DpopConstants.DpopNonceHeaderName = "DPoP-Nonce" -> string
+const Microsoft.IdentityModel.Dpop.DpopConstants.DpopProofTokenType = "dpop+jwt" -> string
+const Microsoft.IdentityModel.Dpop.DpopErrorCodes.InvalidRequest = "invalid_request" -> string
+const Microsoft.IdentityModel.Dpop.DpopErrorCodes.InvalidToken = "invalid_token" -> string
+Microsoft.IdentityModel.Dpop.DpopClaimTypes
+Microsoft.IdentityModel.Dpop.DpopErrorCodes
+Microsoft.IdentityModel.Dpop.DpopProofValidator
+Microsoft.IdentityModel.Dpop.DpopValidationOptions
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.AllowedSigningAlgorithms.get -> System.Collections.Generic.ISet<string>
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.AllowedSigningAlgorithms.set -> void
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.ClockSkewInSeconds.get -> int
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.JtiReplayCache.get -> Microsoft.IdentityModel.Dpop.IJtiReplayCache
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.MaxLifetimeInSeconds.get -> int
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.MaxLifetimeInSeconds.set -> void
+Microsoft.IdentityModel.Dpop.DpopValidationResult
+Microsoft.IdentityModel.Dpop.DpopValidationResult.ErrorCode.get -> string
+Microsoft.IdentityModel.Dpop.DpopValidationResult.IsValid.get -> bool
+Microsoft.IdentityModel.Dpop.DpopValidationResult.Nonce.get -> string
+virtual Microsoft.IdentityModel.Dpop.DpopProofValidator.ValidateAsync(string dpopProofJwt, string httpMethod, System.Uri requestUri, string accessToken, string expectedCnfJkt, Microsoft.IdentityModel.Dpop.DpopValidationOptions options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Dpop.DpopValidationResult>
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.TimeProvider.get -> System.TimeProvider
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.TimeProvider.set -> void
