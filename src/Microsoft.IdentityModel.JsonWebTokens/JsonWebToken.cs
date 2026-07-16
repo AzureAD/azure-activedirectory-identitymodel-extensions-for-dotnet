@@ -234,6 +234,67 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="JsonWebToken"/> class by replacing the header of an existing <see cref="JsonWebToken"/> while reusing its payload and signature.
+        /// </summary>
+        /// <param name="jsonWebToken">The <see cref="JsonWebToken"/> whose payload and signature are reused. Must be a JWS, not a JWE.</param>
+        /// <param name="encodedHeader">The Base64UrlEncoded header that replaces the header of <paramref name="jsonWebToken"/>.</param>
+        /// <remarks>
+        /// This is the implementation behind <see cref="JsonWebTokenHandler.ReplaceTokenHeader"/>; use that method to perform a header replacement.
+        /// The new token is formed as 'encodedHeader.EncodedPayload.EncodedSignature' using the <see cref="EncodedPayload"/> and <see cref="EncodedSignature"/> from <paramref name="jsonWebToken"/>.
+        /// The already parsed payload of <paramref name="jsonWebToken"/> is reused, so the payload is not decoded or parsed again; only the replacement header is decoded and parsed.
+        /// The signature is reused verbatim, so it only remains valid when <paramref name="encodedHeader"/> reconstructs the originally signed header.
+        /// <para>
+        /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="jsonWebToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encodedHeader"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="jsonWebToken"/> is an encrypted token (JWE), as its payload cannot be reused.</exception>
+        internal JsonWebToken(JsonWebToken jsonWebToken, string encodedHeader)
+        {
+            _ = jsonWebToken ?? throw LogHelper.LogArgumentNullException(nameof(jsonWebToken));
+
+            if (string.IsNullOrEmpty(encodedHeader))
+                throw LogHelper.LogArgumentNullException(nameof(encodedHeader));
+
+            if (jsonWebToken.IsEncrypted)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14117, nameof(jsonWebToken)));
+
+            string encodedPayload = jsonWebToken.EncodedPayload;
+            string encodedSignature = jsonWebToken.EncodedSignature;
+
+#if NET6_0_OR_GREATER
+            int totalLength = encodedHeader.Length + 1 + encodedPayload.Length + 1 + encodedSignature.Length;
+            string encodedToken = string.Create(
+                totalLength,
+                (encodedHeader, encodedPayload, encodedSignature),
+                static (span, state) =>
+                {
+                    var (header, payload, signature) = state;
+                    header.AsSpan().CopyTo(span);
+                    int pos = header.Length;
+                    span[pos++] = '.';
+                    payload.AsSpan().CopyTo(span.Slice(pos));
+                    pos += payload.Length;
+                    span[pos++] = '.';
+                    signature.AsSpan().CopyTo(span.Slice(pos));
+                });
+#else
+            string encodedToken = encodedHeader + "." + encodedPayload + "." + encodedSignature;
+#endif
+
+            Dot1 = encodedHeader.Length;
+            Dot2 = Dot1 + 1 + encodedPayload.Length;
+            Dot3 = -1;
+            IsSigned = encodedSignature.Length > 0;
+
+            Header = CreateClaimSet(encodedToken.AsSpan(), 0, Dot1, createHeaderClaimSet: true);
+            Payload = jsonWebToken.Payload;
+
+            _encodedToken = encodedToken;
+        }
+
+        /// <summary>
         /// Gets or sets the delegate that will be called when reading JSON Web Token header and payload claims.
         /// </summary>
         /// <remarks>
