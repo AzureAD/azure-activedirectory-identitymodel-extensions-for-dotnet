@@ -280,6 +280,169 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // The header-replacement constructor reuses the payload and signature of an existing token while swapping only the header.
+        // When the header is unchanged, the resulting token is identical to the original.
+        [Fact]
+        public void JsonWebToken_ReplaceHeader_SameHeader_ProducesEquivalentToken()
+        {
+            // Arrange
+            var context = new CompareContext();
+            var handler = new JsonWebTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            string jwtString = handler.CreateToken(Default.PayloadString, signingCredentials);
+            JsonWebToken original = new JsonWebToken(jwtString);
+
+            // Act
+            JsonWebToken swapped = handler.ReplaceTokenHeader(original, original.EncodedHeader);
+
+            // Assert
+            Assert.Equal(original.EncodedToken, swapped.EncodedToken);
+            Assert.Equal(original.EncodedHeader, swapped.EncodedHeader);
+            Assert.Equal(original.EncodedPayload, swapped.EncodedPayload);
+            Assert.Equal(original.EncodedSignature, swapped.EncodedSignature);
+            Assert.Equal(original.Dot1, swapped.Dot1);
+            Assert.Equal(original.Dot2, swapped.Dot2);
+            Assert.Equal(original.IsSigned, swapped.IsSigned);
+            IdentityComparer.AreEqual(original.Claims, swapped.Claims, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // When the header is changed, the payload and signature are reused and the parsed payload instance is shared (not re-parsed).
+        [Fact]
+        public void JsonWebToken_ReplaceHeader_DifferentHeader_ReusesPayloadAndSignature()
+        {
+            // Arrange
+            var context = new CompareContext();
+            var handler = new JsonWebTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            string jwtString = handler.CreateToken(Default.PayloadString, signingCredentials);
+            JsonWebToken original = new JsonWebToken(jwtString);
+            string newEncodedHeader = Base64UrlEncoder.Encode(@"{""alg"":""HS256"",""typ"":""JWT"",""nonce"":""abc123""}");
+
+            // Act
+            JsonWebToken swapped = handler.ReplaceTokenHeader(original, newEncodedHeader);
+
+            // Assert
+            Assert.Equal(newEncodedHeader, swapped.EncodedHeader);
+            Assert.Equal(original.EncodedPayload, swapped.EncodedPayload);
+            Assert.Equal(original.EncodedSignature, swapped.EncodedSignature);
+            Assert.Equal(newEncodedHeader + "." + original.EncodedPayload + "." + original.EncodedSignature, swapped.EncodedToken);
+            Assert.Equal("abc123", swapped.GetHeaderValue<string>("nonce"));
+            // The parsed payload instance is reused (the win: no second payload parse).
+            Assert.Same(original.Payload, swapped.Payload);
+            IdentityComparer.AreEqual(original.Claims, swapped.Claims, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // The reconstructed token is observably identical to one produced by re-parsing the assembled string (the path this constructor replaces).
+        [Fact]
+        public void JsonWebToken_ReplaceHeader_EquivalentToReparsedToken()
+        {
+            // Arrange
+            var context = new CompareContext();
+            var handler = new JsonWebTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            string jwtString = handler.CreateToken(Default.PayloadString, signingCredentials);
+            JsonWebToken original = new JsonWebToken(jwtString);
+            string newEncodedHeader = Base64UrlEncoder.Encode(@"{""alg"":""HS256"",""typ"":""JWT"",""nonce"":""xyz""}");
+
+            // Act
+            JsonWebToken swapped = handler.ReplaceTokenHeader(original, newEncodedHeader);
+            JsonWebToken reparsed = new JsonWebToken(newEncodedHeader + "." + original.EncodedPayload + "." + original.EncodedSignature);
+
+            // Assert
+            Assert.Equal(reparsed.EncodedToken, swapped.EncodedToken);
+            Assert.Equal(reparsed.EncodedHeader, swapped.EncodedHeader);
+            Assert.Equal(reparsed.EncodedPayload, swapped.EncodedPayload);
+            Assert.Equal(reparsed.EncodedSignature, swapped.EncodedSignature);
+            Assert.Equal(reparsed.Dot1, swapped.Dot1);
+            Assert.Equal(reparsed.Dot2, swapped.Dot2);
+            Assert.Equal(reparsed.IsSigned, swapped.IsSigned);
+            Assert.Equal(reparsed.Alg, swapped.Alg);
+            Assert.Equal(reparsed.Kid, swapped.Kid);
+            Assert.Equal(reparsed.Issuer, swapped.Issuer);
+            IdentityComparer.AreEqual(reparsed.Claims, swapped.Claims, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // The reconstructed token (same header) still passes signature validation with the original signing key.
+        [Fact]
+        public async Task JsonWebToken_ReplaceHeader_SameHeader_SignatureStillValidates()
+        {
+            // Arrange
+            var handler = new JsonWebTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            string jwtString = handler.CreateToken(Default.PayloadString, signingCredentials);
+            JsonWebToken original = new JsonWebToken(jwtString);
+            JsonWebToken swapped = handler.ReplaceTokenHeader(original, original.EncodedHeader);
+            var validationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = key,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+            };
+
+            // Act
+            TokenValidationResult result = await handler.ValidateTokenAsync(swapped.EncodedToken, validationParameters);
+
+            // Assert
+            Assert.True(result.IsValid);
+        }
+
+        [Fact]
+        public void JsonWebToken_ReplaceHeader_NullJsonWebToken_Throws()
+        {
+            // Arrange
+            var handler = new JsonWebTokenHandler();
+            string encodedHeader = Base64UrlEncoder.Encode(@"{""alg"":""none""}");
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentNullException>(() => handler.ReplaceTokenHeader(null, encodedHeader));
+            Assert.Equal("jsonWebToken", exception.ParamName);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void JsonWebToken_ReplaceHeader_NullOrEmptyHeader_Throws(string encodedHeader)
+        {
+            // Arrange
+            var handler = new JsonWebTokenHandler();
+            var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128))), SecurityAlgorithms.HmacSha256);
+            JsonWebToken jsonWebToken = new JsonWebToken(handler.CreateToken(Default.PayloadString, signingCredentials));
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentNullException>(() => handler.ReplaceTokenHeader(jsonWebToken, encodedHeader));
+            Assert.Equal("encodedHeader", exception.ParamName);
+        }
+
+        // An encrypted (JWE) token has no reusable plaintext payload, so header replacement must be rejected.
+        [Fact]
+        public void JsonWebToken_ReplaceHeader_EncryptedToken_Throws()
+        {
+            // Arrange
+            var handler = new JsonWebTokenHandler();
+            var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128))), SecurityAlgorithms.HmacSha256);
+            var encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Claims = new Dictionary<string, object> { ["sub"] = "user" },
+                SigningCredentials = signingCredentials,
+                EncryptingCredentials = encryptingCredentials,
+            };
+            JsonWebToken jwe = new JsonWebToken(handler.CreateToken(tokenDescriptor));
+            string encodedHeader = Base64UrlEncoder.Encode(@"{""alg"":""none""}");
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentException>(() => handler.ReplaceTokenHeader(jwe, encodedHeader));
+            Assert.Contains("IDX14117", exception.Message);
+        }
+
         // Test checks to make sure that the 'Audiences' claim can be successfully retrieved when multiple audiences are present.
         // It also checks that the rest of the claims match up as well
         [Fact]
