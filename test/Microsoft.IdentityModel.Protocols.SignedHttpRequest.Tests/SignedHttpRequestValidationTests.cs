@@ -859,6 +859,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
+                        // A query parameter with an empty value must be parsed correctly:
+                        // "name2=" should produce name="name2", value="" and be covered in the hash.
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?name1=value1&name2=&name3=value3"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"name1\",\"name2\",\"name3\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("name1=value1&name2=&name3=value3")}\"]"))),
+                        TestId = "ValidEmptyValueQueryParam",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
                         // A malformed query parameter (e.g. "admin=true=1") must be parsed as
                         // name="admin", value="true=1" and treated as an unsigned extra when
                         // AcceptUnsignedQueryParameters=false — it must not be silently discarded.
