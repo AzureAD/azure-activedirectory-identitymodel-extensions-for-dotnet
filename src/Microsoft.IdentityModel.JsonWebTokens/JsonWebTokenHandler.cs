@@ -562,6 +562,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Creates a new <see cref="JsonWebToken"/> by replacing the header of an existing <see cref="JsonWebToken"/>, reusing its already parsed payload and signature.
+        /// </summary>
+        /// <param name="jsonWebToken">The signed <see cref="JsonWebToken"/> (JWS) whose payload and signature are reused.</param>
+        /// <param name="encodedHeader">The Base64UrlEncoded header that replaces the header of <paramref name="jsonWebToken"/>.</param>
+        /// <returns>A <see cref="JsonWebToken"/> formed as 'encodedHeader.EncodedPayload.EncodedSignature'.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="jsonWebToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encodedHeader"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="jsonWebToken"/> is an encrypted token (JWE), as its payload cannot be reused.</exception>
+        /// <remarks>
+        /// This is an intentional transform for header-only rewrites (for example, hashing a Protected Forwarded Token nonce). Only the replacement header is decoded and parsed; the payload is reused from <paramref name="jsonWebToken"/> without re-parsing.
+        /// <para>
+        /// The signature of <paramref name="jsonWebToken"/> is reused verbatim and is NOT recomputed. The resulting token therefore only validates when <paramref name="encodedHeader"/> reconstructs the header over which the original signature was computed; supplying an arbitrary header produces a token whose signature will fail validation.
+        /// </para>
+        /// <para>
+        /// The returned token is NOT validated. Use <see cref="ValidateToken(string, TokenValidationParameters)"/> or <see cref="ValidateTokenAsync(string, TokenValidationParameters)"/> to ensure the token is acceptable.
+        /// </para>
+        /// </remarks>
+        public virtual JsonWebToken ReplaceTokenHeader(JsonWebToken jsonWebToken, string encodedHeader)
+        {
+            return new JsonWebToken(jsonWebToken, encodedHeader);
+        }
+
+        /// <summary>
         /// Converts a string into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
