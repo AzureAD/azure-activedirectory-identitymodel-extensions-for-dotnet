@@ -151,7 +151,7 @@ static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.CeilingDivide
 static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateDerivedKey(string algorithm, byte[] masterKey, byte[] label, byte[] nonce, int derivedKeySizeInBits, int position) -> byte[]
 static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateRandomBytes(byte[] data) -> void
 static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateRandomBytes(int sizeInBits) -> byte[]
-static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateSymmetricKey(int keySizeInBits, byte[] senderEntropy, out byte[] receiverEntropy) -> byte[]
+static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateSymmetricKey(int keySizeInBits, byte[] requestorEntropy, out byte[] issuerEntropy) -> byte[]
 static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.RandomNumberGenerator.get -> System.Security.Cryptography.RandomNumberGenerator
 static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.ValidateKeySizeInBytes(int keySizeInBits) -> int
 static Microsoft.IdentityModel.Protocols.WsTrust.WsTrustSerializer.CreateXmlElement(System.Xml.XmlReader reader) -> System.Xml.XmlElement

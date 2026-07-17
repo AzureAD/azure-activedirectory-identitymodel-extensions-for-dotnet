@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Protocols.WsUtility;
 using Microsoft.IdentityModel.Xml;
 
@@ -40,7 +41,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
                         XmlResolver = null
                     };
 
-                    using (var dictReader = XmlDictionaryReader.CreateTextReader(stream, XmlDictionaryReaderQuotas.Max))
+                    using (var dictReader = XmlDictionaryReader.CreateTextReader(stream, WsUtils.BoundedReaderQuotas))
                     {
                         dom.Load(dictReader);
                         return dom.DocumentElement;

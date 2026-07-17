@@ -81,7 +81,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 else
                 {
                     reader.Read();
-                    return null;
                 }
 
                 return binarySecret;

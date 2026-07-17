@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         }
 
         [Fact]
-        public void ReadBinarySecrect_EmptyElement_ReturnsNull()
+        public void ReadBinarySecrect_EmptyElement_ReturnsObjectWithEncodingType()
         {
             // Arrange
             // Act
@@ -84,7 +84,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             var binarySecret = WsTrustSerializer.ReadBinarySecrect(reader, context);
 
-            Assert.Null(binarySecret);
+            Assert.NotNull(binarySecret);
+            Assert.Equal(WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, binarySecret.EncodingType);
         }
 
         public static TheoryData<WsTrustTheoryData> ReadBinarySecrectTestCases

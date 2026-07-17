@@ -83,8 +83,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public WsTrust14BinarySecretTypes()
         {
             AsymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200802/AsymmetricKey";
-            Nonce = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Nonce";
-            SymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey";
+            Nonce = "http://docs.oasis-open.org/ws-sx/ws-trust/200802/Nonce";
+            SymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200802/SymmetricKey";
         }
     }
 }
