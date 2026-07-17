@@ -66,6 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidatorUsingConfiguration = other.IssuerSigningKeyValidatorUsingConfiguration;
             IssuerValidator = other.IssuerValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
+            IssuerValidatorSync = other.IssuerValidatorSync;
             IssuerValidatorUsingConfiguration = other.IssuerValidatorUsingConfiguration;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
@@ -373,6 +374,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// IssuerValidatorAsync takes precedence over <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/>.
         /// </remarks>
         internal IssuerValidatorAsync IssuerValidatorAsync { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to synchronously validate the issuer of the token.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
+        /// This means that no default 'issuer' validation will occur.
+        /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
+        /// This is the synchronous counterpart of <see cref="IssuerValidatorAsync"/> and takes precedence over <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/>.
+        /// </remarks>
+        internal IssuerValidatorSync IssuerValidatorSync { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
