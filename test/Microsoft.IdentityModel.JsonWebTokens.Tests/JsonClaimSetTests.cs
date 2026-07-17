@@ -80,6 +80,90 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             return theoryData;
         }
 
+        // Exercises the claims dictionary presizing (capacity == byteSpan.Length / AverageJsonClaimLengthInBytes).
+        // The seeded capacity is a performance hint only and must never change the parsed result, so these cases
+        // cover the different capacity regimes: capacity 0 (payload smaller than one average claim), the boundary
+        // around AverageJsonClaimLengthInBytes, an under-estimate (many small claims forcing growth beyond the seed)
+        // and an over-estimate (few large claims). Each case asserts every expected claim is parsed.
+        [Theory, MemberData(nameof(PresizedClaimSetTestCases), DisableDiscoveryEnumeration = true)]
+        public void PresizedClaimSet_ParsesAllClaims(JsonClaimSetTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.PresizedClaimSet_ParsesAllClaims", theoryData);
+
+            JsonWebToken jwt = new JsonWebToken("{}", $@"{{""true"":true}}");
+
+            // Act
+            JsonClaimSet claimSet = jwt.CreatePayloadClaimSet(theoryData.Utf8Bytes, theoryData.Utf8Bytes.Length);
+
+            // Assert
+            if (claimSet._jsonClaims.Count != theoryData.ExpectedClaimNames.Count)
+                context.AddDiff($"Expected {theoryData.ExpectedClaimNames.Count} claims, found {claimSet._jsonClaims.Count}.");
+
+            foreach (string claimName in theoryData.ExpectedClaimNames)
+            {
+                if (!claimSet._jsonClaims.ContainsKey(claimName))
+                    context.AddDiff($"Expected claim '{claimName}' was not found in the parsed claim set.");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JsonClaimSetTheoryData> PresizedClaimSetTestCases()
+        {
+            var theoryData = new TheoryData<JsonClaimSetTheoryData>();
+
+            // Empty object: length 2 => capacity 0, no claims.
+            theoryData.Add(new JsonClaimSetTheoryData("EmptyObject")
+            {
+                Utf8Bytes = Encoding.UTF8.GetBytes("{}"),
+                ExpectedClaimNames = new List<string>()
+            });
+
+            // Tiny single claim, well under AverageJsonClaimLengthInBytes => capacity 0.
+            theoryData.Add(new JsonClaimSetTheoryData("SingleClaimCapacityZero")
+            {
+                Utf8Bytes = Encoding.UTF8.GetBytes(@"{""a"":""b""}"),
+                ExpectedClaimNames = new List<string> { "a" }
+            });
+
+            // Payload sized right around AverageJsonClaimLengthInBytes (32 bytes) => capacity ~1.
+            theoryData.Add(new JsonClaimSetTheoryData("PayloadAtCapacityBoundary")
+            {
+                Utf8Bytes = Encoding.UTF8.GetBytes(@"{""iss"":""abc"",""sub"":""1234567""}"),
+                ExpectedClaimNames = new List<string> { "iss", "sub" }
+            });
+
+            // Many small claims: the byte-length estimate under-counts the claims, forcing growth
+            // beyond the seeded capacity.
+            var manyClaims = new List<string>();
+            var manyClaimsBuilder = new StringBuilder("{");
+            for (int i = 0; i < 20; i++)
+            {
+                string name = "c" + i;
+                manyClaims.Add(name);
+                if (i > 0)
+                    manyClaimsBuilder.Append(',');
+
+                manyClaimsBuilder.Append($@"""{name}"":{i}");
+            }
+
+            manyClaimsBuilder.Append('}');
+            theoryData.Add(new JsonClaimSetTheoryData("ManySmallClaimsUnderEstimate")
+            {
+                Utf8Bytes = Encoding.UTF8.GetBytes(manyClaimsBuilder.ToString()),
+                ExpectedClaimNames = manyClaims
+            });
+
+            // Few large claims: the byte-length estimate over-counts the claims, over-sizing the dictionary.
+            theoryData.Add(new JsonClaimSetTheoryData("FewLargeClaimsOverEstimate")
+            {
+                Utf8Bytes = Encoding.UTF8.GetBytes($@"{{""big"":""{new string('x', 512)}""}}"),
+                ExpectedClaimNames = new List<string> { "big" }
+            });
+
+            return theoryData;
+        }
+
         [Theory, MemberData(nameof(GetClaimAsTypeTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetClaimAsType(JsonClaimSetTheoryData theoryData)
         {
@@ -198,6 +282,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public class JsonClaimSetTheoryData : TheoryDataBase
         {
             public JsonClaimSetTheoryData(string id) : base(id) { }
+
+            public List<string> ExpectedClaimNames { get; set; }
 
             public string Json { get; set; }
 
