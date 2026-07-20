@@ -282,6 +282,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10723 = "IDX10723: Unable to extract the private key from the X.509 certificate for algorithm '{0}' (Key: '{1}'). Private key extraction may not be supported on this platform.";
         public const string IDX10724 = "IDX10724: Unable to compute a JWK thumbprint, public key extraction from the X.509 certificate is not supported on this platform (Key: '{0}').";
         public const string IDX10725 = "IDX10725: Unable to create a SignatureProvider for algorithm '{0}' (Key: '{1}'). The X.509 certificate key could not be extracted. This may indicate the platform does not support the certificate's key type.";
+        public const string IDX10726 = "IDX10726: The JWE key-management algorithm '{0}' was rejected by the algorithm policy (ValidAlgorithms/AlgorithmValidator). This check was not present in earlier versions. To restore the previous behavior while updating your algorithm allowlist, set AppContext switch '{1}' to 'true'.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
@@ -305,7 +306,6 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10901 = "IDX10901: CryptoProviderCacheOptions.SizeLimit must be greater than 10. Value: '{0}'";
         public const string IDX10902 = "IDX10902: Exception caught while removing expired items: '{0}', Exception: '{1}'";
         public const string IDX10906 = "IDX10906: Exception caught while compacting items: '{0}', Exception: '{1}'";
-
 
         // Base64UrlEncoding
         public const string IDX10820 = "IDX10820: Invalid character found in Base64UrlEncoding. Character: '{0}', Encoding: '{1}'.";

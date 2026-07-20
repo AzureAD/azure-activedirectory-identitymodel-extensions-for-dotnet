@@ -1,3 +1,6 @@
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonDefault = false -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparison.get -> bool
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.SkipKeyManagementAlgorithmValidationSwitch = "Switch.Microsoft.IdentityModel.SkipKeyManagementAlgorithmValidation" -> string
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.SkipKeyManagementAlgorithmValidation.get -> bool
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10726 = "IDX10726: The JWE key-management algorithm '{0}' was rejected by the algorithm policy (ValidAlgorithms/AlgorithmValidator). This check was not present in earlier versions. To restore the previous behavior while updating your algorithm allowlist, set AppContext switch '{1}' to 'true'." -> string

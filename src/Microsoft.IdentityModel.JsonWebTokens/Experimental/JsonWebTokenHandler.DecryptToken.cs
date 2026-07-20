@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -134,13 +134,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 || jwtToken.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
                 return (keys, null);
 
+            // Validate key-management alg before checking keys, so a policy-excluded alg surfaces
+            // as SecurityTokenInvalidAlgorithmException regardless of whether keys were resolved.
+            if (!AppContextSwitches.SkipKeyManagementAlgorithmValidation)
+            {
+                ValidationResult<string, ValidationError> algResult =
+                    Validators.ValidateAlgorithmInternal(jwtToken.Alg, jwtToken, validationParameters, callContext ?? new CallContext());
+                if (!algResult.Succeeded)
+                {
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(TokenLogMessages.IDX10726,
+                            LogHelper.MarkAsNonPII(jwtToken.Alg),
+                            LogHelper.MarkAsNonPII(AppContextSwitches.SkipKeyManagementAlgorithmValidationSwitch));
+                    return (null, algResult.Error!.AddCurrentStackFrame());
+                }
+            }
+
             if (keys is null)
                 return (keys, null); // Cannot iterate over null.
-
-            ValidationResult<string, ValidationError> algResult =
-                Validators.ValidateAlgorithmInternal(jwtToken.Alg, jwtToken, validationParameters, callContext ?? new CallContext());
-            if (!algResult.Succeeded)
-                return (null, algResult.Error!.AddCurrentStackFrame());
 
             var unwrappedKeys = new List<SecurityKey>();
 

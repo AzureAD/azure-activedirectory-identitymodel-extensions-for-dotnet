@@ -1888,7 +1888,8 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg))
                 return keys;
 
-            Validators.ValidateAlgorithm(jwtToken.Header.Alg, null, jwtToken, validationParameters);
+            if (!AppContextSwitches.SkipKeyManagementAlgorithmValidation)
+                JwtTokenUtilities.ValidateKeyManagementAlgorithm(jwtToken.Header.Alg, jwtToken, validationParameters);
 
             var unwrappedKeys = new List<SecurityKey>();
 

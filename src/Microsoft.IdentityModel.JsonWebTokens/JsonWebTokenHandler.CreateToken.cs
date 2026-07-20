@@ -1332,7 +1332,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 || jwtToken.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
                 return keys;
 
-            Validators.ValidateAlgorithm(jwtToken.Alg, null, jwtToken, validationParameters);
+            if (!AppContextSwitches.SkipKeyManagementAlgorithmValidation)
+                JwtTokenUtilities.ValidateKeyManagementAlgorithm(jwtToken.Alg, jwtToken, validationParameters);
 
             var unwrappedKeys = new List<SecurityKey>();
 

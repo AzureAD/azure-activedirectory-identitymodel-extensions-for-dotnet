@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -627,6 +627,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             return ClaimValueTypes.String;
+        }
+
+        /// <summary>
+        /// Validates the JWE key-management algorithm against the caller's algorithm policy, logging a
+        /// warning with escape-hatch guidance if the new check rejects it. Rethrows the original exception.
+        /// Only call this when the switch guard has already confirmed the new check should run.
+        /// </summary>
+        internal static void ValidateKeyManagementAlgorithm(string alg, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            try
+            {
+                Validators.ValidateAlgorithm(alg, null, token, validationParameters);
+            }
+            catch (SecurityTokenInvalidAlgorithmException)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(TokenLogMessages.IDX10726,
+                        LogHelper.MarkAsNonPII(alg),
+                        LogHelper.MarkAsNonPII(AppContextSwitches.SkipKeyManagementAlgorithmValidationSwitch));
+                throw;
+            }
         }
     }
 }

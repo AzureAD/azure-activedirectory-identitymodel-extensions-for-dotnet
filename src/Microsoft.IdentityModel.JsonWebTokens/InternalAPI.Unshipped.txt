@@ -1,0 +1,1 @@
+static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.ValidateKeyManagementAlgorithm(string alg, Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> void
