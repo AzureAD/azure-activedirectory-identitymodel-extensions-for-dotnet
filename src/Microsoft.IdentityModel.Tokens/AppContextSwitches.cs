@@ -113,6 +113,20 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCaseSensitivePClaimComparison => _useCaseSensitivePClaimComparison ??= (AppContext.TryGetSwitch(UseCaseSensitivePClaimComparisonSwitch, out bool useCaseSensitivePClaimComparison) ? useCaseSensitivePClaimComparison : UseCaseSensitivePClaimComparisonDefault);
 
         /// <summary>
+        /// When enabled, restores the pre-8.19.x behavior of <c>SanitizeQueryParams</c> in which query parameters
+        /// whose value contains <c>'='</c> (e.g. base64-padded values such as <c>sig=YWJjZA==</c>) or that carry no
+        /// <c>'='</c> separator (e.g. <c>?flag</c>) were silently dropped rather than included in the <c>q</c> claim
+        /// hash and subjected to the <c>AcceptUnsignedQueryParameters</c> gate.
+        /// Enable during a rolling upgrade if the signing side has not yet picked up the new parsing logic, to prevent
+        /// hash mismatches until both sides are updated.
+        /// </summary>
+        internal const string UseLegacyQueryParamParsingSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyQueryParamParsing";
+
+        private static bool? _useLegacyQueryParamParsing;
+
+        internal static bool UseLegacyQueryParamParsing => _useLegacyQueryParamParsing ??= (AppContext.TryGetSwitch(UseLegacyQueryParamParsingSwitch, out bool useLegacy) && useLegacy);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -142,6 +156,9 @@ namespace Microsoft.IdentityModel.Tokens
             // because AppContext cannot truly un-set a switch.
             _useCaseSensitivePClaimComparison = null;
             AppContext.SetSwitch(UseCaseSensitivePClaimComparisonSwitch, UseCaseSensitivePClaimComparisonDefault);
+
+            _useLegacyQueryParamParsing = null;
+            AppContext.SetSwitch(UseLegacyQueryParamParsingSwitch, false);
         }
     }
 }

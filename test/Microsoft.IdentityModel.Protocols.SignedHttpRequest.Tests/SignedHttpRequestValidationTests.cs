@@ -746,6 +746,32 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        [ResetAppContextSwitches]
+        public void ValidateQClaim_LegacySwitch_DropsBase64PaddedParam()
+        {
+            // Under UseLegacyQueryParamParsing=true the old Split('=').Length==2 behavior is
+            // restored: a value containing '=' (e.g. "sig=YWJjZA==") is silently dropped and
+            // does not surface as an unsigned extra or affect the q hash.
+            AppContext.SetSwitch(AppContextSwitches.UseLegacyQueryParamParsingSwitch, true);
+            var handler = new SignedHttpRequestHandler();
+
+            // Token covers no params; the base64-padded sig param is dropped under legacy mode.
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestUri = new Uri("https://www.contoso.com/path1?sig=YWJjZA=="),
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(
+                    new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]"))),
+                SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters
+                {
+                    AcceptUnsignedQueryParameters = true,
+                },
+            };
+            var ctx = theoryData.BuildSignedHttpRequestValidationContext();
+            var ex = Record.Exception(() => handler.ValidateQClaim(theoryData.SignedHttpRequestToken, ctx));
+            Assert.Null(ex);
+        }
+
         public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidateQClaimTheoryData
         {
             get
@@ -864,6 +890,31 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?name1=value1&name2=&name3=value3"),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"name1\",\"name2\",\"name3\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("name1=value1&name2=&name3=value3")}\"]"))),
                         TestId = "ValidEmptyValueQueryParam",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        // A token where '=' is the first character (e.g. "=value") has no name
+                        // and is silently dropped — it is invisible to the signed coverage and to
+                        // the AcceptUnsignedQueryParameters gate.
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&=value"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        TestId = "ValidLeadingEqualsQueryParamDropped",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        // A value that starts with '=' (e.g. "key==rest") is parsed correctly:
+                        // name="key", value="=rest". The value is included in the hash as-is.
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?key==rest"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"key\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("key==rest")}\"]"))),
+                        TestId = "ValidValueStartsWithEquals",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        // A value that ends with '=' (e.g. "key=value=") is parsed correctly:
+                        // name="key", value="value=". The trailing '=' is part of the value.
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?key=value="),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"key\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("key=value=")}\"]"))),
+                        TestId = "ValidValueEndsWithEquals",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {

@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
             Uri httpRequestUri = EnsureAbsoluteUri(signedHttpRequestDescriptor.HttpRequestData.Uri);
-            IDictionary<string, string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
+            IDictionary<string, string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri, out _);
 
             StringBuilder stringBuffer = new StringBuilder();
             try
@@ -857,7 +857,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q))));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
-            var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
+            var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri, out bool hadPreviouslyDroppedParam);
             string qClaimBase64UrlEncodedHash = string.Empty;
             string calculatedBase64UrlEncodedHash = string.Empty;
             object[] qClaimQueryParamNames;
@@ -905,8 +905,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
 
             if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters && sanitizedQueryParams.Any())
+            {
+                if (hadPreviouslyDroppedParam && LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogMessages.IDX23039, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Select(x => x.Key))));
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Select(x => x.Key))))));
-
+            }
             if (!string.Equals(calculatedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), calculatedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash)));
         }
@@ -1330,11 +1333,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Sanitizes the query params to comply with the specification.
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5</remarks>
-        private static Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri)
+        private static Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri, out bool hadPreviouslyDroppedParam)
         {
             // Remove repeated query params according to the spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7-5
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
+            hadPreviouslyDroppedParam = false;
             var sanitizedQueryParams = new Dictionary<string, string>(StringComparer.Ordinal);
             var repeatedQueryParams = new List<string>();
 
@@ -1348,18 +1352,49 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 // Split on the first '=' only so that values containing '=' (e.g. base64-padded
                 // strings like "sig=YWJjZA==") are parsed consistently with how resource servers
                 // parse them, rather than being silently discarded.
+                // Set Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyQueryParamParsing=true
+                // to restore the old drop-on-multi-equals behavior during a rolling upgrade.
                 int separatorIndex = queryParamValuePair.IndexOf('=');
-                if (separatorIndex > 0)
+                string queryParamName, queryParamValue;
+                if (AppContextSwitches.UseLegacyQueryParamParsing)
                 {
-                    var queryParamName = queryParamValuePair.Substring(0, separatorIndex);
-                    var queryParamValue = queryParamValuePair.Substring(separatorIndex + 1);
-                    // if sanitizedQueryParams already contains the query parameter name it means that the queryParamName is repeated.
-                    // in that case queryParamName should not be added, and the existing entry in sanitizedQueryParams should be removed.
-                    if (sanitizedQueryParams.ContainsKey(queryParamName))
-                        repeatedQueryParams.Add(queryParamName);
-                    else
-                        sanitizedQueryParams.Add(queryParamName, queryParamValue);
+                    var splitQueryParam = queryParamValuePair.Split('=');
+                    if (splitQueryParam.Length != 2)
+                        continue;
+                    queryParamName = splitQueryParam[0];
+                    queryParamValue = splitQueryParam[1];
                 }
+                else if (separatorIndex > 0)
+                {
+                    queryParamName = queryParamValuePair.Substring(0, separatorIndex);
+                    queryParamValue = queryParamValuePair.Substring(separatorIndex + 1);
+                    // Under the old parsing, a value containing '=' (multi-separator) was dropped.
+                    // Flag it so the rejection warning can indicate the new parsing may be the cause.
+                    if (queryParamValue.IndexOf('=') >= 0)
+                        hadPreviouslyDroppedParam = true;
+                }
+                else if (separatorIndex < 0 && queryParamValuePair.Length > 0)
+                {
+                    // Bare param with no '=' (e.g. "?flag"): most parsers treat this as key="" value.
+                    // Make it visible to the AcceptUnsignedQueryParameters gate rather than silently dropping it.
+                    queryParamName = queryParamValuePair;
+                    queryParamValue = string.Empty;
+                    hadPreviouslyDroppedParam = true;
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(queryParamName))
+                    continue;
+
+                // if sanitizedQueryParams already contains the query parameter name it means that the queryParamName is repeated.
+                // in that case queryParamName should not be added, and the existing entry in sanitizedQueryParams should be removed.
+                if (sanitizedQueryParams.ContainsKey(queryParamName))
+                    repeatedQueryParams.Add(queryParamName);
+                else
+                    sanitizedQueryParams.Add(queryParamName, queryParamValue);
             }
 
             if (repeatedQueryParams.Any())

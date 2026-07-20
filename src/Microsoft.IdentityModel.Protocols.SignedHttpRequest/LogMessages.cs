@@ -48,5 +48,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23036 = "IDX23036: Signed http request nonce validation failed. Exceptions caught: '{0}'.";
         public const string IDX23037 = "IDX23037: Resolving a PoP key from the 'jku' claim is not allowed. To allow it, set AllowResolvingPopKeyFromJku property on SignedHttpRequestValidationParameters to true and provide a list of trusted domains via AllowedDomainsForJkuRetrieval.";
         public const string IDX23038 = "IDX23038: Resolving a PoP key from the 'jku' claim is not allowed as '{0}' is not present in the list of allowed domains for 'jku' retrieval: '{1}'. If '{0}' belongs to a trusted domain, add it to AllowedDomainsForJkuRetrieval property on SignedHttpRequestValidationParameters.";
+        public const string IDX23039 = "IDX23039: The request contains query parameters that were not covered by the 'q' claim signature and AcceptUnsignedQueryParameters is 'false'. A query parameter that was previously dropped during parsing is now visible under the updated parsing rules. To restore the previous behavior during a rolling upgrade, set AppContext switch 'Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyQueryParamParsing' to 'true'. Unsigned query parameters: '{0}'.";
     }
 }
