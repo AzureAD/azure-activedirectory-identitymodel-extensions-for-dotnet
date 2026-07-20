@@ -493,17 +493,19 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="configuration">When this method returns <see langword="true"/>, the cached configuration; otherwise <see langword="null"/>.</param>
         /// <returns><see langword="true"/> on a cache hit; otherwise <see langword="false"/> (the caller should fall back to the asynchronous path).</returns>
-        public override bool TryGetCurrentConfiguration(out BaseConfiguration configuration)
+#nullable enable
+        public override bool TryGetCurrentConfiguration(out BaseConfiguration? configuration)
         {
-            if (TryGetCurrentConfigurationCore(out T current))
+            if (TryGetCurrentConfigurationCore(out T current) && current is BaseConfiguration baseConfiguration)
             {
-                configuration = current as BaseConfiguration;
+                configuration = baseConfiguration;
                 return true;
             }
 
             configuration = null;
             return false;
         }
+#nullable restore
 
         /// <summary>
         /// Triggers updating metadata when:

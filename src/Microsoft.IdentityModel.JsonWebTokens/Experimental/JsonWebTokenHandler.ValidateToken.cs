@@ -382,6 +382,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> or a <see cref="ValidationError"/>.</returns>
+        /// <remarks>
+        /// This method can block. On a configuration cache miss, a recoverable failure (for example a signing key that
+        /// rotated within the cached-but-fresh window), or when a token replay cache is configured, it delegates to
+        /// <see cref="ValidateTokenAsync(string, ValidationParameters, CallContext, CancellationToken)"/> and blocks on
+        /// the result. Callers on latency-sensitive threads should account for this fallback.
+        /// </remarks>
         public ValidationResult<ValidatedToken, ValidationError> ValidateToken(
             string token,
             ValidationParameters validationParameters,
@@ -430,6 +436,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> or a <see cref="ValidationError"/>.</returns>
+        /// <remarks>
+        /// This method can block. On a configuration cache miss, a recoverable failure (for example a signing key that
+        /// rotated within the cached-but-fresh window), or when a token replay cache is configured, it delegates to
+        /// <see cref="ValidateTokenAsync(SecurityToken, ValidationParameters, CallContext, CancellationToken)"/> and blocks
+        /// on the result. Callers on latency-sensitive threads should account for this fallback.
+        /// </remarks>
         public ValidationResult<ValidatedToken, ValidationError> ValidateToken(
             SecurityToken token,
             ValidationParameters validationParameters,
@@ -447,6 +459,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
                     ValidationFailureType.SecurityTokenNotExpectedType,
                     ValidationError.GetCurrentStackFrame());
+            }
+
+            // Token replay validation has a side effect: it records the token in the replay cache (ITokenReplayCache.TryAdd).
+            // The synchronous fast path may validate speculatively and then fall back to the asynchronous path on a
+            // recoverable failure (e.g. a rotated signing key), which would run replay validation a second time and cause
+            // the token to be spuriously reported as replayed. When a replay cache is configured, route straight to the
+            // asynchronous path so replay validation runs exactly once.
+            if (validationParameters.TokenReplayCache is not null)
+            {
+                return ValidateTokenAsync(token, validationParameters, callContext, CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
             }
 
             BaseConfigurationManager? configurationManager = validationParameters.ConfigurationManager;

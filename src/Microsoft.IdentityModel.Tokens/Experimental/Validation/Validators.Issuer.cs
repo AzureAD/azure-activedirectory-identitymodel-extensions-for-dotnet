@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10212,
                         LogHelper.MarkAsNonPII(issuer),
-                        "ValdIssuers is empty",
+                        "ValidIssuers is empty",
                         LogHelper.MarkAsNonPII(configuration?.Issuer)
                         ),
                     IssuerValidationFailure.NoValidationParameterIssuersProvided,
@@ -213,7 +213,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10212,
                         LogHelper.MarkAsNonPII(issuer),
-                        "ValdIssuers is empty",
+                        "ValidIssuers is empty",
                         LogHelper.MarkAsNonPII(configuration?.Issuer)
                         ),
                     IssuerValidationFailure.NoValidationParameterIssuersProvided,

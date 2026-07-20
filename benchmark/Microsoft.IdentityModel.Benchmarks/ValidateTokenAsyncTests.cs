@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -32,6 +34,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         private TokenValidationParameters _invalidTokenValidationParameters;
         private ValidationParameters _validationParameters;
         private ValidationParameters _invalidValidationParameters;
+        private ValidationParameters _cachedConfigValidationParameters;
 
         [GlobalSetup]
         public void Setup()
@@ -82,6 +85,22 @@ namespace Microsoft.IdentityModel.Benchmarks
             _invalidValidationParameters.ValidAudiences.Add(BenchmarkUtils.Audience);
             _invalidValidationParameters.ValidIssuers.Add(BenchmarkUtils.Issuer);
 
+            // Cached-configuration (issuer/config-cache) scenario. The ConfigurationManager is primed so the
+            // synchronous peek (BaseConfigurationManager.TryGetCurrentConfiguration) hits and the issuer plus signing
+            // keys are resolved from the cached configuration rather than from the ValidationParameters directly.
+            OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration { Issuer = BenchmarkUtils.Issuer };
+            configuration.SigningKeys.Add(BenchmarkUtils.SigningCredentialsRsaSha256.Key);
+            ConfigurationManager<OpenIdConnectConfiguration> configurationManager =
+                new ConfigurationManager<OpenIdConnectConfiguration>(
+                    "benchmark-metadata",
+                    new BenchmarkConfigurationRetriever(configuration));
+            // Prime the cache once so every measured call is a cache hit on both the async and sync paths.
+            configurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
+
+            _cachedConfigValidationParameters = new ValidationParameters();
+            _cachedConfigValidationParameters.ValidAudiences.Add(BenchmarkUtils.Audience);
+            _cachedConfigValidationParameters.ConfigurationManager = configurationManager;
+
             _callContext = new CallContext();
         }
 
@@ -116,6 +135,25 @@ namespace Microsoft.IdentityModel.Benchmarks
             // Synchronous result-based fast path (issue #3459). With no ConfigurationManager set on the
             // ValidationParameters, ValidateToken runs fully synchronously (no per-call Task, no config await).
             ValidationResult<ValidatedToken, ValidationError> validationResult = _jsonWebTokenHandler.ValidateToken(_jwsExtendedClaims, _validationParameters, _callContext);
+            return validationResult.Succeeded;
+        }
+
+        [BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
+        public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CachedConfig()
+        {
+            // Issuer/configuration-cache scenario (issue #3459). The ConfigurationManager is primed, so the asynchronous
+            // path resolves issuer and signing keys from the cached configuration. Baseline for the synchronous peek-hit
+            // variant below; this is the scenario the sync fast path is designed to accelerate at MISE call volume.
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _cachedConfigValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            return validationResult.Succeeded;
+        }
+
+        [BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
+        public bool JsonWebTokenHandler_ValidateTokenWithVP_CachedConfig()
+        {
+            // Issuer/configuration-cache scenario (issue #3459). TryGetCurrentConfiguration hits, so ValidateToken runs
+            // synchronously against the cached configuration with no await and no config fetch.
+            ValidationResult<ValidatedToken, ValidationError> validationResult = _jsonWebTokenHandler.ValidateToken(_jwsExtendedClaims, _cachedConfigValidationParameters, _callContext);
             return validationResult.Succeeded;
         }
 
@@ -211,6 +249,23 @@ namespace Microsoft.IdentityModel.Benchmarks
             var claimsIdentity = validationResult.Result.ClaimsIdentity;
             var claims = claimsIdentity.Claims;
             return claims.ToList();
+        }
+
+        // Returns a fixed configuration without any network or file I/O so the ConfigurationManager can be primed once
+        // in setup, making TryGetCurrentConfiguration a synchronous cache hit for every measured call.
+        private sealed class BenchmarkConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
+        {
+            private readonly OpenIdConnectConfiguration _configuration;
+
+            public BenchmarkConfigurationRetriever(OpenIdConnectConfiguration configuration)
+            {
+                _configuration = configuration;
+            }
+
+            public Task<OpenIdConnectConfiguration> GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+            {
+                return Task.FromResult(_configuration);
+            }
         }
     }
 

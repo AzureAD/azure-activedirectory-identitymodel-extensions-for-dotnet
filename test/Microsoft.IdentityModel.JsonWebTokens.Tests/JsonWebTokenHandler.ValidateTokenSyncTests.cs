@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 #nullable disable
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -187,6 +189,232 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.NotNull(syncParameters.ConfigurationManager.LastKnownGoodConfiguration);
         }
 
+        [Fact]
+        public async Task ValidateToken_PeekMissConfiguration_FallsBackToAsyncAndMatchesAsync()
+        {
+            // Arrange - MockConfigurationManager does not override the synchronous peek, so TryGetCurrentConfiguration
+            // misses and the sync fast path must fall back to the asynchronous pipeline, which resolves the configuration.
+            string token = testTokenCreator.CreateDefaultValidToken();
+
+            ValidationParameters syncParameters = ValidationUtils.CreateValidationParameters(audiences: ["http://Default.Audience.com"]);
+            syncParameters.ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(CreateConfiguration());
+
+            ValidationParameters asyncParameters = ValidationUtils.CreateValidationParameters(audiences: ["http://Default.Audience.com"]);
+            asyncParameters.ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(CreateConfiguration());
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> syncResult =
+                jsonWebTokenHandler.ValidateToken(token, syncParameters, new CallContext());
+            ValidationResult<ValidatedToken, ValidationError> asyncResult =
+                await ResultBasedHandler.ValidateTokenAsync(token, asyncParameters, new CallContext(), default);
+
+            // Assert
+            Assert.True(syncResult.Succeeded);
+            Assert.Equal(asyncResult.Succeeded, syncResult.Succeeded);
+        }
+
+        [Fact]
+        public async Task ValidateToken_RecoverableFailureOnStaleConfig_FallsBackToAsyncAndSucceeds()
+        {
+            // Arrange - the synchronous peek returns a stale configuration whose signing key cannot validate the token,
+            // producing a recoverable signature failure. The sync fast path must route to the async pipeline, which
+            // supplies the good configuration and succeeds - the recovery is never duplicated on the sync path.
+            string token = testTokenCreator.CreateDefaultValidToken();
+
+            ValidationParameters syncParameters = ValidationUtils.CreateValidationParameters(audiences: ["http://Default.Audience.com"], signingKeys: []);
+            syncParameters.ConfigurationManager = new StalePeekFreshAsyncConfigurationManager(CreateStaleConfiguration(), CreateConfiguration());
+
+            ValidationParameters asyncParameters = ValidationUtils.CreateValidationParameters(audiences: ["http://Default.Audience.com"], signingKeys: []);
+            asyncParameters.ConfigurationManager = new StalePeekFreshAsyncConfigurationManager(CreateStaleConfiguration(), CreateConfiguration());
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> syncResult =
+                jsonWebTokenHandler.ValidateToken(token, syncParameters, new CallContext());
+            ValidationResult<ValidatedToken, ValidationError> asyncResult =
+                await ResultBasedHandler.ValidateTokenAsync(token, asyncParameters, new CallContext(), default);
+
+            // Assert
+            Assert.True(syncResult.Succeeded);
+            Assert.Equal(asyncResult.Succeeded, syncResult.Succeeded);
+        }
+
+        [Fact]
+        public void ValidateToken_ReplayCacheConfigured_RoutesToAsyncAndConsumesReplayOnce()
+        {
+            // Arrange - a replay cache is configured together with a stale cached configuration that would force a
+            // recoverable signature failure on the sync path. Without the replay guard the sync fast path would consume
+            // the replay cache during its speculative attempt and then again on the async fallback, spuriously reporting
+            // the token as replayed. The guard routes straight to the async path so the token is recorded exactly once.
+            string token = testTokenCreator.CreateDefaultValidToken();
+
+            ValidationParameters syncParameters = ValidationUtils.CreateValidationParameters(audiences: ["http://Default.Audience.com"], signingKeys: []);
+            syncParameters.ConfigurationManager = new StalePeekFreshAsyncConfigurationManager(CreateStaleConfiguration(), CreateConfiguration());
+            syncParameters.TokenReplayCache = new CountingTokenReplayCache();
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> syncResult =
+                jsonWebTokenHandler.ValidateToken(token, syncParameters, new CallContext());
+
+            // Assert - the token validates (it was not double-counted as a replay).
+            Assert.True(syncResult.Succeeded);
+        }
+
+        [Fact]
+        public async Task ValidateToken_EncryptedToken_Succeeds_MatchesAsync()
+        {
+            // Arrange
+            string token = CreateEncryptedToken();
+
+            ValidationParameters syncParameters = CreateDefaultValidationParameters();
+            syncParameters.DecryptionKeys.Add(KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key);
+            ValidationParameters asyncParameters = CreateDefaultValidationParameters();
+            asyncParameters.DecryptionKeys.Add(KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key);
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> syncResult =
+                jsonWebTokenHandler.ValidateToken(token, syncParameters, new CallContext());
+            ValidationResult<ValidatedToken, ValidationError> asyncResult =
+                await ResultBasedHandler.ValidateTokenAsync(token, asyncParameters, new CallContext(), default);
+
+            // Assert
+            Assert.True(syncResult.Succeeded);
+            Assert.Equal(asyncResult.Succeeded, syncResult.Succeeded);
+        }
+
+        [Fact]
+        public async Task ValidateToken_EncryptedToken_WrongDecryptionKey_FailsLikeAsync()
+        {
+            // Arrange
+            string token = CreateEncryptedToken();
+
+            ValidationParameters syncParameters = CreateDefaultValidationParameters();
+            syncParameters.DecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_128);
+            ValidationParameters asyncParameters = CreateDefaultValidationParameters();
+            asyncParameters.DecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_128);
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> syncResult =
+                jsonWebTokenHandler.ValidateToken(token, syncParameters, new CallContext());
+            ValidationResult<ValidatedToken, ValidationError> asyncResult =
+                await ResultBasedHandler.ValidateTokenAsync(token, asyncParameters, new CallContext(), default);
+
+            // Assert
+            Assert.False(syncResult.Succeeded);
+            Assert.Equal(asyncResult.Succeeded, syncResult.Succeeded);
+            Assert.Equal(asyncResult.Error.GetType(), syncResult.Error.GetType());
+        }
+
+        [Fact]
+        public async Task ValidateToken_CustomAsyncOnlyIssuerValidator_Succeeds_MatchesAsync()
+        {
+            // Arrange - a custom issuer validator that implements only the asynchronous IIssuerValidator (not
+            // ISynchronousIssuerValidator). The sync path completes it synchronously; issuer validation itself does no I/O.
+            string token = testTokenCreator.CreateDefaultValidToken();
+
+            ValidationParameters syncParameters = CreateDefaultValidationParameters();
+            syncParameters.IssuerValidatorAsync = new AsyncOnlyIssuerValidator(succeed: true);
+            ValidationParameters asyncParameters = CreateDefaultValidationParameters();
+            asyncParameters.IssuerValidatorAsync = new AsyncOnlyIssuerValidator(succeed: true);
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> syncResult =
+                jsonWebTokenHandler.ValidateToken(token, syncParameters, new CallContext());
+            ValidationResult<ValidatedToken, ValidationError> asyncResult =
+                await ResultBasedHandler.ValidateTokenAsync(token, asyncParameters, new CallContext(), default);
+
+            // Assert
+            Assert.True(syncResult.Succeeded);
+            Assert.Equal(asyncResult.Succeeded, syncResult.Succeeded);
+        }
+
+        [Fact]
+        public async Task ValidateToken_CustomAsyncOnlyIssuerValidator_Fails_MatchesAsync()
+        {
+            // Arrange
+            string token = testTokenCreator.CreateDefaultValidToken();
+
+            ValidationParameters syncParameters = CreateDefaultValidationParameters();
+            syncParameters.IssuerValidatorAsync = new AsyncOnlyIssuerValidator(succeed: false);
+            ValidationParameters asyncParameters = CreateDefaultValidationParameters();
+            asyncParameters.IssuerValidatorAsync = new AsyncOnlyIssuerValidator(succeed: false);
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> syncResult =
+                jsonWebTokenHandler.ValidateToken(token, syncParameters, new CallContext());
+            ValidationResult<ValidatedToken, ValidationError> asyncResult =
+                await ResultBasedHandler.ValidateTokenAsync(token, asyncParameters, new CallContext(), default);
+
+            // Assert
+            Assert.False(syncResult.Succeeded);
+            Assert.Equal(asyncResult.Succeeded, syncResult.Succeeded);
+            Assert.Equal(asyncResult.Error.GetType(), syncResult.Error.GetType());
+        }
+
+        [Fact]
+        public async Task ValidateToken_ActorValidation_Succeeds_MatchesAsync()
+        {
+            // Arrange - the outer token carries an "actort" claim (a nested JWT). With ValidateActor set, the actor
+            // token is validated synchronously via the same sync pipeline.
+            string actorToken = testTokenCreator.CreateDefaultValidToken();
+            string token = CreateTokenWithActor(actorToken);
+
+            ValidationParameters syncParameters = CreateDefaultValidationParameters();
+            syncParameters.ValidateActor = true;
+            syncParameters.ActorValidationParameters = CreateDefaultValidationParameters();
+
+            ValidationParameters asyncParameters = CreateDefaultValidationParameters();
+            asyncParameters.ValidateActor = true;
+            asyncParameters.ActorValidationParameters = CreateDefaultValidationParameters();
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> syncResult =
+                jsonWebTokenHandler.ValidateToken(token, syncParameters, new CallContext());
+            ValidationResult<ValidatedToken, ValidationError> asyncResult =
+                await ResultBasedHandler.ValidateTokenAsync(token, asyncParameters, new CallContext(), default);
+
+            // Assert
+            Assert.True(syncResult.Succeeded);
+            Assert.Equal(asyncResult.Succeeded, syncResult.Succeeded);
+        }
+
+        private string CreateEncryptedToken()
+        {
+            SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "http://Default.Issuer.com",
+                Audience = "http://Default.Audience.com",
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
+                NotBefore = DateTime.UtcNow - TimeSpan.FromHours(1),
+                Expires = DateTime.UtcNow + TimeSpan.FromHours(1),
+            };
+
+            return jsonWebTokenHandler.CreateToken(descriptor);
+        }
+
+        private string CreateTokenWithActor(string actorToken)
+        {
+            SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = "http://Default.Issuer.com",
+                Audience = "http://Default.Audience.com",
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                NotBefore = DateTime.UtcNow - TimeSpan.FromHours(1),
+                Expires = DateTime.UtcNow + TimeSpan.FromHours(1),
+                Claims = new Dictionary<string, object> { { "actort", actorToken } },
+            };
+
+            return jsonWebTokenHandler.CreateToken(descriptor);
+        }
+
+        private static OpenIdConnectConfiguration CreateStaleConfiguration()
+        {
+            // A configuration whose signing key does not match the token, so signature validation fails recoverably.
+            OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration { Issuer = "http://Default.Issuer.com" };
+            configuration.SigningKeys.Add(KeyingMaterial.RsaSecurityKey_2048);
+            return configuration;
+        }
+
         private static OpenIdConnectConfiguration CreateConfiguration()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration { Issuer = "http://Default.Issuer.com" };
@@ -218,6 +446,83 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             public override void RequestRefresh()
             {
+            }
+        }
+
+        // A configuration manager whose synchronous peek hits with a stale configuration (wrong signing key) but whose
+        // asynchronous fetch returns a good configuration. This exercises the sync fast path's recoverable-failure
+        // fallback: the sync attempt fails signature validation against the stale config and routes to the async path.
+        private sealed class StalePeekFreshAsyncConfigurationManager : BaseConfigurationManager
+        {
+            private readonly BaseConfiguration _staleConfiguration;
+            private readonly BaseConfiguration _freshConfiguration;
+
+            public StalePeekFreshAsyncConfigurationManager(BaseConfiguration staleConfiguration, BaseConfiguration freshConfiguration)
+            {
+                _staleConfiguration = staleConfiguration;
+                _freshConfiguration = freshConfiguration;
+            }
+
+            public override bool TryGetCurrentConfiguration(out BaseConfiguration configuration)
+            {
+                configuration = _staleConfiguration;
+                return true;
+            }
+
+            public override Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+            {
+                return Task.FromResult(_freshConfiguration);
+            }
+
+            public override void RequestRefresh()
+            {
+            }
+        }
+
+        // A stateful token replay cache that records nonces, so a token added twice is detected as a replay. This lets
+        // the tests catch double-consumption of the replay cache by the synchronous fast path.
+        private sealed class CountingTokenReplayCache : ITokenReplayCache
+        {
+            private readonly HashSet<string> _cache = new HashSet<string>();
+
+            public bool TryAdd(string nonce, DateTime expiresAt) => _cache.Add(nonce);
+
+            public bool TryFind(string nonce) => _cache.Contains(nonce);
+        }
+
+        // A custom issuer validator that implements only the asynchronous IIssuerValidator (not
+        // ISynchronousIssuerValidator), so the synchronous path must complete it via the async validator.
+        private sealed class AsyncOnlyIssuerValidator : IIssuerValidator
+        {
+            private readonly bool _succeed;
+
+            public AsyncOnlyIssuerValidator(bool succeed)
+            {
+                _succeed = succeed;
+            }
+
+            public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+                string issuer,
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                CallContext callContext,
+                CancellationToken cancellationToken)
+            {
+                ValidationResult<ValidatedIssuer, ValidationError> result;
+                if (_succeed)
+                {
+                    result = new ValidatedIssuer(issuer, IssuerValidationSource.IssuerMatchedValidationParameters);
+                }
+                else
+                {
+                    result = new IssuerValidationError(
+                        new MessageDetail("custom async-only issuer validator rejected the issuer"),
+                        IssuerValidationFailure.ValidationFailed,
+                        ValidationError.GetCurrentStackFrame(),
+                        issuer);
+                }
+
+                return Task.FromResult(result);
             }
         }
     }
