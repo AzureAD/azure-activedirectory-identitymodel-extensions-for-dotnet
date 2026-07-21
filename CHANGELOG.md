@@ -1,5 +1,14 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.20.0
+====
+## Performance Improvements
+- Add JsonWebToken header-replacement path to avoid re-parsing payload. See [PR #3552](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3552).
+- Add claims dictionary preallocation. See [PR #3542](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3542).
+
+## Bug Fixes
+- Fix CI build failures: remove unused log message and add missing DPoP API entries. See [PR #3551](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3551).
+
 9.0.0
 ====
 ## Bug Fixes
