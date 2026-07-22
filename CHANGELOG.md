@@ -1,6 +1,6 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
-8.20.0
+8.21.0
 ====
 ## Performance Improvements
 - Add JsonWebToken header-replacement path to avoid re-parsing payload. See [PR #3552](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3552).
