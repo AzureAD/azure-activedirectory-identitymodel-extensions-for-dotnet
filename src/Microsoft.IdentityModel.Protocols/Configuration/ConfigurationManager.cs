@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
+    public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T>, IConfigurationManagerSync<T> where T : class
     {
         internal Action _onBackgroundTaskFinish;
 
@@ -221,7 +221,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
-        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationSync"/> is not called and the current Configuration is returned.</remarks>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetrieverSync{T}.GetConfigurationSync"/> is not called and the current Configuration is returned.</remarks>
         public T GetConfigurationSync()
         {
             return GetConfigurationSync(CancellationToken.None);
@@ -234,7 +234,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
         /// <remarks>
         /// If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/>
-        /// then <see cref="IConfigurationRetriever{T}.GetConfigurationSync"/> is not called and the current Configuration is returned.
+        /// then <see cref="IConfigurationRetrieverSync{T}.GetConfigurationSync"/> is not called and the current Configuration is returned.
         /// This method blocks until the configuration is retrieved.
         /// </remarks>
         public virtual T GetConfigurationSync(CancellationToken cancel)
@@ -417,7 +417,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                     // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                     // The transport should have its own timeouts, etc.
-                    T configuration = _configRetriever.GetConfigurationSync(
+                    T configuration = ((IConfigurationRetrieverSync<T>)_configRetriever).GetConfigurationSync(
                         MetadataAddress,
                         _docRetriever,
                         CancellationToken.None);
@@ -750,15 +750,19 @@ namespace Microsoft.IdentityModel.Protocols
             try
             {
                 ConfigurationEventHandlerResult<T> handlerResult;
-                if (ConfigurationEventHandler is IConfigurationEventHandlerContextAware<T> contextAware)
+                if (ConfigurationEventHandler is IConfigurationEventHandlerContextAwareSync<T> contextAware)
                 {
                     handlerResult = contextAware.BeforeRetrieve(
                         MetadataAddress, context, cancellationToken);
                 }
+                else if (ConfigurationEventHandler is IConfigurationEventHandlerSync<T> handlerSync)
+                {
+                    handlerResult = handlerSync.BeforeRetrieve(
+                        MetadataAddress, cancellationToken);
+                }
                 else
                 {
-                    handlerResult = ConfigurationEventHandler.BeforeRetrieve(
-                        MetadataAddress, cancellationToken);
+                    return ConfigurationEventHandlerResult<T>.NoResult;
                 }
 
                 if (handlerResult != null && handlerResult.Configuration != null)

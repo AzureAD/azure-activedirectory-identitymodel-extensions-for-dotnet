@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Saml2 Tokens. See: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
-    public partial class Saml2SecurityTokenHandler : SecurityTokenHandler, IResultBasedValidation
+    public partial class Saml2SecurityTokenHandler : SecurityTokenHandler, IResultBasedValidation, IResultBasedValidationSync
     {
         /// <inheritdoc/>
         internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
@@ -268,6 +268,56 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 validationParameters,
                 callContext,
                 cancellationToken).ConfigureAwait(false);
+        }
+
+        ValidationResult<ValidatedToken, ValidationError> IResultBasedValidationSync.ValidateToken(
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                default).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        ValidationResult<ValidatedToken, ValidationError> IResultBasedValidationSync.ValidateToken(
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            return ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        ValidationResult<ValidatedToken, ValidationError> IResultBasedValidationSync.ValidateToken(
+            SecurityToken token,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                default).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        ValidationResult<ValidatedToken, ValidationError> IResultBasedValidationSync.ValidateToken(
+            SecurityToken token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            return ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         #endregion
     }

@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// <summary>
     /// Mock implementation of IConfigurationEventHandler for testing
     /// </summary>
-    internal class MockConfigurationEventHandler : IConfigurationEventHandler<OpenIdConnectConfiguration>
+    internal class MockConfigurationEventHandler : IConfigurationEventHandler<OpenIdConnectConfiguration>, IConfigurationEventHandlerSync<OpenIdConnectConfiguration>
     {
         public bool BeforeRetrieveAsyncCalled { get; private set; }
         public string BeforeRetrieveMetadataAddress { get; private set; }

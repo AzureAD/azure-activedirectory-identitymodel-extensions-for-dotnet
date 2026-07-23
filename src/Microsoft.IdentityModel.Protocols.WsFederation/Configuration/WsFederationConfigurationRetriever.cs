@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// <summary>
     ///  Retrieves a populated <see cref="WsFederationConfiguration"/> given an address.
     /// </summary>
-    public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>
+    public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>, IConfigurationRetrieverSync<WsFederationConfiguration>
     {
         private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { XmlResolver = null, DtdProcessing = DtdProcessing.Prohibit, ValidationType = ValidationType.None };
 

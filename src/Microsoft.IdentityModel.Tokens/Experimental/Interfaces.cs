@@ -72,7 +72,13 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken);
+    }
 
+    /// <summary>
+    /// Interface for synchronously validating token issuers.
+    /// </summary>
+    public interface IIssuerValidatorSync
+    {
         /// <summary>
         /// Synchronous method to validate the issuer value in a token.
         /// </summary>

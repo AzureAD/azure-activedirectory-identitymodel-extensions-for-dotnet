@@ -13,7 +13,7 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 #nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
-    public partial class JsonWebTokenHandler : TokenHandler, IResultBasedValidation
+    public partial class JsonWebTokenHandler : TokenHandler, IResultBasedValidation, IResultBasedValidationSync
     {
         /// <inheritdoc/>
         internal ValidationResult<ValidatedToken, ValidationError> ValidateToken(
@@ -790,6 +790,56 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 validationParameters,
                 callContext,
                 cancellationToken).ConfigureAwait(false);
+        }
+
+        ValidationResult<ValidatedToken, ValidationError> IResultBasedValidationSync.ValidateToken(
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return ValidateToken(
+                token,
+                validationParameters,
+                callContext,
+                default);
+        }
+
+        ValidationResult<ValidatedToken, ValidationError> IResultBasedValidationSync.ValidateToken(
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            return ValidateToken(
+                token,
+                validationParameters,
+                callContext,
+                cancellationToken);
+        }
+
+        ValidationResult<ValidatedToken, ValidationError> IResultBasedValidationSync.ValidateToken(
+            SecurityToken token,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return ValidateToken(
+                token,
+                validationParameters,
+                callContext,
+                default);
+        }
+
+        ValidationResult<ValidatedToken, ValidationError> IResultBasedValidationSync.ValidateToken(
+            SecurityToken token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            return ValidateToken(
+                token,
+                validationParameters,
+                callContext,
+                cancellationToken);
         }
         #endregion
     }

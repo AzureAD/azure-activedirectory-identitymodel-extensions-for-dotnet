@@ -616,7 +616,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/>.</returns>
+        /// <remarks>
+        /// This is the synchronous counterpart of <see cref="ValidateTokenAsync(string, TokenValidationParameters)"/>.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned <see cref="TokenValidationResult.Exception"/> property.
+        /// Callers should always check the <see cref="TokenValidationResult.IsValid"/> property to verify the validity of the result.
+        /// </remarks>
         public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters)
+        {
+            return ValidateToken(token, validationParameters, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Validates a JWS or a JWE.
+        /// </summary>
+        /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the operation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
+        /// <remarks>
+        /// This is the synchronous counterpart of <see cref="ValidateTokenAsync(string, TokenValidationParameters, CancellationToken)"/>.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned <see cref="TokenValidationResult.Exception"/> property.
+        /// Callers should always check the <see cref="TokenValidationResult.IsValid"/> property to verify the validity of the result.
+        /// </remarks>
+        public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
         {
 #if NET5_0_OR_GREATER
             if (string.IsNullOrEmpty(token))
@@ -632,7 +654,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 TokenValidationResult result = ReadToken(token, validationParameters);
                 if (result.IsValid)
-                    return ValidateTokenSync(result.SecurityToken as JsonWebToken, validationParameters, CancellationToken.None);
+                    return ValidateToken(result.SecurityToken, validationParameters, cancellationToken);
 
                 return result;
             }
@@ -650,7 +672,70 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Synchronous document retrieval is not supported before .NET 5.0
             // (HttpDocumentRetriever does not implement ISyncDocumentRetriever), so run
             // the asynchronous validation path synchronously (sync-over-async).
-            return ValidateTokenAsync(token, validationParameters).ConfigureAwait(false).GetAwaiter().GetResult();
+            return ValidateTokenAsync(token, validationParameters, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+#endif
+        }
+
+        /// <summary>
+        /// Validates a token.
+        /// </summary>
+        /// <param name="token">The <see cref="SecurityToken"/> to be validated. Must be a <see cref="JsonWebToken"/>.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
+        /// <remarks>
+        /// This is the synchronous counterpart of <see cref="ValidateTokenAsync(SecurityToken, TokenValidationParameters)"/>.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned <see cref="TokenValidationResult.Exception"/> property.
+        /// Callers should always check the <see cref="TokenValidationResult.IsValid"/> property to verify the validity of the result.
+        /// </remarks>
+        public virtual TokenValidationResult ValidateToken(SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return ValidateToken(token, validationParameters, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Validates a token.
+        /// </summary>
+        /// <param name="token">The <see cref="SecurityToken"/> to be validated. Must be a <see cref="JsonWebToken"/>.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the operation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
+        /// <remarks>
+        /// This is the synchronous counterpart of <see cref="ValidateTokenAsync(SecurityToken, TokenValidationParameters, CancellationToken)"/>.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned <see cref="TokenValidationResult.Exception"/> property.
+        /// Callers should always check the <see cref="TokenValidationResult.IsValid"/> property to verify the validity of the result.
+        /// </remarks>
+        public virtual TokenValidationResult ValidateToken(SecurityToken token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
+        {
+            if (token == null)
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (validationParameters == null)
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)), IsValid = false };
+
+            var jwt = token as JsonWebToken;
+            if (jwt == null)
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentException<ArgumentException>(nameof(token), $"{nameof(token)} must be a {nameof(JsonWebToken)}."), IsValid = false };
+
+#if NET5_0_OR_GREATER
+            try
+            {
+                return ValidateTokenSync(jwt, validationParameters, cancellationToken);
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenValidationResult
+                {
+                    Exception = ex,
+                    IsValid = false
+                };
+            }
+#else
+            // Synchronous document retrieval is not supported before .NET 5.0
+            // (HttpDocumentRetriever does not implement ISyncDocumentRetriever), so run
+            // the asynchronous validation path synchronously (sync-over-async).
+            return ValidateTokenAsync(token, validationParameters, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 #endif
         }
 

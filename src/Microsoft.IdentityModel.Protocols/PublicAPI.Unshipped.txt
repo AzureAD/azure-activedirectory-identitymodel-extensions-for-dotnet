@@ -8,20 +8,27 @@ Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext.By
 Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext.ConfigurationRetrievalContext() -> void
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>.AfterUpdateAsync(string metadataAddress, T configuration, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
-Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>.BeforeRetrieve(string metadataAddress, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>.BeforeRetrieveAsync(string metadataAddress, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>>
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>.AfterUpdateAsync(string metadataAddress, T configuration, Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
-Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>.BeforeRetrieve(string metadataAddress, Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
 Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAware<T>.BeforeRetrieveAsync(string metadataAddress, Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAwareSync<T>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerContextAwareSync<T>.BeforeRetrieve(string metadataAddress, Microsoft.IdentityModel.Protocols.Configuration.ConfigurationRetrievalContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerSync<T>
+Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandlerSync<T>.BeforeRetrieve(string metadataAddress, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationEventHandler.get -> Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T>
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationEventHandler.set -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator, Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions lkgCacheOptions, Microsoft.IdentityModel.Protocols.Configuration.IConfigurationEventHandler<T> configurationEventHandler) -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetConfigurationSync() -> T
 Microsoft.IdentityModel.Protocols.FileDocumentRetriever.GetDocumentSync(string address, System.Threading.CancellationToken cancel) -> string
-Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T>.GetConfigurationSync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> T
+Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>
+Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>.GetConfigurationSync(System.Threading.CancellationToken cancel) -> T
+Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>.RequestRefresh() -> void
+Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>
+Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>.GetConfigurationSync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> T
 Microsoft.IdentityModel.Protocols.ISyncDocumentRetriever
 Microsoft.IdentityModel.Protocols.ISyncDocumentRetriever.GetDocumentSync(string address, System.Threading.CancellationToken cancel) -> string
+Microsoft.IdentityModel.Protocols.StaticConfigurationManager<T>.GetConfigurationSync(System.Threading.CancellationToken cancel) -> T
 override Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetBaseConfigurationSync(System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Tokens.BaseConfiguration
 override Microsoft.IdentityModel.Protocols.StaticConfigurationManager<T>.GetBaseConfigurationSync(System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Tokens.BaseConfiguration
 static readonly Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.NoResult -> Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>

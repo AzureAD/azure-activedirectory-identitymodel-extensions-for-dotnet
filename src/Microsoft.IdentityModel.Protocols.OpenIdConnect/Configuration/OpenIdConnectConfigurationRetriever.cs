@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// <summary>
     /// Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address.
     /// </summary>
-    public class OpenIdConnectConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
+    public class OpenIdConnectConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>, IConfigurationRetrieverSync<OpenIdConnectConfiguration>
     {
         /// <summary>
         /// Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address.
@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             return GetAsync(address, retriever, cancel);
         }
 
-        OpenIdConnectConfiguration IConfigurationRetriever<OpenIdConnectConfiguration>.GetConfigurationSync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+        OpenIdConnectConfiguration IConfigurationRetrieverSync<OpenIdConnectConfiguration>.GetConfigurationSync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
             return GetSync(address, retriever, cancel);
         }

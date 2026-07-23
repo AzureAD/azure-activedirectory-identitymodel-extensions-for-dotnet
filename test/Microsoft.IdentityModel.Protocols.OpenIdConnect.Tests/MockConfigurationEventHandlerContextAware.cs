@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests;
 /// <summary>
 /// Mock implementation of IConfigurationEventHandlerContextAware for testing context-aware retrieval.
 /// </summary>
-internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHandlerContextAware<OpenIdConnectConfiguration>
+internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHandlerContextAware<OpenIdConnectConfiguration>, IConfigurationEventHandlerContextAwareSync<OpenIdConnectConfiguration>
 {
     public bool BeforeRetrieveAsyncCalled { get; private set; }
     public bool ContextAwareBeforeRetrieveAsyncCalled { get; set; }

@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        private class IssuerValidator : IIssuerValidator
+        private class IssuerValidator : IIssuerValidator, IIssuerValidatorSync
         {
             public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,

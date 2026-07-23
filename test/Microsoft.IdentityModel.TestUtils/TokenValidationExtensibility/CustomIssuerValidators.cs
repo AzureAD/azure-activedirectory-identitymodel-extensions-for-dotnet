@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.TestUtils
         internal static IIssuerValidator IssuerValidatorDelegateAsync = new IssuerValidatorDelegateAsyncValidator();
         internal static IIssuerValidator IssuerValidatorThrows = new IssuerValidatorThrowsValidator();
 
-        private class CustomValidationFailedValidator : IIssuerValidator
+        private class CustomValidationFailedValidator : IIssuerValidator, IIssuerValidatorSync
         {
             public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        private class IssuerValidationFailedValidator : IIssuerValidator
+        private class IssuerValidationFailedValidator : IIssuerValidator, IIssuerValidatorSync
         {
             public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        private class UnknownValidationFailureValidator : IIssuerValidator
+        private class UnknownValidationFailureValidator : IIssuerValidator, IIssuerValidatorSync
         {
             public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        private class IssuerValidatorDelegateAsyncValidator : IIssuerValidator
+        private class IssuerValidatorDelegateAsyncValidator : IIssuerValidator, IIssuerValidatorSync
         {
             public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        private class IssuerValidatorThrowsValidator : IIssuerValidator
+        private class IssuerValidatorThrowsValidator : IIssuerValidator, IIssuerValidatorSync
         {
             public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
                 string issuer,
