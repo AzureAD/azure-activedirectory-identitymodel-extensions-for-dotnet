@@ -27,6 +27,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         private static readonly SecurityTokenDescriptor s_emptyTokenDescriptor = new();
 
+        // The actor is always serialized/deserialized under the RFC 8693 "act" claim.
+        // This is intentionally not configurable to avoid actor claims shadowing
+        // registered claims (e.g. iss/aud/exp). Legacy "actort" is honored on read only.
+        internal const string ActClaimType = "act";
+
         /// <summary>
         /// Creates an unsigned JSON Web Signature (JWS).
         /// </summary>
@@ -674,7 +679,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal) && kvp.Value is ClaimsIdentity)
+                    if (kvp.Key.Equals(ActClaimType, StringComparison.Ordinal) && kvp.Value is ClaimsIdentity)
                     {
                         isActorFound = true;
                         continue;
@@ -1089,7 +1094,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (actorTokenDescriptor == null || actorTokenDescriptor.Subject == null)
                 return;
 
-            writer.WritePropertyName(tokenDescriptor.ActorClaimType);
+            writer.WritePropertyName(ActClaimType);
             WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
         }
 
@@ -1109,7 +1114,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             SecurityTokenDescriptor actorTokenDescriptor = null;
 
-            if (tokenDescriptor.Claims?.TryGetValue(tokenDescriptor.ActorClaimType, out object actorValue) == true
+            if (tokenDescriptor.Claims?.TryGetValue(ActClaimType, out object actorValue) == true
                 && actorValue is ClaimsIdentity actorIdentity)
             {
                 actorTokenDescriptor = new SecurityTokenDescriptor
@@ -1128,7 +1133,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (actorTokenDescriptor != null)
             {
                 ValidateActorChainDepth(tokenDescriptor);
-                actorTokenDescriptor.ActorClaimType = tokenDescriptor.ActorClaimType;
                 actorTokenDescriptor.ActorChainDepth = tokenDescriptor.ActorChainDepth + 1;
             }
 
