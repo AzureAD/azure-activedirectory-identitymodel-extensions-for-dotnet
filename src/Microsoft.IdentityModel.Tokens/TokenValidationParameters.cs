@@ -47,11 +47,6 @@ namespace Microsoft.IdentityModel.Tokens
         internal const int MaxActorChainLength = 5;
 
         /// <summary>
-        /// Default for actor claim name.
-        /// </summary>
-        private string actorClaimType = "act";
-
-        /// <summary>
         /// This variable was previously used during recursion calls for deserializing the act claim.
         /// Depth tracking during deserialization is now handled via a local parameter in CreateClaimsIdentityActor.
         /// Retained for token creation scenarios where it is still used.
@@ -131,7 +126,6 @@ namespace Microsoft.IdentityModel.Tokens
             ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
             ActClaimRetriever = other.ActClaimRetriever;
             ActorChainDepth = other.ActorChainDepth;
-            ActorClaimType = other.ActorClaimType;
         }
 
         /// <summary>
@@ -783,34 +777,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
-
-        /// <summary>
-        /// Gets or sets the claim type that helps identify the type of actor claim in tokens. 
-        /// <para>This property determines which claim in a token contains the actor information during token validation and creation.</para>
-        /// <para>It is "act" by default which means all the actor claims are assumed to be in the "act" claim. Claims with this name will be deserialized into a JSON object by default.</para>
-        /// <para>We need to still support customers who are using "actort" which is unsigned JWT. When actor is in "actort" claim , it will be deserialized into unsigned JWT by default.</para>
-        /// <para>For JWT tokens, this is the claim name in the payload that holds the actor object.</para>
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown if the value is null, empty, or equal to "actort".
-        /// </exception>
-        public string ActorClaimType
-        {
-            get => actorClaimType;
-            set
-            {
-                if (string.IsNullOrEmpty(value) || string.Equals(value.Trim(), "actort", StringComparison.OrdinalIgnoreCase))
-                    throw LogHelper.LogExceptionMessage(
-                        new ArgumentOutOfRangeException(
-                            nameof(value),
-                            LogHelper.FormatInvariant(
-                                LogMessages.IDX11027,
-                                LogHelper.MarkAsNonPII("ActorClaimType"),
-                                LogHelper.MarkAsNonPII("ActorClaimType cannot be empty or equal to actort."))));
-
-                actorClaimType = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the current depth in the actor chain during token creation.

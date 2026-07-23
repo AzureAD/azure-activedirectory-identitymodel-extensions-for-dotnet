@@ -28,7 +28,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
             var validationParameters = new TokenValidationParameters()
             {
-                ActorClaimType = "act",
             };
 
             // Create ClaimsIdentity from JsonElement
@@ -63,7 +62,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ActorClaimType = "act",
             };
 
             // Create ClaimsIdentity from JsonElement
@@ -102,7 +100,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ActorClaimType = "act",
             };
 
             // Create ClaimsIdentity from JsonElement
@@ -142,7 +139,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ActorClaimType = "act",
             };
 
             // Create ClaimsIdentity from JsonElement
@@ -180,7 +176,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ActorClaimType = "act",
             };
 
             // Create ClaimsIdentity from JsonElement
@@ -216,7 +211,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ActorClaimType = "act",
             };
 
             // Act & Assert
@@ -245,41 +239,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void CreateActorClaimsIdentity_CustomActorClaimName_IsRespected()
-        {
-            // Create JSON with custom actor claim name
-            string actorJson = @"{
-                ""sub"": ""actor-subject-id"",
-                ""name"": ""Actor Name"",
-                ""custom_act"": {
-                    ""sub"": ""nested-actor-id"",
-                    ""name"": ""Nested Actor""
-                }
-            }";
-
-            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ActorClaimType = "custom_act",
-            };
-
-            // Create ClaimsIdentity from JsonElement
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
-
-            // Verify main identity
-            Assert.NotNull(identity);
-            Assert.Equal("actor-subject-id", identity.Claims.First(c => c.Type == "sub").Value);
-            Assert.Equal("Actor Name", identity.Claims.First(c => c.Type == "name").Value);
-
-            // Verify nested actor was found using custom claim name
-            Assert.NotNull(identity.Actor);
-            Assert.Equal("nested-actor-id", identity.Actor.Claims.First(c => c.Type == "sub").Value);
-            Assert.Equal("Nested Actor", identity.Actor.Claims.First(c => c.Type == "name").Value);
-        }
-
-        [Fact]
         public void CreateActorClaimsIdentity_WithNestedActor_DoesNotMutateTokenValidationParameters()
         {
             // Create actor JSON with nested actor
@@ -295,7 +254,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ActorClaimType = "act",
             };
 
             // Create ClaimsIdentity from JsonElement
@@ -337,7 +295,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 {
                     { "act", actorIdentity}
                 },
-                ActorClaimType = "act",
             };
             string token = handler.CreateToken(tokenDescriptor);
             handler.MapInboundClaims = true;
@@ -350,7 +307,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 ValidateLifetime = false,
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
-                ActorClaimType = "act",
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -428,7 +384,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 ValidateLifetime = false,
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
-                ActorClaimType = "act",
                 ActClaimRetriever = CustomDelegate,
             };
 
@@ -477,7 +432,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 ValidateLifetime = false,
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
-                ActorClaimType = "act",
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -526,7 +480,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 ValidateLifetime = false,
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
-                ActorClaimType = "act",
                 ActClaimRetriever = CustomDelegate,
             };
 
@@ -579,7 +532,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 ValidateLifetime = false,
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
-                ActorClaimType = "act",
             };
 
             // Default delegate
@@ -711,13 +663,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 SigningCredentials = Default.AsymmetricSigningCredentials,
                 Claims = new Dictionary<string, object>
                 {
-                    { "actor_claim_name", jsonActor }
+                    { "act", jsonActor }
                 },
-                ActorClaimType = "actor_claim_name",
             };
 
             string jsonToken = handler.CreateToken(jsonTokenDescriptor);
-            validationParameters.ActorClaimType = "actor_claim_name";
             var jsonResult = await handler.ValidateTokenAsync(jsonToken, validationParameters);
 
             // Verify different processing method
@@ -760,7 +710,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 ValidateLifetime = false,
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
-                ActorClaimType = "act",
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -826,7 +775,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 ValidateLifetime = false,
                 IssuerSigningKey = Default.AsymmetricSigningKey,
                 ValidateIssuerSigningKey = true,
-                ActorClaimType = "act",
             };
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -937,7 +885,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ActorClaimType = "act",
             };
 
             var exception = Assert.Throws<SecurityTokenException>(() =>
@@ -972,7 +919,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ActorClaimType = "act",
             };
 
             var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
