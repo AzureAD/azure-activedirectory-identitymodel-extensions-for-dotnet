@@ -1286,67 +1286,35 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
         private static string NormalizePercentEncodingHexCase(string value)
         {
-            for (int i = 0; i < value.Length - 2; i++)
+            char[] normalizedValue = null;
+            for (int i = 0; i + 2 < value.Length; i++)
             {
                 if (value[i] != '%')
                     continue;
 
                 char firstHexCharacter = value[i + 1];
                 char secondHexCharacter = value[i + 2];
-                bool firstCharacterIsHex =
-                    (firstHexCharacter >= '0' && firstHexCharacter <= '9') ||
-                    (firstHexCharacter >= 'A' && firstHexCharacter <= 'F') ||
-                    (firstHexCharacter >= 'a' && firstHexCharacter <= 'f');
-                bool secondCharacterIsHex =
-                    (secondHexCharacter >= '0' && secondHexCharacter <= '9') ||
-                    (secondHexCharacter >= 'A' && secondHexCharacter <= 'F') ||
-                    (secondHexCharacter >= 'a' && secondHexCharacter <= 'f');
-
-                if (!firstCharacterIsHex || !secondCharacterIsHex)
+                if (!Uri.IsHexDigit(firstHexCharacter) || !Uri.IsHexDigit(secondHexCharacter))
                     continue;
 
-                bool firstCharacterNeedsNormalization = firstHexCharacter >= 'a' && firstHexCharacter <= 'f';
-                bool secondCharacterNeedsNormalization = secondHexCharacter >= 'a' && secondHexCharacter <= 'f';
-                if (!firstCharacterNeedsNormalization && !secondCharacterNeedsNormalization)
+                if (IsLowerHex(firstHexCharacter) || IsLowerHex(secondHexCharacter))
                 {
-                    i += 2;
-                    continue;
+                    normalizedValue ??= value.ToCharArray();
+
+                    if (IsLowerHex(firstHexCharacter))
+                        normalizedValue[i + 1] = (char)(firstHexCharacter - ('a' - 'A'));
+
+                    if (IsLowerHex(secondHexCharacter))
+                        normalizedValue[i + 2] = (char)(secondHexCharacter - ('a' - 'A'));
                 }
 
-                char[] normalizedValue = value.ToCharArray();
-                for (int j = i; j < normalizedValue.Length - 2; j++)
-                {
-                    if (normalizedValue[j] != '%')
-                        continue;
-
-                    firstHexCharacter = normalizedValue[j + 1];
-                    secondHexCharacter = normalizedValue[j + 2];
-                    firstCharacterIsHex =
-                        (firstHexCharacter >= '0' && firstHexCharacter <= '9') ||
-                        (firstHexCharacter >= 'A' && firstHexCharacter <= 'F') ||
-                        (firstHexCharacter >= 'a' && firstHexCharacter <= 'f');
-                    secondCharacterIsHex =
-                        (secondHexCharacter >= '0' && secondHexCharacter <= '9') ||
-                        (secondHexCharacter >= 'A' && secondHexCharacter <= 'F') ||
-                        (secondHexCharacter >= 'a' && secondHexCharacter <= 'f');
-
-                    if (!firstCharacterIsHex || !secondCharacterIsHex)
-                        continue;
-
-                    if (firstHexCharacter >= 'a' && firstHexCharacter <= 'f')
-                        normalizedValue[j + 1] = (char)(firstHexCharacter - ('a' - 'A'));
-
-                    if (secondHexCharacter >= 'a' && secondHexCharacter <= 'f')
-                        normalizedValue[j + 2] = (char)(secondHexCharacter - ('a' - 'A'));
-
-                    j += 2;
-                }
-
-                return new string(normalizedValue);
+                i += 2;
             }
 
-            return value;
+            return normalizedValue == null ? value : new string(normalizedValue);
         }
+
+        private static bool IsLowerHex(char character) => character >= 'a' && character <= 'f';
 
         /// <summary>
         /// Ensures that the <paramref name="uri"/> is <see cref="UriKind.Absolute"/>.

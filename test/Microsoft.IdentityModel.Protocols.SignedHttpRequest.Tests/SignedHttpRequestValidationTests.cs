@@ -511,6 +511,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%2Fbar%2Fbaz"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2Fbar%2fbaz")),
+                        TestId = "ValidPMultipleTripletsMixedHexCase",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
                         HttpRequestUri = new Uri("https://www.contoso.com/Foo%2Fbar"),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
