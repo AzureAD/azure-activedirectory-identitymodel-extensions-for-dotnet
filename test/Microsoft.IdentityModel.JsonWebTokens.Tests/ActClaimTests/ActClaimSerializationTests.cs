@@ -48,9 +48,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim(tokenDescriptor.ActorClaimType), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'actort' claim");
                 // Verify the actor object directly
-                var actorObject = decodedToken.Payload.GetValue<JsonElement>(tokenDescriptor.ActorClaimType);
+                var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
                 Assert.Equal(JsonValueKind.Object, actorObject.ValueKind);
 
                 // Verify actor claims directly from the JSON object
@@ -97,13 +97,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim(tokenDescriptor.ActorClaimType), "JWT token should contain 'act' claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'act' claim");
 
                 // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim(tokenDescriptor.ActorClaimType), "JWT token should contain actor claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain actor claim");
 
                 // Verify the actor object directly
-                var actorObject = decodedToken.Payload.GetValue<JsonElement>(tokenDescriptor.ActorClaimType);
+                var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
                 Assert.Equal(JsonValueKind.Object, actorObject.ValueKind);
 
                 // Verify actor claims directly from the JSON object
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Assert.Equal("Actor Name", actorObject.GetProperty("name").GetString());
 
                 // Verify nested actor exists and is a JSON object
-                Assert.True(actorObject.TryGetProperty(tokenDescriptor.ActorClaimType, out var nestedActorElement));
+                Assert.True(actorObject.TryGetProperty("act", out var nestedActorElement));
                 Assert.Equal(JsonValueKind.Object, nestedActorElement.ValueKind);
 
                 // Verify nested actor claims directly from JSON object
@@ -276,7 +276,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Audience = "https://api.example.com",
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                ActorClaimType = "act",
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
@@ -293,7 +292,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Equal("Actor Name", actorObject.GetProperty("name").GetString());
 
             // Verify nested actor exists and is a JSON object
-            Assert.True(actorObject.TryGetProperty(tokenDescriptor.ActorClaimType, out var nestedActorElement));
+            Assert.True(actorObject.TryGetProperty("act", out var nestedActorElement));
             Assert.Equal(JsonValueKind.Object, nestedActorElement.ValueKind);
 
             // Verify nested actor claims directly from JSON object
@@ -342,7 +341,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Issuer = "https://example.com",
                 Audience = "https://api.example.com",
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                ActorClaimType = "act",
             };
 
             var exception = Assert.Throws<SecurityTokenException>(() => handler.CreateToken(tokenDescriptor));
@@ -392,7 +390,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 {
                     { "act", level1Actor }
                 },
-                ActorClaimType = "act",
             };
 
             var exception = Assert.Throws<SecurityTokenException>(() => handler.CreateToken(tokenDescriptor));
@@ -435,7 +432,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Issuer = "https://example.com",
                 Audience = "https://api.example.com",
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                ActorClaimType = "act",
             };
 
             var token = handler.CreateToken(tokenDescriptor);
