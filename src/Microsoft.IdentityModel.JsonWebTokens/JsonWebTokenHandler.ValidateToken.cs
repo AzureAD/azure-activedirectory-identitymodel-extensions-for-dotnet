@@ -737,7 +737,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // the asynchronous validation path synchronously (sync-over-async).
             return ValidateTokenAsync(token, validationParameters, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 #endif
-#endif
         }
 
         /// <summary>

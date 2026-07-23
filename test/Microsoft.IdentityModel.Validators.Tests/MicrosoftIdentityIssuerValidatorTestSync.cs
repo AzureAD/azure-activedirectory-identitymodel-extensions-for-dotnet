@@ -218,6 +218,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+#if NET5_0_OR_GREATER
         [Theory]
         [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.AadIssuer)]
         [InlineData(ValidatorConstants.TenantId, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.AadIssuer)]
@@ -242,6 +243,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             IdentityComparer.AreEqual(issuer, validator.Validate(issuer, jwtSecurityToken, tokenValidationParams), context);
             TestUtilities.AssertFailIfErrors(context);
         }
+#endif
 
         [Theory]
         [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.V1Issuer, false)]
@@ -728,6 +730,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+#if NET5_0_OR_GREATER
         [Theory]
         [InlineData(ProtocolVersion.V1, ProtocolVersion.V1)]
         [InlineData(ProtocolVersion.V1, ProtocolVersion.V11)]
@@ -991,6 +994,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
+#endif
 
         [Fact]
         public void Validate_UsesLKGWithConfigurationProvider()
