@@ -1,4 +1,5 @@
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr" -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX11027 = "IDX11027: Invalid JsonWebToken handler configuration parameter value provided for {0}. {1}" -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10278 = "IDX10278: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token decryption in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}. See https://aka.ms/validate-using-configuration-manager for additional information." -> string
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttr.get -> bool
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.BlockingTypeTag = "Blocking" -> string
@@ -111,7 +112,9 @@ virtual Microsoft.IdentityModel.Tokens.TokenHandler.CreateClaimsIdentityInternal
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
 virtual Microsoft.IdentityModel.Tokens.ValidationError.CreateException() -> System.Exception
-
+Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorChainDepth.get -> int
+Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorChainDepth.set -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.MaxActorChainLength.get -> int
 ~Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.MlDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, bool usePrivateKey) -> void
 static Microsoft.IdentityModel.Tokens.MlDsaAdapter.CreateMlDsa(Microsoft.IdentityModel.Tokens.JsonWebKey jsonWebKey, bool usePrivateKey) -> System.Security.Cryptography.MLDsa
 static Microsoft.IdentityModel.Tokens.MlDsaAdapter.GetMLDsaAlgorithm(string algorithm) -> System.Security.Cryptography.MLDsaAlgorithm

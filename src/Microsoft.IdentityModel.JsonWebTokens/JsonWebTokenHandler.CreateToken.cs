@@ -668,11 +668,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Duplicates are resolved according to the following priority:
             // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
+            bool isActorFound = false;
 
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
+                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimType, StringComparison.Ordinal) && kvp.Value is ClaimsIdentity)
+                    {
+                        isActorFound = true;
+                        continue;
+                    }
                     if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
                     {
                         descriptorClaimsAudienceChecked = true;
@@ -754,6 +760,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
+            if (isActorFound || tokenDescriptor.Subject?.Actor != null)
+                WriteActorToken(ref writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
@@ -1070,6 +1078,61 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     writer?.Dispose();
                 }
             }
+        }
+        internal static void WriteActorToken(
+            ref Utf8JsonWriter writer,
+            SecurityTokenDescriptor tokenDescriptor,
+            bool setDefaultTimesOnTokenCreation,
+            int tokenLifetimeInMinutes)
+        {
+            var actorTokenDescriptor = CreateActorTokenDescriptor(tokenDescriptor);
+            if (actorTokenDescriptor == null || actorTokenDescriptor.Subject == null)
+                return;
+
+            writer.WritePropertyName(tokenDescriptor.ActorClaimType);
+            WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+        }
+
+        private static void ValidateActorChainDepth(SecurityTokenDescriptor tokenDescriptor)
+        {
+            if (tokenDescriptor.ActorChainDepth >= tokenDescriptor.MaxActorChainLength)
+            {
+                throw LogHelper.LogExceptionMessage(
+                new SecurityTokenException(LogHelper.FormatInvariant(
+                    LogMessages.IDX14313,
+                    LogHelper.MarkAsNonPII(tokenDescriptor.ActorChainDepth),
+                    LogHelper.MarkAsNonPII(tokenDescriptor.MaxActorChainLength))));
+            }
+        }
+
+        private static SecurityTokenDescriptor CreateActorTokenDescriptor(SecurityTokenDescriptor tokenDescriptor)
+        {
+            SecurityTokenDescriptor actorTokenDescriptor = null;
+
+            if (tokenDescriptor.Claims?.TryGetValue(tokenDescriptor.ActorClaimType, out object actorValue) == true
+                && actorValue is ClaimsIdentity actorIdentity)
+            {
+                actorTokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = actorIdentity,
+                };
+            }
+            // Then check for actor in subject
+            else if (tokenDescriptor.Subject?.Actor != null)
+            {
+                actorTokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = tokenDescriptor.Subject.Actor,
+                };
+            }
+            if (actorTokenDescriptor != null)
+            {
+                ValidateActorChainDepth(tokenDescriptor);
+                actorTokenDescriptor.ActorClaimType = tokenDescriptor.ActorClaimType;
+                actorTokenDescriptor.ActorChainDepth = tokenDescriptor.ActorChainDepth + 1;
+            }
+
+            return actorTokenDescriptor;
         }
 
         internal static byte[] CompressToken(byte[] utf8Bytes, string compressionAlgorithm)

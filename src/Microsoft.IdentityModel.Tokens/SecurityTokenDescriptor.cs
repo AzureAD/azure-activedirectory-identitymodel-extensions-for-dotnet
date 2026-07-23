@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -15,6 +16,9 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenDescriptor
     {
         private List<string> _audiences;
+        private string _actorClaimType = "act";
+        private int _actorChainDepth;
+        private int _maxActorChainLength = 5;
 
         /// <summary>
         /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
@@ -116,5 +120,61 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public bool IncludeKeyIdInHeader { get; set; } = true;
+
+        /// <summary>
+        /// Gets the maximum depth allowed when processing nested actor tokens.
+        /// <para>This is a fixed value of 5, representing 1 top-level actor and up to 4 nested actors.</para>
+        /// <para>This value is not configurable to prevent security issues with excessively deep actor chains.</para>
+        /// </summary>
+        /// <remarks>
+        /// <para>During token creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
+        /// </remarks>
+        internal int MaxActorChainLength => _maxActorChainLength;
+
+        /// <summary>
+        /// Gets or sets the claim type that helps identify the type of actor claim in tokens. 
+        /// <para>This property determines which claim in a token contains the actor information during token validation and creation.</para>
+        /// <para>It is "act" by default which means all the actor claims are assumed to be in the "act" claim. Claims with this name will be serialized into a JSON object by default.</para>
+        /// <para>We need to still support customers who are using "actort" which is unsigned JWT. When actor is in "actort" claim , it will be serialized into unsigned JWT by default.</para>
+        /// <para>For JWT tokens, this is the claim name in the payload that holds the actor object.</para>
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if the value is null, empty, or equal to "actort".
+        /// </exception>
+        public string ActorClaimType
+        {
+            get => _actorClaimType;
+            set
+            {
+                if (string.IsNullOrEmpty(value) || string.Equals(value.Trim(), "actort", StringComparison.OrdinalIgnoreCase))
+                    throw LogHelper.LogExceptionMessage(
+                    new ArgumentOutOfRangeException(
+                    nameof(value),
+                    LogHelper.FormatInvariant(
+                    LogMessages.IDX11027,
+                    LogHelper.MarkAsNonPII("ActorClaimType"),
+                    LogHelper.MarkAsNonPII("ActorClaimType cannot be empty or equal to actort"))));
+                _actorClaimType = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the current depth in the actor chain during token creation.
+        /// <para>This is used internally to track the nesting level during recursive processing 
+        /// of nested actor tokens during serialization.</para>
+        /// <para>The value starts at 0 and is incremented for each level of actor nesting. The maximum permissible value is 4 (i.e., 5 total levels).</para>
+        /// </summary>
+        /// <remarks>
+        /// <para>This value is compared against <see cref="MaxActorChainLength"/> to prevent excessive 
+        /// recursion or deeply nested actor tokens during token creation.</para>
+        /// </remarks>
+        internal int ActorChainDepth
+        {
+            get => _actorChainDepth;
+            set
+            {
+                _actorChainDepth = value;
+            }
+        }
     }
 }
