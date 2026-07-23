@@ -23,6 +23,16 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         Task<ConfigurationEventHandlerResult<T>> BeforeRetrieveAsync(string metadataAddress, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Called before retrieving configuration from the metadata endpoint.
+        /// </summary>
+        /// <param name="metadataAddress">The metadata endpoint address.</param>
+        /// <param name="cancellationToken">A cancellation token to observe while waiting for the operation to complete.</param>
+        /// <returns>
+        /// A <see cref="ConfigurationEventHandlerResult{T}"/> if valid and available, or <see cref="ConfigurationEventHandlerResult{T}.NoResult"/> to proceed with normal retrieval.
+        /// </returns>
+        ConfigurationEventHandlerResult<T> BeforeRetrieve(string metadataAddress, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Called after a configuration has been successfully retrieved in a fire-and-forget manner.
         /// </summary>
         /// <param name="metadataAddress">The metadata endpoint address.</param>
