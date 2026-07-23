@@ -819,8 +819,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P))));
 
             // relax comparison by trimming start and ending forward slashes
-            pClaimValue = pClaimValue.Trim('/');
-            var expectedPClaimValue = httpRequestUri.AbsolutePath.Trim('/');
+            pClaimValue = NormalizePercentEncodingHexCase(pClaimValue.Trim('/'));
+            var expectedPClaimValue = NormalizePercentEncodingHexCase(httpRequestUri.AbsolutePath.Trim('/'));
 
             // URI path components are case-sensitive per RFC 3986 section 3.3, so the comparison is ordinal (case-sensitive) by default.
             // The AppContext switch allows a consumer to restore the legacy case-insensitive comparison during transition.
@@ -1282,6 +1282,70 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 #endif
 
             return Base64UrlEncoder.Encode(hashedBytes);
+        }
+
+        private static string NormalizePercentEncodingHexCase(string value)
+        {
+            for (int i = 0; i < value.Length - 2; i++)
+            {
+                if (value[i] != '%')
+                    continue;
+
+                char firstHexCharacter = value[i + 1];
+                char secondHexCharacter = value[i + 2];
+                bool firstCharacterIsHex =
+                    (firstHexCharacter >= '0' && firstHexCharacter <= '9') ||
+                    (firstHexCharacter >= 'A' && firstHexCharacter <= 'F') ||
+                    (firstHexCharacter >= 'a' && firstHexCharacter <= 'f');
+                bool secondCharacterIsHex =
+                    (secondHexCharacter >= '0' && secondHexCharacter <= '9') ||
+                    (secondHexCharacter >= 'A' && secondHexCharacter <= 'F') ||
+                    (secondHexCharacter >= 'a' && secondHexCharacter <= 'f');
+
+                if (!firstCharacterIsHex || !secondCharacterIsHex)
+                    continue;
+
+                bool firstCharacterNeedsNormalization = firstHexCharacter >= 'a' && firstHexCharacter <= 'f';
+                bool secondCharacterNeedsNormalization = secondHexCharacter >= 'a' && secondHexCharacter <= 'f';
+                if (!firstCharacterNeedsNormalization && !secondCharacterNeedsNormalization)
+                {
+                    i += 2;
+                    continue;
+                }
+
+                char[] normalizedValue = value.ToCharArray();
+                for (int j = i; j < normalizedValue.Length - 2; j++)
+                {
+                    if (normalizedValue[j] != '%')
+                        continue;
+
+                    firstHexCharacter = normalizedValue[j + 1];
+                    secondHexCharacter = normalizedValue[j + 2];
+                    firstCharacterIsHex =
+                        (firstHexCharacter >= '0' && firstHexCharacter <= '9') ||
+                        (firstHexCharacter >= 'A' && firstHexCharacter <= 'F') ||
+                        (firstHexCharacter >= 'a' && firstHexCharacter <= 'f');
+                    secondCharacterIsHex =
+                        (secondHexCharacter >= '0' && secondHexCharacter <= '9') ||
+                        (secondHexCharacter >= 'A' && secondHexCharacter <= 'F') ||
+                        (secondHexCharacter >= 'a' && secondHexCharacter <= 'f');
+
+                    if (!firstCharacterIsHex || !secondCharacterIsHex)
+                        continue;
+
+                    if (firstHexCharacter >= 'a' && firstHexCharacter <= 'f')
+                        normalizedValue[j + 1] = (char)(firstHexCharacter - ('a' - 'A'));
+
+                    if (secondHexCharacter >= 'a' && secondHexCharacter <= 'f')
+                        normalizedValue[j + 2] = (char)(secondHexCharacter - ('a' - 'A'));
+
+                    j += 2;
+                }
+
+                return new string(normalizedValue);
+            }
+
+            return value;
         }
 
         /// <summary>
