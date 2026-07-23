@@ -1297,14 +1297,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (!Uri.IsHexDigit(firstHexCharacter) || !Uri.IsHexDigit(secondHexCharacter))
                     continue;
 
-                if (IsLowerHex(firstHexCharacter) || IsLowerHex(secondHexCharacter))
+                if (char.IsLower(firstHexCharacter) || char.IsLower(secondHexCharacter))
                 {
                     normalizedValue ??= value.ToCharArray();
 
-                    if (IsLowerHex(firstHexCharacter))
+                    if (char.IsLower(firstHexCharacter))
                         normalizedValue[i + 1] = (char)(firstHexCharacter - ('a' - 'A'));
 
-                    if (IsLowerHex(secondHexCharacter))
+                    if (char.IsLower(secondHexCharacter))
                         normalizedValue[i + 2] = (char)(secondHexCharacter - ('a' - 'A'));
                 }
 
@@ -1313,8 +1313,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             return normalizedValue == null ? value : new string(normalizedValue);
         }
-
-        private static bool IsLowerHex(char character) => character >= 'a' && character <= 'f';
 
         /// <summary>
         /// Ensures that the <paramref name="uri"/> is <see cref="UriKind.Absolute"/>.
