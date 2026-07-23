@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -194,4 +195,12 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="claimValue">The claim value that was read and parsed from the reader.</param>
     /// <returns>True, if the claim value was read successfully; false otherwise.</returns>
     public delegate bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegmentType jwtSegmentType, string claimName, out object claimValue);
+
+    /// <summary>
+    /// Delegate to validate the 'act' claim and create actor's ClaimsIdentity.
+    /// </summary>
+    /// <param name="actClaim">The JSON element representing the 'act' claim.</param>
+    /// <param name="tokenValidationParameters"> Opitonal validation parameters if needed</param>
+    /// <returns>A ClaimsIdentity representing the actor.</returns>
+    public delegate ClaimsIdentity ActClaimRetriever(JsonElement actClaim, TokenValidationParameters tokenValidationParameters = null);
 }

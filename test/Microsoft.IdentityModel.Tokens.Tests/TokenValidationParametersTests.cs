@@ -15,12 +15,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 62;
+        int ExpectedPropertyCount = 65;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
         // Remove if/once we make TimeProvider public. As the GetSets() test will fail.
-        List<string> internalNonDelegateProperties = new() { "TimeProvider" };
+        List<string> internalNonDelegateProperties = new() { "TimeProvider", "ActorChainDepth" };
 
         [Fact]
         public void Publics()
@@ -198,6 +198,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
+                    new KeyValuePair<string, List<object>>("ActorClaimType", new List<object>{"act"}),
                     new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                     new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
@@ -320,6 +321,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.TransformBeforeSignatureValidation = ValidationDelegates.TransformBeforeSignatureValidation;
             validationParameters.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParameters.TypeValidator = ValidationDelegates.TypeValidator;
+            validationParameters.ActClaimRetriever = ValidationDelegates.ActClaimRetriever;
 
             validationParameters.ActorValidationParameters = new TokenValidationParameters();
             validationParameters.ClockSkew = TimeSpan.FromSeconds(42);
