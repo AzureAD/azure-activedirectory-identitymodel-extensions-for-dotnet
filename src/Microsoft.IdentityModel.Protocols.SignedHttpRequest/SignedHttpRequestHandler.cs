@@ -827,6 +827,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             var comparison = AppContextSwitches.UseCaseSensitivePClaimComparison ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
             if (!ArePClaimValuesEqual(expectedPClaimValue, pClaimValue, comparison))
             {
+                // ArePClaimValuesEqual already treats percent-triplet hex digits as case-insensitive, so a failure here is never caused by hex casing alone.
+                // Normalize both values to the canonical uppercase form only for the IDX23011 message, so it does not surface a hex-case difference the comparison deliberately ignored.
+                // Example: request path "/Foo%2Fbar" versus claim "/foo%2fbar" fails on the literal "F" vs "f"; without normalization the message would also show "%2F" vs "%2f" and point at a non-cause.
                 expectedPClaimValue = NormalizePercentEncodingHexCase(expectedPClaimValue);
                 pClaimValue = NormalizePercentEncodingHexCase(pClaimValue);
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P), expectedPClaimValue, pClaimValue)));
