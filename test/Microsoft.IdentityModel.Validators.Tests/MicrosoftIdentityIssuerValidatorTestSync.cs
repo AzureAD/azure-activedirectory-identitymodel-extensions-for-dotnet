@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading;
@@ -22,6 +23,16 @@ namespace Microsoft.IdentityModel.Validators.Tests
     public class MicrosoftIdentityIssuerValidatorTestSync
     {
         private readonly HttpClient _httpClient;
+
+        // URL markers and fixtures for the offline metadata-mocking tests below. The mock handler routes
+        // requests by these path fragments, and PlaceholderJwksUri is the jwks_uri advertised in the mock
+        // metadata so the key-set fetch is routed back to the handler. Issuer validation itself only reads
+        // the metadata issuer ({tenantid} template) and JwksUri.
+        private const string OpenIdConfigurationPath = "/.well-known/openid-configuration";
+        private const string DiscoveryPathMarker = "/discovery/";
+        private const string KeysPathMarker = "/keys";
+        private const string UnexpectedUrlMessagePrefix = "Unexpected URL in offline test: ";
+        private const string PlaceholderJwksUri = "https://example.com/discovery/keys";
 
         public MicrosoftIdentityIssuerValidatorTestSync()
         {
@@ -984,7 +995,35 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
 
             var authority = authorityUrlProvider(authorityVersion);
-            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient);
+
+            // Serve OpenID Connect metadata and a JWKS from in-memory fixtures through a mock HTTP handler
+            // instead of calling the live pre-production metadata endpoint, which is not reachable from CI
+            // runners. Every layer below the HTTP transport stays real, so the retriever, serializer, and
+            // key-set parsing run exactly as they would against the live document.
+            // The metadata issuer is the same {tenantid} template the live endpoint returns, so the validator
+            // still matches the token issuer through its normal tenant-substitution logic. Issuer validation
+            // only reads Issuer and JwksUri, so a minimal metadata document is sufficient.
+            string issuerTemplate = issuer.Replace(ValidatorConstants.TenantIdAsGuid, AadIssuerValidator.TenantIdTemplate);
+            string metadataJson = OpenIdConnectConfiguration.Write(
+                new OpenIdConnectConfiguration { Issuer = issuerTemplate, JwksUri = PlaceholderJwksUri });
+            string jwksJson = KeyingMaterial.AADJWKS;
+
+            var handler = new DelegateHttpMessageHandler((request, ct) =>
+            {
+                string url = request.RequestUri.AbsoluteUri;
+
+                if (url.EndsWith(OpenIdConfigurationPath, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(metadataJson));
+
+                if (url.IndexOf(DiscoveryPathMarker, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    url.EndsWith(KeysPathMarker, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(jwksJson));
+
+                throw new InvalidOperationException(UnexpectedUrlMessagePrefix + url);
+            });
+
+            using var mockHttpClient = new HttpClient(handler);
+            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, mockHttpClient);
 
             ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = ValidateIssuerSync(issuer, jwtSecurityToken, validator);
             var actualIssuer = validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters());
@@ -995,6 +1034,52 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 #endif
+
+        // Negative coverage for the metadata-fetch-failure path. When the mock handler rejects the discovery
+        // request (for example, a 403), the validator surfaces IDX40001. This deterministically exercises
+        // HttpDocumentRetriever's failure path and AadIssuerValidator's catch that maps the fetch failure to
+        // IDX40001, which previously ran only when the live endpoint happened to fail.
+        [Fact]
+        public void Validate_WithoutConfigurationProvider_MetadataFetchForbidden_ThrowsIDX40001()
+        {
+            var context = new CompareContext();
+            var issuer = ValidatorConstants.AadIssuerPPE;
+            var authority = ValidatorConstants.AuthorityCommonTenantWithV2PPE;
+
+            // Build a token whose issuer and tenant id match the authority, so validation gets past the
+            // issuer/tenant checks and reaches the on-demand metadata fetch.
+            var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
+            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
+            var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
+
+            // Reject the OpenID Connect discovery request with 403 to simulate an unreachable metadata
+            // endpoint. Validation fails before the JWKS is requested, so any other URL is unexpected here.
+            var handler = new DelegateHttpMessageHandler((request, ct) =>
+            {
+                string url = request.RequestUri.AbsoluteUri;
+
+                if (url.EndsWith(OpenIdConfigurationPath, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(string.Empty, HttpStatusCode.Forbidden));
+
+                throw new InvalidOperationException(UnexpectedUrlMessagePrefix + url);
+            });
+
+            using var mockHttpClient = new HttpClient(handler);
+            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, mockHttpClient);
+
+            // The failed metadata fetch leaves the validator without issuer metadata, so it reports IDX40001.
+            var expectedErrorMessage = string.Format(
+                CultureInfo.InvariantCulture,
+                LogMessages.IDX40001,
+                issuer);
+
+            // Validate surfaces the failure as SecurityTokenInvalidIssuerException carrying the IDX40001 message.
+            var exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() =>
+                validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters()));
+
+            IdentityComparer.AreEqual(expectedErrorMessage, exception.Message, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
 
         [Fact]
         public void Validate_UsesLKGWithConfigurationProvider()

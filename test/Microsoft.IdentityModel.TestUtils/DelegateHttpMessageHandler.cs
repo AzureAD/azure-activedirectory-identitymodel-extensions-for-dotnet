@@ -29,5 +29,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return await _callback(request, cancellationToken).ConfigureAwait(false);
         }
+
+#if NET5_0_OR_GREATER
+        /// <inheritdoc />
+        protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return _callback(request, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+#endif
     }
 }
