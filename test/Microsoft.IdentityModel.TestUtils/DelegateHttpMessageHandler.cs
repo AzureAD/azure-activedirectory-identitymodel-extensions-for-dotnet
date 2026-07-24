@@ -34,7 +34,9 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <inheritdoc />
         protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            throw new InvalidOperationException("SYNC_SEND_MARKER_PROOF");
+            // The registered callbacks return already-completed tasks (e.g. Task.FromResult), so retrieving
+            // the result here is a synchronous operation used to exercise the sync HTTP path in tests.
+            return _callback(request, cancellationToken).GetAwaiter().GetResult();
         }
 #endif
     }
