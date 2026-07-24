@@ -130,12 +130,18 @@ namespace Microsoft.IdentityModel.Protocols
 
                 var httpClient = _httpClient ?? _defaultHttpClient;
                 var uri = new Uri(address, UriKind.RelativeOrAbsolute);
-                response = SendAndRetryOnNetworkError(httpClient, uri, cancel);
+                response = SendAndRetryOnNetworkError(httpClient, uri, cancel, out string responseContent);
 
-                // ReadAsStream() is synchronous in .NET 5+, compared to the original async method: await response.Content.ReadAsStringAsync()
-                using var stream = response.Content.ReadAsStream();
-                using var reader = new StreamReader(stream);
-                var responseContent = reader.ReadToEnd();
+                // If SendAndRetryOnNetworkError already read the body (non-retryable failure), reuse it.
+                // HttpContent.ReadAsStream() returns a single cached stream instance, so reading it again
+                // after it was consumed/disposed would fail; read here only when it hasn't been read yet.
+                if (responseContent is null)
+                {
+                    // ReadAsStream() is synchronous in .NET 5+, compared to the original async method: await response.Content.ReadAsStringAsync()
+                    using var stream = response.Content.ReadAsStream();
+                    using var reader = new StreamReader(stream);
+                    responseContent = reader.ReadToEnd();
+                }
 
                 if (response.IsSuccessStatusCode)
                     return responseContent;
@@ -163,8 +169,9 @@ namespace Microsoft.IdentityModel.Protocols
             throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
         }
 
-        private HttpResponseMessage SendAndRetryOnNetworkError(HttpClient httpClient, Uri uri, CancellationToken cancel)
+        private HttpResponseMessage SendAndRetryOnNetworkError(HttpClient httpClient, Uri uri, CancellationToken cancel, out string responseContent)
         {
+            responseContent = null;
             int maxAttempt = 2;
             HttpResponseMessage response = null;
             for (int i = 1; i <= maxAttempt; i++)
@@ -194,14 +201,15 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                     else // if the exception type does not indicate the need to retry we should break
                     {
+                        // Read the body exactly once here so the caller can reuse it. HttpContent.ReadAsStream()
+                        // returns a single cached stream instance; reading and disposing it here and then again in
+                        // the caller would fail, dropping the HTTP status code from the resulting exception.
+                        using (var stream = response.Content.ReadAsStream())
+                        using (var reader = new StreamReader(stream))
+                            responseContent = reader.ReadToEnd();
+
                         if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        {
-                            // Read content synchronously for logging, this is the synchronous version of await response.Content.ReadAsStringAsync()
-                            using var stream = response.Content.ReadAsStream();
-                            using var reader = new StreamReader(stream);
-                            var content = reader.ReadToEnd();
-                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX20809, message.RequestUri, response.StatusCode, content));
-                        }
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX20809, message.RequestUri, response.StatusCode, responseContent));
 
                         break;
                     }

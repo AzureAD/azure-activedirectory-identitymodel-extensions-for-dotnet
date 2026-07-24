@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <inheritdoc />
         protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            return _callback(request, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+            throw new InvalidOperationException("SYNC_SEND_MARKER_PROOF");
         }
 #endif
     }
