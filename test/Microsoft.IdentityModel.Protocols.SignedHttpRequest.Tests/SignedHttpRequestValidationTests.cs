@@ -380,32 +380,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Assert.Contains("IDX23011", exception.Message);
         }
 
-        [Fact]
-        [ResetAppContextSwitches]
-        public void ValidatePClaim_NormalizesPercentEncodingHexCase_WhenSwitchEnabled()
-        {
-            // Arrange
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, true);
-            var handler = new SignedHttpRequestHandler();
-            var theoryData = new ValidateSignedHttpRequestTheoryData
-            {
-                HttpRequestUri = new Uri("https://www.contoso.com/foo%2Fbar"),
-                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
-            };
-            var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
-
-            // Act
-            var exception = Record.Exception(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
-
-            // Assert
-            Assert.Null(exception);
-        }
-
         [Theory]
         [InlineData("/path", "/path", true, true)]
         [InlineData("/path", "/path", false, true)]
         [InlineData("/foo%2Fbar", "/foo%2Fbar", true, true)]
         [InlineData("/foo%2Fbar", "/foo%2fbar", true, true)]
+        [InlineData("/foo%2Fbar%ABbaz", "/foo%2fbar%abbaz", true, true)]
         [InlineData("/foo%2fbar", "/foo%2fbar", false, true)]
         [InlineData("/caf%C3%A9", "/caf%c3%a9", true, true)]
         [InlineData("/caf%C3%A9", "/caf%c3%a9", false, true)]
@@ -415,6 +395,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [InlineData("/foo%25", "/foo%", true, false)]
         [InlineData("/foo%25X", "/foo%X", false, false)]
         [InlineData("/foo%252G", "/foo%2G", true, false)]
+        [InlineData("/foo%BAr", "/foo%bar", true, true)]
+        [InlineData("/foo%25bar", "/foo%bar", true, false)]
+        [InlineData("/foo%2Fbar", "/foo/bar", true, false)]
+        [InlineData("/fooABC", "/fooAB%", false, false)]
+        [InlineData("/fooABCD", "/fooAB%2", false, false)]
         [ResetAppContextSwitches]
         public void ValidatePClaim_ComparisonMatrix(string requestPath, string pClaim, bool useCaseSensitiveComparison, bool expectedValid)
         {
@@ -460,6 +445,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             // Assert
             Assert.Contains("Expected%2FPath", exception.Message);
             Assert.Contains("Actual%2APath", exception.Message);
+            Assert.DoesNotContain("Expected%2fPath", exception.Message);
+            Assert.DoesNotContain("Actual%2aPath", exception.Message);
         }
 
         public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidatePClaimTheoryData

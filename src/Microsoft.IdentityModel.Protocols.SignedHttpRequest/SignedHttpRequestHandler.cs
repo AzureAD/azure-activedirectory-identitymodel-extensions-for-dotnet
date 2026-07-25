@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
@@ -26,6 +27,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <remarks>The handler implementation is based on 'A Method for Signing HTTP Requests for OAuth' specification.</remarks>
     public class SignedHttpRequestHandler
     {
+        private const string _percentEncodedTripletPattern = "%[0-9A-Fa-f]{2}";
+
         // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2
         // "Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character."
         private readonly string _newlineSeparator = "\n";
@@ -825,13 +828,26 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // URI path components are case-sensitive per RFC 3986 section 3.3, so the comparison is ordinal (case-sensitive) by default.
             // The AppContext switch allows a consumer to restore the legacy case-insensitive comparison during transition.
             var comparison = AppContextSwitches.UseCaseSensitivePClaimComparison ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-            if (!ArePClaimValuesEqual(expectedPClaimValue, pClaimValue, comparison))
+            // Fast path: identical values such as "/path" avoid normalization.
+            if (!string.Equals(expectedPClaimValue, pClaimValue, comparison))
             {
-                // ArePClaimValuesEqual already treats percent-triplet hex digits as case-insensitive, so a failure here is never caused by hex casing alone.
-                // Normalize both values to the canonical uppercase form only for the IDX23011 message, so it does not surface a hex-case difference the comparison deliberately ignored.
-                // Example: request path "/Foo%2Fbar" versus claim "/foo%2fbar" fails on the literal "F" vs "f"; without normalization the message would also show "%2F" vs "%2f" and point at a non-cause.
+                // Only equal-length ordinal values with '%' on both sides can differ solely by hex case, such as "%2F" and "%2f".
+                bool mayMatchAfterNormalization =
+                    comparison == StringComparison.Ordinal &&
+                    expectedPClaimValue.Length == pClaimValue.Length &&
+                    expectedPClaimValue.IndexOf('%') >= 0 &&
+                    pClaimValue.IndexOf('%') >= 0;
+
+                // Canonicalize valid triplets for comparison and IDX23011, such as "%2f" to "%2F".
                 expectedPClaimValue = NormalizePercentEncodingHexCase(expectedPClaimValue);
                 pClaimValue = NormalizePercentEncodingHexCase(pClaimValue);
+
+                if (mayMatchAfterNormalization &&
+                    string.Equals(expectedPClaimValue, pClaimValue, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P), expectedPClaimValue, pClaimValue)));
             }
         }
@@ -1291,81 +1307,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             return Base64UrlEncoder.Encode(hashedBytes);
         }
 
-        private static bool ArePClaimValuesEqual(string expectedValue, string actualValue, StringComparison comparison)
-        {
-            // Percent-encoding normalization does not change string length.
-            if (expectedValue.Length != actualValue.Length)
-                return false;
-
-            int comparisonStartIndex = 0;
-            for (int i = 0; i + 2 < expectedValue.Length; i++)
-            {
-                if (expectedValue[i] != '%' || actualValue[i] != '%')
-                    continue;
-
-                bool expectedHasValidHexPair = Uri.IsHexDigit(expectedValue[i + 1]) && Uri.IsHexDigit(expectedValue[i + 2]);
-                bool actualHasValidHexPair = Uri.IsHexDigit(actualValue[i + 1]) && Uri.IsHexDigit(actualValue[i + 2]);
-
-                // Only aligned, valid percent-encoded triplets need special handling.
-                if (!expectedHasValidHexPair || !actualHasValidHexPair)
-                    continue;
-
-                // Compare the literal path segment before this triplet using the configured case policy.
-                int literalSegmentLength = i - comparisonStartIndex;
-                if (string.Compare(expectedValue, comparisonStartIndex, actualValue, comparisonStartIndex, literalSegmentLength, comparison) != 0)
-                    return false;
-
-                char expectedFirstHexCharacter = expectedValue[i + 1];
-                char expectedSecondHexCharacter = expectedValue[i + 2];
-                char actualFirstHexCharacter = actualValue[i + 1];
-                char actualSecondHexCharacter = actualValue[i + 2];
-
-                // Hex digits in a valid percent-encoded triplet are equivalent regardless of case.
-                bool firstHexCharacterMatches = expectedFirstHexCharacter == actualFirstHexCharacter ||
-                    char.ToUpperInvariant(expectedFirstHexCharacter) == char.ToUpperInvariant(actualFirstHexCharacter);
-                bool secondHexCharacterMatches = expectedSecondHexCharacter == actualSecondHexCharacter ||
-                    char.ToUpperInvariant(expectedSecondHexCharacter) == char.ToUpperInvariant(actualSecondHexCharacter);
-                if (!firstHexCharacterMatches || !secondHexCharacterMatches)
-                    return false;
-
-                // Skip the two hex digits; the loop increment advances past the complete triplet.
-                i += 2;
-                comparisonStartIndex = i + 1;
-            }
-
-            // Compare the remaining literal path segment after the final triplet.
-            int remainingSegmentLength = expectedValue.Length - comparisonStartIndex;
-            return string.Compare(expectedValue, comparisonStartIndex, actualValue, comparisonStartIndex, remainingSegmentLength, comparison) == 0;
-        }
-
         private static string NormalizePercentEncodingHexCase(string value)
         {
-            char[] normalizedValue = null;
-            for (int i = 0; i + 2 < value.Length; i++)
-            {
-                if (value[i] != '%')
-                    continue;
-
-                char firstHexCharacter = value[i + 1];
-                char secondHexCharacter = value[i + 2];
-                if (!Uri.IsHexDigit(firstHexCharacter) || !Uri.IsHexDigit(secondHexCharacter))
-                    continue;
-
-                if (char.IsLower(firstHexCharacter) || char.IsLower(secondHexCharacter))
-                {
-                    normalizedValue ??= value.ToCharArray();
-
-                    if (char.IsLower(firstHexCharacter))
-                        normalizedValue[i + 1] = (char)(firstHexCharacter - ('a' - 'A'));
-
-                    if (char.IsLower(secondHexCharacter))
-                        normalizedValue[i + 2] = (char)(secondHexCharacter - ('a' - 'A'));
-                }
-
-                i += 2;
-            }
-
-            return normalizedValue == null ? value : new string(normalizedValue);
+            return Regex.Replace(
+                value,
+                _percentEncodedTripletPattern,
+                static match => match.Value.ToUpperInvariant(),
+                RegexOptions.CultureInvariant);
         }
 
         /// <summary>
