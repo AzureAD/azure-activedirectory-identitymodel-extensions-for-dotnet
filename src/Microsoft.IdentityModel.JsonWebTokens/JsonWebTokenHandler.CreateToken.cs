@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -1332,9 +1333,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
-            // keep track of exceptions thrown, keys that were tried
-            StringBuilder exceptionStrings = null;
-            StringBuilder keysAttempted = null;
+
+            // Pre-generate a placeholder key used as a fallback when an unwrap call
+            // does not yield a usable key, so that downstream processing follows a
+            // single uniform path regardless of which key was tried.
+            int expectedCekSizeInBytes = GetExpectedCekSizeInBytes(jwtToken.Enc);
+            byte[] fallbackCek = new byte[expectedCekSizeInBytes];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+                rng.GetBytes(fallbackCek);
+
             if (keys != null)
             {
                 foreach (var key in keys)
@@ -1387,22 +1394,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                     catch (Exception ex)
                     {
-                        (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
-                    }
+                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                            LogHelper.LogWarning(ex.ToString());
 
-                    (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+                        // Use the placeholder key so the downstream code path is the
+                        // same regardless of whether unwrap succeeded.
+                        unwrappedKeys.Add(new SymmetricSecurityKey(fallbackCek));
+                    }
                 }
             }
-            if (unwrappedKeys.Count > 0 || exceptionStrings is null)
-                return unwrappedKeys;
-            else
-                throw LogHelper.LogExceptionMessage(
-                    new SecurityTokenKeyWrapException(
-                        LogHelper.FormatInvariant(
-                            TokenLogMessages.IDX10618,
-                            LogHelper.MarkAsNonPII((object)keysAttempted ?? ""),
-                            LogHelper.MarkAsNonPII((object)exceptionStrings ?? ""),
-                            jwtToken)));
+
+            return unwrappedKeys;
+        }
+
+        /// <summary>
+        /// Returns the expected Content Encryption Key (CEK) size in bytes for
+        /// the given content encryption algorithm (JWE "enc" header value).
+        /// </summary>
+        private static int GetExpectedCekSizeInBytes(string encAlgorithm)
+        {
+            // CBC algorithms use a composite key (AES + HMAC), so CEK is double the AES key size.
+            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 32;
+            if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 48;
+            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 64;
+
+            // GCM algorithms use a single AES key.
+            if (SecurityAlgorithms.Aes128Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 16;
+            if (SecurityAlgorithms.Aes192Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 24;
+            if (SecurityAlgorithms.Aes256Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 32;
+
+            // Default for unknown algorithms.
+            return 32;
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -1888,9 +1889,15 @@ namespace System.IdentityModel.Tokens.Jwt
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
-            // keep track of exceptions thrown, keys that were tried
-            var exceptionStrings = new StringBuilder();
-            var keysAttempted = new StringBuilder();
+
+            // Pre-generate a placeholder key used as a fallback when an unwrap call
+            // does not yield a usable key, so that downstream processing follows a
+            // single uniform path regardless of which key was tried.
+            int expectedCekSizeInBytes = GetExpectedCekSizeInBytes(jwtToken.Header.Enc);
+            byte[] fallbackCek = new byte[expectedCekSizeInBytes];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+                rng.GetBytes(fallbackCek);
+
             foreach (var key in keys)
             {
                 try
@@ -1940,15 +1947,39 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 catch (Exception ex)
                 {
-                    exceptionStrings.AppendLine(ex.ToString());
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(ex.ToString());
+
+                    // Use the placeholder key so the downstream code path is the
+                    // same regardless of whether unwrap succeeded.
+                    unwrappedKeys.Add(new SymmetricSecurityKey(fallbackCek));
                 }
-                keysAttempted.AppendLine(key.KeyId);
             }
 
-            if (unwrappedKeys.Count > 0 || exceptionStrings.Length == 0)
-                return unwrappedKeys;
-            else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, LogHelper.MarkAsNonPII(keysAttempted.ToString()), exceptionStrings, jwtToken)));
+            return unwrappedKeys;
+        }
+
+        /// <summary>
+        /// Returns the expected Content Encryption Key (CEK) size in bytes for
+        /// the given content encryption algorithm (JWE "enc" header value).
+        /// </summary>
+        private static int GetExpectedCekSizeInBytes(string encAlgorithm)
+        {
+            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 32;
+            if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 48;
+            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 64;
+
+            if (SecurityAlgorithms.Aes128Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 16;
+            if (SecurityAlgorithms.Aes192Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 24;
+            if (SecurityAlgorithms.Aes256Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 32;
+
+            return 32;
         }
 
         private static byte[] GetSymmetricSecurityKey(SecurityKey key)
