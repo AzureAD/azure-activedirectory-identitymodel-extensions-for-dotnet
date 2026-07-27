@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         private IAlgorithmValidator _algorithmValidator = new DefaultAlgorithmValidator();
         private IAudienceValidator _audienceValidator = new DefaultAudienceValidator();
         private IIssuerValidator _issuerValidatorAsync = new DefaultIssuerValidator();
+        private IIssuerValidatorSync _issuerValidatorSync = new DefaultIssuerValidator();
         private ILifetimeValidator _lifetimeValidator = new DefaultLifetimeValidator();
         private ISignatureValidator? _signatureValidator;
         private ITokenReplayValidator _tokenReplayValidator = new DefaultTokenReplayValidator();
@@ -79,6 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             _signingKeys = other.SigningKeys;
             SignatureKeyValidator = other.SignatureKeyValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
+            IssuerValidatorSync = other.IssuerValidatorSync;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
             NameClaimType = other.NameClaimType;
@@ -326,6 +328,17 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         {
             get { return _issuerValidatorAsync; }
             set { _issuerValidatorAsync = value ?? throw new ArgumentNullException(nameof(value), "IssuerValidatorAsync cannot be set as null."); }
+        }
+
+        /// <summary>
+        /// Allows overriding the validator that will be used to synchronously validate the issuer of the token.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
+        /// <returns>The <see cref="IIssuerValidatorSync"/> used to synchronously validate the issuer of a token</returns>
+        public IIssuerValidatorSync IssuerValidatorSync
+        {
+            get { return _issuerValidatorSync; }
+            set { _issuerValidatorSync = value ?? throw new ArgumentNullException(nameof(value), "IssuerValidatorSync cannot be set as null."); }
         }
 
         /// <summary>

@@ -141,6 +141,8 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureKeyVal
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.SignatureKeyValidator.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerValidatorAsync.get -> Microsoft.IdentityModel.Tokens.Experimental.IIssuerValidator!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerValidatorAsync.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerValidatorSync.get -> Microsoft.IdentityModel.Tokens.Experimental.IIssuerValidatorSync!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IssuerValidatorSync.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.LifetimeValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.ILifetimeValidator!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.LifetimeValidator.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.LogTokenId.get -> bool

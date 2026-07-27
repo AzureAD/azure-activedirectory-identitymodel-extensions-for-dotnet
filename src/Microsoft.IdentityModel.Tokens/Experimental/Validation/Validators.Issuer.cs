@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 ValidationResult<ValidatedIssuer, ValidationError> result =
-                    ((IIssuerValidatorSync)validationParameters.IssuerValidatorAsync).ValidateIssuerSync(
+                    validationParameters.IssuerValidatorSync.ValidateIssuerSync(
                         issuer,
                         securityToken,
                         validationParameters,
