@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <remarks>The handler implementation is based on 'A Method for Signing HTTP Requests for OAuth' specification.</remarks>
     public class SignedHttpRequestHandler
     {
-        private const string _percentEncodedTripletPattern = "%[0-9A-Fa-f]{2}";
+        private const string PercentEncodedTripletPattern = "%[0-9A-Fa-f]{2}";
 
         // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2
         // "Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character."
@@ -838,7 +838,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     expectedPClaimValue.IndexOf('%') >= 0 &&
                     pClaimValue.IndexOf('%') >= 0;
 
-                // Canonicalize valid triplets for comparison and IDX23011, such as "%2f" to "%2F".
+                // A failure cannot be caused only by percent-triplet hex casing because values such as
+                // "foo%2Fbar" and "foo%2fbar" compare equal after normalization. Normalize both
+                // values before inserting them into the IDX23011 error message. For example,
+                // "foo%2fbar" and "goo%2Fbar" are logged as "foo%2Fbar" and "goo%2Fbar".
+                // This removes the irrelevant "%2f" versus "%2F" difference and makes the real
+                // "f" versus "g" mismatch clear.
                 expectedPClaimValue = NormalizePercentEncodingHexCase(expectedPClaimValue);
                 pClaimValue = NormalizePercentEncodingHexCase(pClaimValue);
 
@@ -1307,11 +1312,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             return Base64UrlEncoder.Encode(hashedBytes);
         }
 
+        // Uppercases hexadecimal letters only within valid percent-encoded triplets.
+        // It does not URL-decode values or modify malformed sequences.
+        // For example, "foo%2fbar%zz" becomes "foo%2Fbar%zz".
         private static string NormalizePercentEncodingHexCase(string value)
         {
             return Regex.Replace(
                 value,
-                _percentEncodedTripletPattern,
+                PercentEncodedTripletPattern,
                 static match => match.Value.ToUpperInvariant(),
                 RegexOptions.CultureInvariant);
         }

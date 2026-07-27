@@ -257,6 +257,23 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             audiences1,
                             [audience2])
                     },
+                    new AudienceValidationTheoryData("CaseDiffers_IgnoreCaseDefaultNotMatched")
+                    {
+                        TokenAudiences = audiences1,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
+                        ValidationParameters = new ValidationParameters(),
+                        ValidAudiences = [audience1.ToUpperInvariant()],
+                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
+                        OperationResult = new AudienceValidationError(
+                            new MessageDetail(
+                                LogMessages.IDX10215,
+                                LogHelper.MarkAsNonPII(commaAudience1),
+                                LogHelper.MarkAsNonPII(audience1.ToUpperInvariant())),
+                            AudienceValidationFailure.AudienceDidNotMatch,
+                            null,
+                            audiences1,
+                            [audience1.ToUpperInvariant()])
+                    },
                     new AudienceValidationTheoryData("AudiencesValidAudienceWithSlashNotMatched")
                     {
                         TokenAudiences = audiences1,
@@ -540,6 +557,21 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ValidationParameters = new ValidationParameters(),
                         ValidAudiences = [audience1],
                         OperationResult = audience1Slash
+                    },
+                    new AudienceValidationTheoryData("CaseDiffers_IgnoreCaseTrueMatched")
+                    {
+                        TokenAudiences = audiences1,
+                        ValidationParameters = new ValidationParameters{ IgnoreCaseWhenValidatingAudience = true },
+                        ValidAudiences = [audience1.ToUpperInvariant()],
+                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
+                        OperationResult = audience1
+                    },
+                    new AudienceValidationTheoryData("CaseDiffersAndSlash_IgnoreCaseTrueMatched")
+                    {
+                        TokenAudiences = audiences1,
+                        ValidationParameters = new ValidationParameters{ IgnoreCaseWhenValidatingAudience = true },
+                        ValidAudiences = [audience1.ToUpperInvariant() + "/"],
+                        OperationResult = audience1
                     }
                 };
             }
