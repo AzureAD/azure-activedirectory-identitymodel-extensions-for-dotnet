@@ -27,9 +27,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         private static readonly SecurityTokenDescriptor s_emptyTokenDescriptor = new();
 
-        // The actor is always serialized/deserialized under the RFC 8693 "act" claim.
-        // This is intentionally not configurable to avoid actor claims shadowing
-        // registered claims (e.g. iss/aud/exp). Legacy "actort" is honored on read only.
+        // The actor is always serialized under the RFC 8693 "act" claim. The claim name
+        // is intentionally fixed (not configurable) to avoid actor claims shadowing
+        // registered claims such as iss/aud/exp.
         internal const string ActClaimType = "act";
 
         /// <summary>

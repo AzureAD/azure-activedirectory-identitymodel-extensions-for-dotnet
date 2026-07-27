@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'act' claim");
                 // Verify the actor object directly
                 var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
                 Assert.Equal(JsonValueKind.Object, actorObject.ValueKind);
@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists
-                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'act' claim");
 
                 // Verify the actor object
                 var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
