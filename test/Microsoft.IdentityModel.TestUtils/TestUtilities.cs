@@ -49,6 +49,7 @@ namespace Microsoft.IdentityModel.TestUtils
             validationParameters.DebugId = tokenValidationParameters.DebugId;
             validationParameters.IncludeTokenOnFailedValidation = tokenValidationParameters.IncludeTokenOnFailedValidation;
             validationParameters.IgnoreTrailingSlashWhenValidatingAudience = tokenValidationParameters.IgnoreTrailingSlashWhenValidatingAudience;
+            validationParameters.IgnoreCaseWhenValidatingAudience = tokenValidationParameters.IgnoreCaseWhenValidatingAudience;
 
             //validationParameters.IssuerSigningKeyResolver = tokenValidationParameters.IssuerSigningKeyResolver;
             if (tokenValidationParameters.IssuerSigningKeys != null)
