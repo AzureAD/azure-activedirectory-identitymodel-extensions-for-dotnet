@@ -75,6 +75,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             DebugId = other.DebugId;
             IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
+            IgnoreCaseWhenValidatingAudience = other.IgnoreCaseWhenValidatingAudience;
             SignatureKeyResolver = other.SignatureKeyResolver;
             _signingKeys = other.SigningKeys;
             SignatureKeyValidator = other.SignatureKeyValidator;
@@ -264,6 +265,13 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// </summary>
         [DefaultValue(true)]
         public bool IgnoreTrailingSlashWhenValidatingAudience { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a boolean that controls if case is ignored when validating the audience.
+        /// The default is <c>false</c>, meaning audience comparison is case-sensitive (ordinal).
+        /// </summary>
+        [DefaultValue(false)]
+        public bool IgnoreCaseWhenValidatingAudience { get; set; }
 
         /// <summary>
         /// Gets or sets the flag that indicates whether to include the <see cref="SecurityToken"/> when the validation fails.
