@@ -188,9 +188,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             var envelopeReader = new EnvelopedSignatureReader(reader) { Serializer = DSigSerializer };
             var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
-            t_currentDepth++;
             try
             {
+                t_currentDepth++;
                 if (t_currentDepth >= MaxDepth)
                     throw LogReadException(
                         LogMessages.IDX13111,

@@ -201,9 +201,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Assertion, SamlConstants.Namespace);
 
-            t_currentDepth++;
             try
             {
+                t_currentDepth++;
                 if (t_currentDepth >= MaxDepth)
                     throw LogReadException(
                         LogMessages.IDX11138,

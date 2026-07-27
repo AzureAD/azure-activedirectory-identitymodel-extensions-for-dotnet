@@ -1979,7 +1979,9 @@ namespace System.IdentityModel.Tokens.Jwt
             if (SecurityAlgorithms.Aes256Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
                 return 32;
 
-            return 32;
+            // Default for unknown algorithms — use maximum known size (64) so the
+            // fallback key is never too small for any known algorithm.
+            return 64;
         }
 
         private static byte[] GetSymmetricSecurityKey(SecurityKey key)

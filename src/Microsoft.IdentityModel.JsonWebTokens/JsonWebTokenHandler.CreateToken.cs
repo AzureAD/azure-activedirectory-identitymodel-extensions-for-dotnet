@@ -1429,8 +1429,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (SecurityAlgorithms.Aes256Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
                 return 32;
 
-            // Default for unknown algorithms.
-            return 32;
+            // Default for unknown algorithms — use maximum known size (64) so the
+            // fallback key is never too small for any known algorithm.
+            return 64;
         }
     }
 }
