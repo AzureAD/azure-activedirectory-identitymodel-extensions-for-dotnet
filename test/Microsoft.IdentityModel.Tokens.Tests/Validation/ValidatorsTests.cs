@@ -287,6 +287,39 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         {
                             ValidAudiences = new List<string>()  // Empty list should still return false through optimized path
                         }
+                    },
+                    new AudienceValidationTheoryData("CaseDiffersIgnoreCaseDefaultNotMatched")
+                    {
+                        Audiences = audiences1,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                        TokenValidationParameters = new TokenValidationParameters{ ValidAudience = audience1.ToUpperInvariant() }
+                    },
+                    new AudienceValidationTheoryData("CaseDiffersIgnoreCaseFalseNotMatched")
+                    {
+                        Audiences = audiences1,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                        TokenValidationParameters = new TokenValidationParameters{ IgnoreCaseWhenValidatingAudience = false, ValidAudience = audience1.ToUpperInvariant() }
+                    },
+                    new AudienceValidationTheoryData("CaseDiffersIgnoreCaseTrueMatched")
+                    {
+                        Audiences = audiences1,
+                        TokenValidationParameters = new TokenValidationParameters{ IgnoreCaseWhenValidatingAudience = true, ValidAudience = audience1.ToUpperInvariant() }
+                    },
+                    new AudienceValidationTheoryData("CaseDiffersInValidAudiencesIgnoreCaseTrueMatched")
+                    {
+                        Audiences = audiences1,
+                        TokenValidationParameters = new TokenValidationParameters{ IgnoreCaseWhenValidatingAudience = true, ValidAudiences = new List<string> { "", audience1.ToUpperInvariant() } }
+                    },
+                    new AudienceValidationTheoryData("CaseDiffersAndTrailingSlashIgnoreCaseTrueMatched")
+                    {
+                        Audiences = audiences1,
+                        TokenValidationParameters = new TokenValidationParameters{ IgnoreCaseWhenValidatingAudience = true, ValidAudience = audience1.ToUpperInvariant() + "/" }
+                    },
+                    new AudienceValidationTheoryData("CaseDiffersAndTrailingSlashIgnoreTrailingSlashFalseNotMatched")
+                    {
+                        Audiences = audiences1,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                        TokenValidationParameters = new TokenValidationParameters{ IgnoreCaseWhenValidatingAudience = true, IgnoreTrailingSlashWhenValidatingAudience = false, ValidAudience = audience1.ToUpperInvariant() + "/" }
                     }
                 };
             }

@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 62;
+        int ExpectedPropertyCount = 63;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
@@ -205,6 +205,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new KeyValuePair<string, List<object>>("CryptoProviderFactory", new List<object>{(CryptoProviderFactory)null, new CryptoProviderFactory(), new CryptoProviderFactory() }),
                     new KeyValuePair<string, List<object>>("DebugId", new List<object>{(string)null, "DebugId", "DebugId" }),
                     new KeyValuePair<string, List<object>>("IgnoreTrailingSlashWhenValidatingAudience",  new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("IgnoreCaseWhenValidatingAudience",  new List<object>{false, true, false}),
                     new KeyValuePair<string, List<object>>("IncludeTokenOnFailedValidation",  new List<object>{false, true, true}),
                     new KeyValuePair<string, List<object>>("IsClone",  new List<object>{ false, true, true }),
                     new KeyValuePair<string, List<object>>("InstancePropertyBag",  new List<object>{ new Dictionary<string, object>(), new Dictionary<string, object>(), new Dictionary<string, object>()}),
