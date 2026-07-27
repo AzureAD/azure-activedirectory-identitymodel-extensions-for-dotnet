@@ -10,7 +10,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
@@ -27,8 +26,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <remarks>The handler implementation is based on 'A Method for Signing HTTP Requests for OAuth' specification.</remarks>
     public class SignedHttpRequestHandler
     {
-        private const string PercentEncodedTripletPattern = "%[0-9A-Fa-f]{2}";
-
         // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2
         // "Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character."
         private readonly string _newlineSeparator = "\n";
@@ -821,40 +818,26 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.P, out string pClaimValue) || pClaimValue == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P))));
 
-            // relax comparison by trimming start and ending forward slashes
-            pClaimValue = pClaimValue.Trim('/');
-            var expectedPClaimValue = httpRequestUri.AbsolutePath.Trim('/');
+            // Relax comparison by trimming start and ending forward slashes without allocating new strings.
+            ReadOnlySpan<char> pClaimValueSpan = pClaimValue.AsSpan().Trim('/');
+            ReadOnlySpan<char> expectedPClaimValueSpan = httpRequestUri.AbsolutePath.AsSpan().Trim('/');
 
             // URI path components are case-sensitive per RFC 3986 section 3.3, so the comparison is ordinal (case-sensitive) by default.
             // The AppContext switch allows a consumer to restore the legacy case-insensitive comparison during transition.
             var comparison = AppContextSwitches.UseCaseSensitivePClaimComparison ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-            // Fast path: identical values such as "/path" avoid normalization.
-            if (!string.Equals(expectedPClaimValue, pClaimValue, comparison))
-            {
-                // Only equal-length ordinal values with '%' on both sides can differ solely by hex case, such as "%2F" and "%2f".
-                bool mayMatchAfterNormalization =
-                    comparison == StringComparison.Ordinal &&
-                    expectedPClaimValue.Length == pClaimValue.Length &&
-                    expectedPClaimValue.IndexOf('%') >= 0 &&
-                    pClaimValue.IndexOf('%') >= 0;
+            if (expectedPClaimValueSpan.Equals(pClaimValueSpan, comparison))
+                return;
 
-                // A failure cannot be caused only by percent-triplet hex casing because values such as
-                // "foo%2Fbar" and "foo%2fbar" compare equal after normalization. Normalize both
-                // values before inserting them into the IDX23011 error message. For example,
-                // "foo%2fbar" and "goo%2Fbar" are logged as "foo%2Fbar" and "goo%2Fbar".
-                // This removes the irrelevant "%2f" versus "%2F" difference and makes the real
-                // "f" versus "g" mismatch clear.
-                expectedPClaimValue = NormalizePercentEncodingHexCase(expectedPClaimValue);
-                pClaimValue = NormalizePercentEncodingHexCase(pClaimValue);
+            // RFC 3986 requires an additional check because ordinal comparison distinguishes equivalent percent-encoded hexadecimal casing.
+            if (comparison == StringComparison.Ordinal &&
+                ArePClaimValuesEqual(expectedPClaimValueSpan, pClaimValueSpan))
+                return;
 
-                if (mayMatchAfterNormalization &&
-                    string.Equals(expectedPClaimValue, pClaimValue, StringComparison.Ordinal))
-                {
-                    return;
-                }
-
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P), expectedPClaimValue, pClaimValue)));
-            }
+            throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(
+                LogMessages.IDX23011,
+                LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P),
+                expectedPClaimValueSpan.ToString(),
+                pClaimValueSpan.ToString())));
         }
 
         /// <summary>
@@ -1312,16 +1295,50 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             return Base64UrlEncoder.Encode(hashedBytes);
         }
 
-        // Uppercases hexadecimal letters only within valid percent-encoded triplets.
-        // It does not URL-decode values or modify malformed sequences.
-        // For example, "foo%2fbar%zz" becomes "foo%2Fbar%zz".
-        private static string NormalizePercentEncodingHexCase(string value)
+        // Compares p-claim path values ordinally while ignoring hexadecimal letter casing
+        // only within aligned, valid percent-encoded triplets. The triplets are not decoded:
+        // "foo%2Fbar" equals "foo%2fbar", but "foo%2Fbar" does not equal "foo/bar",
+        // and malformed "foo%2Gbar" does not equal "foo%2gbar".
+        private static bool ArePClaimValuesEqual(ReadOnlySpan<char> expectedValue, ReadOnlySpan<char> actualValue)
         {
-            return Regex.Replace(
-                value,
-                PercentEncodedTripletPattern,
-                static match => match.Value.ToUpperInvariant(),
-                RegexOptions.CultureInvariant);
+            if (expectedValue.Length != actualValue.Length)
+                return false;
+
+            for (int i = 0; i < expectedValue.Length; i++)
+            {
+                if (expectedValue[i] == '%' &&
+                    actualValue[i] == '%' &&
+                    i + 2 < expectedValue.Length)
+                {
+                    char expectedFirstHexCharacter = expectedValue[i + 1];
+                    char expectedSecondHexCharacter = expectedValue[i + 2];
+                    char actualFirstHexCharacter = actualValue[i + 1];
+                    char actualSecondHexCharacter = actualValue[i + 2];
+
+                    if (Uri.IsHexDigit(expectedFirstHexCharacter) &&
+                        Uri.IsHexDigit(expectedSecondHexCharacter) &&
+                        Uri.IsHexDigit(actualFirstHexCharacter) &&
+                        Uri.IsHexDigit(actualSecondHexCharacter))
+                    {
+                        // RFC 3986 section 6.2.2.1 defines uppercase hexadecimal letters as the canonical form for percent-encoded triplets.
+                        if (char.ToUpperInvariant(expectedFirstHexCharacter) != char.ToUpperInvariant(actualFirstHexCharacter) ||
+                            char.ToUpperInvariant(expectedSecondHexCharacter) != char.ToUpperInvariant(actualSecondHexCharacter))
+                        {
+                            return false;
+                        }
+
+                        i += 2;
+                        continue;
+                    }
+                }
+
+                if (expectedValue[i] != actualValue[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

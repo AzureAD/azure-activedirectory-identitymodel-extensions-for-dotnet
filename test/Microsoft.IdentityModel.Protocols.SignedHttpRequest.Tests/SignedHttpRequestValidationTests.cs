@@ -385,6 +385,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [InlineData("/path", "/path", false, true)]
         [InlineData("/foo%2Fbar", "/foo%2Fbar", true, true)]
         [InlineData("/foo%2Fbar", "/foo%2fbar", true, true)]
+        [InlineData("/foo%2Fbar", "/foo%3Fbar", true, false)]
         [InlineData("/foo%2Fbar%ABbaz", "/foo%2fbar%abbaz", true, true)]
         [InlineData("/foo%2fbar", "/foo%2fbar", false, true)]
         [InlineData("/caf%C3%A9", "/caf%c3%a9", true, true)]
@@ -395,6 +396,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [InlineData("/foo%25", "/foo%", true, false)]
         [InlineData("/foo%25X", "/foo%X", false, false)]
         [InlineData("/foo%252G", "/foo%2G", true, false)]
+        [InlineData("/foo%252Gbar", "/foo%252gbar", true, false)]
+        [InlineData("/foo%252Gbar", "/foo%252gbar", false, true)]
         [InlineData("/foo%BAr", "/foo%bar", true, true)]
         [InlineData("/foo%25bar", "/foo%bar", true, false)]
         [InlineData("/foo%2Fbar", "/foo/bar", true, false)]
@@ -427,7 +430,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [InlineData(true)]
         [InlineData(false)]
         [ResetAppContextSwitches]
-        public void ValidatePClaim_NormalizesPercentEncodingHexCaseInException(bool useCaseSensitiveComparison)
+        public void ValidatePClaim_PreservesPercentEncodingHexCaseInException(bool useCaseSensitiveComparison)
         {
             // Arrange
             AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, useCaseSensitiveComparison);
@@ -443,10 +446,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var exception = Assert.Throws<SignedHttpRequestInvalidPClaimException>(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
 
             // Assert
-            Assert.Contains("Expected%2FPath", exception.Message);
-            Assert.Contains("Actual%2APath", exception.Message);
-            Assert.DoesNotContain("Expected%2fPath", exception.Message);
-            Assert.DoesNotContain("Actual%2aPath", exception.Message);
+            Assert.Contains("Expected%2fPath", exception.Message);
+            Assert.Contains("Actual%2aPath", exception.Message);
+            Assert.DoesNotContain("Expected%2FPath", exception.Message);
+            Assert.DoesNotContain("Actual%2APath", exception.Message);
         }
 
         public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidatePClaimTheoryData
