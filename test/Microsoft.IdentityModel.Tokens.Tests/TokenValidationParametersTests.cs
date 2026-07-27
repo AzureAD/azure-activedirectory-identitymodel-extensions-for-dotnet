@@ -205,6 +205,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new KeyValuePair<string, List<object>>("CryptoProviderFactory", new List<object>{(CryptoProviderFactory)null, new CryptoProviderFactory(), new CryptoProviderFactory() }),
                     new KeyValuePair<string, List<object>>("DebugId", new List<object>{(string)null, "DebugId", "DebugId" }),
                     new KeyValuePair<string, List<object>>("IgnoreTrailingSlashWhenValidatingAudience",  new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("IgnoreCaseWhenValidatingAudience",  new List<object>{false, true, false}),
                     new KeyValuePair<string, List<object>>("IncludeTokenOnFailedValidation",  new List<object>{false, true, true}),
                     new KeyValuePair<string, List<object>>("IsClone",  new List<object>{ false, true, true }),
                     new KeyValuePair<string, List<object>>("InstancePropertyBag",  new List<object>{ new Dictionary<string, object>(), new Dictionary<string, object>(), new Dictionary<string, object>()}),

@@ -228,18 +228,22 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static bool AudiencesMatch(TokenValidationParameters validationParameters, string tokenAudience, string validAudience)
         {
+            StringComparison comparisonType = validationParameters.IgnoreCaseWhenValidatingAudience
+                ? StringComparison.OrdinalIgnoreCase
+                : StringComparison.Ordinal;
+
             if (validAudience.Length == tokenAudience.Length)
             {
-                if (string.Equals(validAudience, tokenAudience))
+                if (string.Equals(validAudience, tokenAudience, comparisonType))
                     return true;
             }
-            else if (validationParameters.IgnoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience))
+            else if (validationParameters.IgnoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience, comparisonType))
                 return true;
 
             return false;
         }
 
-        private static bool AudiencesMatchIgnoringTrailingSlash(string tokenAudience, string validAudience)
+        private static bool AudiencesMatchIgnoringTrailingSlash(string tokenAudience, string validAudience, StringComparison comparisonType)
         {
             int length = -1;
 
@@ -252,7 +256,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (length == -1)
                 return false;
 
-            if (string.CompareOrdinal(validAudience, 0, tokenAudience, 0, length) == 0)
+            if (string.Compare(validAudience, 0, tokenAudience, 0, length, comparisonType) == 0)
             {
                 if (AppContextSwitches.SuccessValidationLogsAsInformation)
                 {
