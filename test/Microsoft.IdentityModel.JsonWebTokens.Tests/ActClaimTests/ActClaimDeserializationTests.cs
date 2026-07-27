@@ -576,6 +576,65 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
+        public async Task ValidateTokenAsync_WithBothActAndActort_ActTakesPrecedence()
+        {
+            // ARRANGE
+            // Build a legacy "actort" JWT string with a distinguishable actor subject.
+            var innerHandler = new JsonWebTokenHandler();
+            var actortActorIdentity = new CaseSensitiveClaimsIdentity("ActortAuth");
+            actortActorIdentity.AddClaim(new Claim("sub", "actort-actor-id"));
+            string actortJwtString = innerHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = actortActorIdentity,
+                Issuer = "https://actor.example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            });
+
+            // The modern RFC 8693 "act" actor (JSON object) with a different, distinguishable subject.
+            var actActorIdentity = new CaseSensitiveClaimsIdentity("ActAuth");
+            actActorIdentity.AddClaim(new Claim("sub", "act-actor-id"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            var handler = new JsonWebTokenHandler();
+            // Token carries BOTH: "act" (JSON object) and legacy "actort" (JWT string).
+            string mainToken = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    { "act", actActorIdentity },
+                    { "actort", actortJwtString }
+                }
+            });
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            };
+
+            // ACT
+            var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
+
+            // ASSERT
+            // No duplicate-actor exception is thrown, and "act" wins over legacy "actort".
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("act-actor-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+            Assert.DoesNotContain(result.ClaimsIdentity.Actor.Claims, c => c.Value == "actort-actor-id");
+        }
+
+        [Fact]
         public async Task ValidateTokenAsync_WithActortClaim_HandlesJwtStringNotJson()
         {
             // ARRANGE
@@ -1086,6 +1145,137 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Equal("level1-actor", identity.Actor.FindFirst("sub")?.Value);
             Assert.NotNull(identity.Actor.Actor);
             Assert.Equal("level2-actor", identity.Actor.Actor.FindFirst("sub")?.Value);
+        }
+
+        // ---------------------------------------------------------------------------------------
+        // End-to-end tests: create a token, inspect the raw serialized payload to show exactly
+        // where "act" / "actort" land, then validate the token round-trip and assert the Actor.
+        // ---------------------------------------------------------------------------------------
+
+        [Fact]
+        public async Task EndToEnd_ActFromSubjectActor_SerializedAsJsonObject_AndRoundTrips()
+        {
+            // ARRANGE: a subject carrying an actor via ClaimsIdentity.Actor.
+            var handler = new JsonWebTokenHandler();
+            var actor = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "service-A"), new Claim("role", "worker") });
+            var subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "user-1") }) { Actor = actor };
+
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = subject,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            });
+
+            // ASSERT (serialization): the actor is written under the "act" claim as a JSON OBJECT,
+            // and there is no "actort" claim.
+            var decoded = handler.ReadJsonWebToken(token);
+            Assert.True(decoded.Payload.HasClaim("act"), "payload should contain 'act'");
+            Assert.False(decoded.Payload.HasClaim("actort"), "payload should NOT contain 'actort'");
+            var act = decoded.Payload.GetValue<JsonElement>("act");
+            Assert.Equal(JsonValueKind.Object, act.ValueKind);
+            Assert.Equal("service-A", act.GetProperty("sub").GetString());
+
+            // ACT + ASSERT (deserialization round-trip): the actor is read back onto ClaimsIdentity.Actor.
+            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            });
+
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("service-A", result.ClaimsIdentity.Actor.FindFirst("sub")?.Value);
+            Assert.Equal("worker", result.ClaimsIdentity.Actor.FindFirst("role")?.Value);
+        }
+
+        [Fact]
+        public async Task EndToEnd_NestedActors_SerializedAsNestedActObjects_AndRoundTrip()
+        {
+            // ARRANGE: a delegation chain user-1 <- service-A <- service-B.
+            var handler = new JsonWebTokenHandler();
+            var inner = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "service-B") });
+            var outer = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "service-A") }) { Actor = inner };
+            var subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "user-1") }) { Actor = outer };
+
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = subject,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            });
+
+            // ASSERT (serialization): "act" nests another "act" (RFC 8693 delegation chain).
+            var decoded = handler.ReadJsonWebToken(token);
+            var act = decoded.Payload.GetValue<JsonElement>("act");
+            Assert.Equal("service-A", act.GetProperty("sub").GetString());
+            Assert.True(act.TryGetProperty("act", out var nestedAct), "'act' should contain a nested 'act'");
+            Assert.Equal("service-B", nestedAct.GetProperty("sub").GetString());
+
+            // ACT + ASSERT (deserialization round-trip): both levels of Actor are populated.
+            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            });
+
+            Assert.True(result.IsValid);
+            Assert.Equal("service-A", result.ClaimsIdentity.Actor?.FindFirst("sub")?.Value);
+            Assert.Equal("service-B", result.ClaimsIdentity.Actor?.Actor?.FindFirst("sub")?.Value);
+        }
+
+        [Fact]
+        public async Task EndToEnd_LegacyActortJwtString_SerializedAsString_AndRoundTrips()
+        {
+            // ARRANGE: the handler never *writes* actort; a caller supplies it as a JWT string
+            // in the Claims dictionary (this is what legacy JwtSecurityTokenHandler tokens look like).
+            var handler = new JsonWebTokenHandler();
+            string actorJwt = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "legacy-actor") }),
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            });
+
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "user-1") }),
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "actort", actorJwt } }
+            });
+
+            // ASSERT (serialization): the actor is present under "actort" as a JWT STRING, not "act".
+            var decoded = handler.ReadJsonWebToken(token);
+            Assert.True(decoded.Payload.HasClaim("actort"), "payload should contain 'actort'");
+            Assert.False(decoded.Payload.HasClaim("act"), "payload should NOT contain 'act'");
+            // "actort" is a JWT string (not a JSON object), so it reads back as a string.
+            Assert.Equal(actorJwt, decoded.Payload.GetValue<string>("actort"));
+
+            // ACT + ASSERT (deserialization round-trip): the legacy actort JWT is parsed onto Actor.
+            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            });
+
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("legacy-actor", result.ClaimsIdentity.Actor.FindFirst("sub")?.Value);
         }
     }
 }

@@ -223,14 +223,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
 
-                if (jwtClaim.Type.Equals(ActClaimType) || jwtClaim.Type.Equals(JwtRegisteredClaimNames.Actort))
+                // Actor precedence: the RFC 8693 "act" (JSON object) claim always wins; the legacy
+                // "actort" (JWT string) is only used when "act" has not already set the actor.
+                if (jwtClaim.Type.Equals(ActClaimType))
                 {
-                    if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
-                                    LogMessages.IDX14112,
-                                    LogHelper.MarkAsNonPII(jwtClaim.Type),
-                                    jwtClaim.Value)));
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, jwtClaim.Type.Equals(ActClaimType), currentActorDepth);
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, true, currentActorDepth);
+                }
+
+                if (jwtClaim.Type.Equals(JwtRegisteredClaimNames.Actort) && identity.Actor is null)
+                {
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, false, currentActorDepth);
                 }
 
                 if (wasMapped)
@@ -283,11 +285,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
-                if (claimType == ActClaimType || claimType.Equals(JwtRegisteredClaimNames.Actort))
+                // Actor precedence: the RFC 8693 "act" (JSON object) claim always wins; the legacy
+                // "actort" (JWT string) is only used when "act" has not already set the actor.
+                if (claimType == ActClaimType)
                 {
-                    if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(claimType), jwtClaim.Value)));
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, claimType.Equals(ActClaimType), currentActorDepth);
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, true, currentActorDepth);
+                }
+                else if (claimType.Equals(JwtRegisteredClaimNames.Actort) && identity.Actor is null)
+                {
+                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, false, currentActorDepth);
                 }
 
                 if (jwtClaim.Properties.Count == 0)
