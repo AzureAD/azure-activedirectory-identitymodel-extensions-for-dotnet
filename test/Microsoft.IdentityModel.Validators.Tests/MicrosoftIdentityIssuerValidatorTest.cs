@@ -20,6 +20,11 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Validators.Tests
 {
+    // These tests mutate the process-wide static AadIssuerValidator.s_issuerValidators cache (cleared in the
+    // constructor). Sharing a collection with MicrosoftIdentityIssuerValidatorTestSync disables parallel execution
+    // between the two classes so they cannot race on that shared static cache (which previously surfaced as an
+    // ObjectDisposedException when one class disposed an HttpClient still referenced by the other's cached validator).
+    [Collection("AadIssuerValidatorStaticCache")]
     public class MicrosoftIdentityIssuerValidatorTest
     {
         private readonly HttpClient _httpClient;

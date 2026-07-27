@@ -20,6 +20,10 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Validators.Tests
 {
+    // Shares a collection with MicrosoftIdentityIssuerValidatorTest to disable parallel execution between the two
+    // classes; both clear and populate the process-wide static AadIssuerValidator.s_issuerValidators cache, so running
+    // them concurrently races on that shared static (previously an intermittent ObjectDisposedException on the HttpClient).
+    [Collection("AadIssuerValidatorStaticCache")]
     public class MicrosoftIdentityIssuerValidatorTestSync
     {
         private readonly HttpClient _httpClient;
