@@ -197,7 +197,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // First time to fetch metadata
             try
             {
-                var configuration = configManager.GetConfigurationSync();
+                _ = configManager.GetConfigurationSync();
             }
             catch (Exception firstFetchMetadataFailure)
             {
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 // Fetch metadata again during refresh interval, the exception should be same from above
                 try
                 {
-                    var configuration = configManager.GetConfigurationSync();
+                    _ = configManager.GetConfigurationSync();
                 }
                 catch (Exception secondFetchMetadataFailure)
                 {
