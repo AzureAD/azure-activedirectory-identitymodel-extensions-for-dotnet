@@ -3100,8 +3100,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var encryptionKeysFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.GetContentEncryptionKeys(jwtTokenFromJwtHandlerWithNoKid, theoryData.ValidationParameters);
 
                 // In failure cases (e.g. AlgorithmMisMatch), GetContentEncryptionKeys returns a
-                // random dummy fallback CEK — comparing key bytes would be non-deterministic.
-                if (theoryData.ExpectedException == ExpectedException.NoExceptionExpected)
+                // random dummy fallback CEK and never throws — comparing key bytes would be
+                // non-deterministic. Only assert when a successful result with known keys is expected.
+                if (theoryData.ExpectedException == ExpectedException.NoExceptionExpected
+                    && theoryData.ExpectedDecryptionKeys != null)
                 {
                     IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, theoryData.ExpectedDecryptionKeys);
                     IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithNoKid, theoryData.ExpectedDecryptionKeys);
@@ -3156,9 +3158,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         TestId = "AlgorithmMisMatch",
                         Payload = Default.PayloadString,
-                        // With the fallback-CEK pattern, unwrap failure adds a random dummy key;
-                        // downstream decryption then fails with IDX10603 instead of IDX10618.
-                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:"),
+                        // GetContentEncryptionKeys no longer throws on key-unwrap failure — it
+                        // returns a random dummy CEK. The downstream decrypt failure (IDX10603)
+                        // is covered by DecryptToken tests. No exception expected here.
+                        ExpectedException = ExpectedException.NoExceptionExpected,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
