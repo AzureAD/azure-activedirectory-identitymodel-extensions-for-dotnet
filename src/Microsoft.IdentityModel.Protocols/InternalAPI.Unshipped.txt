@@ -8,7 +8,7 @@ Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>
 Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>.GetConfigurationSync(System.Threading.CancellationToken cancel) -> T
 Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>.RequestRefresh() -> void
 Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>
-Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>.GetConfigurationSync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> T
+Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>.GetConfigurationSync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetrieverSync retriever, System.Threading.CancellationToken cancel) -> T
 Microsoft.IdentityModel.Protocols.IDocumentRetrieverSync
 Microsoft.IdentityModel.Protocols.IDocumentRetrieverSync.GetDocument(string address, System.Threading.CancellationToken cancel) -> string
 const Microsoft.IdentityModel.Protocols.LogMessages.IDX20811 = "IDX20811: Failed to retrieve configuration from event handler. MetadataAddress: '{0}', Exception: '{1}'." -> string
