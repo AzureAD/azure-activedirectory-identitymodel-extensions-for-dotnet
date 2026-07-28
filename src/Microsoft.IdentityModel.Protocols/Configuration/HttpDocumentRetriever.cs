@@ -19,6 +19,9 @@ namespace Microsoft.IdentityModel.Protocols
     /// Retrieves metadata information using HttpClient.
     /// </summary>
     public class HttpDocumentRetriever : IDocumentRetriever
+#if NET5_0_OR_GREATER
+        , ISyncDocumentRetriever
+#endif
     {
         private HttpClient _httpClient;
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
@@ -98,6 +101,124 @@ namespace Microsoft.IdentityModel.Protocols
         public HttpVersionPolicy? HttpVersionPolicy { get; set; }
 #endif
 
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Returns a string converted from remote document when completed, by using the provided address.
+        /// </summary>
+        /// <param name="address">Location of document</param>
+        /// <param name="cancel">A cancellation token that can be used by other objects or threads to receive notice of cancellation. <see cref="CancellationToken"/></param>
+        /// <returns>Document as a string</returns>
+        public string GetDocumentSync(string address, CancellationToken cancel)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+                throw LogHelper.LogArgumentNullException(nameof(address));
+
+            if (!Utility.IsHttps(address) && RequireHttps)
+                throw LogHelper.LogExceptionMessage(
+                    new ArgumentException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20108,
+                            LogHelper.MarkAsNonPII(address)),
+                        nameof(address)));
+
+            Exception unsuccessfulHttpResponseException;
+            HttpResponseMessage response;
+            try
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogMessages.IDX20805, LogHelper.MarkAsNonPII(address));
+
+                var httpClient = _httpClient ?? _defaultHttpClient;
+                var uri = new Uri(address, UriKind.RelativeOrAbsolute);
+                response = SendAndRetryOnNetworkError(httpClient, uri, cancel, out string responseContent);
+
+                // If SendAndRetryOnNetworkError already read the body (non-retryable failure), reuse it.
+                // HttpContent.ReadAsStream() returns a single cached stream instance, so reading it again
+                // after it was consumed/disposed would fail; read here only when it hasn't been read yet.
+                if (responseContent is null)
+                {
+                    // ReadAsStream() is synchronous in .NET 5+, compared to the original async method: await response.Content.ReadAsStringAsync()
+                    using var stream = response.Content.ReadAsStream();
+                    using var reader = new StreamReader(stream);
+                    responseContent = reader.ReadToEnd();
+                }
+
+                if (response.IsSuccessStatusCode)
+                    return responseContent;
+
+                unsuccessfulHttpResponseException = new IOException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX20807,
+                        LogHelper.MarkAsNonPII(address),
+                        response,
+                        responseContent));
+
+                unsuccessfulHttpResponseException.Data.Add(StatusCode, response.StatusCode);
+                unsuccessfulHttpResponseException.Data.Add(ResponseContent, responseContent);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(
+                    new IOException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20804,
+                            LogHelper.MarkAsNonPII(address)),
+                        ex));
+            }
+
+            throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
+        }
+
+        private HttpResponseMessage SendAndRetryOnNetworkError(HttpClient httpClient, Uri uri, CancellationToken cancel, out string responseContent)
+        {
+            responseContent = null;
+            int maxAttempt = 2;
+            HttpResponseMessage response = null;
+            for (int i = 1; i <= maxAttempt; i++)
+            {
+                // need to create a new message each time since you cannot send the same message twice
+                using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
+                {
+                    ApplyHttpVersionAndPolicy(httpClient, message);
+
+                    if (SendAdditionalHeaderData)
+                        IdentityModelTelemetryUtil.SetTelemetryData(message, AdditionalHeaderData);
+
+                    response = httpClient.Send(message, cancel);
+                    if (response.IsSuccessStatusCode)
+                        return response;
+
+                    if (response.StatusCode.Equals(HttpStatusCode.RequestTimeout) || response.StatusCode.Equals(HttpStatusCode.ServiceUnavailable))
+                    {
+                        if (i < maxAttempt && LogHelper.IsEnabled(EventLogLevel.Informational))
+                        {
+                            // Read content synchronously for logging, this is the synchronous version of await response.Content.ReadAsStringAsync()
+                            using var stream = response.Content.ReadAsStream();
+                            using var reader = new StreamReader(stream);
+                            var content = reader.ReadToEnd();
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX20808, response.StatusCode, content, message.RequestUri));
+                        }
+                    }
+                    else // if the exception type does not indicate the need to retry we should break
+                    {
+                        // Read the body exactly once here so the caller can reuse it. HttpContent.ReadAsStream()
+                        // returns a single cached stream instance; reading and disposing it here and then again in
+                        // the caller would fail, dropping the HTTP status code from the resulting exception.
+                        using (var stream = response.Content.ReadAsStream())
+                        using (var reader = new StreamReader(stream))
+                            responseContent = reader.ReadToEnd();
+
+                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX20809, message.RequestUri, response.StatusCode, responseContent));
+
+                        break;
+                    }
+                }
+            }
+
+            return response;
+        }
+#endif
         /// <summary>
         /// Returns a task which contains a string converted from remote document when completed, by using the provided address.
         /// </summary>
