@@ -127,9 +127,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
 
-            OpenIdConnectConfiguration firstConfig = null;
-            OpenIdConnectConfiguration secondConfig = null;
-
             try
             {
                 _ = configurationManager.GetConfigurationSync();
