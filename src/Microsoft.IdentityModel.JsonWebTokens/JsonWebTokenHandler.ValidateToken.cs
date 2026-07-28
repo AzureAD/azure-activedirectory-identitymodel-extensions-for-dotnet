@@ -707,7 +707,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public virtual TokenValidationResult ValidateToken(SecurityToken token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
         {
             if (token == null)
-                throw LogHelper.LogArgumentNullException(nameof(token));
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(token)), IsValid = false };
 
             if (validationParameters == null)
                 return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)), IsValid = false };
