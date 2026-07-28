@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
 #if NET6_0_OR_GREATER
         [Theory, MemberData(nameof(GetVersionTheoryData))]
-        public async Task HttpDefaultRequestVersionTest(Version version)
+        public void HttpDefaultRequestVersionTest(Version version)
         {
             var callback = new Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>((msg, ct) =>
             {
@@ -229,11 +229,11 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             httpClient.DefaultRequestVersion = version;
 
             var documentRetriever = new HttpDocumentRetriever(httpClient);
-            await documentRetriever.GetDocumentAsync("https://localhost", CancellationToken.None);
+            documentRetriever.GetDocumentSync("https://localhost", CancellationToken.None);
         }
 
         [Theory, MemberData(nameof(GetVersionPolicyTheoryData))]
-        public async Task HttpDefaultVersionPolicyTest(HttpVersionPolicy policy)
+        public void HttpDefaultVersionPolicyTest(HttpVersionPolicy policy)
         {
             var callback = new Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>((msg, ct) =>
             {
@@ -245,11 +245,11 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             httpClient.DefaultVersionPolicy = policy;
 
             var documentRetriever = new HttpDocumentRetriever(httpClient);
-            await documentRetriever.GetDocumentAsync("https://localhost", CancellationToken.None);
+            documentRetriever.GetDocumentSync("https://localhost", CancellationToken.None);
         }
 
         [Theory, MemberData(nameof(GetVersionPolicyTheoryData))]
-        public async Task HttpVersionPolicyTest(HttpVersionPolicy policy)
+        public void HttpVersionPolicyTest(HttpVersionPolicy policy)
         {
             var callback = new Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>((msg, ct) =>
             {
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
             using var httpClient = new HttpClient(new DelegateHttpMessageHandler(callback));
             var documentRetriever = new HttpDocumentRetriever(httpClient) { HttpVersionPolicy = policy };
-            await documentRetriever.GetDocumentAsync("https://localhost", CancellationToken.None);
+            documentRetriever.GetDocumentSync("https://localhost", CancellationToken.None);
         }
 
         public static TheoryData<HttpVersionPolicy> GetVersionPolicyTheoryData
