@@ -3099,9 +3099,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 var encryptionKeysFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.GetContentEncryptionKeys(jwtTokenFromJwtHandlerWithNoKid, theoryData.ValidationParameters);
 
-                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, theoryData.ExpectedDecryptionKeys);
-                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithNoKid, theoryData.ExpectedDecryptionKeys);
-                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, encryptionKeysFromJwtHandlerWithNoKid, context);
+                // In failure cases (e.g. AlgorithmMisMatch), GetContentEncryptionKeys returns a
+                // random dummy fallback CEK — comparing key bytes would be non-deterministic.
+                if (theoryData.ExpectedException == ExpectedException.NoExceptionExpected)
+                {
+                    IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, theoryData.ExpectedDecryptionKeys);
+                    IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithNoKid, theoryData.ExpectedDecryptionKeys);
+                    IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, encryptionKeysFromJwtHandlerWithNoKid, context);
+                }
+
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
