@@ -136,8 +136,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             };
 
             // Act
-            var configuration = configurationManager.GetConfigurationSync();
-
+            _ = configurationManager.GetConfigurationSync();
             // Assert
             if (!mockEventHandler.BeforeRetrieveAsyncCalled)
                 testContext.AddDiff("BeforeRetrieve should have been called.");
