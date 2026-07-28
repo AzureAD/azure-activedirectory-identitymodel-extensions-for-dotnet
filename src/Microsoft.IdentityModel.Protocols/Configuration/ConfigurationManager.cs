@@ -31,6 +31,12 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
 
+        // Tracks the most recent fetch failure for the blocking path. Promoted from a local in
+        // GetConfigurationWithBlockingAsync so the original exception (e.g. an IOException carrying
+        // HttpDocumentRetriever.StatusCode/ResponseContent in its Data dictionary) is preserved across
+        // calls that arrive within the backoff window (_syncAfter > now) and skip the fetch.
+        private Exception _fetchMetadataFailure;
+
         // task states are used to ensure the call to 'update config' (UpdateCurrentConfiguration) is a singleton. Uses Interlocked.CompareExchange.
         // metadata is not being obtained
         private const int ConfigurationRetrieverIdle = 0;
