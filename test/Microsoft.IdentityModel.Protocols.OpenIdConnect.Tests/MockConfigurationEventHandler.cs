@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// <summary>
     /// Mock implementation of IConfigurationEventHandler for testing
     /// </summary>
-    internal class MockConfigurationEventHandler : IConfigurationEventHandler<OpenIdConnectConfiguration>
+    internal class MockConfigurationEventHandler : IConfigurationEventHandler<OpenIdConnectConfiguration>, IConfigurationEventHandlerSync<OpenIdConnectConfiguration>
     {
         public bool BeforeRetrieveAsyncCalled { get; private set; }
         public string BeforeRetrieveMetadataAddress { get; private set; }
@@ -41,6 +41,26 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             return Task.FromResult(ConfigurationEventHandlerResult<OpenIdConnectConfiguration>.NoResult);
+        }
+
+        public ConfigurationEventHandlerResult<OpenIdConnectConfiguration> BeforeRetrieve(
+            string metadataAddress,
+            CancellationToken cancellationToken = default)
+        {
+            BeforeRetrieveMetadataAddress = metadataAddress;
+            BeforeRetrieveAsyncCalled = true;
+
+            if (ThrowExceptionInBeforeRetrieve)
+                throw new InvalidOperationException("Test exception from BeforeRetrieve");
+
+            if (ConfigurationToReturn != null)
+            {
+                return new ConfigurationEventHandlerResult<OpenIdConnectConfiguration>(
+                    ConfigurationToReturn,
+                    RetrievalTimeToReturn);
+            }
+
+            return ConfigurationEventHandlerResult<OpenIdConnectConfiguration>.NoResult;
         }
 
         public Task AfterUpdateAsync(

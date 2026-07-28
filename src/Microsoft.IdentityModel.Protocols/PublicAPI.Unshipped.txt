@@ -1,1 +1,6 @@
 Microsoft.IdentityModel.Protocols.FileDocumentRetriever.GetDocument(string address, System.Threading.CancellationToken cancel) -> string
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetConfigurationSync() -> T
+virtual Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetConfigurationSync(System.Threading.CancellationToken cancel) -> T
+override Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetBaseConfigurationSync(System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Tokens.BaseConfiguration
+Microsoft.IdentityModel.Protocols.StaticConfigurationManager<T>.GetConfigurationSync(System.Threading.CancellationToken cancel) -> T
+override Microsoft.IdentityModel.Protocols.StaticConfigurationManager<T>.GetBaseConfigurationSync(System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Tokens.BaseConfiguration
