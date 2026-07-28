@@ -416,13 +416,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             public Task<string> GetDocumentAsync(string address, CancellationToken cancel)
             {
                 GetDocumentCalled = true;
-                return null;
+                return Task.FromResult(string.Empty);
             }
 
             public string GetDocumentSync(string address, CancellationToken cancel)
             {
                 GetDocumentCalled = true;
-                return null;
+                return string.Empty;
             }
         }
     }
