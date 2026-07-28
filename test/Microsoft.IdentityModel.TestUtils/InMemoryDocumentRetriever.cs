@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         /// <summary>
-        /// Returns the document passed in constructor in dictionary./>
+        /// Returns the document passed in constructor in dictionary.
         /// </summary>
         /// <param name="address">Fully qualified path to a file. Ignored for now.</param>
         /// <param name="cancel"><see cref="CancellationToken"/> Ignored for now.</param>
