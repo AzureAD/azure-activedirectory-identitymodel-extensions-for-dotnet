@@ -55,15 +55,14 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         /// <summary>
-        /// Returns the document passed in constructor in dictionary./>
+        /// Returns the document passed in constructor in the dictionary.
         /// </summary>
         /// <param name="address">Fully qualified path to a file. Ignored for now.</param>
         /// <param name="cancel"><see cref="CancellationToken"/> Ignored for now.</param>
         /// <returns>UTF8 decoding of bytes in the file.</returns>
         public string GetDocumentSync(string address, CancellationToken cancel)
         {
-            // Some tests change the Metadata address on ConfigurationManger to test different scenarios.
-            // This event is used to let the test know that the GetDocumentSync method has been called, and the test can now change the Metadata address.
+            // Some tests change the Metadata address on ConfigurationManager to test different scenarios.
             if (_signalEvent != null)
                 _signalEvent.Set();
 
