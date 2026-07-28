@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="cancel"><see cref="CancellationToken"/> not used.</param>
         /// <returns>UTF8 decoding of bytes in the file.</returns>
         /// <exception cref="ArgumentNullException">If address is null or whitespace.</exception>
-        /// <exception cref="IOException">with inner expection containing the original exception.</exception>
+        /// <exception cref="IOException">With inner exception containing the original exception.</exception>
         public string GetDocumentSync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
