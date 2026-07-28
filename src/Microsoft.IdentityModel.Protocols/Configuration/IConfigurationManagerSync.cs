@@ -8,7 +8,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Interface that defines a synchronous model for retrieving configuration data.
     /// </summary>
-    /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
+    /// <typeparam name="T">The type of the configuration metadata.</typeparam>
     public interface IConfigurationManagerSync<T> where T : class
     {
         /// <summary>
