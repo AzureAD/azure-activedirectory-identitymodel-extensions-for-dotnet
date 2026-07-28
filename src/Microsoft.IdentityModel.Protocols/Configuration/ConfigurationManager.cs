@@ -419,7 +419,7 @@ namespace Microsoft.IdentityModel.Protocols
                     // The transport should have its own timeouts, etc.
                     T configuration = ((IConfigurationRetrieverSync<T>)_configRetriever).GetConfigurationSync(
                         MetadataAddress,
-                        _docRetriever,
+                        (ISyncDocumentRetriever)_docRetriever,
                         CancellationToken.None);
 
                     if (_configValidator != null)

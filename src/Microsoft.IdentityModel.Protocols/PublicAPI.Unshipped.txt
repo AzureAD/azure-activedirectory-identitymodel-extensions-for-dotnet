@@ -24,7 +24,7 @@ Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>
 Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>.GetConfigurationSync(System.Threading.CancellationToken cancel) -> T
 Microsoft.IdentityModel.Protocols.IConfigurationManagerSync<T>.RequestRefresh() -> void
 Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>
-Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>.GetConfigurationSync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> T
+Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>.GetConfigurationSync(string address, Microsoft.IdentityModel.Protocols.ISyncDocumentRetriever retriever, System.Threading.CancellationToken cancel) -> T
 Microsoft.IdentityModel.Protocols.ISyncDocumentRetriever
 Microsoft.IdentityModel.Protocols.ISyncDocumentRetriever.GetDocumentSync(string address, System.Threading.CancellationToken cancel) -> string
 static readonly Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.NoResult -> Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
