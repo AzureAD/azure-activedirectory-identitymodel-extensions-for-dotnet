@@ -797,6 +797,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         () => listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage),
                         TimeSpan.FromMilliseconds(100),
                         TimeSpan.FromSeconds(10));
+                }
 
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage) && !listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage))
                     context.AddDiff($"Expected exception to contain: '{theoryData.ExpectedErrorMessage}'.{Environment.NewLine}Log is:{Environment.NewLine}'{listener.TraceBuffer}'");
