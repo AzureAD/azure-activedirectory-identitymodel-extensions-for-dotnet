@@ -132,12 +132,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             try
             {
-                firstConfig = configurationManager.GetConfigurationSync();
+                _ = configurationManager.GetConfigurationSync();
                 if (theoryData.AdjustTime.HasValue)
                 {
                     testTelemetryClient.ClearExportedItems();
                     timeProvider.Advance(theoryData.AdjustTime.Value);
-                    secondConfig = configurationManager.GetConfigurationSync();
+                    _ = configurationManager.GetConfigurationSync();
 
                     if (!blocking)
                         ConfigurationManagerTests.WaitOrFail(resetEvent);
