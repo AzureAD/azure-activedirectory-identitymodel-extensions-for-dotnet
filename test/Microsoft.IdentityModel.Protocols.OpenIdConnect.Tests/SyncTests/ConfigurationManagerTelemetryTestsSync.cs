@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TimeSpan.FromMilliseconds(250),
                 TimeSpan.FromSeconds(20));
 
-            DateTimeOffset syncAfter = (DateTimeOffset)TestUtilities.GetField(configurationManager, "_syncAfter");
+            _ = (DateTimeOffset)TestUtilities.GetField(configurationManager, "_syncAfter");
 
             Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
         }
