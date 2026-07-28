@@ -793,11 +793,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 // Need to wait for the events on the listener to be processed.
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage))
                 {
-                    var success = PollForCondition(
+                    _ = PollForCondition(
                         () => listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage),
                         TimeSpan.FromMilliseconds(100),
                         TimeSpan.FromSeconds(10));
-                }
 
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage) && !listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage))
                     context.AddDiff($"Expected exception to contain: '{theoryData.ExpectedErrorMessage}'.{Environment.NewLine}Log is:{Environment.NewLine}'{listener.TraceBuffer}'");
