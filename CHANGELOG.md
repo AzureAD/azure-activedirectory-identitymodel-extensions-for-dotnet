@@ -1,5 +1,13 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.23.0
+====
+## Bug Fixes
+- **Fix query parameter parsing in Signed HTTP Request `q` claim computation**  
+  `SanitizeQueryParams` now splits on the first `=` only, so query parameters whose value contains `=` (e.g. base64-padded values like `sig=YWJjZA==`) and parameters with an empty value (`name=`) are correctly included in the `q` claim hash rather than silently dropped. This aligns with how resource servers parse query strings and closes a request-binding bypass for callers using `AcceptUnsignedQueryParameters = false`.  
+  **If you sign and validate SHRs across a rolling upgrade** where the signing side has not yet picked up this fix, the `q` hashes for requests containing the above parameter shapes will disagree. Set the AppContext switch `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyQueryParamParsing` to `true` on the validating side to restore the previous behaviour during the transition. IDX23039 is logged when the new parsing is the cause of a rejection.  
+  See PR [#3554](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3554) for details.
+
 8.15.0
 ====
 ## New Features
