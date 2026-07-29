@@ -113,6 +113,18 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCaseSensitivePClaimComparison => _useCaseSensitivePClaimComparison ??= (AppContext.TryGetSwitch(UseCaseSensitivePClaimComparisonSwitch, out bool useCaseSensitivePClaimComparison) ? useCaseSensitivePClaimComparison : UseCaseSensitivePClaimComparisonDefault);
 
         /// <summary>
+        /// When enabled, restores the pre-8.19.x behavior where the JWE key-management <c>alg</c> header
+        /// was not validated against the caller's algorithm policy (<c>ValidAlgorithms</c> /
+        /// <c>AlgorithmValidator</c>). Callers who set <c>ValidAlgorithms</c> but did not include their
+        /// key-management algorithm (e.g. <c>RSA-OAEP</c>) can set this switch while updating their allowlist.
+        /// </summary>
+        internal const string SkipKeyManagementAlgorithmValidationSwitch = "Switch.Microsoft.IdentityModel.SkipKeyManagementAlgorithmValidation";
+
+        private static bool? _skipKeyManagementAlgorithmValidation;
+
+        internal static bool SkipKeyManagementAlgorithmValidation => _skipKeyManagementAlgorithmValidation ??= (AppContext.TryGetSwitch(SkipKeyManagementAlgorithmValidationSwitch, out bool skip) && skip);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -142,6 +154,9 @@ namespace Microsoft.IdentityModel.Tokens
             // because AppContext cannot truly un-set a switch.
             _useCaseSensitivePClaimComparison = null;
             AppContext.SetSwitch(UseCaseSensitivePClaimComparisonSwitch, UseCaseSensitivePClaimComparisonDefault);
+
+            _skipKeyManagementAlgorithmValidation = null;
+            AppContext.SetSwitch(SkipKeyManagementAlgorithmValidationSwitch, false);
         }
     }
 }

@@ -3337,7 +3337,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.DefaultX509Key_2048,
                             AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false)
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenDecryptionFailedException), "IDX10697:"),
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAlgorithmException), "IDX10697:"),
                     },
                     new JwtTheoryData
                     {
