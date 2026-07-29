@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestExtensions;
 using Microsoft.IdentityModel.TestUtils;
@@ -407,6 +408,74 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             return jsonWebTokenHandler.CreateToken(descriptor);
         }
 
+        [Fact]
+        public async Task ValidateTokenAsync_NoConfigurationManager_CompletesSynchronously()
+        {
+            // Arrange - keys are supplied directly, so no configuration is needed and nothing can suspend.
+            string token = testTokenCreator.CreateDefaultValidToken();
+            ValidationParameters validationParameters = CreateDefaultValidationParameters();
+
+            // Act
+            Task<ValidationResult<ValidatedToken, ValidationError>> validationTask =
+                ResultBasedHandler.ValidateTokenAsync(token, validationParameters, new CallContext(), default);
+
+            // Assert - the task is already complete before it is ever awaited, proving no async state machine suspended.
+            Assert.Equal(TaskStatus.RanToCompletion, validationTask.Status);
+            Assert.True((await validationTask).Succeeded);
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_CachedConfiguration_CompletesSynchronously()
+        {
+            // Arrange - the configuration peek hits, so ValidateTokenAsync must complete without suspending.
+            string token = testTokenCreator.CreateDefaultValidToken();
+            ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(audiences: ["http://Default.Audience.com"]);
+            validationParameters.ConfigurationManager = new PeekableConfigurationManager(CreateConfiguration());
+
+            // Act
+            Task<ValidationResult<ValidatedToken, ValidationError>> validationTask =
+                ResultBasedHandler.ValidateTokenAsync(token, validationParameters, new CallContext(), default);
+
+            // Assert
+            Assert.Equal(TaskStatus.RanToCompletion, validationTask.Status);
+            Assert.True((await validationTask).Succeeded);
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_CacheMissThenCacheHits_RetrievesConfigurationOnce()
+        {
+            // Arrange - a real ConfigurationManager with an empty cache and a counting retriever, so the first
+            // validation must retrieve configuration asynchronously and later validations must not retrieve again.
+            string token = testTokenCreator.CreateDefaultValidToken();
+            CountingConfigurationRetriever retriever = new CountingConfigurationRetriever(CreateConfiguration());
+            ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(audiences: ["http://Default.Audience.com"]);
+            validationParameters.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "lifecycle-metadata",
+                retriever);
+
+            // Act - cold call: the cache is empty, so the peek misses and the asynchronous path retrieves once.
+            Task<ValidationResult<ValidatedToken, ValidationError>> coldTask =
+                ResultBasedHandler.ValidateTokenAsync(token, validationParameters, new CallContext(), default);
+            ValidationResult<ValidatedToken, ValidationError> coldResult = await coldTask;
+
+            int retrievalsAfterColdCall = retriever.RetrievalCount;
+
+            // Act - warm calls: the cache is now primed, so each call must complete on the synchronous fast path.
+            for (int i = 0; i < 5; i++)
+            {
+                Task<ValidationResult<ValidatedToken, ValidationError>> warmTask =
+                    ResultBasedHandler.ValidateTokenAsync(token, validationParameters, new CallContext(), default);
+
+                Assert.Equal(TaskStatus.RanToCompletion, warmTask.Status);
+                Assert.True((await warmTask).Succeeded);
+            }
+
+            // Assert - exactly one retrieval for the cold call and none for any of the warm calls.
+            Assert.True(coldResult.Succeeded);
+            Assert.Equal(1, retrievalsAfterColdCall);
+            Assert.Equal(1, retriever.RetrievalCount);
+        }
+
         private static OpenIdConnectConfiguration CreateStaleConfiguration()
         {
             // A configuration whose signing key does not match the token, so signature validation fails recoverably.
@@ -488,6 +557,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public bool TryAdd(string nonce, DateTime expiresAt) => _cache.Add(nonce);
 
             public bool TryFind(string nonce) => _cache.Contains(nonce);
+        }
+
+        // Returns a fixed configuration without any I/O and counts how many times it was asked for one, so tests can
+        // prove that a cache miss retrieves exactly once and subsequent cache hits never retrieve again.
+        private sealed class CountingConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
+        {
+            private readonly OpenIdConnectConfiguration _configuration;
+            private int _retrievalCount;
+
+            public CountingConfigurationRetriever(OpenIdConnectConfiguration configuration)
+            {
+                _configuration = configuration;
+            }
+
+            public int RetrievalCount => Volatile.Read(ref _retrievalCount);
+
+            public Task<OpenIdConnectConfiguration> GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+            {
+                Interlocked.Increment(ref _retrievalCount);
+                return Task.FromResult(_configuration);
+            }
         }
 
         // A custom issuer validator that implements only the asynchronous IIssuerValidator (not

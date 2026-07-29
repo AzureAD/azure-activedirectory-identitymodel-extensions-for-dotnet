@@ -16,7 +16,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public partial class JsonWebTokenHandler : TokenHandler, IResultBasedValidation
     {
         /// <inheritdoc/>
-        public override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        /// <remarks>
+        /// This method is intentionally not declared <see langword="async"/>. When validation can complete without
+        /// obtaining configuration, it runs synchronously and returns an already-completed task, so no async state
+        /// machine is generated for the caller's request.
+        /// </remarks>
+        public override Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -24,50 +29,88 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             if (string.IsNullOrEmpty(token))
             {
-                return ValidationError.NullParameter(
-                    nameof(token),
-                    ValidationError.GetCurrentStackFrame());
+                return Task.FromResult<ValidationResult<ValidatedToken, ValidationError>>(
+                    ValidationError.NullParameter(
+                        nameof(token),
+                        ValidationError.GetCurrentStackFrame()));
             }
 
             if (validationParameters is null)
             {
-                return ValidationError.NullParameter(
-                    nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
+                return Task.FromResult<ValidationResult<ValidatedToken, ValidationError>>(
+                    ValidationError.NullParameter(
+                        nameof(validationParameters),
+                        ValidationError.GetCurrentStackFrame()));
             }
 
             if (token.Length > MaximumTokenSizeInBytes)
             {
-                return new ValidationError(
-                    new MessageDetail(
-                        TokenLogMessages.IDX10209,
-                        LogHelper.MarkAsNonPII(token.Length),
-                        LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
-                    ValidationFailureType.SecurityTokenTooLarge,
-                    ValidationError.GetCurrentStackFrame());
+                return Task.FromResult<ValidationResult<ValidatedToken, ValidationError>>(
+                    new ValidationError(
+                        new MessageDetail(
+                            TokenLogMessages.IDX10209,
+                            LogHelper.MarkAsNonPII(token.Length),
+                            LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
+                        ValidationFailureType.SecurityTokenTooLarge,
+                        ValidationError.GetCurrentStackFrame()));
             }
 
             ValidationResult<SecurityToken, ValidationError> readResult = ReadToken(token, callContext);
-            if (readResult.Succeeded)
+            if (!readResult.Succeeded)
             {
-                ValidationResult<ValidatedToken, ValidationError> validationResult = await ValidateTokenAsync(
-                    readResult.Result!,
-                    validationParameters,
-                    callContext,
-                    cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (validationResult.Succeeded)
-                    return validationResult; // No need to unwrap and re-wrap the result.
-
-                return validationResult.Error!.AddStackFrame(ValidationError.GetCurrentStackFrame());
+                return Task.FromResult<ValidationResult<ValidatedToken, ValidationError>>(
+                    readResult.Error!.AddCurrentStackFrame());
             }
 
-            return readResult.Error!.AddCurrentStackFrame();
+            Task<ValidationResult<ValidatedToken, ValidationError>> validationTask = ValidateTokenAsync(
+                readResult.Result!,
+                validationParameters,
+                callContext,
+                cancellationToken);
+
+            // The overwhelming majority of calls complete synchronously (no configuration needed, or a configuration
+            // cache hit), so unwrap the completed task inline rather than awaiting it and forcing a state machine.
+            if (validationTask.Status == TaskStatus.RanToCompletion)
+            {
+                // The task is already in the RanToCompletion state, so reading Result cannot block or throw.
+#pragma warning disable VSTHRD103 // Call async methods when in an async method
+                ValidationResult<ValidatedToken, ValidationError> validationResult = validationTask.Result;
+#pragma warning restore VSTHRD103
+                if (validationResult.Succeeded)
+                    return validationTask; // No need to unwrap and re-wrap the result.
+
+                return Task.FromResult<ValidationResult<ValidatedToken, ValidationError>>(
+                    validationResult.Error!.AddStackFrame(ValidationError.GetCurrentStackFrame()));
+            }
+
+            return AddStackFrameOnFailureAsync(validationTask);
+        }
+
+        // The task passed here was created by this type on the calling context; the threading analyzer cannot see that.
+#pragma warning disable VSTHRD003 // Avoid awaiting foreign Tasks
+        private static async Task<ValidationResult<ValidatedToken, ValidationError>> AddStackFrameOnFailureAsync(
+            Task<ValidationResult<ValidatedToken, ValidationError>> validationTask)
+        {
+            ValidationResult<ValidatedToken, ValidationError> validationResult =
+                await validationTask.ConfigureAwait(false);
+#pragma warning restore VSTHRD003
+
+            if (validationResult.Succeeded)
+                return validationResult;
+
+            return validationResult.Error!.AddStackFrame(ValidationError.GetCurrentStackFrame());
         }
 
         /// <inheritdoc/>
-        public override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        /// <remarks>
+        /// This method is intentionally not declared <see langword="async"/>. When configuration is not required (no
+        /// <see cref="BaseConfigurationManager"/> is set) or is already cached and fresh, the whole validation pipeline
+        /// runs synchronously and an already-completed task is returned; no async state machine, awaiter, or
+        /// per-await continuation is allocated. The asynchronous path is entered only when configuration must actually
+        /// be obtained (cache miss), when a recoverable failure requires refresh / last-known-good recovery, or when a
+        /// token replay cache is configured.
+        /// </remarks>
+        public override Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -75,26 +118,47 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             if (token is null)
             {
-                return ValidationError.NullParameter(
-                    nameof(token),
-                    ValidationError.GetCurrentStackFrame());
+                return Task.FromResult<ValidationResult<ValidatedToken, ValidationError>>(
+                    ValidationError.NullParameter(
+                        nameof(token),
+                        ValidationError.GetCurrentStackFrame()));
             }
 
             if (validationParameters is null)
             {
-                return ValidationError.NullParameter(
-                    nameof(validationParameters),
-                    ValidationError.GetCurrentStackFrame());
+                return Task.FromResult<ValidationResult<ValidatedToken, ValidationError>>(
+                    ValidationError.NullParameter(
+                        nameof(validationParameters),
+                        ValidationError.GetCurrentStackFrame()));
             }
 
             if (token is not JsonWebToken jsonWebToken)
             {
-                return new ValidationError(
-                    new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
-                    ValidationFailureType.SecurityTokenNotExpectedType,
-                    ValidationError.GetCurrentStackFrame());
+                return Task.FromResult<ValidationResult<ValidatedToken, ValidationError>>(
+                    new ValidationError(
+                        new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
+                        ValidationFailureType.SecurityTokenNotExpectedType,
+                        ValidationError.GetCurrentStackFrame()));
             }
 
+            if (TryValidateTokenSynchronously(
+                    jsonWebToken,
+                    validationParameters,
+                    callContext,
+                    out ValidationResult<ValidatedToken, ValidationError> result))
+            {
+                return Task.FromResult(result);
+            }
+
+            return ValidateTokenCoreAsync(jsonWebToken, validationParameters, callContext, cancellationToken);
+        }
+
+        private async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenCoreAsync(
+            JsonWebToken jsonWebToken,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
             BaseConfiguration? currentConfiguration =
                 await GetCurrentConfigurationAsync(validationParameters, cancellationToken).ConfigureAwait(false);
 
@@ -461,59 +525,97 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
-            // Token replay validation has a side effect: it records the token in the replay cache (ITokenReplayCache.TryAdd).
-            // The synchronous fast path may validate speculatively and then fall back to the asynchronous path on a
-            // recoverable failure (e.g. a rotated signing key), which would run replay validation a second time and cause
-            // the token to be spuriously reported as replayed. When a replay cache is configured, route straight to the
-            // asynchronous path so replay validation runs exactly once.
-            if (validationParameters.TokenReplayCache is not null)
+            if (TryValidateTokenSynchronously(
+                    jsonWebToken,
+                    validationParameters,
+                    callContext,
+                    out ValidationResult<ValidatedToken, ValidationError> result))
             {
-                return ValidateTokenAsync(token, validationParameters, callContext, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                return result;
             }
 
-            BaseConfigurationManager? configurationManager = validationParameters.ConfigurationManager;
+            // Configuration must be obtained, or refresh / last-known-good recovery is required. Both are asynchronous
+            // today, so this is the one place the synchronous contract blocks. True synchronous configuration retrieval
+            // is tracked separately; see the #3459 scope notes.
+            return ValidateTokenAsync(token, validationParameters, callContext, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
 
-            // The synchronous fast path is available only when configuration is not needed (no ConfigurationManager)
-            // or is already cached and fresh (peek hit). On a peek miss the configuration must be fetched, which is
-            // asynchronous; route those (rare) calls to the untouched async path so miss/refresh/LKG behavior is preserved.
+        /// <summary>
+        /// Runs the validation pipeline synchronously when it can complete without obtaining configuration.
+        /// </summary>
+        /// <param name="jsonWebToken">The token to validate.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
+        /// <param name="result">When this method returns <see langword="true"/>, the final validation result.</param>
+        /// <returns>
+        /// <see langword="true"/> when <paramref name="result"/> is final; <see langword="false"/> when the caller must
+        /// use the asynchronous path because configuration has to be obtained, a recoverable failure needs
+        /// refresh / last-known-good recovery, or a token replay cache is configured.
+        /// </returns>
+        /// <remarks>
+        /// This is the single implementation of the cache-hit fast path. Both
+        /// <see cref="ValidateTokenAsync(SecurityToken, ValidationParameters, CallContext, CancellationToken)"/> and
+        /// <see cref="ValidateToken(SecurityToken, ValidationParameters, CallContext)"/> call it so the two entry points
+        /// cannot drift. It never blocks, fetches, or refreshes.
+        /// </remarks>
+        private bool TryValidateTokenSynchronously(
+            JsonWebToken jsonWebToken,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            out ValidationResult<ValidatedToken, ValidationError> result)
+        {
+            result = default;
+
+            // Token replay validation has a side effect: it records the token in the replay cache (ITokenReplayCache.TryAdd).
+            // The synchronous fast path may validate speculatively and then hand off to the asynchronous path on a
+            // recoverable failure, which would run replay validation a second time and cause the token to be spuriously
+            // reported as replayed. When a replay cache is configured, defer to the asynchronous path so replay
+            // validation runs exactly once.
+            if (validationParameters.TokenReplayCache is not null)
+                return false;
+
+            // The fast path is available only when configuration is not needed (no ConfigurationManager) or is already
+            // cached and fresh (peek hit). On a peek miss the configuration must be fetched, which is asynchronous.
+            BaseConfigurationManager? configurationManager = validationParameters.ConfigurationManager;
             BaseConfiguration? currentConfiguration = null;
             if (configurationManager is not null && !configurationManager.TryGetCurrentConfiguration(out currentConfiguration))
-            {
-                return ValidateTokenAsync(token, validationParameters, callContext, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
-            }
+                return false;
 
-            ValidationResult<ValidatedToken, ValidationError> result = jsonWebToken.IsEncrypted ?
+            ValidationResult<ValidatedToken, ValidationError> validationResult = jsonWebToken.IsEncrypted ?
                 ValidateJWE(jsonWebToken, validationParameters, currentConfiguration, callContext) :
                 ValidateJWS(jsonWebToken, validationParameters, currentConfiguration, callContext);
 
             if (configurationManager is null)
             {
-                if (result.Succeeded)
-                    return result;
+                result = validationResult.Succeeded ?
+                    validationResult :
+                    validationResult.Error!.AddStackFrame(ValidationError.GetCurrentStackFrame());
 
-                return result.Error!.AddStackFrame(ValidationError.GetCurrentStackFrame());
+                return true;
             }
 
-            if (result.Succeeded)
+            if (validationResult.Succeeded)
             {
                 // Set current configuration as LKG if it exists.
                 if (currentConfiguration is not null)
                     configurationManager.LastKnownGoodConfiguration = currentConfiguration;
 
-                return result;
+                result = validationResult;
+                return true;
             }
 
-            // On a recoverable failure (e.g. a signing key rotated within the cached-but-fresh window) route to the
-            // asynchronous path so its refresh-and-retry + last-known-good recovery runs; that recovery is never duplicated here.
-            if (TokenUtilities.IsRecoverableFailureType(result.Error!.FailureType, (currentConfiguration != null && currentConfiguration.TokenDecryptionKeys.Count > 0)))
+            // A recoverable failure (for example a signing key that rotated within the cached-but-fresh window) needs the
+            // asynchronous refresh-and-retry plus last-known-good recovery; that recovery is never duplicated here.
+            if (TokenUtilities.IsRecoverableFailureType(
+                    validationResult.Error!.FailureType,
+                    currentConfiguration is not null && currentConfiguration.TokenDecryptionKeys.Count > 0))
             {
-                return ValidateTokenAsync(token, validationParameters, callContext, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                return false;
             }
 
-            return result.Error!.AddCurrentStackFrame();
+            result = validationResult.Error!.AddCurrentStackFrame();
+            return true;
         }
 
         private ValidationResult<ValidatedToken, ValidationError> ValidateJWE(
