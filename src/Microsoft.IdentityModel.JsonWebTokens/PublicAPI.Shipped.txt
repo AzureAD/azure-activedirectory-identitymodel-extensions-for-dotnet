@@ -1,4 +1,5 @@
 #nullable enable
+~virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReplaceTokenHeader(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jsonWebToken, string encodedHeader) -> Microsoft.IdentityModel.JsonWebTokens.JsonWebToken
 const Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.Json = "JSON" -> string
 const Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.JsonArray = "JSON_ARRAY" -> string
 const Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.JsonNull = "JSON_NULL" -> string
