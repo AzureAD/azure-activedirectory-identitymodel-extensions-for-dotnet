@@ -101,6 +101,16 @@ namespace Microsoft.IdentityModel.Tokens
     internal delegate ValueTask<string> IssuerValidatorAsync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
+    /// Synchronously validates the issuer of the security token.
+    /// </summary>
+    /// <param name="issuer">The issuer to be validated.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+    /// <returns>The validated issuer to use when creating claims.</returns>
+    /// <remarks>The delegate should return a non-null string that represents the issuer. If null, a default value will be used. This is the synchronous counterpart of <see cref="IssuerValidatorAsync"/>.</remarks>
+    internal delegate string IssuerValidatorSync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Validates the lifetime of the security token.
     /// </summary>
     /// <param name="notBefore">The 'not before' time found in the <see cref="SecurityToken"/>.</param>

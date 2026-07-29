@@ -75,6 +75,24 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     }
 
     /// <summary>
+    /// Interface for synchronously validating token issuers.
+    /// </summary>
+    public interface IIssuerValidatorSync
+    {
+        /// <summary>
+        /// Synchronous method to validate the issuer value in a token.
+        /// </summary>
+        /// <param name="issuer">The issuer to validate.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> that contains the results of validating the issuer.</returns>
+        /// <remarks>This method is not expected to throw.</remarks>
+        ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerSync(string issuer, SecurityToken securityToken, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken);
+    }
+
+    /// <summary>
     /// Interface for validating signature keys.
     /// </summary>
     public interface ISignatureKeyValidator
