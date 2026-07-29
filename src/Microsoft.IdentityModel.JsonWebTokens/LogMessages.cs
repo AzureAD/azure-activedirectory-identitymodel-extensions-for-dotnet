@@ -52,6 +52,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14310 = "IDX14310: JWE authentication tag is missing.";
         internal const string IDX14311 = "IDX14311: Unable to decode the authentication tag as a Base64Url encoded string.";
         internal const string IDX14312 = "IDX14312: Unable to decode the cipher text as a Base64Url encoded string.";
-        internal const string IDX14313 = "IDX14313: Unable to serialize/deserialize act claim. Maximum actor token depth reached. Current nesting depth is {0} while max depth set is {1}";
+        internal const string IDX14317 = "IDX14317: JsonWebTokenHandler.MaxActorChainLength must be greater than or equal to 1. Value provided was: '{0}'.";
     }
 }

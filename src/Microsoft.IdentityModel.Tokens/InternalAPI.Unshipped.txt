@@ -111,9 +111,8 @@ virtual Microsoft.IdentityModel.Tokens.TokenHandler.CreateClaimsIdentityInternal
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
 virtual Microsoft.IdentityModel.Tokens.ValidationError.CreateException() -> System.Exception
-Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorChainDepth.get -> int
-Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.ActorChainDepth.set -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.MaxActorChainLength.get -> int
+Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.CurrentActorChainLength.get -> int?
+Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.CurrentActorChainLength.set -> void
 ~Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.MlDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, bool usePrivateKey) -> void
 static Microsoft.IdentityModel.Tokens.MlDsaAdapter.CreateMlDsa(Microsoft.IdentityModel.Tokens.JsonWebKey jsonWebKey, bool usePrivateKey) -> System.Security.Cryptography.MLDsa
 static Microsoft.IdentityModel.Tokens.MlDsaAdapter.GetMLDsaAlgorithm(string algorithm) -> System.Security.Cryptography.MLDsaAlgorithm

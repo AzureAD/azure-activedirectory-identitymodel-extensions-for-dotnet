@@ -32,6 +32,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // registered claims such as iss/aud/exp.
         internal const string ActClaimType = "act";
 
+        private static int s_maxActorChainLength = 1;
+
+        /// <summary>
+        /// Gets or sets the maximum number of nested actor ("act") levels that are materialized
+        /// as JSON objects during token creation and read back into <see cref="System.Security.Claims.ClaimsIdentity.Actor"/>
+        /// during token validation.
+        /// </summary>
+        /// <remarks>
+        /// <para>This is a process-wide ("Wilson-level") setting shared by serialization and
+        /// deserialization so a token written by this handler round-trips consistently. The default is 1.</para>
+        /// <para>On serialization, actors nested deeper than this value are written as a JSON-text string
+        /// (never a JWT) instead of a nested object. On deserialization, actor levels beyond this value are
+        /// retained as claims and are not expanded into the <c>Actor</c> chain, consistent with RFC 8693
+        /// (nested/prior actors are informational only).</para>
+        /// </remarks>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the value is less than 1.</exception>
+        public static int MaxActorChainLength
+        {
+            get => s_maxActorChainLength;
+            set
+            {
+                if (value < 1)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                        nameof(value),
+                        LogHelper.FormatInvariant(LogMessages.IDX14317, LogHelper.MarkAsNonPII(value))));
+
+                s_maxActorChainLength = value;
+            }
+        }
+
         /// <summary>
         /// Creates an unsigned JSON Web Signature (JWS).
         /// </summary>
@@ -766,7 +796,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
             if (isActorFound || tokenDescriptor.Subject?.Actor != null)
-                WriteActorToken(ref writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+                WriteActor(ref writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
@@ -1084,59 +1114,72 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
         }
-        internal static void WriteActorToken(
+
+        // Writes the actor as the RFC 8693 "act" claim. The actor is taken from the "act" entry in
+        // SecurityTokenDescriptor.Claims when it is a ClaimsIdentity, otherwise from Subject.Actor.
+        // While actor object levels remain, the actor is written as a nested JSON object; once the
+        // limit is reached, the remaining actor subtree is written as a JSON-text string (never a JWT).
+        internal static void WriteActor(
             ref Utf8JsonWriter writer,
             SecurityTokenDescriptor tokenDescriptor,
             bool setDefaultTimesOnTokenCreation,
             int tokenLifetimeInMinutes)
         {
-            var actorTokenDescriptor = CreateActorTokenDescriptor(tokenDescriptor);
-            if (actorTokenDescriptor == null || actorTokenDescriptor.Subject == null)
+            ClaimsIdentity actor = GetActorIdentity(tokenDescriptor);
+            if (actor == null)
                 return;
 
-            writer.WritePropertyName(ActClaimType);
-            WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
-        }
+            // The remaining actor object levels are carried on the descriptor as it flows down the
+            // recursion. The caller's top-level descriptor leaves it unset, so it seeds from the
+            // process-wide MaxActorChainLength; only the internal per-level actor descriptors created
+            // below are ever stamped, so the caller's descriptor is never mutated.
+            int remainingActorLevels = tokenDescriptor.CurrentActorChainLength ?? MaxActorChainLength;
 
-        private static void ValidateActorChainDepth(SecurityTokenDescriptor tokenDescriptor)
-        {
-            if (tokenDescriptor.ActorChainDepth >= tokenDescriptor.MaxActorChainLength)
+            writer.WritePropertyName(ActClaimType);
+
+            if (remainingActorLevels > 0)
             {
-                throw LogHelper.LogExceptionMessage(
-                new SecurityTokenException(LogHelper.FormatInvariant(
-                    LogMessages.IDX14313,
-                    LogHelper.MarkAsNonPII(tokenDescriptor.ActorChainDepth),
-                    LogHelper.MarkAsNonPII(tokenDescriptor.MaxActorChainLength))));
+                // Within the limit: write the actor as a nested JSON object and recurse. The child
+                // descriptor carries one fewer level so nested actors degrade once the limit is hit.
+                var actorTokenDescriptor = new SecurityTokenDescriptor { Subject = actor, CurrentActorChainLength = remainingActorLevels - 1 };
+                WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+            }
+            else
+            {
+                // Beyond the limit: write the remaining actor subtree as a JSON-text string.
+                var actorTokenDescriptor = new SecurityTokenDescriptor { Subject = actor };
+                writer.WriteStringValue(WriteActorAsJsonString(actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes));
             }
         }
 
-        private static SecurityTokenDescriptor CreateActorTokenDescriptor(SecurityTokenDescriptor tokenDescriptor)
+        // Returns the actor ClaimsIdentity for the descriptor: the "act" entry in Claims when it is a
+        // ClaimsIdentity (takes precedence), otherwise Subject.Actor. A non-ClaimsIdentity "act" claim
+        // is written verbatim by the normal claim loop and is not treated as a structured actor here.
+        private static ClaimsIdentity GetActorIdentity(SecurityTokenDescriptor tokenDescriptor)
         {
-            SecurityTokenDescriptor actorTokenDescriptor = null;
-
             if (tokenDescriptor.Claims?.TryGetValue(ActClaimType, out object actorValue) == true
                 && actorValue is ClaimsIdentity actorIdentity)
-            {
-                actorTokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = actorIdentity,
-                };
-            }
-            // Then check for actor in subject
-            else if (tokenDescriptor.Subject?.Actor != null)
-            {
-                actorTokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = tokenDescriptor.Subject.Actor,
-                };
-            }
-            if (actorTokenDescriptor != null)
-            {
-                ValidateActorChainDepth(tokenDescriptor);
-                actorTokenDescriptor.ActorChainDepth = tokenDescriptor.ActorChainDepth + 1;
-            }
+                return actorIdentity;
 
-            return actorTokenDescriptor;
+            return tokenDescriptor.Subject?.Actor;
+        }
+
+        // Serializes an actor descriptor (and its full nested actor chain, as nested objects) to a
+        // JSON-text string used when the actor chain exceeds the configured MaxActorChainLength.
+        private static string WriteActorAsJsonString(
+            SecurityTokenDescriptor actorTokenDescriptor,
+            bool setDefaultTimesOnTokenCreation,
+            int tokenLifetimeInMinutes)
+        {
+            // int.MaxValue: fully expand the remaining subtree as nested objects within the string.
+            actorTokenDescriptor.CurrentActorChainLength = int.MaxValue;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Utf8JsonWriter actorWriter = new Utf8JsonWriter(stream);
+                WriteJwsPayload(ref actorWriter, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+                actorWriter.Flush();
+                return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
+            }
         }
 
         internal static byte[] CompressToken(byte[] utf8Bytes, string compressionAlgorithm)
