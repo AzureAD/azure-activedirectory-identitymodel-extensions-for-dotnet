@@ -3,8 +3,8 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 9.0.0
 ====
 ## Bug Fixes
-- Align Signed HTTP Request `p` (path) claim comparison with RFC 3986 section 3.3 by comparing the path case-sensitively; previously `/Admin/resource` matched `/admin/resource`. An AppContext opt out is available during transition. See [PR #3526](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3526).
-- Normalize hexadecimal letter casing inside percent-encoded triplets during Signed HTTP Request `p` claim validation. Literal path-letter comparison remains controlled by `UseCaseSensitivePClaimComparison`, and `p` claim creation output is unchanged.
+- Compare Signed HTTP Request `p` claim paths case-sensitively by default. Configure with `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison`; the legacy AppContext setting seeds its initial value. See [PR #3539](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3539).
+- Ignore hexadecimal casing in percent-encoded `p` claim path triplets.
 
 7.7.2
 ====

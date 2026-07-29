@@ -82,6 +82,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// </summary>
     public class SignedHttpRequestValidationParameters
     {
+        internal const bool DefaultUseCaseSensitivePClaimComparison = true;
+        internal const string UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison";
         private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
         private TokenHandler _tokenHandler = new JsonWebTokenHandler();
         private ICollection<string> _allowedDomainsForJkuRetrieval;
@@ -242,6 +244,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public bool ValidateP { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.P"/> claim is compared
+        /// case-sensitively with the request path.
+        /// </summary>
+        /// <remarks>
+        /// The default is <see langword="true"/>. If the AppContext switch
+        /// "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" is configured before
+        /// this instance is created, its value is used as the initial value. Assigning this property overrides that
+        /// initial value. AppContext changes made after construction do not affect this instance.
+        /// </remarks>
+        public bool UseCaseSensitivePClaimComparison { get; set; } = GetUseCaseSensitivePClaimComparison();
+
+        /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Q"/> claim should be validated or not.
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
@@ -266,5 +280,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Allows for validation of a claim if present, even if the validation option for the claim is set to <c>false</c>.
         /// </remarks>
         public bool ValidatePresentClaims { get; set; }
+
+        private static bool GetUseCaseSensitivePClaimComparison()
+        {
+            return AppContext.TryGetSwitch(UseCaseSensitivePClaimComparisonSwitch, out bool useCaseSensitivePClaimComparison)
+                ? useCaseSensitivePClaimComparison
+                : DefaultUseCaseSensitivePClaimComparison;
+        }
     }
 }

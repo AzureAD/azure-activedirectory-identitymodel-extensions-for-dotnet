@@ -18,6 +18,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
+    [Collection("SignedHttpRequest Configuration")]
     public class SignedHttpRequestValidationTests
     {
         [Fact]
@@ -319,7 +320,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Theory, MemberData(nameof(ValidatePClaimTheoryData), DisableDiscoveryEnumeration = true)]
-        [ResetAppContextSwitches]
         public void ValidatePClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidatePClaim", theoryData);
@@ -339,17 +339,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Fact]
-        [ResetAppContextSwitches]
-        public void ValidatePClaim_IsCaseInsensitive_WhenSwitchDisabled()
+        public void ValidatePClaim_IsCaseInsensitive_WhenConfigurationDisabled()
         {
             // Arrange - request path and signed 'p' claim differ by literal case and percent-triplet hex case.
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, false);
             var handler = new SignedHttpRequestHandler();
             var theoryData = new ValidateSignedHttpRequestTheoryData
             {
                 HttpRequestUri = new Uri("https://www.contoso.com/Foo%2Fbar"),
                 SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
             };
+            theoryData.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison = false;
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             // Act
@@ -360,17 +359,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Fact]
-        [ResetAppContextSwitches]
-        public void ValidatePClaim_IsCaseSensitive_WhenSwitchEnabled()
+        public void ValidatePClaim_IsCaseSensitive_WhenConfigurationEnabled()
         {
             // Arrange - request path and signed 'p' claim differ by literal case and percent-triplet hex case.
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, true);
             var handler = new SignedHttpRequestHandler();
             var theoryData = new ValidateSignedHttpRequestTheoryData
             {
                 HttpRequestUri = new Uri("https://www.contoso.com/Foo%2Fbar"),
                 SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
             };
+            theoryData.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison = true;
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             // Act
@@ -403,17 +401,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [InlineData("/foo%2Fbar", "/foo/bar", true, false)]
         [InlineData("/fooABC", "/fooAB%", false, false)]
         [InlineData("/fooABCD", "/fooAB%2", false, false)]
-        [ResetAppContextSwitches]
         public void ValidatePClaim_ComparisonMatrix(string requestPath, string pClaim, bool useCaseSensitiveComparison, bool expectedValid)
         {
             // Arrange
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, useCaseSensitiveComparison);
             var handler = new SignedHttpRequestHandler();
             var theoryData = new ValidateSignedHttpRequestTheoryData
             {
                 HttpRequestUri = new Uri($"https://www.contoso.com{requestPath}"),
                 SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, pClaim)),
             };
+            theoryData.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison = useCaseSensitiveComparison;
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             // Act
@@ -429,17 +426,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        [ResetAppContextSwitches]
         public void ValidatePClaim_PreservesPercentEncodingHexCaseInException(bool useCaseSensitiveComparison)
         {
             // Arrange
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, useCaseSensitiveComparison);
             var handler = new SignedHttpRequestHandler();
             var theoryData = new ValidateSignedHttpRequestTheoryData
             {
                 HttpRequestUri = new Uri("https://www.contoso.com/Expected%2fPath"),
                 SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/Actual%2aPath")),
             };
+            theoryData.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison = useCaseSensitiveComparison;
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             // Act

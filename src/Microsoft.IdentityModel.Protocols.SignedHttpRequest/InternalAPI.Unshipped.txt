@@ -1,0 +1,2 @@
+const Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.DefaultUseCaseSensitivePClaimComparison = true -> bool
+const Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" -> string
