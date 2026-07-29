@@ -208,8 +208,8 @@ namespace Microsoft.IdentityModel.Protocols
         /// </remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
-                return _currentConfiguration;
+            if (TryGetCurrentConfigurationCore(out T cachedConfiguration))
+                return cachedConfiguration;
 
             if (AppContextSwitches.UpdateConfigAsBlocking)
                 return await GetConfigurationWithBlockingAsync(cancel).ConfigureAwait(false);
@@ -469,6 +469,43 @@ namespace Microsoft.IdentityModel.Protocols
             T obj = await GetConfigurationAsync(cancel).ConfigureAwait(false);
             return obj as BaseConfiguration;
         }
+
+        // Shared cache-hit predicate used by both the asynchronous fast path (GetConfigurationAsync) and the
+        // synchronous peek (TryGetCurrentConfiguration) so the two can never drift. The reference is read once
+        // (reference-atomic) so a concurrent background refresh swapping _currentConfiguration cannot tear the
+        // result; any miss (null, or past the refresh backoff window) is reported as false.
+        private bool TryGetCurrentConfigurationCore(out T configuration)
+        {
+            T current = _currentConfiguration;
+            if (current != null && _syncAfter > TimeProvider.GetUtcNow())
+            {
+                configuration = current;
+                return true;
+            }
+
+            configuration = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Synchronously returns the currently cached configuration when it is present and still within the automatic
+        /// refresh window, without awaiting, fetching, or refreshing.
+        /// </summary>
+        /// <param name="configuration">When this method returns <see langword="true"/>, the cached configuration; otherwise <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> on a cache hit; otherwise <see langword="false"/> (the caller should fall back to the asynchronous path).</returns>
+#nullable enable
+        public override bool TryGetCurrentConfiguration(out BaseConfiguration? configuration)
+        {
+            if (TryGetCurrentConfigurationCore(out T current) && current is BaseConfiguration baseConfiguration)
+            {
+                configuration = baseConfiguration;
+                return true;
+            }
+
+            configuration = null;
+            return false;
+        }
+#nullable restore
 
         /// <summary>
         /// Triggers updating metadata when:

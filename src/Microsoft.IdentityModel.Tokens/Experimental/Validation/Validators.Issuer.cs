@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10212,
                         LogHelper.MarkAsNonPII(issuer),
-                        "ValdIssuers is empty",
+                        "ValidIssuers is empty",
                         LogHelper.MarkAsNonPII(configuration?.Issuer)
                         ),
                     IssuerValidationFailure.NoValidationParameterIssuersProvided,
@@ -167,6 +167,161 @@ namespace Microsoft.IdentityModel.Tokens
                 IssuerValidationFailure.ValidationFailed,
                 ValidationError.GetCurrentStackFrame(),
                 issuer);
+        }
+
+        /// <summary>
+        /// Synchronously determines if an issuer found in a <see cref="SecurityToken"/> is valid, using the already-resolved
+        /// <paramref name="configuration"/> instead of fetching it.
+        /// </summary>
+        /// <param name="issuer">The issuer to validate.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="configuration">The already-resolved <see cref="BaseConfiguration"/> (peeked from the cache), or <see langword="null"/>.</param>
+        /// <param name="callContext"></param>
+        /// <returns>A <see cref="ValidationResult{ValidatedIssuer, ValidationError}"/> that contains either the issuer that was validated or an error.</returns>
+        /// <remarks>An EXACT match is required. This is the synchronous counterpart of <c>ValidateIssuerAsync</c>; it performs no configuration fetch (the caller supplies the peeked configuration) which also collapses the double configuration fetch on the synchronous path.</remarks>
+        public static ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuer(
+            string? issuer,
+#pragma warning disable CA1801 // Review unused parameters
+            SecurityToken? securityToken,
+            ValidationParameters validationParameters,
+            BaseConfiguration? configuration,
+            CallContext? callContext)
+#pragma warning restore CA1801 // Review unused parameters
+        {
+            if (string.IsNullOrWhiteSpace(issuer))
+            {
+                return new IssuerValidationError(
+                    new MessageDetail(LogMessages.IDX10211),
+                    IssuerValidationFailure.NoIssuerInToken,
+                    ValidationError.GetCurrentStackFrame(),
+                    issuer,
+                    null);
+            }
+
+            if (validationParameters == null)
+                return new IssuerValidationError(
+                    MessageDetail.NullParameter(nameof(validationParameters)),
+                    ValidationFailureType.NullArgument,
+                    ValidationError.GetCurrentStackFrame(),
+                    issuer,
+                    null);
+
+            // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
+            if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
+                return new IssuerValidationError(
+                    new MessageDetail(
+                        LogMessages.IDX10212,
+                        LogHelper.MarkAsNonPII(issuer),
+                        "ValidIssuers is empty",
+                        LogHelper.MarkAsNonPII(configuration?.Issuer)
+                        ),
+                    IssuerValidationFailure.NoValidationParameterIssuersProvided,
+                    ValidationError.GetCurrentStackFrame(),
+                    issuer);
+
+            if (configuration != null)
+            {
+                if (string.Equals(configuration.Issuer, issuer))
+                {
+                    return new ValidatedIssuer(
+                            issuer!,
+                            IssuerValidationSource.IssuerMatchedConfiguration);
+                }
+            }
+
+            if (validationParameters.ValidIssuers.Count != 0)
+            {
+                for (int i = 0; i < validationParameters.ValidIssuers.Count; i++)
+                {
+                    if (string.IsNullOrEmpty(validationParameters.ValidIssuers[i]))
+                    {
+                        continue;
+                    }
+
+                    if (string.Equals(validationParameters.ValidIssuers[i], issuer))
+                        return new ValidatedIssuer(
+                            issuer!,
+                            IssuerValidationSource.IssuerMatchedValidationParameters);
+                }
+            }
+
+            return new IssuerValidationError(
+                new MessageDetail(
+                    LogMessages.IDX10212,
+                    LogHelper.MarkAsNonPII(issuer),
+                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
+                    LogHelper.MarkAsNonPII(configuration?.Issuer)),
+                IssuerValidationFailure.ValidationFailed,
+                ValidationError.GetCurrentStackFrame(),
+                issuer);
+        }
+
+        /// <summary>
+        /// Synchronous counterpart of <see cref="ValidateIssuerInternalAsync"/>. Invokes the configured issuer validator
+        /// synchronously via <see cref="Experimental.ISynchronousIssuerValidator"/> when supported.
+        /// </summary>
+        /// <param name="issuer">The issuer to validate.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="configuration">The already-resolved <see cref="BaseConfiguration"/> (peeked from the cache), or <see langword="null"/>.</param>
+        /// <param name="callContext"></param>
+        /// <returns>A <see cref="ValidationResult{ValidatedIssuer, ValidationError}"/> that contains either the issuer that was validated or an error.</returns>
+        internal static ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerInternal(
+            string issuer,
+            SecurityToken securityToken,
+            ValidationParameters validationParameters,
+            BaseConfiguration? configuration,
+            CallContext callContext)
+        {
+            if (validationParameters == null)
+                return new IssuerValidationError(
+                    MessageDetail.NullParameter(nameof(validationParameters)),
+                    ValidationFailureType.NullArgument,
+                    ValidationError.GetCurrentStackFrame(),
+                    issuer,
+                    null);
+
+            try
+            {
+                ValidationResult<ValidatedIssuer, ValidationError> result;
+                if (validationParameters.IssuerValidatorAsync is ISynchronousIssuerValidator synchronousIssuerValidator)
+                {
+                    result = synchronousIssuerValidator.ValidateIssuer(
+                        issuer,
+                        securityToken,
+                        validationParameters,
+                        configuration,
+                        callContext);
+                }
+                else
+                {
+                    // A custom async-only issuer validator is configured. Issuer validation itself does no I/O
+                    // (the configuration is already resolved), so completing it synchronously does not block on a fetch.
+                    result = validationParameters.IssuerValidatorAsync.ValidateIssuerAsync(
+                        issuer,
+                        securityToken,
+                        validationParameters,
+                        callContext,
+                        CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                }
+
+                if (!result.Succeeded)
+                    return result.Error!.AddCurrentStackFrame();
+
+                return result;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new IssuerValidationError(
+                    new MessageDetail(LogMessages.IDX10269),
+                    IssuerValidationFailure.ValidatorThrew,
+                    ValidationError.GetCurrentStackFrame(),
+                    issuer,
+                    ex);
+            }
         }
     }
 }

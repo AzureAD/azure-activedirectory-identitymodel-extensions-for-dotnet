@@ -95,6 +95,26 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(GetType().FullName))));
         }
 
+#nullable enable
+        /// <summary>
+        /// Attempts to synchronously return the currently cached <see cref="BaseConfiguration"/> without triggering a
+        /// network refresh or any I/O.
+        /// </summary>
+        /// <param name="configuration">When this method returns <see langword="true"/>, contains the cached configuration; otherwise <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> if a fresh, cached configuration is available synchronously; otherwise <see langword="false"/>.</returns>
+        /// <remarks>
+        /// The base implementation always returns <see langword="false"/> so existing subclasses remain unaffected and callers
+        /// fall back to <see cref="GetBaseConfigurationAsync(CancellationToken)"/>. Subclasses that cache configuration override
+        /// this to expose a synchronous cache-hit fast path. This method must never block, refresh, or fetch; a cache miss is
+        /// reported as <see langword="false"/>.
+        /// </remarks>
+        public virtual bool TryGetCurrentConfiguration(out BaseConfiguration? configuration)
+        {
+            configuration = null;
+            return false;
+        }
+#nullable restore
+
         /// <summary>
         /// Gets all valid last known good configurations.
         /// </summary>

@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+Unreleased
+====
+## Experimental
+- (POC, issue [#3459](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3459)) Add a synchronous, result-based validation fast path to the experimental model: `BaseConfigurationManager.TryGetCurrentConfiguration`, `ISynchronousIssuerValidator` / `Validators.ValidateIssuer`, and `JsonWebTokenHandler.ValidateToken(...)`. On a configuration cache hit (or when no `ConfigurationManager` is set) validation runs fully synchronously; a cache miss or a recoverable failure falls back to `ValidateTokenAsync`. Experimental surface only; the shipped `TokenValidationParameters` path is unchanged.
+
 7.7.2
 ====
 ## Bug Fixes
