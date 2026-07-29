@@ -538,6 +538,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedClaimValue = $"{{\"q\":[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]}}",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1")
                     },
+                    new CreateSignedHttpRequestTheoryData("ValidQ_MultiEquals_IncludedInQClaim")
+                    {
+                        // A param whose value contains '=' (e.g. base64-padded) must be included
+                        // in the q claim with the full value (name="sig", value="YWJjZA==").
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Q,
+                        ExpectedClaimValue = $"{{\"q\":[[\"sig\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("sig=YWJjZA==")}\"]}}",
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?sig=YWJjZA==")
+                    },
                     new CreateSignedHttpRequestTheoryData("ValidNoQueryParams1")
                     {
                         ExpectedClaim = SignedHttpRequestClaimTypes.Q,

@@ -1363,14 +1363,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         continue;
                     queryParamName = splitQueryParam[0];
                     queryParamValue = splitQueryParam[1];
+                    // The old code dropped empty-value params (else if (!string.IsNullOrEmpty(queryParamValue))).
+                    // Match that behavior so the legacy switch faithfully restores pre-8.19.x semantics.
+                    if (string.IsNullOrEmpty(queryParamValue))
+                        continue;
                 }
                 else if (separatorIndex > 0)
                 {
                     queryParamName = queryParamValuePair.Substring(0, separatorIndex);
                     queryParamValue = queryParamValuePair.Substring(separatorIndex + 1);
-                    // Under the old parsing, a value containing '=' (multi-separator) was dropped.
-                    // Flag it so the rejection warning can indicate the new parsing may be the cause.
-                    if (queryParamValue.IndexOf('=') >= 0)
+                    // Under the old parsing, a value containing '=' (multi-separator) was dropped,
+                    // and empty-value params (name=) were also dropped. Flag both cases.
+                    if (queryParamValue.IndexOf('=') >= 0 || queryParamValue.Length == 0)
                         hadPreviouslyDroppedParam = true;
                 }
                 else if (separatorIndex < 0 && queryParamValuePair.Length > 0)

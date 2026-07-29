@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -770,6 +772,61 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var ctx = theoryData.BuildSignedHttpRequestValidationContext();
             var ex = Record.Exception(() => handler.ValidateQClaim(theoryData.SignedHttpRequestToken, ctx));
             Assert.Null(ex);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void ValidateQClaim_LegacySwitch_DropsEmptyValueParam()
+        {
+            // Under UseLegacyQueryParamParsing=true, empty-value params (name=) must be dropped
+            // to match pre-8.19.x behavior. A client signing with legacy behavior excludes name2
+            // from the q hash; a server validating with the legacy switch must do the same or
+            // rolling-upgrade hash mismatches will occur.
+            AppContext.SetSwitch(AppContextSwitches.UseLegacyQueryParamParsingSwitch, true);
+            var handler = new SignedHttpRequestHandler();
+
+            // Token covers only name1; name2= is dropped under legacy mode.
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestUri = new Uri("https://www.contoso.com/path1?name1=value1&name2="),
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(
+                    new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"name1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("name1=value1")}\"]"))),
+                SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters
+                {
+                    AcceptUnsignedQueryParameters = true,
+                },
+            };
+            var ctx = theoryData.BuildSignedHttpRequestValidationContext();
+            var ex = Record.Exception(() => handler.ValidateQClaim(theoryData.SignedHttpRequestToken, ctx));
+            Assert.Null(ex);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void ValidateQClaim_IDX23039_EmittedWhenPreviouslyDroppedParamCausesRejection()
+        {
+            // IDX23039 must be logged (before IDX23029) when a param that was previously dropped
+            // under the old parsing is the reason AcceptUnsignedQueryParameters=false fires.
+            // admin=true=1 was silently dropped by the old Split('=').Length==2 guard;
+            // the new code parses it as name="admin", value="true=1" and gates it correctly.
+            var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            var handler = new SignedHttpRequestHandler();
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&admin=true=1"),
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(
+                    new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters
+                {
+                    AcceptUnsignedQueryParameters = false,
+                },
+            };
+            var ctx = theoryData.BuildSignedHttpRequestValidationContext();
+            Assert.Throws<SignedHttpRequestInvalidQClaimException>(
+                () => handler.ValidateQClaim(theoryData.SignedHttpRequestToken, ctx));
+            Assert.Contains("IDX23039", listener.TraceBuffer);
+            listener.DisableEvents(IdentityModelEventSource.Logger);
         }
 
         public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidateQClaimTheoryData
