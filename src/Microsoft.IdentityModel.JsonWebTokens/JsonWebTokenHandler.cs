@@ -665,14 +665,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            if (currentActorDepth >= TokenValidationParameters.MaxActorChainLength)
-            {
-                throw LogHelper.LogExceptionMessage(
-                    new SecurityTokenException(LogHelper.FormatInvariant(
-                    LogMessages.IDX14313,
-                    LogHelper.MarkAsNonPII(currentActorDepth),
-                    LogHelper.MarkAsNonPII(TokenValidationParameters.MaxActorChainLength))));
-            }
+            // Beyond the configured chain length we stop expanding the Actor chain. The raw act/actort
+            // value is still retained as a claim by the caller, so nothing is lost (RFC 8693: nested/
+            // prior actors are informational only and must not be used for access-control decisions).
+            if (currentActorDepth >= MaxActorChainLength)
+                return null;
 
             if (isStandardAct)
             {
@@ -726,17 +723,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            if (currentDepth >= TokenValidationParameters.MaxActorChainLength)
-            {
-                throw LogHelper.LogExceptionMessage(
-                    new SecurityTokenException(LogHelper.FormatInvariant(
-                    LogMessages.IDX14313,
-                    LogHelper.MarkAsNonPII(currentDepth),
-                    LogHelper.MarkAsNonPII(TokenValidationParameters.MaxActorChainLength))));
-            }
-
+            // A non-object "act" cannot be expanded into an Actor chain (e.g. a JSON-text string
+            // produced when serialization exceeded the chain length). Warn and let the caller retain
+            // the raw value as a claim instead of failing.
             if (jsonElement.ValueKind != JsonValueKind.Object)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14316));
+            {
+                LogHelper.LogWarning(LogMessages.IDX14316);
+                return null;
+            }
 
             // Use CaseSensitiveClaimsIdentity for consistent behavior with the rest of the library
             var identity = new CaseSensitiveClaimsIdentity();
@@ -751,12 +745,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // Special handling for nested actor claim
                 if (claimType == ActClaimType)
                 {
-                    if (value.ValueKind == JsonValueKind.Object)
+                    // Expand the nested actor only while within the configured chain length and it is
+                    // a JSON object. Otherwise keep the nested "act" as a claim so it round-trips.
+                    if (currentDepth + 1 < MaxActorChainLength)
                     {
-                        // Recursively create nested actor identity with incremented depth
-                        identity.Actor = CreateActorClaimsIdentityFromJsonElement(
-                            value, tokenValidationParameters, issuer, currentDepth + 1);
+                        if (value.ValueKind == JsonValueKind.Object)
+                        {
+                            identity.Actor = CreateActorClaimsIdentityFromJsonElement(
+                                value, tokenValidationParameters, issuer, currentDepth + 1);
+                            continue;
+                        }
+
+                        // Within the limit but not a JSON object: keep as a claim and warn.
+                        LogHelper.LogWarning(LogMessages.IDX14316);
                     }
+
+                    // Beyond the limit (silent) or a within-limit non-object (warned above): retain the
+                    // "act" value verbatim as a claim.
+                    var actClaim = JsonClaimSet.CreateClaimFromJsonElement(claimType, issuer, value);
+                    if (actClaim != null)
+                        identity.AddClaim(actClaim);
+
                     continue;
                 }
 

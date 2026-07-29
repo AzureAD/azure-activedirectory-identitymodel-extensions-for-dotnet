@@ -41,19 +41,6 @@ namespace Microsoft.IdentityModel.Tokens
         public const int DefaultMaximumTokenSizeInBytes = 1024 * 250;
 
         /// <summary>
-        /// Default for permissible max actor chain length.
-        /// </summary>
-        /// <remarks>Fixed at 5, allowing up to 1 top-level actor and 4 nested actors. This limit applies to both token creation and validation.</remarks>
-        internal const int MaxActorChainLength = 5;
-
-        /// <summary>
-        /// This variable was previously used during recursion calls for deserializing the act claim.
-        /// Depth tracking during deserialization is now handled via a local parameter in CreateClaimsIdentityActor.
-        /// Retained for token creation scenarios where it is still used.
-        /// </summary>
-        private int _actorChainDepth;
-
-        /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
         /// </summary>
         protected TokenValidationParameters(TokenValidationParameters other)
@@ -126,7 +113,6 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
             ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
             ActClaimRetriever = other.ActClaimRetriever;
-            ActorChainDepth = other.ActorChainDepth;
         }
 
         /// <summary>
@@ -785,26 +771,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
-
-        /// <summary>
-        /// Gets or sets the current depth in the actor chain during token creation.
-        /// <para>During deserialization (token validation), depth is tracked via a local parameter
-        /// and this property is not used.</para>
-        /// </summary>
-        /// <remarks>
-        /// <para>This value is compared against <see cref="MaxActorChainLength"/> during token creation to prevent excessive 
-        /// recursion or deeply nested actor tokens.</para>
-        /// <para>In most scenarios, users don't need to set this property as it's managed internally 
-        /// by the token creation process.</para>
-        /// </remarks>
-        internal int ActorChainDepth
-        {
-            get => _actorChainDepth;
-            set
-            {
-                _actorChainDepth = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the delegate that will be used to convert the 'act' claim JSON into a ClaimsIdentity.

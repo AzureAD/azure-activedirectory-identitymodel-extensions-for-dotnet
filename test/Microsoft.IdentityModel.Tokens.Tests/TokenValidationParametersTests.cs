@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
         // Remove if/once we make TimeProvider public. As the GetSets() test will fail.
-        List<string> internalNonDelegateProperties = new() { "TimeProvider", "ActorChainDepth" };
+        List<string> internalNonDelegateProperties = new() { "TimeProvider" };
 
         [Fact]
         public void Publics()
