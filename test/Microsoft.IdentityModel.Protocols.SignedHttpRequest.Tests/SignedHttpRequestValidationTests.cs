@@ -18,7 +18,6 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
-    [Collection("SignedHttpRequest Configuration")]
     public class SignedHttpRequestValidationTests
     {
         [Fact]

@@ -10,79 +10,17 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
-    [Collection("SignedHttpRequest Configuration")]
     public class SignedHttpRequestConfigurationTests
     {
         [Fact]
-        public void UseCaseSensitivePClaimComparison_SeedsFromAppContext()
+        public void UseCaseSensitivePClaimComparison_DefaultsToCaseSensitiveComparison()
         {
-            try
-            {
-                // Arrange
-                AppContext.SetSwitch(SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparisonSwitch, false);
+            // Arrange and Act
+            var validationParameters = new SignedHttpRequestValidationParameters();
 
-                // Act
-                var validationParameters = new SignedHttpRequestValidationParameters();
-
-                // Assert
-                Assert.False(validationParameters.UseCaseSensitivePClaimComparison);
-            }
-            finally
-            {
-                RestoreUseCaseSensitivePClaimComparisonSwitch();
-            }
-        }
-
-        [Fact]
-        public void UseCaseSensitivePClaimComparison_ExplicitPropertyOverridesSeed()
-        {
-            try
-            {
-                // Arrange
-                AppContext.SetSwitch(SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparisonSwitch, false);
-
-                // Act
-                var validationParameters = new SignedHttpRequestValidationParameters
-                {
-                    UseCaseSensitivePClaimComparison = true
-                };
-
-                // Assert
-                Assert.True(validationParameters.UseCaseSensitivePClaimComparison);
-            }
-            finally
-            {
-                RestoreUseCaseSensitivePClaimComparisonSwitch();
-            }
-        }
-
-        [Fact]
-        public void UseCaseSensitivePClaimComparison_CapturesAppContextValueAtConstruction()
-        {
-            try
-            {
-                // Arrange
-                AppContext.SetSwitch(SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparisonSwitch, false);
-                var validationParameters = new SignedHttpRequestValidationParameters();
-
-                // Act
-                AppContext.SetSwitch(
-                    SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparisonSwitch,
-                    !SignedHttpRequestValidationParameters.DefaultUseCaseSensitivePClaimComparison);
-
-                // Assert
-                Assert.False(validationParameters.UseCaseSensitivePClaimComparison);
-            }
-            finally
-            {
-                RestoreUseCaseSensitivePClaimComparisonSwitch();
-            }
-        }
-
-        [Fact]
-        public void UseCaseSensitivePClaimComparison_DefaultsToTrueOn9x()
-        {
+            // Assert
             Assert.True(SignedHttpRequestValidationParameters.DefaultUseCaseSensitivePClaimComparison);
+            Assert.True(validationParameters.UseCaseSensitivePClaimComparison);
         }
 
         [Theory]
@@ -109,10 +47,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Fact]
-        public async Task ValidateSignedHttpRequestAsync_DefaultContextUses9xPathComparison()
+        public async Task ValidateSignedHttpRequestAsync_DefaultContextUsesDefaultPathComparison()
         {
             // Arrange
-            RestoreUseCaseSensitivePClaimComparisonSwitch();
             var signedHttpRequest = CreateSignedHttpRequestWithPath("/Path1");
             var httpRequestData = CreateHttpRequestData();
             var validationContext = new SignedHttpRequestValidationContext(
@@ -128,35 +65,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Assert.True(validationContext.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison);
             Assert.False(result.IsValid);
             Assert.IsType<SignedHttpRequestInvalidPClaimException>(result.Exception);
-        }
-
-        [Fact]
-        public async Task ValidateSignedHttpRequestAsync_DefaultContextUsesAppContextSeed()
-        {
-            try
-            {
-                // Arrange
-                AppContext.SetSwitch(SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparisonSwitch, false);
-                var signedHttpRequest = CreateSignedHttpRequestWithPath("/Path1");
-                var httpRequestData = CreateHttpRequestData();
-                var validationContext = new SignedHttpRequestValidationContext(
-                    signedHttpRequest,
-                    httpRequestData,
-                    SignedHttpRequestTestUtils.DefaultTokenValidationParameters);
-                var handler = new SignedHttpRequestHandler();
-
-                // Act
-                var result = await handler.ValidateSignedHttpRequestAsync(validationContext, CancellationToken.None);
-
-                // Assert
-                Assert.False(validationContext.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison);
-                Assert.True(result.IsValid);
-                Assert.Null(result.Exception);
-            }
-            finally
-            {
-                RestoreUseCaseSensitivePClaimComparisonSwitch();
-            }
         }
 
         private static SignedHttpRequestValidationParameters CreatePathValidationParameters(bool useCaseSensitiveComparison)
@@ -197,13 +105,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         {
             return SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(
                 new JProperty(SignedHttpRequestClaimTypes.P, path)).EncodedToken;
-        }
-
-        private static void RestoreUseCaseSensitivePClaimComparisonSwitch()
-        {
-            AppContext.SetSwitch(
-                SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparisonSwitch,
-                SignedHttpRequestValidationParameters.DefaultUseCaseSensitivePClaimComparison);
         }
     }
 }
