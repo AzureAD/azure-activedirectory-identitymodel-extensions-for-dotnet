@@ -213,5 +213,85 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             public TestableValidationParameters(ValidationParameters other) : base(other) { }
         }
+
+        /// <summary>
+        /// Verifies that the experimental VP path rejects a key-management alg excluded by
+        /// <see cref="ValidationParameters.AlgorithmValidator"/>, surfacing a ValidationError rather than
+        /// decrypting.
+        /// </summary>
+        [Fact]
+        public void GetContentEncryptionKeys_ExperimentalPath_ExcludedAlgSurfacesValidationError()
+        {
+            var handler = new JsonWebTokenHandler();
+
+            var encryptingCredentials = new EncryptingCredentials(
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaPKCS1,
+                SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                EncryptingCredentials = encryptingCredentials,
+                Claims = Default.PayloadDictionary
+            };
+
+            string jweString = handler.CreateToken(tokenDescriptor);
+            var jwtToken = new JsonWebToken(jweString);
+
+            // ValidationParameters with AlgorithmValidator that rejects RSA-PKCS1.
+            var vp = new ValidationParameters();
+            vp.DecryptionKeys.Add(KeyingMaterial.RsaSecurityKey_2048);
+            vp.AlgorithmValidator = (algorithm, _, _, _) =>
+                algorithm == SecurityAlgorithms.RsaPKCS1
+                    ? new ValidationResult<string, ValidationError>(new AlgorithmValidationError(
+                        new MessageDetail("RSA-PKCS1 not allowed"),
+                        AlgorithmValidationFailure.ValidationFailed,
+                        ValidationError.GetCurrentStackFrame(),
+                        algorithm))
+                    : new ValidationResult<string, ValidationError>(algorithm);
+
+            var (keys, error) = handler.GetContentEncryptionKeys(jwtToken, vp, null, null);
+
+            Assert.Null(keys);
+            Assert.NotNull(error);
+        }
+
+        /// <summary>
+        /// Verifies that the experimental VP path succeeds when the key-management alg is accepted
+        /// by the <see cref="ValidationParameters.AlgorithmValidator"/>.
+        /// </summary>
+        [Fact]
+        public void GetContentEncryptionKeys_ExperimentalPath_AllowedAlgDecryptsSuccessfully()
+        {
+            var handler = new JsonWebTokenHandler();
+
+            var encryptingCredentials = new EncryptingCredentials(
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaOAEP,
+                SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                EncryptingCredentials = encryptingCredentials,
+                Claims = Default.PayloadDictionary
+            };
+
+            string jweString = handler.CreateToken(tokenDescriptor);
+            var jwtToken = new JsonWebToken(jweString);
+
+            // AlgorithmValidator that accepts RSA-OAEP.
+            var vp = new ValidationParameters();
+            vp.DecryptionKeys.Add(KeyingMaterial.RsaSecurityKey_2048);
+            vp.AlgorithmValidator = (algorithm, _, _, _) =>
+                new ValidationResult<string, ValidationError>(algorithm);
+
+            var (keys, error) = handler.GetContentEncryptionKeys(jwtToken, vp, null, null);
+
+            Assert.Null(error);
+            Assert.NotNull(keys);
+            Assert.NotEmpty(keys);
+        }
     }
 }

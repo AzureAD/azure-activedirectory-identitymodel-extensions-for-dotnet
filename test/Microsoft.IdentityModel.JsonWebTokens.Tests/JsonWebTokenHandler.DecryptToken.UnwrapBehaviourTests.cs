@@ -262,6 +262,42 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.True(result.IsValid, $"Token validation must succeed when the key-management alg is on the allowlist. Exception: {result.Exception}");
         }
 
+        /// <summary>
+        /// When <see cref="AppContextSwitches.SkipKeyManagementAlgorithmValidationSwitch"/> is set,
+        /// a key-management alg excluded from <see cref="TokenValidationParameters.ValidAlgorithms"/>
+        /// must still decrypt successfully — restoring pre-8.19.x behavior as a back-compat escape hatch.
+        /// </summary>
+        [Fact]
+        [ResetAppContextSwitches]
+        public async Task SkipKeyManagementAlgValidationSwitch_ExcludedAlgStillDecrypts()
+        {
+            AppContext.SetSwitch(AppContextSwitches.SkipKeyManagementAlgorithmValidationSwitch, true);
+
+            var handler = new JsonWebTokenHandler();
+
+            var encryptingCredentials = new EncryptingCredentials(
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaPKCS1,
+                SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            string jwe = handler.CreateToken(
+                Default.PayloadString,
+                Default.SymmetricSigningCredentials,
+                encryptingCredentials);
+
+            // ValidAlgorithms excludes RSA-PKCS1, but the switch bypasses the check.
+            var tvp = Default.TokenValidationParameters(
+                KeyingMaterial.RsaSecurityKey_2048,
+                Default.SymmetricSigningKey256);
+            tvp.ValidateLifetime = false;
+            tvp.ValidAlgorithms = new[] { SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256 };
+
+            var result = await handler.ValidateTokenAsync(jwe, tvp);
+
+            Assert.True(result.IsValid,
+                $"Validation must succeed when SkipKeyManagementAlgorithmValidation is set, even if the alg is excluded. Exception: {result.Exception}");
+        }
+
         private static string AlterJweEncryptedKey(string jwe, int charactersToFlip)
         {
             string[] parts = jwe.Split('.');

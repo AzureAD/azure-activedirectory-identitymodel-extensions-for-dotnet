@@ -1,5 +1,13 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.23.0
+====
+## Bug Fixes
+- **Enforce caller algorithm policy on JWE key-management `alg` during decryption**  
+  `JsonWebTokenHandler` and `JwtSecurityTokenHandler` now apply `ValidAlgorithms`/`AlgorithmValidator` to the JWE key-management `alg` header before unwrapping the content-encryption key. Previously, only the content-encryption `enc` and the inner JWS signing algorithm were validated against the caller's policy, allowing a token sender to select a deprecated algorithm (e.g. `RSA1_5`) even when it was excluded from the allowlist.  
+  **Breaking change:** Callers who have set `ValidAlgorithms` and also validate JWE-encrypted tokens must now include the key-management algorithm (e.g. `RSA-OAEP`) in their allowlist, or decryption will fail with `IDX10696`. A warning log (IDX10726) is emitted at the rejection site with migration guidance. If you need time to update your allowlist, set the AppContext switch `Switch.Microsoft.IdentityModel.SkipKeyManagementAlgorithmValidation` to `true` as a temporary escape hatch.  
+  See PR [#3555](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3555) for details.
+
 8.15.0
 ====
 ## New Features
