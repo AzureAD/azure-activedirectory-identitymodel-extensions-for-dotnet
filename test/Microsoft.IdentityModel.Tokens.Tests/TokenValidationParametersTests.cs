@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 63;
+        int ExpectedPropertyCount = 64;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
@@ -317,6 +317,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.IssuerSigningKeyValidatorUsingConfiguration = ValidationDelegates.IssuerSigningKeyValidatorUsingConfiguration;
             validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
             validationParameters.IssuerValidatorAsync = ValidationDelegates.IssuerValidatorInternalAsync;
+            validationParameters.IssuerValidatorSync = ValidationDelegates.IssuerValidatorEcho;
             validationParameters.IssuerValidatorUsingConfiguration = ValidationDelegates.IssuerValidatorUsingConfigEcho;
             validationParameters.LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue;
             validationParameters.NameClaimTypeRetriever = ValidationDelegates.NameClaimTypeRetriever;
