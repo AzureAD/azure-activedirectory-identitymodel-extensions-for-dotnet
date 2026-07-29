@@ -1,5 +1,13 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.22.0
+====
+## New Features
+- Add `IgnoreCaseWhenValidatingAudience` flag to `TokenValidationParameters` (and the experimental `ValidationParameters`) to allow case-insensitive audience validation. The default remains case-sensitive (ordinal). See [PR #3563](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3563).
+
+## Bug Fixes
+- Preserve the original metadata fetch exception in the `ConfigurationManager` blocking path so callers within the backoff window still receive the inner `IOException` (including the HTTP status code) instead of an `IDX20803` with a null `InnerException`. See [PR #3486](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3486).
+
 9.0.0
 ====
 ## Bug Fixes
