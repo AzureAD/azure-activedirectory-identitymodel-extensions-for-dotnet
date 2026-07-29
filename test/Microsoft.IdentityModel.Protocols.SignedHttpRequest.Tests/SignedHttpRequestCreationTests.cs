@@ -449,6 +449,24 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedClaimValue = $@"{{""p"":""/pa%20th1""}}",
                         HttpRequestUri = new Uri("http://www.contoso.com:81/pa th1")
                     },
+                    new CreateSignedHttpRequestTheoryData("ValidPLowerHexPreserved")
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.P,
+                        ExpectedClaimValue = $@"{{""p"":""/foo%2fbar""}}",
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%2fbar")
+                    },
+                    new CreateSignedHttpRequestTheoryData("ValidPUpperHexPreserved")
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.P,
+                        ExpectedClaimValue = $@"{{""p"":""/foo%2Fbar""}}",
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%2Fbar")
+                    },
+                    new CreateSignedHttpRequestTheoryData("ValidPDoubleEncodingPreserved")
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.P,
+                        ExpectedClaimValue = $@"{{""p"":""/foo%252Fbar""}}",
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%252Fbar")
+                    },
                     new CreateSignedHttpRequestTheoryData("NoPath")
                     {
                         ExpectedClaim = SignedHttpRequestClaimTypes.P,
