@@ -4,8 +4,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ====
 ## Bug Fixes
 - **Enforce caller algorithm policy on JWE key-management `alg` during decryption**  
-  `JsonWebTokenHandler` and `JwtSecurityTokenHandler` now apply `ValidAlgorithms`/`AlgorithmValidator` to the JWE key-management `alg` header before unwrapping the content-encryption key. Previously, only the content-encryption `enc` and the inner JWS signing algorithm were validated against the caller's policy, allowing a token sender to select a deprecated algorithm (e.g. `RSA1_5`) even when it was excluded from the allowlist.  
-  **Breaking change:** Callers who have set `ValidAlgorithms` and also validate JWE-encrypted tokens must now include the key-management algorithm (e.g. `RSA-OAEP`) in their allowlist, or decryption will fail with `IDX10696`. A warning log (IDX10726) is emitted at the rejection site with migration guidance. If you need time to update your allowlist, set the AppContext switch `Switch.Microsoft.IdentityModel.SkipKeyManagementAlgorithmValidation` to `true` as a temporary escape hatch.  
+  `JsonWebTokenHandler` and `JwtSecurityTokenHandler` now apply `ValidAlgorithms`/`AlgorithmValidator` to the JWE key-management `alg` header before unwrapping the content-encryption key. Previously only the content-encryption `enc` and the inner JWS signing algorithm were validated against the caller's policy.  
+  **If you use `ValidAlgorithms` and validate JWE-encrypted tokens**, verify that your allowlist includes the key-management algorithm (e.g. `RSA-OAEP`). If it does not, decryption will now correctly fail with `IDX10696` — a warning log (IDX10726) is emitted with guidance. A temporary escape hatch is available via the AppContext switch `Switch.Microsoft.IdentityModel.SkipKeyManagementAlgorithmValidation`.  
+  Algorithm policy failures (`SecurityTokenInvalidAlgorithmException`) are not recoverable by metadata refresh and will not trigger a `ConfigurationManager` retry, unlike `SecurityTokenDecryptionFailedException` which is retried when the configuration provides decryption keys. This is intentional: a different set of metadata keys will not resolve an algorithm policy mismatch.  
   See PR [#3555](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3555) for details.
 
 8.15.0
