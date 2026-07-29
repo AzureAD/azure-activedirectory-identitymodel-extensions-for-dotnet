@@ -151,6 +151,128 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
+        internal TokenValidationResult ValidateJWESync(
+            JsonWebToken jwtToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
+        {
+            return ValidateJWESync(jwtToken, validationParameters, configuration, CancellationToken.None);
+        }
+
+        internal TokenValidationResult ValidateJWESync(
+            JsonWebToken jwtToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                TokenValidationResult tokenValidationResult = ReadToken(DecryptToken(jwtToken, validationParameters, configuration), validationParameters);
+                if (!tokenValidationResult.IsValid)
+                    return tokenValidationResult;
+
+                tokenValidationResult = ValidateJWSSync(
+                    tokenValidationResult.SecurityToken as JsonWebToken,
+                    validationParameters,
+                    configuration,
+                    cancellationToken);
+
+                if (!tokenValidationResult.IsValid)
+                    return tokenValidationResult;
+
+                jwtToken.InnerToken = tokenValidationResult.SecurityToken as JsonWebToken;
+                jwtToken.Payload = (tokenValidationResult.SecurityToken as JsonWebToken).Payload;
+                return new TokenValidationResult
+                {
+                    SecurityToken = jwtToken,
+                    ClaimsIdentityNoLocking = tokenValidationResult.ClaimsIdentityNoLocking,
+                    IsValid = true,
+                    TokenType = tokenValidationResult.TokenType
+                };
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenValidationResult
+                {
+                    Exception = ex,
+                    IsValid = false,
+                    TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jwtToken : null
+                };
+            }
+        }
+
+        internal TokenValidationResult ValidateJWSSync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
+        {
+            return ValidateJWSSync(jsonWebToken, validationParameters, configuration, CancellationToken.None);
+        }
+
+        internal TokenValidationResult ValidateJWSSync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                TokenValidationResult tokenValidationResult;
+                if (validationParameters.TransformBeforeSignatureValidation != null)
+                    jsonWebToken = validationParameters.TransformBeforeSignatureValidation(jsonWebToken, validationParameters) as JsonWebToken;
+
+                if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
+                {
+                    var validatedToken = ValidateSignatureUsingDelegates(jsonWebToken, validationParameters);
+                    tokenValidationResult = ValidateTokenPayloadSync(
+                        validatedToken,
+                        validationParameters,
+                        configuration,
+                        cancellationToken);
+
+                    Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, validatedToken, validationParameters);
+                }
+                else
+                {
+                    if (validationParameters.ValidateSignatureLast)
+                    {
+                        tokenValidationResult = ValidateTokenPayloadSync(
+                            jsonWebToken,
+                            validationParameters,
+                            configuration,
+                            cancellationToken);
+
+                        if (tokenValidationResult.IsValid)
+                            tokenValidationResult.SecurityToken = ValidateSignatureAndIssuerSecurityKey(jsonWebToken, validationParameters, configuration);
+                    }
+                    else
+                    {
+                        var validatedToken = ValidateSignatureAndIssuerSecurityKey(jsonWebToken, validationParameters, configuration);
+                        tokenValidationResult = ValidateTokenPayloadSync(
+                            validatedToken,
+                            validationParameters,
+                            configuration,
+                            cancellationToken);
+                    }
+                }
+
+                return tokenValidationResult;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenValidationResult
+                {
+                    Exception = ex,
+                    IsValid = false,
+                    TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jsonWebToken : null
+                };
+            }
+        }
+
         private JsonWebToken ValidateSignatureAndIssuerSecurityKey(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             JsonWebToken validatedToken = ValidateSignature(jsonWebToken, validationParameters, configuration);
@@ -494,10 +616,127 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/>.</returns>
-        [Obsolete("`JsonWebTokens.ValidateToken(string, TokenValidationParameters)` has been deprecated and will be removed in a future release. Use `JsonWebTokens.ValidateTokenAsync(string, TokenValidationParameters)` instead. For more information, see https://aka.ms/IdentityModel/7-breaking-changes", false)]
+        /// <remarks>
+        /// This is the synchronous counterpart of <see cref="ValidateTokenAsync(string, TokenValidationParameters)"/>.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned <see cref="TokenValidationResult.Exception"/> property.
+        /// Callers should always check the <see cref="TokenValidationResult.IsValid"/> property to verify the validity of the result.
+        /// </remarks>
         public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters)
         {
-            return ValidateTokenAsync(token, validationParameters).ConfigureAwait(false).GetAwaiter().GetResult();
+            return ValidateToken(token, validationParameters, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Validates a JWS or a JWE.
+        /// </summary>
+        /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the operation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
+        /// <remarks>
+        /// This is the synchronous counterpart of <see cref="ValidateTokenAsync(string, TokenValidationParameters, CancellationToken)"/>.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned <see cref="TokenValidationResult.Exception"/> property.
+        /// Callers should always check the <see cref="TokenValidationResult.IsValid"/> property to verify the validity of the result.
+        /// </remarks>
+        public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
+        {
+#if NET5_0_OR_GREATER
+            if (string.IsNullOrEmpty(token))
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(token)), IsValid = false };
+
+            if (validationParameters == null)
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)), IsValid = false };
+
+            if (token.Length > MaximumTokenSizeInBytes)
+                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)))), IsValid = false };
+
+            try
+            {
+                TokenValidationResult result = ReadToken(token, validationParameters);
+                if (result.IsValid)
+                    return ValidateToken(result.SecurityToken, validationParameters, cancellationToken);
+
+                return result;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenValidationResult
+                {
+                    Exception = ex,
+                    IsValid = false
+                };
+            }
+#else
+            // Synchronous document retrieval is not supported before .NET 5.0
+            // (HttpDocumentRetriever does not implement ISyncDocumentRetriever), so run
+            // the asynchronous validation path synchronously (sync-over-async).
+            return ValidateTokenAsync(token, validationParameters, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+#endif
+        }
+
+        /// <summary>
+        /// Validates a token.
+        /// </summary>
+        /// <param name="token">The <see cref="SecurityToken"/> to be validated. Must be a <see cref="JsonWebToken"/>.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
+        /// <remarks>
+        /// This is the synchronous counterpart of <see cref="ValidateTokenAsync(SecurityToken, TokenValidationParameters)"/>.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned <see cref="TokenValidationResult.Exception"/> property.
+        /// Callers should always check the <see cref="TokenValidationResult.IsValid"/> property to verify the validity of the result.
+        /// </remarks>
+        public virtual TokenValidationResult ValidateToken(SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return ValidateToken(token, validationParameters, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Validates a token.
+        /// </summary>
+        /// <param name="token">The <see cref="SecurityToken"/> to be validated. Must be a <see cref="JsonWebToken"/>.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the operation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
+        /// <remarks>
+        /// This is the synchronous counterpart of <see cref="ValidateTokenAsync(SecurityToken, TokenValidationParameters, CancellationToken)"/>.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned <see cref="TokenValidationResult.Exception"/> property.
+        /// Callers should always check the <see cref="TokenValidationResult.IsValid"/> property to verify the validity of the result.
+        /// </remarks>
+        public virtual TokenValidationResult ValidateToken(SecurityToken token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
+        {
+            if (token == null)
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (validationParameters == null)
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)), IsValid = false };
+
+            var jwt = token as JsonWebToken;
+            if (jwt == null)
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentException<ArgumentException>(nameof(token), $"{nameof(token)} must be a {nameof(JsonWebToken)}."), IsValid = false };
+
+#if NET5_0_OR_GREATER
+            try
+            {
+                return ValidateTokenSync(jwt, validationParameters, cancellationToken);
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenValidationResult
+                {
+                    Exception = ex,
+                    IsValid = false
+                };
+            }
+#else
+            // Synchronous document retrieval is not supported before .NET 5.0
+            // (HttpDocumentRetriever does not implement ISyncDocumentRetriever), so run
+            // the asynchronous validation path synchronously (sync-over-async).
+            return ValidateTokenAsync(token, validationParameters, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+#endif
         }
 
         /// <summary>
@@ -708,6 +947,110 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return tokenValidationResult;
         }
 
+        /// <summary>
+        ///  Internal synchronous method for token validation, mirroring <see cref="ValidateTokenAsync(JsonWebToken, TokenValidationParameters, CancellationToken)"/>, responsible for:
+        ///  (1) Obtaining a configuration from the <see cref="TokenValidationParameters.ConfigurationManager"/>.
+        ///  (2) Revalidating using the Last Known Good Configuration (if present), and obtaining a refreshed configuration (if necessary) and revalidating using it.
+        /// </summary>
+        /// <param name="jsonWebToken">The JWT token.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the operation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
+        internal TokenValidationResult ValidateTokenSync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            CancellationToken cancellationToken)
+        {
+            BaseConfiguration currentConfiguration = null;
+            if (validationParameters.ConfigurationManager != null)
+            {
+                try
+                {
+                    currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationSync(cancellationToken);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
+                    // directly on them, allowing the library to continue with token validation.
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                }
+            }
+
+            TokenValidationResult tokenValidationResult = jsonWebToken.IsEncrypted ?
+                ValidateJWESync(jsonWebToken, validationParameters, currentConfiguration, cancellationToken) :
+                ValidateJWSSync(jsonWebToken, validationParameters, currentConfiguration, cancellationToken);
+
+            if (validationParameters.ConfigurationManager != null)
+            {
+                if (tokenValidationResult.IsValid)
+                {
+                    // Set current configuration as LKG if it exists.
+                    if (currentConfiguration != null)
+                        validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
+
+                    return tokenValidationResult;
+                }
+                else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception, (currentConfiguration != null && currentConfiguration.TokenDecryptionKeys.Count > 0)))
+                {
+                    // If we were still unable to validate, attempt to refresh the configuration and validate using it
+                    // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
+                    // retrieval error as this case should have already been hit before. This refresh handles the case
+                    // where a new valid configuration was somehow published during validation time.
+                    if (currentConfiguration != null)
+                    {
+                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                            validationParameters.ConfigurationManager.MetadataAddress,
+                            TelemetryConstants.Protocols.Lkg,
+                            TelemetryConstants.Protocols.ConfigurationSourceUnknown);
+
+                        validationParameters.ConfigurationManager.RequestRefresh();
+                        validationParameters.RefreshBeforeValidation = true;
+                        var lastConfig = currentConfiguration;
+                        currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationSync(cancellationToken);
+
+                        // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
+                        if (lastConfig != currentConfiguration)
+                        {
+                            tokenValidationResult = jsonWebToken.IsEncrypted ?
+                                ValidateJWESync(jsonWebToken, validationParameters, currentConfiguration, cancellationToken) :
+                                ValidateJWSSync(jsonWebToken, validationParameters, currentConfiguration, cancellationToken);
+
+                            if (tokenValidationResult.IsValid)
+                            {
+                                validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
+                                return tokenValidationResult;
+                            }
+                        }
+                    }
+
+                    if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration)
+                    {
+                        validationParameters.RefreshBeforeValidation = false;
+                        validationParameters.ValidateWithLKG = true;
+                        var recoverableException = tokenValidationResult.Exception;
+
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfigurations())
+                        {
+                            if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableException))
+                            {
+                                tokenValidationResult = jsonWebToken.IsEncrypted ?
+                                    ValidateJWESync(jsonWebToken, validationParameters, lkgConfiguration, cancellationToken) :
+                                    ValidateJWSSync(jsonWebToken, validationParameters, lkgConfiguration, cancellationToken);
+
+                                if (tokenValidationResult.IsValid)
+                                    return tokenValidationResult;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return tokenValidationResult;
+        }
+
         internal async ValueTask<TokenValidationResult> ValidateTokenPayloadAsync(
             JsonWebToken jsonWebToken,
             TokenValidationParameters validationParameters,
@@ -740,6 +1083,54 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // this code will still work properly.
                 TokenValidationResult tokenValidationResult =
                     await ValidateTokenAsync(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters, cancellationToken).ConfigureAwait(false);
+
+                if (!tokenValidationResult.IsValid)
+                    return tokenValidationResult;
+            }
+
+            string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
+            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer)
+            {
+                IsValid = true,
+                TokenType = tokenType
+            };
+        }
+
+        internal TokenValidationResult ValidateTokenPayloadSync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
+        {
+            return ValidateTokenPayloadSync(jsonWebToken, validationParameters, configuration, CancellationToken.None);
+        }
+
+        internal TokenValidationResult ValidateTokenPayloadSync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration,
+            CancellationToken cancellationToken)
+        {
+            var expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? (DateTime?)jsonWebToken.ValidTo : null;
+            var notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? (DateTime?)jsonWebToken.ValidFrom : null;
+
+            Validators.ValidateLifetime(notBefore, expires, jsonWebToken, validationParameters);
+            Validators.ValidateAudience(jsonWebToken.Audiences, jsonWebToken, validationParameters);
+            string issuer = Validators.ValidateIssuerSync(jsonWebToken.Issuer, jsonWebToken, validationParameters, configuration);
+
+            Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
+            if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
+            {
+                // Infinite recursion should not occur here, as the JsonWebToken passed into this method is (1) constructed from a string
+                // AND (2) the signature is successfully validated on it. (1) implies that even if there are nested actor tokens,
+                // they must end at some point since they cannot reference one another. (2) means that the token has a valid signature
+                // and (since issuer validation occurs first) came from a trusted authority.
+                // NOTE: More than one nested actor token should not be considered a valid token, but if we somehow encounter one,
+                // this code will still work properly.
+                TokenValidationParameters actorValidationParameters = validationParameters.ActorValidationParameters ?? validationParameters;
+                TokenValidationResult actorReadResult = ReadToken(jsonWebToken.Actor, actorValidationParameters);
+                TokenValidationResult tokenValidationResult = actorReadResult.IsValid ?
+                    ValidateTokenSync(actorReadResult.SecurityToken as JsonWebToken, actorValidationParameters, cancellationToken) :
+                    actorReadResult;
 
                 if (!tokenValidationResult.IsValid)
                     return tokenValidationResult;
