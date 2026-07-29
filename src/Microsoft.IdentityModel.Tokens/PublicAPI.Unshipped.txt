@@ -126,6 +126,8 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CryptoProviderF
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CryptoProviderFactory.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DebugId.get -> string?
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DebugId.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreCaseWhenValidatingAudience.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreTrailingSlashWhenValidatingAudience.get -> bool
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreTrailingSlashWhenValidatingAudience.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IncludeTokenOnFailedValidation.get -> bool
@@ -359,3 +361,5 @@ virtual Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.Dispose(bool disposing) 
 ~static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromMlDsaSecurityKey(Microsoft.IdentityModel.Tokens.MlDsaSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.get -> bool
 Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.set -> void
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.get -> bool
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void

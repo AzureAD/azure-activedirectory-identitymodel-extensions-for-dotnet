@@ -15,8 +15,6 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenDescriptor
     {
         private List<string> _audiences;
-        private int _actorChainDepth;
-        private int _maxActorChainLength = 5;
 
         /// <summary>
         /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
@@ -110,6 +108,15 @@ namespace Microsoft.IdentityModel.Tokens
         public ClaimsIdentity Subject { get; set; }
 
         /// <summary>
+        /// Carries the remaining number of actor (<c>act</c>) object levels to materialize while the
+        /// descriptor flows down the actor-chain recursion during payload serialization. The caller's
+        /// top-level descriptor leaves this <see langword="null"/>, so serialization seeds it from
+        /// <c>JsonWebTokenHandler.MaxActorChainLength</c>; only the internal per-level actor descriptors
+        /// are stamped, so a caller's descriptor is never mutated. Not part of the public contract.
+        /// </summary>
+        internal int? CurrentActorChainLength { get; set; }
+
+        /// <summary>
         /// Indicates if <c>kid</c> and <c>x5t</c> should be included in the header of a JSON web token (JWT)
         ///
         /// <remarks>
@@ -118,34 +125,5 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public bool IncludeKeyIdInHeader { get; set; } = true;
-
-        /// <summary>
-        /// Gets the maximum depth allowed when processing nested actor tokens.
-        /// <para>This is a fixed value of 5, representing 1 top-level actor and up to 4 nested actors.</para>
-        /// <para>This value is not configurable to prevent security issues with excessively deep actor chains.</para>
-        /// </summary>
-        /// <remarks>
-        /// <para>During token creation, an exception will be thrown if the actor nesting exceeds this limit.</para>
-        /// </remarks>
-        internal int MaxActorChainLength => _maxActorChainLength;
-
-        /// <summary>
-        /// Gets or sets the current depth in the actor chain during token creation.
-        /// <para>This is used internally to track the nesting level during recursive processing 
-        /// of nested actor tokens during serialization.</para>
-        /// <para>The value starts at 0 and is incremented for each level of actor nesting. The maximum permissible value is 4 (i.e., 5 total levels).</para>
-        /// </summary>
-        /// <remarks>
-        /// <para>This value is compared against <see cref="MaxActorChainLength"/> to prevent excessive 
-        /// recursion or deeply nested actor tokens during token creation.</para>
-        /// </remarks>
-        internal int ActorChainDepth
-        {
-            get => _actorChainDepth;
-            set
-            {
-                _actorChainDepth = value;
-            }
-        }
     }
 }

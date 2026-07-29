@@ -10,8 +10,32 @@ using Microsoft.IdentityModel.Tokens;
 using Xunit;
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 {
-    public class ActClaimSerializationTests
+    // MaxActorChainLength is a process-wide static shared by the act-claim serialization and
+    // deserialization tests; disable parallelization so mutating it can't race other collections.
+    [CollectionDefinition("ActClaimTests", DisableParallelization = true)]
+    public class ActClaimTestsCollection { }
+
+    [Collection("ActClaimTests")]
+    public class ActClaimSerializationTests : IDisposable
     {
+        // Reset the process-wide MaxActorChainLength after every test for isolation.
+        public void Dispose() => JsonWebTokenHandler.MaxActorChainLength = 1;
+
+        [Fact]
+        public void MaxActorChainLength_DefaultIsOne()
+        {
+            // Arrange / Act / Assert
+            Assert.Equal(1, JsonWebTokenHandler.MaxActorChainLength);
+        }
+
+        [Fact]
+        public void MaxActorChainLength_LessThanOne_Throws()
+        {
+            // Arrange / Act / Assert
+            var ex = Assert.Throws<ArgumentOutOfRangeException>(() => JsonWebTokenHandler.MaxActorChainLength = 0);
+            Assert.Contains("IDX14317", ex.Message);
+        }
+
         [Fact]
         public void ActorToken_InClaimsDictionary_IsCorrectlySerialized()
         {
@@ -186,6 +210,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
             try
             {
+                // Two object levels needed: the actor and its nested actor.
+                JsonWebTokenHandler.MaxActorChainLength = 2;
+
                 // Create nested actor identity
                 var nestedActorIdentity = new CaseSensitiveClaimsIdentity("NestedActorAuth");
                 nestedActorIdentity.AddClaim(new Claim("sub", "nested-actor-id"));
@@ -250,6 +277,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         {
             var context = new CompareContext($"{this}.NestedActorToken_AsSubject_IsCorrectlySerialized");
 
+            // Two object levels needed: the actor and its nested actor.
+            JsonWebTokenHandler.MaxActorChainLength = 2;
+
             // Create nested actor
             var nestedActorIdentity = new CaseSensitiveClaimsIdentity("NestedActorAuth");
             nestedActorIdentity.AddClaim(new Claim("sub", "nested-actor-id"));
@@ -302,10 +332,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public void NestedActorTokens_ExceedingFixedMaxDepthOf5_ThrowsSecurityTokenException()
+        public void NestedActorChain_ExceedingDefaultMaxChainLength_Subject_DegradesToJsonString()
         {
-            // MaxActorChainLength is fixed at 5 (1 top-level + 4 nested actors).
-            // 6 actor levels (main -> level1 -> ... -> level6) should exceed the limit.
+            // Default MaxActorChainLength is 1: only the immediate actor is a JSON object; deeper
+            // actors degrade to a JSON-text string instead of throwing.
             var handler = new JsonWebTokenHandler();
 
             var level6Actor = new CaseSensitiveClaimsIdentity("Level6Auth");
@@ -343,15 +373,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 SigningCredentials = Default.AsymmetricSigningCredentials,
             };
 
-            var exception = Assert.Throws<SecurityTokenException>(() => handler.CreateToken(tokenDescriptor));
-            Assert.Contains("IDX14313", exception.Message);
+            // No throw: the immediate actor is written as an object; the deeper chain degrades.
+            var token = handler.CreateToken(tokenDescriptor);
+            var decodedToken = handler.ReadJsonWebToken(token);
+
+            var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
+            Assert.Equal(JsonValueKind.Object, actorObject.ValueKind);
+            Assert.Equal("level1-actor", actorObject.GetProperty("sub").GetString());
+
+            // The nested actor beyond the limit is a JSON-text string, not a nested object.
+            Assert.True(actorObject.TryGetProperty("act", out var nestedActor));
+            Assert.Equal(JsonValueKind.String, nestedActor.ValueKind);
+
+            // The string is valid JSON whose remaining subtree is fully expanded (level2 -> level3 ...).
+            using var nestedDoc = JsonDocument.Parse(nestedActor.GetString());
+            Assert.Equal("level2-actor", nestedDoc.RootElement.GetProperty("sub").GetString());
+            Assert.Equal(JsonValueKind.Object, nestedDoc.RootElement.GetProperty("act").ValueKind);
         }
 
         [Fact]
-        public void NestedActorTokens_InClaimsDictionary_ExceedingFixedMaxDepthOf5_ThrowsSecurityTokenException()
+        public void NestedActorChain_ExceedingDefaultMaxChainLength_ClaimsDictionary_DegradesToJsonString()
         {
-            // MaxActorChainLength is fixed at 5 (1 top-level + 4 nested actors).
-            // 6 actor levels via Claims dictionary should exceed the limit.
+            // Default MaxActorChainLength is 1: the immediate actor from the Claims dictionary is a
+            // JSON object; deeper actors degrade to a JSON-text string instead of throwing.
             var handler = new JsonWebTokenHandler();
 
             var level6Actor = new CaseSensitiveClaimsIdentity("Level6Auth");
@@ -392,15 +436,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 },
             };
 
-            var exception = Assert.Throws<SecurityTokenException>(() => handler.CreateToken(tokenDescriptor));
-            Assert.Contains("IDX14313", exception.Message);
+            // No throw: the immediate actor is written as an object; the deeper chain degrades.
+            var token = handler.CreateToken(tokenDescriptor);
+            var decodedToken = handler.ReadJsonWebToken(token);
+
+            var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
+            Assert.Equal(JsonValueKind.Object, actorObject.ValueKind);
+            Assert.Equal("level1-actor", actorObject.GetProperty("sub").GetString());
+
+            // The nested actor beyond the limit is a JSON-text string, not a nested object.
+            Assert.True(actorObject.TryGetProperty("act", out var nestedActor));
+            Assert.Equal(JsonValueKind.String, nestedActor.ValueKind);
+
+            using var nestedDoc = JsonDocument.Parse(nestedActor.GetString());
+            Assert.Equal("level2-actor", nestedDoc.RootElement.GetProperty("sub").GetString());
+            Assert.Equal(JsonValueKind.Object, nestedDoc.RootElement.GetProperty("act").ValueKind);
         }
 
         [Fact]
         public void NestedActorTokens_AtExactlyMaxDepthOf5_Succeeds()
         {
-            // MaxActorChainLength is fixed at 5 (1 top-level + 4 nested actors).
-            // 5 actor levels (main -> level1 -> ... -> level5) should succeed at exactly the limit.
+            // Configure 5 object levels (main -> level1 -> ... -> level5) and verify all serialize as objects.
+            JsonWebTokenHandler.MaxActorChainLength = 5;
             var handler = new JsonWebTokenHandler();
 
             var level5Actor = new CaseSensitiveClaimsIdentity("Level5Auth");
