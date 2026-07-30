@@ -342,20 +342,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [ResetAppContextSwitches]
         public void ValidatePClaim_IsCaseInsensitive_WhenSwitchDisabled()
         {
-            // Arrange - request path and signed 'p' claim differ only by case; disable the switch to opt in to legacy behavior.
+            // Arrange - request path and signed 'p' claim differ by literal case and percent-triplet hex case.
             AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, false);
             var handler = new SignedHttpRequestHandler();
             var theoryData = new ValidateSignedHttpRequestTheoryData
             {
-                HttpRequestUri = new Uri("https://www.contoso.com/path1"),
-                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/Path1")),
+                HttpRequestUri = new Uri("https://www.contoso.com/Foo%2Fbar"),
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
             };
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
-            // Act - with the switch disabled the comparison is case-insensitive (OrdinalIgnoreCase).
+            // Act
             var exception = Record.Exception(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
 
-            // Assert - the case-only mismatch is accepted.
+            // Assert
             Assert.Null(exception);
         }
 
@@ -363,18 +363,93 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [ResetAppContextSwitches]
         public void ValidatePClaim_IsCaseSensitive_WhenSwitchEnabled()
         {
-            // Arrange - request path and signed 'p' claim differ only by case; enable the switch (also the default on this line).
+            // Arrange - request path and signed 'p' claim differ by literal case and percent-triplet hex case.
             AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, true);
             var handler = new SignedHttpRequestHandler();
             var theoryData = new ValidateSignedHttpRequestTheoryData
             {
-                HttpRequestUri = new Uri("https://www.contoso.com/path1"),
-                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/Path1")),
+                HttpRequestUri = new Uri("https://www.contoso.com/Foo%2Fbar"),
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
             };
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
-            // Act & Assert - with the switch enabled the comparison is ordinal (case-sensitive), so the case-only mismatch is rejected.
-            Assert.Throws<SignedHttpRequestInvalidPClaimException>(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
+            // Act
+            var exception = Assert.Throws<SignedHttpRequestInvalidPClaimException>(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
+
+            // Assert
+            Assert.Contains("IDX23011", exception.Message);
+        }
+
+        [Theory]
+        [InlineData("/path", "/path", true, true)]
+        [InlineData("/path", "/path", false, true)]
+        [InlineData("/foo%2Fbar", "/foo%2Fbar", true, true)]
+        [InlineData("/foo%2Fbar", "/foo%2fbar", true, true)]
+        [InlineData("/foo%2Fbar", "/foo%3Fbar", true, false)]
+        [InlineData("/foo%2Fbar%ABbaz", "/foo%2fbar%abbaz", true, true)]
+        [InlineData("/foo%2fbar", "/foo%2fbar", false, true)]
+        [InlineData("/caf%C3%A9", "/caf%c3%a9", true, true)]
+        [InlineData("/caf%C3%A9", "/caf%c3%a9", false, true)]
+        [InlineData("/Path", "/path", true, false)]
+        [InlineData("/Path", "/path", false, true)]
+        [InlineData("/path", "/paths", true, false)]
+        [InlineData("/foo%25", "/foo%", true, false)]
+        [InlineData("/foo%25X", "/foo%X", false, false)]
+        [InlineData("/foo%252G", "/foo%2G", true, false)]
+        [InlineData("/foo%252Gbar", "/foo%252gbar", true, false)]
+        [InlineData("/foo%252Gbar", "/foo%252gbar", false, true)]
+        [InlineData("/foo%BAr", "/foo%bar", true, true)]
+        [InlineData("/foo%25bar", "/foo%bar", true, false)]
+        [InlineData("/foo%2Fbar", "/foo/bar", true, false)]
+        [InlineData("/fooABC", "/fooAB%", false, false)]
+        [InlineData("/fooABCD", "/fooAB%2", false, false)]
+        [ResetAppContextSwitches]
+        public void ValidatePClaim_ComparisonMatrix(string requestPath, string pClaim, bool useCaseSensitiveComparison, bool expectedValid)
+        {
+            // Arrange
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, useCaseSensitiveComparison);
+            var handler = new SignedHttpRequestHandler();
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestUri = new Uri($"https://www.contoso.com{requestPath}"),
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, pClaim)),
+            };
+            var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
+
+            // Act
+            var exception = Record.Exception(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
+
+            // Assert
+            if (expectedValid)
+                Assert.Null(exception);
+            else
+                Assert.IsType<SignedHttpRequestInvalidPClaimException>(exception);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [ResetAppContextSwitches]
+        public void ValidatePClaim_PreservesPercentEncodingHexCaseInException(bool useCaseSensitiveComparison)
+        {
+            // Arrange
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, useCaseSensitiveComparison);
+            var handler = new SignedHttpRequestHandler();
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestUri = new Uri("https://www.contoso.com/Expected%2fPath"),
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/Actual%2aPath")),
+            };
+            var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
+
+            // Act
+            var exception = Assert.Throws<SignedHttpRequestInvalidPClaimException>(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
+
+            // Assert
+            Assert.Contains("Expected%2fPath", exception.Message);
+            Assert.Contains("Actual%2aPath", exception.Message);
+            Assert.DoesNotContain("Expected%2FPath", exception.Message);
+            Assert.DoesNotContain("Actual%2APath", exception.Message);
         }
 
         public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidatePClaimTheoryData
@@ -463,18 +538,113 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
-                        // Percent-encoding hex case is preserved by Uri.AbsolutePath; equal hex case validates under the ordinal comparison.
                         HttpRequestUri = new Uri("https://www.contoso.com/foo%2fbar"),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
-                        TestId = "ValidPHexCaseMatch",
+                        TestId = "ValidPHexCaseMatchLower",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
-                        // %2F (upper) and %2f (lower) differ under the ordinal comparison and must be rejected; they would fold under OrdinalIgnoreCase.
                         HttpRequestUri = new Uri("https://www.contoso.com/foo%2Fbar"),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
+                        TestId = "ValidPHexCaseMismatchUpperRequest",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%2fbar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2Fbar")),
+                        TestId = "ValidPHexCaseMismatchLowerRequest",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%ABbar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%aBbar")),
+                        TestId = "ValidPMixedHexCase",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%2Fbar%2Fbaz"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2Fbar%2fbaz")),
+                        TestId = "ValidPMultipleTripletsMixedHexCase",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/Foo%2Fbar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2fbar")),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
-                        TestId = "InvalidPHexCaseMismatch",
+                        TestId = "InvalidPLiteralCaseAndHexCaseMismatch",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%2Fbar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo/bar")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidPEncodedSlashVsLiteralSlash",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo/bar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2Fbar")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidPLiteralSlashVsEncodedSlash",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%25bar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%25bar")),
+                        TestId = "ValidPEncodedPercent",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%252Fbar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%252Fbar")),
+                        TestId = "ValidPDoubleEncodedSlash",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%252Fbar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2Fbar")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidPDoubleEncodedVsSingleEncoded",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%25"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidPTrailingPercent",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%252"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%2")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidPTruncatedTriplet",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%25zz"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%zz")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidPNonHexTriplet",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%25bar"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/foo%bar")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23011"),
+                        TestId = "InvalidPValidLowerHexDifferentOctet",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/")),
+                        TestId = "ValidPRootSlash",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, string.Empty)),
+                        TestId = "ValidPRootEmptyClaim",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
