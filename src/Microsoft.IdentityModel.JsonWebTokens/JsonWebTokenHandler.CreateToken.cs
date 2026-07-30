@@ -34,6 +34,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private static int s_maxActorChainLength = 1;
 
+        // Per-thread pool of SecurityTokenDescriptors reused for each actor level, to avoid allocating
+        // a descriptor per level. Rented/returned with stack discipline (try/finally), which is safe
+        // for nested actor chains on the same thread.
+        [ThreadStatic] private static Stack<SecurityTokenDescriptor> t_actorDescriptorPool;
+
         /// <summary>
         /// Gets or sets the maximum number of nested actor ("act") levels that are materialized
         /// as JSON objects during token creation and read back into <see cref="System.Security.Claims.ClaimsIdentity.Actor"/>
@@ -1141,15 +1146,49 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 // Within the limit: write the actor as a nested JSON object and recurse. The child
                 // descriptor carries one fewer level so nested actors degrade once the limit is hit.
-                var actorTokenDescriptor = new SecurityTokenDescriptor { Subject = actor, CurrentActorChainLength = remainingActorLevels - 1 };
-                WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+                // The descriptor is rented from a per-thread pool to avoid a per-level allocation.
+                SecurityTokenDescriptor actorTokenDescriptor = RentActorDescriptor();
+                actorTokenDescriptor.Subject = actor;
+                actorTokenDescriptor.CurrentActorChainLength = remainingActorLevels - 1;
+                try
+                {
+                    WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+                }
+                finally
+                {
+                    ReturnActorDescriptor(actorTokenDescriptor);
+                }
             }
             else
             {
                 // Beyond the limit: write the remaining actor subtree as a JSON-text string.
-                var actorTokenDescriptor = new SecurityTokenDescriptor { Subject = actor };
-                writer.WriteStringValue(WriteActorAsJsonString(actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes));
+                SecurityTokenDescriptor actorTokenDescriptor = RentActorDescriptor();
+                actorTokenDescriptor.Subject = actor;
+                try
+                {
+                    writer.WriteStringValue(WriteActorAsJsonString(actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes));
+                }
+                finally
+                {
+                    ReturnActorDescriptor(actorTokenDescriptor);
+                }
             }
+        }
+
+        // Rents a SecurityTokenDescriptor from a per-thread pool for writing a single actor level.
+        // Only Subject and CurrentActorChainLength are ever set on rented descriptors (reset on return),
+        // so all other fields stay at their defaults across reuses.
+        private static SecurityTokenDescriptor RentActorDescriptor()
+        {
+            Stack<SecurityTokenDescriptor> pool = t_actorDescriptorPool;
+            return pool != null && pool.Count > 0 ? pool.Pop() : new SecurityTokenDescriptor();
+        }
+
+        private static void ReturnActorDescriptor(SecurityTokenDescriptor actorTokenDescriptor)
+        {
+            actorTokenDescriptor.Subject = null;
+            actorTokenDescriptor.CurrentActorChainLength = null;
+            (t_actorDescriptorPool ??= new Stack<SecurityTokenDescriptor>()).Push(actorTokenDescriptor);
         }
 
         // Returns the actor ClaimsIdentity for the descriptor: the "act" entry in Claims when it is a
