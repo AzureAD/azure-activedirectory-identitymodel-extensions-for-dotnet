@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class HttpDocumentRetriever : IDocumentRetriever
 #if NET5_0_OR_GREATER
-        , ISyncDocumentRetriever
+        , IDocumentRetrieverSync
 #endif
     {
         private HttpClient _httpClient;
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="address">Location of document</param>
         /// <param name="cancel">A cancellation token that can be used by other objects or threads to receive notice of cancellation. <see cref="CancellationToken"/></param>
         /// <returns>Document as a string</returns>
-        public string GetDocumentSync(string address, CancellationToken cancel)
+        public string GetDocument(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
                 throw LogHelper.LogArgumentNullException(nameof(address));

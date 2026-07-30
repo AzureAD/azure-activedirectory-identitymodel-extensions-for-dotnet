@@ -1,1 +1,1 @@
-Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.GetDocumentSync(string address, System.Threading.CancellationToken cancel) -> string
+Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.GetDocument(string address, System.Threading.CancellationToken cancel) -> string

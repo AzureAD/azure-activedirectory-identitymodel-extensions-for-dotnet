@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Reads a local file from the disk.
     /// </summary>
-    public class FileDocumentRetriever : IDocumentRetriever, ISyncDocumentRetriever
+    public class FileDocumentRetriever : IDocumentRetriever, IDocumentRetrieverSync
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FileDocumentRetriever"/> class.
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <returns>UTF8 decoding of bytes in the file.</returns>
         /// <exception cref="ArgumentNullException">If address is null or whitespace.</exception>
         /// <exception cref="IOException">With inner exception containing the original exception.</exception>
-        public string GetDocumentSync(string address, CancellationToken cancel)
+        public string GetDocument(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
                 throw LogHelper.LogArgumentNullException("address");
