@@ -785,6 +785,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             writer.Flush();
         }
 
+        // Per-thread reusable buffer so AddSubjectClaims does not allocate a Dictionary on every
+        // token-creation call. Safe today because AddSubjectClaims fully finishes with the dictionary
+        // before returning and is not reentrant on a single thread.
+        // TODO(perf-review): before merging, add a reentrancy-safe fallback (so correctness does not
+        // depend on the non-reentrancy invariant) and a multi-threaded stress test.
+        [ThreadStatic] private static Dictionary<string, object> t_subjectClaimsPayload;
+
         internal static void AddSubjectClaims(
             ref Utf8JsonWriter writer,
             SecurityTokenDescriptor tokenDescriptor,
@@ -801,7 +808,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             bool iatReset = false;
             bool nbfReset = false;
 
-            var payload = new Dictionary<string, object>();
+            // Reuse a per-thread dictionary to avoid a per-call allocation.
+            Dictionary<string, object> payload = t_subjectClaimsPayload ??= new Dictionary<string, object>();
+            payload.Clear();
 
             bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
 
