@@ -1,0 +1,3 @@
+*REMOVED*const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonDefault = false -> bool
+*REMOVED*const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" -> string
+*REMOVED*static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparison.get -> bool
