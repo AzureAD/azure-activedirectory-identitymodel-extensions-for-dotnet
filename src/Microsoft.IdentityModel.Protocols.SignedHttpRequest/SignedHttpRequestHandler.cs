@@ -823,8 +823,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             ReadOnlySpan<char> expectedPClaimValueSpan = httpRequestUri.AbsolutePath.AsSpan().Trim('/');
 
             // URI path components are case-sensitive per RFC 3986 section 3.3, so the comparison is ordinal (case-sensitive) by default.
-            // The AppContext switch allows a consumer to restore the legacy case-insensitive comparison during transition.
-            var comparison = AppContextSwitches.UseCaseSensitivePClaimComparison ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+            var comparison = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison
+                ? StringComparison.Ordinal
+                : StringComparison.OrdinalIgnoreCase;
             if (expectedPClaimValueSpan.Equals(pClaimValueSpan, comparison))
                 return;
 
