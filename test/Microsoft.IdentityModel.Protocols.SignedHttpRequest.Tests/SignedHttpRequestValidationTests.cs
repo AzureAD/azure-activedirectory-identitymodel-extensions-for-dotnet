@@ -319,7 +319,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Theory, MemberData(nameof(ValidatePClaimTheoryData), DisableDiscoveryEnumeration = true)]
-        [ResetAppContextSwitches]
         public void ValidatePClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidatePClaim", theoryData);
@@ -339,42 +338,43 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Fact]
-        [ResetAppContextSwitches]
-        public void ValidatePClaim_IsCaseInsensitive_WhenSwitchDisabled()
+        public void ValidatePClaim_IsCaseInsensitive_WhenConfigurationDisabled()
         {
-            // Arrange - request path and signed 'p' claim differ only by case; disable the switch to select the case-insensitive (OrdinalIgnoreCase) comparison, which is the default on the 8.x line.
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, false);
+            // Arrange
             var handler = new SignedHttpRequestHandler();
             var theoryData = new ValidateSignedHttpRequestTheoryData
             {
                 HttpRequestUri = new Uri("https://www.contoso.com/path1"),
                 SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/Path1")),
             };
+            theoryData.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison = false;
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
-            // Act - with the switch disabled the comparison is case-insensitive (OrdinalIgnoreCase).
+            // Act
             var exception = Record.Exception(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
 
-            // Assert - the case-only mismatch is accepted.
+            // Assert
             Assert.Null(exception);
         }
 
         [Fact]
-        [ResetAppContextSwitches]
-        public void ValidatePClaim_IsCaseSensitive_WhenSwitchEnabled()
+        public void ValidatePClaim_IsCaseSensitive_WhenConfigurationEnabled()
         {
-            // Arrange - request path and signed 'p' claim differ only by case; enable the switch to opt in to the case-sensitive (Ordinal) comparison (not the default on the 8.x line).
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch, true);
+            // Arrange
             var handler = new SignedHttpRequestHandler();
             var theoryData = new ValidateSignedHttpRequestTheoryData
             {
                 HttpRequestUri = new Uri("https://www.contoso.com/path1"),
                 SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, "/Path1")),
             };
+            theoryData.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison = true;
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
-            // Act & Assert - with the switch enabled the comparison is ordinal (case-sensitive), so the case-only mismatch is rejected.
-            Assert.Throws<SignedHttpRequestInvalidPClaimException>(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
+            // Act
+            var exception = Assert.Throws<SignedHttpRequestInvalidPClaimException>(() => handler.ValidatePClaim(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext));
+
+            // Assert
+            Assert.Contains("IDX23011", exception.Message);
         }
 
         public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidatePClaimTheoryData
