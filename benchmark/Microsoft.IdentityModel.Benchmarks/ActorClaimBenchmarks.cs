@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
-    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ActorClaimSerializationBenchmarks*
+    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ActorClaimBenchmarks*
     //
     // Serialization (write-path) benchmarks for actor ("act") claim support: CreateToken only.
     //
@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Benchmarks
     // JSON-text string rather than nested "act" objects. MaxActorChainLength is a process-wide static,
     // so every benchmark sets it explicitly (the assignment is ~1ns and negligible against the
     // microsecond-scale token operations).
-    public class ActorClaimSerializationBenchmarks
+    public class ActorClaimBenchmarks
     {
         private JsonWebTokenHandler _jsonWebTokenHandler;
         private SecurityTokenDescriptor _descNoActor;
