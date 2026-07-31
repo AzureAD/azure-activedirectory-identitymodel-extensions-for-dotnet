@@ -3,7 +3,7 @@
 
 // Ignore Spelling: Metadata Validator Retreiver
 
-// The synchronous configuration retrieval path relies on ISyncDocumentRetriever.GetDocumentSync.
+// The synchronous configuration retrieval path relies on IDocumentRetrieverSync.GetDocument.
 // HttpDocumentRetriever only implements it on .NET 5.0 or greater, and several tests below use it,
 // so the entire sync mirror is gated to NET5_0_OR_GREATER.
 #if NET5_0_OR_GREATER

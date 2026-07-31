@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             httpClient.DefaultRequestVersion = version;
 
             var documentRetriever = new HttpDocumentRetriever(httpClient);
-            documentRetriever.GetDocumentSync("https://localhost", CancellationToken.None);
+            documentRetriever.GetDocument("https://localhost", CancellationToken.None);
         }
 
         [Theory, MemberData(nameof(GetVersionPolicyTheoryData))]
@@ -245,7 +245,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             httpClient.DefaultVersionPolicy = policy;
 
             var documentRetriever = new HttpDocumentRetriever(httpClient);
-            documentRetriever.GetDocumentSync("https://localhost", CancellationToken.None);
+            documentRetriever.GetDocument("https://localhost", CancellationToken.None);
         }
 
         [Theory, MemberData(nameof(GetVersionPolicyTheoryData))]
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
             using var httpClient = new HttpClient(new DelegateHttpMessageHandler(callback));
             var documentRetriever = new HttpDocumentRetriever(httpClient) { HttpVersionPolicy = policy };
-            documentRetriever.GetDocumentSync("https://localhost", CancellationToken.None);
+            documentRetriever.GetDocument("https://localhost", CancellationToken.None);
         }
 
         public static TheoryData<HttpVersionPolicy> GetVersionPolicyTheoryData

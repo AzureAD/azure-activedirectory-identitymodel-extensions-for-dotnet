@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.TestUtils
     /// Returns a string set in the constructor.
     /// Simplifies testing.
     /// </summary>
-    public class InMemoryDocumentRetriever : IDocumentRetriever, ISyncDocumentRetriever
+    public class InMemoryDocumentRetriever : IDocumentRetriever, IDocumentRetrieverSync
     {
         private readonly Dictionary<string, string> _configurations;
         private ManualResetEvent _waitEvent;
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <param name="address">Fully qualified path to a file. Ignored for now.</param>
         /// <param name="cancel"><see cref="CancellationToken"/> Ignored for now.</param>
         /// <returns>UTF8 decoding of bytes in the file.</returns>
-        public string GetDocumentSync(string address, CancellationToken cancel)
+        public string GetDocument(string address, CancellationToken cancel)
         {
             // Some tests change the Metadata address on ConfigurationManager to test different scenarios.
             if (_signalEvent != null)

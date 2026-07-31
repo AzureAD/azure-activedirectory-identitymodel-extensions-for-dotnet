@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         /// <summary>
         /// Mock document retriever to track calls
         /// </summary>
-        private class MockDocumentRetriever : IDocumentRetriever, ISyncDocumentRetriever
+        private class MockDocumentRetriever : IDocumentRetriever, IDocumentRetrieverSync
         {
             public bool GetDocumentCalled { get; private set; }
 
@@ -418,7 +418,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 return Task.FromResult(string.Empty);
             }
 
-            public string GetDocumentSync(string address, CancellationToken cancel)
+            public string GetDocument(string address, CancellationToken cancel)
             {
                 GetDocumentCalled = true;
                 return string.Empty;

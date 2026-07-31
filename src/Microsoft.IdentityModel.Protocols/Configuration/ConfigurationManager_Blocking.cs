@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
-                        var configuration = ((IConfigurationRetrieverSync<T>)_configRetriever).GetConfigurationSync(MetadataAddress, (ISyncDocumentRetriever)_docRetriever, CancellationToken.None);
+                        var configuration = ((IConfigurationRetrieverSync<T>)_configRetriever).GetConfigurationSync(MetadataAddress, (IDocumentRetrieverSync)_docRetriever, CancellationToken.None);
 
                         var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                         TelemetryClient.LogConfigurationRetrievalDuration(

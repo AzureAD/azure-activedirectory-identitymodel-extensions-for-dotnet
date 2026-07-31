@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             return GetAsync(address, retriever, cancel);
         }
 
-        OpenIdConnectConfiguration IConfigurationRetrieverSync<OpenIdConnectConfiguration>.GetConfigurationSync(string address, ISyncDocumentRetriever retriever, CancellationToken cancel)
+        OpenIdConnectConfiguration IConfigurationRetrieverSync<OpenIdConnectConfiguration>.GetConfigurationSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
         {
             return GetSync(address, retriever, cancel);
         }
@@ -92,13 +92,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
-        /// Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address and an <see cref="ISyncDocumentRetriever"/>.
+        /// Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address and an <see cref="IDocumentRetrieverSync"/>.
         /// </summary>
         /// <param name="address">address of the discovery document.</param>
-        /// <param name="retriever">the <see cref="ISyncDocumentRetriever"/> to use to read the discovery document</param>
+        /// <param name="retriever">the <see cref="IDocumentRetrieverSync"/> to use to read the discovery document</param>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>A populated <see cref="OpenIdConnectConfiguration"/> instance.</returns>
-        public static OpenIdConnectConfiguration GetSync(string address, ISyncDocumentRetriever retriever, CancellationToken cancel)
+        public static OpenIdConnectConfiguration GetSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
                 throw LogHelper.LogArgumentNullException(nameof(address));
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 throw LogHelper.LogArgumentNullException(nameof(retriever));
             }
 
-            string doc = retriever.GetDocumentSync(address, cancel);
+            string doc = retriever.GetDocument(address, cancel);
 
             if (LogHelper.IsEnabled(EventLogLevel.Verbose))
                 LogHelper.LogVerbose(LogMessages.IDX21811, doc);
@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
                     LogHelper.LogVerbose(LogMessages.IDX21812, openIdConnectConfiguration.JwksUri);
 
-                string keys = retriever.GetDocumentSync(openIdConnectConfiguration.JwksUri, cancel);
+                string keys = retriever.GetDocument(openIdConnectConfiguration.JwksUri, cancel);
 
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
                     LogHelper.LogVerbose(LogMessages.IDX21813, openIdConnectConfiguration.JwksUri);
