@@ -3,19 +3,18 @@
 
 using System.Threading;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols;
+
+/// <summary>
+/// Synchronous interface that defines a document retriever that returns the document as a string.
+/// </summary>
+public interface IDocumentRetrieverSync
 {
     /// <summary>
-    /// Synchronous interface that defines a document retriever that returns the document as a string.
+    /// Obtains a document from an address.
     /// </summary>
-    public interface IDocumentRetrieverSync
-    {
-        /// <summary>
-        /// Obtains a document from an address.
-        /// </summary>
-        /// <param name="address">location of document.</param>
-        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
-        /// <returns>document as a string.</returns>
-        string GetDocument(string address, CancellationToken cancel);
-    }
+    /// <param name="address">location of document.</param>
+    /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+    /// <returns>document as a string.</returns>
+    string GetDocument(string address, CancellationToken cancel);
 }
