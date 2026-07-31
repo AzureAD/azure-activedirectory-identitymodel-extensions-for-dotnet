@@ -8,6 +8,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
   See PR [#2377](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2377) for details.
 
 ## Bug Fixes
+- Normalize hexadecimal letter casing inside percent-encoded triplets during Signed HTTP Request `p` claim validation. Literal path-letter comparison remains controlled by `UseCaseSensitivePClaimComparison`, and `p` claim creation output is unchanged.
 - **Sanitize logs to avoid leaking sensitive data**  
   Updated logging to sanitize sensitive values, reducing the risk of inadvertently exposing secrets or PII in logs.  
   See PR [#3316](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3316) for details.
