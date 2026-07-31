@@ -37,6 +37,88 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
+        public void ActorToken_IsRfcCompliant_ActObjectHasNoNonIdentityClaims()
+        {
+            // RFC 8693 section 4.1: the "act" claim holds only identity claims; non-identity claims
+            // (exp, nbf, iat, aud, iss) are not meaningful within "act" and must not be present -
+            // even though the top-level payload still receives default temporal claims.
+            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.Actor = actorIdentity;
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+            };
+            var token = handler.CreateToken(tokenDescriptor);
+            var decoded = handler.ReadJsonWebToken(token);
+
+            // The top-level payload still gets default temporal claims (feature unchanged there).
+            Assert.True(decoded.Payload.HasClaim("exp"), "top-level payload should contain 'exp'");
+            Assert.True(decoded.Payload.HasClaim("nbf"), "top-level payload should contain 'nbf'");
+            Assert.True(decoded.Payload.HasClaim("iat"), "top-level payload should contain 'iat'");
+
+            // The act object contains identity claims only.
+            var act = decoded.Payload.GetValue<JsonElement>("act");
+            Assert.Equal("actor-subject-id", act.GetProperty("sub").GetString());
+            Assert.False(act.TryGetProperty("exp", out _), "act must not contain 'exp'");
+            Assert.False(act.TryGetProperty("nbf", out _), "act must not contain 'nbf'");
+            Assert.False(act.TryGetProperty("iat", out _), "act must not contain 'iat'");
+            Assert.False(act.TryGetProperty("aud", out _), "act must not contain 'aud'");
+            Assert.False(act.TryGetProperty("iss", out _), "act must not contain 'iss'");
+        }
+
+        [Fact]
+        public void NestedActorToken_IsRfcCompliant_EveryActObjectHasNoNonIdentityClaims()
+        {
+            // RFC 8693 section 4.1: every actor object in a nested delegation chain is identity-only.
+            JsonWebTokenHandler.MaxActorChainLength = 2;
+
+            var nestedActor = new CaseSensitiveClaimsIdentity("NestedActorAuth");
+            nestedActor.AddClaim(new Claim("sub", "nested-actor-id"));
+
+            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+            actorIdentity.Actor = nestedActor;
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.Actor = actorIdentity;
+
+            var handler = new JsonWebTokenHandler();
+            var token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+            });
+            var decoded = handler.ReadJsonWebToken(token);
+
+            var act = decoded.Payload.GetValue<JsonElement>("act");
+            AssertActorObjectIsIdentityOnly(act, "actor-subject-id");
+
+            Assert.True(act.TryGetProperty("act", out var nestedAct));
+            AssertActorObjectIsIdentityOnly(nestedAct, "nested-actor-id");
+        }
+
+        private static void AssertActorObjectIsIdentityOnly(JsonElement act, string expectedSub)
+        {
+            Assert.Equal(JsonValueKind.Object, act.ValueKind);
+            Assert.Equal(expectedSub, act.GetProperty("sub").GetString());
+            Assert.False(act.TryGetProperty("exp", out _), "act must not contain 'exp'");
+            Assert.False(act.TryGetProperty("nbf", out _), "act must not contain 'nbf'");
+            Assert.False(act.TryGetProperty("iat", out _), "act must not contain 'iat'");
+        }
+
+        [Fact]
         public void ActorToken_InClaimsDictionary_IsCorrectlySerialized()
         {
             var context = new CompareContext($"{this}.ActorToken_InClaimsDictionary_IsCorrectlySerialized");

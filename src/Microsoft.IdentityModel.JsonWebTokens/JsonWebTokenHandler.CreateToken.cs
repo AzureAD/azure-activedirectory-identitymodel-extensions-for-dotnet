@@ -796,7 +796,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
             if (isActorFound || tokenDescriptor.Subject?.Actor != null)
-                WriteActor(ref writer, tokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+                WriteActor(ref writer, tokenDescriptor);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
@@ -1119,37 +1119,90 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // SecurityTokenDescriptor.Claims when it is a ClaimsIdentity, otherwise from Subject.Actor.
         // While actor object levels remain, the actor is written as a nested JSON object; once the
         // limit is reached, the remaining actor subtree is written as a JSON-text string (never a JWT).
-        internal static void WriteActor(
-            ref Utf8JsonWriter writer,
-            SecurityTokenDescriptor tokenDescriptor,
-            bool setDefaultTimesOnTokenCreation,
-            int tokenLifetimeInMinutes)
+        // Writes the RFC 8693 "act" claim for the actor resolved from the descriptor. Per RFC 8693
+        // section 4.1 the actor is a JSON object of identity claims only; non-identity claims (exp,
+        // nbf, iat, aud, iss) are not meaningful within "act" and are not written. The actor is written
+        // directly from its ClaimsIdentity, without allocating a per-level SecurityTokenDescriptor.
+        internal static void WriteActor(ref Utf8JsonWriter writer, SecurityTokenDescriptor tokenDescriptor)
         {
             ClaimsIdentity actor = GetActorIdentity(tokenDescriptor);
             if (actor == null)
                 return;
 
-            // The remaining actor object levels are carried on the descriptor as it flows down the
-            // recursion. The caller's top-level descriptor leaves it unset, so it seeds from the
-            // process-wide MaxActorChainLength; only the internal per-level actor descriptors created
-            // below are ever stamped, so the caller's descriptor is never mutated.
+            // The remaining actor object levels are carried on the descriptor. The caller's top-level
+            // descriptor leaves it unset, so it seeds from the process-wide MaxActorChainLength.
             int remainingActorLevels = tokenDescriptor.CurrentActorChainLength ?? MaxActorChainLength;
 
             writer.WritePropertyName(ActClaimType);
+            WriteActorValue(ref writer, actor, remainingActorLevels);
+        }
 
+        // Writes a single actor as the value of an "act" member: a nested JSON object while within the
+        // configured chain length, otherwise the remaining subtree as a JSON-text string.
+        private static void WriteActorValue(ref Utf8JsonWriter writer, ClaimsIdentity actor, int remainingActorLevels)
+        {
             if (remainingActorLevels > 0)
-            {
-                // Within the limit: write the actor as a nested JSON object and recurse. The child
-                // descriptor carries one fewer level so nested actors degrade once the limit is hit.
-                var actorTokenDescriptor = new SecurityTokenDescriptor { Subject = actor, CurrentActorChainLength = remainingActorLevels - 1 };
-                WriteJwsPayload(ref writer, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
-            }
+                WriteActorObject(ref writer, actor, remainingActorLevels);
             else
+                writer.WriteStringValue(WriteActorAsJsonString(actor));
+        }
+
+        // Writes an actor as an RFC 8693 "act" JSON object: identity claims only, plus a nested "act"
+        // for the next (prior) actor in the delegation chain when one exists and the limit allows.
+        private static void WriteActorObject(ref Utf8JsonWriter writer, ClaimsIdentity actor, int remainingActorLevels)
+        {
+            writer.WriteStartObject();
+
+            WriteIdentityClaims(ref writer, actor);
+
+            // Delegation chain: the current actor is outermost, prior actors are nested (RFC 8693 4.1).
+            if (actor.Actor != null)
             {
-                // Beyond the limit: write the remaining actor subtree as a JSON-text string.
-                var actorTokenDescriptor = new SecurityTokenDescriptor { Subject = actor };
-                writer.WriteStringValue(WriteActorAsJsonString(actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes));
+                writer.WritePropertyName(ActClaimType);
+                WriteActorValue(ref writer, actor.Actor, remainingActorLevels - 1);
             }
+
+            writer.WriteEndObject();
+        }
+
+        // Writes the identity claims of a ClaimsIdentity, coalescing duplicate claim types into JSON
+        // arrays (consistent with AddSubjectClaims). No non-identity (exp/nbf/iat/aud/iss) claims are
+        // injected, so actor ("act") objects remain RFC 8693 section 4.1 compliant.
+        private static void WriteIdentityClaims(ref Utf8JsonWriter writer, ClaimsIdentity identity)
+        {
+            var payload = new Dictionary<string, object>();
+
+            foreach (Claim claim in identity.Claims)
+            {
+                if (claim == null)
+                    continue;
+
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : TokenUtilities.GetClaimValueUsingValueType(claim);
+
+                // Duplicate claim types are coalesced into a List, later written as a JSON array.
+                if (payload.TryGetValue(claim.Type, out object existingValue))
+                {
+                    if (existingValue is List<object> existingList)
+                    {
+                        existingList.Add(jsonClaimValue);
+                    }
+                    else
+                    {
+                        payload[claim.Type] = new List<object>
+                        {
+                            existingValue,
+                            jsonClaimValue
+                        };
+                    }
+                }
+                else
+                {
+                    payload[claim.Type] = jsonClaimValue;
+                }
+            }
+
+            foreach (KeyValuePair<string, object> kvp in payload)
+                JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
         }
 
         // Returns the actor ClaimsIdentity for the descriptor: the "act" entry in Claims when it is a
@@ -1164,19 +1217,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return tokenDescriptor.Subject?.Actor;
         }
 
-        // Serializes an actor descriptor (and its full nested actor chain, as nested objects) to a
-        // JSON-text string used when the actor chain exceeds the configured MaxActorChainLength.
-        private static string WriteActorAsJsonString(
-            SecurityTokenDescriptor actorTokenDescriptor,
-            bool setDefaultTimesOnTokenCreation,
-            int tokenLifetimeInMinutes)
+        // Serializes an actor (and its full remaining nested actor chain, as nested "act" objects) to a
+        // JSON-text string, used when the actor chain exceeds the configured MaxActorChainLength.
+        private static string WriteActorAsJsonString(ClaimsIdentity actor)
         {
-            // int.MaxValue: fully expand the remaining subtree as nested objects within the string.
-            actorTokenDescriptor.CurrentActorChainLength = int.MaxValue;
             using (MemoryStream stream = new MemoryStream())
             {
                 Utf8JsonWriter actorWriter = new Utf8JsonWriter(stream);
-                WriteJwsPayload(ref actorWriter, actorTokenDescriptor, setDefaultTimesOnTokenCreation, tokenLifetimeInMinutes);
+                // int.MaxValue: fully expand the remaining subtree as nested objects within the string.
+                WriteActorObject(ref actorWriter, actor, int.MaxValue);
                 actorWriter.Flush();
                 return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
             }
