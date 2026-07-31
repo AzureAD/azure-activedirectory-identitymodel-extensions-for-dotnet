@@ -108,15 +108,6 @@ namespace Microsoft.IdentityModel.Tokens
         public ClaimsIdentity Subject { get; set; }
 
         /// <summary>
-        /// Carries the remaining number of actor (<c>act</c>) object levels to materialize while the
-        /// descriptor flows down the actor-chain recursion during payload serialization. The caller's
-        /// top-level descriptor leaves this <see langword="null"/>, so serialization seeds it from
-        /// <c>JsonWebTokenHandler.MaxActorChainLength</c>; only the internal per-level actor descriptors
-        /// are stamped, so a caller's descriptor is never mutated. Not part of the public contract.
-        /// </summary>
-        internal int? CurrentActorChainLength { get; set; }
-
-        /// <summary>
         /// Indicates if <c>kid</c> and <c>x5t</c> should be included in the header of a JSON web token (JWT)
         ///
         /// <remarks>

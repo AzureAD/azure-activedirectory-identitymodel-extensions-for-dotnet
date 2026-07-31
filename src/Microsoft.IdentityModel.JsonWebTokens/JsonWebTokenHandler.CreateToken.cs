@@ -1129,9 +1129,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (actor == null)
                 return;
 
-            // The remaining actor object levels are carried on the descriptor. The caller's top-level
-            // descriptor leaves it unset, so it seeds from the process-wide MaxActorChainLength.
-            int remainingActorLevels = tokenDescriptor.CurrentActorChainLength ?? MaxActorChainLength;
+            // The number of actor object levels to materialize is governed by the process-wide
+            // MaxActorChainLength; the remaining count is then carried as a parameter down the recursion.
+            int remainingActorLevels = MaxActorChainLength;
 
             writer.WritePropertyName(ActClaimType);
             WriteActorValue(ref writer, actor, remainingActorLevels);
