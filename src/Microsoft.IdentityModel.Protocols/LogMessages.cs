@@ -32,6 +32,8 @@ namespace Microsoft.IdentityModel.Protocols
         internal const string IDX20811 = "IDX20811: Failed to retrieve configuration from event handler. MetadataAddress: '{0}', Exception: '{1}'.";
         internal const string IDX20812 = "IDX20812: Failed to validate configuration retrieved via event handler. Exception: '{0}'.";
         internal const string IDX20813 = "IDX20813: ConfigurationEventHandler implementation threw an exception on AfterUpdateAsync call for metadata address '{0}'. Exception: '{1}'.";
+        internal const string IDX20814 = "IDX20814: The synchronous configuration retrieval path is not available on this ConfigurationManager. It requires a configuration retriever that implements 'IConfigurationRetrieverSync<T>' and a document retriever that implements 'IDocumentRetrieverSync'. Create the manager with ConfigurationManager<T>.CreateSync(...), or provide retrievers that implement the synchronous interfaces.";
+        internal const string IDX20815 = "IDX20815: The asynchronous configuration retrieval path is not available on this ConfigurationManager. It requires a configuration retriever that implements 'IConfigurationRetriever<T>' and a document retriever that implements 'IDocumentRetriever'.";
 
 #pragma warning restore 1591
     }
