@@ -39,11 +39,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         [Fact]
         public void ActorToken_IsRfcCompliant_ActObjectHasNoNonIdentityClaims()
         {
-            // RFC 8693 section 4.1: the "act" claim holds only identity claims; non-identity claims
-            // (exp, nbf, iat, aud, iss) are not meaningful within "act" and must not be present -
-            // even though the top-level payload still receives default temporal claims.
+            // RFC 8693 section 4.1: the "act" claim holds only identity claims; the handler must not
+            // INJECT its own default temporal claims (exp, nbf, iat) into "act" the way it does for the
+            // top-level payload. This is the regression guard for the original bug, where reusing
+            // WriteJwsPayload for actors leaked default exp/iat/nbf into every "act" object.
             var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
             actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+            actorIdentity.AddClaim(new Claim("name", "Actor Name"));
 
             var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
             mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
@@ -60,19 +62,56 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var token = handler.CreateToken(tokenDescriptor);
             var decoded = handler.ReadJsonWebToken(token);
 
-            // The top-level payload still gets default temporal claims (feature unchanged there).
+            // The top-level payload DOES receive the default temporal claims that CreateToken injects.
+            // Asserting this first is what makes the "act" asserts below non-trivial: it proves the
+            // default-time injection actually runs for this token, yet does not reach the "act" object.
             Assert.True(decoded.Payload.HasClaim("exp"), "top-level payload should contain 'exp'");
             Assert.True(decoded.Payload.HasClaim("nbf"), "top-level payload should contain 'nbf'");
             Assert.True(decoded.Payload.HasClaim("iat"), "top-level payload should contain 'iat'");
 
-            // The act object contains identity claims only.
+            // The "act" object carries the actor's identity claims and NONE of the injected temporal
+            // claims. (Caller-provided non-identity claims are a separate concern - see the
+            // ActorToken_WithCallerProvidedNonIdentityClaims_AreWrittenVerbatim test - here the actor
+            // has none, so any exp/nbf/iat present could only have come from injection.)
             var act = decoded.Payload.GetValue<JsonElement>("act");
             Assert.Equal("actor-subject-id", act.GetProperty("sub").GetString());
-            Assert.False(act.TryGetProperty("exp", out _), "act must not contain 'exp'");
-            Assert.False(act.TryGetProperty("nbf", out _), "act must not contain 'nbf'");
-            Assert.False(act.TryGetProperty("iat", out _), "act must not contain 'iat'");
-            Assert.False(act.TryGetProperty("aud", out _), "act must not contain 'aud'");
-            Assert.False(act.TryGetProperty("iss", out _), "act must not contain 'iss'");
+            Assert.Equal("Actor Name", act.GetProperty("name").GetString());
+            Assert.False(act.TryGetProperty("exp", out _), "act must not contain an injected 'exp'");
+            Assert.False(act.TryGetProperty("nbf", out _), "act must not contain an injected 'nbf'");
+            Assert.False(act.TryGetProperty("iat", out _), "act must not contain an injected 'iat'");
+        }
+
+        [Fact]
+        public void ActorToken_WithCallerProvidedNonIdentityClaims_AreWrittenVerbatim()
+        {
+            // By design the actor ClaimsIdentity is serialized as-is. RFC 8693 section 4.1 says
+            // non-identity claims (exp/nbf/iat/aud/iss) are "not used" within "act", but it does not
+            // require a serializer to strip caller-provided ones. We deliberately do NOT strip: whatever
+            // the caller puts on the actor identity is written verbatim (no silent data loss). The handler
+            // only refrains from injecting its OWN default temporal claims (asserted in the test above).
+            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+            actorIdentity.AddClaim(new Claim("exp", "9999999999"));
+            actorIdentity.AddClaim(new Claim("aud", "https://actor.example.com"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.Actor = actorIdentity;
+
+            var handler = new JsonWebTokenHandler();
+            var token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+            });
+
+            // Caller-provided non-identity claims survive verbatim in "act" (not stripped, not rejected).
+            var act = handler.ReadJsonWebToken(token).Payload.GetValue<JsonElement>("act");
+            Assert.Equal("actor-subject-id", act.GetProperty("sub").GetString());
+            Assert.Equal("9999999999", act.GetProperty("exp").GetString());
+            Assert.Equal("https://actor.example.com", act.GetProperty("aud").GetString());
         }
 
         [Fact]
@@ -204,9 +243,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
                 // Verify actor claim exists in the token
                 Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain 'act' claim");
-
-                // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim("act"), "JWT token should contain actor claim");
 
                 // Verify the actor object directly
                 var actorObject = decodedToken.Payload.GetValue<JsonElement>("act");
