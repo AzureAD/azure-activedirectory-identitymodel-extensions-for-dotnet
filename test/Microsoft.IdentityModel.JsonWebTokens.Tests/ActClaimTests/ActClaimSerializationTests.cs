@@ -161,6 +161,45 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
+        public void ActClaim_NonClaimsIdentityValueInClaims_NoSubjectActor_IsWrittenVerbatimAsOrdinaryClaim()
+        {
+            // Backward compatibility: before actor support, an "act" entry in the Claims dictionary was
+            // just an ordinary claim written verbatim. That must be unchanged when its value is NOT a
+            // ClaimsIdentity and there is no Subject.Actor - the actor feature must not intercept it.
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", "raw-act-string" } },
+            };
+
+            var token = handler.CreateToken(tokenDescriptor);
+            var decoded = handler.ReadJsonWebToken(token);
+
+            // Exactly one top-level "act" member (WriteActor is not invoked: no ClaimsIdentity actor and
+            // no Subject.Actor), written verbatim as the caller supplied it.
+            using var payloadDoc = JsonDocument.Parse(Base64UrlEncoder.Decode(decoded.EncodedPayload));
+            int actCount = 0;
+            foreach (JsonProperty property in payloadDoc.RootElement.EnumerateObject())
+            {
+                if (property.NameEquals("act"))
+                    actCount++;
+            }
+
+            Assert.Equal(1, actCount);
+
+            JsonElement singleAct = payloadDoc.RootElement.GetProperty("act");
+            Assert.Equal(JsonValueKind.String, singleAct.ValueKind);
+            Assert.Equal("raw-act-string", singleAct.GetString());
+        }
+
+        [Fact]
         public void ActorChain_CyclicClaimsIdentityActor_IsRejectedByClaimsIdentity()
         {
             // The actor-serialization recursion (WriteActorObject / WriteActorAsJsonString, the latter
