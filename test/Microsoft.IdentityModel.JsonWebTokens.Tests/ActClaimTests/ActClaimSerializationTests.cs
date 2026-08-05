@@ -115,6 +115,72 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
+        public void ActClaim_NonClaimsIdentityValueInClaims_WithSubjectActor_WritesSingleActMember()
+        {
+            // Regression (PR #3560 review): when the "act" entry in the Claims dictionary is NOT a
+            // ClaimsIdentity (e.g. a plain string) AND Subject.Actor is also set, the claim loop writes
+            // "act" verbatim while WriteActor could ALSO emit an "act" object from Subject.Actor, producing
+            // two "act" members (a duplicate/ambiguous key, since Utf8JsonWriter does not dedupe property
+            // names). The Claims "act" key must take precedence and exactly one "act" must be written.
+            var subjectActor = new CaseSensitiveClaimsIdentity("ActorAuth");
+            subjectActor.AddClaim(new Claim("sub", "subject-actor-id"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.Actor = subjectActor;
+
+            var handler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", "raw-act-string" } },
+            };
+
+            var token = handler.CreateToken(tokenDescriptor);
+            var decoded = handler.ReadJsonWebToken(token);
+
+            // Exactly one top-level "act" member. JsonDocument preserves duplicate property names, so a
+            // second "act" (the bug) would be counted here.
+            using var payloadDoc = JsonDocument.Parse(Base64UrlEncoder.Decode(decoded.EncodedPayload));
+            int actCount = 0;
+            foreach (JsonProperty property in payloadDoc.RootElement.EnumerateObject())
+            {
+                if (property.NameEquals("act"))
+                    actCount++;
+            }
+
+            Assert.Equal(1, actCount);
+
+            // The Claims "act" value wins verbatim; Subject.Actor is not emitted as a second "act".
+            JsonElement singleAct = payloadDoc.RootElement.GetProperty("act");
+            Assert.Equal(JsonValueKind.String, singleAct.ValueKind);
+            Assert.Equal("raw-act-string", singleAct.GetString());
+        }
+
+        [Fact]
+        public void ActorChain_CyclicClaimsIdentityActor_IsRejectedByClaimsIdentity()
+        {
+            // The actor-serialization recursion (WriteActorObject / WriteActorAsJsonString, the latter
+            // expanding with int.MaxValue) terminates on a null Actor and therefore relies on the
+            // ClaimsIdentity.Actor chain being finite and acyclic. ClaimsIdentity enforces exactly that:
+            // its Actor setter throws InvalidOperationException on any circular reference, so a cycle can
+            // never reach the serializer. This test documents the guarantee the recursion depends on.
+
+            // Self reference.
+            var self = new CaseSensitiveClaimsIdentity("Self");
+            Assert.Throws<InvalidOperationException>(() => self.Actor = self);
+
+            // Mutual reference.
+            var first = new CaseSensitiveClaimsIdentity("First");
+            var second = new CaseSensitiveClaimsIdentity("Second");
+            first.Actor = second;
+            Assert.Throws<InvalidOperationException>(() => second.Actor = first);
+        }
+
+        [Fact]
         public void NestedActorToken_IsRfcCompliant_EveryActObjectHasNoNonIdentityClaims()
         {
             // RFC 8693 section 4.1: every actor object in a nested delegation chain is identity-only.

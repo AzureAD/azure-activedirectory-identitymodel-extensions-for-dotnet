@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // The actor is always serialized under the RFC 8693 "act" claim. The claim name
         // is intentionally fixed (not configurable) to avoid actor claims shadowing
         // registered claims such as iss/aud/exp.
-        internal const string ActClaimType = "act";
+        internal const string ActClaimType = JwtRegisteredClaimNames.Act;
 
         private static int s_maxActorChainLength = 1;
 
@@ -704,15 +704,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
             bool isActorFound = false;
+            bool rawActClaimWritten = false;
 
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (kvp.Key.Equals(ActClaimType, StringComparison.Ordinal) && kvp.Value is ClaimsIdentity)
+                    if (kvp.Key.Equals(ActClaimType, StringComparison.Ordinal))
                     {
-                        isActorFound = true;
-                        continue;
+                        if (kvp.Value is ClaimsIdentity)
+                        {
+                            // Structured actor: skip here; WriteActor emits it as the "act" object.
+                            isActorFound = true;
+                            continue;
+                        }
+
+                        // A non-ClaimsIdentity "act" value is written verbatim below as an ordinary
+                        // claim. Record it so we do NOT also emit Subject.Actor as a second "act" member
+                        // (a duplicate/ambiguous "act" key; Utf8JsonWriter does not dedupe property
+                        // names). The "act" key in Claims takes precedence over Subject.Actor.
+                        rawActClaimWritten = true;
                     }
                     if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
                     {
@@ -795,7 +806,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
-            if (isActorFound || tokenDescriptor.Subject?.Actor != null)
+            if (isActorFound || (tokenDescriptor.Subject?.Actor != null && !rawActClaimWritten))
                 WriteActor(ref writer, tokenDescriptor);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
@@ -1224,7 +1235,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             using (MemoryStream stream = new MemoryStream())
             {
                 Utf8JsonWriter actorWriter = new Utf8JsonWriter(stream);
-                // int.MaxValue: fully expand the remaining subtree as nested objects within the string.
+                // int.MaxValue fully expands the remaining subtree (lossless degrade: no actor level is
+                // dropped past MaxActorChainLength). This recursion always terminates because
+                // ClaimsIdentity.Actor is guaranteed finite and acyclic - its setter throws on circular
+                // references (IsCircular), so a cycle can never reach the serializer.
                 WriteActorObject(ref actorWriter, actor, int.MaxValue);
                 actorWriter.Flush();
                 return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
