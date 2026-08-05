@@ -200,6 +200,49 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
+        public void ActClaim_SubjectActorAndLiteralActClaimOnSubject_WritesSingleStructuredActMember()
+        {
+            // A ClaimsIdentity can carry BOTH a structural Actor and a raw "act" claim - notably after a
+            // round-trip, since deserialization sets identity.Actor AND retains the raw "act" claim. On
+            // re-serialization WriteActor emits "act" from Subject.Actor while AddSubjectClaims would emit
+            // the raw "act" claim too, producing a duplicate "act". The structural actor must win and
+            // exactly one "act" (a JSON object) must be written. The Claims dictionary has no "act" here, so
+            // the existing dictionary-based skip does not apply - this exercises the Subject.Actor guard.
+            var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actor.AddClaim(new Claim("sub", "actor-id"));
+
+            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            mainIdentity.AddClaim(new Claim("act", "literal-act-on-subject"));
+            mainIdentity.Actor = actor;
+
+            var handler = new JsonWebTokenHandler();
+            var token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = mainIdentity,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+            });
+            var decoded = handler.ReadJsonWebToken(token);
+
+            using var payloadDoc = JsonDocument.Parse(Base64UrlEncoder.Decode(decoded.EncodedPayload));
+            int actCount = 0;
+            foreach (JsonProperty property in payloadDoc.RootElement.EnumerateObject())
+            {
+                if (property.NameEquals("act"))
+                    actCount++;
+            }
+
+            Assert.Equal(1, actCount);
+
+            // The single "act" is the structural actor object (from Subject.Actor), not the raw string.
+            JsonElement act = payloadDoc.RootElement.GetProperty("act");
+            Assert.Equal(JsonValueKind.Object, act.ValueKind);
+            Assert.Equal("actor-id", act.GetProperty("sub").GetString());
+        }
+
+        [Fact]
         public void ActorChain_CyclicClaimsIdentityActor_IsRejectedByClaimsIdentity()
         {
             // The actor-serialization recursion (WriteActorObject / WriteActorAsJsonString, the latter

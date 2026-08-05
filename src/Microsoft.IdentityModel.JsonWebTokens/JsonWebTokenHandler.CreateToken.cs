@@ -806,7 +806,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
-            if (isActorFound || (tokenDescriptor.Subject?.Actor != null && !rawActClaimWritten))
+            if (isActorFound || (tokenDescriptor.Subject?.Actor is not null && !rawActClaimWritten))
                 WriteActor(ref writer, tokenDescriptor);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
@@ -859,9 +859,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
 
+            // When Subject.Actor is set, the actor is emitted as the structural "act" claim by WriteActor.
+            // A literal "act" claim on the Subject (e.g. one retained by deserialization) would otherwise be
+            // written again here, producing a duplicate "act" member. Skip it so the structural actor is the
+            // single source of "act". Evaluated once and short-circuited, so non-actor tokens (the common
+            // case) pay only a bool check and never a per-claim string comparison.
+            bool subjectHasActor = tokenDescriptor.Subject.Actor is not null;
+
             foreach (Claim claim in tokenDescriptor.Subject.Claims)
             {
                 if (claim == null)
+                    continue;
+
+                if (subjectHasActor && claim.Type.Equals(ActClaimType, StringComparison.Ordinal))
                     continue;
 
                 // skipping these as they have been added by values in the SecurityTokenDescriptor
@@ -1137,7 +1147,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal static void WriteActor(ref Utf8JsonWriter writer, SecurityTokenDescriptor tokenDescriptor)
         {
             ClaimsIdentity actor = GetActorIdentity(tokenDescriptor);
-            if (actor == null)
+            if (actor is null)
                 return;
 
             // The number of actor object levels to materialize is governed by the process-wide
@@ -1167,7 +1177,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             WriteIdentityClaims(ref writer, actor);
 
             // Delegation chain: the current actor is outermost, prior actors are nested (RFC 8693 4.1).
-            if (actor.Actor != null)
+            if (actor.Actor is not null)
             {
                 writer.WritePropertyName(ActClaimType);
                 WriteActorValue(ref writer, actor.Actor, remainingActorLevels - 1);
@@ -1185,7 +1195,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             foreach (Claim claim in identity.Claims)
             {
-                if (claim == null)
+                if (claim is null)
                     continue;
 
                 object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : TokenUtilities.GetClaimValueUsingValueType(claim);
