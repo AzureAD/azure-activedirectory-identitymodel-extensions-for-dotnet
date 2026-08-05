@@ -596,7 +596,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public async Task ValidateTokenAsync_WithBothActAndActort_ActTakesPrecedence()
+        public async Task ValidateTokenAsync_WithBothActAndActort_OnlyActIsExpanded()
         {
             // ARRANGE
             // Build a legacy "actort" JWT string with a distinguishable actor subject.
@@ -647,111 +647,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
 
             // ASSERT
-            // No duplicate-actor exception is thrown, and "act" wins over legacy "actort".
+            // Only "act" (JSON object) is expanded into ClaimsIdentity.Actor. The legacy "actort"
+            // (JWT string) is not structurally deserialized; it survives as an ordinary string claim
+            // on the main identity.
             Assert.True(result.IsValid);
             Assert.NotNull(result.ClaimsIdentity.Actor);
             Assert.Equal("act-actor-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
             Assert.DoesNotContain(result.ClaimsIdentity.Actor.Claims, c => c.Value == "actort-actor-id");
-        }
 
-        [Fact]
-        public async Task ValidateTokenAsync_WithActortClaim_HandlesJwtStringNotJson()
-        {
-            // ARRANGE
-            // First create a JWT token to use as the actor token string
-            var innerHandler = new JsonWebTokenHandler();
-            var actorJwtIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actorJwtIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
-            actorJwtIdentity.AddClaim(new Claim("name", "Actor Name"));
-
-            var actorJwtDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = actorJwtIdentity,
-                Issuer = "https://actor.example.com",
-                Audience = "https://api.example.com",
-                SigningCredentials = Default.AsymmetricSigningCredentials
-            };
-
-            // Create the actor token as a JWT string
-            string actorJwtString = innerHandler.CreateToken(actorJwtDescriptor);
-
-            // Now create the main token with the actort claim containing the JWT string
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-            mainIdentity.AddClaim(new Claim("name", "Main User"));
-
-            var handler = new JsonWebTokenHandler();
-            var mainTokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = mainIdentity,
-                Issuer = "https://example.com",
-                Audience = "https://api.example.com",
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-                Claims = new Dictionary<string, object>
-                {
-                    // Use actort claim with JWT string
-                    { "actort", actorJwtString }
-                }
-            };
-
-            // Create the main token
-            string mainToken = handler.CreateToken(mainTokenDescriptor);
-
-            // ACT
-            // Validate the token with actort claim type
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            };
-
-            var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
-
-            // ASSERT
-            // Verify validation succeeded
-            Assert.True(result.IsValid);
-            Assert.NotNull(result.ClaimsIdentity);
-
-            // Verify actor is processed as a JWT
-            Assert.NotNull(result.ClaimsIdentity.Actor);
-
-            // The actor should have claims from the JWT token
-            var actorSubClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "sub");
-            var actorNameClaim = result.ClaimsIdentity.Actor.Claims.FirstOrDefault(c => c.Type == "name");
-
-            Assert.NotNull(actorSubClaim);
-            Assert.NotNull(actorNameClaim);
-            Assert.Equal("actor-subject-id", actorSubClaim.Value);
-            Assert.Equal("Actor Name", actorNameClaim.Value);
-
-            // For comparison, create another token with 'act' claim as JSON
-            var jsonActor = new CaseSensitiveClaimsIdentity("ActorAuth");
-            jsonActor.AddClaim(new Claim("sub", "json-actor-id"));
-            jsonActor.AddClaim(new Claim("name", "JSON Actor"));
-
-            var jsonTokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = mainIdentity,
-                Issuer = "https://example.com",
-                Audience = "https://api.example.com",
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-                Claims = new Dictionary<string, object>
-                {
-                    { "act", jsonActor }
-                },
-            };
-
-            string jsonToken = handler.CreateToken(jsonTokenDescriptor);
-            var jsonResult = await handler.ValidateTokenAsync(jsonToken, validationParameters);
-
-            // Verify different processing method
-            Assert.NotNull(jsonResult.ClaimsIdentity.Actor);
-            Assert.Equal("json-actor-id", jsonResult.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+            // The raw "actort" claim is retained verbatim on the main identity as an opaque JWT string.
+            var actortClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "actort");
+            Assert.NotNull(actortClaim);
+            Assert.Equal(actortJwtString, actortClaim.Value);
         }
 
         [Fact]
@@ -886,58 +793,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public async Task ValidateTokenAsync_MapInboundClaimsTrue_WithActortClaim_DetectsActorCorrectly()
-        {
-            // When MapInboundClaims is true, "actort" gets mapped to the long URI ClaimTypes.Actor.
-            // The actor detection must use the raw claim type (not mapped) to correctly identify actor claims.
-            var handler = new JsonWebTokenHandler();
-            handler.MapInboundClaims = true;
-
-            // Create a token with "actort" claim (legacy unsigned JWT format)
-            var innerHandler = new JsonWebTokenHandler();
-            var actorDescriptor = new SecurityTokenDescriptor
-            {
-                Claims = new Dictionary<string, object>
-                {
-                    { "sub", "actor-subject-id" },
-                    { "name", "Actor Name" },
-                },
-            };
-            // Create unsigned actor JWT (actort is a JWT string)
-            string actorJwt = innerHandler.CreateToken(actorDescriptor);
-
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-
-            // Put "actort" in the claims dictionary as a raw JWT string
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = mainIdentity,
-                Issuer = "https://example.com",
-                Audience = "https://api.example.com",
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-                Claims = new Dictionary<string, object> { { "actort", actorJwt } },
-            };
-            string token = handler.CreateToken(tokenDescriptor);
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true,
-            };
-
-            var result = await handler.ValidateTokenAsync(token, validationParameters);
-
-            Assert.True(result.IsValid);
-            Assert.NotNull(result.ClaimsIdentity.Actor);
-            Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
-        }
-
-        [Fact]
         public void CreateActorClaimsIdentity_ExceedingMaxChainLength_KeepsRemainderAsClaim()
         {
             // With the default chain length of 1, only the top actor is expanded; deeper actors are
@@ -1026,156 +881,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Equal("level5-subject", identity.Actor.Actor.Actor.Actor.Claims.First(c => c.Type == "sub").Value);
 
             Assert.Null(identity.Actor.Actor.Actor.Actor.Actor);
-        }
-
-        [Fact]
-        public async Task LegacyActort_NestedJwtChain_ExceedingMaxChainLength_StopsExpanding()
-        {
-            // Legacy "actort" JWT-string actor chains are depth-limited during validation: beyond the
-            // configured chain length the chain stops expanding (no throw) rather than recursing without bound.
-            var handler = new JsonWebTokenHandler();
-            var signingCredentials = Default.AsymmetricSigningCredentials;
-
-            // Build a chain of nested actort JWTs exceeding MaxActorChainLength (5).
-            // Create the innermost actor JWT first, then wrap each level.
-            string currentActorToken = null;
-
-            // Create 6 levels of nested actort tokens (exceeds limit of 5)
-            for (int i = 6; i >= 1; i--)
-            {
-                var actorIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                actorIdentity.AddClaim(new Claim("sub", $"level{i}-actor"));
-
-                var descriptor = new SecurityTokenDescriptor
-                {
-                    Subject = actorIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    SigningCredentials = signingCredentials,
-                };
-
-                if (currentActorToken != null)
-                {
-                    descriptor.Claims = new Dictionary<string, object>
-                    {
-                        { "actort", currentActorToken }
-                    };
-                }
-
-                currentActorToken = handler.CreateToken(descriptor);
-            }
-
-            // Create the main token with the deeply nested actort chain
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-
-            var mainDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = mainIdentity,
-                Issuer = "https://example.com",
-                Audience = "https://api.example.com",
-                SigningCredentials = signingCredentials,
-                Claims = new Dictionary<string, object>
-                {
-                    { "actort", currentActorToken }
-                },
-            };
-
-            var mainToken = handler.CreateToken(mainDescriptor);
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-            };
-
-            var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
-            Assert.True(result.IsValid);
-
-            // With the default chain length of 1 the immediate actor is expanded and the chain stops there.
-            var identity = result.ClaimsIdentity;
-            Assert.NotNull(identity.Actor);
-            Assert.Equal("level1-actor", identity.Actor.FindFirst("sub")?.Value);
-            Assert.Null(identity.Actor.Actor);
-        }
-
-        [Fact]
-        public async Task LegacyActort_NestedJwtChain_WithinMaxDepth_Succeeds()
-        {
-            // Validates that legacy "actort" JWT-string actor chains within the depth limit
-            // are processed successfully during token validation.
-            // The chain has 4 actor levels; configure the chain length to expand all of them.
-            JsonWebTokenHandler.MaxActorChainLength = 4;
-
-            var handler = new JsonWebTokenHandler();
-            var signingCredentials = Default.AsymmetricSigningCredentials;
-
-            // Build a chain of 4 nested actort JWTs (within limit of 5).
-            string currentActorToken = null;
-
-            for (int i = 4; i >= 1; i--)
-            {
-                var actorIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-                actorIdentity.AddClaim(new Claim("sub", $"level{i}-actor"));
-
-                var descriptor = new SecurityTokenDescriptor
-                {
-                    Subject = actorIdentity,
-                    Issuer = "https://example.com",
-                    Audience = "https://api.example.com",
-                    SigningCredentials = signingCredentials,
-                };
-
-                if (currentActorToken != null)
-                {
-                    descriptor.Claims = new Dictionary<string, object>
-                    {
-                        { "actort", currentActorToken }
-                    };
-                }
-
-                currentActorToken = handler.CreateToken(descriptor);
-            }
-
-            // Create the main token with nested actort chain
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-
-            var mainDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = mainIdentity,
-                Issuer = "https://example.com",
-                Audience = "https://api.example.com",
-                SigningCredentials = signingCredentials,
-                Claims = new Dictionary<string, object>
-                {
-                    { "actort", currentActorToken }
-                },
-            };
-
-            var mainToken = handler.CreateToken(mainDescriptor);
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-            };
-
-            var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
-            Assert.True(result.IsValid, $"Token validation failed: {result.Exception?.Message}");
-
-            // ClaimsIdentity is lazily created — accessing it triggers actor chain processing
-            var identity = result.ClaimsIdentity;
-
-            // Verify the actor chain was created
-            Assert.NotNull(identity.Actor);
-            Assert.Equal("level1-actor", identity.Actor.FindFirst("sub")?.Value);
-            Assert.NotNull(identity.Actor.Actor);
-            Assert.Equal("level2-actor", identity.Actor.Actor.FindFirst("sub")?.Value);
         }
 
         // ---------------------------------------------------------------------------------------
@@ -1269,7 +974,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public async Task EndToEnd_LegacyActortJwtString_SerializedAsString_AndRoundTrips()
+        public async Task EndToEnd_LegacyActortJwtString_IsLeftAsOpaqueClaim_NotExpandedToActor()
         {
             // ARRANGE: the handler never *writes* actort; a caller supplies it as a JWT string
             // in the Claims dictionary (this is what legacy JwtSecurityTokenHandler tokens look like).
@@ -1297,7 +1002,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             // "actort" is a JWT string (not a JSON object), so it reads back as a string.
             Assert.Equal(actorJwt, decoded.Payload.GetValue<string>("actort"));
 
-            // ACT + ASSERT (deserialization round-trip): the legacy actort JWT is parsed onto Actor.
+            // ACT + ASSERT (deserialization): this handler expands only "act" into ClaimsIdentity.Actor.
+            // The legacy "actort" is NOT structurally deserialized, so Actor stays null and the raw
+            // "actort" JWT string remains an opaque claim on the identity.
             var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
             {
                 ValidateIssuer = false,
@@ -1308,8 +1015,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             });
 
             Assert.True(result.IsValid);
-            Assert.NotNull(result.ClaimsIdentity.Actor);
-            Assert.Equal("legacy-actor", result.ClaimsIdentity.Actor.FindFirst("sub")?.Value);
+            Assert.Null(result.ClaimsIdentity.Actor);
+            var actortClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "actort");
+            Assert.NotNull(actortClaim);
+            Assert.Equal(actorJwt, actortClaim.Value);
         }
     }
 }

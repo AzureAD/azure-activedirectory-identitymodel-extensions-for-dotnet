@@ -211,7 +211,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreateClaimsIdentityPrivate(jwtToken, validationParameters, issuer);
         }
 
-        private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer, int currentActorDepth = 0)
+        private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
@@ -223,16 +223,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
 
-                // Actor precedence: the RFC 8693 "act" (JSON object) claim always wins; the legacy
-                // "actort" (JWT string) is only used when "act" has not already set the actor.
+                // Only the RFC 8693 "act" (JSON object) claim is expanded into ClaimsIdentity.Actor.
+                // The legacy "actort" (JWT string) is left as an ordinary claim and is not structurally
+                // deserialized here (this handler never writes "actort").
                 if (jwtClaim.Type.Equals(ActClaimType))
                 {
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, true, currentActorDepth);
-                }
-
-                if (jwtClaim.Type.Equals(JwtRegisteredClaimNames.Actort) && identity.Actor is null)
-                {
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, false, currentActorDepth);
+                    identity.Actor = CreateActorClaimsIdentity(jwtToken, validationParameters);
                 }
 
                 if (wasMapped)
@@ -277,7 +273,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return actualIssuer;
         }
 
-        private ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer, int currentActorDepth = 0)
+        private static ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
@@ -285,15 +281,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
-                // Actor precedence: the RFC 8693 "act" (JSON object) claim always wins; the legacy
-                // "actort" (JWT string) is only used when "act" has not already set the actor.
+                // Only the RFC 8693 "act" (JSON object) claim is expanded into ClaimsIdentity.Actor.
+                // The legacy "actort" (JWT string) is left as an ordinary claim and is not structurally
+                // deserialized here (this handler never writes "actort").
                 if (claimType == ActClaimType)
                 {
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, true, currentActorDepth);
-                }
-                else if (claimType.Equals(JwtRegisteredClaimNames.Actort) && identity.Actor is null)
-                {
-                    identity.Actor = CreateClaimsIdentityActor(jwtToken, jwtClaim.Value, validationParameters, false, currentActorDepth);
+                    identity.Actor = CreateActorClaimsIdentity(jwtToken, validationParameters);
                 }
 
                 if (jwtClaim.Properties.Count == 0)
@@ -643,67 +636,45 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a ClaimsIdentity from an actor claim string.
+        /// Creates a <see cref="ClaimsIdentity"/> for the RFC 8693 "act" (actor) claim on a token.
         /// </summary>
-        /// <param name="jwtToken">The actual JWT token parsed into JsonWebToken class.</param>
-        /// <param name="actorString">The actor claim string.</param>
+        /// <param name="jwtToken">The token whose "act" claim is expanded.</param>
         /// <param name="tokenValidationParameters">The token validation parameters.</param>
-        /// <param name="isStandardAct">This tells us if we want to deserialize it as a JWT or Json Object. If this is set to true then we deserialize as JsonObject else as JWT.</param>
-        /// <param name="currentActorDepth">The current recursion depth for nested actor processing.</param>
-        /// <returns>A ClaimsIdentity representing the actor.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="actorString"/> or <paramref name="tokenValidationParameters"/> is null.</exception>
-        private ClaimsIdentity CreateClaimsIdentityActor(
+        /// <returns>
+        /// A <see cref="ClaimsIdentity"/> representing the actor, or <see langword="null"/> when the token
+        /// has no "act" claim or the claim cannot be expanded into an actor identity.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="tokenValidationParameters"/> is null.</exception>
+        private static ClaimsIdentity CreateActorClaimsIdentity(
             JsonWebToken jwtToken,
-            string actorString,
-            TokenValidationParameters tokenValidationParameters,
-            bool isStandardAct = false,
-            int currentActorDepth = 0)
+            TokenValidationParameters tokenValidationParameters)
         {
-            if (string.IsNullOrEmpty(actorString))
-                throw LogHelper.LogArgumentNullException(nameof(actorString));
-
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            // Beyond the configured chain length we stop expanding the Actor chain. The raw act/actort
-            // value is still retained as a claim by the caller, so nothing is lost (RFC 8693: nested/
-            // prior actors are informational only and must not be used for access-control decisions).
-            if (currentActorDepth >= MaxActorChainLength)
+            if (!jwtToken.TryGetPayloadValue<JsonElement>(ActClaimType, out JsonElement actClaim))
                 return null;
 
-            if (isStandardAct)
+            // When a custom retriever is supplied it fully owns actor construction; it is invoked
+            // unconditionally (never gated by MaxActorChainLength) and its result is used as-is.
+            if (tokenValidationParameters.ActClaimRetriever != null)
             {
-                if (jwtToken.TryGetPayloadValue<JsonElement>(ActClaimType, out JsonElement actClaim))
+                try
                 {
-                    if (tokenValidationParameters.ActClaimRetriever != null)
-                    {
-                        try
-                        {
-                            return tokenValidationParameters.ActClaimRetriever(actClaim, tokenValidationParameters);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(
-                                LogMessages.IDX14314,
-                                LogHelper.MarkAsNonPII(ex.ToString()))));
-                        }
-                    }
-                    else
-                    {
-                        return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters, currentDepth: currentActorDepth);
-                    }
+                    return tokenValidationParameters.ActClaimRetriever(actClaim, tokenValidationParameters);
                 }
-            }
-            else
-            {
-                if (CanReadToken(actorString))
+                catch (Exception ex)
                 {
-                    JsonWebToken actor = ReadToken(actorString) as JsonWebToken;
-                    return CreateClaimsIdentityPrivate(actor, tokenValidationParameters, GetActualIssuer(actor), currentActorDepth + 1);
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(
+                        LogMessages.IDX14314,
+                        LogHelper.MarkAsNonPII(ex.ToString()))));
                 }
             }
 
-            return null;
+            // Default expansion: materialize the top actor object; nested "act" objects are expanded only
+            // while within the configured MaxActorChainLength (one level unless raised), otherwise retained
+            // as a claim by CreateActorClaimsIdentityFromJsonElement.
+            return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters);
         }
 
         /// <summary>
