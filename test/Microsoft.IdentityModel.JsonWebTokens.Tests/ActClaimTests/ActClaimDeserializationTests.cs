@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
@@ -253,6 +254,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         [Fact]
         public void CreateActorClaimsIdentity_NonObjectJsonElement_ReturnsNullAndWarns()
         {
+            using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
             // Create a non-object JSON Element (string)
             string actorJson = @"""This is just a string, not an object""";
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
@@ -267,8 +270,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 jsonElement,
                 tokenValidationParameters);
 
-            // Assert
+            // Assert: returns null AND logs the IDX14316 warning (a within-limit non-object).
             Assert.Null(identity);
+            Assert.Contains("IDX14316", listener.TraceBuffer);
+        }
+
+        [Fact]
+        public void CreateActorClaimsIdentity_NestedActorBeyondMaxChainLength_KeptAsClaimWithoutWarning()
+        {
+            // Past MaxActorChainLength the nested "act" is kept as-is (a claim) and must NOT warn -
+            // beyond the limit is the expected place for un-expanded actors (e.g. serialization's
+            // degraded value), so the IDX14316 warning is reserved for within-limit non-objects only.
+            using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            // Default MaxActorChainLength = 1: the top actor is expanded; the nested "act" (an object)
+            // is beyond the limit and kept as a claim.
+            string actorJson = @"{
+                ""sub"": ""level1"",
+                ""act"": { ""sub"": ""level2"", ""act"": { ""sub"": ""level3"" } }
+            }";
+            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
+
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
+                jsonElement, new TokenValidationParameters());
+
+            Assert.NotNull(identity);
+            Assert.Equal("level1", identity.Claims.First(c => c.Type == "sub").Value);
+            // Beyond the limit: not expanded into Actor, kept as a claim, and NOT warned.
+            Assert.Null(identity.Actor);
+            Assert.Contains(identity.Claims, c => c.Type == "act");
+            Assert.DoesNotContain("IDX14316", listener.TraceBuffer);
         }
 
         [Fact]
