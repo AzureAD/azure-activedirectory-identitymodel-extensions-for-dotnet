@@ -243,6 +243,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
+        public void NestedActorChain_ExceedingGlobalJsonMaxDepth_ThrowsIDX10815()
+        {
+            // Actor levels beyond MaxActorChainLength degrade to a JSON-text string, but that expansion
+            // still flows through the library's global JSON writer guard (JsonSerializerPrimitives: max
+            // depth 64, shared by all serialized JSON). A delegation chain deep enough to exceed that
+            // limit therefore fails fast with IDX10815 rather than emitting pathological JSON - consistent
+            // with how the library caps every token it writes, and far beyond any real scenario (RFC 8693
+            // uses only the top actor; the default MaxActorChainLength is 1).
+            JsonWebTokenHandler.MaxActorChainLength = 1;
+
+            var subject = new CaseSensitiveClaimsIdentity("Bearer");
+            subject.AddClaim(new Claim("sub", "subject"));
+            ClaimsIdentity current = subject;
+
+            for (int i = 0; i < 70; i++)
+            {
+                var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
+                actor.AddClaim(new Claim("sub", $"actor-{i}"));
+                current.Actor = actor;
+                current = actor;
+            }
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+                new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+                {
+                    Subject = subject,
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                }));
+
+            Assert.Contains("IDX10815", exception.Message);
+        }
+
+        [Fact]
         public void ActorChain_CyclicClaimsIdentityActor_IsRejectedByClaimsIdentity()
         {
             // The actor-serialization recursion (WriteActorObject / WriteActorAsJsonString, the latter
