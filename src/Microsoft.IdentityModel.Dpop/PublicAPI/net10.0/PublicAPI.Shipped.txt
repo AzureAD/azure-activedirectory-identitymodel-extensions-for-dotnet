@@ -17,10 +17,10 @@ Microsoft.IdentityModel.Dpop.DpopValidationOptions.ClockSkewInSeconds.get -> int
 Microsoft.IdentityModel.Dpop.DpopValidationOptions.JtiReplayCache.get -> Microsoft.IdentityModel.Dpop.IJtiReplayCache
 Microsoft.IdentityModel.Dpop.DpopValidationOptions.MaxLifetimeInSeconds.get -> int
 Microsoft.IdentityModel.Dpop.DpopValidationOptions.MaxLifetimeInSeconds.set -> void
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.TimeProvider.get -> System.TimeProvider
+Microsoft.IdentityModel.Dpop.DpopValidationOptions.TimeProvider.set -> void
 Microsoft.IdentityModel.Dpop.DpopValidationResult
 Microsoft.IdentityModel.Dpop.DpopValidationResult.ErrorCode.get -> string
 Microsoft.IdentityModel.Dpop.DpopValidationResult.IsValid.get -> bool
 Microsoft.IdentityModel.Dpop.DpopValidationResult.Nonce.get -> string
 virtual Microsoft.IdentityModel.Dpop.DpopProofValidator.ValidateAsync(string dpopProofJwt, string httpMethod, System.Uri requestUri, string accessToken, string expectedCnfJkt, Microsoft.IdentityModel.Dpop.DpopValidationOptions options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Dpop.DpopValidationResult>
-Microsoft.IdentityModel.Dpop.DpopValidationOptions.TimeProvider.get -> System.TimeProvider
-Microsoft.IdentityModel.Dpop.DpopValidationOptions.TimeProvider.set -> void

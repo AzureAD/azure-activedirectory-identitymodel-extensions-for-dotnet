@@ -82,6 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// </summary>
     public class SignedHttpRequestValidationParameters
     {
+        internal const bool DefaultUseCaseSensitivePClaimComparison = false;
         private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
         private TokenHandler _tokenHandler = new JsonWebTokenHandler();
         private ICollection<string> _allowedDomainsForJkuRetrieval;
@@ -240,6 +241,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateP { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.P"/> claim is compared
+        /// case-sensitively with the request path.
+        /// </summary>
+        /// <remarks>
+        /// The default is <see langword="false"/>. Set this property to <see langword="true"/> to compare paths
+        /// case-sensitively.
+        /// </remarks>
+        public bool UseCaseSensitivePClaimComparison { get; set; } = DefaultUseCaseSensitivePClaimComparison;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Q"/> claim should be validated or not.

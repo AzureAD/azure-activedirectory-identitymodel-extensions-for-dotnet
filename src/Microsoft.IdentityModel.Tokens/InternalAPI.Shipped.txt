@@ -42,6 +42,8 @@ const Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotScrubExceptionsSwit
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTimeSwitch = "Switch.Microsoft.IdentityModel.TryAllStringClaimsAsDateTime" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr" -> string
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonDefault = false -> bool
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseRfcDefinitionOfEpkAndKidSwitch = "Switch.Microsoft.IdentityModel.UseRfcDefinitionOfEpkAndKid" -> string
 const Microsoft.IdentityModel.Tokens.Cng.BCRYPT_AES_ALGORITHM = "AES" -> string
@@ -882,6 +884,7 @@ static Microsoft.IdentityModel.Tokens.AppContextSwitches.ResetAllSwitches() -> v
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTime.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UpdateConfigAsBlocking.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttr.get -> bool
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparison.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseClaimsIdentityType.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseRfcDefinitionOfEpkAndKid.get -> bool
 static Microsoft.IdentityModel.Tokens.AsymmetricAdapter.DecryptFunctionNotFound(byte[] _) -> byte[]

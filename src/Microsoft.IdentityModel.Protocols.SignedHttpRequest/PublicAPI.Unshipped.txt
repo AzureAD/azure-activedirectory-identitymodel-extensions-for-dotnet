@@ -1,0 +1,2 @@
+Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison.get -> bool
+Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison.set -> void

@@ -1,1 +1,0 @@
-~virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReplaceTokenHeader(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jsonWebToken, string encodedHeader) -> Microsoft.IdentityModel.JsonWebTokens.JsonWebToken
