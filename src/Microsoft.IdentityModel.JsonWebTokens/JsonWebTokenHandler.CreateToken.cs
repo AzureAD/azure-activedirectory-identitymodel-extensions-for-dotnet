@@ -27,6 +27,41 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         private static readonly SecurityTokenDescriptor s_emptyTokenDescriptor = new();
 
+        // The actor is always serialized under the RFC 8693 "act" claim. The claim name
+        // is intentionally fixed (not configurable) to avoid actor claims shadowing
+        // registered claims such as iss/aud/exp.
+        internal const string ActClaimType = JwtRegisteredClaimNames.Act;
+
+        private static int s_maxActorChainLength = 1;
+
+        /// <summary>
+        /// Gets or sets the maximum number of nested actor ("act") levels that are materialized
+        /// as JSON objects during token creation and read back into <see cref="System.Security.Claims.ClaimsIdentity.Actor"/>
+        /// during token validation.
+        /// </summary>
+        /// <remarks>
+        /// <para>This is a process-wide ("Wilson-level") setting shared by serialization and
+        /// deserialization so a token written by this handler round-trips consistently. The default is 1.</para>
+        /// <para>On serialization, actors nested deeper than this value are written as a JSON-text string
+        /// (never a JWT) instead of a nested object. On deserialization, actor levels beyond this value are
+        /// retained as claims and are not expanded into the <c>Actor</c> chain, consistent with RFC 8693
+        /// (nested/prior actors are informational only).</para>
+        /// </remarks>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the value is less than 1.</exception>
+        public static int MaxActorChainLength
+        {
+            get => s_maxActorChainLength;
+            set
+            {
+                if (value < 1)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                        nameof(value),
+                        LogHelper.FormatInvariant(LogMessages.IDX14317, LogHelper.MarkAsNonPII(value))));
+
+                s_maxActorChainLength = value;
+            }
+        }
+
         /// <summary>
         /// Creates an unsigned JSON Web Signature (JWS).
         /// </summary>
@@ -668,11 +703,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Duplicates are resolved according to the following priority:
             // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
+            bool isActorFound = false;
+            bool rawActClaimWritten = false;
 
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
+                    if (kvp.Key.Equals(ActClaimType, StringComparison.Ordinal))
+                    {
+                        if (kvp.Value is ClaimsIdentity)
+                        {
+                            // Structured actor: skip here; WriteActor emits it as the "act" object.
+                            isActorFound = true;
+                            continue;
+                        }
+
+                        // A non-ClaimsIdentity "act" value is written verbatim below as an ordinary
+                        // claim. Record it so we do NOT also emit Subject.Actor as a second "act" member
+                        // (a duplicate/ambiguous "act" key; Utf8JsonWriter does not dedupe property
+                        // names). The "act" key in Claims takes precedence over Subject.Actor.
+                        rawActClaimWritten = true;
+                    }
                     if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
                     {
                         descriptorClaimsAudienceChecked = true;
@@ -754,6 +806,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
             }
+            if (isActorFound || (tokenDescriptor.Subject?.Actor is not null && !rawActClaimWritten))
+                WriteActor(ref writer, tokenDescriptor);
 
             AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
 
@@ -805,9 +859,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
 
+            // When Subject.Actor is set, the actor is emitted as the structural "act" claim by WriteActor.
+            // A literal "act" claim on the Subject (e.g. one retained by deserialization) would otherwise be
+            // written again here, producing a duplicate "act" member. Skip it so the structural actor is the
+            // single source of "act". Evaluated once and short-circuited, so non-actor tokens (the common
+            // case) pay only a bool check and never a per-claim string comparison.
+            bool subjectHasActor = tokenDescriptor.Subject.Actor is not null;
+
             foreach (Claim claim in tokenDescriptor.Subject.Claims)
             {
                 if (claim == null)
+                    continue;
+
+                if (subjectHasActor && claim.Type.Equals(ActClaimType, StringComparison.Ordinal))
                     continue;
 
                 // skipping these as they have been added by values in the SecurityTokenDescriptor
@@ -1069,6 +1133,125 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     writer?.Dispose();
                 }
+            }
+        }
+
+        // Writes the actor as the RFC 8693 "act" claim. The actor is taken from the "act" entry in
+        // SecurityTokenDescriptor.Claims when it is a ClaimsIdentity, otherwise from Subject.Actor.
+        // While actor object levels remain, the actor is written as a nested JSON object; once the
+        // limit is reached, the remaining actor subtree is written as a JSON-text string (never a JWT).
+        // Writes the RFC 8693 "act" claim for the actor resolved from the descriptor. Per RFC 8693
+        // section 4.1 the actor is a JSON object of identity claims only; non-identity claims (exp,
+        // nbf, iat, aud, iss) are not meaningful within "act" and are not written. The actor is written
+        // directly from its ClaimsIdentity, without allocating a per-level SecurityTokenDescriptor.
+        internal static void WriteActor(ref Utf8JsonWriter writer, SecurityTokenDescriptor tokenDescriptor)
+        {
+            ClaimsIdentity actor = GetActorIdentity(tokenDescriptor);
+            if (actor is null)
+                return;
+
+            // The number of actor object levels to materialize is governed by the process-wide
+            // MaxActorChainLength; the remaining count is then carried as a parameter down the recursion.
+            int remainingActorLevels = MaxActorChainLength;
+
+            writer.WritePropertyName(ActClaimType);
+            WriteActorValue(ref writer, actor, remainingActorLevels);
+        }
+
+        // Writes a single actor as the value of an "act" member: a nested JSON object while within the
+        // configured chain length, otherwise the remaining subtree as a JSON-text string.
+        private static void WriteActorValue(ref Utf8JsonWriter writer, ClaimsIdentity actor, int remainingActorLevels)
+        {
+            if (remainingActorLevels > 0)
+                WriteActorObject(ref writer, actor, remainingActorLevels);
+            else
+                writer.WriteStringValue(WriteActorAsJsonString(actor));
+        }
+
+        // Writes an actor as an RFC 8693 "act" JSON object: identity claims only, plus a nested "act"
+        // for the next (prior) actor in the delegation chain when one exists and the limit allows.
+        private static void WriteActorObject(ref Utf8JsonWriter writer, ClaimsIdentity actor, int remainingActorLevels)
+        {
+            writer.WriteStartObject();
+
+            WriteIdentityClaims(ref writer, actor);
+
+            // Delegation chain: the current actor is outermost, prior actors are nested (RFC 8693 4.1).
+            if (actor.Actor is not null)
+            {
+                writer.WritePropertyName(ActClaimType);
+                WriteActorValue(ref writer, actor.Actor, remainingActorLevels - 1);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        // Writes the identity claims of a ClaimsIdentity, coalescing duplicate claim types into JSON
+        // arrays (consistent with AddSubjectClaims). No non-identity (exp/nbf/iat/aud/iss) claims are
+        // injected, so actor ("act") objects remain RFC 8693 section 4.1 compliant.
+        private static void WriteIdentityClaims(ref Utf8JsonWriter writer, ClaimsIdentity identity)
+        {
+            var payload = new Dictionary<string, object>();
+
+            foreach (Claim claim in identity.Claims)
+            {
+                if (claim is null)
+                    continue;
+
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : TokenUtilities.GetClaimValueUsingValueType(claim);
+
+                // Duplicate claim types are coalesced into a List, later written as a JSON array.
+                if (payload.TryGetValue(claim.Type, out object existingValue))
+                {
+                    if (existingValue is List<object> existingList)
+                    {
+                        existingList.Add(jsonClaimValue);
+                    }
+                    else
+                    {
+                        payload[claim.Type] = new List<object>
+                        {
+                            existingValue,
+                            jsonClaimValue
+                        };
+                    }
+                }
+                else
+                {
+                    payload[claim.Type] = jsonClaimValue;
+                }
+            }
+
+            foreach (KeyValuePair<string, object> kvp in payload)
+                JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
+        }
+
+        // Returns the actor ClaimsIdentity for the descriptor: the "act" entry in Claims when it is a
+        // ClaimsIdentity (takes precedence), otherwise Subject.Actor. A non-ClaimsIdentity "act" claim
+        // is written verbatim by the normal claim loop and is not treated as a structured actor here.
+        private static ClaimsIdentity GetActorIdentity(SecurityTokenDescriptor tokenDescriptor)
+        {
+            if (tokenDescriptor.Claims?.TryGetValue(ActClaimType, out object actorValue) == true
+                && actorValue is ClaimsIdentity actorIdentity)
+                return actorIdentity;
+
+            return tokenDescriptor.Subject?.Actor;
+        }
+
+        // Serializes an actor (and its full remaining nested actor chain, as nested "act" objects) to a
+        // JSON-text string, used when the actor chain exceeds the configured MaxActorChainLength.
+        private static string WriteActorAsJsonString(ClaimsIdentity actor)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Utf8JsonWriter actorWriter = new Utf8JsonWriter(stream);
+                // int.MaxValue fully expands the remaining subtree (lossless degrade: no actor level is
+                // dropped past MaxActorChainLength). This recursion always terminates because
+                // ClaimsIdentity.Actor is guaranteed finite and acyclic - its setter throws on circular
+                // references (IsCircular), so a cycle can never reach the serializer.
+                WriteActorObject(ref actorWriter, actor, int.MaxValue);
+                actorWriter.Flush();
+                return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
             }
         }
 
