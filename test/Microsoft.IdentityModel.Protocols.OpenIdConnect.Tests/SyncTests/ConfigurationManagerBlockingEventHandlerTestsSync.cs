@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -28,13 +28,11 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         // Act
         configurationManager.GetConfigurationSync();
@@ -56,17 +54,15 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         // First retrieval to populate configuration
         configurationManager.GetConfigurationSync();
-        mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled = false;
+        mockEventHandler.ContextAwareBeforeRetrieveCalled = false;
         mockEventHandler.LastContext = null;
 
         // Act — RequestRefresh in blocking mode sets _refreshRequested = true and _syncAfter = now
@@ -74,7 +70,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         configurationManager.GetConfigurationSync();
 
         // Assert
-        if (!mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled)
+        if (!mockEventHandler.ContextAwareBeforeRetrieveCalled)
             testContext.AddDiff("Context-aware BeforeRetrieve should have been called after RequestRefresh.");
 
         if (mockEventHandler.LastContext == null)
@@ -94,14 +90,12 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var timeProvider = new FakeTimeProvider();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler,
-            TimeProvider = timeProvider
-        };
+            new FileDocumentRetriever());
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+        configurationManager.TimeProvider = timeProvider;
 
         // First retrieval
         configurationManager.GetConfigurationSync();
@@ -139,58 +133,54 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         // Act
         configurationManager.GetConfigurationSync();
 
         // Assert
-        if (!mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled)
+        if (!mockEventHandler.ContextAwareBeforeRetrieveCalled)
             testContext.AddDiff("Context-aware BeforeRetrieve should have been called.");
 
-        if (mockEventHandler.BeforeRetrieveAsyncCalled)
+        if (mockEventHandler.BeforeRetrieveCalled)
             testContext.AddDiff("Base BeforeRetrieve should NOT have been called when context-aware interface is implemented.");
 
         TestUtilities.AssertFailIfErrors(testContext);
     }
 
     [Fact]
-    public void Blocking_ContextAwareAfterUpdateAsync_Called_InsteadOfBase()
+    public void Blocking_ContextAwareAfterUpdate_Called_InsteadOfBase()
     {
         // Arrange
-        var testContext = new CompareContext($"{this}.Blocking_ContextAwareAfterUpdateAsync_Called_InsteadOfBase");
+        var testContext = new CompareContext($"{this}.Blocking_ContextAwareAfterUpdate_Called_InsteadOfBase");
         AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         // Act
         configurationManager.GetConfigurationSync();
 
-        // AfterUpdateAsync is fire-and-forget; poll for it
+        // AfterUpdate is fire-and-forget; poll for it
         PollForCondition(
-            () => mockEventHandler.ContextAwareAfterUpdateAsyncCalled,
+            () => mockEventHandler.ContextAwareAfterUpdateCalled,
             TimeSpan.FromMilliseconds(100),
             TimeSpan.FromSeconds(10));
 
         // Assert
-        if (!mockEventHandler.ContextAwareAfterUpdateAsyncCalled)
-            testContext.AddDiff("Context-aware AfterUpdateAsync should have been called.");
+        if (!mockEventHandler.ContextAwareAfterUpdateCalled)
+            testContext.AddDiff("Context-aware AfterUpdate should have been called.");
 
-        if (mockEventHandler.AfterUpdateAsyncCalled)
-            testContext.AddDiff("Base AfterUpdateAsync should NOT have been called when context-aware interface is implemented.");
+        if (mockEventHandler.AfterUpdateCalled)
+            testContext.AddDiff("Base AfterUpdate should NOT have been called when context-aware interface is implemented.");
 
         TestUtilities.AssertFailIfErrors(testContext);
     }
@@ -213,13 +203,12 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             RetrievalTimeToReturn = DateTimeOffset.UtcNow
         };
 
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         // Act — first call, no RequestRefresh
         var configuration = configurationManager.GetConfigurationSync();
@@ -257,13 +246,12 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             RetrievalTimeToReturn = DateTimeOffset.UtcNow
         };
 
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         var resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
 
@@ -285,10 +273,10 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
     }
 
     [Fact]
-    public void AfterUpdateAsync_ReceivesCorrectContext_WhenHandlerProvidedConfig()
+    public void AfterUpdate_ReceivesCorrectContext_WhenHandlerProvidedConfig()
     {
         // Arrange
-        var testContext = new CompareContext($"{this}.AfterUpdateAsync_ReceivesCorrectContext_WhenHandlerProvidedConfig");
+        var testContext = new CompareContext($"{this}.AfterUpdate_ReceivesCorrectContext_WhenHandlerProvidedConfig");
 
         var preloadedConfig = new OpenIdConnectConfiguration
         {
@@ -302,33 +290,32 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             RetrievalTimeToReturn = DateTimeOffset.UtcNow
         };
 
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         // Act — first call, handler provides config
         configurationManager.GetConfigurationSync();
 
-        // Poll for fire-and-forget AfterUpdateAsync
+        // Poll for fire-and-forget AfterUpdate
         PollForCondition(
-            () => mockEventHandler.ContextAwareAfterUpdateAsyncCalled,
+            () => mockEventHandler.ContextAwareAfterUpdateCalled,
             TimeSpan.FromMilliseconds(100),
             TimeSpan.FromSeconds(10));
 
-        // Assert — AfterUpdateAsync should receive the same context object as BeforeRetrieve
+        // Assert — AfterUpdate should receive the same context object as BeforeRetrieve
         if (mockEventHandler.LastAfterUpdateContext == null)
-            testContext.AddDiff("AfterUpdateAsync should have received a context.");
+            testContext.AddDiff("AfterUpdate should have received a context.");
         else if (mockEventHandler.LastAfterUpdateContext.BypassCache)
-            testContext.AddDiff("AfterUpdateAsync context BypassCache should be false on first retrieval.");
+            testContext.AddDiff("AfterUpdate context BypassCache should be false on first retrieval.");
 
         if (mockEventHandler.LastContext != null && mockEventHandler.LastAfterUpdateContext != null)
         {
             if (!ReferenceEquals(mockEventHandler.LastContext, mockEventHandler.LastAfterUpdateContext))
-                testContext.AddDiff("AfterUpdateAsync should receive the same context instance as BeforeRetrieve.");
+                testContext.AddDiff("AfterUpdate should receive the same context instance as BeforeRetrieve.");
         }
 
         TestUtilities.AssertFailIfErrors(testContext);
@@ -345,13 +332,12 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             ThrowExceptionInBeforeRetrieve = true
         };
 
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         // Act — should fall back to endpoint retrieval
         var configuration = configurationManager.GetConfigurationSync();
@@ -360,40 +346,39 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         if (configuration == null)
             testContext.AddDiff("Configuration should not be null even when context-aware handler throws.");
 
-        if (!mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled)
+        if (!mockEventHandler.ContextAwareBeforeRetrieveCalled)
             testContext.AddDiff("Context-aware BeforeRetrieve should have been called (even though it threw).");
 
-        if (mockEventHandler.BeforeRetrieveAsyncCalled)
+        if (mockEventHandler.BeforeRetrieveCalled)
             testContext.AddDiff("Base BeforeRetrieve should NOT have been called; only context-aware overload should be invoked.");
 
         TestUtilities.AssertFailIfErrors(testContext);
     }
 
     [Fact]
-    public void ContextAware_AfterUpdateAsync_Throws_NoCrashFireAndForget()
+    public void ContextAware_AfterUpdate_Throws_NoCrashFireAndForget()
     {
         // Arrange
-        var testContext = new CompareContext($"{this}.ContextAware_AfterUpdateAsync_Throws_NoCrashFireAndForget");
+        var testContext = new CompareContext($"{this}.ContextAware_AfterUpdate_Throws_NoCrashFireAndForget");
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware
         {
             ThrowExceptionInAfterUpdate = true
         };
 
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
 
-        // Act — should not throw even though AfterUpdateAsync throws
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+
+        // Act — should not throw even though AfterUpdate throws
         var configuration = configurationManager.GetConfigurationSync();
 
         // Poll to confirm the callback was actually invoked (and threw)
         PollForCondition(
-            () => mockEventHandler.ContextAwareAfterUpdateAsyncCalled,
+            () => mockEventHandler.ContextAwareAfterUpdateCalled,
             TimeSpan.FromMilliseconds(100),
             TimeSpan.FromSeconds(10));
 
@@ -401,62 +386,58 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         if (configuration == null)
             testContext.AddDiff("Configuration should not be null.");
 
-        if (!mockEventHandler.ContextAwareAfterUpdateAsyncCalled)
-            testContext.AddDiff("Context-aware AfterUpdateAsync should have been called even though it throws.");
+        if (!mockEventHandler.ContextAwareAfterUpdateCalled)
+            testContext.AddDiff("Context-aware AfterUpdate should have been called even though it throws.");
 
         TestUtilities.AssertFailIfErrors(testContext);
     }
 
     [Fact]
-    public void BaseHandler_AfterUpdateAsync_Called_ForNonContextAwareHandler()
+    public void BaseHandler_AfterUpdate_Called_ForNonContextAwareHandler()
     {
         // Arrange — use the base mock that only implements IConfigurationEventHandler<T>
-        var testContext = new CompareContext($"{this}.BaseHandler_AfterUpdateAsync_Called_ForNonContextAwareHandler");
+        var testContext = new CompareContext($"{this}.BaseHandler_AfterUpdate_Called_ForNonContextAwareHandler");
 
         var mockEventHandler = new MockConfigurationEventHandler();
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler
-        };
+            new FileDocumentRetriever());
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
         // Act
         configurationManager.GetConfigurationSync();
 
-        // Poll for fire-and-forget AfterUpdateAsync
+        // Poll for fire-and-forget AfterUpdate
         PollForCondition(
-            () => mockEventHandler.AfterUpdateAsyncCalled,
+            () => mockEventHandler.AfterUpdateCalled,
             TimeSpan.FromMilliseconds(100),
             TimeSpan.FromSeconds(10));
 
-        // Assert — base AfterUpdateAsync should be called for non-context-aware handler
-        if (!mockEventHandler.AfterUpdateAsyncCalled)
-            testContext.AddDiff("Base AfterUpdateAsync should have been called for non-context-aware handler.");
+        // Assert — base AfterUpdate should be called for non-context-aware handler
+        if (!mockEventHandler.AfterUpdateCalled)
+            testContext.AddDiff("Base AfterUpdate should have been called for non-context-aware handler.");
 
         if (mockEventHandler.AfterUpdateConfiguration == null)
-            testContext.AddDiff("AfterUpdateAsync should have received non-null configuration.");
+            testContext.AddDiff("AfterUpdate should have received non-null configuration.");
 
         TestUtilities.AssertFailIfErrors(testContext);
     }
 
     [Fact]
-    public void AfterUpdateAsync_BypassCacheFalse_OnAutomaticRefresh()
+    public void AfterUpdate_BypassCacheFalse_OnAutomaticRefresh()
     {
         // Arrange
-        var testContext = new CompareContext($"{this}.AfterUpdateAsync_BypassCacheFalse_OnAutomaticRefresh");
+        var testContext = new CompareContext($"{this}.AfterUpdate_BypassCacheFalse_OnAutomaticRefresh");
 
         var timeProvider = new FakeTimeProvider();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler,
-            TimeProvider = timeProvider
-        };
+            new FileDocumentRetriever());
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+        configurationManager.TimeProvider = timeProvider;
 
         var resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
 
@@ -465,12 +446,12 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         // Wait for fire-and-forget AfterUpdate from first retrieval
         PollForCondition(
-            () => mockEventHandler.ContextAwareAfterUpdateAsyncCalled,
+            () => mockEventHandler.ContextAwareAfterUpdateCalled,
             TimeSpan.FromMilliseconds(100),
             TimeSpan.FromSeconds(10));
 
         // Reset tracking
-        mockEventHandler.ContextAwareAfterUpdateAsyncCalled = false;
+        mockEventHandler.ContextAwareAfterUpdateCalled = false;
         mockEventHandler.LastAfterUpdateContext = null;
 
         // Advance time past AutomaticRefreshInterval
@@ -482,15 +463,15 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         // Poll for the fire-and-forget AfterUpdate from automatic refresh
         PollForCondition(
-            () => mockEventHandler.ContextAwareAfterUpdateAsyncCalled,
+            () => mockEventHandler.ContextAwareAfterUpdateCalled,
             TimeSpan.FromMilliseconds(100),
             TimeSpan.FromSeconds(10));
 
         // Assert
         if (mockEventHandler.LastAfterUpdateContext == null)
-            testContext.AddDiff("AfterUpdateAsync context should have been provided during automatic refresh.");
+            testContext.AddDiff("AfterUpdate context should have been provided during automatic refresh.");
         else if (mockEventHandler.LastAfterUpdateContext.BypassCache)
-            testContext.AddDiff("AfterUpdateAsync BypassCache should be false on automatic refresh.");
+            testContext.AddDiff("AfterUpdate BypassCache should be false on automatic refresh.");
 
         TestUtilities.AssertFailIfErrors(testContext);
     }
@@ -504,18 +485,16 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var timeProvider = new FakeTimeProvider();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever())
-        {
-            ConfigurationEventHandler = mockEventHandler,
-            TimeProvider = timeProvider
-        };
+            new FileDocumentRetriever());
+        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+        configurationManager.TimeProvider = timeProvider;
 
         // First retrieval
         configurationManager.GetConfigurationSync();
-        mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled = false;
+        mockEventHandler.ContextAwareBeforeRetrieveCalled = false;
         mockEventHandler.LastContext = null;
 
         // Act — multiple rapid RequestRefresh calls in blocking mode
@@ -529,7 +508,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         configurationManager.GetConfigurationSync();
 
         // Assert — one refresh with BypassCache=true
-        if (!mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled)
+        if (!mockEventHandler.ContextAwareBeforeRetrieveCalled)
             testContext.AddDiff("Context-aware BeforeRetrieve should have been called.");
 
         if (mockEventHandler.LastContext == null)

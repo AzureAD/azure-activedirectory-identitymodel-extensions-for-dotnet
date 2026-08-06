@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var mockEventHandler = new MockConfigurationEventHandler();
 
             // Act
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever,
@@ -43,11 +43,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 mockEventHandler);
 
             // Assert
-            if (configurationManager.ConfigurationEventHandler == null)
-                testContext.AddDiff("ConfigurationEventHandler should not be null after construction.");
+            if (configurationManager.ConfigurationEventHandlerSync == null)
+                testContext.AddDiff("ConfigurationEventHandlerSync should not be null after construction.");
 
-            if (!ReferenceEquals(configurationManager.ConfigurationEventHandler, mockEventHandler))
-                testContext.AddDiff("ConfigurationEventHandler should be the same instance as passed in constructor.");
+            if (!ReferenceEquals(configurationManager.ConfigurationEventHandlerSync, mockEventHandler))
+                testContext.AddDiff("ConfigurationEventHandlerSync should be the same instance as passed in constructor.");
 
             TestUtilities.AssertFailIfErrors(testContext);
         }
@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // Act & Assert
             var exception = Assert.Throws<ArgumentNullException>(() =>
-                new ConfigurationManager<OpenIdConnectConfiguration>(
+                ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                     "OpenIdConnectMetadata.json",
                     configurationRetriever,
                     documentRetriever,
@@ -86,32 +86,32 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var documentRetriever = new FileDocumentRetriever();
             var configurationRetriever = new OpenIdConnectConfigurationRetriever();
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever);
 
             // Initially should be null
-            if (configurationManager.ConfigurationEventHandler != null)
-                testContext.AddDiff("ConfigurationEventHandler should be null initially.");
+            if (configurationManager.ConfigurationEventHandlerSync != null)
+                testContext.AddDiff("ConfigurationEventHandlerSync should be null initially.");
 
             // Act - Set the property
             var mockEventHandler = new MockConfigurationEventHandler();
-            configurationManager.ConfigurationEventHandler = mockEventHandler;
+            configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
             // Assert
-            if (configurationManager.ConfigurationEventHandler == null)
-                testContext.AddDiff("ConfigurationEventHandler should not be null after setting.");
+            if (configurationManager.ConfigurationEventHandlerSync == null)
+                testContext.AddDiff("ConfigurationEventHandlerSync should not be null after setting.");
 
-            if (!ReferenceEquals(configurationManager.ConfigurationEventHandler, mockEventHandler))
-                testContext.AddDiff("ConfigurationEventHandler should be the same instance as set.");
+            if (!ReferenceEquals(configurationManager.ConfigurationEventHandlerSync, mockEventHandler))
+                testContext.AddDiff("ConfigurationEventHandlerSync should be the same instance as set.");
 
             // Act - Set to null
-            configurationManager.ConfigurationEventHandler = null;
+            configurationManager.ConfigurationEventHandlerSync = null;
 
             // Assert
-            if (configurationManager.ConfigurationEventHandler != null)
-                testContext.AddDiff("ConfigurationEventHandler should be null after setting to null.");
+            if (configurationManager.ConfigurationEventHandlerSync != null)
+                testContext.AddDiff("ConfigurationEventHandlerSync should be null after setting to null.");
 
             TestUtilities.AssertFailIfErrors(testContext);
         }
@@ -126,19 +126,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var mockEventHandler = new MockConfigurationEventHandler();
             var testTelemetryClient = new MockTelemetryClient();
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
-                documentRetriever)
-            {
-                ConfigurationEventHandler = mockEventHandler,
-                TelemetryClient = testTelemetryClient
-            };
+                documentRetriever);
+
+            configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+
+            configurationManager.TelemetryClient = testTelemetryClient;
 
             // Act
             _ = configurationManager.GetConfigurationSync();
             // Assert
-            if (!mockEventHandler.BeforeRetrieveAsyncCalled)
+            if (!mockEventHandler.BeforeRetrieveCalled)
                 testContext.AddDiff("BeforeRetrieve should have been called.");
 
             if (mockEventHandler.BeforeRetrieveMetadataAddress != "OpenIdConnectMetadata.json")
@@ -183,14 +183,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 RetrievalTimeToReturn = DateTimeOffset.UtcNow
             };
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
-                documentRetriever)
-            {
-                ConfigurationEventHandler = mockEventHandler,
-                TelemetryClient = testTelemetryClient
-            };
+                documentRetriever);
+
+            configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+
+            configurationManager.TelemetryClient = testTelemetryClient;
 
             // Act
             var configuration = configurationManager.GetConfigurationSync();
@@ -224,39 +224,39 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
-        public void AfterUpdateAsync_Called_AfterConfigurationUpdate()
+        public void AfterUpdate_Called_AfterConfigurationUpdate()
         {
             // Arrange
-            var testContext = new CompareContext($"{this}.AfterUpdateAsync_Called_AfterConfigurationUpdate");
+            var testContext = new CompareContext($"{this}.AfterUpdate_Called_AfterConfigurationUpdate");
             var documentRetriever = new FileDocumentRetriever();
             var configurationRetriever = new OpenIdConnectConfigurationRetriever();
             var mockEventHandler = new MockConfigurationEventHandler();
             var testTelemetryClient = new MockTelemetryClient();
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
-                documentRetriever)
-            {
-                ConfigurationEventHandler = mockEventHandler,
-                TelemetryClient = testTelemetryClient
-            };
+                documentRetriever);
+
+            configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+
+            configurationManager.TelemetryClient = testTelemetryClient;
 
             // Act
             var configuration = configurationManager.GetConfigurationSync();
 
-            // Wait a bit for the fire-and-forget AfterUpdateAsync to be called
+            // Wait a bit for the fire-and-forget AfterUpdate to be called
             Thread.Sleep(100);
 
             // Assert
-            if (!mockEventHandler.AfterUpdateAsyncCalled)
-                testContext.AddDiff("AfterUpdateAsync should have been called after configuration update.");
+            if (!mockEventHandler.AfterUpdateCalled)
+                testContext.AddDiff("AfterUpdate should have been called after configuration update.");
 
             if (mockEventHandler.AfterUpdateMetadataAddress != "OpenIdConnectMetadata.json")
-                testContext.AddDiff($"AfterUpdateAsync should have been called with correct metadata address. Expected: 'OpenIdConnectMetadata.json', Actual: '{mockEventHandler.AfterUpdateMetadataAddress}'");
+                testContext.AddDiff($"AfterUpdate should have been called with correct metadata address. Expected: 'OpenIdConnectMetadata.json', Actual: '{mockEventHandler.AfterUpdateMetadataAddress}'");
 
             if (mockEventHandler.AfterUpdateConfiguration == null)
-                testContext.AddDiff("AfterUpdateAsync should have been called with non-null configuration.");
+                testContext.AddDiff("AfterUpdate should have been called with non-null configuration.");
 
             var expectedTagList = new Dictionary<string, object>
             {
@@ -289,14 +289,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             };
             var testTelemetryClient = new MockTelemetryClient();
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
-                documentRetriever)
-            {
-                ConfigurationEventHandler = mockEventHandler,
-                TelemetryClient = testTelemetryClient
-            };
+                documentRetriever);
+
+            configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+
+            configurationManager.TelemetryClient = testTelemetryClient;
 
             // Act
             var configuration = configurationManager.GetConfigurationSync();
@@ -305,7 +305,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (configuration == null)
                 testContext.AddDiff("Configuration should not be null even when event handler throws.");
 
-            if (!mockEventHandler.BeforeRetrieveAsyncCalled)
+            if (!mockEventHandler.BeforeRetrieveCalled)
                 testContext.AddDiff("BeforeRetrieve should have been called even if it throws.");
 
             var expectedTagList = new Dictionary<string, object>
@@ -350,15 +350,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 RetrievalTimeToReturn = DateTimeOffset.UtcNow
             };
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever,
-                configurationValidator)
-            {
-                ConfigurationEventHandler = mockEventHandler,
-                TelemetryClient = testTelemetryClient
-            };
+                configurationValidator);
+
+            configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
+
+            configurationManager.TelemetryClient = testTelemetryClient;
 
             // Act
             var configuration = configurationManager.GetConfigurationSync();

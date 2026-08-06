@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 // Ignore Spelling: Metadata Validator Retreiver
@@ -45,10 +45,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             CompareContext context = TestUtilities.WriteHeader($"{this}.GetPublicMetadata", theoryData);
             try
             {
-                var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                     theoryData.MetadataAddress,
-                    theoryData.ConfigurationRetriever,
-                    theoryData.DocumentRetriever,
+                    (IConfigurationRetrieverSync<OpenIdConnectConfiguration>)theoryData.ConfigurationRetriever,
+                    (IDocumentRetrieverSync)theoryData.DocumentRetriever,
                     theoryData.ConfigurationValidator);
 
                 var configuration = configurationManager.GetConfigurationSync(CancellationToken.None);
@@ -70,7 +70,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = TestUtilities.WriteHeader($"{this}.OpenIdConnectConstructor", theoryData);
             try
             {
-                var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetriever, theoryData.DocumentRetriever, theoryData.ConfigurationValidator);
+                var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+                    theoryData.MetadataAddress,
+                    (IConfigurationRetrieverSync<OpenIdConnectConfiguration>)theoryData.ConfigurationRetriever,
+                    (IDocumentRetrieverSync)theoryData.DocumentRetriever,
+                    theoryData.ConfigurationValidator);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -114,7 +118,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var documentRetriever = new HttpDocumentRetriever(
                 HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "https://example.invalid/.well-known/openid-configuration",
                 new OpenIdConnectConfigurationRetriever(),
                 documentRetriever);
@@ -192,7 +196,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = new CompareContext($"{this}.FetchMetadataFailureTest");
 
             var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
+            var configManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
 
             // First time to fetch metadata
             try
@@ -228,7 +232,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             ManualResetEvent signalEvent = new ManualResetEvent(false);
             InMemoryDocumentRetriever inMemoryDocumentRetriever = InMemoryDocumentRetrieverWithEvents(waitEvent, signalEvent);
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                     "AADCommonV1Json",
                     new OpenIdConnectConfigurationRetriever(),
                     inMemoryDocumentRetriever);
@@ -264,7 +268,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             InMemoryDocumentRetriever inMemoryDocumentRetriever = InMemoryDocumentRetrieverWithEvents(waitEvent, signalEvent);
             waitEvent.Set();
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                     "AADCommonV1Json",
                     new OpenIdConnectConfigurationRetriever(),
                     inMemoryDocumentRetriever);
@@ -300,11 +304,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var documentRetriever = new HttpDocumentRetriever(
                 HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
 
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 new OpenIdConnectConfigurationRetriever(),
-                documentRetriever)
-            { RefreshInterval = TimeSpan.FromSeconds(2) };
+                documentRetriever);
+
+            configManager.RefreshInterval = TimeSpan.FromSeconds(2);
 
             // ConfigurationManager._syncAfter is set to DateTimeOffset.MinValue on startup
             // If obtaining the metadata fails due to error, the value should not change
@@ -353,7 +358,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = new CompareContext($"{this}.BootstrapRefreshIntervalTest_Blocking");
 
             var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever) { RefreshInterval = TimeSpan.FromSeconds(2) };
+            var configManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
+            configManager.RefreshInterval = TimeSpan.FromSeconds(2);
 
             // First time to fetch metadata.
             try
@@ -398,8 +404,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
-            int ExpectedPropertyCount = 8;
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
+            int ExpectedPropertyCount = 9;
+            var configManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != ExpectedPropertyCount)
@@ -562,7 +568,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = new CompareContext($"{this}.CheckSyncAfterAndRefreshRequested");
 
             var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 new OpenIdConnectConfigurationRetriever(),
                 docRetriever);
@@ -639,7 +645,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = new CompareContext($"{this}.GetConfiguration");
 
             var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 "OpenIdConnectMetadata.json",
                 new OpenIdConnectConfigurationRetriever(),
                 docRetriever);
@@ -769,10 +775,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader($"{this}.ValidateOpenIdConnectConfigurationTests");
             var context = new CompareContext();
             OpenIdConnectConfiguration configuration;
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 theoryData.MetadataAddress,
-                theoryData.ConfigurationRetriever,
-                theoryData.DocumentRetriever,
+                (IConfigurationRetrieverSync<OpenIdConnectConfiguration>)theoryData.ConfigurationRetriever,
+                (IDocumentRetrieverSync)theoryData.DocumentRetriever,
                 theoryData.ConfigurationValidator);
 
             var resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);

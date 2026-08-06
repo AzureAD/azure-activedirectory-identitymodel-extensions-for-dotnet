@@ -279,17 +279,17 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
     /// <param name="docRetriever">The <see cref="IDocumentRetrieverSync"/> that reaches out to obtain the configuration.</param>
     /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/>.</param>
     /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/>.</param>
-    /// <param name="configurationEventHandler">The <see cref="IConfigurationEventHandler{T}"/> that handles configuration events.</param>
+    /// <param name="configurationEventHandler">The <see cref="IConfigurationEventHandlerSync{T}"/> that handles configuration events.</param>
     /// <returns>A <see cref="ConfigurationManager{T}"/> whose synchronous pipeline is enabled.</returns>
     /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
     /// <exception cref="ArgumentNullException">If 'configurationEventHandler' is null.</exception>
-    public static ConfigurationManager<T> CreateSync(string metadataAddress, IConfigurationRetrieverSync<T> configRetriever, IDocumentRetrieverSync docRetriever, IConfigurationValidator<T> configValidator, LastKnownGoodConfigurationCacheOptions lkgCacheOptions, IConfigurationEventHandler<T> configurationEventHandler)
+    public static ConfigurationManager<T> CreateSync(string metadataAddress, IConfigurationRetrieverSync<T> configRetriever, IDocumentRetrieverSync docRetriever, IConfigurationValidator<T> configValidator, LastKnownGoodConfigurationCacheOptions lkgCacheOptions, IConfigurationEventHandlerSync<T> configurationEventHandler)
     {
         if (configurationEventHandler == null)
             throw LogHelper.LogArgumentNullException(nameof(configurationEventHandler));
 
         ConfigurationManager<T> configurationManager = new ConfigurationManager<T>(metadataAddress, configRetriever, docRetriever, configValidator, lkgCacheOptions);
-        configurationManager.ConfigurationEventHandler = configurationEventHandler;
+        configurationManager.ConfigurationEventHandlerSync = configurationEventHandler;
 
         return configurationManager;
     }

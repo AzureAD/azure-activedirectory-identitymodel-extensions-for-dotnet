@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 #if NET5_0_OR_GREATER
@@ -43,14 +43,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             // arrange
             var testTelemetryClient = new MockTelemetryClient();
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 OpenIdConfigData.AccountsGoogle,
                 new OpenIdConnectConfigurationRetriever(),
                 new HttpDocumentRetriever(),
-                new OpenIdConnectConfigurationValidator())
-            {
-                TelemetryClient = testTelemetryClient
-            };
+                new OpenIdConnectConfigurationValidator());
+            configurationManager.TelemetryClient = testTelemetryClient;
 
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
 
@@ -115,15 +113,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var testTelemetryClient = new MockTelemetryClient();
             var timeProvider = new FakeTimeProvider();
 
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
                 theoryData.MetadataAddress,
                 new OpenIdConnectConfigurationRetriever(),
-                theoryData.DocumentRetriever,
-                theoryData.ConfigurationValidator)
-            {
-                TelemetryClient = testTelemetryClient,
-                TimeProvider = timeProvider,
-            };
+                (IDocumentRetrieverSync)theoryData.DocumentRetriever,
+                theoryData.ConfigurationValidator);
+
+            configurationManager.TelemetryClient = testTelemetryClient;
+
+            configurationManager.TimeProvider = timeProvider;
 
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
 

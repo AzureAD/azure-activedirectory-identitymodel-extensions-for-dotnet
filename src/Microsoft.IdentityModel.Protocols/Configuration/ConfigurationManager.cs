@@ -58,6 +58,11 @@ namespace Microsoft.IdentityModel.Protocols
         public IConfigurationEventHandler<T> ConfigurationEventHandler { get; set; }
 
         /// <summary>
+        /// Gets or sets the optional synchronous configuration event handler.
+        /// </summary>
+        public IConfigurationEventHandlerSync<T> ConfigurationEventHandlerSync { get; set; }
+
+        /// <summary>
         /// Triggers updating metadata when:
         /// <para>1. Called the first time.</para>
         /// <para>2. The time between when this method was called and DateTimeOffset.Now is greater than <see cref="BaseConfigurationManager.RefreshInterval"/>.</para>
@@ -90,12 +95,10 @@ namespace Microsoft.IdentityModel.Protocols
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    // Prefer the asynchronous refresh pipeline when available; fall back to the synchronous pipeline
-                    // so a manager constructed via CreateSync (with sync-only retrievers) still refreshes in the background.
-                    if (_configRetrieverAsync != null && _docRetrieverAsync != null)
-                        _ = Task.Run(_updateCurrentConfigurationWithBypassAsync, CancellationToken.None);
-                    else
+                    if (ConfigurationEventHandlerSync != null || _configRetrieverAsync == null || _docRetrieverAsync == null)
                         _ = Task.Run(_updateCurrentConfigurationWithBypassSync, CancellationToken.None);
+                    else
+                        _ = Task.Run(_updateCurrentConfigurationWithBypassAsync, CancellationToken.None);
 
                     _lastRequestRefresh = now;
                 }
@@ -140,21 +143,46 @@ namespace Microsoft.IdentityModel.Protocols
             _syncAfter = DateTimeUtil.Add(retrievalTime.UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
 
-            if (ConfigurationEventHandler != null)
+            // runs the correct event handler based on sync/async
+            IConfigurationEventHandlerSync<T> eventHandlerSync = ConfigurationEventHandlerSync;
+
+            if (eventHandlerSync != null)
             {
-                // fire-and-forget an after update task
+                _ = Task.Run(() =>
+                {
+                    try
+                    {
+                        if (eventHandlerSync is IConfigurationEventHandlerContextAwareSync<T> contextAwareSync)
+                            contextAwareSync.AfterUpdate(MetadataAddress, configuration, context);
+                        else
+                            eventHandlerSync.AfterUpdate(MetadataAddress, configuration);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.LogExceptionMessage(
+                            new InvalidOperationException(
+                                LogHelper.FormatInvariant(
+                                   LogMessages.IDX20813,
+                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                    ex),
+                                ex));
+                    }
+                });
+            }
+
+            IConfigurationEventHandler<T> eventHandler = ConfigurationEventHandler;
+
+            // Prefer the synchronous handler when both properties reference handlers.
+            if (eventHandlerSync == null && eventHandler != null)
+            {
                 _ = Task.Run(async () =>
                 {
                     try
                     {
-                        if (ConfigurationEventHandler is IConfigurationEventHandlerContextAware<T> contextAware)
-                        {
+                        if (eventHandler is IConfigurationEventHandlerContextAware<T> contextAware)
                             await contextAware.AfterUpdateAsync(MetadataAddress, configuration, context).ConfigureAwait(false);
-                        }
                         else
-                        {
-                            await ConfigurationEventHandler.AfterUpdateAsync(MetadataAddress, configuration).ConfigureAwait(false);
-                        }
+                            await eventHandler.AfterUpdateAsync(MetadataAddress, configuration).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {

@@ -13,12 +13,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests;
 /// </summary>
 internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHandlerContextAware<OpenIdConnectConfiguration>, IConfigurationEventHandlerContextAwareSync<OpenIdConnectConfiguration>
 {
+    public bool BeforeRetrieveCalled { get; private set; }
     public bool BeforeRetrieveAsyncCalled { get; private set; }
+    public bool ContextAwareBeforeRetrieveCalled { get; set; }
     public bool ContextAwareBeforeRetrieveAsyncCalled { get; set; }
+    public bool ContextAwareAfterUpdateCalled { get; set; }
     public bool ContextAwareAfterUpdateAsyncCalled { get; set; }
     public ConfigurationRetrievalContext LastContext { get; set; }
     public ConfigurationRetrievalContext LastAfterUpdateContext { get; set; }
     public string BeforeRetrieveMetadataAddress { get; set; }
+    public bool AfterUpdateCalled { get; set; }
     public bool AfterUpdateAsyncCalled { get; set; }
     public string AfterUpdateMetadataAddress { get; set; }
     public OpenIdConnectConfiguration AfterUpdateConfiguration { get; set; }
@@ -44,6 +48,7 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
         string metadataAddress,
         CancellationToken cancellationToken = default)
     {
+        BeforeRetrieveCalled = true;
         throw new NotImplementedException();
     }
 
@@ -82,7 +87,7 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
     {
         LastContext = context;
         BeforeRetrieveMetadataAddress = metadataAddress;
-        ContextAwareBeforeRetrieveAsyncCalled = true;
+        ContextAwareBeforeRetrieveCalled = true;
 
         if (ThrowExceptionInBeforeRetrieve)
             throw new InvalidOperationException("Test exception from context-aware BeforeRetrieve");
@@ -120,5 +125,29 @@ internal class MockConfigurationEventHandlerContextAware : IConfigurationEventHa
             throw new InvalidOperationException("Test exception from context-aware AfterUpdateAsync");
 
         return Task.CompletedTask;
+    }
+
+    public void AfterUpdate(
+        string metadataAddress,
+        OpenIdConnectConfiguration configuration,
+        CancellationToken cancellationToken = default)
+    {
+        AfterUpdateCalled = true;
+        throw new NotImplementedException();
+    }
+
+    public void AfterUpdate(
+        string metadataAddress,
+        OpenIdConnectConfiguration configuration,
+        ConfigurationRetrievalContext context,
+        CancellationToken cancellationToken = default)
+    {
+        AfterUpdateMetadataAddress = metadataAddress;
+        AfterUpdateConfiguration = configuration;
+        LastAfterUpdateContext = context;
+        ContextAwareAfterUpdateCalled = true;
+
+        if (ThrowExceptionInAfterUpdate)
+            throw new InvalidOperationException("Test exception from context-aware AfterUpdate");
     }
 }

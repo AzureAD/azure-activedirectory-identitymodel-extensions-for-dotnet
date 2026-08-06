@@ -13,8 +13,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     internal class MockConfigurationEventHandler : IConfigurationEventHandler<OpenIdConnectConfiguration>, IConfigurationEventHandlerSync<OpenIdConnectConfiguration>
     {
+        public bool BeforeRetrieveCalled { get; private set; }
         public bool BeforeRetrieveAsyncCalled { get; private set; }
         public string BeforeRetrieveMetadataAddress { get; private set; }
+        public bool AfterUpdateCalled { get; private set; }
         public bool AfterUpdateAsyncCalled { get; private set; }
         public string AfterUpdateMetadataAddress { get; private set; }
         public OpenIdConnectConfiguration AfterUpdateConfiguration { get; private set; }
@@ -48,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             CancellationToken cancellationToken = default)
         {
             BeforeRetrieveMetadataAddress = metadataAddress;
-            BeforeRetrieveAsyncCalled = true;
+            BeforeRetrieveCalled = true;
 
             if (ThrowExceptionInBeforeRetrieve)
                 throw new InvalidOperationException("Test exception from BeforeRetrieve");
@@ -76,6 +78,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 throw new InvalidOperationException("Test exception from AfterUpdateAsync");
 
             return Task.CompletedTask;
+        }
+
+        public void AfterUpdate(
+            string metadataAddress,
+            OpenIdConnectConfiguration configuration,
+            CancellationToken cancellationToken = default)
+        {
+            AfterUpdateMetadataAddress = metadataAddress;
+            AfterUpdateConfiguration = configuration;
+            AfterUpdateCalled = true;
+
+            if (ThrowExceptionInAfterUpdate)
+                throw new InvalidOperationException("Test exception from AfterUpdate");
         }
     }
 }

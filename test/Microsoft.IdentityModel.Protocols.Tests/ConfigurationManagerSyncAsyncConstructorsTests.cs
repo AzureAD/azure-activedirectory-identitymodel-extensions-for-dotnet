@@ -114,7 +114,7 @@ public class ConfigurationManagerSyncAsyncConstructorsTests
         IDocumentRetrieverSync docRetriever = new SyncOnlyDocumentRetriever();
         IConfigurationValidator<TestConfiguration> validator = new SucceedingConfigurationValidator();
         LastKnownGoodConfigurationCacheOptions lkgCacheOptions = new LastKnownGoodConfigurationCacheOptions();
-        IConfigurationEventHandler<TestConfiguration> eventHandler = new NoOpConfigurationEventHandler();
+        IConfigurationEventHandlerSync<TestConfiguration> eventHandler = new NoOpConfigurationEventHandler();
 
         ConfigurationManager<TestConfiguration>[] managers =
         [
@@ -134,10 +134,10 @@ public class ConfigurationManagerSyncAsyncConstructorsTests
     }
 
     [Fact]
-    public void CreateSyncWithEventHandler_AssignsEventHandler()
+    public void CreateSyncWithEventHandler_UsesEventHandler()
     {
         // Arrange
-        IConfigurationEventHandler<TestConfiguration> eventHandler = new NoOpConfigurationEventHandler();
+        var eventHandler = new NoOpConfigurationEventHandler();
 
         // Act
         ConfigurationManager<TestConfiguration> manager = ConfigurationManager<TestConfiguration>.CreateSync(
@@ -148,8 +148,60 @@ public class ConfigurationManagerSyncAsyncConstructorsTests
             new LastKnownGoodConfigurationCacheOptions(),
             eventHandler);
 
+        // Act
+        _ = manager.GetConfigurationSync(CancellationToken.None);
+
         // Assert
-        Assert.Same(eventHandler, manager.ConfigurationEventHandler);
+        Assert.True(eventHandler.BeforeRetrieveCalled);
+    }
+
+    [Fact]
+    public void CreateSyncWithAsyncOnlyEventHandler_ThrowsArgumentException()
+    {
+        // Arrange
+        IConfigurationEventHandler<TestConfiguration> eventHandler = new AsyncOnlyConfigurationEventHandler();
+        System.Reflection.MethodInfo createSyncMethod = Array.Find(
+            typeof(ConfigurationManager<TestConfiguration>).GetMethods(),
+            method =>
+            {
+                System.Reflection.ParameterInfo[] parameters = method.GetParameters();
+                return method.Name == nameof(ConfigurationManager<TestConfiguration>.CreateSync)
+                    && parameters.Length == 6
+                    && parameters[5].ParameterType == typeof(IConfigurationEventHandlerSync<TestConfiguration>);
+            });
+
+        object[] arguments =
+        [
+            MetadataAddress,
+            new SyncOnlyConfigurationRetriever(),
+            new SyncOnlyDocumentRetriever(),
+            new SucceedingConfigurationValidator(),
+            new LastKnownGoodConfigurationCacheOptions(),
+            eventHandler,
+        ];
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => createSyncMethod.Invoke(null, arguments));
+    }
+
+    [Fact]
+    public void BothEventHandlersConfigured_InvokesSyncHandlerOnly()
+    {
+        // Arrange
+        var eventHandler = new DualConfigurationEventHandler();
+        ConfigurationManager<TestConfiguration> manager = ConfigurationManager<TestConfiguration>.CreateSync(
+            MetadataAddress,
+            new SyncOnlyConfigurationRetriever(),
+            new SyncOnlyDocumentRetriever());
+        manager.ConfigurationEventHandler = eventHandler;
+        manager.ConfigurationEventHandlerSync = eventHandler;
+
+        // Act
+        _ = manager.GetConfigurationSync(CancellationToken.None);
+        Assert.True(SpinWait.SpinUntil(() => eventHandler.AfterUpdateCalled, TimeSpan.FromSeconds(10)));
+
+        // Assert
+        Assert.False(eventHandler.AfterUpdateAsyncCalled);
     }
 
     #endregion
@@ -397,7 +449,22 @@ public class ConfigurationManagerSyncAsyncConstructorsTests
         }
     }
 
-    private sealed class NoOpConfigurationEventHandler : IConfigurationEventHandler<TestConfiguration>
+    private sealed class NoOpConfigurationEventHandler : IConfigurationEventHandlerSync<TestConfiguration>
+    {
+        public bool BeforeRetrieveCalled { get; private set; }
+
+        public ConfigurationEventHandlerResult<TestConfiguration> BeforeRetrieve(string metadataAddress, CancellationToken cancellationToken = default)
+        {
+            BeforeRetrieveCalled = true;
+            return ConfigurationEventHandlerResult<TestConfiguration>.NoResult;
+        }
+
+        public void AfterUpdate(string metadataAddress, TestConfiguration configuration, CancellationToken cancellationToken = default)
+        {
+        }
+    }
+
+    private sealed class AsyncOnlyConfigurationEventHandler : IConfigurationEventHandler<TestConfiguration>
     {
         public Task<ConfigurationEventHandlerResult<TestConfiguration>> BeforeRetrieveAsync(string metadataAddress, CancellationToken cancellationToken = default)
         {
@@ -406,6 +473,35 @@ public class ConfigurationManagerSyncAsyncConstructorsTests
 
         public Task AfterUpdateAsync(string metadataAddress, TestConfiguration configuration, CancellationToken cancellationToken = default)
         {
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class DualConfigurationEventHandler :
+        IConfigurationEventHandler<TestConfiguration>,
+        IConfigurationEventHandlerSync<TestConfiguration>
+    {
+        public bool AfterUpdateCalled { get; private set; }
+        public bool AfterUpdateAsyncCalled { get; private set; }
+
+        public ConfigurationEventHandlerResult<TestConfiguration> BeforeRetrieve(string metadataAddress, CancellationToken cancellationToken = default)
+        {
+            return ConfigurationEventHandlerResult<TestConfiguration>.NoResult;
+        }
+
+        public Task<ConfigurationEventHandlerResult<TestConfiguration>> BeforeRetrieveAsync(string metadataAddress, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(ConfigurationEventHandlerResult<TestConfiguration>.NoResult);
+        }
+
+        public void AfterUpdate(string metadataAddress, TestConfiguration configuration, CancellationToken cancellationToken = default)
+        {
+            AfterUpdateCalled = true;
+        }
+
+        public Task AfterUpdateAsync(string metadataAddress, TestConfiguration configuration, CancellationToken cancellationToken = default)
+        {
+            AfterUpdateAsyncCalled = true;
             return Task.CompletedTask;
         }
     }

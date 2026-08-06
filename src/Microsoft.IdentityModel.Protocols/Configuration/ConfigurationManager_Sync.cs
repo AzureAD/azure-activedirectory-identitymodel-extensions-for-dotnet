@@ -94,7 +94,7 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
 
                 // Check if event handler can provide configuration.
                 // If provided configuration is valid, skip regular retriaval process and update current configuration.
-                if (ConfigurationEventHandler != null)
+                if (ConfigurationEventHandlerSync != null)
                 {
                     var configurationRetrieved = HandleBeforeRetrieveSync(retrievalContext, cancel);
 
@@ -176,7 +176,7 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
                 {
                     // Check if event handler can provide configuration
                     // If provided configuration is valid, skip regular retriaval process and update current configuration.
-                    if (ConfigurationEventHandler != null)
+                    if (ConfigurationEventHandlerSync != null)
                     {
                         ConfigurationEventHandlerResult<T> configurationRetrieved =
                             HandleBeforeRetrieveSync(retrievalContext, cancel);
@@ -260,7 +260,7 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
         {
             // Check if event handler can provide configuration
             // If provided configuration is valid, skip regular retrieval process and update current configuration.
-            if (ConfigurationEventHandler != null)
+            if (ConfigurationEventHandlerSync != null)
             {
                 ConfigurationEventHandlerResult<T> configurationRetrieved = HandleBeforeRetrieveSync(retrievalContext);
 
@@ -352,14 +352,16 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
         try
         {
             ConfigurationEventHandlerResult<T> handlerResult;
-            if (ConfigurationEventHandler is IConfigurationEventHandlerContextAwareSync<T> contextAware)
+            IConfigurationEventHandlerSync<T> eventHandlerSync = ConfigurationEventHandlerSync;
+
+            if (eventHandlerSync is IConfigurationEventHandlerContextAwareSync<T> contextAware)
             {
                 handlerResult = contextAware.BeforeRetrieve(
                     MetadataAddress, context, cancellationToken);
             }
-            else if (ConfigurationEventHandler is IConfigurationEventHandlerSync<T> handlerSync)
+            else if (eventHandlerSync != null)
             {
-                handlerResult = handlerSync.BeforeRetrieve(
+                handlerResult = eventHandlerSync.BeforeRetrieve(
                     MetadataAddress, cancellationToken);
             }
             else
