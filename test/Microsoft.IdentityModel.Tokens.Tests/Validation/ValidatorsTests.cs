@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -337,6 +338,72 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 ee.ProcessException(ex);
             }
+        }
+
+        [Theory, MemberData(nameof(IssuerDataSet), DisableDiscoveryEnumeration = true)]
+        public void IssuerSync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration, ExpectedException ee)
+        {
+            try
+            {
+                Validators.ValidateIssuerSync(issuer, securityToken, validationParameters, configuration);
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        [Fact]
+        public async Task IssuerValidatorPrecedenceAsync()
+        {
+            // Arrange
+            TokenValidationParameters validationParameters = new()
+            {
+                IssuerValidatorAsync = (issuer, token, parameters) => new ValueTask<string>("async"),
+                IssuerValidatorSync = (issuer, token, parameters) => "sync",
+                IssuerValidatorUsingConfiguration = (issuer, token, parameters, configuration) => "configuration",
+                IssuerValidator = (issuer, token, parameters) => "issuer",
+                ValidIssuer = Default.Issuer
+            };
+
+            // Act & Assert
+            Assert.Equal("async", await Validators.ValidateIssuerAsync(Default.Issuer, null, validationParameters, null));
+
+            validationParameters.IssuerValidatorAsync = null;
+            Assert.Equal("configuration", await Validators.ValidateIssuerAsync(Default.Issuer, null, validationParameters, null));
+
+            validationParameters.IssuerValidatorUsingConfiguration = null;
+            Assert.Equal("issuer", await Validators.ValidateIssuerAsync(Default.Issuer, null, validationParameters, null));
+
+            validationParameters.IssuerValidator = null;
+            Assert.Equal(Default.Issuer, await Validators.ValidateIssuerAsync(Default.Issuer, null, validationParameters, null));
+        }
+
+        [Fact]
+        public void IssuerValidatorPrecedenceSync()
+        {
+            // Arrange
+            TokenValidationParameters validationParameters = new()
+            {
+                IssuerValidatorAsync = (issuer, token, parameters) => new ValueTask<string>("async"),
+                IssuerValidatorSync = (issuer, token, parameters) => "sync",
+                IssuerValidatorUsingConfiguration = (issuer, token, parameters, configuration) => "configuration",
+                IssuerValidator = (issuer, token, parameters) => "issuer",
+                ValidIssuer = Default.Issuer
+            };
+
+            // Act & Assert
+            Assert.Equal("sync", Validators.ValidateIssuerSync(Default.Issuer, null, validationParameters, null));
+
+            validationParameters.IssuerValidatorSync = null;
+            Assert.Equal("configuration", Validators.ValidateIssuerSync(Default.Issuer, null, validationParameters, null));
+
+            validationParameters.IssuerValidatorUsingConfiguration = null;
+            Assert.Equal("issuer", Validators.ValidateIssuerSync(Default.Issuer, null, validationParameters, null));
+
+            validationParameters.IssuerValidator = null;
+            Assert.Equal(Default.Issuer, Validators.ValidateIssuerSync(Default.Issuer, null, validationParameters, null));
         }
 
         public static TheoryData<string, SecurityToken, TokenValidationParameters, BaseConfiguration, ExpectedException> IssuerDataSet

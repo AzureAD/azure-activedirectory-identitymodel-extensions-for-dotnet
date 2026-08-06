@@ -17,9 +17,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
     public class IssuerValidationTests
     {
         [Theory, MemberData(nameof(InvalidIssuerTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task InvalidIssuers(IssuerValidationTheoryData theoryData)
+        public async Task InvalidIssuersAsync(IssuerValidationTheoryData theoryData)
         {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.InvalidIssuers", theoryData);
+            CompareContext context = TestUtilities.WriteHeader($"{this}.InvalidIssuersAsync", theoryData);
 
             if (theoryData.ValidIssuerToAdd != null)
                 theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
@@ -164,9 +164,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         }
 
         [Theory, MemberData(nameof(ValidIssuerTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task ValidIssuers(IssuerValidationTheoryData theoryData)
+        public async Task ValidIssuersAsync(IssuerValidationTheoryData theoryData)
         {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.ValidIssuers", theoryData);
+            CompareContext context = TestUtilities.WriteHeader($"{this}.ValidIssuersAsync", theoryData);
 
             if (theoryData.ValidIssuerToAdd != null)
                 theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
@@ -274,6 +274,108 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 return theoryData;
             }
         }
+
+        [Theory, MemberData(nameof(InvalidCustomIssuerValidatorTestCases), DisableDiscoveryEnumeration = true)]
+        public async Task ValidateIssuerInternalAsync_CustomValidators(InternalIssuerValidatorTheoryData theoryData)
+        {
+            // Arrange
+            ValidationParameters validationParameters = new()
+            {
+                IssuerValidatorAsync = theoryData.IssuerValidatorAsync
+            };
+
+            // Act
+            ValidationResult<ValidatedIssuer, ValidationError> result =
+                await Validators.ValidateIssuerInternalAsync(
+                    Default.Issuer,
+                    JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, Default.Issuer),
+                    validationParameters,
+                    new CallContext(),
+                    CancellationToken.None);
+
+            // Assert
+            AssertInternalIssuerValidatorResult(result, theoryData);
+        }
+
+        [Theory, MemberData(nameof(InvalidCustomIssuerValidatorTestCases), DisableDiscoveryEnumeration = true)]
+        public void ValidateIssuerInternalSync_CustomValidators(InternalIssuerValidatorTheoryData theoryData)
+        {
+            // Arrange
+            ValidationParameters validationParameters = new()
+            {
+                IssuerValidatorSync = theoryData.IssuerValidatorSync
+            };
+
+            // Act
+            ValidationResult<ValidatedIssuer, ValidationError> result =
+                Validators.ValidateIssuerInternalSync(
+                    Default.Issuer,
+                    JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, Default.Issuer),
+                    validationParameters,
+                    new CallContext(),
+                    CancellationToken.None);
+
+            // Assert
+            AssertInternalIssuerValidatorResult(result, theoryData);
+        }
+
+        public static TheoryData<InternalIssuerValidatorTheoryData> InvalidCustomIssuerValidatorTestCases
+        {
+            get
+            {
+                return new TheoryData<InternalIssuerValidatorTheoryData>
+                {
+                    new InternalIssuerValidatorTheoryData(
+                        "CustomIssuerValidationFailed",
+                        CustomIssuerValidationValidators.CustomValidationFailed,
+                        typeof(CustomIssuerValidationError),
+                        CustomValidationFailure.IssuerValidationFailed,
+                        typeof(CustomSecurityTokenInvalidIssuerException)),
+                    new InternalIssuerValidatorTheoryData(
+                        "IssuerValidationFailed",
+                        CustomIssuerValidationValidators.IssuerValidationFailed,
+                        typeof(CustomIssuerValidationError),
+                        IssuerValidationFailure.ValidationFailed,
+                        typeof(SecurityTokenInvalidIssuerException)),
+                    new InternalIssuerValidatorTheoryData(
+                        "IssuerUnknownValidationFailure",
+                        CustomIssuerValidationValidators.UnknownValidationFailure,
+                        typeof(CustomIssuerValidationError),
+                        AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                        typeof(SecurityTokenValidationException)),
+                    new InternalIssuerValidatorTheoryData(
+                        "IssuerValidatorDelegate",
+                        CustomIssuerValidationValidators.IssuerValidatorDelegateAsync,
+                        typeof(IssuerValidationError),
+                        IssuerValidationFailure.ValidationFailed,
+                        typeof(SecurityTokenInvalidIssuerException)),
+                    new InternalIssuerValidatorTheoryData(
+                        "IssuerValidatorThrows",
+                        CustomIssuerValidationValidators.IssuerValidatorThrows,
+                        typeof(IssuerValidationError),
+                        IssuerValidationFailure.ValidatorThrew,
+                        typeof(SecurityTokenInvalidIssuerException),
+                        typeof(CustomSecurityTokenInvalidIssuerException),
+                        1)
+                };
+            }
+        }
+
+        private static void AssertInternalIssuerValidatorResult(
+            ValidationResult<ValidatedIssuer, ValidationError> result,
+            InternalIssuerValidatorTheoryData theoryData)
+        {
+            Assert.False(result.Succeeded);
+            Assert.IsType(theoryData.ExpectedErrorType, result.Error);
+            Assert.Same(theoryData.ExpectedFailureType, result.Error.FailureType);
+            Assert.Equal(theoryData.ExpectedStackFrameCount, result.Error.StackFrames.Count);
+
+            Exception exception = result.Error.GetException();
+            Assert.IsType(theoryData.ExpectedExceptionType, exception);
+
+            if (theoryData.ExpectedInnerExceptionType != null)
+                Assert.IsType(theoryData.ExpectedInnerExceptionType, exception.InnerException);
+        }
     }
 
     public class IssuerValidationTheoryData : TheoryDataBase
@@ -292,5 +394,41 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         internal ValidationFailureType ValidationFailure { get; set; }
         public string ValidIssuerToAdd { get; internal set; }
+    }
+
+    public class InternalIssuerValidatorTheoryData : TheoryDataBase
+    {
+        public InternalIssuerValidatorTheoryData(
+            string testId,
+            IIssuerValidator issuerValidator,
+            Type expectedErrorType,
+            ValidationFailureType expectedFailureType,
+            Type expectedExceptionType,
+            Type expectedInnerExceptionType = null,
+            int expectedStackFrameCount = 2)
+            : base(testId)
+        {
+            IssuerValidatorAsync = issuerValidator;
+            IssuerValidatorSync = (IIssuerValidatorSync)issuerValidator;
+            ExpectedErrorType = expectedErrorType;
+            ExpectedFailureType = expectedFailureType;
+            ExpectedExceptionType = expectedExceptionType;
+            ExpectedInnerExceptionType = expectedInnerExceptionType;
+            ExpectedStackFrameCount = expectedStackFrameCount;
+        }
+
+        public Type ExpectedErrorType { get; }
+
+        public Type ExpectedExceptionType { get; }
+
+        public ValidationFailureType ExpectedFailureType { get; }
+
+        public Type ExpectedInnerExceptionType { get; }
+
+        public int ExpectedStackFrameCount { get; }
+
+        public IIssuerValidator IssuerValidatorAsync { get; }
+
+        public IIssuerValidatorSync IssuerValidatorSync { get; }
     }
 }

@@ -16,11 +16,38 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             var validationParameters = new ValidationParameters();
             Assert.Throws<ArgumentNullException>(() => validationParameters.IssuerValidatorAsync = null);
+            Assert.Throws<ArgumentNullException>(() => validationParameters.IssuerValidatorSync = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.TokenReplayValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.LifetimeValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.TokenTypeValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.AudienceValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.SignatureKeyValidator = null);
+        }
+
+        [Fact]
+        public void Clone_CopiesIssuerValidatorAsync()
+        {
+            // Arrange
+            ValidationParameters validationParameters = new();
+
+            // Act
+            ValidationParameters clone = validationParameters.Clone();
+
+            // Assert
+            Assert.Same(validationParameters.IssuerValidatorAsync, clone.IssuerValidatorAsync);
+        }
+
+        [Fact]
+        public void Clone_CopiesIssuerValidatorSync()
+        {
+            // Arrange
+            ValidationParameters validationParameters = new();
+
+            // Act
+            ValidationParameters clone = validationParameters.Clone();
+
+            // Assert
+            Assert.Same(validationParameters.IssuerValidatorSync, clone.IssuerValidatorSync);
         }
 
         [Fact]
