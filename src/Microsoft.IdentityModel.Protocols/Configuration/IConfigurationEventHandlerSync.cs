@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols.Configuration;
 
@@ -23,10 +22,10 @@ public interface IConfigurationEventHandlerSync<T> where T : class
     ConfigurationEventHandlerResult<T> BeforeRetrieve(string metadataAddress, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Called after a configuration has been successfully retrieved in a fire-and-forget manner.
+    /// Called after a configuration has been successfully retrieved.
     /// </summary>
     /// <param name="metadataAddress">The metadata endpoint address.</param>
     /// <param name="configuration">The retrieved configuration.</param>
-    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
-    Task AfterUpdateAsync(string metadataAddress, T configuration, CancellationToken cancellationToken = default);
+    /// <param name="cancellationToken">A cancellation token to observe while the operation completes.</param>
+    void AfterUpdate(string metadataAddress, T configuration, CancellationToken cancellationToken = default);
 }
