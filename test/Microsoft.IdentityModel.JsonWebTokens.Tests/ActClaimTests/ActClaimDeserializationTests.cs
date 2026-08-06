@@ -20,6 +20,44 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         public void Dispose() => JsonWebTokenHandler.MaxActorChainLength = 1;
 
         [Fact]
+        public void DeserializeToken_ActNestedBeyondGlobalJsonMaxDepth_FailsToReadWithIDX14101()
+        {
+            // Reverse of the serialization depth test: just as serialization refuses to WRITE an actor
+            // chain deeper than the global JSON max depth (64) - throwing IDX10815 - deserialization
+            // cannot READ one. The token payload is parsed by Utf8JsonReader (max depth 64), so a token
+            // whose "act" nests beyond 64 fails at read time with IDX14101 wrapping a JsonReaderException
+            // ("maximum configured depth of 64 has been exceeded"). The token is built manually because
+            // our own serializer caps at 64 and cannot produce such a token.
+            const int depth = 70;
+            var sb = new System.Text.StringBuilder();
+            sb.Append("{\"sub\":\"main\",\"act\":");
+            for (int i = 0; i < depth; i++)
+                sb.Append("{\"sub\":\"actor-" + i + "\",\"act\":");
+            sb.Append("{\"sub\":\"leaf\"}");
+            for (int i = 0; i < depth; i++)
+                sb.Append('}');
+            sb.Append('}');
+
+            var credentials = Default.AsymmetricSigningCredentials;
+            var signatureProvider = credentials.Key.CryptoProviderFactory.CreateForSigning(credentials.Key, credentials.Algorithm);
+            string encodedHeader = Base64UrlEncoder.Encode("{\"alg\":\"" + credentials.Algorithm + "\",\"typ\":\"JWT\"}");
+            string encodedPayload = Base64UrlEncoder.Encode(sb.ToString());
+            byte[] signature = signatureProvider.Sign(System.Text.Encoding.UTF8.GetBytes(encodedHeader + "." + encodedPayload));
+            credentials.Key.CryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+            string jwt = encodedHeader + "." + encodedPayload + "." + Base64UrlEncoder.Encode(signature);
+
+            var exception = Assert.Throws<ArgumentException>(() =>
+            {
+                var token = new JsonWebToken(jwt);
+                _ = token.Claims.ToList();
+            });
+
+            Assert.Contains("IDX14101", exception.Message);
+            Assert.IsAssignableFrom<JsonException>(exception.InnerException);
+            Assert.Contains("depth of 64", exception.InnerException.Message);
+        }
+
+        [Fact]
         public void CreateActorClaimsIdentity_BasicJsonElement_CreatesClaimsIdentityCorrectly()
         {
             // Create a simple JSON Element that represents an actor token
