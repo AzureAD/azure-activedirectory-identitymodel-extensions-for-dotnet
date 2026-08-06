@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+9.0.0
+====
+## New Features
+- Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The default is case-sensitive; set the property to `false` for case-insensitive comparison. The previous `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext key is no longer honored. Applications upgrading from 8.22.0 that set the key to `false` must set this property to `false` instead. See [PR #3569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3569).
+
 8.22.0
 ====
 ## New Features

@@ -1,3 +1,4 @@
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Act = "act" -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.DecryptTokenWithConfigurationAsync(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<string>
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.MaxActorChainLength.get -> int
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.MaxActorChainLength.set -> void
