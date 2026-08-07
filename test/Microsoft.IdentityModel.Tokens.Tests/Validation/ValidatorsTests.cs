@@ -327,11 +327,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Theory, MemberData(nameof(IssuerDataSet), DisableDiscoveryEnumeration = true)]
-        public void Issuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration, ExpectedException ee)
+        public async Task IssuerAsync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration, ExpectedException ee)
         {
             try
             {
-                Validators.ValidateIssuer(issuer, securityToken, validationParameters, configuration);
+                await Validators.ValidateIssuerAsync(issuer, securityToken, validationParameters, configuration);
                 ee.ProcessNoException();
             }
             catch (Exception ex)

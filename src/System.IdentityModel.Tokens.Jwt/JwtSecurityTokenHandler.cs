@@ -1132,7 +1132,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             // use protected virtual method that does not take in configuration for back compatibility purposes
             string issuer = configuration == null ? ValidateIssuer(jwtToken.Issuer, jwtToken, validationParameters) :
-                Validators.ValidateIssuer(jwtToken.Issuer, jwtToken, validationParameters, configuration);
+                Validators.ValidateIssuerSync(jwtToken.Issuer, jwtToken, validationParameters, configuration);
 
             ValidateTokenReplay(expires, jwtToken.RawData, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwtToken.Actor))

@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
             BaseConfiguration configuration)
         {
             Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
-            Validators.ValidateIssuer(securityToken.Issuer, securityToken, validationParameters, configuration);
+            Validators.ValidateIssuerSync(securityToken.Issuer, securityToken, validationParameters, configuration);
             Validators.ValidateAudience(audiences, securityToken, validationParameters);
         }
     }

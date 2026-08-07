@@ -109,6 +109,17 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.ConfigurationManager != null)
                 configuration = validationParameters.ConfigurationManager.GetBaseConfigurationSync(cancellationToken);
 
+            return ValidateIssuerAfterConfiguration(
+                issuer!,
+                validationParameters,
+                configuration);
+        }
+
+        private static ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuerAfterConfiguration(
+            string issuer,
+            ValidationParameters validationParameters,
+            BaseConfiguration? configuration)
+        {
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
                 return new IssuerValidationError(
@@ -263,64 +274,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.ConfigurationManager != null)
                 configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
 
-            // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
-            if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
-                return new IssuerValidationError(
-                    new MessageDetail(
-                        LogMessages.IDX10212,
-                        LogHelper.MarkAsNonPII(issuer),
-                        "ValdIssuers is empty",
-                        LogHelper.MarkAsNonPII(configuration?.Issuer)
-                        ),
-                    IssuerValidationFailure.NoValidationParameterIssuersProvided,
-                    ValidationError.GetCurrentStackFrame(),
-                    issuer);
-
-            if (configuration != null)
-            {
-                if (string.Equals(configuration.Issuer, issuer))
-                {
-                    // TODO - how and when to log
-                    // Logs will have to be passed back to Wilson
-                    // so that they can be written to the correct place and in the correct format respecting PII.
-                    // Add to CallContext
-                    //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
-                    return new ValidatedIssuer(
-                            issuer!,
-                            IssuerValidationSource.IssuerMatchedConfiguration);
-                }
-            }
-
-            if (validationParameters.ValidIssuers.Count != 0)
-            {
-                for (int i = 0; i < validationParameters.ValidIssuers.Count; i++)
-                {
-                    if (string.IsNullOrEmpty(validationParameters.ValidIssuers[i]))
-                    {
-                        // TODO: Add to CallContext
-                        //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        //    LogHelper.LogInformation(LogMessages.IDX10262);
-
-                        continue;
-                    }
-
-                    if (string.Equals(validationParameters.ValidIssuers[i], issuer))
-                        return new ValidatedIssuer(
-                            issuer!,
-                            IssuerValidationSource.IssuerMatchedValidationParameters);
-                }
-            }
-
-            return new IssuerValidationError(
-                new MessageDetail(
-                    LogMessages.IDX10212,
-                    LogHelper.MarkAsNonPII(issuer),
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
-                    LogHelper.MarkAsNonPII(configuration?.Issuer)),
-                IssuerValidationFailure.ValidationFailed,
-                ValidationError.GetCurrentStackFrame(),
-                issuer);
+            return ValidateIssuerAfterConfiguration(
+                issuer!,
+                validationParameters,
+                configuration);
         }
     }
 }
