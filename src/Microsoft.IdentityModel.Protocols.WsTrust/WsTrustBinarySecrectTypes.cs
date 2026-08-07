@@ -75,6 +75,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Constants: WS-Trust 1.4 BinarySecretTypes.
     /// </summary>
+    /// <remarks>
+    /// WS-Trust 1.4 is an addendum to 1.3 and does not define its own BinarySecretTypeEnum.
+    /// The 1.4 schema declares targetNamespace='http://docs.oasis-open.org/ws-sx/ws-trust/200802'
+    /// but imports the core types with xmlns:wst='http://docs.oasis-open.org/ws-sx/ws-trust/200512',
+    /// adding only the interactive challenge elements. The BinarySecret/@Type values therefore
+    /// remain in the 200512 namespace, as do the 1.4 action and key type URIs.
+    /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/v1.4/ws-trust-1.4.xsd </para>
+    /// </remarks>
     public class WsTrust14BinarySecretTypes : WsTrustBinarySecretTypes
     {
         /// <summary>
@@ -82,9 +90,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         public WsTrust14BinarySecretTypes()
         {
-            AsymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200802/AsymmetricKey";
-            Nonce = "http://docs.oasis-open.org/ws-sx/ws-trust/200802/Nonce";
-            SymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200802/SymmetricKey";
+            AsymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/AsymmetricKey";
+            Nonce = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Nonce";
+            SymmetricKey = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey";
         }
     }
 }
