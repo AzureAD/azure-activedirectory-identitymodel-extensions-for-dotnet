@@ -59,6 +59,9 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
     /// </remarks>
     public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
     {
+        if (_configRetrieverAsync == null || _docRetrieverAsync == null)
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20815));
+
         if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
             return _currentConfiguration;
 
@@ -110,10 +113,6 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
                         return _currentConfiguration;
                     }
                 }
-
-                // Ensure that we have a IConfigurationRetriever and IDocumentRetriever to complete the async retrieval
-                if (_configRetrieverAsync == null || _docRetrieverAsync == null)
-                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20815));
 
                 T configuration = await _configRetrieverAsync.GetConfigurationAsync(
                     MetadataAddress,
@@ -197,10 +196,6 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
                         }
                     }
 
-                    // Ensure that we have a IConfigurationRetriever and IDocumentRetriever to complete the async retrieval
-                    if (_configRetrieverAsync == null || _docRetrieverAsync == null)
-                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20815));
-
                     var configuration = await _configRetrieverAsync.GetConfigurationAsync(MetadataAddress, _docRetrieverAsync, CancellationToken.None).ConfigureAwait(false);
 
                     var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
@@ -272,10 +267,6 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
                     return;
                 }
             }
-
-            // Ensure that we have a IConfigurationRetriever and IDocumentRetriever to complete the async retrieval
-            if (_configRetrieverAsync == null || _docRetrieverAsync == null)
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20815));
 
             T configuration = await _configRetrieverAsync.GetConfigurationAsync(
                 MetadataAddress,

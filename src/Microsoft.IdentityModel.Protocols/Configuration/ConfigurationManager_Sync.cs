@@ -58,6 +58,9 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
     /// </remarks>
     public virtual T GetConfigurationSync(CancellationToken cancel)
     {
+        if (_configRetrieverSync == null || _docRetrieverSync == null)
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20814));
+
         if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
             return _currentConfiguration;
 
@@ -110,10 +113,6 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
                         return _currentConfiguration;
                     }
                 }
-
-                // Ensure that we have a IConfigurationRetrieverSync and IDocumentRetrieverSync to complete the sync retrieval
-                if (_configRetrieverSync == null || _docRetrieverSync == null)
-                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20814));
 
                 T configuration = _configRetrieverSync.GetConfigurationSync(
                     MetadataAddress,
@@ -197,10 +196,6 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
                         }
                     }
 
-                    // Ensure that we have a IConfigurationRetrieverSync and IDocumentRetrieverSync to complete the sync retrieval
-                    if (_configRetrieverSync == null || _docRetrieverSync == null)
-                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20814));
-
                     var configuration = _configRetrieverSync.GetConfigurationSync(MetadataAddress, _docRetrieverSync, CancellationToken.None);
 
                     var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
@@ -272,10 +267,6 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
                     return;
                 }
             }
-
-            // Ensure that we have a IConfigurationRetrieverSync and IDocumentRetrieverSync to complete the sync retrieval
-            if (_configRetrieverSync == null || _docRetrieverSync == null)
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20814));
 
             T configuration = _configRetrieverSync.GetConfigurationSync(
                 MetadataAddress,
