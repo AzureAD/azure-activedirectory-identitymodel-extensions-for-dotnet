@@ -67,11 +67,8 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
     /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>
     /// <exception cref="ArgumentNullException">If 'lkgCacheOptions' is null.</exception>
     /// <remarks>
-    /// The synchronous retrieval pipeline (<see cref="GetConfigurationSync()"/>) is enabled only when the supplied
-    /// <paramref name="configRetriever"/> also implements <see cref="IConfigurationRetrieverSync{T}"/> and the supplied
-    /// <paramref name="docRetriever"/> also implements <see cref="IDocumentRetrieverSync"/>. Otherwise the synchronous
-    /// path throws <see cref="NotSupportedException"/>. To construct a manager backed exclusively by the synchronous
-    /// interfaces, use <see cref="CreateSync(string, IConfigurationRetrieverSync{T}, IDocumentRetrieverSync)"/>.
+    /// This constructor enables only the asynchronous retrieval pipeline. To enable synchronous retrieval, use
+    /// <see cref="CreateSync(string, IConfigurationRetrieverSync{T}, IDocumentRetrieverSync)"/>.
     /// </remarks>
     public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, LastKnownGoodConfigurationCacheOptions lkgCacheOptions)
         : base(lkgCacheOptions)
@@ -88,10 +85,7 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
         MetadataAddress = metadataAddress;
         _docRetrieverAsync = docRetriever;
         _configRetrieverAsync = configRetriever;
-
-        // Best-effort enable the synchronous pipeline when the async retrievers also implement the sync contracts.
-        _docRetrieverSync = docRetriever as IDocumentRetrieverSync;
-        _configRetrieverSync = configRetriever as IConfigurationRetrieverSync<T>;
+        _preferSynchronousRetrieval = false;
 
         _updateCurrentConfigurationWithBypassAsync = () => UpdateCurrentConfigurationAsync(bypassCache: true);
         _updateCurrentConfigurationWithoutBypassAsync = () => UpdateCurrentConfigurationAsync(bypassCache: false);
@@ -150,9 +144,7 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
     }
 
     /// <summary>
-    /// Private base constructor for the synchronous-only construction path. Backs the manager with the
-    /// synchronous retriever contracts and best-effort enables the asynchronous pipeline when the supplied
-    /// retrievers also implement the asynchronous contracts.
+    /// Private base constructor for the synchronous-only construction path.
     /// </summary>
     /// <param name="metadataAddress">The address to obtain configuration.</param>
     /// <param name="configRetriever">The <see cref="IConfigurationRetrieverSync{T}"/>.</param>
@@ -177,10 +169,7 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
         MetadataAddress = metadataAddress;
         _docRetrieverSync = docRetriever;
         _configRetrieverSync = configRetriever;
-
-        // Best-effort enable the asynchronous pipeline when the sync retrievers also implement the async contracts.
-        _docRetrieverAsync = docRetriever as IDocumentRetriever;
-        _configRetrieverAsync = configRetriever as IConfigurationRetriever<T>;
+        _preferSynchronousRetrieval = true;
 
         _updateCurrentConfigurationWithBypassAsync = () => UpdateCurrentConfigurationAsync(bypassCache: true);
         _updateCurrentConfigurationWithoutBypassAsync = () => UpdateCurrentConfigurationAsync(bypassCache: false);
@@ -213,10 +202,7 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
     /// <param name="configRetriever">The <see cref="IConfigurationRetrieverSync{T}"/>.</param>
     /// <param name="docRetriever">The <see cref="IDocumentRetrieverSync"/> that reaches out to obtain the configuration.</param>
     /// <returns>A <see cref="ConfigurationManager{T}"/> whose synchronous pipeline is enabled.</returns>
-    /// <remarks>
-    /// The returned manager also serves the asynchronous pipeline when the supplied retrievers additionally implement
-    /// <see cref="IConfigurationRetriever{T}"/> and <see cref="IDocumentRetriever"/>; otherwise the asynchronous path throws <see cref="NotSupportedException"/>.
-    /// </remarks>
+    /// <remarks>The returned manager enables only the synchronous retrieval pipeline.</remarks>
     /// <exception cref="ArgumentNullException">If 'metadataAddress' is null or empty.</exception>
     /// <exception cref="ArgumentNullException">If 'configRetriever' is null.</exception>
     /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>

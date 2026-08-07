@@ -449,22 +449,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         private void AutomaticRefreshIntervalBody(ConfigurationManagerTests.ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData, bool blocking)
         {
             var context = new CompareContext($"{this}.AutomaticRefreshInterval");
+            ConfigurationManager<OpenIdConnectConfiguration> configurationManager = CreateSyncConfigurationManager(theoryData);
 
-            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(theoryData.ConfigurationManager);
+            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
 
             try
             {
-                var configuration = theoryData.ConfigurationManager.GetConfigurationSync(CancellationToken.None);
+                var configuration = configurationManager.GetConfigurationSync(CancellationToken.None);
                 IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
 
-                theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
-                TestUtilities.SetField(theoryData.ConfigurationManager, "_syncAfter", theoryData.SyncAfter);
-                var updatedConfiguration = theoryData.ConfigurationManager.GetConfigurationSync(CancellationToken.None);
+                configurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
+                TestUtilities.SetField(configurationManager, "_syncAfter", theoryData.SyncAfter);
+                var updatedConfiguration = configurationManager.GetConfigurationSync(CancellationToken.None);
 
                 if (theoryData.WaitForEvent && !blocking)
                     ConfigurationManagerTests.WaitOrFail(resetEvent);
 
-                updatedConfiguration = theoryData.ConfigurationManager.GetConfigurationSync(CancellationToken.None);
+                updatedConfiguration = configurationManager.GetConfigurationSync(CancellationToken.None);
                 IdentityComparer.AreEqual(updatedConfiguration, theoryData.ExpectedUpdatedConfiguration, context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -493,38 +494,39 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         private void RequestRefreshBody(ConfigurationManagerTests.ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData, bool blocking)
         {
             var context = new CompareContext($"{this}.RequestRefresh");
+            ConfigurationManager<OpenIdConnectConfiguration> configurationManager = CreateSyncConfigurationManager(theoryData);
 
-            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(theoryData.ConfigurationManager);
+            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
 
             var timeProvider = new FakeTimeProvider();
-            theoryData.ConfigurationManager.TimeProvider = timeProvider;
+            configurationManager.TimeProvider = timeProvider;
 
-            var configuration = theoryData.ConfigurationManager.GetConfigurationSync(CancellationToken.None);
+            var configuration = configurationManager.GetConfigurationSync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
 
             // the first call to RequestRefresh will trigger a refresh with ConfigurationManager.RefreshInterval being ignored.
             // Testing RefreshInterval requires a two calls, the second call will trigger a refresh with ConfigurationManager.RefreshInterval being used.
             if (theoryData.RequestRefresh)
             {
-                theoryData.ConfigurationManager.RequestRefresh();
+                configurationManager.RequestRefresh();
 
                 if (theoryData.WaitForEvent && !blocking)
                     ConfigurationManagerTests.WaitOrFail(resetEvent);
 
-                configuration = theoryData.ConfigurationManager.GetConfigurationSync(CancellationToken.None);
+                configuration = configurationManager.GetConfigurationSync(CancellationToken.None);
             }
 
-            theoryData.ConfigurationManager.RefreshInterval = theoryData.RefreshInterval;
-            theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
+            configurationManager.RefreshInterval = theoryData.RefreshInterval;
+            configurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
 
             timeProvider.Advance(TimeSpan.FromMilliseconds(theoryData.SleepTimeInMs));
 
-            theoryData.ConfigurationManager.RequestRefresh();
+            configurationManager.RequestRefresh();
 
             if (theoryData.WaitForEvent && !blocking)
                 ConfigurationManagerTests.WaitOrFail(resetEvent);
 
-            var updatedConfiguration = theoryData.ConfigurationManager.GetConfigurationSync(CancellationToken.None);
+            var updatedConfiguration = configurationManager.GetConfigurationSync(CancellationToken.None);
 
             IdentityComparer.AreEqual(updatedConfiguration, theoryData.ExpectedUpdatedConfiguration, context);
 
@@ -535,10 +537,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public void HttpFailures(ConfigurationManagerTests.ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
             var context = new CompareContext($"{this}.HttpFailures");
+            ConfigurationManager<OpenIdConnectConfiguration> configurationManager = CreateSyncConfigurationManager(theoryData);
 
             try
             {
-                _ = theoryData.ConfigurationManager.GetConfigurationSync(CancellationToken.None);
+                _ = configurationManager.GetConfigurationSync(CancellationToken.None);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -547,6 +550,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        private static ConfigurationManager<OpenIdConnectConfiguration> CreateSyncConfigurationManager(
+            ConfigurationManagerTests.ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        {
+            return ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+                theoryData.MetadataAddress,
+                (IConfigurationRetrieverSync<OpenIdConnectConfiguration>)theoryData.ConfigurationRetriever,
+                (IDocumentRetrieverSync)theoryData.DocumentRetriever);
         }
 
         [Fact]

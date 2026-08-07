@@ -27,6 +27,7 @@ namespace Microsoft.IdentityModel.Protocols
 
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
+        private readonly bool _preferSynchronousRetrieval;
 
         // Tracks the most recent fetch failure for the blocking path. Promoted from a local in
         // GetConfigurationWithBlockingAsync/GetConfigurationWithBlockingSync so the original exception (e.g. an IOException carrying
@@ -95,7 +96,9 @@ namespace Microsoft.IdentityModel.Protocols
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    if (ConfigurationEventHandlerSync != null || _configRetrieverAsync == null || _docRetrieverAsync == null)
+                    // Construction guarantees that the preferred retriever pair is available:
+                    // constructors use the asynchronous path and CreateSync uses the synchronous path.
+                    if (_preferSynchronousRetrieval)
                         _ = Task.Run(_updateCurrentConfigurationWithBypassSync, CancellationToken.None);
                     else
                         _ = Task.Run(_updateCurrentConfigurationWithBypassAsync, CancellationToken.None);

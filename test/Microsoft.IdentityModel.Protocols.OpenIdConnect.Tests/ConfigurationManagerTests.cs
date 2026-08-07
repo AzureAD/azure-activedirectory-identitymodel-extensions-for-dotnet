@@ -593,8 +593,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = InMemoryDocumentRetriever,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
+                    MetadataAddress = "AADCommonV1Json",
                     SyncAfter = DateTime.UtcNow - TimeSpan.FromDays(2),
                     UpdatedMetadataAddress = "https://httpstat.us/429"
                 });
@@ -606,8 +609,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                        "AADCommonV1Json",
                        new OpenIdConnectConfigurationRetriever(),
                        InMemoryDocumentRetriever),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = InMemoryDocumentRetriever,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
+                    MetadataAddress = "AADCommonV1Json",
                     SyncAfter = DateTime.UtcNow + TimeSpan.FromDays(2),
                     UpdatedMetadataAddress = "AADCommonV2Json"
                 });
@@ -619,8 +625,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = InMemoryDocumentRetriever,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
+                    MetadataAddress = "AADCommonV1Json",
                     SyncAfter = DateTime.UtcNow,
                     UpdatedMetadataAddress = "AADCommonV2Json",
                     WaitForEvent = true
@@ -697,8 +706,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = InMemoryDocumentRetriever,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
+                    MetadataAddress = "AADCommonV1Json",
                     RefreshInterval = TimeSpan.FromSeconds(1),
                     RequestRefresh = true,
                     SleepTimeInMs = 1000,
@@ -713,8 +725,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = InMemoryDocumentRetriever,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
+                    MetadataAddress = "AADCommonV1Json",
                     RefreshInterval = TimeSpan.MaxValue,
                     RequestRefresh = true,
                     SleepTimeInMs = 1000,
@@ -728,8 +743,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = InMemoryDocumentRetriever,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
+                    MetadataAddress = "AADCommonV1Json",
                     SleepTimeInMs = 100,
                     UpdatedMetadataAddress = "AADCommonV2Json",
                     WaitForEvent = true
@@ -769,7 +787,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "https://httpstat.us/429",
                         new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever()),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = new HttpDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException)),
+                    MetadataAddress = "https://httpstat.us/429",
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>("LocalHost_HTTPS_Error")
@@ -778,7 +799,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "https://127.0.0.1",
                         new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever()),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = new HttpDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException)),
+                    MetadataAddress = "https://127.0.0.1",
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>("LocalHost_HTTP_ArgumentError")
@@ -787,7 +811,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "http://127.0.0.1",
                         new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever()),
+                    ConfigurationRetriever = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = new HttpDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(ArgumentException)),
+                    MetadataAddress = "http://127.0.0.1",
                 });
 
                 return theoryData;

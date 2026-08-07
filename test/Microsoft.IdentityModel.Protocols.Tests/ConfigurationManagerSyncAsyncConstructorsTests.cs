@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests;
 /// <list type="number">
 /// <item>async-only retrievers: the asynchronous path works and the synchronous path is not supported (IDX20814).</item>
 /// <item>sync-only retrievers (built through the CreateSync factories): the synchronous path works and the asynchronous path is not supported (IDX20815).</item>
-/// <item>retrievers implementing both contracts: either path can be used.</item>
+/// <item>retrievers implementing both contracts: only the path selected during construction can be used.</item>
 /// </list>
 /// </summary>
 public class ConfigurationManagerSyncAsyncConstructorsTests
@@ -209,47 +209,28 @@ public class ConfigurationManagerSyncAsyncConstructorsTests
     #region Case 3: retrievers implementing both contracts
 
     [Fact]
-    public async Task DualRetrievers_AsynchronousRetrievalSucceeds()
+    public async Task DualRetrievers_OnlyConstructionPathIsSupported()
     {
         // Arrange
-        ConfigurationManager<TestConfiguration> manager = CreateDual();
-
-        // Act
-        TestConfiguration configuration = await manager.GetConfigurationAsync(CancellationToken.None);
-
-        // Assert
-        Assert.NotNull(configuration);
-    }
-
-    [Fact]
-    public void DualRetrievers_SynchronousRetrievalSucceeds()
-    {
-        // Arrange
-        ConfigurationManager<TestConfiguration> manager = CreateDual();
-
-        // Act
-        TestConfiguration configuration = manager.GetConfigurationSync(CancellationToken.None);
-
-        // Assert
-        Assert.NotNull(configuration);
-    }
-
-    [Fact]
-    public async Task DualRetrieversViaCreateSync_BothPathsSucceed()
-    {
-        // Arrange
-        ConfigurationManager<TestConfiguration> manager = ConfigurationManager<TestConfiguration>.CreateSync(
+        ConfigurationManager<TestConfiguration> asyncManager = new(
+            MetadataAddress,
+            new DualConfigurationRetriever(),
+            new DualDocumentRetriever());
+        ConfigurationManager<TestConfiguration> syncManager = ConfigurationManager<TestConfiguration>.CreateSync(
             MetadataAddress,
             new DualConfigurationRetriever(),
             new DualDocumentRetriever());
 
-        // Act
-        TestConfiguration syncConfiguration = manager.GetConfigurationSync(CancellationToken.None);
-        TestConfiguration asyncConfiguration = await manager.GetConfigurationAsync(CancellationToken.None);
+        // Act & Assert
+        Assert.NotNull(await asyncManager.GetConfigurationAsync(CancellationToken.None));
+        Exception syncException = Assert.ThrowsAny<Exception>(
+            () => asyncManager.GetConfigurationSync(CancellationToken.None));
+        AssertRetrievalNotSupported(syncException, "IDX20814");
 
-        // Assert
-        Assert.NotNull(syncConfiguration);
-        Assert.NotNull(asyncConfiguration);
+        Assert.NotNull(syncManager.GetConfigurationSync(CancellationToken.None));
+        Exception asyncException = await Assert.ThrowsAnyAsync<Exception>(
+            () => syncManager.GetConfigurationAsync(CancellationToken.None));
+        AssertRetrievalNotSupported(asyncException, "IDX20815");
     }
 
     #endregion
@@ -345,14 +326,6 @@ public class ConfigurationManagerSyncAsyncConstructorsTests
             MetadataAddress,
             new SyncOnlyConfigurationRetriever(),
             new SyncOnlyDocumentRetriever());
-    }
-
-    private static ConfigurationManager<TestConfiguration> CreateDual()
-    {
-        return new ConfigurationManager<TestConfiguration>(
-            MetadataAddress,
-            new DualConfigurationRetriever(),
-            new DualDocumentRetriever());
     }
 
     /// <summary>

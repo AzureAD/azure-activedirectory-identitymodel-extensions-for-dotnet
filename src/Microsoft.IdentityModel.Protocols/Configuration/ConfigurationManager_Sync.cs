@@ -58,7 +58,7 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
     /// </remarks>
     public virtual T GetConfigurationSync(CancellationToken cancel)
     {
-        if (_configRetrieverSync == null || _docRetrieverSync == null)
+        if (!_preferSynchronousRetrieval || _configRetrieverSync == null || _docRetrieverSync == null)
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20814));
 
         if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
