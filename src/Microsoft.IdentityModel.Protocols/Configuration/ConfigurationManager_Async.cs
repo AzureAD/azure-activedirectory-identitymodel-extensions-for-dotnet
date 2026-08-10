@@ -211,8 +211,6 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
                             throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                     }
 
-                    _lastRequestRefresh = TimeProvider.GetUtcNow().UtcDateTime;
-
                     TelemetryForUpdateBlocking(TelemetryConstants.Protocols.ConfigurationSourceRetriever);
 
                     if (_refreshRequested)

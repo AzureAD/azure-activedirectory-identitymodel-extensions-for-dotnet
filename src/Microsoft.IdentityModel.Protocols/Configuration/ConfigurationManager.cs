@@ -110,12 +110,13 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void RequestRefreshBlocking()
         {
-            DateTime now = TimeProvider.GetUtcNow().UtcDateTime;
+            DateTimeOffset now = TimeProvider.GetUtcNow();
 
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _refreshRequested = true;
                 _syncAfter = now;
+                _lastRequestRefresh = now;
                 _isFirstRefreshRequest = false;
             }
         }
