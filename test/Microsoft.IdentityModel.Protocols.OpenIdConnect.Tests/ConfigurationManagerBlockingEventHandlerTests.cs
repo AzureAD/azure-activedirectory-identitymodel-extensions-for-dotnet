@@ -495,6 +495,52 @@ public class ConfigurationManagerBlockingEventHandlerTests
     }
 
     [Fact]
+    public async Task Blocking_RequestRefresh_IsThrottledFromAcceptedRequest()
+    {
+        // Arrange
+        AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+
+        var timeProvider = new FakeTimeProvider();
+        var mockEventHandler = new MockConfigurationEventHandlerContextAware
+        {
+            ConfigurationToReturn = new OpenIdConnectConfiguration { Issuer = "https://test.issuer.com" },
+            RetrievalTimeToReturn = timeProvider.GetUtcNow()
+        };
+        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            "OpenIdConnectMetadata.json",
+            new OpenIdConnectConfigurationRetriever(),
+            new FileDocumentRetriever())
+        {
+            ConfigurationEventHandler = mockEventHandler,
+            TimeProvider = timeProvider
+        };
+
+        await configurationManager.GetConfigurationAsync();
+
+        // Act - consume the first accepted manual refresh.
+        configurationManager.RequestRefresh();
+        await configurationManager.GetConfigurationAsync();
+
+        mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled = false;
+        mockEventHandler.LastContext = null;
+
+        // A second request inside RefreshInterval should be ignored.
+        configurationManager.RequestRefresh();
+        await configurationManager.GetConfigurationAsync();
+
+        // Assert
+        Assert.False(mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled);
+
+        // A request after RefreshInterval should be accepted.
+        timeProvider.Advance(configurationManager.RefreshInterval + TimeSpan.FromSeconds(1));
+        configurationManager.RequestRefresh();
+        await configurationManager.GetConfigurationAsync();
+
+        Assert.True(mockEventHandler.ContextAwareBeforeRetrieveAsyncCalled);
+        Assert.True(mockEventHandler.LastContext?.BypassCache);
+    }
+
+    [Fact]
     public async Task Blocking_MultipleRequestRefresh_OnlyOneBypassTrueRefreshFires()
     {
         // Arrange
