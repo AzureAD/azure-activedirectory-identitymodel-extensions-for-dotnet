@@ -1252,5 +1252,47 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Null(result.ClaimsIdentity.Actor);
             Assert.Contains("IDX14316", listener.TraceBuffer);
         }
+
+        [Fact]
+        public async Task ValidateTokenAsync_PrimitiveActAndActort_ActWins_ActorNull()
+        {
+            // A primitive "act" (a JSON string) is present, so "act" takes precedence and SUPPRESSES the
+            // legacy "actort": Actor is null (a primitive cannot be expanded; IDX14316 warned), the raw
+            // "act" is retained as a claim, and "actort" is NOT expanded.
+            using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            var handler = new JsonWebTokenHandler();
+            string actortJwt = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "actort-actor") }),
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            });
+
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "user-1") }),
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", "not-an-object" }, { "actort", actortJwt } }
+            });
+
+            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            });
+
+            Assert.True(result.IsValid);
+            // "act" wins (present) -> Actor is null (primitive not expandable); "actort" is NOT used.
+            Assert.Null(result.ClaimsIdentity.Actor);
+            Assert.Contains("IDX14316", listener.TraceBuffer);
+            // The raw primitive "act" is retained as an ordinary claim.
+            Assert.Contains(result.ClaimsIdentity.Claims, c => c.Type == "act" && c.Value == "not-an-object");
+        }
     }
 }

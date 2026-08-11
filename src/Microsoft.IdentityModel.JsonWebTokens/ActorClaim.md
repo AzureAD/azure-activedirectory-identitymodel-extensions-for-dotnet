@@ -120,19 +120,31 @@ expands the remainder with `int.MaxValue`, i.e. losslessly). This is safe becaus
 
 On validation, `JsonWebTokenHandler` populates `ClaimsIdentity.Actor` from the token:
 
-- **`act` (RFC 8693 object) takes precedence** whenever present; otherwise the legacy **`actort`**
-  (an unsigned nested-JWT string) is expanded for read back-compatibility (this handler writes
-  `act`, never `actort`). Having both is not an error — `act` wins and nothing is thrown. The
-  `actort` chain is not bounded by `MaxActorChainLength` (that bounds `act` only).
+- **`act` (RFC 8693) takes precedence whenever the claim is present — in *any* form** — and always
+  suppresses the legacy `actort`. A JSON **object** is expanded into `Actor`. A non-expandable `act`
+  (a JSON **array**, or a **primitive** such as a string/number) warns (`IDX14316`), leaves `Actor`
+  null, and is kept as an ordinary claim — but it *still* wins, so `actort` is not consulted. When
+  there is no `act` at all, the legacy `actort` (an unsigned nested-JWT string) is expanded for read
+  back-compatibility (this handler writes `act`, never `actort`). The `actort` chain is **not**
+  bounded by `MaxActorChainLength` (that bounds `act` only).
 - **Degrade, don't throw.** Nested `act` objects are expanded up to `MaxActorChainLength`; deeper
   levels are **kept as a claim** (silent). A within-limit non-object `act` logs a warning
   (`IDX14316`) and is kept as a claim. A failing custom `ActClaimRetriever` logs a warning
   (`IDX14314`, PII-scrubbed) and leaves `Actor` null. **Nothing in the actor read path fails token
   validation** (except a null `TokenValidationParameters`).
 - **Issuer.** `act`-derived actor claims carry the **outer token's validated issuer** on
-  `Claim.Issuer` (the `act` object is asserted by the outer token). Their `NameClaimType` /
-  `RoleClaimType` / `AuthenticationType` are left at their defaults — a documented, non-RFC
-  library choice; consumers read the actor via its raw claims, not `Actor.Name` / `IsInRole`.
+  `Claim.Issuer` (the `act` object is asserted by the outer token). `actort`-derived actor claims,
+  by contrast, carry the **nested actor JWT's own issuer** (`GetActualIssuer(actor)`), since `actort`
+  is an independent (if unsigned) token.
+- **Config asymmetry (`act` vs `actort`).** `act` actors are built as a **bare**
+  `CaseSensitiveClaimsIdentity`, so they use **default** `NameClaimType` / `RoleClaimType` /
+  `AuthenticationType` and no inbound mapping — read them via their **raw claims** (`sub`, …), not
+  `Actor.Name` / `IsInRole`. `actort` actors are built through
+  `validationParameters.CreateClaimsIdentity(...)`, so they **do** get the configured name/role/auth
+  types and inbound mapping. So an actor's name/role behavior can differ purely based on the wire
+  format the sender used — by design. The raw `act` path is deliberate: it preserves the actor's
+  claims **verbatim**, without the renaming/transformation inbound mapping would apply, so no actor
+  information is lost.
 - **Extensibility.** Override `CreateClaimsIdentity` to customize `actort`-derived actors, or set
   `TokenValidationParameters.ActClaimRetriever` to fully own `act` construction.
 

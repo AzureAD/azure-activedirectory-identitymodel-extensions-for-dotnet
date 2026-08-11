@@ -639,9 +639,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // wins and no exception is thrown.
         private ClaimsIdentity ResolveActorClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
-            // Single payload lookup: capture the "act" element and hand it to the helper (no second lookup).
+            // "act" (RFC 8693) takes precedence whenever the claim is present, in ANY form, and always
+            // suppresses the legacy "actort". TryGetPayloadValue<JsonElement> succeeds only for JSON
+            // objects/arrays, so the common object case is a single lookup here (object -> expanded;
+            // array -> the helper warns IDX14316 and yields null).
             if (jwtToken.TryGetPayloadValue<JsonElement>(ActClaimType, out JsonElement actClaim))
                 return CreateActorClaimsIdentity(actClaim, validationParameters, issuer);
+
+            // "act" present but a primitive (string/number/bool): it cannot be expanded, but it still wins -
+            // warn IDX14316 and suppress "actort". The raw "act" value is retained as a claim by the caller.
+            if (jwtToken.HasPayloadClaim(ActClaimType))
+            {
+                LogHelper.LogWarning(LogMessages.IDX14316);
+                return null;
+            }
 
             // Legacy fallback: "actort" is an unsigned nested JWT (not validated here, matching the classic
             // behavior). Its chain depth is not bounded by MaxActorChainLength (that bounds "act" only).
