@@ -102,7 +102,10 @@ maximum.** Setting it below 1 throws `ArgumentOutOfRangeException` (`IDX14317`).
   token round-trips consistently. A per-call setting could drift between write and read.
 - **Within the limit:** each actor level is a nested `act` **object**.
 - **Beyond the limit:** the remaining actor subtree **degrades to a JSON-text string** (never a
-  JWT, never a throw) — `"We cannot drop the data; we pass it as-is."`
+  JWT) — `"We cannot drop the data; we pass it as-is."` This degradation is still bounded by the
+  library's global JSON depth limit of **64**: an actor nested beyond depth 64 fails fast with
+  `IDX10815` on write, and a token whose `act` nests beyond 64 fails to **read** (`IDX14101`
+  wrapping a depth-64 `JsonReaderException`).
 - **Default of 1** is RFC-informed (only the current actor is used for access control) and keeps
   the common case cheap; callers who need deeper chains opt in explicitly.
 
@@ -112,6 +115,26 @@ The recursion terminates on a `null` `Actor` at the end of the chain (the string
 expands the remainder with `int.MaxValue`, i.e. losslessly). This is safe because
 `ClaimsIdentity.Actor` is guaranteed **finite and acyclic** — its setter throws
 `InvalidOperationException` on any circular reference, so a cycle can never reach the serializer.
+
+### Deserialization (read path)
+
+On validation, `JsonWebTokenHandler` populates `ClaimsIdentity.Actor` from the token:
+
+- **`act` (RFC 8693 object) takes precedence** whenever present; otherwise the legacy **`actort`**
+  (an unsigned nested-JWT string) is expanded for read back-compatibility (this handler writes
+  `act`, never `actort`). Having both is not an error — `act` wins and nothing is thrown. The
+  `actort` chain is not bounded by `MaxActorChainLength` (that bounds `act` only).
+- **Degrade, don't throw.** Nested `act` objects are expanded up to `MaxActorChainLength`; deeper
+  levels are **kept as a claim** (silent). A within-limit non-object `act` logs a warning
+  (`IDX14316`) and is kept as a claim. A failing custom `ActClaimRetriever` logs a warning
+  (`IDX14314`, PII-scrubbed) and leaves `Actor` null. **Nothing in the actor read path fails token
+  validation** (except a null `TokenValidationParameters`).
+- **Issuer.** `act`-derived actor claims carry the **outer token's validated issuer** on
+  `Claim.Issuer` (the `act` object is asserted by the outer token). Their `NameClaimType` /
+  `RoleClaimType` / `AuthenticationType` are left at their defaults — a documented, non-RFC
+  library choice; consumers read the actor via its raw claims, not `Actor.Name` / `IsInRole`.
+- **Extensibility.** Override `CreateClaimsIdentity` to customize `actort`-derived actors, or set
+  `TokenValidationParameters.ActClaimRetriever` to fully own `act` construction.
 
 ---
 

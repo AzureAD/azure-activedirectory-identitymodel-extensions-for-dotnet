@@ -335,7 +335,7 @@ Microsoft.IdentityModel.Tokens.Experimental.ITokenTypeValidator.ValidateTokenTyp
 Microsoft.IdentityModel.Tokens.ActClaimRetriever
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetriever.get -> Microsoft.IdentityModel.Tokens.ActClaimRetriever
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetriever.set -> void
-~virtual Microsoft.IdentityModel.Tokens.ActClaimRetriever.Invoke(System.Text.Json.JsonElement actClaim, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters = null) -> System.Security.Claims.ClaimsIdentity
+~virtual Microsoft.IdentityModel.Tokens.ActClaimRetriever.Invoke(System.Text.Json.JsonElement actClaim, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters) -> System.Security.Claims.ClaimsIdentity
 ~const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jkt = "jkt" -> string
 ~Microsoft.IdentityModel.Tokens.Cnf.Jkt.get -> string
 ~const Microsoft.IdentityModel.Tokens.JsonWebAlgorithmsKeyTypes.Akp = "AKP" -> string

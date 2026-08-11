@@ -535,11 +535,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
 
         [Fact]
-        public async Task ValidateTokenAsync_CustomDelegate_WhenDelegateFails_ThrowsOnClaimsIdentityAccess()
+        public async Task ValidateTokenAsync_CustomDelegate_WhenDelegateFails_WarnsAndLeavesActorNull()
         {
-            // When a custom delegate throws an exception, validation succeeds but accessing
-            // ClaimsIdentity throws because it's lazily evaluated
-            ClaimsIdentity CustomDelegate(JsonElement element, TokenValidationParameters tokenValidationParameters = null)
+            // A failing ActClaimRetriever must NOT fail token validation. It warns (IDX14314) and leaves
+            // Actor null; the raw "act" claim is still retained. Accessing ClaimsIdentity does not throw.
+            using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            ClaimsIdentity CustomDelegate(JsonElement element, TokenValidationParameters tokenValidationParameters)
             {
                 throw new InvalidOperationException("Delegate failure");
             }
@@ -574,14 +576,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
 
-            // Validation succeeds
+            // Validation succeeds and the identity is accessible without throwing.
             Assert.True(result.IsValid);
-
-            // But accessing ClaimsIdentity throws because the delegate fails during lazy evaluation
-            var exception = Assert.Throws<SecurityTokenException>(
-                () => result.ClaimsIdentity);
-
-            Assert.Contains("IDX14314", exception.Message);
+            var identity = result.ClaimsIdentity; // does not throw
+            Assert.Null(identity.Actor);
+            // The raw "act" claim is retained on the identity.
+            Assert.Contains(identity.Claims, c => c.Type == "act");
+            // The retriever failure was warned, not thrown.
+            Assert.Contains("IDX14314", listener.TraceBuffer);
         }
 
         [Fact]
@@ -1043,10 +1045,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         }
 
         [Fact]
-        public async Task EndToEnd_LegacyActortJwtString_IsLeftAsOpaqueClaim_NotExpandedToActor()
+        public async Task EndToEnd_LegacyActortJwtString_IsExpandedIntoActor_ForBackCompat()
         {
-            // ARRANGE: the handler never *writes* actort; a caller supplies it as a JWT string
-            // in the Claims dictionary (this is what legacy JwtSecurityTokenHandler tokens look like).
+            // The handler never *writes* actort, but for READ back-compatibility it expands the legacy
+            // actort (an unsigned nested JWT) into ClaimsIdentity.Actor when no RFC 8693 "act" is present.
             var handler = new JsonWebTokenHandler();
             string actorJwt = handler.CreateToken(new SecurityTokenDescriptor
             {
@@ -1068,12 +1070,175 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var decoded = handler.ReadJsonWebToken(token);
             Assert.True(decoded.Payload.HasClaim("actort"), "payload should contain 'actort'");
             Assert.False(decoded.Payload.HasClaim("act"), "payload should NOT contain 'act'");
-            // "actort" is a JWT string (not a JSON object), so it reads back as a string.
             Assert.Equal(actorJwt, decoded.Payload.GetValue<string>("actort"));
 
-            // ACT + ASSERT (deserialization): this handler expands only "act" into ClaimsIdentity.Actor.
-            // The legacy "actort" is NOT structurally deserialized, so Actor stays null and the raw
-            // "actort" JWT string remains an opaque claim on the identity.
+            // ACT + ASSERT (deserialization): with no "act", the legacy "actort" is expanded into
+            // ClaimsIdentity.Actor for back-compat, and the raw "actort" JWT string is still retained.
+            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            });
+
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("legacy-actor", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+            var actortClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "actort");
+            Assert.NotNull(actortClaim);
+            Assert.Equal(actorJwt, actortClaim.Value);
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_BothActAndActort_ActWins()
+        {
+            // When a token carries BOTH "act" (RFC 8693 object) and "actort" (legacy JWT string),
+            // "act" takes precedence and populates Actor; no exception is thrown.
+            var handler = new JsonWebTokenHandler();
+            string actortJwt = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "actort-actor") }),
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            });
+
+            var actIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actIdentity.AddClaim(new Claim("sub", "act-actor"));
+
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "user-1") }),
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actIdentity }, { "actort", actortJwt } }
+            });
+
+            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            });
+
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            Assert.Equal("act-actor", result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_ActActorClaims_CarryOuterTokenIssuer()
+        {
+            // "act" is an unsigned JSON object inside the outer token, so its claims are asserted by the
+            // outer token's issuer. Actor claims must carry the outer issuer on Claim.Issuer - not
+            // ClaimsIdentity.DefaultIssuer ("LOCAL AUTHORITY").
+            const string outerIssuer = "https://issuer.example.com";
+            var handler = new JsonWebTokenHandler();
+
+            var actIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+            actIdentity.AddClaim(new Claim("sub", "act-actor"));
+
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "user-1") }),
+                Issuer = outerIssuer,
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", actIdentity } }
+            });
+
+            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            });
+
+            Assert.True(result.IsValid);
+            Assert.NotNull(result.ClaimsIdentity.Actor);
+            var actorSub = result.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub");
+            Assert.Equal(outerIssuer, actorSub.Issuer);
+            Assert.NotEqual(ClaimsIdentity.DefaultIssuer, actorSub.Issuer);
+        }
+
+        [Fact]
+        public async Task RoundTrip_ActorChainAtExactlyMaxChainLength_IsSymmetric()
+        {
+            // Write/read symmetry at the boundary: a chain of exactly MaxActorChainLength object levels is
+            // written as nested objects and read back into the Actor chain to the same depth.
+            JsonWebTokenHandler.MaxActorChainLength = 3;
+            var handler = new JsonWebTokenHandler();
+
+            var level3 = new CaseSensitiveClaimsIdentity("L3");
+            level3.AddClaim(new Claim("sub", "actor-3"));
+            var level2 = new CaseSensitiveClaimsIdentity("L2");
+            level2.AddClaim(new Claim("sub", "actor-2"));
+            level2.Actor = level3;
+            var level1 = new CaseSensitiveClaimsIdentity("L1");
+            level1.AddClaim(new Claim("sub", "actor-1"));
+            level1.Actor = level2;
+
+            var main = new CaseSensitiveClaimsIdentity("Bearer");
+            main.AddClaim(new Claim("sub", "user-1"));
+            main.Actor = level1;
+
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = main,
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            });
+
+            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true
+            });
+
+            Assert.True(result.IsValid);
+            var a1 = result.ClaimsIdentity.Actor;
+            Assert.NotNull(a1);
+            Assert.Equal("actor-1", a1.Claims.First(c => c.Type == "sub").Value);
+            var a2 = a1.Actor;
+            Assert.NotNull(a2);
+            Assert.Equal("actor-2", a2.Claims.First(c => c.Type == "sub").Value);
+            var a3 = a2.Actor;
+            Assert.NotNull(a3);
+            Assert.Equal("actor-3", a3.Claims.First(c => c.Type == "sub").Value);
+            Assert.Null(a3.Actor);
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_ArrayActClaim_WarnsAndLeavesActorNull()
+        {
+            // A non-compliant token whose "act" is a JSON ARRAY reaches the actor helper as a non-object
+            // (TryGetPayloadValue<JsonElement> succeeds for arrays as well as objects). The guard must warn
+            // (IDX14316) and leave Actor null - NOT throw from EnumerateObject(). Validation still succeeds.
+            using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            var handler = new JsonWebTokenHandler();
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = new CaseSensitiveClaimsIdentity(new[] { new Claim("sub", "user-1") }),
+                Issuer = "https://example.com",
+                Audience = "https://api.example.com",
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Claims = new Dictionary<string, object> { { "act", new List<string> { "a", "b" } } }
+            });
+
             var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
             {
                 ValidateIssuer = false,
@@ -1085,9 +1250,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
             Assert.True(result.IsValid);
             Assert.Null(result.ClaimsIdentity.Actor);
-            var actortClaim = result.ClaimsIdentity.Claims.FirstOrDefault(c => c.Type == "actort");
-            Assert.NotNull(actortClaim);
-            Assert.Equal(actorJwt, actortClaim.Value);
+            Assert.Contains("IDX14316", listener.TraceBuffer);
         }
     }
 }

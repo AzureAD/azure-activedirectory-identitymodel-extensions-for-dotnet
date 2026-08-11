@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14311 = "IDX14311: Unable to decode the authentication tag as a Base64Url encoded string.";
         internal const string IDX14312 = "IDX14312: Unable to decode the cipher text as a Base64Url encoded string.";
         internal const string IDX14314 = "IDX14314: Unable to deserialize act claim. Exception faced while using custom delegate to deserialize act claim. Nested exception is :{0}";
-        internal const string IDX14316 = "IDX14316: Actor token must be a JSON object";
+        internal const string IDX14316 = "IDX14316: The 'act' claim must be a JSON object.";
         internal const string IDX14317 = "IDX14317: JsonWebTokenHandler.MaxActorChainLength must be greater than or equal to 1. Value provided was: '{0}'.";
     }
 }

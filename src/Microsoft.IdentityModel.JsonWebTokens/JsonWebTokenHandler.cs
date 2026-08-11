@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -216,20 +216,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+
+            // Actor resolution is order-independent: "act" (RFC 8693 object) wins whenever present,
+            // otherwise the legacy "actort" (nested-JWT string) is expanded. The raw "act"/"actort"
+            // claims are still added as ordinary claims by the loop below.
+            identity.Actor = ResolveActorClaimsIdentity(jwtToken, validationParameters, issuer);
+
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 bool wasMapped = _inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out string claimType);
 
                 if (!wasMapped)
                     claimType = jwtClaim.Type;
-
-                // Only the RFC 8693 "act" (JSON object) claim is expanded into ClaimsIdentity.Actor.
-                // The legacy "actort" (JWT string) is left as an ordinary claim and is not structurally
-                // deserialized here (this handler never writes "actort").
-                if (jwtClaim.Type.Equals(ActClaimType))
-                {
-                    identity.Actor = CreateActorClaimsIdentity(jwtToken, validationParameters);
-                }
 
                 if (wasMapped)
                 {
@@ -273,21 +271,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return actualIssuer;
         }
 
-        private static ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        private ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+
+            // Actor resolution is order-independent: "act" (RFC 8693 object) wins whenever present,
+            // otherwise the legacy "actort" (nested-JWT string) is expanded. The raw "act"/"actort"
+            // claims are still added as ordinary claims by the loop below.
+            identity.Actor = ResolveActorClaimsIdentity(jwtToken, validationParameters, issuer);
+
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
-                // Only the RFC 8693 "act" (JSON object) claim is expanded into ClaimsIdentity.Actor.
-                // The legacy "actort" (JWT string) is left as an ordinary claim and is not structurally
-                // deserialized here (this handler never writes "actort").
-                if (claimType == ActClaimType)
-                {
-                    identity.Actor = CreateActorClaimsIdentity(jwtToken, validationParameters);
-                }
 
                 if (jwtClaim.Properties.Count == 0)
                 {
@@ -635,46 +632,72 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             };
         }
 
+        // Resolves ClaimsIdentity.Actor for a token. The RFC 8693 "act" (JSON object) claim takes precedence
+        // whenever present; otherwise the legacy "actort" (an unsigned nested-JWT string) is expanded so the
+        // read path stays back-compatible with tokens produced by JwtSecurityTokenHandler. This handler only
+        // reads "actort" - it never writes it. Having both "act" and "actort" is not an error: "act" simply
+        // wins and no exception is thrown.
+        private ClaimsIdentity ResolveActorClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            // Single payload lookup: capture the "act" element and hand it to the helper (no second lookup).
+            if (jwtToken.TryGetPayloadValue<JsonElement>(ActClaimType, out JsonElement actClaim))
+                return CreateActorClaimsIdentity(actClaim, validationParameters, issuer);
+
+            // Legacy fallback: "actort" is an unsigned nested JWT (not validated here, matching the classic
+            // behavior). Its chain depth is not bounded by MaxActorChainLength (that bounds "act" only).
+            if (jwtToken.TryGetPayloadValue<string>(JwtRegisteredClaimNames.Actort, out string actorToken)
+                && CanReadToken(actorToken)
+                && ReadToken(actorToken) is JsonWebToken actor)
+            {
+                return CreateClaimsIdentity(actor, validationParameters, GetActualIssuer(actor));
+            }
+
+            return null;
+        }
+
         /// <summary>
-        /// Creates a <see cref="ClaimsIdentity"/> for the RFC 8693 "act" (actor) claim on a token.
+        /// Creates a <see cref="ClaimsIdentity"/> from the RFC 8693 "act" (actor) claim element.
         /// </summary>
-        /// <param name="jwtToken">The token whose "act" claim is expanded.</param>
+        /// <param name="actClaim">The "act" claim element already retrieved from the token payload.</param>
         /// <param name="tokenValidationParameters">The token validation parameters.</param>
+        /// <param name="issuer">The outer token's validated issuer, stamped on the actor claims.</param>
         /// <returns>
-        /// A <see cref="ClaimsIdentity"/> representing the actor, or <see langword="null"/> when the token
-        /// has no "act" claim or the claim cannot be expanded into an actor identity.
+        /// A <see cref="ClaimsIdentity"/> representing the actor, or <see langword="null"/> when the "act"
+        /// claim cannot be expanded into an actor identity.
         /// </returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="tokenValidationParameters"/> is null.</exception>
         private static ClaimsIdentity CreateActorClaimsIdentity(
-            JsonWebToken jwtToken,
-            TokenValidationParameters tokenValidationParameters)
+            JsonElement actClaim,
+            TokenValidationParameters tokenValidationParameters,
+            string issuer)
         {
-            if (tokenValidationParameters == null)
+            if (tokenValidationParameters is null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
-
-            if (!jwtToken.TryGetPayloadValue<JsonElement>(ActClaimType, out JsonElement actClaim))
-                return null;
 
             // When a custom retriever is supplied it fully owns actor construction; it is invoked
             // unconditionally (never gated by MaxActorChainLength) and its result is used as-is.
-            if (tokenValidationParameters.ActClaimRetriever != null)
+            if (tokenValidationParameters.ActClaimRetriever is not null)
             {
                 try
                 {
                     return tokenValidationParameters.ActClaimRetriever(actClaim, tokenValidationParameters);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(
-                        LogMessages.IDX14314,
-                        LogHelper.MarkAsNonPII(ex.ToString()))));
+                    // A failing retriever must not fail token validation. Warn (PII-scrubbed by default;
+                    // full detail only when PII logging is enabled) and leave Actor unset; the raw "act"
+                    // claim is still retained on the identity.
+                    LogHelper.LogWarning(LogMessages.IDX14314, ex);
+                    return null;
                 }
+#pragma warning restore CA1031 // Do not catch general exception types
             }
 
             // Default expansion: materialize the top actor object; nested "act" objects are expanded only
             // while within the configured MaxActorChainLength (one level unless raised), otherwise retained
             // as a claim by CreateActorClaimsIdentityFromJsonElement.
-            return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters);
+            return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters, issuer);
         }
 
         /// <summary>
@@ -691,12 +714,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string issuer = null,
             int currentDepth = 0)
         {
-            if (tokenValidationParameters == null)
+            if (tokenValidationParameters is null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            // A non-object "act" cannot be expanded into an Actor chain (e.g. a JSON-text string
-            // produced when serialization exceeded the chain length). Warn and let the caller retain
-            // the raw value as a claim instead of failing.
+            // Defensive guard. On the read path, TryGetPayloadValue<JsonElement>("act") succeeds only for
+            // JSON objects and arrays (primitives such as strings/numbers return false and never reach here),
+            // so a non-compliant "act":[...] arrives as an Array; direct callers may also pass any kind. A
+            // non-object has no members to expand, and jsonElement.EnumerateObject() below throws
+            // InvalidOperationException on anything that is not an object. So we warn (IDX14316) and return
+            // null - the caller keeps the raw "act" as an ordinary claim rather than failing validation.
             if (jsonElement.ValueKind != JsonValueKind.Object)
             {
                 LogHelper.LogWarning(LogMessages.IDX14316);
@@ -734,7 +760,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // Beyond the limit (silent) or a within-limit non-object (warned above): retain the
                     // "act" value verbatim as a claim.
                     var actClaim = JsonClaimSet.CreateClaimFromJsonElement(claimType, issuer, value);
-                    if (actClaim != null)
+                    if (actClaim is not null)
                         identity.AddClaim(actClaim);
 
                     continue;
@@ -746,14 +772,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     foreach (JsonElement element in value.EnumerateArray())
                     {
                         var claim = JsonClaimSet.CreateClaimFromJsonElement(claimType, issuer, element);
-                        if (claim != null)
+                        if (claim is not null)
                             identity.AddClaim(claim);
                     }
                 }
                 else
                 {
                     var claim = JsonClaimSet.CreateClaimFromJsonElement(claimType, issuer, value);
-                    if (claim != null)
+                    if (claim is not null)
                         identity.AddClaim(claim);
                 }
             }
