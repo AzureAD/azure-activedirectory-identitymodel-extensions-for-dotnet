@@ -99,6 +99,20 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
+        /// Restores the previous behavior that ignored query parameter forms that cannot be covered by the Signed HTTP Request 'q' claim.
+        /// </summary>
+        internal const string UseLegacyUnsignedQueryParameterValidationSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyUnsignedQueryParameterValidation";
+        private static bool? _useLegacyUnsignedQueryParameterValidation;
+        internal static bool UseLegacyUnsignedQueryParameterValidation => _useLegacyUnsignedQueryParameterValidation ??= (AppContext.TryGetSwitch(UseLegacyUnsignedQueryParameterValidationSwitch, out bool useLegacyUnsignedQueryParameterValidation) && useLegacyUnsignedQueryParameterValidation);
+
+        /// <summary>
+        /// Restores the previous behavior that ignored header forms that cannot be covered by the Signed HTTP Request 'h' claim.
+        /// </summary>
+        internal const string UseLegacyUnsignedHeaderValidationSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyUnsignedHeaderValidation";
+        private static bool? _useLegacyUnsignedHeaderValidation;
+        internal static bool UseLegacyUnsignedHeaderValidation => _useLegacyUnsignedHeaderValidation ??= (AppContext.TryGetSwitch(UseLegacyUnsignedHeaderValidationSwitch, out bool useLegacyUnsignedHeaderValidation) && useLegacyUnsignedHeaderValidation);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -124,6 +138,11 @@ namespace Microsoft.IdentityModel.Tokens
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
 
+            _useLegacyUnsignedQueryParameterValidation = null;
+            AppContext.SetSwitch(UseLegacyUnsignedQueryParameterValidationSwitch, false);
+
+            _useLegacyUnsignedHeaderValidation = null;
+            AppContext.SetSwitch(UseLegacyUnsignedHeaderValidationSwitch, false);
         }
     }
 }

@@ -48,5 +48,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23036 = "IDX23036: Signed http request nonce validation failed. Exceptions caught: '{0}'.";
         public const string IDX23037 = "IDX23037: Resolving a PoP key from the 'jku' claim is not allowed. To allow it, set AllowResolvingPopKeyFromJku property on SignedHttpRequestValidationParameters to true and provide a list of trusted domains via AllowedDomainsForJkuRetrieval.";
         public const string IDX23038 = "IDX23038: Resolving a PoP key from the 'jku' claim is not allowed as '{0}' is not present in the list of allowed domains for 'jku' retrieval: '{1}'. If '{0}' belongs to a trusted domain, add it to AllowedDomainsForJkuRetrieval property on SignedHttpRequestValidationParameters.";
+        public const string IDX23039 = "IDX23039: Query parameters that cannot be covered by the 'q' claim were ignored because legacy unsigned query parameter validation is enabled. Query parameters: '{0}'.";
+        public const string IDX23040 = "IDX23040: Headers that cannot be covered by the 'h' claim were ignored because legacy unsigned header validation is enabled. Headers: '{0}'.";
+        public const string IDX23041 = "IDX23041: The request contains query parameters that cannot be covered by the 'q' claim and SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters is set to 'false'. Query parameters: '{0}'. To restore the previous behavior during migration, enable 'Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyUnsignedQueryParameterValidation'.";
+        public const string IDX23042 = "IDX23042: The request contains headers that cannot be covered by the 'h' claim and SignedHttpRequestValidationParameters.AcceptUnsignedHeaders is set to 'false'. Headers: '{0}'. To restore the previous behavior during migration, enable 'Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyUnsignedHeaderValidation'.";
     }
 }

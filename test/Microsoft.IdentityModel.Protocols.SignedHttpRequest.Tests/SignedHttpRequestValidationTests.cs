@@ -662,6 +662,63 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        [ResetAppContextSwitches]
+        public void ValidateHClaim_LegacySwitchAllowsRepeatedHeaders()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UseLegacyUnsignedHeaderValidationSwitch, true);
+            var handler = new SignedHttpRequestHandler();
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "headerName1", new List<string> { "headerValue1", "headerValue2" } }
+                },
+                SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters
+                {
+                    ValidateH = true,
+                    AcceptUnsignedHeaders = false,
+                },
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(
+                    new JProperty(
+                        SignedHttpRequestClaimTypes.H,
+                        JArray.Parse($"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]"))),
+            };
+
+            var exception = Record.Exception(() =>
+                handler.ValidateHClaim(theoryData.SignedHttpRequestToken, theoryData.BuildSignedHttpRequestValidationContext()));
+
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void ValidateHClaim_LegacySwitchStillRejectsUnsignedHeaders()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UseLegacyUnsignedHeaderValidationSwitch, true);
+            var handler = new SignedHttpRequestHandler();
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "headerName1", new List<string> { "headerValue1" } },
+                    { "headerName2", new List<string> { "headerValue2" } }
+                },
+                SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters
+                {
+                    ValidateH = true,
+                    AcceptUnsignedHeaders = false,
+                },
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(
+                    new JProperty(
+                        SignedHttpRequestClaimTypes.H,
+                        JArray.Parse($"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
+            };
+
+            Assert.Throws<SignedHttpRequestInvalidHClaimException>(() =>
+                handler.ValidateHClaim(theoryData.SignedHttpRequestToken, theoryData.BuildSignedHttpRequestValidationContext()));
+        }
+
         public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidateHClaimTheoryData
         {
             get
@@ -850,6 +907,36 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
+                            { "headerName1" , new List<string> { "headerValue1", "headerValue2" } }
+                        },
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateH = true,
+                            AcceptUnsignedHeaders = false,
+                        },
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, JArray.Parse($"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23042"),
+                        TestId = "InvalidDontAcceptRepeatedHeaders",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { string.Empty } }
+                        },
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateH = true,
+                            AcceptUnsignedHeaders = false,
+                        },
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, JArray.Parse($"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23042"),
+                        TestId = "InvalidDontAcceptEmptyHeader",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
                             { "headerName1" , new List<string> { "headerValue2" } }
                         },
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
@@ -911,6 +998,56 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void ValidateQClaim_LegacySwitchAllowsUncoverableQueryParameter()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UseLegacyUnsignedQueryParameterValidationSwitch, true);
+            var handler = new SignedHttpRequestHandler();
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&admin=true=1"),
+                SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters
+                {
+                    ValidateQ = true,
+                    AcceptUnsignedQueryParameters = false,
+                },
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(
+                    new JProperty(
+                        SignedHttpRequestClaimTypes.Q,
+                        JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+            };
+
+            var exception = Record.Exception(() =>
+                handler.ValidateQClaim(theoryData.SignedHttpRequestToken, theoryData.BuildSignedHttpRequestValidationContext()));
+
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void ValidateQClaim_LegacySwitchStillRejectsUnsignedQueryParameter()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UseLegacyUnsignedQueryParameterValidationSwitch, true);
+            var handler = new SignedHttpRequestHandler();
+            var theoryData = new ValidateSignedHttpRequestTheoryData
+            {
+                HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam2=value2"),
+                SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters
+                {
+                    ValidateQ = true,
+                    AcceptUnsignedQueryParameters = false,
+                },
+                SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(
+                    new JProperty(
+                        SignedHttpRequestClaimTypes.Q,
+                        JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+            };
+
+            Assert.Throws<SignedHttpRequestInvalidQClaimException>(() =>
+                handler.ValidateQClaim(theoryData.SignedHttpRequestToken, theoryData.BuildSignedHttpRequestValidationContext()));
         }
 
         public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidateQClaimTheoryData
@@ -1015,6 +1152,42 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             AcceptUnsignedQueryParameters = false,
                         },
                         TestId = "InvalidDontAcceptUnsignedQueryParams",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&admin=true=1"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23041"),
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateQ = true,
+                            AcceptUnsignedQueryParameters = false,
+                        },
+                        TestId = "InvalidDontAcceptMultipleEqualsQueryParam",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&role=reader&role=writer"),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23041"),
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateQ = true,
+                            AcceptUnsignedQueryParameters = false,
+                        },
+                        TestId = "InvalidDontAcceptRepeatedQueryParams",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&admin="),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23041"),
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateQ = true,
+                            AcceptUnsignedQueryParameters = false,
+                        },
+                        TestId = "InvalidDontAcceptEmptyQueryParam",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {

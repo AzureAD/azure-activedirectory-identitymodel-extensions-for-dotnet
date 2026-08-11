@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
             Uri httpRequestUri = EnsureAbsoluteUri(signedHttpRequestDescriptor.HttpRequestData.Uri);
-            IDictionary<string, string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
+            IDictionary<string, string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri, out _);
 
             StringBuilder stringBuffer = new StringBuilder();
             try
@@ -361,7 +361,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>  
         internal void AddHClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            IDictionary<string, string> sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
+            IDictionary<string, string> sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers, out _);
             StringBuilder stringBuffer = new StringBuilder();
             try
             {
@@ -869,7 +869,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q))));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
-            var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
+            var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri, out var uncoveredQueryParameters);
             string qClaimBase64UrlEncodedHash = string.Empty;
             string calculatedBase64UrlEncodedHash = string.Empty;
             object[] qClaimQueryParamNames;
@@ -916,8 +916,24 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), e), e));
             }
 
-            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters && sanitizedQueryParams.Any())
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Select(x => x.Key))))));
+            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters)
+            {
+                if (uncoveredQueryParameters.Any())
+                {
+                    if (AppContextSwitches.UseLegacyUnsignedQueryParameterValidation)
+                    {
+                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23039, LogHelper.MarkAsNonPII(string.Join(", ", uncoveredQueryParameters))));
+                    }
+                    else
+                    {
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23041, LogHelper.MarkAsNonPII(string.Join(", ", uncoveredQueryParameters.Distinct(StringComparer.Ordinal))))));
+                    }
+                }
+
+                if (sanitizedQueryParams.Any())
+                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Keys)))));
+            }
 
             if (!string.Equals(calculatedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), calculatedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash)));
@@ -938,7 +954,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.H, out List<object> hClaim) || hClaim == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H))));
 
-            var sanitizedHeaders = SanitizeHeaders(signedHttpRequestValidationContext.HttpRequestData.Headers);
+            var sanitizedHeaders = SanitizeHeaders(signedHttpRequestValidationContext.HttpRequestData.Headers, out var uncoveredHeaders);
 
             string hClaimBase64UrlEncodedHash = string.Empty;
             string calculatedBase64UrlEncodedHash = string.Empty;
@@ -985,8 +1001,24 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), e), e));
             }
 
-            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedHeaders && sanitizedHeaders.Any())
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23026, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedHeaders.Select(x => x.Key))))));
+            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedHeaders)
+            {
+                if (uncoveredHeaders.Any())
+                {
+                    if (AppContextSwitches.UseLegacyUnsignedHeaderValidation)
+                    {
+                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23040, LogHelper.MarkAsNonPII(string.Join(", ", uncoveredHeaders))));
+                    }
+                    else
+                    {
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23042, LogHelper.MarkAsNonPII(string.Join(", ", uncoveredHeaders.Distinct(StringComparer.OrdinalIgnoreCase))))));
+                    }
+                }
+
+                if (sanitizedHeaders.Any())
+                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23026, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedHeaders.Keys)))));
+            }
 
             if (!string.Equals(calculatedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), calculatedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash)));
@@ -1388,13 +1420,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Sanitizes the query params to comply with the specification.
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5</remarks>
-        private static Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri)
+        private static Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri, out List<string> uncoveredQueryParameters)
         {
             // Remove repeated query params according to the spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7-5
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var sanitizedQueryParams = new Dictionary<string, string>(StringComparer.Ordinal);
             var repeatedQueryParams = new List<string>();
+            uncoveredQueryParameters = new List<string>();
 
             var queryString = httpRequestUri.Query.TrimStart('?');
             if (string.IsNullOrEmpty(queryString))
@@ -1403,6 +1436,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             var queryParamKeyValuePairs = queryString.Split('&');
             foreach (var queryParamValuePair in queryParamKeyValuePairs)
             {
+                if (string.IsNullOrEmpty(queryParamValuePair))
+                    continue;
+
                 var queryParamKeyValuePairArray = queryParamValuePair.Split('=');
                 if (queryParamKeyValuePairArray.Length == 2)
                 {
@@ -1413,11 +1449,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         // if sanitizedQueryParams already contains the query parameter name it means that the queryParamName is repeated.
                         // in that case queryParamName should not be added, and the existing entry in sanitizedQueryParams should be removed.
                         if (sanitizedQueryParams.ContainsKey(queryParamName))
+                        {
                             repeatedQueryParams.Add(queryParamName);
+                            uncoveredQueryParameters.Add(queryParamName);
+                        }
                         else if (!string.IsNullOrEmpty(queryParamValue))
                             sanitizedQueryParams.Add(queryParamName, queryParamValue);
+                        else
+                            uncoveredQueryParameters.Add(queryParamName);
                     }
+                    else
+                        uncoveredQueryParameters.Add("(empty)");
                 }
+                else
+                    uncoveredQueryParameters.Add(GetQueryParameterName(queryParamValuePair));
             }
 
             if (repeatedQueryParams.Any())
@@ -1435,6 +1480,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             return sanitizedQueryParams;
         }
 
+        private static string GetQueryParameterName(string queryParameter)
+        {
+            int separatorIndex = queryParameter.IndexOf('=');
+            string queryParameterName = separatorIndex < 0 ? queryParameter : queryParameter.Substring(0, separatorIndex);
+            return string.IsNullOrEmpty(queryParameterName) ? "(empty)" : queryParameterName;
+        }
+
         /// <summary>
         /// Sanitizes the headers to comply with the specification.
         /// </summary>
@@ -1442,19 +1494,23 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4.1
         /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5
         /// </remarks>
-        private static IDictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
+        private static IDictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers, out List<string> uncoveredHeaders)
         {
             // Remove repeated headers according to the spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var sanitizedHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var repeatedHeaders = new List<string>();
+            uncoveredHeaders = new List<string>();
             foreach (var header in headers)
             {
                 var headerName = header.Key;
 
                 if (string.IsNullOrEmpty(headerName))
+                {
+                    uncoveredHeaders.Add("(empty)");
                     continue;
+                }
 
                 // Don't include the authorization header https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4.1
                 if (string.Equals(headerName, SignedHttpRequestConstants.AuthorizationHeader, StringComparison.OrdinalIgnoreCase))
@@ -1465,14 +1521,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (sanitizedHeaders.ContainsKey(headerName))
                 {
                     repeatedHeaders.Add(headerName.ToLowerInvariant());
+                    uncoveredHeaders.Add(headerName.ToLowerInvariant());
                 }
                 // if header has more than one value don't add it to the sanitizedHeaders as it's repeated.
                 else if (header.Value.Count() > 1)
                 {
                     repeatedHeaders.Add(headerName.ToLowerInvariant());
+                    uncoveredHeaders.Add(headerName.ToLowerInvariant());
                 }
                 else if (header.Value.Count() == 1 && !string.IsNullOrEmpty(header.Value.First()))
                     sanitizedHeaders.Add(headerName, header.Value.First());
+                else
+                    uncoveredHeaders.Add(headerName.ToLowerInvariant());
             }
 
             if (repeatedHeaders.Any())

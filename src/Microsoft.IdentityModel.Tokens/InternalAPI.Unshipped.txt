@@ -1,3 +1,7 @@
 *REMOVED*const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonDefault = false -> bool
 *REMOVED*const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" -> string
 *REMOVED*static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparison.get -> bool
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseLegacyUnsignedHeaderValidationSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyUnsignedHeaderValidation" -> string
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseLegacyUnsignedQueryParameterValidationSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseLegacyUnsignedQueryParameterValidation" -> string
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseLegacyUnsignedHeaderValidation.get -> bool
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseLegacyUnsignedQueryParameterValidation.get -> bool
