@@ -41,7 +41,7 @@ public partial class Signature : DSigElement
         if (!cryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
             return new SignatureValidationError(
                 new MessageDetail(LogMessages.IDX30207, SignedInfo.SignatureMethod, cryptoProviderFactory.GetType()),
-                AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                ValidationFailureType.CryptoProviderAlgorithmNotSupported,
                 ValidationError.GetCurrentStackFrame());
 
         SignatureProvider signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);

@@ -260,6 +260,7 @@ static readonly Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidatio
 static readonly Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationFailure.ValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationFailure.ValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationFailure.ValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationFailure!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.CryptoProviderAlgorithmNotSupported -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.CryptoProviderReturnedNull -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.KeyWrapFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.NullArgument -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!

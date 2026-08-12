@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         TokenLogMessages.IDX10652,
                         LogHelper.MarkAsNonPII(jsonWebToken.Alg),
                         key),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    ValidationFailureType.CryptoProviderAlgorithmNotSupported,
                     ValidationError.GetCurrentStackFrame());
             }
 

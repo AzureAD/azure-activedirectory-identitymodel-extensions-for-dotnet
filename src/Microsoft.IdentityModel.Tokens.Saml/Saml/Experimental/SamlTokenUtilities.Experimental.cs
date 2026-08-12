@@ -214,7 +214,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 #pragma warning restore CA1801 // Review unused parameters
             Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
-            // TODO - this is not an AlgorithmValidationFailure, but a CryptoProviderFactory failure.
             // TODO we need tests across token handlers
             CryptoProviderFactory cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(signature.SignedInfo.SignatureMethod, key))
@@ -224,7 +223,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         Tokens.LogMessages.IDX10652,
                         LogHelper.MarkAsNonPII(signature.SignedInfo.SignatureMethod),
                         key),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    ValidationFailureType.CryptoProviderAlgorithmNotSupported,
                     ValidationError.GetCurrentStackFrame());
             }
 

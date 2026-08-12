@@ -87,7 +87,7 @@ public class SignatureExperimentalTests
                 {
                     TestId = "SignatureMethodNotSupported",
                     ExpectedException = new ExpectedException(typeof(SecurityTokenValidationException), "IDX30207:"),
-                    ExpectedFailureType = AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    ExpectedFailureType = ValidationFailureType.CryptoProviderAlgorithmNotSupported,
                     CryptoProviderFactory = CryptoProviderFactory.Default,
                     Signature = new Signature(new SignedInfo { SignatureMethod = SecurityAlgorithms.Aes128CbcHmacSha256 }),
                     SecurityKey = Default.AsymmetricSigningKey,
