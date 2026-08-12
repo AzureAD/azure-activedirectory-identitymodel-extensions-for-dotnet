@@ -4,45 +4,46 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Xml;
+
+/// <summary>
+/// Represents a XmlDsig SignedInfo element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-SignedInfo
+/// </summary>
+public partial class SignedInfo : DSigElement
 {
     /// <summary>
-    /// Represents a XmlDsig SignedInfo element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-SignedInfo
+    /// Verifies the digest of all <see cref="References"/>
     /// </summary>
-    public partial class SignedInfo : DSigElement
+    /// <param name="key"> the <see cref="SecurityKey"/> associated with the signature being verified.</param>
+    /// <param name="cryptoProviderFactory"> supplies any required cryptographic operators.</param>
+    /// <param name="callContext"> contextual information for diagnostics.</param>
+    internal ValidationResult<SecurityKey, ValidationError> Verify(
+        SecurityKey key,
+        CryptoProviderFactory cryptoProviderFactory,
+        CallContext callContext)
     {
-#nullable enable
-        /// <summary>
-        /// Verifies the digest of all <see cref="References"/>
-        /// </summary>
-        /// <param name="cryptoProviderFactory">supplies any required cryptographic operators.</param>
-        /// <param name="callContext"> contextual information for diagnostics.</param>
-        internal ValidationError? Verify(
-            CryptoProviderFactory cryptoProviderFactory,
-            CallContext callContext)
+        if (key == null)
+            return ValidationError.NullParameter(
+                nameof(key),
+                ValidationError.GetCurrentStackFrame());
+
+        if (cryptoProviderFactory == null)
+            return ValidationError.NullParameter(
+                nameof(cryptoProviderFactory),
+                ValidationError.GetCurrentStackFrame());
+
+        for (int i = 0; i < References.Count; i++)
         {
-            // TODO needs to return ValidationResult<SecurityKey, ValidationError>
-            if (cryptoProviderFactory == null)
-                return ValidationError.NullParameter(
-                    nameof(cryptoProviderFactory),
-                    ValidationError.GetCurrentStackFrame());
+            Reference reference = References[i];
+            ValidationError? validationError = reference.Verify(key, cryptoProviderFactory, callContext).Error;
 
-            ValidationError? validationError = null;
-
-            for (int i = 0; i < References.Count; i++)
+            if (validationError is not null)
             {
-                var reference = References[i];
-                validationError = reference.Verify(cryptoProviderFactory, callContext);
-
-                if (validationError is not null)
-                {
-                    validationError.AddCurrentStackFrame();
-                    break;
-                }
+                validationError.AddCurrentStackFrame();
+                return validationError;
             }
-
-            return validationError;
         }
-#nullable restore
+
+        return key;
     }
 }
