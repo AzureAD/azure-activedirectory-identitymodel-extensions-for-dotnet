@@ -14,6 +14,7 @@ namespace Microsoft.IdentityModel.Xml;
 /// </summary>
 public partial class Signature : DSigElement
 {
+#nullable enable
     internal ValidationResult<SecurityKey, ValidationError> Verify(
         SecurityKey key,
         CryptoProviderFactory cryptoProviderFactory,
@@ -81,6 +82,7 @@ public partial class Signature : DSigElement
 
         if (validationError is not null)
             return validationError;
+#nullable restore
 
         return key;
     }
