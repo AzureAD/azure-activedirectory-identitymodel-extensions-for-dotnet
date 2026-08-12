@@ -11,6 +11,7 @@ namespace Microsoft.IdentityModel.Xml;
 /// </summary>
 public partial class SignedInfo : DSigElement
 {
+#nullable enable
     /// <summary>
     /// Verifies the digest of all <see cref="References"/>
     /// </summary>
@@ -43,7 +44,7 @@ public partial class SignedInfo : DSigElement
                 return validationError;
             }
         }
-
+#nullable restore
         return key;
     }
 }
