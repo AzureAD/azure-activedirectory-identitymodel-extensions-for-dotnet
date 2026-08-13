@@ -235,7 +235,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>An EXACT match is required.</remarks>
         public static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            return ValidateIssuerSync(issuer, securityToken, validationParameters, null);
+            return ValidateIssuer(issuer, securityToken, validationParameters, null);
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidIssuerException">If <see cref="TokenValidationParameters.ValidIssuer"/> is null or whitespace and <see cref="TokenValidationParameters.ValidIssuers"/> is null and <see cref="BaseConfiguration.Issuer"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/> or <see cref="BaseConfiguration.Issuer"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static async ValueTask<string> ValidateIssuerAsync(
+        public static async ValueTask<string> ValidateIssuerAsync(
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,
@@ -285,7 +285,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidIssuerException">If <see cref="TokenValidationParameters.ValidIssuer"/> is null or whitespace and <see cref="TokenValidationParameters.ValidIssuers"/> is null and <see cref="BaseConfiguration.Issuer"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/> or <see cref="BaseConfiguration.Issuer"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static string ValidateIssuerSync(
+        internal static string ValidateIssuer(
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,

@@ -345,7 +345,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-                Validators.ValidateIssuerSync(issuer, securityToken, validationParameters, configuration);
+                Validators.ValidateIssuer(issuer, securityToken, validationParameters, configuration);
                 ee.ProcessNoException();
             }
             catch (Exception ex)
@@ -394,16 +394,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
 
             // Act & Assert
-            Assert.Equal("sync", Validators.ValidateIssuerSync(Default.Issuer, null, validationParameters, null));
+            Assert.Equal("sync", Validators.ValidateIssuer(Default.Issuer, null, validationParameters, null));
 
             validationParameters.IssuerValidatorSync = null;
-            Assert.Equal("configuration", Validators.ValidateIssuerSync(Default.Issuer, null, validationParameters, null));
+            Assert.Equal("configuration", Validators.ValidateIssuer(Default.Issuer, null, validationParameters, null));
 
             validationParameters.IssuerValidatorUsingConfiguration = null;
-            Assert.Equal("issuer", Validators.ValidateIssuerSync(Default.Issuer, null, validationParameters, null));
+            Assert.Equal("issuer", Validators.ValidateIssuer(Default.Issuer, null, validationParameters, null));
 
             validationParameters.IssuerValidator = null;
-            Assert.Equal(Default.Issuer, Validators.ValidateIssuerSync(Default.Issuer, null, validationParameters, null));
+            Assert.Equal(Default.Issuer, Validators.ValidateIssuer(Default.Issuer, null, validationParameters, null));
         }
 
         public static TheoryData<string, SecurityToken, TokenValidationParameters, BaseConfiguration, ExpectedException> IssuerDataSet
