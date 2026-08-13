@@ -148,6 +148,8 @@ namespace Microsoft.IdentityModel.Tokens
             _asymmetricAdapterObjectPool = new DisposableObjectPool<AsymmetricAdapter>(
                 CreateAsymmetricAdapter,
                 _cryptoProviderFactory.SignatureProviderObjectPoolCacheSize);
+
+            ValidateAsymmetricSecurityKeySize(Key, Algorithm, WillCreateSignatures);
         }
 
         /// <summary>

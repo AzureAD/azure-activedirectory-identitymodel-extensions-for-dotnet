@@ -47,6 +47,61 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // Guards that the asymmetric key-size floor is enforced at construction time.
+        // The enforcement previously became unreachable when the net45-only code path was removed,
+        // leaving sub-floor keys silently accepted; it is restored in the constructor and must throw.
+        [Fact]
+        public void ConstructorEnforcesAsymmetricKeySizeFloor()
+        {
+            var context = new CompareContext("ConstructorEnforcesAsymmetricKeySizeFloor");
+            TestUtilities.WriteHeader($"{this}.ConstructorEnforcesAsymmetricKeySizeFloor");
+
+            // Signing floor for RS256 is 2048 bits: a 1024-bit key must be rejected (IDX10630).
+            RunCase(
+                context,
+                "SigningBelowFloor_1024",
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                () => new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256, true));
+
+            // Verifying floor for RS256 is 1024 bits: a key reporting 512 bits must be rejected (IDX10631).
+            RunCase(
+                context,
+                "VerifyingBelowFloor_512",
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"),
+                () => new AsymmetricSignatureProvider(
+                    new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024),
+                    SecurityAlgorithms.RsaSha256,
+                    false));
+
+            // A compliant 2048-bit key must be accepted for both signing and verifying.
+            RunCase(
+                context,
+                "SigningAtFloor_2048",
+                ExpectedException.NoExceptionExpected,
+                () => new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, true));
+
+            RunCase(
+                context,
+                "VerifyingAtFloor_2048",
+                ExpectedException.NoExceptionExpected,
+                () => new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, false));
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        private static void RunCase(CompareContext context, string caseId, ExpectedException expectedException, Action construct)
+        {
+            try
+            {
+                construct();
+                expectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex, context);
+            }
+        }
+
         [Theory, MemberData(nameof(SignVerifyTheoryData), DisableDiscoveryEnumeration = true)]
         public void SignVerify(SignatureProviderTheoryData theoryData)
         {
