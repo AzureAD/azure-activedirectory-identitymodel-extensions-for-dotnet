@@ -194,7 +194,74 @@ namespace Microsoft.IdentityModel.Validators
         {
 #if NET5_0_OR_GREATER
             if (!AppContextSwitches.PreserveLegacySyncBehavior)
-                return ValidateSync(issuer, securityToken, validationParameters);
+            {
+                _ = issuer ?? throw LogHelper.LogArgumentNullException(nameof(issuer));
+                _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
+                _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+                string tenantId = GetTenantIdFromToken(securityToken);
+
+                if (string.IsNullOrWhiteSpace(tenantId))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40003));
+
+                if (validationParameters.ValidIssuers != null)
+                {
+                    foreach (string validIssuerTemplate in validationParameters.ValidIssuers)
+                    {
+                        if (IsValidIssuer(validIssuerTemplate, tenantId, issuer))
+                            return issuer;
+                    }
+                }
+
+                if (validationParameters.ValidIssuer != null &&
+                    IsValidIssuer(validationParameters.ValidIssuer, tenantId, issuer))
+                {
+                    return issuer;
+                }
+
+                try
+                {
+                    ProtocolVersion issuerVersion = GetTokenIssuerVersion(securityToken);
+                    BaseConfigurationManagerSync configurationManager = GetConfigurationManagerSync(issuerVersion);
+
+                    string aadIssuer;
+                    if (validationParameters.ValidateWithLKG)
+                    {
+                        aadIssuer = GetEffectiveLKGIssuer(issuerVersion);
+                    }
+                    else
+                    {
+                        BaseConfiguration configuration = GetBaseConfigurationSync(configurationManager, validationParameters);
+                        aadIssuer = configuration.Issuer;
+                    }
+
+                    if (aadIssuer != null)
+                    {
+                        bool isIssuerValid = IsValidIssuer(aadIssuer, tenantId, issuer);
+
+                        if (isIssuerValid && !validationParameters.ValidateWithLKG)
+                            SetEffectiveLKGIssuer(aadIssuer, issuerVersion, configurationManager.LastKnownGoodLifetime);
+
+                        if (isIssuerValid)
+                            return issuer;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(
+                        new SecurityTokenInvalidIssuerException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX40001,
+                                LogHelper.MarkAsNonPII(issuer)),
+                            ex));
+                }
+
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenInvalidIssuerException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX40001,
+                            LogHelper.MarkAsNonPII(issuer))));
+            }
 #endif
 
             ValueTask<string> vt = ValidateAsync(issuer, securityToken, validationParameters);
@@ -202,81 +269,6 @@ namespace Microsoft.IdentityModel.Validators
                 vt.Result :
                 vt.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
         }
-
-#if NET5_0_OR_GREATER
-        private string ValidateSync(
-            string issuer,
-            SecurityToken securityToken,
-            TokenValidationParameters validationParameters)
-        {
-            _ = issuer ?? throw LogHelper.LogArgumentNullException(nameof(issuer));
-            _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
-            _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
-            string tenantId = GetTenantIdFromToken(securityToken);
-
-            if (string.IsNullOrWhiteSpace(tenantId))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40003));
-
-            if (validationParameters.ValidIssuers != null)
-            {
-                foreach (string validIssuerTemplate in validationParameters.ValidIssuers)
-                {
-                    if (IsValidIssuer(validIssuerTemplate, tenantId, issuer))
-                        return issuer;
-                }
-            }
-
-            if (validationParameters.ValidIssuer != null &&
-                IsValidIssuer(validationParameters.ValidIssuer, tenantId, issuer))
-            {
-                return issuer;
-            }
-
-            try
-            {
-                ProtocolVersion issuerVersion = GetTokenIssuerVersion(securityToken);
-                BaseConfigurationManagerSync configurationManager = GetConfigurationManagerSync(issuerVersion);
-
-                string aadIssuer;
-                if (validationParameters.ValidateWithLKG)
-                {
-                    aadIssuer = GetEffectiveLKGIssuer(issuerVersion);
-                }
-                else
-                {
-                    BaseConfiguration configuration = GetBaseConfigurationSync(configurationManager, validationParameters);
-                    aadIssuer = configuration.Issuer;
-                }
-
-                if (aadIssuer != null)
-                {
-                    bool isIssuerValid = IsValidIssuer(aadIssuer, tenantId, issuer);
-
-                    if (isIssuerValid && !validationParameters.ValidateWithLKG)
-                        SetEffectiveLKGIssuer(aadIssuer, issuerVersion, configurationManager.LastKnownGoodLifetime);
-
-                    if (isIssuerValid)
-                        return issuer;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(
-                    new SecurityTokenInvalidIssuerException(
-                        LogHelper.FormatInvariant(
-                            LogMessages.IDX40001,
-                            LogHelper.MarkAsNonPII(issuer)),
-                        ex));
-            }
-
-            throw LogHelper.LogExceptionMessage(
-                new SecurityTokenInvalidIssuerException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX40001,
-                        LogHelper.MarkAsNonPII(issuer))));
-        }
-#endif
 
         /// <summary>
         /// Validate the issuer for single and multi-tenant applications of various audiences (Work and School accounts, or Work and School accounts +
@@ -287,7 +279,7 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <example><code>
         /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient);
-        /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;
+        /// TokenValidationParameters.IssuerValidatorAsync = aadIssuerValidator.ValidateAsync;
         /// </code></example>
         /// <remarks>The issuer is considered as valid if it has the same HTTP scheme and authority as the
         /// authority from the configuration file, has a tenant ID, and optionally v2.0 (if this web API
@@ -296,7 +288,7 @@ namespace Microsoft.IdentityModel.Validators
         /// <exception cref="ArgumentNullException"> if <paramref name="securityToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException"> if <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">if the issuer is invalid or if there is a network issue. </exception>
-        internal async ValueTask<string> ValidateAsync(
+        public async ValueTask<string> ValidateAsync(
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
