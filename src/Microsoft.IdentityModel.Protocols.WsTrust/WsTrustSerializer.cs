@@ -126,6 +126,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 string dialect = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Dialect, serializationContext.TrustConstants.Namespace);
                 reader.ReadStartElement();
                 var claimTypes = new List<ClaimType>();
+                if (isEmptyElement)
+                    return new Claims(dialect, claimTypes);
+
                 while (reader.IsStartElement())
                 {
                     if (reader.IsLocalName(WsFedElements.ClaimType))
@@ -178,6 +181,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 reader.ReadStartElement();
                 var entropy = new Entropy();
+                if (isEmptyElement)
+                    return entropy;
+
                 if (reader.IsStartElement(WsTrustElements.BinarySecret, serializationContext.TrustConstants.Namespace))
                     entropy.BinarySecret = ReadBinarySecrect(reader, serializationContext);
 
@@ -219,6 +225,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 bool isEmptyElement = reader.IsEmptyElement;
                 reader.ReadStartElement();
                 var lifetime = new Lifetime(null, null);
+                if (isEmptyElement)
+                    return lifetime;
 
                 if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Created))
                     lifetime.Created = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
@@ -358,7 +366,20 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 var doc = new XmlDocument { XmlResolver = null };
                 foreach (XmlAttributeHolder attribute in xmlAttributes)
-                    trustRequest.AdditionalXmlAttributes.Add(doc.CreateAttribute(attribute.Prefix, attribute.LocalName, attribute.NamespaceUri));
+                {
+                    bool isNamespaceDeclaration = attribute.Prefix == "xmlns" ||
+                        (string.IsNullOrEmpty(attribute.Prefix) && attribute.LocalName == "xmlns");
+                    bool isContext = attribute.LocalName == WsTrustAttributes.Context &&
+                        ((string.IsNullOrEmpty(attribute.Prefix) && string.IsNullOrEmpty(attribute.NamespaceUri)) ||
+                        attribute.NamespaceUri == serializationContext.TrustConstants.Namespace);
+
+                    if (isNamespaceDeclaration || isContext)
+                        continue;
+
+                    XmlAttribute xmlAttribute = doc.CreateAttribute(attribute.Prefix, attribute.LocalName, attribute.NamespaceUri);
+                    xmlAttribute.Value = attribute.Value;
+                    trustRequest.AdditionalXmlAttributes.Add(xmlAttribute);
+                }
 
                 reader.MoveToContent();
                 reader.ReadStartElement();
@@ -499,8 +520,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             {
                 bool isEmptyElement = reader.IsEmptyElement;
                 var tokenResponse = new RequestSecurityTokenResponse();
-                bool processed = false;
                 reader.ReadStartElement();
+                if (isEmptyElement)
+                    return tokenResponse;
+
                 while (reader.IsStartElement())
                 {
                     if (reader.IsStartElement(WsTrustElements.TokenType, serializationContext.TrustConstants.Namespace))
@@ -541,6 +564,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     }
                     else if (reader.IsLocalName(WsPolicyElements.AppliesTo))
                     {
+                        bool processed = false;
                         foreach (string @namespace in WsPolicyConstants.KnownNamespaces)
                         {
                             if (reader.IsNamespaceUri(@namespace))
@@ -634,6 +658,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 // TODO, add additional scenarios for Requested proof token;
                 var proofToken = new RequestedProofToken();
+                if (isEmptyElement)
+                    return proofToken;
 
                 while (reader.IsStartElement())
                 {
@@ -641,10 +667,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     {
                         proofToken.BinarySecret = ReadBinarySecrect(reader, serializationContext);
                     }
-
-                    if (reader.IsStartElement(WsTrustElements.ComputedKey, serializationContext.TrustConstants.Namespace))
+                    else if (reader.IsStartElement(WsTrustElements.ComputedKey, serializationContext.TrustConstants.Namespace))
                     {
                         proofToken.ComputedKeyAlgorithm = WsUtils.ReadStringElement(reader);
+                    }
+                    else
+                    {
+                        reader.Skip();
                     }
                 }
 
@@ -836,6 +865,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             {
                 reader.ReadStartElement();
                 hasRstrCollection = true;
+                if (isEmptyElement)
+                    return response;
             }
 
             while (reader.IsStartElement())
@@ -874,6 +905,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 // ReadSubtree will advance the reader to the current element's end element. If the reader is at
                 // an empty element, it won't advance and the deserializer will be stuck on the empty unknown element.
                 reader.Read();
+            }
+            else
+            {
+                reader.ReadEndElement();
             }
         }
 

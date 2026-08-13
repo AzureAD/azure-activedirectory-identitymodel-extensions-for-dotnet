@@ -40,6 +40,9 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                 {
                     bool isEmptyElement = reader.IsEmptyElement;
                     reader.ReadStartElement();
+                    if (isEmptyElement)
+                        throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15016, WsAddressingElements.Address)));
+
                     var endpointReference = new EndpointReference(reader.ReadElementContentAsString());
                     while (reader.IsStartElement())
                     {
@@ -53,7 +56,9 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                         using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth))
                             doc.Load(depthLimitingReader);
                         endpointReference.AdditionalXmlElements.Add(doc.DocumentElement);
-                        if (!isInnerEmptyElement)
+                        if (isInnerEmptyElement)
+                            reader.Read();
+                        else
                             reader.ReadEndElement();
                     }
 

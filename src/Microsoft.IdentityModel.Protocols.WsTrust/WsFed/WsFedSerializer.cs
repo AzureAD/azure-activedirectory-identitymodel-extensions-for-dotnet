@@ -37,6 +37,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
 
             // brentsch - TODO, this is an open spec, we are skipping all unknown attributes.
             reader.ReadStartElement();
+            if (isEmptyElement)
+                return additionalContext;
+
             try
             {
                 while (reader.IsStartElement())
@@ -85,6 +88,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
             };
 
             reader.ReadStartElement();
+            if (isEmptyElement)
+                return contextItem;
+
             if (reader.IsStartElement(WsFedElements.Value, @namespace))
             {
                 string value = WsUtils.ReadStringElement(reader);
@@ -93,10 +99,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
             }
             else
                 reader.Skip();
-
             // </ContextItem>
-            if (!isEmptyElement)
-                reader.ReadEndElement();
+            // </ContextItem>
+            reader.ReadEndElement();
 
             return contextItem;
         }
