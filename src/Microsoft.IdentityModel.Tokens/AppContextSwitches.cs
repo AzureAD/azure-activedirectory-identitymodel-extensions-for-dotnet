@@ -99,6 +99,13 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
+        /// When enabled, synchronous issuer validation preserves the legacy sync-over-async behavior.
+        /// </summary>
+        internal const string PreserveLegacySyncBehaviorSwitch = "Switch.Microsoft.IdentityModel.Tokens.PreserveLegacySyncBehavior";
+        private static bool? _preserveLegacySyncBehavior;
+        internal static bool PreserveLegacySyncBehavior => _preserveLegacySyncBehavior ??= (AppContext.TryGetSwitch(PreserveLegacySyncBehaviorSwitch, out bool preserveLegacySyncBehavior) && preserveLegacySyncBehavior);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -123,6 +130,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
+
+            _preserveLegacySyncBehavior = null;
+            AppContext.SetSwitch(PreserveLegacySyncBehaviorSwitch, false);
 
         }
     }

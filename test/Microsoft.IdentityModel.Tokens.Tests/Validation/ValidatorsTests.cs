@@ -406,6 +406,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(Default.Issuer, Validators.ValidateIssuer(Default.Issuer, null, validationParameters, null));
         }
 
+        [Theory]
+        [InlineData(false, "sync")]
+        [InlineData(true, "async")]
+        public void Issuer_PreserveLegacySyncBehavior_SelectsValidator(bool preserveLegacySyncBehavior, string expected)
+        {
+            AppContextSwitches.ResetAllSwitches();
+            AppContext.SetSwitch(AppContextSwitches.PreserveLegacySyncBehaviorSwitch, preserveLegacySyncBehavior);
+
+            try
+            {
+                TokenValidationParameters validationParameters = new()
+                {
+                    IssuerValidatorAsync = (issuer, token, parameters) => new ValueTask<string>("async"),
+                    IssuerValidatorSync = (issuer, token, parameters) => "sync"
+                };
+
+                Assert.Equal(expected, Validators.ValidateIssuer(Default.Issuer, null, validationParameters));
+            }
+            finally
+            {
+                AppContextSwitches.ResetAllSwitches();
+            }
+        }
+
         public static TheoryData<string, SecurityToken, TokenValidationParameters, BaseConfiguration, ExpectedException> IssuerDataSet
         {
             get
