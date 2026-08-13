@@ -9,6 +9,7 @@ const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15024 = "IDX15024
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15025 = "IDX15025: Unable to read XML. The element nesting depth exceeds the maximum supported depth of '{0}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15101 = "IDX15101: Unable to read OnBehalfOf Element. Unable to read token: '{0}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15407 = "IDX15407: Exception caught while writing: '{0}'. Caught exception: '{1}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15408 = "IDX15408: Unable to write '{0}'. The configured '{1}' does not contain serializable content." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15500 = "IDX15500: Lifetime constructed with expires <= created." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15850 = "IDX15850: '{0}' cannot be less than zero. Was: '{1}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15851 = "IDX15851: '{0}' must be a multiple of 8. Was: '{1}'." -> string
@@ -83,6 +84,8 @@ Microsoft.IdentityModel.Protocols.WsTrust.Entropy.Entropy() -> void
 Microsoft.IdentityModel.Protocols.WsTrust.ExceptionLogger
 Microsoft.IdentityModel.Protocols.WsTrust.ExceptionLogger.ExceptionLogger() -> void
 Microsoft.IdentityModel.Protocols.WsTrust.LogMessages
+Microsoft.IdentityModel.Protocols.XmlEnc.EncryptedKey.EncryptedKey(System.Xml.XmlElement sourceElement) -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.EncryptedKey.SourceElement.get -> System.Xml.XmlElement
 Microsoft.IdentityModel.Protocols.WsTrust.PshaDerivedKeyGenerator
 Microsoft.IdentityModel.Protocols.WsTrust.PshaDerivedKeyGenerator.ComputeCombinedKey(string algorithm, byte[] label, byte[] nonce, int keySizeInBits, int position) -> byte[]
 Microsoft.IdentityModel.Protocols.WsTrust.PshaDerivedKeyGenerator.PshaDerivedKeyGenerator(byte[] masterKey) -> void

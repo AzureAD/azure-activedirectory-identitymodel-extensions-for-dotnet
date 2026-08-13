@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Xml;
+
 namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
     /// <summary>
@@ -14,5 +16,12 @@ namespace Microsoft.IdentityModel.Protocols.XmlEnc
         public EncryptedKey()
         {
         }
+
+        internal EncryptedKey(XmlElement sourceElement)
+        {
+            SourceElement = sourceElement;
+        }
+
+        internal XmlElement SourceElement { get; }
     }
 }

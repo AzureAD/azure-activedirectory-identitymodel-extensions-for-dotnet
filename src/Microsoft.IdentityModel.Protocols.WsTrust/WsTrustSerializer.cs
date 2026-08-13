@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Protocols.WsFed;
 using Microsoft.IdentityModel.Protocols.WsPolicy;
 using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.Protocols.WsUtility;
+using Microsoft.IdentityModel.Protocols.XmlEnc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -671,6 +672,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     {
                         proofToken.ComputedKeyAlgorithm = WsUtils.ReadStringElement(reader);
                     }
+                    else if (reader.IsStartElement(XmlEncryptionElements.EncryptedKey, XmlEncryptionConstants.XmlEnc11.Namespace))
+                    {
+                        proofToken.EncryptedKey = new EncryptedKey(CreateXmlElement(reader));
+                    }
                     else
                     {
                         reader.Skip();
@@ -1062,6 +1067,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //  </t:Entropy>
 
             WsUtils.ValidateParamsForWritting(writer, serializationContext, entropy, nameof(entropy));
+            if (entropy.ProtectedKey != null)
+                throw XmlUtil.LogWriteException(LogMessages.IDX15408, WsTrustElements.Entropy, nameof(Entropy.ProtectedKey));
 
             try
             {
@@ -1480,6 +1487,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //  </t:RequestedProofToken>
 
             WsUtils.ValidateParamsForWritting(writer, serializationContext, requestedProofToken, nameof(requestedProofToken));
+            if (requestedProofToken.EncryptedKey != null && requestedProofToken.EncryptedKey.SourceElement == null)
+                throw XmlUtil.LogWriteException(LogMessages.IDX15408, WsTrustElements.RequestedProofToken, nameof(RequestedProofToken.EncryptedKey));
 
             try
             {
@@ -1492,6 +1501,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     writer.WriteString(requestedProofToken.ComputedKeyAlgorithm);
                     writer.WriteEndElement();
                 }
+                if (requestedProofToken.EncryptedKey?.SourceElement != null)
+                    requestedProofToken.EncryptedKey.SourceElement.WriteTo(writer);
 
                 writer.WriteEndElement();
             }
