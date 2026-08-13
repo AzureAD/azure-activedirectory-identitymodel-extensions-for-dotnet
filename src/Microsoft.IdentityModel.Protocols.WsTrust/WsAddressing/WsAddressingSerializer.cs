@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsTrust;
@@ -44,11 +45,18 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                     if (isEmptyElement)
                         throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15016, WsAddressingElements.Address)));
 
-                    var endpointReference = new EndpointReference(WsUtils.ReadStringElement(reader));
+                    string address = null;
+                    var additionalElements = new List<XmlElement>();
                     int childCount = 0;
                     while (reader.IsStartElement())
                     {
                         WsUtils.EnsureElementCount(++childCount);
+                        if (address == null && reader.IsStartElement(WsAddressingElements.Address, @namespace))
+                        {
+                            address = WsUtils.ReadStringElement(reader);
+                            continue;
+                        }
+
                         bool isInnerEmptyElement = reader.IsEmptyElement;
                         var doc = new XmlDocument
                         {
@@ -58,15 +66,20 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
 
                         using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth, false))
                             doc.Load(depthLimitingReader);
-                        endpointReference.AdditionalXmlElements.Add(doc.DocumentElement);
+                        additionalElements.Add(doc.DocumentElement);
                         if (isInnerEmptyElement)
                             reader.Read();
                         else
                             reader.ReadEndElement();
                     }
 
-                    if (!isEmptyElement)
-                        reader.ReadEndElement();
+                    reader.ReadEndElement();
+                    if (string.IsNullOrEmpty(address))
+                        throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15016, WsAddressingElements.Address)));
+
+                    var endpointReference = new EndpointReference(address);
+                    foreach (XmlElement element in additionalElements)
+                        endpointReference.AdditionalXmlElements.Add(element);
 
                     return endpointReference;
                 }

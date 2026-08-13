@@ -3,6 +3,7 @@
 
 using System.Xml;
 using Microsoft.IdentityModel.Protocols.WsAddressing;
+using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsPolicy
@@ -28,7 +29,7 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
         {
             if (reader.IsEmptyElement)
             {
-                reader.Skip();
+                WsUtils.SkipElement(reader);
                 return new AppliesTo();
             }
 

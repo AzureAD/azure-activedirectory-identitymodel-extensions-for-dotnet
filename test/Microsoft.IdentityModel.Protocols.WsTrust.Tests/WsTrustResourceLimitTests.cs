@@ -92,6 +92,37 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         }
 
         [Fact]
+        public void ReadResponse_SkippedUnknownSubtree_StillEnforcesCharacterLimit()
+        {
+            string xml =
+                $"<wst:RequestSecurityTokenResponse xmlns:wst=\"{TrustNamespace}\" xmlns:ext=\"urn:extension\">" +
+                $"<ext:AppliesTo><ext:Value>{new string('a', WsUtils.MaxXmlCharacters + 1)}</ext:Value>" +
+                "</ext:AppliesTo></wst:RequestSecurityTokenResponse>";
+            var serializer = new WsTrustSerializer();
+
+            AssertResourceLimit(
+                () => serializer.ReadRequestSeurityTokenResponse(
+                    CreateReader(xml),
+                    new WsSerializationContext(WsTrustVersion.Trust13)));
+        }
+
+        [Fact]
+        public void ReadRequestedAttachedReference_TooManyChildren_ExceedsElementLimit()
+        {
+            var xml = new StringBuilder(
+                $"<wst:RequestedAttachedReference xmlns:wst=\"{TrustNamespace}\" xmlns:ext=\"urn:extension\">");
+            for (int i = 0; i <= WsUtils.MaxElementCount; i++)
+                xml.Append("<ext:Extension/>");
+
+            xml.Append("</wst:RequestedAttachedReference>");
+
+            AssertResourceLimit(
+                () => WsTrustSerializer.ReadRequestedAttachedReference(
+                    CreateReader(xml.ToString()),
+                    new WsSerializationContext(WsTrustVersion.Trust13)));
+        }
+
+        [Fact]
         public void ReadRequest_KnownStringWithComment_PreservesText()
         {
             string xml =

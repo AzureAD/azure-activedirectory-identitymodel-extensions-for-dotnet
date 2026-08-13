@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
                 if (reader.IsStartElement(WsSecurityElements.KeyIdentifier, WsSecurityConstants.WsSecurity10.Namespace))
                     securityTokenReference.KeyIdentifier = ReadKeyIdentifier(reader);
                 else
-                    reader.Skip();
+                    WsUtils.SkipElement(reader);
             }
 
             if (!isEmptyElement)

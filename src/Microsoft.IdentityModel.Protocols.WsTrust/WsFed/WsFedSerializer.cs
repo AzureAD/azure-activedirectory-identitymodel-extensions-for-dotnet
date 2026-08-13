@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
                     }
                     else
                     {
-                        reader.Skip();
+                        WsUtils.SkipElement(reader);
                     }
                 }
             }
@@ -101,8 +101,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
                 if (!string.IsNullOrEmpty(value))
                     contextItem.Value = value;
             }
-            else
-                reader.Skip();
+            else if (reader.IsStartElement())
+                WsUtils.SkipElement(reader);
             // </ContextItem>
             // </ContextItem>
             reader.ReadEndElement();

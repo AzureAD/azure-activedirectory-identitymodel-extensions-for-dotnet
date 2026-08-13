@@ -159,7 +159,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     }
                     else
                     {
-                        reader.Skip();
+                        WsUtils.SkipElement(reader);
                     }
                 }
 
@@ -261,7 +261,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     else if (reader.IsStartElement(WsUtilityElements.Expires, WsUtilityConstants.WsUtility10.Namespace))
                         lifetime.Expires = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
                     else
-                        reader.Skip();
+                        WsUtils.SkipElement(reader);
                 }
 
                 if (!isEmptyElement)
@@ -368,12 +368,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     return null;
 
                 SecurityTokenReference tokenReference = null;
+                int childCount = 0;
                 while (reader.IsStartElement())
                 {
+                    WsUtils.EnsureElementCount(++childCount);
                     if (reader.IsStartElement(WsSecurityElements.SecurityTokenReference, WsSecurityConstants.WsSecurity10.Namespace))
                         tokenReference = WsSecuritySerializer.ReadSecurityTokenReference(reader);
                     else
-                        reader.Skip();
+                        WsUtils.SkipElement(reader);
                 }
 
                 reader.ReadEndElement();
@@ -644,7 +646,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                         }
 
                         if (!processed)
-                            reader.Skip();
+                            WsUtils.SkipElement(reader);
                     }
                     else
                     {
@@ -678,6 +680,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedAttachedReference&gt;.</exception>
         public static SecurityTokenReference ReadRequestedAttachedReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:RequestedAttachedReference>
             //      <wsse:SecurityTokenReference ...>
             //          ...
@@ -748,7 +751,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     }
                     else
                     {
-                        reader.Skip();
+                        WsUtils.SkipElement(reader);
                     }
                 }
 
@@ -853,6 +856,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedUnattachedReference&gt;.</exception>
         public static SecurityTokenReference ReadRequestedUnattachedReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:RequestedUnattachedReference>
             //      <wsse:SecurityTokenReference ...>
             //          ...
@@ -960,7 +964,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     response.RequestSecurityTokenResponseCollection.Add(ReadRequestSeurityTokenResponse(reader, serializationContext));
                 else
                     // brentsch - need to put these elements in array
-                    reader.Skip();
+                    WsUtils.SkipElement(reader);
             }
 
             if (!isEmptyElement && hasRstrCollection)
@@ -1044,6 +1048,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             using IDisposable readScope = WsUtils.EnterReadScope();
             WsUtils.CheckReaderOnEntry(reader, WsTrustElements.UseKey, serializationContext);
             return new WsTrustSerializer().ReadUseKeyCore(reader, serializationContext);
+        }
+
+        /// <summary>
+        /// Reads a &lt;UseKey&gt; element using the specified security token handlers.
+        /// </summary>
+        public static UseKey ReadUseKey(
+            XmlDictionaryReader reader,
+            WsSerializationContext serializationContext,
+            IEnumerable<SecurityTokenHandler> securityTokenHandlers)
+        {
+            using IDisposable readScope = WsUtils.EnterReadScope();
+            WsUtils.CheckReaderOnEntry(reader, WsTrustElements.UseKey, serializationContext);
+            return CreateSerializer(securityTokenHandlers).ReadUseKeyCore(reader, serializationContext);
         }
 
         private UseKey ReadUseKeyCore(XmlDictionaryReader reader, WsSerializationContext serializationContext)
@@ -1188,8 +1205,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //  </t:Entropy>
 
             WsUtils.ValidateParamsForWritting(writer, serializationContext, entropy, nameof(entropy));
-            if (entropy.ProtectedKey != null)
-                throw XmlUtil.LogWriteException(LogMessages.IDX15408, WsTrustElements.Entropy, nameof(Entropy.ProtectedKey));
+            ValidateEntropyForWriting(entropy);
 
             try
             {
@@ -1318,6 +1334,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             return null;
         }
 
+        private static WsTrustSerializer CreateSerializer(IEnumerable<SecurityTokenHandler> securityTokenHandlers)
+        {
+            if (securityTokenHandlers == null)
+                throw LogHelper.LogArgumentNullException(nameof(securityTokenHandlers));
+
+            var serializer = new WsTrustSerializer();
+            serializer.SecurityTokenHandlers.Clear();
+            foreach (SecurityTokenHandler tokenHandler in securityTokenHandlers)
+                serializer.SecurityTokenHandlers.Add(tokenHandler ?? throw LogHelper.LogArgumentNullException(nameof(securityTokenHandlers)));
+
+            return serializer;
+        }
+
         private SecurityTokenHandler ResolveTokenWriter(SecurityToken securityToken)
         {
             foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
@@ -1376,6 +1405,63 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             ResolveTokenWriter(tokenElement.SecurityToken).WriteToken(writer, tokenElement.SecurityToken);
         }
 
+        private static void ValidateEntropyForWriting(Entropy entropy)
+        {
+            if (entropy?.ProtectedKey != null)
+                throw XmlUtil.LogWriteException(LogMessages.IDX15408, WsTrustElements.Entropy, nameof(Entropy.ProtectedKey));
+        }
+
+        private static void ValidateRequestedProofTokenForWriting(RequestedProofToken requestedProofToken)
+        {
+            if (requestedProofToken?.EncryptedKey != null && requestedProofToken.EncryptedKey.SourceElement == null)
+                throw XmlUtil.LogWriteException(
+                    LogMessages.IDX15408,
+                    WsTrustElements.RequestedProofToken,
+                    nameof(RequestedProofToken.EncryptedKey));
+        }
+
+        private SecurityTokenElement ValidateRequestedSecurityTokenForWriting(RequestedSecurityToken requestedSecurityToken)
+        {
+            if (requestedSecurityToken.TokenElement != null)
+                return null;
+
+            if (requestedSecurityToken.SecurityToken == null)
+                throw XmlUtil.LogWriteException(
+                    LogMessages.IDX15408,
+                    WsTrustElements.RequestedSecurityToken,
+                    nameof(RequestedSecurityToken));
+
+            var securityTokenElement = new SecurityTokenElement(requestedSecurityToken.SecurityToken);
+            ValidateSecurityTokenElementForWriting(securityTokenElement, WsTrustElements.RequestedSecurityToken);
+            return securityTokenElement;
+        }
+
+        private void ValidateRequestForWriting(WsTrustRequest trustRequest)
+        {
+            if (trustRequest.OnBehalfOf != null)
+                ValidateSecurityTokenElementForWriting(trustRequest.OnBehalfOf, WsTrustElements.OnBehalfOf);
+
+            if (trustRequest.ProofEncryption != null)
+                ValidateSecurityTokenElementForWriting(trustRequest.ProofEncryption, WsTrustElements.ProofEncryption);
+
+            if (trustRequest.UseKey != null)
+                ValidateSecurityTokenElementForWriting(trustRequest.UseKey.SecurityTokenElement, WsTrustElements.UseKey);
+
+            ValidateEntropyForWriting(trustRequest.Entropy);
+        }
+
+        private void ValidateResponseForWriting(RequestSecurityTokenResponse response)
+        {
+            if (response == null)
+                throw LogHelper.LogArgumentNullException(nameof(response));
+
+            if (response.RequestedSecurityToken != null)
+                ValidateRequestedSecurityTokenForWriting(response.RequestedSecurityToken);
+
+            ValidateEntropyForWriting(response.Entropy);
+            ValidateRequestedProofTokenForWriting(response.RequestedProofToken);
+        }
+
         /// <summary>
         /// Writes a &lt;ProofEncryption&gt; element.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
@@ -1391,6 +1477,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, proofEncryption, nameof(proofEncryption));
             new WsTrustSerializer().WriteProofEncryptionCore(writer, serializationContext, proofEncryption);
+        }
+
+        /// <summary>
+        /// Writes a &lt;ProofEncryption&gt; element using the specified security token handlers.
+        /// </summary>
+        public static void WriteProofEncryption(
+            XmlDictionaryWriter writer,
+            WsSerializationContext serializationContext,
+            SecurityTokenElement proofEncryption,
+            IEnumerable<SecurityTokenHandler> securityTokenHandlers)
+        {
+            WsUtils.ValidateParamsForWritting(writer, serializationContext, proofEncryption, nameof(proofEncryption));
+            CreateSerializer(securityTokenHandlers).WriteProofEncryptionCore(writer, serializationContext, proofEncryption);
         }
 
         private void WriteProofEncryptionCore(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenElement proofEncryption)
@@ -1435,6 +1534,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (trustRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(trustRequest));
 
+            ValidateRequestForWriting(trustRequest);
             var serializationContext = new WsSerializationContext(wsTrustVersion);
 
             try
@@ -1536,6 +1636,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (requestSecurityTokenResponse == null)
                 throw LogHelper.LogArgumentNullException(nameof(requestSecurityTokenResponse));
 
+            ValidateResponseForWriting(requestSecurityTokenResponse);
             var serializationContext = new WsSerializationContext(wsTrustVersion);
 
             try
@@ -1664,8 +1765,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //  </t:RequestedProofToken>
 
             WsUtils.ValidateParamsForWritting(writer, serializationContext, requestedProofToken, nameof(requestedProofToken));
-            if (requestedProofToken.EncryptedKey != null && requestedProofToken.EncryptedKey.SourceElement == null)
-                throw XmlUtil.LogWriteException(LogMessages.IDX15408, WsTrustElements.RequestedProofToken, nameof(RequestedProofToken.EncryptedKey));
+            ValidateRequestedProofTokenForWriting(requestedProofToken);
 
             try
             {
@@ -1714,18 +1814,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //  </t:RequestedSecurityToken>
 
             WsUtils.ValidateParamsForWritting(writer, serializationContext, requestedSecurityToken, nameof(requestedSecurityToken));
-            SecurityTokenElement securityTokenElement = null;
-            if (requestedSecurityToken.TokenElement == null)
-            {
-                if (requestedSecurityToken.SecurityToken == null)
-                    throw XmlUtil.LogWriteException(
-                        LogMessages.IDX15408,
-                        WsTrustElements.RequestedSecurityToken,
-                        nameof(RequestedSecurityToken));
-
-                securityTokenElement = new SecurityTokenElement(requestedSecurityToken.SecurityToken);
-                ValidateSecurityTokenElementForWriting(securityTokenElement, WsTrustElements.RequestedSecurityToken);
-            }
+            SecurityTokenElement securityTokenElement = ValidateRequestedSecurityTokenForWriting(requestedSecurityToken);
 
             try
             {
@@ -1809,6 +1898,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (trustResponse == null)
                 throw LogHelper.LogArgumentNullException(nameof(trustResponse));
 
+            foreach (RequestSecurityTokenResponse response in trustResponse.RequestSecurityTokenResponseCollection)
+                ValidateResponseForWriting(response);
+
             var serializationContext = new WsSerializationContext(wsTrustVersion);
 
             try
@@ -1848,6 +1940,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, useKey, nameof(useKey));
             new WsTrustSerializer().WriteUseKeyCore(writer, serializationContext, useKey);
+        }
+
+        /// <summary>
+        /// Writes a &lt;UseKey&gt; element using the specified security token handlers.
+        /// </summary>
+        public static void WriteUseKey(
+            XmlDictionaryWriter writer,
+            WsSerializationContext serializationContext,
+            UseKey useKey,
+            IEnumerable<SecurityTokenHandler> securityTokenHandlers)
+        {
+            WsUtils.ValidateParamsForWritting(writer, serializationContext, useKey, nameof(useKey));
+            CreateSerializer(securityTokenHandlers).WriteUseKeyCore(writer, serializationContext, useKey);
         }
 
         private void WriteUseKeyCore(XmlDictionaryWriter writer, WsSerializationContext serializationContext, UseKey useKey)

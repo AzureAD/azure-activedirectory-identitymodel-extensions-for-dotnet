@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
+using System.Security.Claims;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Protocols.WsSecurity;
@@ -75,6 +77,39 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         }
 
         [Fact]
+        public void UseKey_CustomSecurityTokenHandler_RoundTripsThroughStaticOverloads()
+        {
+            var handlers = new[] { new CustomSecurityTokenHandler() };
+            var useKey = new UseKey(new SecurityTokenElement(new CustomSecurityToken()));
+            var context = new WsSerializationContext(WsTrustVersion.Trust13);
+
+            string xml = WriteXml(writer => WsTrustSerializer.WriteUseKey(writer, context, useKey, handlers));
+            UseKey result = WsTrustSerializer.ReadUseKey(CreateReader(xml), context, handlers);
+
+            Assert.IsType<CustomSecurityToken>(result.SecurityTokenElement.SecurityToken);
+        }
+
+        [Fact]
+        public void ProofEncryption_CustomSecurityTokenHandler_WritesThroughStaticOverload()
+        {
+            var handlers = new[] { new CustomSecurityTokenHandler() };
+            var proofEncryption = new SecurityTokenElement(new CustomSecurityToken());
+            var context = new WsSerializationContext(WsTrustVersion.Trust13);
+
+            string xml = WriteXml(
+                writer => WsTrustSerializer.WriteProofEncryption(
+                    writer,
+                    context,
+                    proofEncryption,
+                    handlers));
+
+            var document = new XmlDocument { XmlResolver = null };
+            document.LoadXml(xml);
+            Assert.Equal("CustomToken", document.DocumentElement.FirstChild.LocalName);
+            Assert.Equal("urn:custom", document.DocumentElement.FirstChild.NamespaceURI);
+        }
+
+        [Fact]
         public void RequestedSecurityToken_SecurityToken_WritesToken()
         {
             var serializer = new WsTrustSerializer();
@@ -132,6 +167,52 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             write(writer);
             writer.Flush();
             return Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        private sealed class CustomSecurityToken : SecurityToken
+        {
+            public override string Id => "custom-id";
+            public override string Issuer => "custom-issuer";
+            public override SecurityKey SecurityKey => null;
+            public override SecurityKey SigningKey { get; set; }
+            public override DateTime ValidFrom => DateTime.MinValue;
+            public override DateTime ValidTo => DateTime.MaxValue;
+        }
+
+        private sealed class CustomSecurityTokenHandler : SecurityTokenHandler
+        {
+            public override bool CanWriteToken => true;
+            public override Type TokenType => typeof(CustomSecurityToken);
+
+            public override bool CanReadToken(XmlReader reader)
+            {
+                return reader?.IsStartElement("CustomToken", "urn:custom") == true;
+            }
+
+            public override SecurityToken ReadToken(XmlReader reader)
+            {
+                reader.ReadStartElement("CustomToken", "urn:custom");
+                return new CustomSecurityToken();
+            }
+
+            public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
+            {
+                return ReadToken(reader);
+            }
+
+            public override void WriteToken(XmlWriter writer, SecurityToken token)
+            {
+                writer.WriteStartElement("custom", "CustomToken", "urn:custom");
+                writer.WriteEndElement();
+            }
+
+            public override ClaimsPrincipal ValidateToken(
+                string securityToken,
+                TokenValidationParameters validationParameters,
+                out SecurityToken validatedToken)
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }

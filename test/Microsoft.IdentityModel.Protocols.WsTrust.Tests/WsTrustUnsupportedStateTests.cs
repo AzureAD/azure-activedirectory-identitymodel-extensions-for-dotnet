@@ -77,6 +77,44 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             Assert.Empty(stream.ToArray());
         }
 
+        [Fact]
+        public void Request_ProtectedKey_FailsBeforeWritingParentElement()
+        {
+            var request = new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)
+            {
+                Entropy = new Entropy(
+                    new ProtectedKey(Guid.NewGuid().ToByteArray(), Default.SymmetricEncryptingCredentials))
+            };
+            using var stream = new MemoryStream();
+            using XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false);
+            var serializer = new WsTrustSerializer();
+
+            Assert.Throws<XmlWriteException>(
+                () => serializer.WriteRequest(writer, WsTrustVersion.Trust13, request));
+
+            writer.Flush();
+            Assert.Empty(stream.ToArray());
+        }
+
+        [Fact]
+        public void Response_EmptyEncryptedKey_FailsBeforeWritingParentElement()
+        {
+            var response = new WsTrustResponse(
+                new RequestSecurityTokenResponse
+                {
+                    RequestedProofToken = new RequestedProofToken(new EncryptedKey())
+                });
+            using var stream = new MemoryStream();
+            using XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false);
+            var serializer = new WsTrustSerializer();
+
+            Assert.Throws<XmlWriteException>(
+                () => serializer.WriteResponse(writer, WsTrustVersion.Trust13, response));
+
+            writer.Flush();
+            Assert.Empty(stream.ToArray());
+        }
+
         private static XmlDictionaryReader CreateReader(string xml)
         {
             return XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(xml), XmlDictionaryReaderQuotas.Max);

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Protocols.WsAddressing;
 using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Xunit;
 
@@ -165,6 +166,23 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             Assert.NotNull(reference);
             Assert.Equal("correct-identifier", reference.KeyIdentifier.Value);
+        }
+
+        [Fact]
+        public void EndpointReference_WrongNamespaceAddressBeforeValidAddress_UsesValidAddress()
+        {
+            const string addressingNamespace = "http://www.w3.org/2005/08/addressing";
+            string xml =
+                $"<wsa:EndpointReference xmlns:wsa=\"{addressingNamespace}\" xmlns:ext=\"urn:extension\">" +
+                "<ext:Address>https://wrong.example.com</ext:Address>" +
+                "<wsa:Address>https://correct.example.com</wsa:Address>" +
+                "</wsa:EndpointReference>";
+            var serializer = new WsAddressingSerializer();
+
+            EndpointReference endpointReference = serializer.ReadEndpointReference(CreateReader(xml));
+
+            Assert.Equal("https://correct.example.com", endpointReference.Uri);
+            Assert.Equal("Address", Assert.Single(endpointReference.AdditionalXmlElements).LocalName);
         }
 
         private static XmlDictionaryReader CreateReader(string xml)

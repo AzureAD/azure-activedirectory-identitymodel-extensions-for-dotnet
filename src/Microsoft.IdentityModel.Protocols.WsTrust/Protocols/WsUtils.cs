@@ -74,6 +74,28 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             AddElementCount(1);
         }
 
+        internal static void SkipElement(XmlReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            if (!reader.IsStartElement())
+                throw XmlUtil.LogReadException(LogMessages.IDX15022, reader.NodeType);
+
+            bool isEmptyElement = reader.IsEmptyElement;
+            using (var boundedReader = new DepthLimitingXmlReader(reader.ReadSubtree(), BoundedReaderQuotas.MaxDepth, false))
+            {
+                while (boundedReader.Read())
+                {
+                }
+            }
+
+            if (isEmptyElement)
+                reader.Read();
+            else
+                reader.ReadEndElement();
+        }
+
         /// <summary>
         /// Assumes the xmlreader is positioned on a start element.
         /// </summary>
