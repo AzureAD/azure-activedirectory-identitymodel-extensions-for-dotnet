@@ -5,6 +5,7 @@ using System;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.Tokens;
+using System.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
@@ -33,6 +34,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             SecurityTokenReference = securityTokenReference ?? throw LogHelper.LogArgumentNullException(nameof(securityTokenReference));
         }
 
+        internal SecurityTokenElement(XmlElement sourceElement)
+        {
+            SourceElement = sourceElement ?? throw LogHelper.LogArgumentNullException(nameof(sourceElement));
+        }
+
         /// <summary>
         /// Gets the <see cref="SecurityToken"/>.
         /// </summary>
@@ -42,5 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Gets the <see cref="SecurityTokenReference"/>.
         /// </summary>
         public SecurityTokenReference SecurityTokenReference { get; }
+
+        internal XmlElement SourceElement { get; }
     }
 }

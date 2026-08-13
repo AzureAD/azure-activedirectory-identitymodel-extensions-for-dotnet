@@ -98,6 +98,8 @@ Microsoft.IdentityModel.Protocols.WsTrust.Renewing.Renewing() -> void
 Microsoft.IdentityModel.Protocols.WsTrust.RequestedProofToken.RequestedProofToken() -> void
 Microsoft.IdentityModel.Protocols.WsTrust.RequestedProofToken.RequestedProofToken(string computedKeyAlgorithm) -> void
 Microsoft.IdentityModel.Protocols.WsTrust.RequestedSecurityToken.RequestedSecurityToken() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.SecurityTokenElement.SecurityTokenElement(System.Xml.XmlElement sourceElement) -> void
+Microsoft.IdentityModel.Protocols.WsTrust.SecurityTokenElement.SourceElement.get -> System.Xml.XmlElement
 Microsoft.IdentityModel.Protocols.WsTrust.WsTrust13Version
 Microsoft.IdentityModel.Protocols.WsTrust.WsTrust13Version.WsTrust13Version() -> void
 Microsoft.IdentityModel.Protocols.WsTrust.WsTrust14Version
