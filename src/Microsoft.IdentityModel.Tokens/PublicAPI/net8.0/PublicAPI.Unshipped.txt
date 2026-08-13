@@ -1,1 +1,0 @@
-~static Microsoft.IdentityModel.Tokens.Validators.ValidateIssuerAsync(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> System.Threading.Tasks.ValueTask<string>

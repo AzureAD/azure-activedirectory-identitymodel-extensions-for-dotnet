@@ -407,7 +407,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Theory]
+#if NET5_0_OR_GREATER
         [InlineData(false, "sync")]
+#else
+        [InlineData(false, "async")]
+#endif
         [InlineData(true, "async")]
         public void Issuer_PreserveLegacySyncBehavior_SelectsValidator(bool preserveLegacySyncBehavior, string expected)
         {

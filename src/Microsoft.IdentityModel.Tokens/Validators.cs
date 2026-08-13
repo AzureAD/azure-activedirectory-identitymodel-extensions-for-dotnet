@@ -235,21 +235,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>An EXACT match is required.</remarks>
         public static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            if (AppContextSwitches.PreserveLegacySyncBehavior)
-            {
-                ValueTask<string> validationTask = ValidateIssuerInternalAsync(
-                    issuer,
-                    securityToken,
-                    validationParameters,
-                    configuration: null);
-
-#pragma warning disable VSTHRD002 // Preserve the legacy sync-over-async behavior when explicitly requested.
-                return validationTask.IsCompletedSuccessfully ?
-                    validationTask.Result :
-                    validationTask.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
-#pragma warning restore VSTHRD002
-            }
-
             return ValidateIssuer(issuer, securityToken, validationParameters, null);
         }
 
@@ -267,7 +252,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidIssuerException">If <see cref="TokenValidationParameters.ValidIssuer"/> is null or whitespace and <see cref="TokenValidationParameters.ValidIssuers"/> is null and <see cref="BaseConfiguration.Issuer"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/> or <see cref="BaseConfiguration.Issuer"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static async ValueTask<string> ValidateIssuerInternalAsync(
+        public static async ValueTask<string> ValidateIssuerAsync(
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,
@@ -285,25 +270,6 @@ namespace Microsoft.IdentityModel.Tokens
                 validationParameters,
                 configuration);
         }
-
-#if NET5_0_OR_GREATER
-        /// <summary>
-        /// Asynchronously determines if an issuer found in a <see cref="SecurityToken"/> is valid.
-        /// </summary>
-        /// <param name="issuer">The issuer to validate.</param>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> required for issuer and signing key validation.</param>
-        /// <returns>A task containing the issuer to use when creating claims.</returns>
-        public static ValueTask<string> ValidateIssuerAsync(
-            string issuer,
-            SecurityToken securityToken,
-            TokenValidationParameters validationParameters,
-            BaseConfiguration configuration)
-        {
-            return ValidateIssuerInternalAsync(issuer, securityToken, validationParameters, configuration);
-        }
-#endif
 
         /// <summary>
         /// Determines if an issuer found in a <see cref="SecurityToken"/> is valid.
@@ -328,14 +294,32 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (validationParameters.IssuerValidatorSync != null)
-                return validationParameters.IssuerValidatorSync(issuer, securityToken, validationParameters);
+#if NET5_0_OR_GREATER
+            if (!AppContextSwitches.PreserveLegacySyncBehavior)
+            {
+                if (validationParameters.IssuerValidatorSync != null)
+                    return validationParameters.IssuerValidatorSync(issuer, securityToken, validationParameters);
 
-            return ValidateIssuerAfterAsyncOrSyncValidator(
+                return ValidateIssuerAfterAsyncOrSyncValidator(
+                    issuer,
+                    securityToken,
+                    validationParameters,
+                    configuration);
+            }
+#endif
+
+            ValueTask<string> validationTask = ValidateIssuerAsync(
                 issuer,
                 securityToken,
                 validationParameters,
                 configuration);
+
+#pragma warning disable VSTHRD002 // Preserve sync-over-async on older frameworks and when explicitly requested.
+            return validationTask.IsCompletedSuccessfully ?
+                validationTask.Result :
+                validationTask.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
+
         }
 
         private static string ValidateIssuerAfterAsyncOrSyncValidator(
