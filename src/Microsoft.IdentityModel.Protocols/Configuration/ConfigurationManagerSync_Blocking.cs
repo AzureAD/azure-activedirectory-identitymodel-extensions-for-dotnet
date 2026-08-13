@@ -325,7 +325,7 @@ internal partial class ConfigurationManagerSync<T> : BaseConfigurationManager, I
     /// <param name="cancel">CancellationToken</param>
     /// <returns>Configuration of type BaseConfiguration.</returns>
     /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetrieverSync{T}.GetConfigurationSync"/> is not called and the current Configuration is returned.</remarks>
-    public override BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
+    public BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
     {
         T obj = GetConfigurationSync(cancel);
         return obj as BaseConfiguration;

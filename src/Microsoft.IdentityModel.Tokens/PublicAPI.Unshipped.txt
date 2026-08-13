@@ -2,4 +2,3 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreCaseWhenV
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.get -> bool
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void
-~virtual Microsoft.IdentityModel.Tokens.BaseConfigurationManager.GetBaseConfigurationSync(System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Tokens.BaseConfiguration

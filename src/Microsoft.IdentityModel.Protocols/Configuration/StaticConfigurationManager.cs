@@ -66,8 +66,9 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>Configuration of type T.</returns>
-        public override BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
+        public BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
         {
+            _ = cancel;
             return _configuration as BaseConfiguration;
         }
 
