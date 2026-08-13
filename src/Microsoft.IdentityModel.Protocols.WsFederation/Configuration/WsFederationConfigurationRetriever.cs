@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// <summary>
     ///  Retrieves a populated <see cref="WsFederationConfiguration"/> given an address.
     /// </summary>
-    public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>, IConfigurationRetrieverSync<WsFederationConfiguration>
+    public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>
     {
         private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { XmlResolver = null, DtdProcessing = DtdProcessing.Prohibit, ValidationType = ValidationType.None };
 
@@ -59,12 +59,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             return GetAsync(address, retriever, cancel);
         }
 
-        /// <inheritdoc/>
-        WsFederationConfiguration IConfigurationRetrieverSync<WsFederationConfiguration>.GetConfigurationSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
-        {
-            return GetSync(address, retriever, cancel);
-        }
-
         /// <summary>
         /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address and an <see cref="IDocumentRetriever"/>.
         /// </summary>
@@ -90,29 +84,5 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
         }
 
-        /// <summary>
-        /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address and an <see cref="IDocumentRetrieverSync"/>.
-        /// </summary>
-        /// <param name="address">address of the metadata document.</param>
-        /// <param name="retriever">the <see cref="IDocumentRetrieverSync"/> to use to read the metadata document</param>
-        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
-        /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
-        /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="retriever"/> is null.</exception>
-        internal static WsFederationConfiguration GetSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
-        {
-            if (string.IsNullOrEmpty(address))
-                throw LogArgumentNullException(nameof(address));
-
-            if (retriever == null)
-                throw LogArgumentNullException(nameof(retriever));
-
-            string document = retriever.GetDocument(address, cancel);
-
-            using (var metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
-            {
-                return (new WsFederationMetadataSerializer()).ReadMetadata(metaDataReader);
-            }
-        }
     }
 }

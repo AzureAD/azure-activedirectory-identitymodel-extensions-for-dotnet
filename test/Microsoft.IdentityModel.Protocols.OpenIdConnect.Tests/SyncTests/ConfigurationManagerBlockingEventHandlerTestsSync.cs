@@ -30,7 +30,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
@@ -56,7 +56,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
@@ -92,7 +92,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
         configurationManager.TimeProvider = timeProvider;
@@ -135,7 +135,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
@@ -162,7 +162,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
@@ -205,7 +205,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
 
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
@@ -248,7 +248,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
 
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
@@ -292,7 +292,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
 
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
@@ -334,7 +334,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
 
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
@@ -368,7 +368,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
 
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
@@ -401,7 +401,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var mockEventHandler = new MockConfigurationEventHandler();
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
 
@@ -434,7 +434,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
         configurationManager.TimeProvider = timeProvider;
@@ -477,50 +477,6 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
     }
 
     [Fact]
-    public void Blocking_RequestRefresh_IsThrottledFromAcceptedRequest()
-    {
-        // Arrange
-        AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
-
-        var timeProvider = new FakeTimeProvider();
-        var mockEventHandler = new MockConfigurationEventHandlerContextAware
-        {
-            ConfigurationToReturn = new OpenIdConnectConfiguration { Issuer = "https://test.issuer.com" },
-            RetrievalTimeToReturn = timeProvider.GetUtcNow()
-        };
-        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
-            "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
-            new FileDocumentRetriever());
-        configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
-        configurationManager.TimeProvider = timeProvider;
-
-        configurationManager.GetConfigurationSync();
-
-        // Act - consume the first accepted manual refresh.
-        configurationManager.RequestRefresh();
-        configurationManager.GetConfigurationSync();
-
-        mockEventHandler.ContextAwareBeforeRetrieveCalled = false;
-        mockEventHandler.LastContext = null;
-
-        // A second request inside RefreshInterval should be ignored.
-        configurationManager.RequestRefresh();
-        configurationManager.GetConfigurationSync();
-
-        // Assert
-        Assert.False(mockEventHandler.ContextAwareBeforeRetrieveCalled);
-
-        // A request after RefreshInterval should be accepted.
-        timeProvider.Advance(configurationManager.RefreshInterval + TimeSpan.FromSeconds(1));
-        configurationManager.RequestRefresh();
-        configurationManager.GetConfigurationSync();
-
-        Assert.True(mockEventHandler.ContextAwareBeforeRetrieveCalled);
-        Assert.True(mockEventHandler.LastContext?.BypassCache);
-    }
-
-    [Fact]
     public void Blocking_MultipleRequestRefresh_OnlyOneBypassTrueRefreshFires()
     {
         // Arrange
@@ -531,7 +487,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
-            new OpenIdConnectConfigurationRetriever(),
+            new OpenIdConnectConfigurationRetrieverSync(),
             new FileDocumentRetriever());
         configurationManager.ConfigurationEventHandlerSync = mockEventHandler;
         configurationManager.TimeProvider = timeProvider;

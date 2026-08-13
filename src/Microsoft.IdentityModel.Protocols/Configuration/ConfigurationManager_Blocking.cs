@@ -163,7 +163,6 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 _refreshRequested = true;
                 _syncAfter = now;
-                _lastRequestRefresh = now;
                 _isFirstRefreshRequest = false;
             }
         }

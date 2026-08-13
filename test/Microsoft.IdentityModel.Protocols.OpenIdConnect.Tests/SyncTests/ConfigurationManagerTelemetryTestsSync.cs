@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var testTelemetryClient = new MockTelemetryClient();
             var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 OpenIdConfigData.AccountsGoogle,
-                new OpenIdConnectConfigurationRetriever(),
+                new OpenIdConnectConfigurationRetrieverSync(),
                 new HttpDocumentRetriever(),
                 new OpenIdConnectConfigurationValidator());
             configurationManager.TelemetryClient = testTelemetryClient;
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 theoryData.MetadataAddress,
-                new OpenIdConnectConfigurationRetriever(),
+                new OpenIdConnectConfigurationRetrieverSync(),
                 (IDocumentRetrieverSync)theoryData.DocumentRetriever,
                 theoryData.ConfigurationValidator);
 

@@ -24,7 +24,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange
         var testContext = new CompareContext($"{this}.ContextAwareBeforeRetrieveSync_Called_InsteadOfBase");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
@@ -53,7 +53,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange
         var testContext = new CompareContext($"{this}.BypassCache_False_OnFirstRetrieval");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
@@ -81,7 +81,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange
         var testContext = new CompareContext($"{this}.BypassCache_False_OnAutomaticRefresh");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var timeProvider = new FakeTimeProvider();
 
@@ -124,7 +124,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange
         var testContext = new CompareContext($"{this}.BypassCache_True_AfterRequestRefresh");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
@@ -164,7 +164,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange
         var testContext = new CompareContext($"{this}.BypassCache_ResetToFalse_AfterRequestRefreshIsConsumed");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var timeProvider = new FakeTimeProvider();
 
@@ -213,7 +213,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange — use the original mock that only implements IConfigurationEventHandler<T>
         var testContext = new CompareContext($"{this}.BaseHandler_StillWorks_WithoutContextAwareInterface");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandler();
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
@@ -239,7 +239,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange
         var testContext = new CompareContext($"{this}.ContextAwareAfterUpdate_Called_InsteadOfBase");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
@@ -271,7 +271,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange
         var testContext = new CompareContext($"{this}.AfterUpdate_BypassCache_False_OnFirstRetrieval");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
@@ -302,7 +302,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         // Arrange
         var testContext = new CompareContext($"{this}.AfterUpdate_BypassCache_True_AfterRequestRefresh");
         var documentRetriever = new FileDocumentRetriever();
-        var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+        var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
         var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(

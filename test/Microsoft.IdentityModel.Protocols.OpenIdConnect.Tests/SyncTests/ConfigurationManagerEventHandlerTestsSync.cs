@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Arrange
             var testContext = new CompareContext($"{this}.Constructor_WithConfigurationEventHandler_SetsPropertyCorrectly");
             var documentRetriever = new FileDocumentRetriever();
-            var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
             var configurationValidator = new OpenIdConnectConfigurationValidator();
             var lkgCacheOptions = new LastKnownGoodConfigurationCacheOptions();
             var mockEventHandler = new MockConfigurationEventHandler();
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Arrange
             var testContext = new CompareContext($"{this}.Constructor_WithNullConfigurationEventHandler_ThrowsArgumentNullException");
             var documentRetriever = new FileDocumentRetriever();
-            var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
             var configurationValidator = new OpenIdConnectConfigurationValidator();
             var lkgCacheOptions = new LastKnownGoodConfigurationCacheOptions();
 
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Arrange
             var testContext = new CompareContext($"{this}.ConfigurationEventHandler_Property_GetSet");
             var documentRetriever = new FileDocumentRetriever();
-            var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
 
             var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Arrange
             var testContext = new CompareContext($"{this}.BeforeRetrieveSync_Called_WhenGettingConfiguration");
             var documentRetriever = new FileDocumentRetriever();
-            var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
             var mockEventHandler = new MockConfigurationEventHandler();
             var testTelemetryClient = new MockTelemetryClient();
 
@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Arrange
             var testContext = new CompareContext($"{this}.BeforeRetrieveSync_ReturnsConfiguration_SkipsEndpointRetrieval");
             var documentRetriever = new MockDocumentRetriever(); // This will track if it's called
-            var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
             var testTelemetryClient = new MockTelemetryClient();
 
             var preloadedConfig = new OpenIdConnectConfiguration
@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Arrange
             var testContext = new CompareContext($"{this}.AfterUpdate_Called_AfterConfigurationUpdate");
             var documentRetriever = new FileDocumentRetriever();
-            var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
             var mockEventHandler = new MockConfigurationEventHandler();
             var testTelemetryClient = new MockTelemetryClient();
 
@@ -282,7 +282,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Arrange
             var testContext = new CompareContext($"{this}.BeforeRetrieveSync_ExceptionHandled_ContinuesWithEndpointRetrieval");
             var documentRetriever = new FileDocumentRetriever();
-            var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
             var mockEventHandler = new MockConfigurationEventHandler
             {
                 ThrowExceptionInBeforeRetrieve = true
@@ -332,7 +332,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Arrange
             var testContext = new CompareContext($"{this}.ConfigurationEventHandler_WithValidator_ValidatesHandlerConfiguration");
             var documentRetriever = new FileDocumentRetriever();
-            var configurationRetriever = new OpenIdConnectConfigurationRetriever();
+            var configurationRetriever = new OpenIdConnectConfigurationRetrieverSync();
             var configurationValidator = new OpenIdConnectConfigurationValidator { MinimumNumberOfKeys = 2 };
             var testTelemetryClient = new MockTelemetryClient();
 
