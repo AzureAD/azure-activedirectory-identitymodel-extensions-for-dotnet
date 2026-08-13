@@ -135,22 +135,6 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         /// <summary>
-        /// Obtains an updated version of Configuration.
-        /// </summary>
-        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
-        /// <returns>Configuration of type <see cref="BaseConfiguration"/>.</returns>
-        public override BaseConfiguration GetBaseConfigurationSync(CancellationToken cancel)
-        {
-            if (_exToThrowOnFirstGet != null && _firstGet)
-            {
-                _firstGet = false;
-                throw _exToThrowOnFirstGet;
-            }
-
-            return _configuration as BaseConfiguration;
-        }
-
-        /// <summary>
         /// Unless _refreshedConfiguration is set, this is a no-op.
         /// </summary>
         public override void RequestRefresh()
