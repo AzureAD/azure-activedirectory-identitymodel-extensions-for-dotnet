@@ -350,6 +350,7 @@ Microsoft.IdentityModel.Protocols.WsSerializationContext.TrustKeyTypes.get -> Mi
 Microsoft.IdentityModel.Protocols.WsSerializationContext.TrustVersion.get -> Microsoft.IdentityModel.Protocols.WsTrust.WsTrustVersion
 Microsoft.IdentityModel.Protocols.WsSerializationContext.WsSerializationContext(Microsoft.IdentityModel.Protocols.WsTrust.WsTrustVersion wsTrustVersion) -> void
 Microsoft.IdentityModel.Protocols.WsTrust.BinarySecret.AdditionalAttributes.get -> System.Collections.Generic.ICollection<string>
+Microsoft.IdentityModel.Protocols.WsTrust.BinarySecret.AdditionalXmlAttributes.get -> System.Collections.Generic.ICollection<System.Xml.XmlAttribute>
 Microsoft.IdentityModel.Protocols.WsTrust.BinarySecret.BinarySecret(byte[] data) -> void
 Microsoft.IdentityModel.Protocols.WsTrust.BinarySecret.BinarySecret(byte[] data, string encodingType) -> void
 Microsoft.IdentityModel.Protocols.WsTrust.BinarySecret.Data.get -> byte[]

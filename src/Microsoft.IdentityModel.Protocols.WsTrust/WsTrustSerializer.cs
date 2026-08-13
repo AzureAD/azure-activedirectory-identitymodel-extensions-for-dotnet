@@ -69,6 +69,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 string encodingType = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace);
                 if (!string.IsNullOrEmpty(encodingType))
                     binarySecret.EncodingType = encodingType;
+                binarySecret.Data = Array.Empty<byte>();
+
+                var attributeDocument = new XmlDocument { XmlResolver = null };
+                foreach (XmlAttributeHolder attribute in attributes)
+                {
+                    if (IsNamespaceDeclaration(attribute) ||
+                        IsAttribute(attribute, WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace))
+                        continue;
+
+                    XmlAttribute xmlAttribute = attributeDocument.CreateAttribute(attribute.Prefix, attribute.LocalName, attribute.NamespaceUri);
+                    xmlAttribute.Value = attribute.Value;
+                    binarySecret.AdditionalXmlAttributes.Add(xmlAttribute);
+                }
 
                 if (!reader.IsEmptyElement)
                 {
@@ -132,7 +145,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 while (reader.IsStartElement())
                 {
-                    if (reader.IsLocalName(WsFedElements.ClaimType))
+                    if (reader.IsStartElement(WsFedElements.ClaimType, serializationContext.FedConstants.AuthNamespace))
                     {
                         claimTypes.Add(_wsFedSerializer.ReadClaimType(reader, serializationContext.FedConstants.AuthNamespace));
                     }
@@ -229,11 +242,15 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (isEmptyElement)
                     return lifetime;
 
-                if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Created))
-                    lifetime.Created = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
-
-                if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Expires))
-                    lifetime.Expires = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
+                while (reader.IsStartElement())
+                {
+                    if (reader.IsStartElement(WsUtilityElements.Created, WsUtilityConstants.WsUtility10.Namespace))
+                        lifetime.Created = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
+                    else if (reader.IsStartElement(WsUtilityElements.Expires, WsUtilityConstants.WsUtility10.Namespace))
+                        lifetime.Expires = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
+                    else
+                        reader.Skip();
+                }
 
                 if (!isEmptyElement)
                     reader.ReadEndElement();
@@ -334,10 +351,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             {
                 bool isEmptyElement = reader.IsEmptyElement;
                 reader.ReadStartElement();
-                SecurityTokenReference tokenReference = WsSecuritySerializer.ReadSecurityTokenReference(reader);
+                if (isEmptyElement)
+                    return null;
 
-                if (!isEmptyElement)
-                    reader.ReadEndElement();
+                SecurityTokenReference tokenReference = null;
+                while (reader.IsStartElement())
+                {
+                    if (reader.IsStartElement(WsSecurityElements.SecurityTokenReference, WsSecurityConstants.WsSecurity10.Namespace))
+                        tokenReference = WsSecuritySerializer.ReadSecurityTokenReference(reader);
+                    else
+                        reader.Skip();
+                }
+
+                reader.ReadEndElement();
 
                 return tokenReference;
             }
@@ -391,22 +417,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (!string.IsNullOrEmpty(context))
                     trustRequest.Context = context;
 
-                var doc = new XmlDocument { XmlResolver = null };
-                foreach (XmlAttributeHolder attribute in xmlAttributes)
-                {
-                    bool isNamespaceDeclaration = attribute.Prefix == "xmlns" ||
-                        (string.IsNullOrEmpty(attribute.Prefix) && attribute.LocalName == "xmlns");
-                    bool isContext = attribute.LocalName == WsTrustAttributes.Context &&
-                        ((string.IsNullOrEmpty(attribute.Prefix) && string.IsNullOrEmpty(attribute.NamespaceUri)) ||
-                        attribute.NamespaceUri == serializationContext.TrustConstants.Namespace);
-
-                    if (isNamespaceDeclaration || isContext)
-                        continue;
-
-                    XmlAttribute xmlAttribute = doc.CreateAttribute(attribute.Prefix, attribute.LocalName, attribute.NamespaceUri);
-                    xmlAttribute.Value = attribute.Value;
-                    trustRequest.AdditionalXmlAttributes.Add(xmlAttribute);
-                }
+                ReadAdditionalAttributes(xmlAttributes, trustRequest, serializationContext);
 
                 reader.MoveToContent();
                 reader.ReadStartElement();
@@ -523,7 +534,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 {
                     trustRequest.Claims = ReadClaims(reader, serializationContext);
                 }
-                else if (reader.IsLocalName(WsPolicyElements.PolicyReference))
+                else if (reader.IsStartElement(WsPolicyElements.PolicyReference, serializationContext.PolicyConstants.Namespace))
                 {
                     trustRequest.PolicyReference = _wsPolicySerializer.ReadPolicyReference(reader, serializationContext.PolicyConstants.Namespace);
                 }
@@ -552,6 +563,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             {
                 bool isEmptyElement = reader.IsEmptyElement;
                 var tokenResponse = new RequestSecurityTokenResponse();
+                XmlAttributeHolder[] xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
+                string context = XmlAttributeHolder.GetAttribute(xmlAttributes, WsTrustAttributes.Context, serializationContext.TrustConstants.Namespace);
+                if (!string.IsNullOrEmpty(context))
+                    tokenResponse.Context = context;
+                ReadAdditionalAttributes(xmlAttributes, tokenResponse, serializationContext);
+
                 reader.ReadStartElement();
                 if (isEmptyElement)
                     return tokenResponse;
@@ -612,7 +629,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     }
                     else
                     {
-                        reader.Skip();
+                        ReadUnknownElement(reader, tokenResponse);
                     }
                 }
 
@@ -924,8 +941,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// TODO - We need a pluggable model here so users can plug in for custom elements.
         /// </summary>
         /// <param name="reader"></param>
-        /// <param name="trustRequest"></param>
-        private static void ReadUnknownElement(XmlDictionaryReader reader, WsTrustRequest trustRequest)
+        /// <param name="trustMessage"></param>
+        private static void ReadUnknownElement(XmlDictionaryReader reader, WsTrustMessage trustMessage)
         {
             // Capture the (open-content / extension) unknown element into a DOM. The subtree is read
             // through a streaming DepthLimitingXmlReader that caps element nesting depth; it is a
@@ -934,7 +951,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             var doc = new XmlDocument { XmlResolver = null };
             using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth))
                 doc.Load(depthLimitingReader);
-            trustRequest.AdditionalXmlElements.Add(doc.DocumentElement);
+            trustMessage.AdditionalXmlElements.Add(doc.DocumentElement);
 
             if (isEmptyElement)
             {
@@ -946,6 +963,38 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             {
                 reader.ReadEndElement();
             }
+        }
+
+        private static void ReadAdditionalAttributes(
+            XmlAttributeHolder[] attributes,
+            WsTrustMessage trustMessage,
+            WsSerializationContext serializationContext)
+        {
+            var document = new XmlDocument { XmlResolver = null };
+            foreach (XmlAttributeHolder attribute in attributes)
+            {
+                if (IsNamespaceDeclaration(attribute) ||
+                    IsAttribute(attribute, WsTrustAttributes.Context, serializationContext.TrustConstants.Namespace))
+                    continue;
+
+                XmlAttribute xmlAttribute = document.CreateAttribute(attribute.Prefix, attribute.LocalName, attribute.NamespaceUri);
+                xmlAttribute.Value = attribute.Value;
+                trustMessage.AdditionalXmlAttributes.Add(xmlAttribute);
+            }
+        }
+
+        private static bool IsAttribute(XmlAttributeHolder attribute, string localName, string @namespace)
+        {
+            if (string.IsNullOrEmpty(attribute.Prefix))
+                return attribute.LocalName == localName;
+
+            return attribute.LocalName == localName && attribute.NamespaceUri == @namespace;
+        }
+
+        private static bool IsNamespaceDeclaration(XmlAttributeHolder attribute)
+        {
+            return attribute.Prefix == "xmlns" ||
+                (string.IsNullOrEmpty(attribute.Prefix) && attribute.LocalName == "xmlns");
         }
 
         /// <summary>
@@ -1031,6 +1080,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.BinarySecret, serializationContext.TrustConstants.Namespace);
                 if (!string.IsNullOrEmpty(binarySecret.EncodingType))
                     writer.WriteAttributeString(WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace, binarySecret.EncodingType);
+
+                foreach (XmlAttribute attribute in binarySecret.AdditionalXmlAttributes)
+                    attribute.WriteTo(writer);
 
                 writer.WriteBase64(binarySecret.Data, 0, binarySecret.Data.Length);
                 writer.WriteEndElement();
@@ -1462,6 +1514,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (!string.IsNullOrEmpty(requestSecurityTokenResponse.Context))
                     writer.WriteAttributeString(WsTrustAttributes.Context, requestSecurityTokenResponse.Context);
 
+                foreach (XmlAttribute attribute in requestSecurityTokenResponse.AdditionalXmlAttributes)
+                    attribute.WriteTo(writer);
+
                 //  <Lifetime>
                 if (requestSecurityTokenResponse.Lifetime != null)
                     WriteLifetime(writer, serializationContext, requestSecurityTokenResponse.Lifetime);
@@ -1505,6 +1560,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 // <RequestedUnattachedReference>
                 if (requestSecurityTokenResponse.UnattachedReference != null)
                     WriteRequestedUnattachedReference(writer, serializationContext, requestSecurityTokenResponse.UnattachedReference);
+
+                foreach (XmlElement element in requestSecurityTokenResponse.AdditionalXmlElements)
+                    element.WriteTo(writer);
 
                 // </RequestSecurityTokenResponse>
                 writer.WriteEndElement();

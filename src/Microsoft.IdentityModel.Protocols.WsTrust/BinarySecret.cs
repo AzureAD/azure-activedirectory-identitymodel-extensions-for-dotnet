@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Xml;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
@@ -82,5 +83,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// A collection of additional attributes.
         /// </summary>
         public ICollection<string> AdditionalAttributes { get; } = new Collection<string>();
+
+        /// <summary>
+        /// A collection of additional XML attributes.
+        /// </summary>
+        public ICollection<XmlAttribute> AdditionalXmlAttributes { get; } = new Collection<XmlAttribute>();
     }
 }

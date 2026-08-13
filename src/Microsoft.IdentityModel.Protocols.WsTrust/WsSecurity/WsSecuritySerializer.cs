@@ -76,8 +76,13 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
 
             bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
-            if (reader.IsStartElement() && reader.IsLocalName(WsSecurityElements.KeyIdentifier))
-                securityTokenReference.KeyIdentifier = ReadKeyIdentifier(reader);
+            while (reader.IsStartElement())
+            {
+                if (reader.IsStartElement(WsSecurityElements.KeyIdentifier, WsSecurityConstants.WsSecurity10.Namespace))
+                    securityTokenReference.KeyIdentifier = ReadKeyIdentifier(reader);
+                else
+                    reader.Skip();
+            }
 
             if (!isEmptyElement)
                 reader.ReadEndElement();
@@ -163,6 +168,9 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
 
             if (!string.IsNullOrEmpty(securityTokenReference.Id))
                 writer.WriteAttributeString(WsUtilityConstants.WsUtility10.Prefix, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace, securityTokenReference.Id);
+
+            if (!string.IsNullOrEmpty(securityTokenReference.Usage))
+                writer.WriteAttributeString(WsSecurityAttributes.Usage, WsSecurityConstants.WsSecurity10.Namespace, securityTokenReference.Usage);
 
             if (securityTokenReference.KeyIdentifier != null)
                 WriteKeyIdentifier(writer, securityTokenReference.KeyIdentifier);
