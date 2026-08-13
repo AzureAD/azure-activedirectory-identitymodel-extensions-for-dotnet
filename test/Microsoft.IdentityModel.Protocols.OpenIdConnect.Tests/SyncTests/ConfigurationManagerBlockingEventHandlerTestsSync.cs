@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -28,7 +28,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -54,7 +54,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -90,7 +90,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var timeProvider = new FakeTimeProvider();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -111,7 +111,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         mockEventHandler.LastContext = null;
 
         // Advance time past AutomaticRefreshInterval to trigger another automatic refresh
-        timeProvider.Advance(ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
+        timeProvider.Advance(ConfigurationManagerSync<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
 
         // Act — this should be an automatic refresh, not a RequestRefresh
         configurationManager.GetConfigurationSync();
@@ -133,7 +133,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -160,7 +160,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
 
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -203,7 +203,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             RetrievalTimeToReturn = DateTimeOffset.UtcNow
         };
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -246,7 +246,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             RetrievalTimeToReturn = DateTimeOffset.UtcNow
         };
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -290,7 +290,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             RetrievalTimeToReturn = DateTimeOffset.UtcNow
         };
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -332,7 +332,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             ThrowExceptionInBeforeRetrieve = true
         };
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -366,7 +366,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             ThrowExceptionInAfterUpdate = true
         };
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -399,7 +399,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         var testContext = new CompareContext($"{this}.BaseHandler_AfterUpdate_Called_ForNonContextAwareHandler");
 
         var mockEventHandler = new MockConfigurationEventHandler();
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -432,7 +432,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var timeProvider = new FakeTimeProvider();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -455,7 +455,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         mockEventHandler.LastAfterUpdateContext = null;
 
         // Advance time past AutomaticRefreshInterval
-        timeProvider.Advance(ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
+        timeProvider.Advance(ConfigurationManagerSync<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
 
         // Act — triggers automatic background refresh
         configurationManager.GetConfigurationSync();
@@ -488,7 +488,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
             ConfigurationToReturn = new OpenIdConnectConfiguration { Issuer = "https://test.issuer.com" },
             RetrievalTimeToReturn = timeProvider.GetUtcNow()
         };
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -529,7 +529,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
 
         var timeProvider = new FakeTimeProvider();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             new OpenIdConnectConfigurationRetriever(),
             new FileDocumentRetriever());
@@ -564,7 +564,7 @@ public class ConfigurationManagerBlockingEventHandlerTestsSync
         mockEventHandler.LastContext = null;
 
         // Advance time past AutomaticRefreshInterval to trigger another refresh
-        timeProvider.Advance(ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
+        timeProvider.Advance(ConfigurationManagerSync<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
 
         configurationManager.GetConfigurationSync();
 

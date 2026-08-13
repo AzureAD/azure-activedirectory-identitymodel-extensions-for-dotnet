@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// In this case, the configuration is obtained and passed to the constructor.
     /// </summary>
     /// <typeparam name="T">must be a class.</typeparam>
-    public class StaticConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T>, IConfigurationManagerSync<T> where T : class
+    public class StaticConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
         private T _configuration;
 
@@ -47,6 +47,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <returns>Configuration of type T.</returns>
         public T GetConfigurationSync(CancellationToken cancel)
         {
+            _ = cancel;
             return _configuration;
         }
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -16,7 +17,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T>, IConfigurationManagerSync<T> where T : class
+    public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
         internal Action _onBackgroundTaskFinish;
 
@@ -25,12 +26,13 @@ namespace Microsoft.IdentityModel.Protocols
         private bool _isFirstRefreshRequest = true;
         private readonly SemaphoreSlim _configurationNullLock = new SemaphoreSlim(1);
 
+        private readonly IDocumentRetriever _docRetriever;
+        private readonly IConfigurationRetriever<T> _configRetriever;
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
-        private readonly bool _preferSynchronousRetrieval;
 
         // Tracks the most recent fetch failure for the blocking path. Promoted from a local in
-        // GetConfigurationWithBlockingAsync/GetConfigurationWithBlockingSync so the original exception (e.g. an IOException carrying
+        // GetConfigurationWithBlockingAsync so the original exception (e.g. an IOException carrying
         // HttpDocumentRetriever.StatusCode/ResponseContent in its Data dictionary) is preserved across
         // calls that arrive within the backoff window (_syncAfter > now) and skip the fetch.
         private Exception _fetchMetadataFailure;
@@ -42,13 +44,8 @@ namespace Microsoft.IdentityModel.Protocols
         private const int ConfigurationRetrieverRunning = 1;
         private int _configurationRetrieverState = ConfigurationRetrieverIdle;
 
-        private readonly SemaphoreSlim _refreshLock = new(1, 1);
-        private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
-
-        /// <summary>
-        /// Used to track the type of request for signaling the event handler and for telemetry.
-        /// </summary>
-        private bool _refreshRequested;
+        private readonly Func<Task> _updateCurrentConfigurationWithBypassAsync;
+        private readonly Func<Task> _updateCurrentConfigurationWithoutBypassAsync;
 
         internal TimeProvider TimeProvider = TimeProvider.System;
         internal ITelemetryClient TelemetryClient = new TelemetryClient();
@@ -59,9 +56,419 @@ namespace Microsoft.IdentityModel.Protocols
         public IConfigurationEventHandler<T> ConfigurationEventHandler { get; set; }
 
         /// <summary>
-        /// Gets or sets the optional synchronous configuration event handler.
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
-        public IConfigurationEventHandlerSync<T> ConfigurationEventHandlerSync { get; set; }
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever)
+            : this(metadataAddress, configRetriever, new HttpDocumentRetriever(), new LastKnownGoodConfigurationCacheOptions())
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="httpClient">The client to use when obtaining configuration.</param>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, HttpClient httpClient)
+            : this(metadataAddress, configRetriever, new HttpDocumentRetriever(httpClient), new LastKnownGoodConfigurationCacheOptions())
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <exception cref="ArgumentNullException">If 'metadataAddress' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">If 'configRetriever' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever)
+            : this(metadataAddress, configRetriever, docRetriever, new LastKnownGoodConfigurationCacheOptions())
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/></param>
+        /// <exception cref="ArgumentNullException">If 'metadataAddress' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">If 'configRetriever' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'lkgCacheOptions' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, LastKnownGoodConfigurationCacheOptions lkgCacheOptions)
+            : base(lkgCacheOptions)
+        {
+            if (string.IsNullOrWhiteSpace(metadataAddress))
+                throw LogHelper.LogArgumentNullException(nameof(metadataAddress));
+
+            if (configRetriever == null)
+                throw LogHelper.LogArgumentNullException(nameof(configRetriever));
+
+            if (docRetriever == null)
+                throw LogHelper.LogArgumentNullException(nameof(docRetriever));
+
+            MetadataAddress = metadataAddress;
+            _docRetriever = docRetriever;
+            _configRetriever = configRetriever;
+
+            _updateCurrentConfigurationWithBypassAsync = () => UpdateCurrentConfigurationAsync(bypassCache: true);
+            _updateCurrentConfigurationWithoutBypassAsync = () => UpdateCurrentConfigurationAsync(bypassCache: false);
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
+        /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator)
+            : this(metadataAddress, configRetriever, docRetriever, configValidator, new LastKnownGoodConfigurationCacheOptions())
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
+        /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/></param>
+        /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator, LastKnownGoodConfigurationCacheOptions lkgCacheOptions)
+            : this(metadataAddress, configRetriever, docRetriever, lkgCacheOptions)
+        {
+            if (configValidator == null)
+                throw LogHelper.LogArgumentNullException(nameof(configValidator));
+
+            _configValidator = configValidator;
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/>.</param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/>.</param>
+        /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/>.</param>
+        /// <param name="configurationEventHandler">The <see cref="IConfigurationEventHandler{T}"/> that handles configuration events.</param>
+        /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator, LastKnownGoodConfigurationCacheOptions lkgCacheOptions, IConfigurationEventHandler<T> configurationEventHandler)
+            : this(metadataAddress, configRetriever, docRetriever, configValidator, lkgCacheOptions)
+        {
+            if (configurationEventHandler == null)
+                throw LogHelper.LogArgumentNullException(nameof(configurationEventHandler));
+
+            ConfigurationEventHandler = configurationEventHandler;
+        }
+
+        /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        public async Task<T> GetConfigurationAsync()
+        {
+            return await GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <param name="cancel">CancellationToken</param>
+        /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
+        /// <remarks>
+        /// <para>
+        /// If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/>
+        /// then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.
+        /// By default, this method blocks until the configuration is retrieved the first time. After the configuration was retrieved once,
+        /// updates will happen in the background. Failures to retrieve the configuration on the background thread will be logged.
+        /// </para>
+        /// <para>
+        /// If this operation is configured to be blocking through the switch 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking'
+        /// then this method will block each time the configuration needs to be updated or hasn't been retrieved. If the configuration
+        /// cannot be initially retrieved an exception will be thrown. If the configuration has been retrieved, but cannot be updated,
+        /// then the exception will be logged and the current configuration will be returned.
+        /// </para>
+        /// <para>
+        /// By using the app context switch you choose what works best for you when there is a signing key update:
+        /// either block requests from being validated until the new key is retrieved, or allow requests to be validated
+        /// with the current key until the new key is retrieved. If blocking, a service receiving high concurrent request
+        /// may experience thread starvation.
+        /// </para>
+        /// </remarks>
+        public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
+        {
+            if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
+                return _currentConfiguration;
+
+            if (AppContextSwitches.UpdateConfigAsBlocking)
+                return await GetConfigurationWithBlockingAsync(cancel).ConfigureAwait(false);
+            else
+                return await GetConfigurationNonBlockingAsync(cancel).ConfigureAwait(false);
+        }
+
+        private async Task<T> GetConfigurationNonBlockingAsync(CancellationToken cancel)
+        {
+            Exception fetchMetadataFailure = null;
+
+            // LOGIC
+            // if configuration == null => configuration has never been retrieved.
+            //   reach out to the metadata endpoint. Since multiple threads could be calling this method
+            //   we need to ensure that only one thread is actually fetching the metadata.
+            // else
+            //   if task is running, return the current configuration
+            //   else kick off task to update current configuration
+            if (_currentConfiguration == null)
+            {
+                await _configurationNullLock.WaitAsync(cancel).ConfigureAwait(false);
+                if (_currentConfiguration != null)
+                {
+                    _configurationNullLock.Release();
+                    return _currentConfiguration;
+                }
+
+                try
+                {
+                    var retrievalContext = new ConfigurationRetrievalContext { BypassCache = false };
+
+                    // Check if event handler can provide configuration.
+                    // If provided configuration is valid, skip regular retriaval process and update current configuration.
+                    if (ConfigurationEventHandler != null)
+                    {
+                        var configurationRetrieved = await HandleBeforeRetrieveAsync(retrievalContext, cancel).ConfigureAwait(false);
+
+                        // replicate the behavior of successful retrieval from endpoint
+                        if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
+                        {
+                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.FirstRefresh,
+                                TelemetryConstants.Protocols.ConfigurationSourceHandler);
+
+                            UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
+                            return _currentConfiguration;
+                        }
+                    }
+
+                    // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
+                    // The transport should have its own timeouts, etc.
+                    T configuration = await _configRetriever.GetConfigurationAsync(
+                        MetadataAddress,
+                        _docRetriever,
+                        CancellationToken.None).ConfigureAwait(false);
+
+                    if (_configValidator != null)
+                    {
+                        ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                        // in this case we have never had a valid configuration, so we will throw an exception if the validation fails
+                        if (!result.Succeeded)
+                        {
+                            var ex = new InvalidConfigurationException(
+                                LogHelper.FormatInvariant(
+                                    LogMessages.IDX20810,
+                                    result.ErrorMessage));
+
+                            throw LogHelper.LogExceptionMessage(ex);
+                        }
+                    }
+
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.FirstRefresh,
+                        TelemetryConstants.Protocols.ConfigurationSourceRetriever);
+
+                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+                {
+                    fetchMetadataFailure = ex;
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.FirstRefresh,
+                        TelemetryConstants.Protocols.ConfigurationSourceRetriever,
+                        ex);
+
+                    LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                             LogHelper.FormatInvariant(
+                                LogMessages.IDX20806,
+                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                LogHelper.MarkAsNonPII(ex)),
+                            ex));
+                }
+#pragma warning restore CA1031 // Do not catch general exception types
+                finally
+                {
+                    _configurationNullLock.Release();
+                }
+            }
+            else
+            {
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
+                {
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.Automatic,
+                        TelemetryConstants.Protocols.ConfigurationSourceUnknown);
+
+                    _ = Task.Run(_updateCurrentConfigurationWithoutBypassAsync, CancellationToken.None);
+                }
+            }
+
+            // If metadata exists return it.
+            if (_currentConfiguration != null)
+                return _currentConfiguration;
+
+            throw LogHelper.LogExceptionMessage(
+                new InvalidOperationException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX20803,
+                        LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                        LogHelper.MarkAsNonPII(_syncAfter),
+                        LogHelper.MarkAsNonPII(fetchMetadataFailure)),
+                    fetchMetadataFailure));
+        }
+
+        /// <summary>
+        /// This should be called when the configuration needs to be updated either from RequestRefresh or AutomaticRefresh
+        /// The Caller should first check the state checking state using:
+        ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle).
+        /// </summary>
+        private async Task UpdateCurrentConfigurationAsync(bool bypassCache)
+        {
+            long startTimestamp = TimeProvider.GetTimestamp();
+            var retrievalContext = new ConfigurationRetrievalContext { BypassCache = bypassCache };
+            try
+            {
+                // Check if event handler can provide configuration
+                // If provided configuration is valid, skip regular retriaval process and update current configuration.
+                if (ConfigurationEventHandler != null)
+                {
+                    ConfigurationEventHandlerResult<T> configurationRetrieved = await HandleBeforeRetrieveAsync(retrievalContext).ConfigureAwait(false);
+
+                    if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
+                    {
+                        UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
+
+                        _onBackgroundTaskFinish?.Invoke();
+                        return;
+                    }
+                }
+
+                T configuration = await _configRetriever.GetConfigurationAsync(
+                    MetadataAddress,
+                    _docRetriever,
+                    CancellationToken.None).ConfigureAwait(false);
+
+                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.ConfigurationSourceRetriever,
+                    elapsedTime);
+
+                if (_configValidator == null)
+                {
+                    UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
+                }
+                else
+                {
+                    ConfigurationValidationResult result = _configValidator.Validate(configuration);
+
+                    if (!result.Succeeded)
+                        LogHelper.LogExceptionMessage(
+                            new InvalidConfigurationException(
+                                LogHelper.FormatInvariant(
+                                    LogMessages.IDX20810,
+                                    result.ErrorMessage)));
+                    else
+                        UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
+                }
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+            {
+                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.ConfigurationSourceRetriever,
+                    elapsedTime,
+                    ex);
+
+                LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20806,
+                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                            ex),
+                        ex));
+            }
+#pragma warning restore CA1031 // Do not catch general exception types
+            finally
+            {
+                Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
+            }
+
+            _onBackgroundTaskFinish?.Invoke();
+        }
+
+        private void UpdateConfiguration(T configuration, DateTimeOffset retrievalTime, ConfigurationRetrievalContext context)
+        {
+            _currentConfiguration = configuration;
+            _syncAfter = DateTimeUtil.Add(retrievalTime.UtcDateTime, AutomaticRefreshInterval +
+                TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
+
+            if (ConfigurationEventHandler != null)
+            {
+                // fire-and-forget an after update task
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        if (ConfigurationEventHandler is IConfigurationEventHandlerContextAware<T> contextAware)
+                        {
+                            await contextAware.AfterUpdateAsync(MetadataAddress, configuration, context).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await ConfigurationEventHandler.AfterUpdateAsync(MetadataAddress, configuration).ConfigureAwait(false);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.LogExceptionMessage(
+                            new InvalidOperationException(
+                                LogHelper.FormatInvariant(
+                                   LogMessages.IDX20813,
+                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                    ex),
+                                ex));
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <param name="cancel">CancellationToken</param>
+        /// <returns>Configuration of type BaseConfiguration.</returns>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        public override async Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+        {
+            T obj = await GetConfigurationAsync(cancel).ConfigureAwait(false);
+            return obj as BaseConfiguration;
+        }
 
         /// <summary>
         /// Triggers updating metadata when:
@@ -71,7 +478,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <remarks>
         /// If the strategy is configured to be blocking through the switch 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking',
-        /// then this method will not update the configuration, instead it will request the next call to <see cref="GetConfigurationAsync()"/> or <see cref="GetConfigurationSync()"/>
+        /// then this method will not update the configuration, instead it will request the next call to <see cref="GetConfigurationAsync()"/>
         /// should request new configuration.
         /// </remarks>
         public override void RequestRefresh()
@@ -96,29 +503,78 @@ namespace Microsoft.IdentityModel.Protocols
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    // Construction guarantees that the preferred retriever pair is available:
-                    // constructors use the asynchronous path and CreateSync uses the synchronous path.
-                    if (_preferSynchronousRetrieval)
-                        _ = Task.Run(_updateCurrentConfigurationWithBypassSync, CancellationToken.None);
-                    else
-                        _ = Task.Run(_updateCurrentConfigurationWithBypassAsync, CancellationToken.None);
-
+                    _ = Task.Run(_updateCurrentConfigurationWithBypassAsync, CancellationToken.None);
                     _lastRequestRefresh = now;
                 }
             }
         }
 
-        private void RequestRefreshBlocking()
+        private async Task<ConfigurationEventHandlerResult<T>> HandleBeforeRetrieveAsync(ConfigurationRetrievalContext context, CancellationToken cancellationToken = default)
         {
-            DateTimeOffset now = TimeProvider.GetUtcNow();
+            long beforeHandlerTimestamp = TimeProvider.GetTimestamp();
 
-            if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
+            try
             {
-                _refreshRequested = true;
-                _syncAfter = now;
-                _lastRequestRefresh = now;
-                _isFirstRefreshRequest = false;
+                ConfigurationEventHandlerResult<T> handlerResult;
+                if (ConfigurationEventHandler is IConfigurationEventHandlerContextAware<T> contextAware)
+                {
+                    handlerResult = await contextAware.BeforeRetrieveAsync(
+                        MetadataAddress, context, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    handlerResult = await ConfigurationEventHandler.BeforeRetrieveAsync(
+                        MetadataAddress, cancellationToken).ConfigureAwait(false);
+                }
+
+                if (handlerResult != null && handlerResult.Configuration != null)
+                {
+                    var handlerElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
+                    TelemetryClient.LogConfigurationRetrievalDuration(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.ConfigurationSourceHandler,
+                        handlerElapsedTime);
+
+                    // Validate configuration from handler
+                    if (_configValidator != null)
+                    {
+                        ConfigurationValidationResult result = _configValidator.Validate(handlerResult.Configuration);
+                        if (!result.Succeeded)
+                        {
+                            // Just log the error and proceed to fetch from endpoint
+                            LogHelper.LogExceptionMessage(
+                                new InvalidConfigurationException(
+                                    LogHelper.FormatInvariant(
+                                        LogMessages.IDX20812,
+                                        result.ErrorMessage)));
+
+                            return ConfigurationEventHandlerResult<T>.NoResult;
+                        }
+                    }
+
+                    // No validator configured, return configuration
+                    return handlerResult;
+                }
             }
+            catch (Exception ex)
+            {
+                var handlerErrorElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.ConfigurationSourceHandler,
+                    handlerErrorElapsedTime,
+                    ex);
+
+                LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20811,
+                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                            ex),
+                        ex));
+            }
+
+            return ConfigurationEventHandlerResult<T>.NoResult;
         }
 
         /// <summary>
@@ -140,273 +596,5 @@ namespace Microsoft.IdentityModel.Protocols
         /// 1 second is the minimum time interval that must pass for <see cref="MinimumRefreshInterval"/> to  obtain new configuration.
         /// </summary>
         public new static readonly TimeSpan MinimumRefreshInterval = BaseConfigurationManager.MinimumRefreshInterval;
-
-        private void UpdateConfiguration(T configuration, DateTimeOffset retrievalTime, ConfigurationRetrievalContext context)
-        {
-            _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(retrievalTime.UtcDateTime, AutomaticRefreshInterval +
-                TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
-
-            // runs the correct event handler based on sync/async
-            IConfigurationEventHandlerSync<T> eventHandlerSync = ConfigurationEventHandlerSync;
-
-            if (eventHandlerSync != null)
-            {
-                _ = Task.Run(() =>
-                {
-                    try
-                    {
-                        if (eventHandlerSync is IConfigurationEventHandlerContextAwareSync<T> contextAwareSync)
-                            contextAwareSync.AfterUpdate(MetadataAddress, configuration, context);
-                        else
-                            eventHandlerSync.AfterUpdate(MetadataAddress, configuration);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.LogExceptionMessage(
-                            new InvalidOperationException(
-                                LogHelper.FormatInvariant(
-                                   LogMessages.IDX20813,
-                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                    ex),
-                                ex));
-                    }
-                });
-            }
-
-            IConfigurationEventHandler<T> eventHandler = ConfigurationEventHandler;
-
-            // Prefer the synchronous handler when both properties reference handlers.
-            if (eventHandlerSync == null && eventHandler != null)
-            {
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        if (eventHandler is IConfigurationEventHandlerContextAware<T> contextAware)
-                            await contextAware.AfterUpdateAsync(MetadataAddress, configuration, context).ConfigureAwait(false);
-                        else
-                            await eventHandler.AfterUpdateAsync(MetadataAddress, configuration).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.LogExceptionMessage(
-                            new InvalidOperationException(
-                                LogHelper.FormatInvariant(
-                                   LogMessages.IDX20813,
-                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                    ex),
-                                ex));
-                    }
-                });
-            }
-        }
-
-        private void TelemetryForUpdateBlocking(string configurationSource)
-        {
-            string updateMode;
-
-            if (_currentConfiguration is null)
-                updateMode = TelemetryConstants.Protocols.FirstRefresh;
-            else
-                updateMode = _refreshRequested ? TelemetryConstants.Protocols.Manual : TelemetryConstants.Protocols.Automatic;
-
-            try
-            {
-                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                    MetadataAddress,
-                    updateMode,
-                    configurationSource);
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch
-            { }
-#pragma warning restore CA1031 // Do not catch general exception types
-        }
-
-        // Shared retrieval helpers used by both the synchronous (ConfigurationManager_Sync.cs)
-        // and asynchronous (ConfigurationManager_Async.cs) partials. They contain only synchronous
-        // logic (no await), so a single implementation can be reused by both pipelines.
-
-        /// <summary>
-        /// Validates the configuration obtained on the very first (bootstrap) retrieval and throws if it is invalid.
-        /// Called by <c>GetConfigurationNonBlockingSync</c> (ConfigurationManager_Sync.cs) and
-        /// <c>GetConfigurationNonBlockingAsync</c> (ConfigurationManager_Async.cs).
-        /// </summary>
-        private void ThrowIfFirstRetrievalInvalid(T configuration)
-        {
-            if (_configValidator != null)
-            {
-                ConfigurationValidationResult result = _configValidator.Validate(configuration);
-                // in this case we have never had a valid configuration, so we will throw an exception if the validation fails
-                if (!result.Succeeded)
-                {
-                    var ex = new InvalidConfigurationException(
-                        LogHelper.FormatInvariant(
-                            LogMessages.IDX20810,
-                            result.ErrorMessage));
-
-                    throw LogHelper.LogExceptionMessage(ex);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Builds (and logs) the "no metadata could be obtained" <see cref="InvalidOperationException"/> (IDX20803).
-        /// Called by <c>GetConfigurationNonBlockingSync</c>/<c>GetConfigurationWithBlockingSync</c>
-        /// (ConfigurationManager_Sync.cs), <c>GetConfigurationNonBlockingAsync</c>/<c>GetConfigurationWithBlockingAsync</c>
-        /// (ConfigurationManager_Async.cs), and <see cref="HandleBlockingRetrievalException"/>.
-        /// </summary>
-        private Exception CreateNoMetadataException(Exception fetchMetadataFailure)
-        {
-            return LogHelper.LogExceptionMessage(
-                new InvalidOperationException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX20803,
-                        LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                        LogHelper.MarkAsNonPII(_syncAfter),
-                        LogHelper.MarkAsNonPII(fetchMetadataFailure)),
-                    fetchMetadataFailure));
-        }
-
-        /// <summary>
-        /// Logs a failure that occurred during the non-blocking (bootstrap) retrieval path (IDX20806).
-        /// Called by <c>GetConfigurationNonBlockingSync</c> (ConfigurationManager_Sync.cs) and
-        /// <c>GetConfigurationNonBlockingAsync</c> (ConfigurationManager_Async.cs).
-        /// </summary>
-        private void LogNonBlockingRetrievalException(Exception ex)
-        {
-            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                MetadataAddress,
-                TelemetryConstants.Protocols.FirstRefresh,
-                TelemetryConstants.Protocols.ConfigurationSourceRetriever,
-                ex);
-
-            LogHelper.LogExceptionMessage(
-                new InvalidOperationException(
-                     LogHelper.FormatInvariant(
-                        LogMessages.IDX20806,
-                        LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                        LogHelper.MarkAsNonPII(ex)),
-                    ex));
-        }
-
-        /// <summary>
-        /// Handles a failure that occurred during the blocking retrieval path. Updates <c>_syncAfter</c>
-        /// (using exponential bootstrap backoff when no configuration exists yet), records telemetry, and
-        /// either throws IDX20803 when there is no cached configuration or logs IDX20806 when stale
-        /// configuration can be served. Called by <c>GetConfigurationWithBlockingSync</c>
-        /// (ConfigurationManager_Sync.cs) and <c>GetConfigurationWithBlockingAsync</c> (ConfigurationManager_Async.cs).
-        /// </summary>
-        private void HandleBlockingRetrievalException(Exception ex, long startTimestamp)
-        {
-            _fetchMetadataFailure = ex;
-
-            if (_currentConfiguration == null)
-            {
-                if (_bootstrapRefreshInterval < RefreshInterval)
-                {
-                    // Adopt exponential backoff for bootstrap refresh interval with a decorrelated jitter if it is not longer than the refresh interval.
-                    TimeSpan _bootstrapRefreshIntervalWithJitter = TimeSpan.FromSeconds(new Random().Next((int)_bootstrapRefreshInterval.TotalSeconds));
-                    _bootstrapRefreshInterval += _bootstrapRefreshInterval;
-                    _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, _bootstrapRefreshIntervalWithJitter);
-                }
-                else
-                {
-                    _syncAfter = DateTimeUtil.Add(
-                        TimeProvider.GetUtcNow().UtcDateTime,
-                        AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
-                }
-
-                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                    MetadataAddress,
-                    TelemetryConstants.Protocols.FirstRefresh,
-                    TelemetryConstants.Protocols.ConfigurationSourceRetriever,
-                    ex);
-
-                throw CreateNoMetadataException(ex);
-            }
-            else
-            {
-                _syncAfter = DateTimeUtil.Add(
-                    TimeProvider.GetUtcNow().UtcDateTime,
-                    AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
-
-                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
-
-                TelemetryClient.LogConfigurationRetrievalDuration(
-                    MetadataAddress,
-                    TelemetryConstants.Protocols.ConfigurationSourceRetriever,
-                    elapsedTime,
-                    ex);
-
-                LogHelper.LogExceptionMessage(
-                    new InvalidOperationException(
-                        LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
-            }
-        }
-
-        /// <summary>
-        /// Validates the configuration returned by an event handler and records telemetry. Returns the
-        /// handler result when it is present and valid, otherwise <see cref="ConfigurationEventHandlerResult{T}.NoResult"/>.
-        /// Called by <c>HandleBeforeRetrieveSync</c> (ConfigurationManager_Sync.cs) and
-        /// <c>HandleBeforeRetrieveAsync</c> (ConfigurationManager_Async.cs).
-        /// </summary>
-        private ConfigurationEventHandlerResult<T> ValidateHandlerResult(ConfigurationEventHandlerResult<T> handlerResult, long beforeHandlerTimestamp)
-        {
-            if (handlerResult != null && handlerResult.Configuration != null)
-            {
-                var handlerElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
-                TelemetryClient.LogConfigurationRetrievalDuration(
-                    MetadataAddress,
-                    TelemetryConstants.Protocols.ConfigurationSourceHandler,
-                    handlerElapsedTime);
-
-                // Validate configuration from handler
-                if (_configValidator != null)
-                {
-                    ConfigurationValidationResult result = _configValidator.Validate(handlerResult.Configuration);
-                    if (!result.Succeeded)
-                    {
-                        // Just log the error and proceed to fetch from endpoint
-                        LogHelper.LogExceptionMessage(
-                            new InvalidConfigurationException(
-                                LogHelper.FormatInvariant(
-                                    LogMessages.IDX20812,
-                                    result.ErrorMessage)));
-
-                        return ConfigurationEventHandlerResult<T>.NoResult;
-                    }
-                }
-
-                // No validator configured, return configuration
-                return handlerResult;
-            }
-
-            return ConfigurationEventHandlerResult<T>.NoResult;
-        }
-
-        /// <summary>
-        /// Logs a failure that occurred while invoking the configuration event handler (IDX20811).
-        /// Called by <c>HandleBeforeRetrieveSync</c> (ConfigurationManager_Sync.cs) and
-        /// <c>HandleBeforeRetrieveAsync</c> (ConfigurationManager_Async.cs).
-        /// </summary>
-        private void LogHandlerRetrievalException(Exception ex, long beforeHandlerTimestamp)
-        {
-            var handlerErrorElapsedTime = TimeProvider.GetElapsedTime(beforeHandlerTimestamp);
-            TelemetryClient.LogConfigurationRetrievalDuration(
-                MetadataAddress,
-                TelemetryConstants.Protocols.ConfigurationSourceHandler,
-                handlerErrorElapsedTime,
-                ex);
-
-            LogHelper.LogExceptionMessage(
-                new InvalidOperationException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX20811,
-                        LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                        ex),
-                    ex));
-        }
     }
 }

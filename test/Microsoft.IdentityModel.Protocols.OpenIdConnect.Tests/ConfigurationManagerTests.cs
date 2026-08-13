@@ -507,7 +507,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
-            int ExpectedPropertyCount = 9;
+            int ExpectedPropertyCount = 8;
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
@@ -1257,6 +1257,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         internal static AutoResetEvent SetupResetEvent(ConfigurationManager<OpenIdConnectConfiguration> configurationManager)
+        {
+            var resetEvent = new AutoResetEvent(false);
+
+            Action _waitAction = () => resetEvent.Set();
+            configurationManager._onBackgroundTaskFinish = _waitAction;
+
+            return resetEvent;
+        }
+
+        internal static AutoResetEvent SetupResetEvent(ConfigurationManagerSync<OpenIdConnectConfiguration> configurationManager)
         {
             var resetEvent = new AutoResetEvent(false);
 

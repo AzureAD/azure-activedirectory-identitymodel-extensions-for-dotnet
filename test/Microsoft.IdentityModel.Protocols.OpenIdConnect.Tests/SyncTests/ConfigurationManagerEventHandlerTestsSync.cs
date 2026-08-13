@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var mockEventHandler = new MockConfigurationEventHandler();
 
             // Act
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever,
@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // Act & Assert
             var exception = Assert.Throws<ArgumentNullException>(() =>
-                ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+                new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                     "OpenIdConnectMetadata.json",
                     configurationRetriever,
                     documentRetriever,
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var documentRetriever = new FileDocumentRetriever();
             var configurationRetriever = new OpenIdConnectConfigurationRetriever();
 
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever);
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var mockEventHandler = new MockConfigurationEventHandler();
             var testTelemetryClient = new MockTelemetryClient();
 
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever);
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 RetrievalTimeToReturn = DateTimeOffset.UtcNow
             };
 
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever);
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var mockEventHandler = new MockConfigurationEventHandler();
             var testTelemetryClient = new MockTelemetryClient();
 
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever);
@@ -289,7 +289,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             };
             var testTelemetryClient = new MockTelemetryClient();
 
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever);
@@ -350,7 +350,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 RetrievalTimeToReturn = DateTimeOffset.UtcNow
             };
 
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 configurationRetriever,
                 documentRetriever,

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 #if NET5_0_OR_GREATER
@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             // arrange
             var testTelemetryClient = new MockTelemetryClient();
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 OpenIdConfigData.AccountsGoogle,
                 new OpenIdConnectConfigurationRetriever(),
                 new HttpDocumentRetriever(),
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var testTelemetryClient = new MockTelemetryClient();
             var timeProvider = new FakeTimeProvider();
 
-            var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
                 theoryData.MetadataAddress,
                 new OpenIdConnectConfigurationRetriever(),
                 (IDocumentRetrieverSync)theoryData.DocumentRetriever,

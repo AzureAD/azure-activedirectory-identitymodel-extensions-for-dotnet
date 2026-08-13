@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <param name="retriever">the <see cref="IDocumentRetrieverSync"/> to use to read the discovery document</param>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>A populated <see cref="OpenIdConnectConfiguration"/> instance.</returns>
-        public static OpenIdConnectConfiguration GetSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
+        internal static OpenIdConnectConfiguration GetSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
                 throw LogHelper.LogArgumentNullException(nameof(address));

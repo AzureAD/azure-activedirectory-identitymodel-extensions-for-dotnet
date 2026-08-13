@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         }
 
         /// <inheritdoc/>
-        public WsFederationConfiguration GetConfigurationSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
+        WsFederationConfiguration IConfigurationRetrieverSync<WsFederationConfiguration>.GetConfigurationSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
         {
             return GetSync(address, retriever, cancel);
         }
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="retriever"/> is null.</exception>
-        public static WsFederationConfiguration GetSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
+        internal static WsFederationConfiguration GetSync(string address, IDocumentRetrieverSync retriever, CancellationToken cancel)
         {
             if (string.IsNullOrEmpty(address))
                 throw LogArgumentNullException(nameof(address));

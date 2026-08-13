@@ -12,9 +12,9 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Protocols;
 
 /// <summary>
-/// Synchronous retrieval methods for <see cref="ConfigurationManager{T}"/>.
+/// Synchronous configuration retrieval.
 /// </summary>
-public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T>, IConfigurationManagerSync<T> where T : class
+internal partial class ConfigurationManagerSync<T> : BaseConfigurationManager, IConfigurationManagerSync<T> where T : class
 {
     private readonly IDocumentRetrieverSync _docRetrieverSync;
     private readonly IConfigurationRetrieverSync<T> _configRetrieverSync;
@@ -58,9 +58,6 @@ public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfig
     /// </remarks>
     public virtual T GetConfigurationSync(CancellationToken cancel)
     {
-        if (!_preferSynchronousRetrieval || _configRetrieverSync == null || _docRetrieverSync == null)
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX20814));
-
         if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
             return _currentConfiguration;
 

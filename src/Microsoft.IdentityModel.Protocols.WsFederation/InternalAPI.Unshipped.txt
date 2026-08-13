@@ -1,0 +1,1 @@
+static Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfigurationRetriever.GetSync(string address, Microsoft.IdentityModel.Protocols.IDocumentRetrieverSync retriever, System.Threading.CancellationToken cancel) -> Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration

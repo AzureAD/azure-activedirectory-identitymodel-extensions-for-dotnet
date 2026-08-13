@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -27,7 +27,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var configurationRetriever = new OpenIdConnectConfigurationRetriever();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
@@ -56,7 +56,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var configurationRetriever = new OpenIdConnectConfigurationRetriever();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
@@ -85,7 +85,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var timeProvider = new FakeTimeProvider();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
@@ -102,7 +102,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         mockEventHandler.LastContext = null;
 
         // Advance time past AutomaticRefreshInterval to trigger automatic refresh
-        timeProvider.Advance(ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
+        timeProvider.Advance(ConfigurationManagerSync<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
 
         // Act — this should trigger an automatic background refresh, not a RequestRefresh
         configurationManager.GetConfigurationSync();
@@ -127,7 +127,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var configurationRetriever = new OpenIdConnectConfigurationRetriever();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
@@ -168,7 +168,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
         var timeProvider = new FakeTimeProvider();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
@@ -193,7 +193,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         mockEventHandler.LastContext = null;
 
         // Advance time past AutomaticRefreshInterval to trigger another automatic refresh
-        timeProvider.Advance(ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
+        timeProvider.Advance(ConfigurationManagerSync<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval + TimeSpan.FromHours(1));
 
         configurationManager.GetConfigurationSync();
         ConfigurationManagerTests.WaitOrFail(resetEvent);
@@ -216,7 +216,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var configurationRetriever = new OpenIdConnectConfigurationRetriever();
         var mockEventHandler = new MockConfigurationEventHandler();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
@@ -242,7 +242,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var configurationRetriever = new OpenIdConnectConfigurationRetriever();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
@@ -274,7 +274,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var configurationRetriever = new OpenIdConnectConfigurationRetriever();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
@@ -305,7 +305,7 @@ public class ConfigurationManagerEventHandlerContextAwareTestsSync
         var configurationRetriever = new OpenIdConnectConfigurationRetriever();
         var mockEventHandler = new MockConfigurationEventHandlerContextAware();
 
-        var configurationManager = ConfigurationManager<OpenIdConnectConfiguration>.CreateSync(
+        var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
             "OpenIdConnectMetadata.json",
             configurationRetriever,
             documentRetriever);
