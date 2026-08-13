@@ -24,6 +24,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         /// </summary>
         public virtual AdditionalContext ReadAdditionalContext(XmlDictionaryReader reader, string @namespace)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <auth:AdditionalContext>
             //    <auth:ContextItem Name="xs:anyURI" Scope="xs:anyURI" ? ...>
             //      (<auth:Value>xs:string</auth:Value> |
@@ -42,8 +43,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
 
             try
             {
+                int childCount = 0;
                 while (reader.IsStartElement())
                 {
+                    WsUtils.EnsureElementCount(++childCount);
                     if (reader.IsStartElement(WsFedElements.ContextItem, @namespace))
                     {
                         additionalContext.Items.Add(ReadContextItem(reader, @namespace));
@@ -71,6 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         /// </summary>
         public virtual ContextItem ReadContextItem(XmlDictionaryReader reader, string @namespace)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //    <auth:ContextItem Name="xs:anyURI" Scope="xs:anyURI" ? ...>
             //      (<auth:Value>xs:string</auth:Value> |
             //       xs:any ) ?
@@ -121,6 +125,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         /// <exception cref="XmlReadException">if the StartElement does not match the expectations in remarks.</exception>
         public virtual ClaimType ReadClaimType(XmlDictionaryReader reader, string @namespace)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             // <auth:ClaimType 
             //      Uri="a14bf1a3-a189-4a81-9d9a-7d3dfeb7724a"
             //      Optional="true/false">

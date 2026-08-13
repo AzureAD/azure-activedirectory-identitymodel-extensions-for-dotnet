@@ -7,6 +7,7 @@ const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15017 = "IDX15017
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15022 = "IDX15022: Unable to read XML. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15024 = "IDX15024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15025 = "IDX15025: Unable to read XML. The element nesting depth exceeds the maximum supported depth of '{0}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15026 = "IDX15026: Unable to read XML. The '{0}' resource limit of '{1}' was exceeded." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15101 = "IDX15101: Unable to read OnBehalfOf Element. Unable to read token: '{0}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15407 = "IDX15407: Exception caught while writing: '{0}'. Caught exception: '{1}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15408 = "IDX15408: Unable to write '{0}'. The configured '{1}' does not contain serializable content." -> string
@@ -17,6 +18,10 @@ const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15852 = "IDX15852
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15853 = "IDX15853: Invalid issuerEntropy size. issuerEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15854 = "IDX15854: Invalid requestorEntropy size. requestorEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'." -> string
 const Microsoft.IdentityModel.Protocols.WsTrust.WsTrustSerializer.GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffffZ" -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxAttributeCount = 4096 -> int
+const Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxBufferedXmlSize = 4194304 -> int
+const Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxElementCount = 4096 -> int
+const Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxXmlCharacters = 4194304 -> int
 const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Algorithm = "Algorithm" -> string
 const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Encoding = "Encoding" -> string
 const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Id = "Id" -> string
@@ -160,8 +165,14 @@ static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateSymme
 static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.RandomNumberGenerator.get -> System.Security.Cryptography.RandomNumberGenerator
 static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.ValidateKeySizeInBytes(int keySizeInBits) -> int
 static Microsoft.IdentityModel.Protocols.WsTrust.WsTrustSerializer.CreateXmlElement(System.Xml.XmlReader reader) -> System.Xml.XmlElement
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.AddAttributeCount(int count) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.AddElementCount(int count) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.AddXmlCharacters(int count) -> void
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.CheckReaderOnEntry(System.Xml.XmlReader reader) -> void
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.CheckReaderOnEntry(System.Xml.XmlReader reader, string element, Microsoft.IdentityModel.Protocols.WsSerializationContext serializationContext) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.CreateBoundedMemoryStream() -> System.IO.MemoryStream
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.EnterReadScope() -> System.IDisposable
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.EnsureElementCount(int elementCount) -> void
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadAsXmlElement(System.Xml.XmlDictionaryReader reader) -> System.Xml.XmlElement
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadIntElement(System.Xml.XmlDictionaryReader reader) -> int?
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadStringElement(System.Xml.XmlDictionaryReader reader) -> string
@@ -175,6 +186,7 @@ static readonly Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.BoundedReaderQ
 static readonly Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionConstants.KnownNamespaces -> System.Collections.Generic.IList<string>
 Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader
 Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.DepthLimitingXmlReader(System.Xml.XmlReader inner, int maxDepth) -> void
+Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.DepthLimitingXmlReader(System.Xml.XmlReader inner, int maxDepth, bool countRootElement) -> void
 override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.AttributeCount.get -> int
 override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.BaseURI.get -> string
 override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Depth.get -> int

@@ -25,6 +25,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         internal const string IDX15022 = "IDX15022: Unable to read XML. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'.";
         internal const string IDX15024 = "IDX15024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX15025 = "IDX15025: Unable to read XML. The element nesting depth exceeds the maximum supported depth of '{0}'.";
+        internal const string IDX15026 = "IDX15026: Unable to read XML. The '{0}' resource limit of '{1}' was exceeded.";
         internal const string IDX15407 = "IDX15407: Exception caught while writing: '{0}'. Caught exception: '{1}'.";
         internal const string IDX15408 = "IDX15408: Unable to write '{0}'. The configured '{1}' does not contain serializable content.";
 

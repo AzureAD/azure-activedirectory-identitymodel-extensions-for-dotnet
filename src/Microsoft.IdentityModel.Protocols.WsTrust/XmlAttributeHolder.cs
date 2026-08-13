@@ -31,6 +31,7 @@ namespace Microsoft.IdentityModel.Xml
             if (reader.AttributeCount == 0)
                 return EmptyArray;
 
+            Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.AddAttributeCount(reader.AttributeCount);
             XmlAttributeHolder[] attributes = new XmlAttributeHolder[reader.AttributeCount];
             reader.MoveToFirstAttribute();
             for (int i = 0; i < attributes.Length; i++)
@@ -41,6 +42,14 @@ namespace Microsoft.IdentityModel.Xml
                 string value = string.Empty;
                 while (reader.ReadAttributeValue())
                 {
+                    Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.AddXmlCharacters(reader.Value.Length);
+                    if (value.Length + reader.Value.Length > Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxXmlCharacters)
+                        throw Microsoft.IdentityModel.Logging.LogHelper.LogExceptionMessage(
+                            new XmlReadException(Microsoft.IdentityModel.Logging.LogHelper.FormatInvariant(
+                                Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15026,
+                                "attribute value characters",
+                                Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxXmlCharacters)));
+
                     if (value.Length == 0)
                         value = reader.Value;
                     else

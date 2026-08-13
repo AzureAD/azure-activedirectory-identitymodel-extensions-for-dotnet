@@ -57,6 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;BinarySecret&gt;.</exception>
         public static BinarySecret ReadBinarySecrect(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:BinarySecret Type="...">
             //      ...
             //  </t:BinarySecret>
@@ -86,9 +87,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (!reader.IsEmptyElement)
                 {
                     reader.ReadStartElement();
-                    byte[] data = reader.ReadContentAsBase64();
-                    if (data != null)
-                        binarySecret.Data = data;
+                    using MemoryStream data = WsUtils.CreateBoundedMemoryStream();
+                    var buffer = new byte[4096];
+                    int read;
+                    while ((read = reader.ReadContentAsBase64(buffer, 0, buffer.Length)) > 0)
+                        data.Write(buffer, 0, read);
+
+                    binarySecret.Data = data.ToArray();
 
                     reader.ReadEndElement();
                 }
@@ -120,6 +125,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;Claims&gt;.</exception>
         public virtual Claims ReadClaims(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             // <trust:Claims
             //  Dialect="edef1723d88b4897a8792d2fc62f9148">
             //      <auth:ClaimType
@@ -143,8 +149,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (isEmptyElement)
                     return new Claims(dialect, claimTypes);
 
+                int childCount = 0;
                 while (reader.IsStartElement())
                 {
+                    WsUtils.EnsureElementCount(++childCount);
                     if (reader.IsStartElement(WsFedElements.ClaimType, serializationContext.FedConstants.AuthNamespace))
                     {
                         claimTypes.Add(_wsFedSerializer.ReadClaimType(reader, serializationContext.FedConstants.AuthNamespace));
@@ -181,6 +189,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;Entropy&gt;.</exception>
         public static Entropy ReadEntropy(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:Entropy>
             //      <t:BinarySecret>
             //          ...
@@ -227,6 +236,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;Lifetime&gt;.</exception>
         public static Lifetime ReadLifetime(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:Lifetime>
             //      <wsu:Created xmlns:wsu="...">2017-04-23T16:11:17.348Z</wsu:Created>
             //      <wsu:Expires xmlns:wsu="...">2017-04-23T17:11:17.348Z</wsu:Expires>
@@ -242,8 +252,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (isEmptyElement)
                     return lifetime;
 
+                int childCount = 0;
                 while (reader.IsStartElement())
                 {
+                    WsUtils.EnsureElementCount(++childCount);
                     if (reader.IsStartElement(WsUtilityElements.Created, WsUtilityConstants.WsUtility10.Namespace))
                         lifetime.Created = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
                     else if (reader.IsStartElement(WsUtilityElements.Expires, WsUtilityConstants.WsUtility10.Namespace))
@@ -278,6 +290,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;OnBehalfOf&gt;.</exception>
         public virtual SecurityTokenElement ReadOnBehalfOf(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:OnBehalfOf>
             //      one of
             //      <wsse:SecurityTokenReference>
@@ -387,6 +400,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;RequestSecurityToken&gt;.</exception>
         public WsTrustRequest ReadRequest(XmlDictionaryReader reader)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:RequestSecurityToken Context="..." xmlns:t="...">
             //      <t:TokenType>...</t:TokenType>
             //      <t:RequestType>...</t:RequestType>
@@ -439,8 +453,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         private void ReadRequest(XmlDictionaryReader reader, WsTrustRequest trustRequest, WsSerializationContext serializationContext)
         {
             // brentsch - TODO, PERF - create a collection of strings assuming only single elements
+            int childCount = 0;
             while (reader.IsStartElement())
             {
+                WsUtils.EnsureElementCount(++childCount);
                 bool processed = false;
                 if (reader.IsStartElement(WsTrustElements.RequestType, serializationContext.TrustConstants.Namespace))
                 {
@@ -557,6 +573,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestSecurityTokenResponse&gt;.</exception>
         public RequestSecurityTokenResponse ReadRequestSeurityTokenResponse(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             WsUtils.CheckReaderOnEntry(reader, WsTrustElements.RequestSecurityTokenResponse, serializationContext);
 
             try
@@ -573,8 +590,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (isEmptyElement)
                     return tokenResponse;
 
+                int childCount = 0;
                 while (reader.IsStartElement())
                 {
+                    WsUtils.EnsureElementCount(++childCount);
                     if (reader.IsStartElement(WsTrustElements.TokenType, serializationContext.TrustConstants.Namespace))
                     {
                         tokenResponse.TokenType = WsUtils.ReadStringElement(reader);
@@ -692,6 +711,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedProofToken&gt;.</exception>
         public static RequestedProofToken ReadRequestedProofToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:RequestedProofToken>
             //      <t:BinarySecret>
             //          5p76ToaxZXMFm4W6fmCcFXfDPd9WgJIM
@@ -710,8 +730,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (isEmptyElement)
                     return proofToken;
 
+                int childCount = 0;
                 while (reader.IsStartElement())
                 {
+                    WsUtils.EnsureElementCount(++childCount);
                     if (reader.IsStartElement(WsTrustElements.BinarySecret, serializationContext.TrustConstants.Namespace))
                     {
                         proofToken.BinarySecret = ReadBinarySecrect(reader, serializationContext);
@@ -722,7 +744,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     }
                     else if (reader.IsStartElement(XmlEncryptionElements.EncryptedKey, XmlEncryptionConstants.XmlEnc11.Namespace))
                     {
-                        proofToken.EncryptedKey = new EncryptedKey(CreateXmlElement(reader));
+                        proofToken.EncryptedKey = new EncryptedKey(CreateXmlElement(reader, false));
                     }
                     else
                     {
@@ -746,10 +768,15 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         internal static XmlElement CreateXmlElement(XmlReader reader)
         {
+            return CreateXmlElement(reader, true);
+        }
+
+        private static XmlElement CreateXmlElement(XmlReader reader, bool countRootElement)
+        {
             string elementName = reader.LocalName;
             string elementNs = reader.NamespaceURI;
             reader.MoveToContent();
-            using (MemoryStream ms = new MemoryStream())
+            using (MemoryStream ms = WsUtils.CreateBoundedMemoryStream())
             {
                 using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
                 {
@@ -759,6 +786,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 ms.Seek(0, SeekOrigin.Begin);
                 using (XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, WsUtils.BoundedReaderQuotas, null))
+                using (var depthLimitingReader = new DepthLimitingXmlReader(memoryReader, WsUtils.BoundedReaderQuotas.MaxDepth, countRootElement))
                 {
                     XmlDocument dom = new XmlDocument
                     {
@@ -766,7 +794,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                         XmlResolver = null
                     };
 
-                    dom.Load(memoryReader);
+                    dom.Load(depthLimitingReader);
                     return dom.DocumentElement;
                 }
             }
@@ -784,6 +812,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedSecurityToken&gt;.</exception>
         public static RequestedSecurityToken ReadRequestedSecurityToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             //  <t:RequestedSecurityToken>
             //      <SecurityToken>
             //      <SecurityTokenReference>
@@ -855,6 +884,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at a known WsTrust version.</exception>
         public WsTrustResponse ReadResponse(XmlDictionaryReader reader)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
@@ -922,8 +952,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     return response;
             }
 
+            int responseCount = 0;
             while (reader.IsStartElement())
             {
+                WsUtils.EnsureElementCount(++responseCount);
                 if (reader.IsStartElement(WsTrustElements.RequestSecurityTokenResponse, serializationContext.TrustConstants.Namespace))
                     response.RequestSecurityTokenResponseCollection.Add(ReadRequestSeurityTokenResponse(reader, serializationContext));
                 else
@@ -949,7 +981,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             // pass-through on typical input and only signals when the configured depth is exceeded.
             bool isEmptyElement = reader.IsEmptyElement;
             var doc = new XmlDocument { XmlResolver = null };
-            using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth))
+            using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth, false))
                 doc.Load(depthLimitingReader);
             trustMessage.AdditionalXmlElements.Add(doc.DocumentElement);
 
@@ -1009,6 +1041,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;UseKey&gt;.</exception>
         public static UseKey ReadUseKey(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            using IDisposable readScope = WsUtils.EnterReadScope();
             WsUtils.CheckReaderOnEntry(reader, WsTrustElements.UseKey, serializationContext);
             return new WsTrustSerializer().ReadUseKeyCore(reader, serializationContext);
         }

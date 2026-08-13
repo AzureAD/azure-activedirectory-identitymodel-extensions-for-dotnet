@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             if (securityTokenReference == null)
                 throw LogHelper.LogArgumentNullException(nameof(securityTokenReference));
 
-            using (var stream = new MemoryStream())
+            using (var stream = WsUtils.CreateBoundedMemoryStream())
             {
                 using (var writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false))
                 {
@@ -42,8 +42,9 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
                     };
 
                     using (var dictReader = XmlDictionaryReader.CreateTextReader(stream, WsUtils.BoundedReaderQuotas))
+                    using (var depthLimitingReader = new DepthLimitingXmlReader(dictReader, WsUtils.BoundedReaderQuotas.MaxDepth))
                     {
-                        dom.Load(dictReader);
+                        dom.Load(depthLimitingReader);
                         return dom.DocumentElement;
                     }
                 }
@@ -76,8 +77,10 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
 
             bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
+            int childCount = 0;
             while (reader.IsStartElement())
             {
+                WsUtils.EnsureElementCount(++childCount);
                 if (reader.IsStartElement(WsSecurityElements.KeyIdentifier, WsSecurityConstants.WsSecurity10.Namespace))
                     securityTokenReference.KeyIdentifier = ReadKeyIdentifier(reader);
                 else
@@ -115,12 +118,10 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             if (!string.IsNullOrEmpty(valueType))
                 keyIdentifier.ValueType = valueType;
 
-            reader.ReadStartElement();
-            if (!isEmptyElement)
-            {
-                keyIdentifier.Value = reader.ReadContentAsString();
-                reader.ReadEndElement();
-            }
+            if (isEmptyElement)
+                reader.ReadStartElement();
+            else
+                keyIdentifier.Value = WsUtils.ReadStringElement(reader);
 
             return keyIdentifier;
         }

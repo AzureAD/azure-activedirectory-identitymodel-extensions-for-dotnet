@@ -24,6 +24,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
         /// <returns>An <see cref="EndpointReference"/> instance.</returns>
         public virtual EndpointReference ReadEndpointReference(XmlDictionaryReader reader)
         {
+            using System.IDisposable readScope = WsUtils.EnterReadScope();
             //  <wsa:EndpointReference>
             //    <wsa:Address>xs:anyURI</wsa:Address>
             //    <wsa:ReferenceProperties>... </wsa:ReferenceProperties> ?
@@ -43,9 +44,11 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                     if (isEmptyElement)
                         throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15016, WsAddressingElements.Address)));
 
-                    var endpointReference = new EndpointReference(reader.ReadElementContentAsString());
+                    var endpointReference = new EndpointReference(WsUtils.ReadStringElement(reader));
+                    int childCount = 0;
                     while (reader.IsStartElement())
                     {
+                        WsUtils.EnsureElementCount(++childCount);
                         bool isInnerEmptyElement = reader.IsEmptyElement;
                         var doc = new XmlDocument
                         {
@@ -53,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                             XmlResolver = null
                         };
 
-                        using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth))
+                        using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth, false))
                             doc.Load(depthLimitingReader);
                         endpointReference.AdditionalXmlElements.Add(doc.DocumentElement);
                         if (isInnerEmptyElement)
