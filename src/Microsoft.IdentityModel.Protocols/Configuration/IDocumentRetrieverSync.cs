@@ -8,7 +8,7 @@ namespace Microsoft.IdentityModel.Protocols;
 /// <summary>
 /// Synchronous interface that defines a document retriever that returns the document as a string.
 /// </summary>
-public interface IDocumentRetrieverSync
+internal interface IDocumentRetrieverSync
 {
     /// <summary>
     /// Obtains a document from an address.

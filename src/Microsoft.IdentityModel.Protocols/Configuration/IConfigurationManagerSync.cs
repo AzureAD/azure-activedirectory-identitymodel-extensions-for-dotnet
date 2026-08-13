@@ -9,7 +9,7 @@ namespace Microsoft.IdentityModel.Protocols;
 /// Interface that defines a synchronous model for retrieving configuration data.
 /// </summary>
 /// <typeparam name="T">The type of the configuration metadata.</typeparam>
-public interface IConfigurationManagerSync<T> where T : class
+internal interface IConfigurationManagerSync<T> where T : class
 {
     /// <summary>
     /// Retrieve the current configuration, refreshing and/or caching as needed.

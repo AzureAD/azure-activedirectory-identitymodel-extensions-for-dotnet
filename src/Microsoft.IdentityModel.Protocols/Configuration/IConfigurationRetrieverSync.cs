@@ -9,7 +9,7 @@ namespace Microsoft.IdentityModel.Protocols;
 /// Interface that defines a synchronous method to retrieve configuration.
 /// </summary>
 /// <typeparam name="T">The type of the configuration metadata.</typeparam>
-public interface IConfigurationRetrieverSync<T>
+internal interface IConfigurationRetrieverSync<T>
 {
     /// <summary>
     /// Retrieves a populated configuration given an address and an <see cref="IDocumentRetriever"/>.

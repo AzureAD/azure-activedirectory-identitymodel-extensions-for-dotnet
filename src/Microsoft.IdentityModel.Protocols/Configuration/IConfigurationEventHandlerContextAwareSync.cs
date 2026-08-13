@@ -9,7 +9,7 @@ namespace Microsoft.IdentityModel.Protocols.Configuration;
 /// Defines synchronous, context-aware event handlers for configuration retrieval and update operations.
 /// </summary>
 /// <typeparam name="T">The type of configuration.</typeparam>
-public interface IConfigurationEventHandlerContextAwareSync<T> : IConfigurationEventHandlerSync<T> where T : class
+internal interface IConfigurationEventHandlerContextAwareSync<T> : IConfigurationEventHandlerSync<T> where T : class
 {
     /// <summary>
     /// Called before retrieving configuration from the metadata endpoint.
