@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    internal partial class ConfigurationManagerSync<T> : BaseConfigurationManager, IConfigurationManagerSync<T> where T : class
+    internal partial class ConfigurationManagerSync<T> : BaseConfigurationManagerSync, IConfigurationManagerSync<T> where T : class
     {
         internal Action _onBackgroundTaskFinish;
 

@@ -54,6 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
             ConfigurationManager = other.ConfigurationManager;
+            ConfigurationManagerSync = other.ConfigurationManagerSync;
             CryptoProviderFactory = other.CryptoProviderFactory;
             DebugId = other.DebugId;
             IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
@@ -264,6 +265,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// The obtained issuer and signing keys will then be used along with those present on the TokenValidationParameters for validation of the incoming token.
         /// </summary>
         public BaseConfigurationManager ConfigurationManager { get; set; }
+
+        /// <summary>
+        /// If set, this property will be used by synchronous validation to obtain issuer and signing key configuration.
+        /// </summary>
+        internal BaseConfigurationManagerSync ConfigurationManagerSync { get; set; }
 
         /// <summary>
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
