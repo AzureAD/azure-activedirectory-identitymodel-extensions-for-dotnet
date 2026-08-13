@@ -60,6 +60,11 @@ namespace Microsoft.IdentityModel.Validators
         private BaseConfigurationManager _configurationManagerV1;
         private BaseConfigurationManager _configurationManagerV11;
         private BaseConfigurationManager _configurationManagerV2;
+#if NET5_0_OR_GREATER
+        private BaseConfigurationManagerSync _configurationManagerV1Sync;
+        private BaseConfigurationManagerSync _configurationManagerV11Sync;
+        private BaseConfigurationManagerSync _configurationManagerV2Sync;
+#endif
         private IssuerLastKnownGood _issuerLKGV1;
         private IssuerLastKnownGood _issuerLKGV11;
         private IssuerLastKnownGood _issuerLKGV2;
@@ -187,11 +192,91 @@ namespace Microsoft.IdentityModel.Validators
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
         {
+#if NET5_0_OR_GREATER
+            if (!AppContextSwitches.PreserveLegacySyncBehavior)
+                return ValidateSync(issuer, securityToken, validationParameters);
+#endif
+
             ValueTask<string> vt = ValidateAsync(issuer, securityToken, validationParameters);
             return vt.IsCompletedSuccessfully ?
                 vt.Result :
                 vt.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
         }
+
+#if NET5_0_OR_GREATER
+        private string ValidateSync(
+            string issuer,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters)
+        {
+            _ = issuer ?? throw LogHelper.LogArgumentNullException(nameof(issuer));
+            _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
+            _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            string tenantId = GetTenantIdFromToken(securityToken);
+
+            if (string.IsNullOrWhiteSpace(tenantId))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40003));
+
+            if (validationParameters.ValidIssuers != null)
+            {
+                foreach (string validIssuerTemplate in validationParameters.ValidIssuers)
+                {
+                    if (IsValidIssuer(validIssuerTemplate, tenantId, issuer))
+                        return issuer;
+                }
+            }
+
+            if (validationParameters.ValidIssuer != null &&
+                IsValidIssuer(validationParameters.ValidIssuer, tenantId, issuer))
+            {
+                return issuer;
+            }
+
+            try
+            {
+                ProtocolVersion issuerVersion = GetTokenIssuerVersion(securityToken);
+                BaseConfigurationManagerSync configurationManager = GetConfigurationManagerSync(issuerVersion);
+
+                string aadIssuer;
+                if (validationParameters.ValidateWithLKG)
+                {
+                    aadIssuer = GetEffectiveLKGIssuer(issuerVersion);
+                }
+                else
+                {
+                    BaseConfiguration configuration = GetBaseConfigurationSync(configurationManager, validationParameters);
+                    aadIssuer = configuration.Issuer;
+                }
+
+                if (aadIssuer != null)
+                {
+                    bool isIssuerValid = IsValidIssuer(aadIssuer, tenantId, issuer);
+
+                    if (isIssuerValid && !validationParameters.ValidateWithLKG)
+                        SetEffectiveLKGIssuer(aadIssuer, issuerVersion, configurationManager.LastKnownGoodLifetime);
+
+                    if (isIssuerValid)
+                        return issuer;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenInvalidIssuerException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX40001,
+                            LogHelper.MarkAsNonPII(issuer)),
+                        ex));
+            }
+
+            throw LogHelper.LogExceptionMessage(
+                new SecurityTokenInvalidIssuerException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX40001,
+                        LogHelper.MarkAsNonPII(issuer))));
+        }
+#endif
 
         /// <summary>
         /// Validate the issuer for single and multi-tenant applications of various audiences (Work and School accounts, or Work and School accounts +
@@ -383,6 +468,25 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
+#if NET5_0_OR_GREATER
+        private ConfigurationManagerSync<OpenIdConnectConfiguration> CreateConfigManagerSync(string aadAuthority)
+        {
+            var documentRetriever = HttpClient != null
+                ? new HttpDocumentRetriever(HttpClient)
+                : new HttpDocumentRetriever();
+
+            var configurationManager = new ConfigurationManagerSync<OpenIdConnectConfiguration>(
+                $"{aadAuthority}{AadIssuerValidatorConstants.OidcEndpoint}",
+                new OpenIdConnectConfigurationRetrieverSync(),
+                documentRetriever)
+            {
+                LastKnownGoodLifetime = LastKnownGoodConfigurationLifetime
+            };
+
+            return configurationManager;
+        }
+#endif
+
         internal static bool IsValidIssuer(string issuerTemplate, string tenantId, string tokenIssuer)
         {
             if (string.IsNullOrEmpty(issuerTemplate) || string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(tokenIssuer))
@@ -515,6 +619,19 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
+#if NET5_0_OR_GREATER
+        private BaseConfigurationManagerSync GetConfigurationManagerSync(ProtocolVersion protocolVersion)
+        {
+            return protocolVersion switch
+            {
+                ProtocolVersion.V1 => _configurationManagerV1Sync ??= CreateConfigManagerSync(AadAuthorityV1),
+                ProtocolVersion.V11 => _configurationManagerV11Sync ??= CreateConfigManagerSync(AadAuthorityV11),
+                ProtocolVersion.V2 => _configurationManagerV2Sync ??= CreateConfigManagerSync(AadAuthorityV2),
+                _ => _configurationManagerV1Sync ??= CreateConfigManagerSync(AadAuthorityV1),
+            };
+        }
+#endif
+
         private string GetAuthority(ProtocolVersion protocolVersion)
         {
             switch (protocolVersion)
@@ -551,6 +668,16 @@ namespace Microsoft.IdentityModel.Validators
 
             return configurationManager.GetBaseConfigurationAsync(CancellationToken.None);
         }
+
+#if NET5_0_OR_GREATER
+        private static BaseConfiguration GetBaseConfigurationSync(BaseConfigurationManagerSync configurationManager, TokenValidationParameters validationParameters)
+        {
+            if (validationParameters.RefreshBeforeValidation)
+                configurationManager.RequestRefresh();
+
+            return configurationManager.GetBaseConfigurationSync(CancellationToken.None);
+        }
+#endif
 
         /// <summary>Gets the tenant ID from a token.</summary>
         /// <param name="securityToken">A JWT token.</param>
