@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsFed;
@@ -776,31 +775,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         private static XmlElement CreateXmlElement(XmlReader reader, bool countRootElement)
         {
-            string elementName = reader.LocalName;
-            string elementNs = reader.NamespaceURI;
-            reader.MoveToContent();
-            using (MemoryStream ms = WsUtils.CreateBoundedMemoryStream())
-            {
-                using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
-                {
-                    writer.WriteNode(reader, true);
-                    writer.Flush();
-                }
-
-                ms.Seek(0, SeekOrigin.Begin);
-                using (XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, WsUtils.BoundedReaderQuotas, null))
-                using (var depthLimitingReader = new DepthLimitingXmlReader(memoryReader, WsUtils.BoundedReaderQuotas.MaxDepth, countRootElement))
-                {
-                    XmlDocument dom = new XmlDocument
-                    {
-                        PreserveWhitespace = true,
-                        XmlResolver = null
-                    };
-
-                    dom.Load(depthLimitingReader);
-                    return dom.DocumentElement;
-                }
-            }
+            return WsUtils.ReadAsXmlElement(reader, countRootElement);
         }
 
         /// <summary>
@@ -983,22 +958,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             // Capture the (open-content / extension) unknown element into a DOM. The subtree is read
             // through a streaming DepthLimitingXmlReader that caps element nesting depth; it is a
             // pass-through on typical input and only signals when the configured depth is exceeded.
-            bool isEmptyElement = reader.IsEmptyElement;
-            var doc = new XmlDocument { XmlResolver = null };
-            using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth, false))
-                doc.Load(depthLimitingReader);
-            trustMessage.AdditionalXmlElements.Add(doc.DocumentElement);
-
-            if (isEmptyElement)
-            {
-                // ReadSubtree will advance the reader to the current element's end element. If the reader is at
-                // an empty element, it won't advance and the deserializer will be stuck on the empty unknown element.
-                reader.Read();
-            }
-            else
-            {
-                reader.ReadEndElement();
-            }
+            trustMessage.AdditionalXmlElements.Add(WsUtils.ReadAsXmlElement(reader, false));
         }
 
         private static void ReadAdditionalAttributes(

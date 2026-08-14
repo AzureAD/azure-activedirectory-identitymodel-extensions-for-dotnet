@@ -82,18 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (!reader.IsStartElement())
                 throw XmlUtil.LogReadException(LogMessages.IDX15022, reader.NodeType);
 
-            bool isEmptyElement = reader.IsEmptyElement;
-            using (var boundedReader = new DepthLimitingXmlReader(reader.ReadSubtree(), BoundedReaderQuotas.MaxDepth, false))
-            {
-                while (boundedReader.Read())
-                {
-                }
-            }
-
-            if (isEmptyElement)
-                reader.Read();
-            else
-                reader.ReadEndElement();
+            CopyElement(reader, null, false);
         }
 
         /// <summary>
@@ -101,14 +90,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        internal static XmlElement ReadAsXmlElement(XmlDictionaryReader reader)
+        internal static XmlElement ReadAsXmlElement(XmlReader reader)
+        {
+            return ReadAsXmlElement(reader, true);
+        }
+
+        internal static XmlElement ReadAsXmlElement(XmlReader reader, bool countRootElement)
         {
             XmlElement xmlElement = null;
             using (MemoryStream ms = CreateBoundedMemoryStream())
             {
                 using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
                 {
-                    writer.WriteNode(reader, true);
+                    CopyElement(reader, writer, countRootElement);
                     writer.Flush();
                 }
 
@@ -131,6 +125,154 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
 
             return xmlElement;
+        }
+
+        private static void CopyElement(XmlReader reader, XmlWriter writer, bool countRootElement)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            if (!reader.IsStartElement())
+                throw XmlUtil.LogReadException(LogMessages.IDX15022, reader.NodeType);
+
+            int rootDepth = reader.Depth;
+            int elementCount = 0;
+            var chunk = new char[4096];
+
+            while (true)
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        elementCount++;
+                        if (elementCount > MaxElementCount)
+                            ThrowResourceLimit("element count", MaxElementCount);
+
+                        if (countRootElement || elementCount > 1)
+                            AddElementCount(1);
+
+                        if (reader.Depth - rootDepth > BoundedReaderQuotas.MaxDepth)
+                            throw LogHelper.LogExceptionMessage(
+                                new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX15025, BoundedReaderQuotas.MaxDepth)));
+
+                        AddXmlCharacters(reader.LocalName.Length);
+                        AddXmlCharacters(reader.NamespaceURI.Length);
+                        writer?.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+                        CopyAttributes(reader, writer, chunk);
+
+                        bool isEmptyElement = reader.IsEmptyElement;
+                        if (isEmptyElement)
+                        {
+                            writer?.WriteEndElement();
+                            bool isRoot = reader.Depth == rootDepth;
+                            reader.Read();
+                            if (isRoot)
+                                return;
+                        }
+                        else
+                        {
+                            reader.Read();
+                        }
+
+                        break;
+
+                    case XmlNodeType.EndElement:
+                        bool isRootEnd = reader.Depth == rootDepth;
+                        writer?.WriteFullEndElement();
+                        reader.Read();
+                        if (isRootEnd)
+                            return;
+
+                        break;
+
+                    case XmlNodeType.Text:
+                    case XmlNodeType.Whitespace:
+                    case XmlNodeType.SignificantWhitespace:
+                        CopyValueChunks(reader, writer, chunk);
+                        reader.Read();
+                        break;
+
+                    case XmlNodeType.CDATA:
+                        writer?.WriteCData(ReadBoundedValue(reader, chunk));
+                        reader.Read();
+                        break;
+
+                    case XmlNodeType.Comment:
+                        writer?.WriteComment(ReadBoundedValue(reader, chunk));
+                        reader.Read();
+                        break;
+
+                    case XmlNodeType.ProcessingInstruction:
+                        writer?.WriteProcessingInstruction(reader.Name, ReadBoundedValue(reader, chunk));
+                        reader.Read();
+                        break;
+
+                    case XmlNodeType.EntityReference:
+                        writer?.WriteEntityRef(reader.Name);
+                        reader.Read();
+                        break;
+
+                    default:
+                        if (!reader.Read())
+                            throw XmlUtil.LogReadException(LogMessages.IDX15017, "Unexpected end of XML while copying an element.");
+
+                        break;
+                }
+            }
+        }
+
+        private static void CopyAttributes(XmlReader reader, XmlWriter writer, char[] chunk)
+        {
+            int attributeCount = reader.AttributeCount;
+            AddAttributeCount(attributeCount);
+            for (int i = 0; i < attributeCount; i++)
+            {
+                reader.MoveToAttribute(i);
+                AddXmlCharacters(reader.LocalName.Length);
+                AddXmlCharacters(reader.NamespaceURI.Length);
+                writer?.WriteStartAttribute(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+
+                if (reader.ReadAttributeValue())
+                {
+                    do
+                    {
+                        if (reader.NodeType == XmlNodeType.EntityReference)
+                            writer?.WriteEntityRef(reader.Name);
+                        else
+                            CopyValueChunks(reader, writer, chunk);
+                    }
+                    while (reader.ReadAttributeValue());
+                }
+
+                writer?.WriteEndAttribute();
+                reader.MoveToElement();
+            }
+        }
+
+        private static void CopyValueChunks(XmlReader reader, XmlWriter writer, char[] chunk)
+        {
+            int read;
+            while ((read = reader.ReadValueChunk(chunk, 0, chunk.Length)) > 0)
+            {
+                AddXmlCharacters(read);
+                writer?.WriteChars(chunk, 0, read);
+            }
+        }
+
+        private static string ReadBoundedValue(XmlReader reader, char[] chunk)
+        {
+            var value = new StringBuilder();
+            int read;
+            while ((read = reader.ReadValueChunk(chunk, 0, chunk.Length)) > 0)
+            {
+                AddXmlCharacters(read);
+                if (value.Length + read > MaxXmlCharacters)
+                    ThrowResourceLimit("XML characters", MaxXmlCharacters);
+
+                value.Append(chunk, 0, read);
+            }
+
+            return value.ToString();
         }
 
         private sealed class BoundedMemoryStream : MemoryStream
@@ -377,20 +519,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     internal sealed class DepthLimitingXmlReader : XmlReader
     {
         private readonly XmlReader _inner;
-        private readonly bool _countRootElement;
         private readonly int _maxDepth;
         private int _elementCount;
 
         internal DepthLimitingXmlReader(XmlReader inner, int maxDepth)
-            : this(inner, maxDepth, true)
-        {
-        }
-
-        internal DepthLimitingXmlReader(XmlReader inner, int maxDepth, bool countRootElement)
         {
             _inner = inner ?? throw LogHelper.LogArgumentNullException(nameof(inner));
             _maxDepth = maxDepth;
-            _countRootElement = countRootElement;
         }
 
         public override bool Read()
@@ -408,33 +543,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 _elementCount++;
                 if (_elementCount > WsUtils.MaxElementCount)
                     ThrowResourceLimit("element count", WsUtils.MaxElementCount);
-
-                if (_countRootElement || _elementCount > 1)
-                    WsUtils.AddElementCount(1);
-
-                WsUtils.AddAttributeCount(_inner.AttributeCount);
-
-                AddCharacters(_inner.LocalName);
-                AddCharacters(_inner.NamespaceURI);
-                for (int i = 0; i < _inner.AttributeCount; i++)
-                {
-                    AddCharacters(_inner.GetAttribute(i));
-                }
-            }
-            else if (_inner.HasValue)
-            {
-                AddCharacters(_inner.Value);
             }
 
             return true;
-        }
-
-        private static void AddCharacters(string value)
-        {
-            if (value == null)
-                return;
-
-            WsUtils.AddXmlCharacters(value.Length);
         }
 
         private static void ThrowResourceLimit(string resource, int limit)

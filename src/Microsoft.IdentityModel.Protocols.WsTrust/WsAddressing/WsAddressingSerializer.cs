@@ -57,20 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                             continue;
                         }
 
-                        bool isInnerEmptyElement = reader.IsEmptyElement;
-                        var doc = new XmlDocument
-                        {
-                            PreserveWhitespace = true,
-                            XmlResolver = null
-                        };
-
-                        using (var depthLimitingReader = new DepthLimitingXmlReader(reader.ReadSubtree(), WsUtils.BoundedReaderQuotas.MaxDepth, false))
-                            doc.Load(depthLimitingReader);
-                        additionalElements.Add(doc.DocumentElement);
-                        if (isInnerEmptyElement)
-                            reader.Read();
-                        else
-                            reader.ReadEndElement();
+                        additionalElements.Add(WsUtils.ReadAsXmlElement(reader, false));
                     }
 
                     reader.ReadEndElement();

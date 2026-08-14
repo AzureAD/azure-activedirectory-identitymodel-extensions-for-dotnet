@@ -173,7 +173,8 @@ static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.CheckReaderOnEntry(Syst
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.CreateBoundedMemoryStream() -> System.IO.MemoryStream
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.EnterReadScope() -> System.IDisposable
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.EnsureElementCount(int elementCount) -> void
-static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadAsXmlElement(System.Xml.XmlDictionaryReader reader) -> System.Xml.XmlElement
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadAsXmlElement(System.Xml.XmlReader reader) -> System.Xml.XmlElement
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadAsXmlElement(System.Xml.XmlReader reader, bool countRootElement) -> System.Xml.XmlElement
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadIntElement(System.Xml.XmlDictionaryReader reader) -> int?
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadStringElement(System.Xml.XmlDictionaryReader reader) -> string
 static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.SkipElement(System.Xml.XmlReader reader) -> void
@@ -187,7 +188,6 @@ static readonly Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.BoundedReaderQ
 static readonly Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionConstants.KnownNamespaces -> System.Collections.Generic.IList<string>
 Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader
 Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.DepthLimitingXmlReader(System.Xml.XmlReader inner, int maxDepth) -> void
-Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.DepthLimitingXmlReader(System.Xml.XmlReader inner, int maxDepth, bool countRootElement) -> void
 override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.AttributeCount.get -> int
 override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.BaseURI.get -> string
 override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Depth.get -> int
