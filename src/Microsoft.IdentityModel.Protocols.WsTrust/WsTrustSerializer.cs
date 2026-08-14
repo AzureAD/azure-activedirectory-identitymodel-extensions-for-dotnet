@@ -1396,10 +1396,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             return securityTokenElement;
         }
 
-        private void ValidateRequestForWriting(WsTrustRequest trustRequest)
+        private void ValidateRequestForWriting(WsTrustRequest trustRequest, bool includeActAs)
         {
             if (trustRequest.OnBehalfOf != null)
                 ValidateSecurityTokenElementForWriting(trustRequest.OnBehalfOf, WsTrustElements.OnBehalfOf);
+
+            if (includeActAs && trustRequest.ActAs != null)
+                ValidateSecurityTokenElementForWriting(trustRequest.ActAs, WsTrustElements.ActAs);
 
             if (trustRequest.ProofEncryption != null)
                 ValidateSecurityTokenElementForWriting(trustRequest.ProofEncryption, WsTrustElements.ProofEncryption);
@@ -1472,6 +1475,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        private void WriteActAs(XmlDictionaryWriter writer, SecurityTokenElement actAs)
+        {
+            writer.WriteStartElement(WsTrust14Constants.Trust14.Prefix, WsTrustElements.ActAs, WsTrust14Constants.Trust14.Namespace);
+            WriteSecurityTokenElementContent(writer, actAs);
+            writer.WriteEndElement();
+        }
+
         /// <summary>
         /// Writes a &lt;RequestSecurityToken&gt; element.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
@@ -1485,6 +1495,29 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteRequest(XmlDictionaryWriter writer, WsTrustVersion wsTrustVersion, WsTrustRequest trustRequest)
         {
+            WriteRequest(writer, wsTrustVersion, trustRequest, includeActAs: false);
+        }
+
+        /// <summary>
+        /// Writes a &lt;RequestSecurityToken&gt; element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryWriter"/> to write the element into.</param>
+        /// <param name="wsTrustVersion">A <see cref="WsTrustVersion"/> defining the core WS-Trust version.</param>
+        /// <param name="trustRequest">The <see cref="WsTrustRequest"/> to write.</param>
+        /// <param name="includeActAs">
+        /// <see langword="true"/> to write <see cref="WsTrustMessage.ActAs"/> in the WS-Trust 1.4 extension namespace;
+        /// otherwise, <see cref="WsTrustMessage.ActAs"/> is ignored for compatibility.
+        /// </param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="wsTrustVersion"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="trustRequest"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
+        public void WriteRequest(
+            XmlDictionaryWriter writer,
+            WsTrustVersion wsTrustVersion,
+            WsTrustRequest trustRequest,
+            bool includeActAs)
+        {
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
@@ -1494,7 +1527,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (trustRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(trustRequest));
 
-            ValidateRequestForWriting(trustRequest);
+            ValidateRequestForWriting(trustRequest, includeActAs);
             var serializationContext = new WsSerializationContext(wsTrustVersion);
 
             try
@@ -1541,6 +1574,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 if (trustRequest.OnBehalfOf != null)
                     WriteOnBehalfOf(writer, serializationContext, trustRequest.OnBehalfOf);
+
+                if (includeActAs && trustRequest.ActAs != null)
+                    WriteActAs(writer, trustRequest.ActAs);
 
                 if (trustRequest.AdditionalContext != null)
                     WsFedSerializer.WriteAdditionalContext(writer, serializationContext, trustRequest.AdditionalContext);
