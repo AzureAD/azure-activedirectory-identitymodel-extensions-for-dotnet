@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Protocols.Configuration;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Performs synchronous configuration retrieval on a dedicated background thread.
+    /// Performs configuration retrieval on a dedicated background thread.
     /// </summary>
     /// <typeparam name="T">The configuration type.</typeparam>
     public sealed class DedicatedThreadRetriever<T> where T : class
@@ -119,15 +119,21 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
+        // this technically can run even if not Attach()'ed to a BackgroundConfigurationManager, though this is not intended use
+        // if desired, can add some sort of _isAttached() flag to enforce this usage
         internal RefreshOperation RequestRefresh()
         {
+            RefreshOperation operation = Volatile.Read(ref _activeOperation);
+            if (operation is not null && !operation.IsCompleted)
+                return operation;
+
             lock (_stateLock)
             {
                 EnsureWorkerIsRunning();
 
                 if (_activeOperation is null || _activeOperation.IsCompleted)
                 {
-                    _activeOperation = new RefreshOperation();
+                    Volatile.Write(ref _activeOperation, new RefreshOperation());
                     _refreshRequested.Set();
                 }
 
@@ -154,7 +160,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 _activeOperation.SetException(
                     new InvalidOperationException("The dedicated configuration retrieval thread stopped unexpectedly."));
-                _activeOperation = null;
+                Volatile.Write(ref _activeOperation, null);
             }
 
             StartWorker();
@@ -170,6 +176,9 @@ namespace Microsoft.IdentityModel.Protocols
             _worker.Start();
         }
 
+        // there is a theoretical race condition under async retrieval where the Thread can fire off a RetrieveAsync,
+        // then get interrupted, then as a new Thread spawns, it fires off another RetrieveAsync, and these duplicate
+        // requests may result in a race
         private void Run()
         {
             try
@@ -185,11 +194,9 @@ namespace Microsoft.IdentityModel.Protocols
                         return;
                     }
 
-                    RefreshOperation operation;
-                    lock (_stateLock)
-                        operation = _activeOperation;
+                    RefreshOperation operation = Volatile.Read(ref _activeOperation);
 
-                    if (operation is null)
+                    if (operation is null || operation.IsCompleted)
                         continue;
 
                     if (_useAsyncRetrieval)
@@ -285,7 +292,7 @@ namespace Microsoft.IdentityModel.Protocols
             lock (_stateLock)
             {
                 if (ReferenceEquals(_activeOperation, operation))
-                    _activeOperation = null;
+                    Volatile.Write(ref _activeOperation, null);
             }
         }
 

@@ -78,6 +78,81 @@ public class DedicatedThreadRetrieverTests
     }
 
     [Fact]
+    public void RequestRefresh_ActiveOperation_DoesNotAcquireStateLock()
+    {
+        // Arrange
+        var configurationRetriever = new BlockingSyncConfigurationRetriever();
+        DedicatedThreadRetriever<TestConfiguration> dedicatedThreadRetriever =
+            DedicatedThreadRetriever<TestConfiguration>.CreateSync(
+                MetadataAddress,
+                configurationRetriever,
+                new SyncDocumentRetriever());
+        DedicatedThreadRetriever<TestConfiguration>.RefreshOperation firstOperation =
+            dedicatedThreadRetriever.RequestRefresh();
+        Assert.True(configurationRetriever.RetrievalStarted.Wait(TimeSpan.FromSeconds(10)));
+
+        FieldInfo stateLockField = typeof(DedicatedThreadRetriever<TestConfiguration>).GetField(
+            "_stateLock",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        object stateLock = Assert.IsType<object>(stateLockField.GetValue(dedicatedThreadRetriever));
+        var requestCompleted = new ManualResetEventSlim();
+        DedicatedThreadRetriever<TestConfiguration>.RefreshOperation secondOperation = null;
+
+        Monitor.Enter(stateLock);
+        try
+        {
+            // Act
+            var requestThread = new Thread(() =>
+            {
+                secondOperation = dedicatedThreadRetriever.RequestRefresh();
+                requestCompleted.Set();
+            });
+            requestThread.Start();
+
+            // Assert
+            Assert.True(requestCompleted.Wait(TimeSpan.FromSeconds(10)));
+            Assert.Same(firstOperation, secondOperation);
+            requestThread.Join();
+        }
+        finally
+        {
+            Monitor.Exit(stateLock);
+            configurationRetriever.AllowRetrieval.Set();
+        }
+    }
+
+    [Fact]
+    public void WorkerDispatch_DoesNotAcquireStateLock()
+    {
+        // Arrange
+        var configurationRetriever = new BlockingSyncConfigurationRetriever();
+        DedicatedThreadRetriever<TestConfiguration> dedicatedThreadRetriever =
+            DedicatedThreadRetriever<TestConfiguration>.CreateSync(
+                MetadataAddress,
+                configurationRetriever,
+                new SyncDocumentRetriever());
+        FieldInfo stateLockField = typeof(DedicatedThreadRetriever<TestConfiguration>).GetField(
+            "_stateLock",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        object stateLock = Assert.IsType<object>(stateLockField.GetValue(dedicatedThreadRetriever));
+
+        Monitor.Enter(stateLock);
+        try
+        {
+            // Act
+            dedicatedThreadRetriever.RequestRefresh();
+
+            // Assert
+            Assert.True(configurationRetriever.RetrievalStarted.Wait(TimeSpan.FromSeconds(10)));
+        }
+        finally
+        {
+            Monitor.Exit(stateLock);
+            configurationRetriever.AllowRetrieval.Set();
+        }
+    }
+
+    [Fact]
     public async Task ConcurrentRefreshRequests_CoalesceIntoSingleRetrieval()
     {
         // Arrange
@@ -205,6 +280,23 @@ public class DedicatedThreadRetrieverTests
 
             Interlocked.Increment(ref _completedCallCount);
             return Task.FromResult(new TestConfiguration());
+        }
+    }
+
+    private sealed class BlockingSyncConfigurationRetriever : IConfigurationRetrieverSync<TestConfiguration>
+    {
+        internal ManualResetEventSlim AllowRetrieval { get; } = new(false);
+
+        internal ManualResetEventSlim RetrievalStarted { get; } = new(false);
+
+        public TestConfiguration GetConfigurationSync(
+            string address,
+            IDocumentRetrieverSync retriever,
+            CancellationToken cancel)
+        {
+            RetrievalStarted.Set();
+            AllowRetrieval.Wait(cancel);
+            return new TestConfiguration();
         }
     }
 
