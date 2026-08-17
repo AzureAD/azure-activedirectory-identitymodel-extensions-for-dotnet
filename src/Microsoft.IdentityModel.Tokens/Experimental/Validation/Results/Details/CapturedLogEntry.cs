@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.IdentityModel.Abstractions;
 
 #nullable enable
@@ -17,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// formatted lazily and honors <c>MarkAsNonPII</c>, so no message string is built unless and until the
     /// entry is emitted. This is the informational-log analog of the failure-path <see cref="ValidationError"/>.
     /// </remarks>
-    public readonly struct CapturedLogEntry : IEquatable<CapturedLogEntry>
+    internal readonly struct CapturedLogEntry
     {
         /// <summary>
         /// Creates a new <see cref="CapturedLogEntry"/>.
@@ -39,23 +38,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// The lazily-formatted, PII-aware message.
         /// </summary>
         public MessageDetail MessageDetail { get; }
-
-        /// <inheritdoc/>
-        public bool Equals(CapturedLogEntry other) =>
-            Level == other.Level && ReferenceEquals(MessageDetail, other.MessageDetail);
-
-        /// <inheritdoc/>
-        public override bool Equals(object? obj) => obj is CapturedLogEntry other && Equals(other);
-
-        /// <inheritdoc/>
-        public override int GetHashCode() =>
-            (((int)Level) * 397) ^ (MessageDetail?.GetHashCode() ?? 0);
-
-        /// <summary>Determines whether two <see cref="CapturedLogEntry"/> values are equal.</summary>
-        public static bool operator ==(CapturedLogEntry left, CapturedLogEntry right) => left.Equals(right);
-
-        /// <summary>Determines whether two <see cref="CapturedLogEntry"/> values are not equal.</summary>
-        public static bool operator !=(CapturedLogEntry left, CapturedLogEntry right) => !left.Equals(right);
     }
 }
 #nullable restore

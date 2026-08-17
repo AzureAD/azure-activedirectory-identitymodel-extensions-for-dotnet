@@ -41,9 +41,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// This is the informational-log analog of the failure-path <see cref="ValidationError"/>: the
         /// result-based validators are side-effect free and record here instead of calling the logger
-        /// directly, so the handler can emit them once, in the right place, respecting PII.
+        /// directly, so the handler can emit them once, in the right place, respecting PII. Exposed as
+        /// internal because only the handler drains the buffer; callers observe the emitted logs, not this list.
         /// </remarks>
-        public IReadOnlyList<CapturedLogEntry> CapturedLogEntries => (IReadOnlyList<CapturedLogEntry>?)_capturedLogEntries ?? Array.Empty<CapturedLogEntry>();
+        internal IReadOnlyList<CapturedLogEntry> CapturedLogEntries => (IReadOnlyList<CapturedLogEntry>?)_capturedLogEntries ?? Array.Empty<CapturedLogEntry>();
 
         /// <summary>
         /// Records a structured, PII-aware informational log entry on the context.
@@ -53,6 +54,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// Call sites should guard with <see cref="LogHelper.IsEnabled(EventLogLevel)"/> so the
         /// <see cref="MessageDetail"/> is not allocated when the target level is disabled.
+        /// A <see cref="CallContext"/> represents a single logical validation call and its captured-log
+        /// buffer is not synchronized; it must not be recorded to or drained from multiple threads concurrently.
         /// </remarks>
         public void AddLog(EventLogLevel level, MessageDetail messageDetail)
         {
@@ -71,8 +74,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// Called once by the handler at the end of validation (issue #3455). Emitting here — rather than from
         /// each validator — keeps the result-based validators side-effect free and gives a single seam for the
         /// LoggerMessage/ILogger migration (#3361). The <see cref="MessageDetail"/> already applied
-        /// <c>MarkAsNonPII</c> at capture time, so the materialized message is wrapped as non-PII to avoid the
-        /// logger re-scrubbing the whole line.
+        /// <c>MarkAsNonPII</c> to its non-sensitive arguments at capture time and redacts unmarked arguments
+        /// when PII display is off, so wrapping the materialized message as non-PII here does not expose PII.
+        /// Passing structured parameters through to the sink (rather than a rendered string) is tracked by #3361.
         /// </remarks>
         internal void EmitCapturedLogs()
         {
@@ -102,6 +106,33 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             _capturedLogEntries.Clear();
+        }
+
+        /// <summary>
+        /// Discards every captured log entry without emitting them. Used by the handler to drop the
+        /// informational logs of a validation attempt that was superseded by a retry (issue #3455).
+        /// </summary>
+        internal void ClearCapturedLogs() => _capturedLogEntries?.Clear();
+
+        /// <summary>
+        /// Begins a scope that emits the captured logs (via <see cref="EmitCapturedLogs"/>) when disposed.
+        /// Use with a <c>using</c> declaration at the top of a validation method so the buffer is drained on
+        /// every exit path — success, failure, or exception — without introducing an extra async state
+        /// machine (issue #3455).
+        /// </summary>
+        internal LogEmissionScope BeginLogEmissionScope() => new(this);
+
+        /// <summary>
+        /// A disposable scope that drains the <see cref="CallContext"/> captured logs on <see cref="Dispose"/>.
+        /// </summary>
+        internal readonly struct LogEmissionScope : IDisposable
+        {
+            private readonly CallContext _callContext;
+
+            internal LogEmissionScope(CallContext callContext) => _callContext = callContext;
+
+            /// <summary>Emits the logs captured on the associated <see cref="CallContext"/>.</summary>
+            public void Dispose() => _callContext.EmitCapturedLogs();
         }
     }
 }

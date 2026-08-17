@@ -170,10 +170,17 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                     Debug.Assert(_claimsIdentity is null);
 
                     CallContext context = CallContext ?? new CallContext();
-                    _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer?.Issuer, context);
-                    // Issue #3455: claims identity creation is lazy and happens after validation returns, so the
-                    // handler's end-of-validation drain has already run. Emit the logs captured during creation here.
-                    context.EmitCapturedLogs();
+                    try
+                    {
+                        _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer?.Issuer, context);
+                    }
+                    finally
+                    {
+                        // Issue #3455: claims identity creation is lazy and happens after validation returns, so the
+                        // handler's end-of-validation drain has already run. Emit the logs captured during creation
+                        // here, on every path, so they are not lost if creation throws.
+                        context.EmitCapturedLogs();
+                    }
                     _claimsIdentityInitialized = true;
                 }
 

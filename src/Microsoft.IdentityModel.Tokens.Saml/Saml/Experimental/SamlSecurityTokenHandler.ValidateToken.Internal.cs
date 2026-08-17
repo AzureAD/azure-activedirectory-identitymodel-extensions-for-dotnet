@@ -50,6 +50,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            // Issue #3455: drain the informational logs captured during validation on every completion path
+            // (success or failure) so they are emitted once and do not leak into a caller-reused CallContext.
+            // The using-scope keeps this to a single async state machine (no wrapper method).
+            using var logScope = callContext.BeginLogEmissionScope();
+
             if (securityToken is null)
             {
                 return ValidationError.NullParameter(

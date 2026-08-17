@@ -73,6 +73,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            // Issue #3455: drain the informational logs captured during validation on every completion path
+            // (success or failure) so they are emitted once, are not tied to whether the caller later accesses
+            // ClaimsIdentity, and do not leak into a caller-reused CallContext. The using-scope keeps this to a
+            // single async state machine (no wrapper method, no extra allocation on the hot path).
+            using var logScope = callContext.BeginLogEmissionScope();
+
             if (token is null)
             {
                 return ValidationError.NullParameter(
@@ -135,6 +141,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                     if (lastConfig != currentConfiguration)
                     {
+                        // Issue #3455: discard the superseded attempt's captured logs so only the final
+                        // attempt's informational logs are emitted.
+                        callContext.ClearCapturedLogs();
                         result = jsonWebToken.IsEncrypted ?
                             await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
                             await ValidateJWSAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false);
@@ -160,6 +169,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if (TokenUtilities.IsRecoverableConfigurationAndExceptionType(
                             jsonWebToken.Kid, currentConfiguration, lkgConfiguration, failureType))
                         {
+                            // Issue #3455: discard the superseded attempt's captured logs so only the final
+                            // attempt's informational logs are emitted.
+                            callContext.ClearCapturedLogs();
                             result = jsonWebToken.IsEncrypted ?
                                 await ValidateJWEAsync(jsonWebToken, validationParameters, lkgConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
                                 await ValidateJWSAsync(jsonWebToken, validationParameters, lkgConfiguration, callContext, cancellationToken).ConfigureAwait(false);

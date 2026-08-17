@@ -121,6 +121,59 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.NotNull(identity);
         }
 
+        [Fact]
+        public void EmitCapturedLogs_EmitsEnabledEntriesThenClearsBuffer()
+        {
+            // Arrange
+            EventLevel previousLevel = IdentityModelEventSource.Logger.LogLevel;
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Informational);
+
+            try
+            {
+                var context = new CallContext();
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: emitted."));
+
+                // Act
+                context.EmitCapturedLogs();
+
+                // Assert
+                Assert.Contains("IDX99999: emitted.", listener.TraceBuffer);
+                Assert.Empty(context.CapturedLogEntries);
+            }
+            finally
+            {
+                listener.Dispose();
+                IdentityModelEventSource.Logger.LogLevel = previousLevel;
+            }
+        }
+
+        [Fact]
+        public void ClearCapturedLogs_DiscardsEntriesWithoutEmitting()
+        {
+            // Arrange
+            EventLevel previousLevel = IdentityModelEventSource.Logger.LogLevel;
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Informational);
+
+            try
+            {
+                var context = new CallContext();
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: discarded."));
+
+                // Act
+                context.ClearCapturedLogs();
+                context.EmitCapturedLogs();
+
+                // Assert
+                Assert.Empty(context.CapturedLogEntries);
+                Assert.DoesNotContain("IDX99999: discarded.", listener.TraceBuffer);
+            }
+            finally
+            {
+                listener.Dispose();
+                IdentityModelEventSource.Logger.LogLevel = previousLevel;
+            }
+        }
+
         public static TheoryData<CallContextTheoryData> CallContextTestTheoryData
         {
             get
