@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens
             IList<string> validAudiences,
             bool ignoreTrailingSlashWhenValidatingAudience,
             bool ignoreCaseWhenValidatingAudience,
-            CallContext? callContext)
+            CallContext callContext)
         {
             StringComparison comparisonType = ignoreCaseWhenValidatingAudience
                 ? StringComparison.OrdinalIgnoreCase

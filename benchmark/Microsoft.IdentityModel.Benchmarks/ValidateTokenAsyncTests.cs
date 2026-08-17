@@ -281,11 +281,16 @@ namespace Microsoft.IdentityModel.Benchmarks
         private JsonWebTokenHandler _jsonWebTokenHandler;
         private string _jwsExtendedClaims;
         private ValidationParameters _validationParameters;
+        // Reused across iterations on purpose: the drain scope clears the buffer at the end of every
+        // ValidateTokenAsync, and lazy claims creation uses its own dedicated CallContext, so no state
+        // leaks between iterations.
         private CallContext _callContext;
-        private IIdentityLogger _originalLogger;
 
         private static readonly IIdentityLogger s_enabledLogger = new NoOpLogger(isEnabled: true);
         private static readonly IIdentityLogger s_disabledLogger = new NoOpLogger(isEnabled: false);
+        // Captured once at type initialization, before any GlobalSetup mutates the static logger, so
+        // GlobalCleanup always restores the true original regardless of target ordering within a process.
+        private static readonly IIdentityLogger s_originalLogger = LogHelper.Logger;
 
         private void CommonSetup()
         {
@@ -304,7 +309,6 @@ namespace Microsoft.IdentityModel.Benchmarks
             _validationParameters.SigningKeys.Add(BenchmarkUtils.SigningCredentialsRsaSha256.Key);
 
             _callContext = new CallContext();
-            _originalLogger = LogHelper.Logger;
         }
 
         // Logger state is established in GlobalSetup (once per benchmark, outside the measured region) so the
@@ -338,7 +342,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [GlobalCleanup]
-        public void Cleanup() => LogHelper.Logger = _originalLogger;
+        public void Cleanup() => LogHelper.Logger = s_originalLogger;
 
         [BenchmarkCategory("LoggingImpact_Success"), Benchmark(Baseline = true)]
         public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingDisabled()

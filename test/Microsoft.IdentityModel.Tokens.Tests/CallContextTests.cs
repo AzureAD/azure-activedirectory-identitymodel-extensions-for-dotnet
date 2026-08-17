@@ -94,6 +94,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact]
+        public void CreateClaimsIdentity_NullCallContext_Throws()
+        {
+            var validationParameters = new ValidationParameters();
+
+            // CreateClaimsIdentity is a public boundary; callContext is a required (non-null) argument.
+            Assert.Throws<ArgumentNullException>(() => validationParameters.CreateClaimsIdentity(new DerivedSecurityToken(), "issuer", null));
+        }
+
+        [Fact]
         public void CreateClaimsIdentity_RecordsInformationalLog_OnCallContext()
         {
             // Arrange

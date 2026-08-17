@@ -213,6 +213,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <returns>A <see cref="ClaimsIdentity"/> with Authentication, NameClaimType and RoleClaimType set.</returns>
         public virtual ClaimsIdentity CreateClaimsIdentity(SecurityToken securityToken, string issuer, CallContext callContext)
         {
+            if (callContext is null)
+                throw LogHelper.LogArgumentNullException(nameof(callContext));
+
             string nameClaimType;
             if (NameClaimTypeRetriever != null)
             {
