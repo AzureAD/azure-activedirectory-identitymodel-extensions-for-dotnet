@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Security.Claims;
@@ -80,6 +81,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Throws<ArgumentNullException>(() => context.AddLog(EventLogLevel.Informational, null));
         }
 
+        [Theory]
+        [InlineData(EventLogLevel.LogAlways)]
+        [InlineData(EventLogLevel.Critical)]
+        [InlineData(EventLogLevel.Error)]
+        public void AddLog_NonInformationalLevel_Throws(EventLogLevel level)
+        {
+            var context = new CallContext();
+
+            // Failure-severity levels belong on the ValidationError path; the capture channel is informational.
+            Assert.Throws<ArgumentOutOfRangeException>(() => context.AddLog(level, new MessageDetail("IDX99999: value.")));
+        }
+
         [Fact]
         public void CreateClaimsIdentity_RecordsInformationalLog_OnCallContext()
         {
@@ -106,19 +119,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 listener.Dispose();
                 IdentityModelEventSource.Logger.LogLevel = previousLevel;
             }
-        }
-
-        [Fact]
-        public void CreateClaimsIdentity_NullCallContext_DoesNotThrow()
-        {
-            // Arrange
-            var validationParameters = new ValidationParameters();
-
-            // Act
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(new DerivedSecurityToken(), "issuer", null);
-
-            // Assert
-            Assert.NotNull(identity);
         }
 
         [Fact]
@@ -172,6 +172,110 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 listener.Dispose();
                 IdentityModelEventSource.Logger.LogLevel = previousLevel;
             }
+        }
+
+        [Fact]
+        public void EmitCapturedLogs_RedactsPii_WhenShowPiiIsOff()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            bool originalShowPii = IdentityModelEventSource.ShowPII;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+            IdentityModelEventSource.ShowPII = false;
+
+            try
+            {
+                const string secret = "super-secret-user-value";
+                var context = new CallContext();
+                // The value is NOT marked NonPII, so it must be redacted end to end (highest-consequence path).
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: value is '{0}'.", secret));
+
+                // Act
+                context.EmitCapturedLogs();
+
+                // Assert
+                string emitted = Assert.Single(recorder.Messages);
+                Assert.DoesNotContain(secret, emitted);
+                Assert.Contains("hidden", emitted, StringComparison.OrdinalIgnoreCase);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+                IdentityModelEventSource.ShowPII = originalShowPii;
+            }
+        }
+
+        [Fact]
+        public void LogEmissionScope_EmitsCapturedLogsOnDispose()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                var context = new CallContext();
+
+                // Act
+                using (context.BeginLogEmissionScope())
+                {
+                    context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: scoped."));
+                }
+
+                // Assert
+                Assert.Contains(recorder.Messages, m => m.Contains("IDX99999: scoped."));
+                Assert.Empty(context.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
+        [Fact]
+        public void LogEmissionScope_EmitsCapturedLogsWhenBodyThrows()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                var context = new CallContext();
+
+                // Act
+                Action act = () =>
+                {
+                    using (context.BeginLogEmissionScope())
+                    {
+                        context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: scoped-throw."));
+                        throw new InvalidOperationException();
+                    }
+                };
+
+                Assert.Throws<InvalidOperationException>(act);
+
+                // Assert
+                Assert.Contains(recorder.Messages, m => m.Contains("IDX99999: scoped-throw."));
+                Assert.Empty(context.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
+        // Captures emitted messages so tests can assert on the drained/emitted output (including PII redaction).
+        private sealed class RecordingLogger : IIdentityLogger
+        {
+            public List<string> Messages { get; } = new List<string>();
+
+            public bool IsEnabled(EventLogLevel eventLogLevel) => true;
+
+            public void Log(LogEntry entry) => Messages.Add(entry.Message);
         }
 
         public static TheoryData<CallContextTheoryData> CallContextTestTheoryData

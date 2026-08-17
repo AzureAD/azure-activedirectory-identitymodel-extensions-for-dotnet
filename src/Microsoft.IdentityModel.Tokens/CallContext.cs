@@ -52,23 +52,31 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="level">The <see cref="EventLogLevel"/> the entry should be emitted at.</param>
         /// <param name="messageDetail">The lazily-formatted, PII-aware message.</param>
         /// <remarks>
-        /// Call sites should guard with <see cref="LogHelper.IsEnabled(EventLogLevel)"/> so the
-        /// <see cref="MessageDetail"/> is not allocated when the target level is disabled.
-        /// A <see cref="CallContext"/> represents a single logical validation call and its captured-log
-        /// buffer is not synchronized; it must not be recorded to or drained from multiple threads concurrently.
+        /// This is an informational capture channel: only <see cref="EventLogLevel.Informational"/>,
+        /// <see cref="EventLogLevel.Verbose"/>, and <see cref="EventLogLevel.Warning"/> are accepted —
+        /// failure-severity levels belong on the <see cref="ValidationError"/> path, not here. Call sites
+        /// should guard with <see cref="LogHelper.IsEnabled(EventLogLevel)"/> so the <see cref="MessageDetail"/>
+        /// is not allocated when the target level is disabled. A <see cref="CallContext"/> represents a single
+        /// logical validation call and its captured-log buffer is not synchronized; it must not be recorded to
+        /// or drained from multiple threads concurrently.
         /// </remarks>
-        public void AddLog(EventLogLevel level, MessageDetail messageDetail)
+        internal void AddLog(EventLogLevel level, MessageDetail messageDetail)
         {
             if (messageDetail is null)
                 throw LogHelper.LogArgumentNullException(nameof(messageDetail));
+
+            if (level is not (EventLogLevel.Informational or EventLogLevel.Verbose or EventLogLevel.Warning))
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                    nameof(level),
+                    level,
+                    "Only Informational, Verbose, and Warning levels can be captured on the CallContext; failures use ValidationError."));
 
             (_capturedLogEntries ??= new List<CapturedLogEntry>()).Add(new CapturedLogEntry(level, messageDetail));
         }
 
         /// <summary>
         /// Emits every captured log entry whose level is enabled through <see cref="LogHelper"/>, then clears
-        /// the buffer. When <see cref="LoggerContext.CaptureLogs"/> is set, the human-readable message is also
-        /// retained in <see cref="LoggerContext.Logs"/> for post-hoc inspection.
+        /// the buffer.
         /// </summary>
         /// <remarks>
         /// Called once by the handler at the end of validation (issue #3455). Emitting here — rather than from
@@ -91,6 +99,8 @@ namespace Microsoft.IdentityModel.Tokens
 
                 string message = entry.MessageDetail.Message;
 
+                // AddLog restricts entries to Informational/Verbose/Warning, so no higher-severity level
+                // can be silently emitted at Informational here.
                 switch (entry.Level)
                 {
                     case EventLogLevel.Verbose:
@@ -111,6 +121,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Discards every captured log entry without emitting them. Used by the handler to drop the
         /// informational logs of a validation attempt that was superseded by a retry (issue #3455).
+        /// The buffer only ever holds the in-flight validation's entries — it is drained (and cleared) at the
+        /// end of every validation and the lazy claims-creation path uses its own CallContext — so clearing
+        /// the whole buffer here cannot discard entries belonging to a different operation.
         /// </summary>
         internal void ClearCapturedLogs() => _capturedLogEntries?.Clear();
 

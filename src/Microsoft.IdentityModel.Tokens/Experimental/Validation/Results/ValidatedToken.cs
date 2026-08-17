@@ -50,12 +50,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// </summary>
         public ValidationParameters ValidationParameters { get; }
 
-        /// <summary>
-        /// The <see cref="CallContext"/> that flowed through validation. Used to capture and emit the
-        /// informational logs produced during lazy <see cref="ClaimsIdentity"/> creation (issue #3455).
-        /// </summary>
-        internal CallContext? CallContext { get; set; }
-
         #region Validated Properties
         /// <summary>
         /// The result of validating the actor.
@@ -169,16 +163,17 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 {
                     Debug.Assert(_claimsIdentity is null);
 
-                    CallContext context = CallContext ?? new CallContext();
+                    // Issue #3455: use a dedicated CallContext for the lazy claims-creation log so that reusing
+                    // the validation CallContext for another validation cannot cross-contaminate this token's
+                    // IDX10245. Claims creation is lazy and runs after the handler's end-of-validation drain, so
+                    // the entry is emitted here, on every path (including if creation throws).
+                    CallContext context = new();
                     try
                     {
                         _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer?.Issuer, context);
                     }
                     finally
                     {
-                        // Issue #3455: claims identity creation is lazy and happens after validation returns, so the
-                        // handler's end-of-validation drain has already run. Emit the logs captured during creation
-                        // here, on every path, so they are not lost if creation throws.
                         context.EmitCapturedLogs();
                     }
                     _claimsIdentityInitialized = true;

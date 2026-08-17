@@ -287,8 +287,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         private static readonly IIdentityLogger s_enabledLogger = new NoOpLogger(isEnabled: true);
         private static readonly IIdentityLogger s_disabledLogger = new NoOpLogger(isEnabled: false);
 
-        [GlobalSetup]
-        public void Setup()
+        private void CommonSetup()
         {
             var tokenDescriptorExtendedClaims = new SecurityTokenDescriptor
             {
@@ -308,13 +307,42 @@ namespace Microsoft.IdentityModel.Benchmarks
             _originalLogger = LogHelper.Logger;
         }
 
+        // Logger state is established in GlobalSetup (once per benchmark, outside the measured region) so the
+        // measurement isolates the capture/drain/emit overhead and does not time the static logger assignment.
+        [GlobalSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingDisabled))]
+        public void SetupSuccessLoggingDisabled()
+        {
+            CommonSetup();
+            LogHelper.Logger = s_disabledLogger;
+        }
+
+        [GlobalSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingEnabled))]
+        public void SetupSuccessLoggingEnabled()
+        {
+            CommonSetup();
+            LogHelper.Logger = s_enabledLogger;
+        }
+
+        [GlobalSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims_LoggingDisabled))]
+        public void SetupClaimsLoggingDisabled()
+        {
+            CommonSetup();
+            LogHelper.Logger = s_disabledLogger;
+        }
+
+        [GlobalSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims_LoggingEnabled))]
+        public void SetupClaimsLoggingEnabled()
+        {
+            CommonSetup();
+            LogHelper.Logger = s_enabledLogger;
+        }
+
         [GlobalCleanup]
         public void Cleanup() => LogHelper.Logger = _originalLogger;
 
         [BenchmarkCategory("LoggingImpact_Success"), Benchmark(Baseline = true)]
         public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingDisabled()
         {
-            LogHelper.Logger = s_disabledLogger;
             ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             return validationResult.Succeeded;
         }
@@ -322,7 +350,6 @@ namespace Microsoft.IdentityModel.Benchmarks
         [BenchmarkCategory("LoggingImpact_Success"), Benchmark]
         public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingEnabled()
         {
-            LogHelper.Logger = s_enabledLogger;
             ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             return validationResult.Succeeded;
         }
@@ -330,7 +357,6 @@ namespace Microsoft.IdentityModel.Benchmarks
         [BenchmarkCategory("LoggingImpact_ClaimAccess"), Benchmark(Baseline = true)]
         public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims_LoggingDisabled()
         {
-            LogHelper.Logger = s_disabledLogger;
             ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             return validationResult.Result.ClaimsIdentity.Claims.ToList();
         }
@@ -338,7 +364,6 @@ namespace Microsoft.IdentityModel.Benchmarks
         [BenchmarkCategory("LoggingImpact_ClaimAccess"), Benchmark]
         public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims_LoggingEnabled()
         {
-            LogHelper.Logger = s_enabledLogger;
             ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             return validationResult.Result.ClaimsIdentity.Claims.ToList();
         }

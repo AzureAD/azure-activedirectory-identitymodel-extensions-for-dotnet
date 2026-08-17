@@ -237,7 +237,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             // validation pipeline is side-effect free; the handler drains and emits these (respecting PII)
             // once the claims identity has been created. Guarded by IsEnabled so the MessageDetail is not
             // allocated when the Informational level is disabled.
-            if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 callContext.AddLog(EventLogLevel.Informational, new MessageDetail(LogMessages.IDX10245, securityToken));
 
             return ClaimsIdentityFactory.Create(

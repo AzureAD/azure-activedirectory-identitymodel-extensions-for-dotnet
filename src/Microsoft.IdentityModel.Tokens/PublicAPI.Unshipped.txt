@@ -359,4 +359,3 @@ Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.get ->
 Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.get -> bool
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void
-Microsoft.IdentityModel.Tokens.CallContext.AddLog(Microsoft.IdentityModel.Abstractions.EventLogLevel level, Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail) -> void
