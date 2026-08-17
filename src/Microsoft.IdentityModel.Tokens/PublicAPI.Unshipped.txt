@@ -273,7 +273,7 @@ static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureTyp
 static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultClockSkew -> System.TimeSpan
 virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationError.GetException() -> System.Exception!
 virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.Clone() -> Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters!
-virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, string! issuer) -> System.Security.Claims.ClaimsIdentity!
+virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, string! issuer, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> System.Security.Claims.ClaimsIdentity!
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.Message.get -> string
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.MessageDetail(string formatString, params object[] parameters) -> void
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.MessageDetail(string message) -> void
@@ -359,3 +359,15 @@ Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.get ->
 Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.get -> bool
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void
+Microsoft.IdentityModel.Tokens.CallContext.AddLog(Microsoft.IdentityModel.Abstractions.EventLogLevel level, Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail) -> void
+Microsoft.IdentityModel.Tokens.CallContext.CapturedLogEntries.get -> System.Collections.Generic.IReadOnlyList<Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry>!
+Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry
+Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.CapturedLogEntry() -> void
+Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.CapturedLogEntry(Microsoft.IdentityModel.Abstractions.EventLogLevel level, Microsoft.IdentityModel.Tokens.Experimental.MessageDetail! messageDetail) -> void
+Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.Equals(Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry other) -> bool
+Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.Level.get -> Microsoft.IdentityModel.Abstractions.EventLogLevel
+Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.MessageDetail.get -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail!
+override Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.Equals(object? obj) -> bool
+override Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.GetHashCode() -> int
+static Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.operator !=(Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry left, Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry right) -> bool
+static Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry.operator ==(Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry left, Microsoft.IdentityModel.Tokens.Experimental.CapturedLogEntry right) -> bool

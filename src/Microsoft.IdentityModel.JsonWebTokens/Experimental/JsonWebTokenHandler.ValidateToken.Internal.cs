@@ -337,6 +337,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return new ValidatedToken(jsonWebToken, this, validationParameters)
             {
+                CallContext = callContext,
                 ValidatedLifetime = lifetimeResult.Result,
                 ValidatedAlgorithm = algorithmResult.Result,
                 ValidatedAudience = audienceResult.Result,

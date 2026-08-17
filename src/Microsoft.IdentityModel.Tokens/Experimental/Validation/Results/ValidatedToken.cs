@@ -50,6 +50,12 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// </summary>
         public ValidationParameters ValidationParameters { get; }
 
+        /// <summary>
+        /// The <see cref="CallContext"/> that flowed through validation. Used to capture and emit the
+        /// informational logs produced during lazy <see cref="ClaimsIdentity"/> creation (issue #3455).
+        /// </summary>
+        internal CallContext? CallContext { get; set; }
+
         #region Validated Properties
         /// <summary>
         /// The result of validating the actor.
@@ -163,7 +169,11 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 {
                     Debug.Assert(_claimsIdentity is null);
 
-                    _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer?.Issuer);
+                    CallContext context = CallContext ?? new CallContext();
+                    _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer?.Issuer, context);
+                    // Issue #3455: claims identity creation is lazy and happens after validation returns, so the
+                    // handler's end-of-validation drain has already run. Emit the logs captured during creation here.
+                    context.EmitCapturedLogs();
                     _claimsIdentityInitialized = true;
                 }
 

@@ -15,12 +15,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
-        internal override ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer)
+        internal override ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer, CallContext callContext)
         {
-            return CreateClaimsIdentity((SamlSecurityToken)securityToken, validationParameters, issuer);
+            return CreateClaimsIdentity((SamlSecurityToken)securityToken, validationParameters, issuer, callContext);
         }
 
-        internal ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, ValidationParameters validationParameters, string issuer)
+        internal ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, ValidationParameters validationParameters, string issuer, CallContext callContext)
         {
             if (samlToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlToken));
@@ -35,7 +35,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             IEnumerable<ClaimsIdentity> identities = ProcessStatements(
                 samlToken,
                 actualIssuer,
-                validationParameters);
+                validationParameters,
+                callContext);
 
             return identities.First();
         }
@@ -45,10 +46,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="samlToken">A <see cref="SamlSecurityToken"/> that will be used to create the claims.</param>
         /// <param name="issuer">The issuer.</param>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>A <see cref="IEnumerable{ClaimsIdentity}"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
         /// <exception cref="SamlSecurityTokenException">if the statement is not a <see cref="SamlSubjectStatement"/>.</exception>
-        internal virtual IEnumerable<ClaimsIdentity> ProcessStatements(SamlSecurityToken samlToken, string issuer, ValidationParameters validationParameters)
+        internal virtual IEnumerable<ClaimsIdentity> ProcessStatements(SamlSecurityToken samlToken, string issuer, ValidationParameters validationParameters, CallContext callContext)
         {
             if (samlToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlToken));
@@ -64,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 if (!identityDict.TryGetValue(statement.Subject, out ClaimsIdentity? identity))
                 {
-                    identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
+                    identity = validationParameters.CreateClaimsIdentity(samlToken, issuer, callContext);
                     ProcessSubject(statement.Subject, identity, issuer);
                     identityDict.Add(statement.Subject, identity);
                 }

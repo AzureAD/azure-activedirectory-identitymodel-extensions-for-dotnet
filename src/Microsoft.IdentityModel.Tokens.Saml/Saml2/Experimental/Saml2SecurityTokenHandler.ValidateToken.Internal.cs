@@ -197,6 +197,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             return new ValidatedToken(samlToken, this, validationParameters)
             {
+                CallContext = callContext,
                 ValidatedAudience = audienceResult.Result,
                 ValidatedAlgorithm = algorithmResult.Result,
                 ValidatedLifetime = lifetimeResult.Result,

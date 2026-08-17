@@ -13,12 +13,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
-        internal override ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer)
+        internal override ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer, CallContext callContext)
         {
-            return CreateClaimsIdentity((Saml2SecurityToken)securityToken, validationParameters, issuer);
+            return CreateClaimsIdentity((Saml2SecurityToken)securityToken, validationParameters, issuer, callContext);
         }
 
-        internal ClaimsIdentity CreateClaimsIdentity(Saml2SecurityToken samlToken, ValidationParameters validationParameters, string issuer)
+        internal ClaimsIdentity CreateClaimsIdentity(Saml2SecurityToken samlToken, ValidationParameters validationParameters, string issuer, CallContext callContext)
         {
             if (samlToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlToken));
@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (string.IsNullOrWhiteSpace(issuer))
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
 
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, actualIssuer);
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, actualIssuer, callContext);
 
             ProcessSubject(samlToken.Assertion.Subject, identity, actualIssuer);
             ProcessStatements(samlToken.Assertion.Statements, identity, actualIssuer);

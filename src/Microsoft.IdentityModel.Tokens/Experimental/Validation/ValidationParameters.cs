@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -210,7 +211,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <para>'RoleClaimType': If RoleClaimTypeRetriever is set, call delegate, else call RoleClaimType. If the result is a null or empty string, use <see cref="ClaimsIdentity.DefaultRoleClaimType"/></para>.
         /// </summary>
         /// <returns>A <see cref="ClaimsIdentity"/> with Authentication, NameClaimType and RoleClaimType set.</returns>
-        public virtual ClaimsIdentity CreateClaimsIdentity(SecurityToken securityToken, string issuer)
+        public virtual ClaimsIdentity CreateClaimsIdentity(SecurityToken securityToken, string issuer, CallContext callContext)
         {
             string nameClaimType;
             if (NameClaimTypeRetriever != null)
@@ -232,9 +233,12 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 roleClaimType = RoleClaimType;
             }
 
-            // TODO: Add to CallContext
-            //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-            //    LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
+            // Issue #3455: record on the CallContext instead of emitting directly. The result-based
+            // validation pipeline is side-effect free; the handler drains and emits these (respecting PII)
+            // once the claims identity has been created. Guarded by IsEnabled so the MessageDetail is not
+            // allocated when the Informational level is disabled.
+            if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                callContext.AddLog(EventLogLevel.Informational, new MessageDetail(LogMessages.IDX10245, securityToken));
 
             return ClaimsIdentityFactory.Create(
                             authenticationType: AuthenticationType ?? DefaultAuthenticationType,

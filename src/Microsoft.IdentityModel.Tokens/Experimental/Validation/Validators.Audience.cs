@@ -119,7 +119,8 @@ namespace Microsoft.IdentityModel.Tokens
                 tokenAudiences,
                 validationParameters.ValidAudiences,
                 validationParameters.IgnoreTrailingSlashWhenValidatingAudience,
-                validationParameters.IgnoreCaseWhenValidatingAudience);
+                validationParameters.IgnoreCaseWhenValidatingAudience,
+                callContext);
 
             if (validAudience != null)
                 return validAudience;
@@ -149,7 +150,8 @@ namespace Microsoft.IdentityModel.Tokens
             IList<string> tokenAudiences,
             IList<string> validAudiences,
             bool ignoreTrailingSlashWhenValidatingAudience,
-            bool ignoreCaseWhenValidatingAudience)
+            bool ignoreCaseWhenValidatingAudience,
+            CallContext? callContext)
         {
             StringComparison comparisonType = ignoreCaseWhenValidatingAudience
                 ? StringComparison.OrdinalIgnoreCase
@@ -167,16 +169,11 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (AudienceMatches(ignoreTrailingSlashWhenValidatingAudience, tokenAudiences[i], validAudiences[j], comparisonType))
                     {
-                        if (AppContextSwitches.SuccessValidationLogsAsInformation)
-                        {
-                            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                                LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudiences[i]));
-                        }
-                        else
-                        {
-                            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                                LogHelper.LogVerbose(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudiences[i]));
-                        }
+                        // Issue #3455: record on the CallContext (single decision point); the handler emits it.
+                        // Level honors the SuccessValidationLogsAsInformation switch (Informational vs Verbose).
+                        EventLogLevel level = AppContextSwitches.SuccessValidationLogsAsInformation ? EventLogLevel.Informational : EventLogLevel.Verbose;
+                        if (callContext is not null && LogHelper.IsEnabled(level))
+                            callContext.AddLog(level, new MessageDetail(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudiences[i])));
 
                         return tokenAudiences[i];
                     }
@@ -209,23 +206,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (length == -1)
                 return false;
 
-            if (string.Compare(validAudience, 0, tokenAudience, 0, length, comparisonType) == 0)
-            {
-                if (AppContextSwitches.SuccessValidationLogsAsInformation)
-                {
-                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
-                }
-                else
-                {
-                    if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                        LogHelper.LogVerbose(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
-                }
-
-                return true;
-            }
-
-            return false;
+            // Issue #3455: audience-match logging is centralized in ValidTokenAudience (the single decision
+            // point). This method previously logged IDX10234 too, double-logging on a trailing-slash match.
+            return string.Compare(validAudience, 0, tokenAudience, 0, length, comparisonType) == 0;
         }
     }
 }
