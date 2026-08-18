@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Tokens
                 CreateAsymmetricAdapter,
                 _cryptoProviderFactory.SignatureProviderObjectPoolCacheSize);
 
-            ValidateAsymmetricSecurityKeySize(Key, Algorithm, WillCreateSignatures);
+            ValidateAsymmetricSecurityKeySizeCore(Key, Algorithm, WillCreateSignatures);
         }
 
         /// <summary>
@@ -342,6 +342,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <seealso cref="MinimumAsymmetricKeySizeInBitsForVerifyingMap"/> for minimum verifying sizes.
         /// </remarks>
         public virtual void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
+        {
+            ValidateAsymmetricSecurityKeySizeCore(key, algorithm, willCreateSignatures);
+        }
+
+        private void ValidateAsymmetricSecurityKeySizeCore(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
