@@ -191,8 +191,8 @@ The final design serializes each actor **directly from its `ClaimsIdentity`** (n
 | 5-deep chain, limit 1 (deep degrade) | 14.48 KB | 10.49 KB |
 
 ~**0.35 KB per actor level** (just the coalescing dictionary), down from ~1.1 KB/level. The
-shipped internal API signatures are untouched. Benchmarks: `ActorClaimBenchmarks` in
-`Microsoft.IdentityModel.Benchmarks`.
+shipped internal API signatures are untouched. Benchmarks: `ActorClaimSerializationBenchmarks` and
+`ActorClaimDeserializationBenchmarks` in `Microsoft.IdentityModel.Benchmarks`.
 
 ---
 
