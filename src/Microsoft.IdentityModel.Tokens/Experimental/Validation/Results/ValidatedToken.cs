@@ -166,7 +166,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                     // Issue #3455: use a dedicated CallContext for the lazy claims-creation log so that reusing
                     // the validation CallContext for another validation cannot cross-contaminate this token's
                     // IDX10245. Claims creation is lazy and runs after the handler's end-of-validation drain, so
-                    // the entry is emitted here, on every path (including if creation throws).
+                    // the entry is emitted here, on every path (including if creation throws). The CallContext's
+                    // ActivityId is not passed to the logger at emit time, so a fresh context loses no correlation.
                     CallContext context = new();
                     try
                     {

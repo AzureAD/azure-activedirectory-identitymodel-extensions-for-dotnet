@@ -302,6 +302,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        [Fact]
+        public void EmitCapturedLogs_OneEntryThrows_StillEmitsRemainingAndClearsBuffer()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var logger = new ThrowOnFirstLogger();
+            LogHelper.Logger = logger;
+
+            try
+            {
+                var context = new CallContext();
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: first."));
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: second."));
+
+                // Act — emitting the first entry throws; the second must still be emitted (best-effort per entry).
+                context.EmitCapturedLogs();
+
+                // Assert
+                Assert.Contains(logger.Messages, m => m.Contains("IDX99999: second."));
+                Assert.Empty(context.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
         // Captures emitted messages so tests can assert on the drained/emitted output (including PII redaction).
         private sealed class RecordingLogger : IIdentityLogger
         {
@@ -318,6 +345,28 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             public bool IsEnabled(EventLogLevel eventLogLevel) => true;
 
             public void Log(LogEntry entry) => throw new InvalidOperationException("sink failure");
+        }
+
+        // A logger that throws on the first Log call and records subsequent ones, to verify per-entry
+        // best-effort emission (one failing entry does not skip the rest).
+        private sealed class ThrowOnFirstLogger : IIdentityLogger
+        {
+            private bool _threw;
+
+            public List<string> Messages { get; } = new List<string>();
+
+            public bool IsEnabled(EventLogLevel eventLogLevel) => true;
+
+            public void Log(LogEntry entry)
+            {
+                if (!_threw)
+                {
+                    _threw = true;
+                    throw new InvalidOperationException("first sink failure");
+                }
+
+                Messages.Add(entry.Message);
+            }
         }
 
         public static TheoryData<CallContextTheoryData> CallContextTestTheoryData
