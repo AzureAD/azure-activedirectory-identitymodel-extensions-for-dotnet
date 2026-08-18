@@ -91,31 +91,45 @@ namespace Microsoft.IdentityModel.Tokens
             if (_capturedLogEntries is null || _capturedLogEntries.Count == 0)
                 return;
 
-            for (int i = 0; i < _capturedLogEntries.Count; i++)
+            try
             {
-                CapturedLogEntry entry = _capturedLogEntries[i];
-                if (!LogHelper.IsEnabled(entry.Level))
-                    continue;
-
-                string message = entry.MessageDetail.Message;
-
-                // AddLog restricts entries to Informational/Verbose/Warning, so no higher-severity level
-                // can be silently emitted at Informational here.
-                switch (entry.Level)
+                for (int i = 0; i < _capturedLogEntries.Count; i++)
                 {
-                    case EventLogLevel.Verbose:
-                        LogHelper.LogVerbose("{0}", LogHelper.MarkAsNonPII(message));
-                        break;
-                    case EventLogLevel.Warning:
-                        LogHelper.LogWarning("{0}", LogHelper.MarkAsNonPII(message));
-                        break;
-                    default:
-                        LogHelper.LogInformation("{0}", LogHelper.MarkAsNonPII(message));
-                        break;
+                    CapturedLogEntry entry = _capturedLogEntries[i];
+                    if (!LogHelper.IsEnabled(entry.Level))
+                        continue;
+
+                    string message = entry.MessageDetail.Message;
+
+                    // AddLog restricts entries to Informational/Verbose/Warning, so no higher-severity level
+                    // can be silently emitted at Informational here.
+                    switch (entry.Level)
+                    {
+                        case EventLogLevel.Verbose:
+                            LogHelper.LogVerbose("{0}", LogHelper.MarkAsNonPII(message));
+                            break;
+                        case EventLogLevel.Warning:
+                            LogHelper.LogWarning("{0}", LogHelper.MarkAsNonPII(message));
+                            break;
+                        default:
+                            LogHelper.LogInformation("{0}", LogHelper.MarkAsNonPII(message));
+                            break;
+                    }
                 }
             }
-
-            _capturedLogEntries.Clear();
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                // Emitting informational logs must never change the validation outcome: the result-based
+                // pipeline is exception-free, so a throwing sink or IIdentityLogger is swallowed here rather
+                // than propagated out of ValidateTokenAsync.
+            }
+            finally
+            {
+                // Always clear so a reused CallContext cannot replay these entries, even if emission threw.
+                _capturedLogEntries.Clear();
+            }
         }
 
         /// <summary>

@@ -17,6 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     // Handler-level coverage for the #3455 logging contract: the drain scope on
     // JsonWebTokenHandler.ValidateTokenAsync emits captured validator logs on completion, independent of
     // whether the caller accesses ClaimsIdentity, and does not accumulate across a reused CallContext.
+    [Collection("LogHelper.Logger Tests")]
     public class JsonWebTokenHandlerLoggingContractTests
     {
         private const string Audience = "http://Default.Audience.com";

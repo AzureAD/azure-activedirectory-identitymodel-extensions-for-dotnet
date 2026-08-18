@@ -16,6 +16,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
+    [Collection("LogHelper.Logger Tests")]
     public class CallContextTests
     {
         [Theory, MemberData(nameof(CallContextTestTheoryData), DisableDiscoveryEnumeration = true)]
@@ -277,6 +278,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        [Fact]
+        public void EmitCapturedLogs_LoggerThrows_DoesNotPropagateAndClearsBuffer()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            LogHelper.Logger = new ThrowingLogger();
+
+            try
+            {
+                var context = new CallContext();
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: entry."));
+
+                // Act + Assert — a throwing sink must not change the (exception-free) validation outcome...
+                context.EmitCapturedLogs();
+
+                // ...and the buffer must be cleared so a reused CallContext cannot replay the entry.
+                Assert.Empty(context.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
         // Captures emitted messages so tests can assert on the drained/emitted output (including PII redaction).
         private sealed class RecordingLogger : IIdentityLogger
         {
@@ -285,6 +310,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             public bool IsEnabled(EventLogLevel eventLogLevel) => true;
 
             public void Log(LogEntry entry) => Messages.Add(entry.Message);
+        }
+
+        // A logger whose Log throws, to verify emission failures never escape the validation pipeline.
+        private sealed class ThrowingLogger : IIdentityLogger
+        {
+            public bool IsEnabled(EventLogLevel eventLogLevel) => true;
+
+            public void Log(LogEntry entry) => throw new InvalidOperationException("sink failure");
         }
 
         public static TheoryData<CallContextTheoryData> CallContextTestTheoryData

@@ -22,6 +22,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            // Issue #3455: scope the string entry point too, so the buffer is drained even if reading the
+            // token fails before the SecurityToken overload runs.
+            using var logScope = callContext.BeginLogEmissionScope();
+
             if (token is null)
                 return ValidationError.NullParameter(
                     nameof(token),
