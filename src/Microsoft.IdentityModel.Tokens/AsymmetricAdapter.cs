@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
+#pragma warning disable SYSLIB5006 // CompositeMLDsa is experimental
+
 namespace Microsoft.IdentityModel.Tokens
 {
     delegate byte[] EncryptDelegate(byte[] bytes);
@@ -32,6 +34,7 @@ namespace Microsoft.IdentityModel.Tokens
         private bool _disposeCryptoOperators;
         private bool _disposed;
         private object _mlDsaSyncLock;
+        private object _compositeMLDsaSyncLock;
         private DecryptDelegate _decryptFunction = DecryptFunctionNotFound;
         private EncryptDelegate _encryptFunction = EncryptFunctionNotFound;
         private SignDelegate _signFunction = SignFunctionNotFound;
@@ -90,6 +93,8 @@ namespace Microsoft.IdentityModel.Tokens
                         InitializeUsingEcdsaSecurityKey(edcsaSecurityKeyFromJsonWebKey);
                     else if (securityKey is MlDsaSecurityKey mlDsaSecurityKeyFromJsonWebKey)
                         InitializeUsingMlDsaSecurityKey(mlDsaSecurityKeyFromJsonWebKey, requirePrivateKey);
+                    else if (securityKey is CompositeMLDsaSecurityKey compositeMLDsaSecurityKeyFromJsonWebKey)
+                        InitializeUsingCompositeMLDsaSecurityKey(compositeMLDsaSecurityKeyFromJsonWebKey, requirePrivateKey);
                     else
                         throw LogHelper.LogExceptionMessage(
                             new NotSupportedException(
@@ -105,6 +110,10 @@ namespace Microsoft.IdentityModel.Tokens
             else if (key is MlDsaSecurityKey mlDsaKey)
             {
                 InitializeUsingMlDsaSecurityKey(mlDsaKey, requirePrivateKey);
+            }
+            else if (key is CompositeMLDsaSecurityKey compositeMLDsaKey)
+            {
+                InitializeUsingCompositeMLDsaSecurityKey(compositeMLDsaKey, requirePrivateKey);
             }
             else
                 throw LogHelper.LogExceptionMessage(
@@ -148,6 +157,9 @@ namespace Microsoft.IdentityModel.Tokens
 
                         if (MLDsa != null)
                             MLDsa.Dispose();
+
+                        if (CompositeMLDsa != null)
+                            CompositeMLDsa.Dispose();
 #if DESKTOP
                         if (RsaCryptoServiceProviderProxy != null)
                             RsaCryptoServiceProviderProxy.Dispose();
@@ -162,6 +174,8 @@ namespace Microsoft.IdentityModel.Tokens
         private ECDsa ECDsa { get; set; }
 
         private MLDsa MLDsa { get; set; }
+
+        private CompositeMLDsa CompositeMLDsa { get; set; }
 
         internal byte[] Encrypt(byte[] data)
         {
@@ -191,6 +205,35 @@ namespace Microsoft.IdentityModel.Tokens
         private void InitializeUsingMlDsaSecurityKey(MlDsaSecurityKey mlDsaSecurityKey, bool requirePrivateKey)
         {
             InitializeUsingMlDsa(mlDsaSecurityKey.MLDsa, requirePrivateKey);
+        }
+
+        private void InitializeUsingCompositeMLDsaSecurityKey(CompositeMLDsaSecurityKey compositeMLDsaSecurityKey, bool requirePrivateKey)
+        {
+            InitializeUsingCompositeMLDsa(compositeMLDsaSecurityKey.CompositeMLDsa, requirePrivateKey);
+        }
+
+        private void InitializeUsingCompositeMLDsa(CompositeMLDsa compositeMLDsa, bool includePrivateKey)
+        {
+            CompositeMLDsa clone = CompositeMLDsaAdapter.CloneCompositeMLDsa(compositeMLDsa, includePrivateKey);
+
+            if (clone is not null)
+            {
+                CompositeMLDsa = clone;
+                _disposeCryptoOperators = true;
+            }
+            else
+            {
+                CompositeMLDsa = compositeMLDsa;
+                _compositeMLDsaSyncLock = new object();
+            }
+
+            _signFunction = SignCompositeMLDsa;
+            _signUsingOffsetFunction = SignUsingOffsetCompositeMLDsa;
+#if NET6_0_OR_GREATER
+            _signUsingSpanFunction = SignUsingSpanCompositeMLDsa;
+#endif
+            _verifyFunction = VerifyCompositeMLDsa;
+            _verifyUsingOffsetFunction = VerifyUsingOffsetCompositeMLDsa;
         }
 
         private void InitializeUsingMlDsa(MLDsa mlDsa, bool includePrivateKey)
@@ -574,6 +617,105 @@ namespace Microsoft.IdentityModel.Tokens
                 new ReadOnlySpan<byte>(bytes, offset, count),
                 signature.AsSpan(),
                 context: default);
+        }
+
+        private byte[] SignCompositeMLDsa(byte[] bytes)
+        {
+            if (_compositeMLDsaSyncLock is not null)
+            {
+                lock (_compositeMLDsaSyncLock)
+                    return CompositeMLDsa.SignData(bytes, context: null);
+            }
+
+            return CompositeMLDsa.SignData(bytes, context: null);
+        }
+
+#if NET6_0_OR_GREATER
+        internal bool SignUsingSpanCompositeMLDsa(
+            ReadOnlySpan<byte> data,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            int signatureSize = CompositeMLDsa.Algorithm.MaxSignatureSizeInBytes;
+            if (destination.Length < signatureSize)
+            {
+                bytesWritten = 0;
+                return false;
+            }
+
+            if (_compositeMLDsaSyncLock is not null)
+            {
+                lock (_compositeMLDsaSyncLock)
+                    bytesWritten = CompositeMLDsa.SignData(data, destination.Slice(0, signatureSize), context: default);
+            }
+            else
+            {
+                bytesWritten = CompositeMLDsa.SignData(data, destination.Slice(0, signatureSize), context: default);
+            }
+
+            return true;
+        }
+#endif
+
+        private byte[] SignUsingOffsetCompositeMLDsa(byte[] bytes, int offset, int count)
+        {
+            if (_compositeMLDsaSyncLock is not null)
+            {
+                lock (_compositeMLDsaSyncLock)
+                    return CompositeMLDsa.SignData(new ReadOnlySpan<byte>(bytes, offset, count).ToArray(), context: null);
+            }
+
+            return CompositeMLDsa.SignData(new ReadOnlySpan<byte>(bytes, offset, count).ToArray(), context: null);
+        }
+
+        private bool VerifyCompositeMLDsa(byte[] bytes, byte[] signature)
+        {
+            bool result;
+            if (_compositeMLDsaSyncLock is not null)
+            {
+                lock (_compositeMLDsaSyncLock)
+                    result = CompositeMLDsa.VerifyData(bytes, signature, context: null);
+            }
+            else
+            {
+                result = CompositeMLDsa.VerifyData(bytes, signature, context: null);
+            }
+
+            if (!result && signature.Length > CompositeMLDsa.Algorithm.MaxSignatureSizeInBytes)
+                LogHelper.LogWarning(LogMessages.IDX10726,
+                    LogHelper.MarkAsNonPII(CompositeMLDsa.Algorithm.Name),
+                    LogHelper.MarkAsNonPII(signature.Length),
+                    LogHelper.MarkAsNonPII(CompositeMLDsa.Algorithm.MaxSignatureSizeInBytes));
+
+            return result;
+        }
+
+        private bool VerifyUsingOffsetCompositeMLDsa(byte[] bytes, int offset, int count, byte[] signature)
+        {
+            bool result;
+            if (_compositeMLDsaSyncLock is not null)
+            {
+                lock (_compositeMLDsaSyncLock)
+                    result = CompositeMLDsa.VerifyData(
+                        new ReadOnlySpan<byte>(bytes, offset, count).ToArray(),
+                        signature,
+                        context: null);
+            }
+            else
+            {
+                result = CompositeMLDsa.VerifyData(
+                    new ReadOnlySpan<byte>(bytes, offset, count).ToArray(),
+                    signature,
+                    context: null);
+            }
+
+            if (!result && signature.Length > CompositeMLDsa.Algorithm.MaxSignatureSizeInBytes)
+                LogHelper.LogWarning(LogMessages.IDX10726,
+                    LogHelper.MarkAsNonPII(CompositeMLDsa.Algorithm.Name),
+                    LogHelper.MarkAsNonPII(signature.Length),
+                    LogHelper.MarkAsNonPII(CompositeMLDsa.Algorithm.MaxSignatureSizeInBytes));
+
+            return result;
         }
 
         private byte[] DecryptWithRsa(byte[] bytes)

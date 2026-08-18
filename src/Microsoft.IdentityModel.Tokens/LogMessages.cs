@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10615 = "IDX10615: Encryption failed. No support for: Algorithm: '{0}', SecurityKey: '{1}'.";
         public const string IDX10616 = "IDX10616: Encryption failed. EncryptionProvider failed for: Algorithm: '{0}', SecurityKey: '{1}'. See inner exception.";
         public const string IDX10617 = "IDX10617: Encryption failed. Keywrap is only supported for: '{0}', '{1}' and '{2}'. The content encryption specified is: '{3}'.";
-        // public const string IDX10618 = "IDX10618:";
+        public const string IDX10618 = "IDX10618: Key unwrap failed using decryption Keys: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
         public const string IDX10619 = "IDX10619: Decryption failed. Algorithm: '{0}'. Either the Encryption Algorithm: '{1}' or none of the Security Keys are supported by the CryptoProviderFactory.";
         public const string IDX10620 = "IDX10620: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CryptoProviderFactory are null.";
         //public const string IDX10903 = "IDX10903: Token decryption succeeded. With thumbprint: '{0}'.";
@@ -282,6 +282,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10723 = "IDX10723: Unable to extract the private key from the X.509 certificate for algorithm '{0}' (Key: '{1}'). Private key extraction may not be supported on this platform.";
         public const string IDX10724 = "IDX10724: Unable to compute a JWK thumbprint, public key extraction from the X.509 certificate is not supported on this platform (Key: '{0}').";
         public const string IDX10725 = "IDX10725: Unable to create a SignatureProvider for algorithm '{0}' (Key: '{1}'). The X.509 certificate key could not be extracted. This may indicate the platform does not support the certificate's key type.";
+        public const string IDX10726 = "IDX10726: Composite ML-DSA signature validation failed for algorithm '{0}'. Signature length {1} is outside the expected range for this algorithm (max: {2} bytes).";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"

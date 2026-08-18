@@ -55,3 +55,4 @@ using System.Diagnostics.CodeAnalysis;
 // a specific target and scoped to a namespace, type, member, etc.
 [assembly: SuppressMessage("ApiDesign", "RS0041:Public members should not use oblivious types", Justification = "Nullability annotations are partially implemented.", Scope = "namespaceanddescendants", Target = "~N:Microsoft.IdentityModel.Tokens")]
 [assembly: SuppressMessage("ApiDesign", "RS0036:Annotate nullability of public types and members in the declared API", Justification = "Nullability annotations are partially implemented.", Scope = "namespaceanddescendants", Target = "~N:Microsoft.IdentityModel.Tokens")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Used for try pattern", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToCompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey,Microsoft.IdentityModel.Tokens.SecurityKey@)~System.Boolean")]

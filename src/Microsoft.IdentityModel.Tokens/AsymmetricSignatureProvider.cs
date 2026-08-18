@@ -196,8 +196,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AsymmetricAdapter CreateAsymmetricAdapter()
         {
-            // ML-DSA and other pure-signing algorithms do not use an external hash.
-            if (SupportedAlgorithms.IsSupportedMlDsaAlgorithm(Algorithm))
+            // ML-DSA and composite ML-DSA do not use an external hash — handle before hash lookup.
+            if (SupportedAlgorithms.IsSupportedMlDsaAlgorithm(Algorithm) ||
+                SupportedAlgorithms.IsSupportedCompositeMLDsaAlgorithm(Algorithm))
                 return new AsymmetricAdapter(Key, Algorithm, WillCreateSignatures);
 
             // Preserve the protected virtual GetHashAlgorithmName extensibility point

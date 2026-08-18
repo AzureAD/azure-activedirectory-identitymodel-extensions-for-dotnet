@@ -111,6 +111,13 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.MlDsa87
         };
 
+        internal static readonly ICollection<string> CompositeMLDsaSigningAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.MlDsa44WithECDsaP256,
+            SecurityAlgorithms.MlDsa65WithECDsaP256,
+            SecurityAlgorithms.MlDsa87WithECDsaP384
+        };
+
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the <see cref="HashAlgorithmName"/>
@@ -262,7 +269,8 @@ namespace Microsoft.IdentityModel.Tokens
                 else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(jsonWebKey.Kty))
                     return IsSupportedSymmetricAlgorithm(algorithm);
                 else if (JsonWebAlgorithmsKeyTypes.Akp.Equals(jsonWebKey.Kty))
-                    return IsSupportedMlDsaAlgorithm(algorithm) && algorithm == jsonWebKey.Alg;
+                    return (IsSupportedMlDsaAlgorithm(algorithm) || IsSupportedCompositeMLDsaAlgorithm(algorithm))
+                           && algorithm == jsonWebKey.Alg;
 
                 return false;
             }
@@ -272,6 +280,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (key is MlDsaSecurityKey mlDsaKey)
                 return MlDsaSecurityKey.GetAlgorithmName(mlDsaKey.MLDsa.Algorithm) == algorithm;
+
+            if (key is CompositeMLDsaSecurityKey compositeMLDsaKey)
+                return IsSupportedCompositeMLDsaAlgorithm(algorithm)
+                    && CompositeMLDsaSecurityKey.GetAlgorithmName(compositeMLDsaKey.CompositeMLDsa.Algorithm) == algorithm;
 
             if (key as SymmetricSecurityKey != null)
                 return IsSupportedSymmetricAlgorithm(algorithm);
@@ -327,6 +339,11 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool IsSupportedMlDsaAlgorithm(string algorithm)
         {
             return MlDsaSigningAlgorithms.Contains(algorithm);
+        }
+
+        internal static bool IsSupportedCompositeMLDsaAlgorithm(string algorithm)
+        {
+            return AppContextSwitches.EnableCompositeMLDsaDraft && CompositeMLDsaSigningAlgorithms.Contains(algorithm);
         }
 
         internal static bool IsSupportedHashAlgorithm(string algorithm)
@@ -438,6 +455,13 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.MlDsa44 => 2420,
             SecurityAlgorithms.MlDsa65 => 3309,
             SecurityAlgorithms.MlDsa87 => 4627,
+
+            // Composite ML-DSA: ML-DSA sig + DER-encoded ECDSA (LAMPS format).
+            // P-256 DER Ecdsa-Sig-Value: up to 72 bytes (2x 35-byte padded INTEGER + 2-byte SEQUENCE header).
+            // P-384 DER Ecdsa-Sig-Value: up to 104 bytes (2x 51-byte padded INTEGER + 2-byte SEQUENCE header).
+            SecurityAlgorithms.MlDsa44WithECDsaP256 => 2420 + 72,    // 2492
+            SecurityAlgorithms.MlDsa65WithECDsaP256 => 3309 + 72,    // 3381
+            SecurityAlgorithms.MlDsa87WithECDsaP384 => 4627 + 104,   // 4731
 
             // if we don't know the algorithm, report 2K twice as big as any known algorithm.
             _ => 2048,

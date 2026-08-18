@@ -90,6 +90,13 @@ namespace Microsoft.IdentityModel.Tokens
         public const string MlDsa65 = "ML-DSA-65";
         public const string MlDsa87 = "ML-DSA-87";
 
+        // Composite ML-DSA algorithm strings (JOSE: draft-ietf-jose-pq-composite-sigs).
+        // Kept internal — the spec is pre-RFC and the BCL type is [Experimental].
+        // See: https://datatracker.ietf.org/doc/draft-ietf-jose-pq-composite-sigs/
+        internal const string MlDsa44WithECDsaP256 = "ML-DSA-44-ES256";
+        internal const string MlDsa65WithECDsaP256 = "ML-DSA-65-ES256";
+        internal const string MlDsa87WithECDsaP384 = "ML-DSA-87-ES384";
+
         // See: https://datatracker.ietf.org/doc/html/rfc7518#section-5.1
         public const string Aes128CbcHmacSha256 = "A128CBC-HS256";
         public const string Aes192CbcHmacSha384 = "A192CBC-HS384";

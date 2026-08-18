@@ -99,6 +99,18 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
+        /// When enabled, allows validation of tokens signed with Composite ML-DSA algorithms.
+        /// This is a draft feature based on an unstable pre-RFC specification
+        /// (draft-ietf-jose-pq-composite-sigs). Disabled by default. Wire format may change
+        /// in future spec revisions; enable only in controlled environments.
+        /// </summary>
+        internal const string EnableCompositeMLDsaDraftSwitch = "Microsoft.IdentityModel.CompositeMLDsa.EnableDraft";
+
+        private static bool? _enableCompositeMLDsaDraft;
+
+        internal static bool EnableCompositeMLDsaDraft => _enableCompositeMLDsaDraft ??= (AppContext.TryGetSwitch(EnableCompositeMLDsaDraftSwitch, out bool enabled) && enabled);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -124,6 +136,8 @@ namespace Microsoft.IdentityModel.Tokens
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
 
+            _enableCompositeMLDsaDraft = null;
+            AppContext.SetSwitch(EnableCompositeMLDsaDraftSwitch, false);
         }
     }
 }
