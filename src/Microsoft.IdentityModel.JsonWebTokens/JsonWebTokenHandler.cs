@@ -745,10 +745,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             issuer ??= ClaimsIdentity.DefaultIssuer;
 
-            foreach (var property in jsonElement.EnumerateObject())
+            // Duplicate member names are resolved last-wins to match the outer payload (whose dictionary-backed
+            // claim set also collapses duplicate members last-wins), so an "act" object and the top-level payload
+            // interpret the same wire bytes identically. JsonElement.EnumerateObject() preserves duplicates in
+            // document order, so the last assignment for a given name wins.
+            var members = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+            foreach (JsonProperty property in jsonElement.EnumerateObject())
+                members[property.Name] = property.Value;
+
+            foreach (KeyValuePair<string, JsonElement> member in members)
             {
-                string claimType = property.Name;
-                JsonElement value = property.Value;
+                string claimType = member.Key;
+                JsonElement value = member.Value;
 
                 // Special handling for nested actor claim
                 if (claimType == ActClaimType)
