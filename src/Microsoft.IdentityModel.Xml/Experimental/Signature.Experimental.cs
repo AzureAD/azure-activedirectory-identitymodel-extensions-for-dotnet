@@ -54,21 +54,21 @@ public partial class Signature : DSigElement
 
         ValidationError? validationError = null;
 
-            try
+        try
+        {
+            using (var memoryStream = new MemoryStream())
             {
-                using (var memoryStream = new MemoryStream())
+                SignedInfo.GetCanonicalBytes(memoryStream);
+                if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
                 {
-                    SignedInfo.GetCanonicalBytes(memoryStream);
-                    if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
-                    {
-                        StringBuilder keyAttempted = new StringBuilder().Append(key.ToString()).Append(", KeyId: ").AppendLine(key.KeyId);
-                        validationError = new SignatureValidationError(
-                            new MessageDetail(Tokens.LogMessages.IDX10520,
-                            LogHelper.MarkAsNonPII(keyAttempted.ToString())),
-                            SignatureValidationFailure.ValidationFailed,
-                            ValidationError.GetCurrentStackFrame());
-                    }
+                    StringBuilder keyAttempted = new StringBuilder().Append(key.ToString()).Append(", KeyId: ").AppendLine(key.KeyId);
+                    validationError = new SignatureValidationError(
+                        new MessageDetail(Tokens.LogMessages.IDX10520,
+                        LogHelper.MarkAsNonPII(keyAttempted.ToString())),
+                        SignatureValidationFailure.ValidationFailed,
+                        ValidationError.GetCurrentStackFrame());
                 }
+            }
 
             if (validationError is null)
             {
