@@ -3,6 +3,7 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Threading;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens;
@@ -13,14 +14,16 @@ namespace Microsoft.IdentityModel.Tokens;
 public class MlDsaSecurityKey : AsymmetricSecurityKey, IDisposable
 {
     private bool? _hasPrivateKey;
-    private bool _disposed;
+    private int _disposed;
     private readonly bool _ownsMlDsa;
+    private readonly JsonWebKey _sourceWebKey;
 
     internal MlDsaSecurityKey(JsonWebKey webKey, bool usePrivateKey)
         : base(webKey)
     {
         MLDsa = MlDsaAdapter.CreateMlDsa(webKey, usePrivateKey);
         _ownsMlDsa = true;
+        _sourceWebKey = webKey;
         webKey.ConvertedSecurityKey = this;
     }
 
@@ -57,13 +60,13 @@ public class MlDsaSecurityKey : AsymmetricSecurityKey, IDisposable
     /// <see langword="false"/> to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!_disposed)
+        if (!disposing || Interlocked.Exchange(ref _disposed, 1) != 0)
+            return;
+
+        if (_ownsMlDsa)
         {
-            _disposed = true;
-            if (disposing && _ownsMlDsa)
-            {
-                MLDsa?.Dispose();
-            }
+            _sourceWebKey.ClearConvertedSecurityKey(this);
+            MLDsa?.Dispose();
         }
     }
 
