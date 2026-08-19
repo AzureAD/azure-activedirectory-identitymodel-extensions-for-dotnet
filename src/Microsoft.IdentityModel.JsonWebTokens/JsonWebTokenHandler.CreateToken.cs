@@ -1191,11 +1191,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // injected, so actor ("act") objects remain RFC 8693 section 4.1 compliant.
         private static void WriteIdentityClaims(ref Utf8JsonWriter writer, ClaimsIdentity identity)
         {
+            // When identity.Actor is set, the structural actor is written separately (by WriteActorObject) as
+            // the single "act" member. A literal "act" claim retained on the identity (deserialization keeps
+            // both identity.Actor and the raw "act" claim) would otherwise be written again here, producing a
+            // duplicate "act" member. Skip it so the structural actor is the single source of "act".
+            bool identityHasActor = identity.Actor is not null;
+
             var payload = new Dictionary<string, object>();
 
             foreach (Claim claim in identity.Claims)
             {
                 if (claim is null)
+                    continue;
+
+                if (identityHasActor && claim.Type.Equals(ActClaimType, StringComparison.Ordinal))
                     continue;
 
                 object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : TokenUtilities.GetClaimValueUsingValueType(claim);
