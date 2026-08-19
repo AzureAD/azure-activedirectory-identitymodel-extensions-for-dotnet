@@ -113,6 +113,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        [Fact]
+        public async Task ValidateTokenAsync_StringEntryPoint_NestedScopes_EmitsCapturedLogExactlyOnce()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                string token = CreateValidToken();
+                ValidationParameters validationParameters = CreateValidationParameters();
+                var callContext = new CallContext();
+
+                // Act - the string overload opens a drain scope and then calls the SecurityToken overload,
+                // which opens a second scope on the SAME CallContext. Only the outermost (string) scope must
+                // drain, so a captured validator log is emitted exactly once, not once per nested scope.
+                ValidationResult<ValidatedToken, ValidationError> validationResult =
+                    await ((IResultBasedValidation)handler).ValidateTokenAsync(token, validationParameters, callContext, default);
+
+                // Assert - the audience-match log (IDX10234) is captured once during validation and emitted
+                // exactly once by the outermost scope, despite the nested string/SecurityToken scoping.
+                Assert.True(validationResult.Succeeded);
+                Assert.Equal(1, recorder.Messages.Count(m => m.Contains("IDX10234")));
+                Assert.Empty(callContext.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
         private sealed class RecordingLogger : IIdentityLogger
         {
             public List<string> Messages { get; } = new List<string>();

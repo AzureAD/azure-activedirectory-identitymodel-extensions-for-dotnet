@@ -279,6 +279,50 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact]
+        public void LogEmissionScope_NestedScopes_OnlyOutermostEmits_OncePerEntryInOrder()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                var context = new CallContext();
+
+                // Act - mirror the handler shape: a string entry point opens the outer scope and captures a
+                // log, then calls the SecurityToken overload (inner scope) which captures more, then captures
+                // again after the inner scope returns. Only the outermost scope may drain.
+                using (context.BeginLogEmissionScope())
+                {
+                    context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: before-inner."));
+
+                    using (context.BeginLogEmissionScope())
+                    {
+                        context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: inside-inner."));
+                    }
+
+                    // The inner scope disposed but must NOT have emitted anything - the outermost scope owns emission.
+                    Assert.Empty(recorder.Messages);
+
+                    context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: after-inner."));
+                }
+
+                // Assert - the outermost scope emitted every entry exactly once (three total, no duplicates),
+                // in capture order across the inner-scope boundary, then cleared the buffer.
+                Assert.Equal(3, recorder.Messages.Count);
+                Assert.Contains("before-inner.", recorder.Messages[0]);
+                Assert.Contains("inside-inner.", recorder.Messages[1]);
+                Assert.Contains("after-inner.", recorder.Messages[2]);
+                Assert.Empty(context.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
+        [Fact]
         public void EmitCapturedLogs_LoggerThrows_DoesNotPropagateAndClearsBuffer()
         {
             // Arrange

@@ -20,6 +20,12 @@ namespace Microsoft.IdentityModel.Tokens
         // seam for the LoggerMessage migration, #3361). Lazily created so the common no-log path allocates nothing.
         private List<CapturedLogEntry>? _capturedLogEntries;
 
+        // Re-entrancy guard for nested LogEmissionScope (issue #3455). A string entry point opens a scope and
+        // then calls the SecurityToken overload, which opens a second scope on the same CallContext. Only the
+        // outermost scope drains, so every captured entry is emitted exactly once, at the outermost boundary,
+        // in capture order. Not synchronized: a CallContext represents a single logical (single-threaded) call.
+        private int _logEmissionScopeDepth;
+
         /// <summary>
         /// Instantiates a new <see cref="CallContext"/> with a default activity identifier.
         /// </summary>
@@ -148,21 +154,43 @@ namespace Microsoft.IdentityModel.Tokens
         /// Begins a scope that emits the captured logs (via <see cref="EmitCapturedLogs"/>) when disposed.
         /// Use with a <c>using</c> declaration at the top of a validation method so the buffer is drained on
         /// every exit path — success, failure, or exception — without introducing an extra async state
-        /// machine (issue #3455).
+        /// machine (issue #3455). Scopes are re-entrant: when a string entry point opens a scope and then
+        /// calls the <see cref="SecurityToken"/> overload (which opens another scope on the same context),
+        /// only the outermost scope drains, so every entry is emitted exactly once and in capture order.
         /// </summary>
-        internal LogEmissionScope BeginLogEmissionScope() => new(this);
+        internal LogEmissionScope BeginLogEmissionScope()
+        {
+            bool isOutermost = _logEmissionScopeDepth == 0;
+            _logEmissionScopeDepth++;
+            return new LogEmissionScope(this, isOutermost);
+        }
 
         /// <summary>
-        /// A disposable scope that drains the <see cref="CallContext"/> captured logs on <see cref="Dispose"/>.
+        /// A disposable scope that drains the <see cref="CallContext"/> captured logs on <see cref="Dispose"/>,
+        /// but only when it is the outermost scope on the context; nested scopes emit nothing.
         /// </summary>
         internal readonly struct LogEmissionScope : IDisposable
         {
             private readonly CallContext _callContext;
+            private readonly bool _isOutermost;
 
-            internal LogEmissionScope(CallContext callContext) => _callContext = callContext;
+            internal LogEmissionScope(CallContext callContext, bool isOutermost)
+            {
+                _callContext = callContext;
+                _isOutermost = isOutermost;
+            }
 
-            /// <summary>Emits the logs captured on the associated <see cref="CallContext"/>.</summary>
-            public void Dispose() => _callContext.EmitCapturedLogs();
+            /// <summary>
+            /// Closes the scope, decrementing the nesting depth. Emits the logs captured on the associated
+            /// <see cref="CallContext"/> only when this is the outermost scope, so nested string/SecurityToken
+            /// validation emits every entry exactly once, in capture order, at the outermost boundary.
+            /// </summary>
+            public void Dispose()
+            {
+                _callContext._logEmissionScopeDepth--;
+                if (_isOutermost)
+                    _callContext.EmitCapturedLogs();
+            }
         }
     }
 }
