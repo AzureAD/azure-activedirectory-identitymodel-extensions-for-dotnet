@@ -361,6 +361,48 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact]
+        public void LogEmissionScope_OuterDisposedBeforeInner_DoesNotDrainEarlyAndOutermostDrainsOnce()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                var context = new CallContext();
+
+                var outer = context.BeginLogEmissionScope(); // level 1
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: outer."));
+
+                var inner = context.BeginLogEmissionScope(); // level 2
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: inner."));
+
+                // Act - dispose the OUTER scope out of order, while the inner scope is still the top of the
+                // stack. The ownership (level) check makes this a no-op, so it must NOT drain early.
+                outer.Dispose();
+                Assert.Empty(recorder.Messages);
+
+                // Closing the inner scope pops level 2 but is not the outermost, so still no emission.
+                inner.Dispose();
+                Assert.Empty(recorder.Messages);
+
+                // Closing the outermost level now drains every captured entry once, in capture order.
+                outer.Dispose();
+
+                // Assert
+                Assert.Equal(2, recorder.Messages.Count);
+                Assert.Contains("outer.", recorder.Messages[0]);
+                Assert.Contains("inner.", recorder.Messages[1]);
+                Assert.Empty(context.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
+        [Fact]
         public void EmitCapturedLogs_LoggerThrows_DoesNotPropagateAndClearsBuffer()
         {
             // Arrange

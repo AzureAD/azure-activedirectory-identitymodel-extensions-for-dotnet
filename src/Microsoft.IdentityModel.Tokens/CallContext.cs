@@ -20,10 +20,13 @@ namespace Microsoft.IdentityModel.Tokens
         // seam for the LoggerMessage migration, #3361). Lazily created so the common no-log path allocates nothing.
         private List<CapturedLogEntry>? _capturedLogEntries;
 
-        // Re-entrancy guard for nested LogEmissionScope (issue #3455). A string entry point opens a scope and
-        // then calls the SecurityToken overload, which opens a second scope on the same CallContext. Only the
-        // outermost scope drains, so every captured entry is emitted exactly once, at the outermost boundary,
-        // in capture order. Not synchronized: a CallContext represents a single logical (single-threaded) call.
+        // Nesting level for LogEmissionScope (issue #3455). A string entry point opens a scope and then
+        // calls the SecurityToken overload, which opens a second scope on the same CallContext. Each scope
+        // captures the depth after it is pushed and, on dispose, acts only when it is still the current top
+        // of the stack - so only the outermost scope (level 1) drains, every captured entry is emitted
+        // exactly once at the outermost boundary in capture order, and double/out-of-order disposal of a
+        // copied value-type scope is a harmless no-op. Not synchronized: a CallContext represents a single
+        // logical (single-threaded) call.
         private int _logEmissionScopeDepth;
 
         /// <summary>
@@ -160,9 +163,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal LogEmissionScope BeginLogEmissionScope()
         {
-            bool isOutermost = _logEmissionScopeDepth == 0;
-            _logEmissionScopeDepth++;
-            return new LogEmissionScope(this, isOutermost);
+            // Capture the level (depth after this scope is pushed) as an ownership token; Dispose acts only
+            // when this scope is still the current top of the stack.
+            return new LogEmissionScope(this, ++_logEmissionScopeDepth);
         }
 
         /// <summary>
@@ -172,29 +175,31 @@ namespace Microsoft.IdentityModel.Tokens
         internal readonly struct LogEmissionScope : IDisposable
         {
             private readonly CallContext _callContext;
-            private readonly bool _isOutermost;
+            private readonly int _level;
 
-            internal LogEmissionScope(CallContext callContext, bool isOutermost)
+            internal LogEmissionScope(CallContext callContext, int level)
             {
                 _callContext = callContext;
-                _isOutermost = isOutermost;
+                _level = level;
             }
 
             /// <summary>
-            /// Closes the scope, decrementing the nesting depth. Emits the logs captured on the associated
-            /// <see cref="CallContext"/> only when this is the outermost scope, so nested string/SecurityToken
-            /// validation emits every entry exactly once, in capture order, at the outermost boundary.
+            /// Closes the scope. Acts only when this scope is the current top of the nesting stack, so a
+            /// double or out-of-order dispose of a copied value-type scope is a harmless no-op. Emits the
+            /// captured logs only when this is the outermost scope (level 1), so nested string/SecurityToken
+            /// validation drains every entry exactly once, in capture order, at the outermost boundary.
             /// </summary>
             public void Dispose()
             {
-                // Guard the decrement so an accidental double dispose (LogEmissionScope is a value type and
-                // could be copied/disposed more than once) cannot drive the depth below zero, which would
-                // make a later scope mis-compute isOutermost and silently skip draining. EmitCapturedLogs is
-                // idempotent (it clears the buffer), so re-emitting from a stale outermost copy is a no-op.
-                if (_callContext._logEmissionScopeDepth > 0)
-                    _callContext._logEmissionScopeDepth--;
+                // Ownership check: only the current top-of-stack scope may pop. A stale copy (already popped,
+                // or disposed out of order while an inner scope is still active) sees a mismatched depth and
+                // no-ops - it neither corrupts the depth nor drains early.
+                if (_callContext._logEmissionScopeDepth != _level)
+                    return;
 
-                if (_isOutermost)
+                _callContext._logEmissionScopeDepth--;
+
+                if (_level == 1)
                     _callContext.EmitCapturedLogs();
             }
         }
