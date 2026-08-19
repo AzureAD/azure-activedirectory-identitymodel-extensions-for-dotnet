@@ -15,13 +15,10 @@ namespace Microsoft.IdentityModel.Tokens;
 /// Provides helper methods for creating and cloning <see cref="CompositeMLDsa"/> instances from JWK parameters.
 /// </summary>
 /// <remarks>
-/// At the time of this implementation the .NET <see cref="CompositeMLDsa"/> BCL type was built
-/// against the pre-02 LAMPS/X.509 encoding of the composite spec. Draft -02 of
-/// <c>draft-ietf-jose-pq-composite-sigs</c> (§4.1) introduced JOSE-specific raw EC encodings
-/// for keys and signatures that differ from the LAMPS format the BCL implements. As a result
-/// Wilson's <see cref="CompositeMLDsa"/> sign output is not byte-compatible with spec -02
-/// reference implementations, and vice versa. This adapter operates against the BCL's native
-/// encoding throughout. Once the BCL is updated to align with spec -02 this note should be removed.
+/// This adapter implements the key and signature encoding defined in
+/// <c>draft-ietf-jose-pq-composite-sigs-01</c>. The composite key and signature
+/// are treated as opaque byte sequences; encoding details are handled internally
+/// by the .NET <see cref="CompositeMLDsa"/> API.
 /// </remarks>
 [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Used as platform test")]
 internal static class CompositeMLDsaAdapter

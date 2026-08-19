@@ -4,7 +4,7 @@
 // Generates CompositeMLDsaSpecVectorTests.cs from the spec reference repository.
 // Run from the repository root:
 //
-//   dotnet run --project tools/GenerateCompositeMLDsaVectorTests
+//   dotnet run --project Tools/GenerateCompositeMLDsaVectorTests
 //
 // The generated file is written to:
 //   test/Microsoft.IdentityModel.Tokens.Tests/CompositeMLDsaSpecVectorTests.cs
@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 
 string baseUrl =
     "https://raw.githubusercontent.com/ietf-wg-jose/draft-ietf-jose-pq-composite-sigs/main/examples/jose/examples/";
+// NOTE: this URL follows the mutable 'main' branch (editor's copy).
 
 (string jose, string file)[] algorithms =
 [
@@ -31,7 +32,7 @@ string outPath = args.Length > 0
     : Path.GetFullPath(
         Path.Combine(
             AppContext.BaseDirectory,
-            @"..\..\..\..\..\..\test\Microsoft.IdentityModel.Tokens.Tests\CompositeMLDsaSpecVectorTests.cs"));
+            @"\..\..\..\..\..\test\Microsoft.IdentityModel.Tokens.Tests\CompositeMLDsaSpecVectorTests.cs"));
 
 Console.WriteLine($"Output: {outPath}");
 
@@ -50,7 +51,7 @@ foreach (var (joseName, fileName) in algorithms)
     string priv = doc["jwk"]!["priv"]!.GetValue<string>();
     string jws  = doc["jws"]!.GetValue<string>();
 
-    Console.WriteLine($"    jws={jws.Length} pub={pub.Length} priv={priv.Length} pub[0]={jws[0]}");
+    Console.WriteLine($"    jws={jws.Length} pub={pub.Length} priv={priv.Length} jws[0]={jws[0]}");
     WriteVectorConstants(sb, joseName, pub, priv, jws);
 }
 
@@ -66,9 +67,9 @@ static void WriteHeader(StringBuilder sb)
     sb.AppendLine("// Licensed under the MIT License.");
     sb.AppendLine("//");
     sb.AppendLine("// AUTO-GENERATED — do not edit by hand.");
-    sb.AppendLine("// Regenerate with: dotnet run --project tools/GenerateCompositeMLDsaVectorTests");
+    sb.AppendLine("// Regenerate with: dotnet run --project Tools/GenerateCompositeMLDsaVectorTests");
     sb.AppendLine("//");
-    sb.AppendLine("// Source: draft-ietf-jose-pq-composite-sigs-02 Appendix A.1");
+    sb.AppendLine("// Source: draft-ietf-jose-pq-composite-sigs (editor's copy)");
     sb.AppendLine("// https://github.com/ietf-wg-jose/draft-ietf-jose-pq-composite-sigs/tree/main/examples/jose/examples");
     sb.AppendLine();
     sb.AppendLine("using System;");
@@ -88,7 +89,7 @@ static void WriteHeader(StringBuilder sb)
 static void WriteVectorConstants(StringBuilder sb, string joseName, string pub, string priv, string jws)
 {
     string safe = joseName.Replace("-", "");
-    sb.AppendLine("    // " + joseName + " — draft-ietf-jose-pq-composite-sigs-02 Appendix A.1");
+    sb.AppendLine("    // " + joseName + " — draft-ietf-jose-pq-composite-sigs (editor's copy)");
     sb.AppendLine("    private const string " + safe + "Pub = \"" + pub + "\";");
     sb.AppendLine("    private const string " + safe + "Priv = \"" + priv + "\";");
 

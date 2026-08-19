@@ -120,7 +120,7 @@ internal sealed class CompositeMLDsaSecurityKey : AsymmetricSecurityKey, IDispos
         if (algorithm == CompositeMLDsaAlgorithm.MLDsa65WithECDsaP256) return 1952 + 65;  // 2017
         if (algorithm == CompositeMLDsaAlgorithm.MLDsa87WithECDsaP384) return 2592 + 97;  // 2689
 
-        // Fallback: export and measure (handles unknown future algorithms gracefully)
-        return 0;
+        // Fallback for an unrecognised algorithm — fail explicitly rather than returning an invalid key size.
+        throw new CryptographicException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm)));
     }
 }
