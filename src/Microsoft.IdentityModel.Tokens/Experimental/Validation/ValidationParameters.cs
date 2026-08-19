@@ -323,10 +323,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                     Interlocked.CompareExchange(ref _signingKeys, [], null) ??
                     _signingKeys;
             }
-            internal set
-            {
-                _signingKeys = value;
-            }
         }
 
         /// <summary>
@@ -571,10 +567,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                     Interlocked.CompareExchange(ref _validAlgorithms, [], null) ??
                     _validAlgorithms;
             }
-            internal set
-            {
-                _validAlgorithms = value;
-            }
         }
 
         /// <summary>
@@ -588,10 +580,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 return _validAudiences ??
                     Interlocked.CompareExchange(ref _validAudiences, [], null) ??
                     _validAudiences;
-            }
-            internal set
-            {
-                _validAudiences = value;
             }
         }
 
@@ -607,10 +595,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 return _validIssuers ??
                     Interlocked.CompareExchange(ref _validIssuers, [], null) ??
                     _validIssuers;
-            }
-            internal set
-            {
-                _validIssuers = value;
             }
         }
 
@@ -628,10 +612,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 return _validTokenTypes ??
                     Interlocked.CompareExchange(ref _validTokenTypes, [], null) ??
                     _validTokenTypes;
-            }
-            internal set
-            {
-                _validTokenTypes = value;
             }
         }
 

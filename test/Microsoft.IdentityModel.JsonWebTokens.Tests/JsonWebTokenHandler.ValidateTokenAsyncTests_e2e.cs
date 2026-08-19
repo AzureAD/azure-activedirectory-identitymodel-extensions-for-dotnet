@@ -24,12 +24,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestDefaultValidToken()
     {
         string token = testTokenCreator.CreateDefaultValidToken();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -43,11 +41,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestDefaultValidTokenValidAudiencesNotSpecified()
     {
         string token = testTokenCreator.CreateDefaultValidToken();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: [],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -64,11 +61,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestDefaultValidTokenValidIssuersNotSpecified()
     {
         string token = testTokenCreator.CreateDefaultValidToken();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: [],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -78,18 +74,16 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
         Assert.NotNull(validationResult.Error);
         Assert.IsType<IssuerValidationError>(validationResult.Error);
         Assert.Contains("IDX10212", validationResult.Error.Message);
-        // IDX10212: Unable to validate issuer. The 'issuer' parameter is null or whitespace.
+        // IDX10212: Issuer validation failed. Issuer did not match any valid issuers or configuration issuer. For more details, see https://aka.ms/IdentityModel/issuer-validation.
     }
 
     [Fact]
     public async Task TestDefaultValidTokenIssuerSigningKeyNotSpecified()
     {
         string token = testTokenCreator.CreateDefaultValidToken();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -108,12 +102,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestTokenWithInvalidSignature()
     {
         string token = testTokenCreator.CreateTokenWithInvalidSignature();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -123,19 +115,17 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
         Assert.NotNull(validationResult.Error);
         Assert.IsType<SignatureValidationError>(validationResult.Error);
         Assert.Contains("IDX10520", validationResult.Error.Message);
-        // IDX10520: Unable to validate signature, token does not have a signature: '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
+        // IDX10520: Signature validation failed. The key provided could not validate the signature.
     }
 
     [Fact]
     public async Task TestTokenWithNoSignature()
     {
         string token = testTokenCreator.CreateTokenWithNoSignature();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -152,12 +142,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestExpiredToken()
     {
         string token = testTokenCreator.CreateExpiredToken();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -174,12 +162,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestTokenWithBadAudience()
     {
         string token = testTokenCreator.CreateTokenWithBadAudience();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -196,12 +182,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestTokenWithBadIssuer()
     {
         string token = testTokenCreator.CreateTokenWithBadIssuer();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -218,12 +202,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestTokenWithBadSignatureKey()
     {
         string token = testTokenCreator.CreateTokenWithBadSignatureKey();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -240,12 +222,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestTokenWithMissingIssuer()
     {
         string token = testTokenCreator.CreateTokenWithMissingIssuer();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -262,12 +242,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestTokenWithMissingAudience()
     {
         string token = testTokenCreator.CreateTokenWithMissingAudience();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -284,12 +262,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestTokenWithMissingExpires()
     {
         string token = testTokenCreator.CreateTokenWithMissingExpires();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -306,12 +282,10 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
     public async Task TestTokenWithMissingKey()
     {
         string token = testTokenCreator.CreateTokenWithMissingKey();
-        ValidationParameters validationParameters = new ValidationParameters()
-        {
-            ValidAudiences = ["http://Default.Audience.com"],
-            ValidIssuers = ["http://Default.Issuer.com"],
-            SigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-        };
+        ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+            audiences: ["http://Default.Audience.com"],
+            issuers: ["http://Default.Issuer.com"],
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
