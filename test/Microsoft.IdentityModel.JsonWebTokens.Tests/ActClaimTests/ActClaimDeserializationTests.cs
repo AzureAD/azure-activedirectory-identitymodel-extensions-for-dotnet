@@ -20,6 +20,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         // Reset the process-wide MaxActorChainLength after every test for isolation.
         public void Dispose() => JsonWebTokenHandler.MaxActorChainLength = 1;
 
+        private static TokenValidationParameters ActorValidationParameters(Action<TokenValidationParameters> configure = null)
+        {
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = Default.AsymmetricSigningKey,
+                ValidateIssuerSigningKey = true,
+            };
+            configure?.Invoke(validationParameters);
+            return validationParameters;
+        }
+
+        private static CaseSensitiveClaimsIdentity BuildIdentity(string authenticationType, params (string Type, string Value)[] claims)
+        {
+            var identity = new CaseSensitiveClaimsIdentity(authenticationType);
+            foreach ((string type, string value) in claims)
+                identity.AddClaim(new Claim(type, value));
+            return identity;
+        }
+
         [Fact]
         public void DeserializeToken_ActNestedBeyondGlobalJsonMaxDepth_FailsToReadWithIDX14101()
         {
@@ -69,14 +91,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
 
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var validationParameters = new TokenValidationParameters()
-            {
-            };
 
             // Create ClaimsIdentity from JsonElement
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                validationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             // Assert
             Assert.NotNull(identity);
@@ -106,14 +123,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
 
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-            };
 
             // Create ClaimsIdentity from JsonElement
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             // Verify main identity
             Assert.NotNull(identity);
@@ -147,14 +159,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
 
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-            };
 
             // Create ClaimsIdentity from JsonElement
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             // Verify level 1
             Assert.NotNull(identity);
@@ -186,14 +193,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
 
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-            };
 
             // Create ClaimsIdentity from JsonElement
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             // Verify identity and simple claims
             Assert.NotNull(identity);
@@ -223,14 +225,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
 
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-            };
 
             // Create ClaimsIdentity from JsonElement
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             // Verify identity and simple claims
             Assert.NotNull(identity);
@@ -260,19 +257,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             string actorJson = @"""This is just a string, not an object""";
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
 
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-            };
 
             // Act: a non-object "act" cannot be expanded into an Actor chain; it warns and returns
             // null instead of throwing.
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
-            // Assert: returns null AND logs the IDX14316 warning (a within-limit non-object).
+            // Assert: returns null AND logs the IDX14314 warning (a within-limit non-object).
             Assert.Null(identity);
-            Assert.Contains("IDX14316", listener.TraceBuffer);
+            Assert.Contains("IDX14314", listener.TraceBuffer);
         }
 
         [Fact]
@@ -280,7 +272,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         {
             // Past MaxActorChainLength the nested "act" is kept as-is (a claim) and must NOT warn -
             // beyond the limit is the expected place for un-expanded actors (e.g. serialization's
-            // degraded value), so the IDX14316 warning is reserved for within-limit non-objects only.
+            // degraded value), so the IDX14314 warning is reserved for within-limit non-objects only.
             using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
             // Default MaxActorChainLength = 1: the top actor is expanded; the nested "act" (an object)
@@ -291,31 +283,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
 
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement, new TokenValidationParameters());
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             Assert.NotNull(identity);
             Assert.Equal("level1", identity.Claims.First(c => c.Type == "sub").Value);
             // Beyond the limit: not expanded into Actor, kept as a claim, and NOT warned.
             Assert.Null(identity.Actor);
             Assert.Contains(identity.Claims, c => c.Type == "act");
-            Assert.DoesNotContain("IDX14316", listener.TraceBuffer);
-        }
-
-        [Fact]
-        public void CreateActorClaimsIdentity_NullValidationParameters_ThrowsArgumentNullException()
-        {
-            // Create a simple JSON Element
-            string actorJson = @"{ ""sub"": ""actor-subject-id"" }";
-            var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() =>
-                JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                    jsonElement,
-                    null));
-
-            Assert.Equal("tokenValidationParameters", exception.ParamName);
+            Assert.DoesNotContain("IDX14314", listener.TraceBuffer);
         }
 
         [Fact]
@@ -335,14 +310,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
 
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-            };
 
             // Create ClaimsIdentity from JsonElement
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             // The configured chain length is not mutated by reading nested actors.
             Assert.Equal(2, JsonWebTokenHandler.MaxActorChainLength);
@@ -358,14 +328,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             // Create a token with an actor claim
             var handler = new JsonWebTokenHandler();
 
-            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
-            actorIdentity.AddClaim(new Claim("name", "Actor Name"));
-            actorIdentity.AddClaim(new Claim("role", "admin"));
+            var actorIdentity = BuildIdentity("ActorAuth", ("sub", "actor-subject-id"), ("name", "Actor Name"), ("role", "admin"));
 
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-            mainIdentity.AddClaim(new Claim("name", "Main User"));
+            var mainIdentity = BuildIdentity("Bearer", ("sub", "main-subject-id"), ("name", "Main User"));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -383,14 +348,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             handler.MapInboundClaims = true;
 
             // Validate token
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true,
-            };
+            var validationParameters = ActorValidationParameters();
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
 
@@ -438,18 +396,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 return id;
             }
 
-            var nestedActor = new CaseSensitiveClaimsIdentity("NestedActorAuth");
-            nestedActor.AddClaim(new Claim("sub", "nested-actor-id"));
-            nestedActor.AddClaim(new Claim("name", "Nested Actor"));
+            var nestedActor = BuildIdentity("NestedActorAuth", ("sub", "nested-actor-id"), ("name", "Nested Actor"));
 
-            var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actor.AddClaim(new Claim("sub", "actor-subject-id"));
-            actor.AddClaim(new Claim("name", "Actor Name"));
+            var actor = BuildIdentity("ActorAuth", ("sub", "actor-subject-id"), ("name", "Actor Name"));
             actor.Actor = nestedActor;
 
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-            mainIdentity.AddClaim(new Claim("name", "Main User"));
+            var mainIdentity = BuildIdentity("Bearer", ("sub", "main-subject-id"), ("name", "Main User"));
 
             var handler = new JsonWebTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -463,15 +415,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             };
             var token = handler.CreateToken(tokenDescriptor);
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true,
-                ActClaimRetriever = CustomDelegate,
-            };
+            var validationParameters = ActorValidationParameters(vp => vp.ActClaimRetriever = CustomDelegate);
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
 
@@ -489,18 +433,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             // Two actor levels: require a chain length of 2.
             JsonWebTokenHandler.MaxActorChainLength = 2;
 
-            var nestedActor = new CaseSensitiveClaimsIdentity("NestedActorAuth");
-            nestedActor.AddClaim(new Claim("sub", "nested-actor-id"));
-            nestedActor.AddClaim(new Claim("name", "Nested Actor"));
+            var nestedActor = BuildIdentity("NestedActorAuth", ("sub", "nested-actor-id"), ("name", "Nested Actor"));
 
-            var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actor.AddClaim(new Claim("sub", "actor-subject-id"));
-            actor.AddClaim(new Claim("name", "Actor Name"));
+            var actor = BuildIdentity("ActorAuth", ("sub", "actor-subject-id"), ("name", "Actor Name"));
             actor.Actor = nestedActor;
 
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-            mainIdentity.AddClaim(new Claim("name", "Main User"));
+            var mainIdentity = BuildIdentity("Bearer", ("sub", "main-subject-id"), ("name", "Main User"));
 
             var handler = new JsonWebTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -514,14 +452,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             };
             var token = handler.CreateToken(tokenDescriptor);
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true,
-            };
+            var validationParameters = ActorValidationParameters();
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
 
@@ -537,7 +468,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         [Fact]
         public async Task ValidateTokenAsync_CustomDelegate_WhenDelegateFails_WarnsAndLeavesActorNull()
         {
-            // A failing ActClaimRetriever must NOT fail token validation. It warns (IDX14314) and leaves
+            // A failing ActClaimRetriever must NOT fail token validation. It warns (IDX14313) and leaves
             // Actor null; the raw "act" claim is still retained. Accessing ClaimsIdentity does not throw.
             using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
@@ -546,11 +477,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 throw new InvalidOperationException("Delegate failure");
             }
 
-            var actor = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actor.AddClaim(new Claim("sub", "actor-subject-id"));
+            var actor = BuildIdentity("ActorAuth", ("sub", "actor-subject-id"));
 
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            var mainIdentity = BuildIdentity("Bearer", ("sub", "main-subject-id"));
 
             var handler = new JsonWebTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -564,15 +493,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             };
             var token = handler.CreateToken(tokenDescriptor);
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true,
-                ActClaimRetriever = CustomDelegate,
-            };
+            var validationParameters = ActorValidationParameters(vp => vp.ActClaimRetriever = CustomDelegate);
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
 
@@ -583,7 +504,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             // The raw "act" claim is retained on the identity.
             Assert.Contains(identity.Claims, c => c.Type == "act");
             // The retriever failure was warned, not thrown.
-            Assert.Contains("IDX14314", listener.TraceBuffer);
+            Assert.Contains("IDX14313", listener.TraceBuffer);
         }
 
         [Fact]
@@ -598,11 +519,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }
 
             // Actor as Subject
-            var actorAsSubject = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actorAsSubject.AddClaim(new Claim("sub", "actor-subject-id"));
+            var actorAsSubject = BuildIdentity("ActorAuth", ("sub", "actor-subject-id"));
 
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            var mainIdentity = BuildIdentity("Bearer", ("sub", "main-subject-id"));
             mainIdentity.Actor = actorAsSubject;
 
             var handler = new JsonWebTokenHandler();
@@ -616,14 +535,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             };
             var token = handler.CreateToken(tokenDescriptor);
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true,
-            };
+            var validationParameters = ActorValidationParameters();
 
             // Default delegate
             var result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -639,14 +551,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Equal("actor-subject-id", result2.ClaimsIdentity.Actor.Claims.First(c => c.Type == "sub").Value);
 
             // Actor in both Subject and Claims dictionary, Claims dictionary should take precedence
-            var subjectActor = new CaseSensitiveClaimsIdentity("SubjectActorAuth");
-            subjectActor.AddClaim(new Claim("sub", "subject-actor-id"));
+            var subjectActor = BuildIdentity("SubjectActorAuth", ("sub", "subject-actor-id"));
 
-            var claimsActor = new CaseSensitiveClaimsIdentity("ClaimsActorAuth");
-            claimsActor.AddClaim(new Claim("sub", "claims-actor-id"));
+            var claimsActor = BuildIdentity("ClaimsActorAuth", ("sub", "claims-actor-id"));
 
-            var mainIdentity2 = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity2.AddClaim(new Claim("sub", "main-subject-id"));
+            var mainIdentity2 = BuildIdentity("Bearer", ("sub", "main-subject-id"));
             mainIdentity2.Actor = subjectActor;
 
             var tokenDescriptor2 = new SecurityTokenDescriptor
@@ -672,8 +581,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             // ARRANGE
             // Build a legacy "actort" JWT string with a distinguishable actor subject.
             var innerHandler = new JsonWebTokenHandler();
-            var actortActorIdentity = new CaseSensitiveClaimsIdentity("ActortAuth");
-            actortActorIdentity.AddClaim(new Claim("sub", "actort-actor-id"));
+            var actortActorIdentity = BuildIdentity("ActortAuth", ("sub", "actort-actor-id"));
             string actortJwtString = innerHandler.CreateToken(new SecurityTokenDescriptor
             {
                 Subject = actortActorIdentity,
@@ -683,11 +591,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             });
 
             // The modern RFC 8693 "act" actor (JSON object) with a different, distinguishable subject.
-            var actActorIdentity = new CaseSensitiveClaimsIdentity("ActAuth");
-            actActorIdentity.AddClaim(new Claim("sub", "act-actor-id"));
+            var actActorIdentity = BuildIdentity("ActAuth", ("sub", "act-actor-id"));
 
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+            var mainIdentity = BuildIdentity("Bearer", ("sub", "main-subject-id"));
 
             var handler = new JsonWebTokenHandler();
             // Token carries BOTH: "act" (JSON object) and legacy "actort" (JWT string).
@@ -705,14 +611,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 }
             });
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            };
+            var validationParameters = ActorValidationParameters();
 
             // ACT
             var result = await handler.ValidateTokenAsync(mainToken, validationParameters);
@@ -740,14 +639,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var handler = new JsonWebTokenHandler();
             handler.MapInboundClaims = true;
 
-            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
-            actorIdentity.AddClaim(new Claim("email", "actor@example.com"));
-            actorIdentity.AddClaim(new Claim("given_name", "ActorFirstName"));
+            var actorIdentity = BuildIdentity("ActorAuth", ("sub", "actor-subject-id"), ("email", "actor@example.com"), ("given_name", "ActorFirstName"));
 
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-            mainIdentity.AddClaim(new Claim("email", "main@example.com"));
+            var mainIdentity = BuildIdentity("Bearer", ("sub", "main-subject-id"), ("email", "main@example.com"));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -760,14 +654,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             };
             string token = handler.CreateToken(tokenDescriptor);
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true,
-            };
+            var validationParameters = ActorValidationParameters();
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
 
@@ -805,14 +692,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             var handler = new JsonWebTokenHandler();
             handler.MapInboundClaims = false;
 
-            var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
-            actorIdentity.AddClaim(new Claim("email", "actor@example.com"));
-            actorIdentity.AddClaim(new Claim("given_name", "ActorFirstName"));
+            var actorIdentity = BuildIdentity("ActorAuth", ("sub", "actor-subject-id"), ("email", "actor@example.com"), ("given_name", "ActorFirstName"));
 
-            var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
-            mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
-            mainIdentity.AddClaim(new Claim("email", "main@example.com"));
+            var mainIdentity = BuildIdentity("Bearer", ("sub", "main-subject-id"), ("email", "main@example.com"));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -825,14 +707,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             };
             string token = handler.CreateToken(tokenDescriptor);
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true,
-            };
+            var validationParameters = ActorValidationParameters();
 
             var result = await handler.ValidateTokenAsync(token, validationParameters);
 
@@ -889,13 +764,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
 
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-            };
 
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             Assert.NotNull(identity);
             Assert.Equal("level1-subject", identity.Claims.First(c => c.Type == "sub").Value);
@@ -928,13 +798,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             }";
 
             var jsonElement = JsonDocument.Parse(actorJson).RootElement;
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-            };
 
-            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(
-                jsonElement,
-                tokenValidationParameters);
+            var identity = JsonWebTokenHandler.CreateActorClaimsIdentityFromJsonElement(jsonElement);
 
             Assert.NotNull(identity);
             Assert.Equal("level1-subject", identity.Claims.First(c => c.Type == "sub").Value);
@@ -986,14 +851,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Equal("service-A", act.GetProperty("sub").GetString());
 
             // ACT + ASSERT (deserialization round-trip): the actor is read back onto ClaimsIdentity.Actor.
-            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            });
+            var result = await handler.ValidateTokenAsync(token, ActorValidationParameters());
 
             Assert.True(result.IsValid);
             Assert.NotNull(result.ClaimsIdentity.Actor);
@@ -1030,14 +888,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             Assert.Equal("service-B", nestedAct.GetProperty("sub").GetString());
 
             // ACT + ASSERT (deserialization round-trip): both levels of Actor are populated.
-            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            });
+            var result = await handler.ValidateTokenAsync(token, ActorValidationParameters());
 
             Assert.True(result.IsValid);
             Assert.Equal("service-A", result.ClaimsIdentity.Actor?.FindFirst("sub")?.Value);
@@ -1074,14 +925,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
 
             // ACT + ASSERT (deserialization): with no "act", the legacy "actort" is expanded into
             // ClaimsIdentity.Actor for back-compat, and the raw "actort" JWT string is still retained.
-            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            });
+            var result = await handler.ValidateTokenAsync(token, ActorValidationParameters());
 
             Assert.True(result.IsValid);
             Assert.NotNull(result.ClaimsIdentity.Actor);
@@ -1103,8 +947,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 SigningCredentials = Default.AsymmetricSigningCredentials
             });
 
-            var actIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actIdentity.AddClaim(new Claim("sub", "act-actor"));
+            var actIdentity = BuildIdentity("ActorAuth", ("sub", "act-actor"));
 
             string token = handler.CreateToken(new SecurityTokenDescriptor
             {
@@ -1116,14 +959,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Claims = new Dictionary<string, object> { { "act", actIdentity }, { "actort", actortJwt } }
             });
 
-            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            });
+            var result = await handler.ValidateTokenAsync(token, ActorValidationParameters());
 
             Assert.True(result.IsValid);
             Assert.NotNull(result.ClaimsIdentity.Actor);
@@ -1139,8 +975,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             const string outerIssuer = "https://issuer.example.com";
             var handler = new JsonWebTokenHandler();
 
-            var actIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
-            actIdentity.AddClaim(new Claim("sub", "act-actor"));
+            var actIdentity = BuildIdentity("ActorAuth", ("sub", "act-actor"));
 
             string token = handler.CreateToken(new SecurityTokenDescriptor
             {
@@ -1152,14 +987,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Claims = new Dictionary<string, object> { { "act", actIdentity } }
             });
 
-            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            });
+            var result = await handler.ValidateTokenAsync(token, ActorValidationParameters());
 
             Assert.True(result.IsValid);
             Assert.NotNull(result.ClaimsIdentity.Actor);
@@ -1176,17 +1004,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
             JsonWebTokenHandler.MaxActorChainLength = 3;
             var handler = new JsonWebTokenHandler();
 
-            var level3 = new CaseSensitiveClaimsIdentity("L3");
-            level3.AddClaim(new Claim("sub", "actor-3"));
-            var level2 = new CaseSensitiveClaimsIdentity("L2");
-            level2.AddClaim(new Claim("sub", "actor-2"));
+            var level3 = BuildIdentity("L3", ("sub", "actor-3"));
+            var level2 = BuildIdentity("L2", ("sub", "actor-2"));
             level2.Actor = level3;
-            var level1 = new CaseSensitiveClaimsIdentity("L1");
-            level1.AddClaim(new Claim("sub", "actor-1"));
+            var level1 = BuildIdentity("L1", ("sub", "actor-1"));
             level1.Actor = level2;
 
-            var main = new CaseSensitiveClaimsIdentity("Bearer");
-            main.AddClaim(new Claim("sub", "user-1"));
+            var main = BuildIdentity("Bearer", ("sub", "user-1"));
             main.Actor = level1;
 
             string token = handler.CreateToken(new SecurityTokenDescriptor
@@ -1198,14 +1022,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 SigningCredentials = Default.AsymmetricSigningCredentials
             });
 
-            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            });
+            var result = await handler.ValidateTokenAsync(token, ActorValidationParameters());
 
             Assert.True(result.IsValid);
             var a1 = result.ClaimsIdentity.Actor;
@@ -1225,7 +1042,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
         {
             // A non-compliant token whose "act" is a JSON ARRAY reaches the actor helper as a non-object
             // (TryGetPayloadValue<JsonElement> succeeds for arrays as well as objects). The guard must warn
-            // (IDX14316) and leave Actor null - NOT throw from EnumerateObject(). Validation still succeeds.
+            // (IDX14314) and leave Actor null - NOT throw from EnumerateObject(). Validation still succeeds.
             using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
             var handler = new JsonWebTokenHandler();
@@ -1239,25 +1056,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Claims = new Dictionary<string, object> { { "act", new List<string> { "a", "b" } } }
             });
 
-            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            });
+            var result = await handler.ValidateTokenAsync(token, ActorValidationParameters());
 
             Assert.True(result.IsValid);
             Assert.Null(result.ClaimsIdentity.Actor);
-            Assert.Contains("IDX14316", listener.TraceBuffer);
+            Assert.Contains("IDX14314", listener.TraceBuffer);
         }
 
         [Fact]
         public async Task ValidateTokenAsync_PrimitiveActAndActort_ActWins_ActorNull()
         {
             // A primitive "act" (a JSON string) is present, so "act" takes precedence and SUPPRESSES the
-            // legacy "actort": Actor is null (a primitive cannot be expanded; IDX14316 warned), the raw
+            // legacy "actort": Actor is null (a primitive cannot be expanded; IDX14314 warned), the raw
             // "act" is retained as a claim, and "actort" is NOT expanded.
             using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
@@ -1278,19 +1088,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests.ActClaimTests
                 Claims = new Dictionary<string, object> { { "act", "not-an-object" }, { "actort", actortJwt } }
             });
 
-            var result = await handler.ValidateTokenAsync(token, new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = Default.AsymmetricSigningKey,
-                ValidateIssuerSigningKey = true
-            });
+            var result = await handler.ValidateTokenAsync(token, ActorValidationParameters());
 
             Assert.True(result.IsValid);
             // "act" wins (present) -> Actor is null (primitive not expandable); "actort" is NOT used.
             Assert.Null(result.ClaimsIdentity.Actor);
-            Assert.Contains("IDX14316", listener.TraceBuffer);
+            Assert.Contains("IDX14314", listener.TraceBuffer);
             // The raw primitive "act" is retained as an ordinary claim.
             Assert.Contains(result.ClaimsIdentity.Claims, c => c.Type == "act" && c.Value == "not-an-object");
         }

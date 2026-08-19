@@ -122,15 +122,15 @@ On validation, `JsonWebTokenHandler` populates `ClaimsIdentity.Actor` from the t
 
 - **`act` (RFC 8693) takes precedence whenever the claim is present — in *any* form** — and always
   suppresses the legacy `actort`. A JSON **object** is expanded into `Actor`. A non-expandable `act`
-  (a JSON **array**, or a **primitive** such as a string/number) warns (`IDX14316`), leaves `Actor`
+  (a JSON **array**, or a **primitive** such as a string/number) warns (`IDX14314`), leaves `Actor`
   null, and is kept as an ordinary claim — but it *still* wins, so `actort` is not consulted. When
   there is no `act` at all, the legacy `actort` (an unsigned nested-JWT string) is expanded for read
   back-compatibility (this handler writes `act`, never `actort`). The `actort` chain is **not**
   bounded by `MaxActorChainLength` (that bounds `act` only).
 - **Degrade, don't throw.** Nested `act` objects are expanded up to `MaxActorChainLength`; deeper
   levels are **kept as a claim** (silent). A within-limit non-object `act` logs a warning
-  (`IDX14316`) and is kept as a claim. A failing custom `ActClaimRetriever` logs a warning
-  (`IDX14314`, PII-scrubbed) and leaves `Actor` null. **Nothing in the actor read path fails token
+  (`IDX14314`) and is kept as a claim. A failing custom `ActClaimRetriever` logs a warning
+  (`IDX14313`, PII-scrubbed) and leaves `Actor` null. **Nothing in the actor read path fails token
   validation** (except a null `TokenValidationParameters`).
 - **Issuer.** `act`-derived actor claims carry the **outer token's validated issuer** on
   `Claim.Issuer` (the `act` object is asserted by the outer token). `actort`-derived actor claims,

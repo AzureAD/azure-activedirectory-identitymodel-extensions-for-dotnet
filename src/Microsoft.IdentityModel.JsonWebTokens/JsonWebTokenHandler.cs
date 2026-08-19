@@ -642,15 +642,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // "act" (RFC 8693) takes precedence whenever the claim is present, in ANY form, and always
             // suppresses the legacy "actort". TryGetPayloadValue<JsonElement> succeeds only for JSON
             // objects/arrays, so the common object case is a single lookup here (object -> expanded;
-            // array -> the helper warns IDX14316 and yields null).
+            // array -> the helper warns IDX14314 and yields null).
             if (jwtToken.TryGetPayloadValue<JsonElement>(ActClaimType, out JsonElement actClaim))
                 return CreateActorClaimsIdentity(actClaim, validationParameters, issuer);
 
             // "act" present but a primitive (string/number/bool): it cannot be expanded, but it still wins -
-            // warn IDX14316 and suppress "actort". The raw "act" value is retained as a claim by the caller.
+            // warn IDX14314 and suppress "actort". The raw "act" value is retained as a claim by the caller.
             if (jwtToken.HasPayloadClaim(ActClaimType))
             {
-                LogHelper.LogWarning(LogMessages.IDX14316);
+                LogHelper.LogWarning(LogMessages.IDX14314);
                 return null;
             }
 
@@ -699,7 +699,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // A failing retriever must not fail token validation. Warn (PII-scrubbed by default;
                     // full detail only when PII logging is enabled) and leave Actor unset; the raw "act"
                     // claim is still retained on the identity.
-                    LogHelper.LogWarning(LogMessages.IDX14314, ex);
+                    LogHelper.LogWarning(LogMessages.IDX14313, ex);
                     return null;
                 }
 #pragma warning restore CA1031 // Do not catch general exception types
@@ -708,35 +708,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Default expansion: materialize the top actor object; nested "act" objects are expanded only
             // while within the configured MaxActorChainLength (one level unless raised), otherwise retained
             // as a claim by CreateActorClaimsIdentityFromJsonElement.
-            return CreateActorClaimsIdentityFromJsonElement(actClaim, tokenValidationParameters, issuer);
+            return CreateActorClaimsIdentityFromJsonElement(actClaim, issuer);
         }
 
         /// <summary>
         /// Creates a ClaimsIdentity from a JsonElement that represents an actor token.
         /// </summary>
         /// <param name="jsonElement">The JsonElement containing actor claims.</param>
-        /// <param name="tokenValidationParameters">These parameters have details like nested actor chain length and max permissible actor length.</param>
         /// <param name="issuer">The issuer for the claims.</param>
         /// <param name="currentDepth">The current recursion depth for nested actor processing.</param>
         /// <returns>A ClaimsIdentity containing claims from the JsonElement.</returns>
         internal static ClaimsIdentity CreateActorClaimsIdentityFromJsonElement(
             JsonElement jsonElement,
-            TokenValidationParameters tokenValidationParameters,
             string issuer = null,
             int currentDepth = 0)
         {
-            if (tokenValidationParameters is null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
-
             // Defensive guard. On the read path, TryGetPayloadValue<JsonElement>("act") succeeds only for
             // JSON objects and arrays (primitives such as strings/numbers return false and never reach here),
             // so a non-compliant "act":[...] arrives as an Array; direct callers may also pass any kind. A
             // non-object has no members to expand, and jsonElement.EnumerateObject() below throws
-            // InvalidOperationException on anything that is not an object. So we warn (IDX14316) and return
+            // InvalidOperationException on anything that is not an object. So we warn (IDX14314) and return
             // null - the caller keeps the raw "act" as an ordinary claim rather than failing validation.
             if (jsonElement.ValueKind != JsonValueKind.Object)
             {
-                LogHelper.LogWarning(LogMessages.IDX14316);
+                LogHelper.LogWarning(LogMessages.IDX14314);
                 return null;
             }
 
@@ -768,42 +763,42 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if (value.ValueKind == JsonValueKind.Object)
                         {
                             identity.Actor = CreateActorClaimsIdentityFromJsonElement(
-                                value, tokenValidationParameters, issuer, currentDepth + 1);
+                                value, issuer, currentDepth + 1);
                             continue;
                         }
 
                         // Within the limit but not a JSON object: keep as a claim and warn.
-                        LogHelper.LogWarning(LogMessages.IDX14316);
+                        LogHelper.LogWarning(LogMessages.IDX14314);
                     }
 
                     // Beyond the limit (silent) or a within-limit non-object (warned above): retain the
                     // "act" value verbatim as a claim.
-                    var actClaim = JsonClaimSet.CreateClaimFromJsonElement(claimType, issuer, value);
-                    if (actClaim is not null)
-                        identity.AddClaim(actClaim);
+                    AddClaimIfNotNull(identity, claimType, issuer, value);
 
                     continue;
                 }
 
-                // For all other claims, create and add them
+                // For all other claims, create and add them (an array expands into one claim per element).
                 if (value.ValueKind == JsonValueKind.Array)
                 {
                     foreach (JsonElement element in value.EnumerateArray())
-                    {
-                        var claim = JsonClaimSet.CreateClaimFromJsonElement(claimType, issuer, element);
-                        if (claim is not null)
-                            identity.AddClaim(claim);
-                    }
+                        AddClaimIfNotNull(identity, claimType, issuer, element);
                 }
                 else
                 {
-                    var claim = JsonClaimSet.CreateClaimFromJsonElement(claimType, issuer, value);
-                    if (claim is not null)
-                        identity.AddClaim(claim);
+                    AddClaimIfNotNull(identity, claimType, issuer, value);
                 }
             }
 
             return identity;
+        }
+
+        // Creates a claim from a single JsonElement value and adds it to the identity when non-null.
+        private static void AddClaimIfNotNull(ClaimsIdentity identity, string claimType, string issuer, JsonElement value)
+        {
+            Claim claim = JsonClaimSet.CreateClaimFromJsonElement(claimType, issuer, value);
+            if (claim is not null)
+                identity.AddClaim(claim);
         }
     }
 }
