@@ -25,6 +25,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             // Issue #3455: scope the string entry point too, so logs captured before/around token parsing
             // are drained and the buffer is cleared even if parsing fails before the SecurityToken overload runs.
+            if (callContext is null)
+                return ValidationError.NullParameter(
+                    nameof(callContext),
+                    ValidationError.GetCurrentStackFrame());
+
             using var logScope = callContext.BeginLogEmissionScope();
 
             if (string.IsNullOrEmpty(token))
@@ -82,6 +87,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // (success or failure) so they are emitted once, are not tied to whether the caller later accesses
             // ClaimsIdentity, and do not leak into a caller-reused CallContext. The using-scope keeps this to a
             // single async state machine (no wrapper method, no extra allocation on the hot path).
+            if (callContext is null)
+                return ValidationError.NullParameter(
+                    nameof(callContext),
+                    ValidationError.GetCurrentStackFrame());
+
             using var logScope = callContext.BeginLogEmissionScope();
 
             if (token is null)

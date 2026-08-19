@@ -242,6 +242,96 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        [Fact]
+        public async Task ValidateTokenAsync_NullCallContext_ReturnsNullParameterErrorInsteadOfThrowing()
+        {
+            // Arrange
+            var handler = new JsonWebTokenHandler();
+            string token = CreateValidToken();
+            ValidationParameters validationParameters = CreateValidationParameters();
+
+            // Act - the handler opens a BeginLogEmissionScope at entry; a null callContext must surface as a
+            // structured ValidationError (NullArgument), not an incidental NullReferenceException.
+            ValidationResult<ValidatedToken, ValidationError> validationResult =
+                await ((IResultBasedValidation)handler).ValidateTokenAsync(token, validationParameters, null!, default);
+
+            // Assert
+            Assert.False(validationResult.Succeeded);
+            Assert.Equal(ValidationFailureType.NullArgument, validationResult.Error!.FailureType);
+        }
+
+        [Fact]
+        public async Task LazyClaimsIdentity_CreationThrows_RepeatedAccessRetriesAndDoesNotCacheFailure()
+        {
+            // Arrange - a NameClaimTypeRetriever that throws makes lazy claims creation fail. Claims creation
+            // runs lazily (after validation completes), so validation itself still succeeds.
+            var handler = new JsonWebTokenHandler();
+            string token = CreateValidToken();
+
+            int retrieverCalls = 0;
+            ValidationParameters validationParameters = CreateValidationParameters();
+            validationParameters.NameClaimTypeRetriever = (securityToken, issuer) =>
+            {
+                retrieverCalls++;
+                throw new InvalidOperationException("claims creation failure");
+            };
+
+            var callContext = new CallContext();
+
+            // Act
+            ValidationResult<ValidatedToken, ValidationError> validationResult =
+                await ((IResultBasedValidation)handler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            Assert.True(validationResult.Succeeded);
+
+            // Assert - each ClaimsIdentity access retries creation because _claimsIdentityInitialized stays
+            // false when creation throws; the failure is deliberately not cached, so the retriever runs again.
+            Assert.Throws<InvalidOperationException>(() => _ = validationResult.Result!.ClaimsIdentity);
+            Assert.Throws<InvalidOperationException>(() => _ = validationResult.Result!.ClaimsIdentity);
+            Assert.Equal(2, retrieverCalls);
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_ConfigRetrievalFails_EmitsIDX10261WarningExactlyOnce()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                string token = CreateValidToken();
+
+                // The configuration manager throws on the first fetch, so GetCurrentConfigurationAsync captures
+                // IDX10261 (Warning) and continues; the issuer/key are set directly on the parameters so
+                // validation succeeds from local data. currentConfiguration stays null, so no refresh/LKG retry
+                // runs and the warning is never cleared.
+                var config = new OpenIdConnectConfiguration { Issuer = Issuer };
+                var configManager = new MockConfigurationManager<OpenIdConnectConfiguration>(
+                    config, new InvalidOperationException("configuration retrieval failed"));
+
+                ValidationParameters validationParameters = CreateValidationParameters();
+                validationParameters.ConfigurationManager = configManager;
+
+                var callContext = new CallContext();
+
+                // Act
+                ValidationResult<ValidatedToken, ValidationError> validationResult =
+                    await ((IResultBasedValidation)handler).ValidateTokenAsync(token, validationParameters, callContext, default);
+
+                // Assert - validation proceeded on the locally-configured issuer/key, and the config-failure
+                // warning (IDX10261) is captured and emitted exactly once.
+                Assert.True(validationResult.Succeeded);
+                Assert.Equal(1, recorder.Messages.Count(m => m.Contains("IDX10261")));
+                Assert.Empty(callContext.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
         private sealed class RecordingLogger : IIdentityLogger
         {
             public List<string> Messages { get; } = new List<string>();
