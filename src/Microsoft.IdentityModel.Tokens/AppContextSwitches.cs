@@ -104,11 +104,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// (draft-ietf-jose-pq-composite-sigs). Disabled by default. Wire format may change
         /// in future spec revisions; enable only in controlled environments.
         /// </summary>
+        /// <remarks>
+        /// Unlike other switches, this property is not cached — it reads the current
+        /// AppContext switch value on every call. This allows the switch to be toggled
+        /// dynamically at runtime (e.g. by a remote feature flag) without requiring a
+        /// process restart.
+        /// </remarks>
         internal const string EnableCompositeMLDsaDraftSwitch = "Microsoft.IdentityModel.CompositeMLDsa.EnableDraft";
 
-        private static bool? _enableCompositeMLDsaDraft;
-
-        internal static bool EnableCompositeMLDsaDraft => _enableCompositeMLDsaDraft ??= (AppContext.TryGetSwitch(EnableCompositeMLDsaDraftSwitch, out bool enabled) && enabled);
+        internal static bool EnableCompositeMLDsaDraft =>
+            AppContext.TryGetSwitch(EnableCompositeMLDsaDraftSwitch, out bool enabled) && enabled;
 
         /// <summary>
         /// Used for testing to reset all switches to its default value.
@@ -136,7 +141,6 @@ namespace Microsoft.IdentityModel.Tokens
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
 
-            _enableCompositeMLDsaDraft = null;
             AppContext.SetSwitch(EnableCompositeMLDsaDraftSwitch, false);
         }
     }
