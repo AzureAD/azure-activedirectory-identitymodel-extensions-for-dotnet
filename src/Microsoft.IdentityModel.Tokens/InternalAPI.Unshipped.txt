@@ -31,6 +31,8 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedSigningKey.s
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedSigningKeyLifetime.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenReplayExpirationTime.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenType.set -> void
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidationActivityId.get -> System.Guid
+Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidationActivityId.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.CreateException(System.Type exceptionType, System.Exception innerException) -> System.Exception
 Microsoft.IdentityModel.Tokens.Experimental.ValidationError.MessageDetail.get -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail
 Microsoft.IdentityModel.Tokens.Experimental.ValidationFailure.Name.set -> void

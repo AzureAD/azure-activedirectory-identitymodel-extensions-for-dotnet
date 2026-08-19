@@ -161,6 +161,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// calls the <see cref="SecurityToken"/> overload (which opens another scope on the same context),
         /// only the outermost scope drains, so every entry is emitted exactly once and in capture order.
         /// </summary>
+        /// <remarks>
+        /// Invariant: <c>_logEmissionScopeDepth</c> is the count of open scopes; each scope owns the level it
+        /// was pushed at and only the top-of-stack scope may pop (so double/out-of-order disposal is a no-op),
+        /// and the outermost scope (level 1) is the single owner of draining. A <see cref="CallContext"/> is a
+        /// single logical (single-threaded) call, so the counter needs no synchronization.
+        /// </remarks>
         internal LogEmissionScope BeginLogEmissionScope()
         {
             // Capture the level (depth after this scope is pushed) as an ownership token; Dispose acts only

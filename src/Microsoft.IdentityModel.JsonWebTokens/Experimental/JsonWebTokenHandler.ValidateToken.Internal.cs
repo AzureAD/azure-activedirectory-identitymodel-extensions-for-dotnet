@@ -370,7 +370,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidatedIssuer = issuerResult.Result,
                 ActorValidationResult = actorResult?.Result,
                 ValidatedTokenType = tokenTypeResult.Result,
-                ValidatedSignatureKey = signatureResult.Result
+                ValidatedSignatureKey = signatureResult.Result,
+                ValidationActivityId = callContext.ActivityId
             };
         }
 

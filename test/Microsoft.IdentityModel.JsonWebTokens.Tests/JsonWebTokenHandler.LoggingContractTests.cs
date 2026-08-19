@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
@@ -329,6 +330,56 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             finally
             {
                 LogHelper.Logger = originalLogger;
+            }
+        }
+
+        [Fact]
+        public void LazyClaimsIdentity_CreationThrowsAfterCapture_EmitsIDX10245OncePerFailedAttempt()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                // A handler whose lazy claims creation captures IDX10245 and then throws.
+                var handler = new CaptureThenThrowHandler();
+                var securityToken = new JsonWebToken(CreateValidToken());
+                var validatedToken = new ValidatedToken(securityToken, handler, CreateValidationParameters());
+
+                // Act + Assert - each ClaimsIdentity access retries creation (the failure is not cached because
+                // _claimsIdentityInitialized stays false when creation throws), and each failed attempt records
+                // and emits its own IDX10245 through the lazy drain. So the log is emitted once PER attempt.
+                Assert.Throws<InvalidOperationException>(() => _ = validatedToken.ClaimsIdentity);
+                Assert.Throws<InvalidOperationException>(() => _ = validatedToken.ClaimsIdentity);
+
+                Assert.Equal(2, handler.Attempts);
+                Assert.Equal(2, recorder.Messages.Count(m => m.Contains("IDX10245")));
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
+        // A handler whose lazy claims creation captures IDX10245 and then throws, exercising the
+        // ValidatedToken.ClaimsIdentityNoLocking failure path (emit-on-every-path, retry-on-failure).
+        private sealed class CaptureThenThrowHandler : JsonWebTokenHandler
+        {
+            public int Attempts { get; private set; }
+
+            internal override ClaimsIdentity CreateClaimsIdentityInternal(
+                SecurityToken securityToken,
+                ValidationParameters validationParameters,
+                string issuer,
+                CallContext callContext)
+            {
+                Attempts++;
+                callContext.AddLog(
+                    EventLogLevel.Informational,
+                    new MessageDetail(Microsoft.IdentityModel.Tokens.LogMessages.IDX10245, securityToken));
+                throw new InvalidOperationException("claims creation failed after capturing IDX10245");
             }
         }
 

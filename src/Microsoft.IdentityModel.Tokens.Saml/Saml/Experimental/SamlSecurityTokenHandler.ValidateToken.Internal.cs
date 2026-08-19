@@ -211,7 +211,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 ValidatedAlgorithm = algorithmResult.Result,
                 ValidatedLifetime = lifetimeResult.Result,
                 ValidatedIssuer = issuerResult.Result,
-                ValidatedSignatureKey = signatureResult.Result
+                ValidatedSignatureKey = signatureResult.Result,
+                ValidationActivityId = callContext.ActivityId
             };
         }
 
