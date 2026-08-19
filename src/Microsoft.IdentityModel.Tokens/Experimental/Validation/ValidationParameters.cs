@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
 
@@ -66,6 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(other)));
 
             ActorValidationParameters = other.ActorValidationParameters;
+            ActClaimRetriever = other.ActClaimRetriever;
             AlgorithmValidator = other.AlgorithmValidator;
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
@@ -118,6 +120,19 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// Gets or sets <see cref="ValidationParameters"/>.
         /// </summary>
         public ValidationParameters? ActorValidationParameters { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that, when set, fully owns construction of the actor
+        /// <see cref="ClaimsIdentity"/> from the RFC 8693 "act" claim's <see cref="JsonElement"/>.
+        /// </summary>
+        /// <remarks>
+        /// When supplied, the delegate is invoked instead of the default "act" expansion and its result is
+        /// used as <see cref="ClaimsIdentity.Actor"/> as-is (it is not bounded by the handler's
+        /// MaxActorChainLength). A delegate that throws does not fail token validation: the failure is logged
+        /// (IDX14313, PII-scrubbed) and <see cref="ClaimsIdentity.Actor"/> is left null while the raw "act"
+        /// claim is retained.
+        /// </remarks>
+        public Func<JsonElement, ValidationParameters, ClaimsIdentity>? ActClaimRetriever { get; set; }
 
         /// <summary>
         /// Allows overriding the validator used to validate the cryptographic algorithm used.
