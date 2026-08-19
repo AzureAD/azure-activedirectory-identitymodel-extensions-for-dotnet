@@ -323,6 +323,44 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact]
+        public void LogEmissionScope_DisposedTwice_DoesNotUnderflowDepthAndLaterScopeStillDrains()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                var context = new CallContext();
+
+                // Act - dispose the same (value-type) scope twice, simulating an accidental copy/double
+                // dispose. The guarded decrement must not drive the depth below zero.
+                var scope = context.BeginLogEmissionScope();
+                context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: first."));
+                scope.Dispose();
+                scope.Dispose();
+
+                // A subsequent scope must still be recognized as the outermost one and drain normally; if the
+                // double dispose had underflowed the depth, this scope would compute isOutermost=false and
+                // silently skip draining.
+                using (context.BeginLogEmissionScope())
+                {
+                    context.AddLog(EventLogLevel.Informational, new MessageDetail("IDX99999: second."));
+                }
+
+                // Assert
+                Assert.Contains(recorder.Messages, m => m.Contains("IDX99999: first."));
+                Assert.Contains(recorder.Messages, m => m.Contains("IDX99999: second."));
+                Assert.Empty(context.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
+        [Fact]
         public void EmitCapturedLogs_LoggerThrows_DoesNotPropagateAndClearsBuffer()
         {
             // Arrange

@@ -187,7 +187,13 @@ namespace Microsoft.IdentityModel.Tokens
             /// </summary>
             public void Dispose()
             {
-                _callContext._logEmissionScopeDepth--;
+                // Guard the decrement so an accidental double dispose (LogEmissionScope is a value type and
+                // could be copied/disposed more than once) cannot drive the depth below zero, which would
+                // make a later scope mis-compute isOutermost and silently skip draining. EmitCapturedLogs is
+                // idempotent (it clears the buffer), so re-emitting from a stale outermost copy is a no-op.
+                if (_callContext._logEmissionScopeDepth > 0)
+                    _callContext._logEmissionScopeDepth--;
+
                 if (_isOutermost)
                     _callContext.EmitCapturedLogs();
             }

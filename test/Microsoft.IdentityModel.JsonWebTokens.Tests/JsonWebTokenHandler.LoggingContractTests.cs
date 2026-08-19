@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -136,6 +137,101 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 // Assert - the audience-match log (IDX10234) is captured once during validation and emitted
                 // exactly once by the outermost scope, despite the nested string/SecurityToken scoping.
+                Assert.True(validationResult.Succeeded);
+                Assert.Equal(1, recorder.Messages.Count(m => m.Contains("IDX10234")));
+                Assert.Empty(callContext.CapturedLogEntries);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+            }
+        }
+
+        [Fact]
+        public async Task LazyClaimsIdentity_IDX10245_RedactedWhenPiiPolicyDisabledBeforeClaimsAccess()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            bool originalShowPii = IdentityModelEventSource.ShowPII;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+            IdentityModelEventSource.ShowPII = true; // PII display ON during validation
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                string token = CreateValidToken();
+                ValidationParameters validationParameters = CreateValidationParameters();
+                var callContext = new CallContext();
+
+                ValidationResult<ValidatedToken, ValidationError> validationResult =
+                    await ((IResultBasedValidation)handler).ValidateTokenAsync(token, validationParameters, callContext, default);
+                Assert.True(validationResult.Succeeded);
+
+                // The claims identity has not been accessed yet, so the lazy IDX10245 has not been emitted.
+                Assert.DoesNotContain(recorder.Messages, m => m.Contains("IDX10245"));
+
+                // Act - the PII policy flips OFF after validation completes but before the lazy claims access.
+                // The lazy path emits IDX10245 at access time on its own CallContext, so redaction must reflect
+                // the policy now (off), not the policy at validation time (on).
+                IdentityModelEventSource.ShowPII = false;
+                _ = validationResult.Result!.ClaimsIdentity;
+
+                // Assert - IDX10245 is emitted (the lazy path drains), but the token argument is redacted.
+                string idx10245 = Assert.Single(recorder.Messages, m => m.Contains("IDX10245"));
+                Assert.Contains("hidden", idx10245, StringComparison.OrdinalIgnoreCase);
+                Assert.DoesNotContain(token, idx10245);
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+                IdentityModelEventSource.ShowPII = originalShowPii;
+            }
+        }
+
+        [Fact]
+        public async Task ValidateTokenAsync_ConfigRefreshRetry_EmitsOnlyFinalAttemptLogs()
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            var recorder = new RecordingLogger();
+            LogHelper.Logger = recorder;
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                string token = CreateValidToken(); // signed with JsonWebKeyRsa256
+
+                // Initial config carries the WRONG signing key so the first validation attempt captures its
+                // informational logs (e.g. the audience match) and then fails at signature validation. The
+                // refreshed config carries the RIGHT key so the retry succeeds.
+                var wrongConfig = new OpenIdConnectConfiguration { Issuer = Issuer };
+                wrongConfig.SigningKeys.Add(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key);
+
+                var rightConfig = new OpenIdConnectConfiguration { Issuer = Issuer };
+                rightConfig.SigningKeys.Add(KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key);
+
+                var configManager = new MockConfigurationManager<OpenIdConnectConfiguration>(
+                    wrongConfig, wrongConfig, rightConfig);
+
+                // Empty SigningKeys forces validation to rely on the configuration's keys, so the first
+                // attempt genuinely fails and the config-refresh retry path is exercised.
+                ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
+                    audiences: [Audience],
+                    issuers: [Issuer],
+                    signingKeys: new List<SecurityKey>());
+                validationParameters.ConfigurationManager = configManager;
+
+                var callContext = new CallContext();
+
+                // Act
+                ValidationResult<ValidatedToken, ValidationError> validationResult =
+                    await ((IResultBasedValidation)handler).ValidateTokenAsync(token, validationParameters, callContext, default);
+
+                // Assert - success proves the retry recovered with the refreshed key (the first attempt failed
+                // at signature). The audience-match log (IDX10234) is captured on BOTH attempts, but the first
+                // attempt's entry is discarded via ClearCapturedLogs before the retry, so it is emitted exactly
+                // once - only the final attempt's logs survive.
                 Assert.True(validationResult.Succeeded);
                 Assert.Equal(1, recorder.Messages.Count(m => m.Contains("IDX10234")));
                 Assert.Empty(callContext.CapturedLogEntries);
