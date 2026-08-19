@@ -250,5 +250,10 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return type;
         }
+
+        public static readonly ActClaimRetriever ActClaimRetriever = (actorClaim, tokenValidationParameters) =>
+        {
+            return null;
+        };
     }
 }
