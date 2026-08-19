@@ -102,7 +102,10 @@ maximum.** Setting it below 1 throws `ArgumentOutOfRangeException` (`IDX14317`).
   token round-trips consistently. A per-call setting could drift between write and read.
 - **Within the limit:** each actor level is a nested `act` **object**.
 - **Beyond the limit:** the remaining actor subtree **degrades to a JSON-text string** (never a
-  JWT, never a throw) — `"We cannot drop the data; we pass it as-is."`
+  JWT) — `"We cannot drop the data; we pass it as-is."` This degradation is still bounded by the
+  library's global JSON depth limit of **64**: an actor nested beyond depth 64 fails fast with
+  `IDX10815` on write, and a token whose `act` nests beyond 64 fails to **read** (`IDX14101`
+  wrapping a depth-64 `JsonReaderException`).
 - **Default of 1** is RFC-informed (only the current actor is used for access control) and keeps
   the common case cheap; callers who need deeper chains opt in explicitly.
 
@@ -112,6 +115,38 @@ The recursion terminates on a `null` `Actor` at the end of the chain (the string
 expands the remainder with `int.MaxValue`, i.e. losslessly). This is safe because
 `ClaimsIdentity.Actor` is guaranteed **finite and acyclic** — its setter throws
 `InvalidOperationException` on any circular reference, so a cycle can never reach the serializer.
+
+### Deserialization (read path)
+
+On validation, `JsonWebTokenHandler` populates `ClaimsIdentity.Actor` from the token:
+
+- **`act` (RFC 8693) takes precedence whenever the claim is present — in *any* form** — and always
+  suppresses the legacy `actort`. A JSON **object** is expanded into `Actor`. A non-expandable `act`
+  (a JSON **array**, or a **primitive** such as a string/number) warns (`IDX14314`), leaves `Actor`
+  null, and is kept as an ordinary claim — but it *still* wins, so `actort` is not consulted. When
+  there is no `act` at all, the legacy `actort` (an unsigned nested-JWT string) is expanded for read
+  back-compatibility (this handler writes `act`, never `actort`). The `actort` chain is **not**
+  bounded by `MaxActorChainLength` (that bounds `act` only).
+- **Degrade, don't throw.** Nested `act` objects are expanded up to `MaxActorChainLength`; deeper
+  levels are **kept as a claim** (silent). A within-limit non-object `act` logs a warning
+  (`IDX14314`) and is kept as a claim. A failing custom `ActClaimRetriever` logs a warning
+  (`IDX14313`, PII-scrubbed) and leaves `Actor` null. **Nothing in the actor read path fails token
+  validation** (except a null `TokenValidationParameters`).
+- **Issuer.** `act`-derived actor claims carry the **outer token's validated issuer** on
+  `Claim.Issuer` (the `act` object is asserted by the outer token). `actort`-derived actor claims,
+  by contrast, carry the **nested actor JWT's own issuer** (`GetActualIssuer(actor)`), since `actort`
+  is an independent (if unsigned) token.
+- **Config asymmetry (`act` vs `actort`).** `act` actors are built as a **bare**
+  `CaseSensitiveClaimsIdentity`, so they use **default** `NameClaimType` / `RoleClaimType` /
+  `AuthenticationType` and no inbound mapping — read them via their **raw claims** (`sub`, …), not
+  `Actor.Name` / `IsInRole`. `actort` actors are built through
+  `validationParameters.CreateClaimsIdentity(...)`, so they **do** get the configured name/role/auth
+  types and inbound mapping. So an actor's name/role behavior can differ purely based on the wire
+  format the sender used — by design. The raw `act` path is deliberate: it preserves the actor's
+  claims **verbatim**, without the renaming/transformation inbound mapping would apply, so no actor
+  information is lost.
+- **Extensibility.** Override `CreateClaimsIdentity` to customize `actort`-derived actors, or set
+  `TokenValidationParameters.ActClaimRetriever` to fully own `act` construction.
 
 ---
 
@@ -156,8 +191,8 @@ The final design serializes each actor **directly from its `ClaimsIdentity`** (n
 | 5-deep chain, limit 1 (deep degrade) | 14.48 KB | 10.49 KB |
 
 ~**0.35 KB per actor level** (just the coalescing dictionary), down from ~1.1 KB/level. The
-shipped internal API signatures are untouched. Benchmarks: `ActorClaimBenchmarks` in
-`Microsoft.IdentityModel.Benchmarks`.
+shipped internal API signatures are untouched. Benchmarks: `ActorClaimSerializationBenchmarks` and
+`ActorClaimDeserializationBenchmarks` in `Microsoft.IdentityModel.Benchmarks`.
 
 ---
 
