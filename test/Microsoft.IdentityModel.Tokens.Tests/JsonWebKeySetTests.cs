@@ -239,6 +239,42 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory]
+        [InlineData(SecurityAlgorithms.MlDsa44, 1312)]
+        [InlineData(SecurityAlgorithms.MlDsa65, 1952)]
+        [InlineData(SecurityAlgorithms.MlDsa87, 2592)]
+        public void ShouldPreserveUnresolvedMlDsaKey_RecognizesValidPublicKey(string algorithm, int publicKeySize)
+        {
+            var webKey = new JsonWebKey
+            {
+                Alg = algorithm,
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(new byte[publicKeySize])
+            };
+
+            Assert.True(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: false));
+            Assert.False(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: true));
+        }
+
+        [Theory]
+        [InlineData(null, JsonWebAlgorithmsKeyTypes.Akp, "AA")]
+        [InlineData("unsupported", JsonWebAlgorithmsKeyTypes.Akp, "AA")]
+        [InlineData(SecurityAlgorithms.MlDsa44, JsonWebAlgorithmsKeyTypes.RSA, "AA")]
+        [InlineData(SecurityAlgorithms.MlDsa44, JsonWebAlgorithmsKeyTypes.Akp, null)]
+        [InlineData(SecurityAlgorithms.MlDsa44, JsonWebAlgorithmsKeyTypes.Akp, "invalid!")]
+        [InlineData(SecurityAlgorithms.MlDsa44, JsonWebAlgorithmsKeyTypes.Akp, "AA")]
+        public void ShouldPreserveUnresolvedMlDsaKey_RejectsInvalidKey(string algorithm, string keyType, string publicKey)
+        {
+            var webKey = new JsonWebKey
+            {
+                Alg = algorithm,
+                Kty = keyType,
+                Pub = publicKey
+            };
+
+            Assert.False(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: false));
+        }
+
         public static TheoryData<JsonWebKeySetTheoryData> GetSigningKeysTheoryData
         {
             get
