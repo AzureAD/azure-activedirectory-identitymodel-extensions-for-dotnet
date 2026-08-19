@@ -183,7 +183,9 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 else if (JsonWebAlgorithmsKeyTypes.Akp.Equals(webKey.Kty))
                 {
-                    if (ShouldPreserveUnresolvedMlDsaKey(webKey, MLDsa.IsSupported) || !SkipUnresolvedJsonWebKeys)
+                    if (JsonWebKeyConverter.TryConvertToSecurityKey(webKey, out SecurityKey securityKey))
+                        signingKeys.Add(securityKey);
+                    else if (ShouldPreserveUnresolvedMlDsaKey(webKey, MLDsa.IsSupported) || !SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
                 }
                 else

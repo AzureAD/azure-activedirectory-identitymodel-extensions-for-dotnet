@@ -275,6 +275,47 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             Assert.False(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: false));
         }
 
+        [MlDsaTheory]
+        [InlineData(SecurityAlgorithms.MlDsa44)]
+        [InlineData(SecurityAlgorithms.MlDsa65)]
+        [InlineData(SecurityAlgorithms.MlDsa87)]
+        public void GetSigningKeys_ConvertsMlDsaAkpKey(string algorithm)
+        {
+            using var mlDsa = MLDsa.GenerateKey(MlDsaAdapter.GetMLDsaAlgorithm(algorithm));
+            var webKey = new JsonWebKey
+            {
+                Alg = algorithm,
+                Kid = "ml-dsa-key",
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(mlDsa.ExportMLDsaPublicKey())
+            };
+            var webKeySet = new JsonWebKeySet();
+            webKeySet.Keys.Add(webKey);
+
+            using var signingKey = Assert.IsType<MlDsaSecurityKey>(Assert.Single(webKeySet.GetSigningKeys()));
+
+            Assert.Equal(webKey.KeyId, signingKey.KeyId);
+            Assert.Equal(algorithm, MlDsaSecurityKey.GetAlgorithmName(signingKey.MLDsa.Algorithm));
+        }
+
+        [Fact]
+        public void GetSigningKeys_InvalidMlDsaAkpKeyRespectsSkipUnresolvedJsonWebKeys()
+        {
+            var webKey = new JsonWebKey
+            {
+                Alg = SecurityAlgorithms.MlDsa44,
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = "AA"
+            };
+            var webKeySet = new JsonWebKeySet();
+            webKeySet.Keys.Add(webKey);
+
+            Assert.Empty(webKeySet.GetSigningKeys());
+
+            webKeySet.SkipUnresolvedJsonWebKeys = false;
+            Assert.Same(webKey, Assert.Single(webKeySet.GetSigningKeys()));
+        }
+
         public static TheoryData<JsonWebKeySetTheoryData> GetSigningKeysTheoryData
         {
             get
