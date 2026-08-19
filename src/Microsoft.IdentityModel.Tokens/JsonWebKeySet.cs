@@ -207,7 +207,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (isMlDsaSupported
                 || !JsonWebAlgorithmsKeyTypes.Akp.Equals(webKey.Kty)
                 || !SupportedAlgorithms.IsSupportedMlDsaAlgorithm(webKey.Alg)
-                || string.IsNullOrEmpty(webKey.Pub))
+                || string.IsNullOrEmpty(webKey.Pub)
+                || !string.IsNullOrEmpty(webKey.Priv))
             {
                 return false;
             }

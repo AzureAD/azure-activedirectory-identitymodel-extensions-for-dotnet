@@ -275,6 +275,20 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             Assert.False(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: false));
         }
 
+        [Fact]
+        public void ShouldPreserveUnresolvedMlDsaKey_RejectsPrivateKey()
+        {
+            var webKey = new JsonWebKey
+            {
+                Alg = SecurityAlgorithms.MlDsa44,
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(new byte[1312]),
+                Priv = Base64UrlEncoder.Encode(new byte[32])
+            };
+
+            Assert.False(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: false));
+        }
+
         [MlDsaTheory]
         [InlineData(SecurityAlgorithms.MlDsa44)]
         [InlineData(SecurityAlgorithms.MlDsa65)]
