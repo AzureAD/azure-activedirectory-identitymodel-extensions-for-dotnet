@@ -117,7 +117,7 @@ public class SignatureExperimentalTests
                 new SignatureExperimentalTheoryData()
                 {
                     TestId = "SignatureValidationFailed",
-                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException), "IDX10511:"),
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException), "IDX10520:"),
                     ExpectedFailureType = SignatureValidationFailure.ValidationFailed,
                     CryptoProviderFactory = new CustomCryptoProviderFactory([ SecurityAlgorithms.RsaSha256Signature ])
                     {
