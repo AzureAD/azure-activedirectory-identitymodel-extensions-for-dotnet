@@ -23,8 +23,21 @@ namespace System.IdentityModel.Tokens.Jwt
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See: https://datatracker.ietf.org/doc/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515
     /// </summary>
+    /// <remarks>
+    /// This type is obsolete. Use <see cref="JsonWebTokenHandler"/> from the
+    /// <c>Microsoft.IdentityModel.JsonWebTokens</c> package instead. <see cref="JsonWebTokenHandler"/> is faster,
+    /// allocates less, and is the handler that receives new functionality.
+    /// See the migration guide at https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/dev/docs/JwtSecurityTokenHandler-migration-guide.md for the behavioral
+    /// differences you need to account for (inbound/outbound claim type mapping defaults, actor claim format,
+    /// and the replacement of the <c>Validate*</c> overridable methods with
+    /// <see cref="TokenValidationParameters"/> delegates).
+    /// </remarks>
+    [Obsolete(ObsoleteMessage, false)]
     public class JwtSecurityTokenHandler : SecurityTokenHandler
     {
+        private const string ObsoleteMessage = "'JwtSecurityTokenHandler' is deprecated and will be removed in a future release. " +
+            "Use 'Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler' instead. " +
+            "For more information, see https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/dev/docs/JwtSecurityTokenHandler-migration-guide.md";
 
         private delegate bool CertMatcher(X509Certificate2 cert);
         private ISet<string> _inboundClaimFilter;

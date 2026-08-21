@@ -298,7 +298,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             try
             {
                 // if user info response is a jwt token
+                // JwtSecurityTokenHandler is obsolete, but this call site cannot be migrated in isolation:
+                // the 'sub' read here is compared below against OpenIdConnectProtocolValidationContext.ValidatedIdToken,
+                // which is shipped public API typed as JwtSecurityToken (as is IdTokenValidator.Invoke).
+                // Moving this method to JsonWebTokenHandler therefore requires a breaking public API change
+                // to this package, which is tracked separately.
+#pragma warning disable CS0618 // Type or member is obsolete
                 var handler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
                 if (handler.CanReadToken(validationContext.UserInfoEndpointResponse))
                 {
                     var token = handler.ReadToken(validationContext.UserInfoEndpointResponse) as JwtSecurityToken;
