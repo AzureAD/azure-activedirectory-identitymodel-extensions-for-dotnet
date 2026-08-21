@@ -35,4 +35,10 @@
     </None>
   </ItemGroup>
 
+  <!-- These tests intentionally exercise the obsolete JwtSecurityTokenHandler to guarantee its
+       behavior stays intact while it remains in the product. -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
+  </PropertyGroup>
+
 </Project>
