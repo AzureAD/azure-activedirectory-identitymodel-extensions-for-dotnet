@@ -379,7 +379,7 @@ namespace Microsoft.IdentityModel.Logging
                 null,
                 message,
                 loggerContext.ResolveCorrelationId(),
-                null);
+                args);
 
             Log(entry, loggerContext.Logger);
         }
@@ -419,7 +419,7 @@ namespace Microsoft.IdentityModel.Logging
                 null,
                 message,
                 loggerContext.ResolveCorrelationId(),
-                null);
+                args);
 
             Log(entry, loggerContext.Logger);
         }
@@ -469,7 +469,7 @@ namespace Microsoft.IdentityModel.Logging
                 null,
                 message,
                 loggerContext.ResolveCorrelationId(),
-                null);
+                args);
 
             Log(entry, loggerContext.Logger);
         }

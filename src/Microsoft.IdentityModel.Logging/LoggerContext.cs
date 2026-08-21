@@ -11,6 +11,10 @@ namespace Microsoft.IdentityModel.Logging
     /// <summary>
     /// A context class that can be used to store work per request to aid with debugging.
     /// </summary>
+    /// <remarks>
+    /// A <see cref="LoggerContext"/> represents a single logical call and is not thread-safe. Its mutable
+    /// properties must not be written on one thread while it is being used to log on another.
+    /// </remarks>
     public class LoggerContext
     {
         /// <summary>
@@ -97,7 +101,8 @@ namespace Microsoft.IdentityModel.Logging
         /// Gets or sets a <see cref="string"/> correlation id that is written to logs emitted through <see cref="ILogger"/>
         /// when <see cref="LogCorrelationId"/> is <see langword="true"/> (the default). Supplying a value is the opt-in.
         /// </summary>
-        /// <remarks>Only this explicitly supplied value is logged; <see cref="ActivityId"/> is never promoted into ILogger messages.</remarks>
+        /// <remarks>Only this explicitly supplied value is logged; <see cref="ActivityId"/> is never promoted into ILogger messages.
+        /// It is treated as a non-PII correlation token and is emitted verbatim (not redacted when PII display is off), so callers must not place PII in it.</remarks>
         public string CorrelationId { get; set; }
 
         /// <summary>
@@ -136,9 +141,9 @@ namespace Microsoft.IdentityModel.Logging
 
         /// <summary>
         /// Resolves the correlation id to write to an <see cref="ILogger"/> message: the explicitly supplied
-        /// <see cref="CorrelationId"/> when <see cref="LogCorrelationId"/> is enabled; otherwise <see langword="null"/>.
-        /// <see cref="ActivityId"/> is intentionally never used here.
+        /// <see cref="CorrelationId"/> when <see cref="LogCorrelationId"/> is enabled and the value is non-empty;
+        /// otherwise <see langword="null"/>. <see cref="ActivityId"/> is intentionally never used here.
         /// </summary>
-        internal string ResolveCorrelationId() => LogCorrelationId ? CorrelationId : null;
+        internal string ResolveCorrelationId() => LogCorrelationId && !string.IsNullOrEmpty(CorrelationId) ? CorrelationId : null;
     }
 }

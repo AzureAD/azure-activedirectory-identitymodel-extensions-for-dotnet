@@ -65,6 +65,18 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.Null(context.ResolveCorrelationId());
         }
 
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void ResolveCorrelationId_ReturnsNull_WhenCorrelationIdNullOrEmpty(string correlationId)
+        {
+            // Arrange: an empty/null correlation id must not produce a trailing "CorrelationId: ." fragment.
+            var context = new LoggerContext { CorrelationId = correlationId };
+
+            // Act & Assert
+            Assert.Null(context.ResolveCorrelationId());
+        }
+
         [Fact]
         public void CopyConstructor_Throws_WhenOtherIsNull()
         {
@@ -154,6 +166,67 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             // Act
             LogHelper.LogWarning("IDXTEST: correlation test.", context);
+
+            // Assert
+            Assert.NotEmpty(logger.Messages);
+            Assert.All(logger.Messages, message => Assert.DoesNotContain("CorrelationId", message));
+        }
+
+        [Fact]
+        public void LogWarning_OmitsCorrelationId_WhenCorrelationIdEmpty()
+        {
+            // Arrange: an empty correlation id must not append a "CorrelationId: ." fragment.
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger) { CorrelationId = string.Empty };
+
+            // Act
+            LogHelper.LogWarning("IDXTEST: correlation test.", context);
+
+            // Assert
+            Assert.NotEmpty(logger.Messages);
+            Assert.All(logger.Messages, message => Assert.DoesNotContain("CorrelationId", message));
+        }
+
+        [Fact]
+        public void LogWarning_AppendsCorrelationId_AfterFormattingArgs()
+        {
+            // Arrange: correlation id is appended after the message is formatted with its args.
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger) { CorrelationId = "corr-123" };
+
+            // Act
+            LogHelper.LogWarning("IDXTEST: value is {0}.", context, LogHelper.MarkAsNonPII("formatted-arg"));
+
+            // Assert
+            Assert.Contains(logger.Messages, message => message.Contains("formatted-arg") && message.Contains("CorrelationId: corr-123"));
+        }
+
+        [Fact]
+        public void LogExceptionMessage_WritesCorrelationId_WhenSet()
+        {
+            // Arrange
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger) { CorrelationId = "corr-123" };
+            var exception = new InvalidOperationException("IDXTEST: exception path.");
+
+            // Act
+            LogHelper.LogExceptionMessage(exception, context);
+
+            // Assert
+            Assert.NotEmpty(logger.Messages);
+            Assert.Contains(logger.Messages, message => message.Contains("CorrelationId: corr-123"));
+        }
+
+        [Fact]
+        public void LogExceptionMessage_OmitsCorrelationId_WhenKillSwitchOff()
+        {
+            // Arrange
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger) { CorrelationId = "corr-123", LogCorrelationId = false };
+            var exception = new InvalidOperationException("IDXTEST: exception path.");
+
+            // Act
+            LogHelper.LogExceptionMessage(exception, context);
 
             // Assert
             Assert.NotEmpty(logger.Messages);
