@@ -6,11 +6,82 @@ using System.Collections.Generic;
 using Xunit;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using System.Net;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
     public class ValidationParametersTests
     {
+        [Fact]
+        public void CopyConstructor_CopiesAllValues()
+        {
+            // Arrange
+            var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
+            var validationParameters = new CopyConstructibleValidationParameters
+            {
+                ActorValidationParameters = new ValidationParameters(),
+                AlgorithmValidator = SkipValidationValidators.SkipAlgorithmValidation,
+                AudienceValidator = SkipValidationValidators.SkipAudienceValidation,
+                AuthenticationType = "authentication-type",
+                ClockSkew = TimeSpan.FromMinutes(1),
+                ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever),
+                CryptoProviderFactory = new CryptoProviderFactory(),
+                DebugId = "debug-id",
+                IgnoreTrailingSlashWhenValidatingAudience = false,
+                IgnoreCaseWhenValidatingAudience = true,
+                IncludeTokenOnFailedValidation = true,
+                SignatureKeyValidator = SkipValidationValidators.SkipIssuerSigningKeyValidation,
+                SignatureKeyResolver = new TestSignatureKeyResolver(),
+                IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation,
+                LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation,
+                LogTokenId = false,
+                NameClaimType = "name-claim-type",
+                NameClaimTypeRetriever = (token, issuer) => "retrieved-name-claim-type",
+                RefreshBeforeValidation = true,
+                RoleClaimType = "role-claim-type",
+                RoleClaimTypeRetriever = (token, issuer) => "retrieved-role-claim-type",
+                SaveSigninToken = true,
+                SignatureValidator = SkipValidationValidators.SkipSignatureValidation,
+                TimeProvider = new MockTimeProvider(),
+                DecryptionKeyResolver = new TestDecryptionKeyResolver(),
+                TokenReplayCache = new TokenReplayCache(),
+                TokenReplayValidator = SkipValidationValidators.SkipTokenReplayValidation,
+                TryAllDecryptionKeys = false,
+                TryAllSigningKeys = true,
+                TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation,
+                ValidateWithLKG = true,
+                ValidateActor = true
+            };
+
+            validationParameters.InstancePropertyBag["instance"] = new object();
+            validationParameters.PropertyBag["property"] = new object();
+            validationParameters.SigningKeys.Add(new SymmetricSecurityKey(new byte[32]));
+            validationParameters.DecryptionKeys.Add(new SymmetricSecurityKey(new byte[32]));
+            validationParameters.ValidAlgorithms.Add("algorithm");
+            validationParameters.ValidAudiences.Add("audience");
+            validationParameters.ValidIssuers.Add("issuer");
+            validationParameters.ValidTypes.Add("type");
+
+            // Act
+            var copy = new CopyConstructibleValidationParameters(validationParameters);
+
+            // Assert
+            var compareContext = new CompareContext();
+            compareContext.PropertiesToIgnoreWhenComparing.Add(
+                typeof(CopyConstructibleValidationParameters),
+                new List<string> { nameof(ValidationParameters.InstancePropertyBag) });
+
+            IdentityComparer.CompareAllPublicProperties(validationParameters, copy, compareContext);
+            TestUtilities.AssertFailIfErrors(compareContext);
+
+            Assert.Same(validationParameters.TimeProvider, copy.TimeProvider);
+            Assert.Same(validationParameters.DecryptionKeyResolver, copy.DecryptionKeyResolver);
+            Assert.NotSame(validationParameters.InstancePropertyBag, copy.InstancePropertyBag);
+            Assert.Empty(copy.InstancePropertyBag);
+        }
+
         [Fact]
         public void SetValidators_NullValue_ThrowsArgumentNullException()
         {
@@ -67,6 +138,45 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             var validationParameters = new ValidationParameters();
 
             Assert.NotNull(validationParameters.TimeProvider);
+        }
+
+        private sealed class CopyConstructibleValidationParameters : ValidationParameters
+        {
+            public CopyConstructibleValidationParameters()
+            {
+            }
+
+            public CopyConstructibleValidationParameters(ValidationParameters other)
+                : base(other)
+            {
+            }
+        }
+
+        private sealed class TestSignatureKeyResolver : ISignatureKeyResolver
+        {
+            public SecurityKey ResolveSignatureKey(
+                string token,
+                SecurityToken securityToken,
+                string kid,
+                ValidationParameters validationParameters,
+                BaseConfiguration configuration,
+                CallContext callContext)
+            {
+                return validationParameters.SigningKeys[0];
+            }
+        }
+
+        private sealed class TestDecryptionKeyResolver : IDecryptionKeyResolver
+        {
+            public IList<SecurityKey> ResolveDecryptionKey(
+                string token,
+                SecurityToken securityToken,
+                string kid,
+                ValidationParameters validationParameters,
+                CallContext callContext)
+            {
+                return validationParameters.DecryptionKeys;
+            }
         }
     }
 }
