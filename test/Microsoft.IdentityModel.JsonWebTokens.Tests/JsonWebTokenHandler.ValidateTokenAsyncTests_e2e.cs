@@ -30,7 +30,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.True(validationResult.Succeeded);
         Assert.NotNull(validationResult.Result);
@@ -47,7 +47,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -67,7 +67,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -86,7 +86,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             issuers: ["http://Default.Issuer.com"]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -108,7 +108,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -128,7 +128,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -148,7 +148,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -168,7 +168,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -188,7 +188,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -208,7 +208,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -228,7 +228,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -248,7 +248,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -268,7 +268,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
@@ -288,7 +288,7 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
             signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
         CallContext callContext = new CallContext();
 
-        ValidationResult<ValidatedToken, ValidationError> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+        ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
         Assert.False(validationResult.Succeeded);
         Assert.Null(validationResult.Result);
