@@ -45,9 +45,10 @@ into four buckets:
 3. **Deliberately dropped** — outbound claim-type mapping, outbound algorithm mapping, the
    inbound claim filter, and `actort` **writing**. These were legacy WIF-compat behaviors.
 4. **Real gaps** — the `SecurityTokenHandler` XML surface (`WriteToken(XmlWriter, …)`,
-   `ReadToken(XmlReader, …)`, `CanWriteToken`, `TokenType`) is not available, because
+   `ReadToken(XmlReader, …)`, `CanWriteToken`) is not available, because
    `JsonWebTokenHandler` does not derive from `SecurityTokenHandler`. This only affects
-   WS-Federation / WS-Trust style hosts that embed a JWT inside XML.
+   WS-Federation / WS-Trust style hosts that embed a JWT inside XML. (`TokenType` *is*
+   available — see §6 — but as a plain property, not a `SecurityTokenHandler` override.)
 
 Nothing in bucket 4 blocks the mainstream OIDC / OAuth2 bearer-token scenarios.
 
