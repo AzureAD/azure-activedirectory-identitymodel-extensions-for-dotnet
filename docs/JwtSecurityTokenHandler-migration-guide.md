@@ -59,7 +59,16 @@ the new types are available without adding a package reference. Once you have mi
 can drop the `System.IdentityModel.Tokens.Jwt` reference.
 
 `JwtRegisteredClaimNames`, `JwtHeaderParameterNames`, `JwtConstants` and `JsonClaimValueTypes`
-exist in **both** namespaces with the same values, so a `using` swap is usually enough.
+exist in **both** namespaces with the same values.
+
+> ⚠️ Because these types exist in both namespaces, a file with `using` directives for *both*
+> `System.IdentityModel.Tokens.Jwt` and `Microsoft.IdentityModel.JsonWebTokens` will fail with
+> **`CS0104: ambiguous reference`**. During an incremental migration, either fully qualify the
+> reference or add a using alias:
+>
+> ```csharp
+> using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
+> ```
 
 ## 3. Validating tokens
 
@@ -88,6 +97,8 @@ catch (SecurityTokenException ex)
 ### After
 
 ```csharp
+using System.Runtime.ExceptionServices;   // for ExceptionDispatchInfo
+
 var handler = new JsonWebTokenHandler();
 
 TokenValidationResult result = await handler.ValidateTokenAsync(token, validationParameters);
@@ -96,7 +107,9 @@ if (!result.IsValid)
 {
     // result.Exception is the exception JwtSecurityTokenHandler would have thrown.
     // It is *not* thrown for you — inspect it, log it, and translate it yourself.
-    throw result.Exception;
+    // Note: `throw result.Exception;` would reset the stack trace. Rethrow via
+    // ExceptionDispatchInfo (or wrap it) to preserve the original trace.
+    ExceptionDispatchInfo.Capture(result.Exception).Throw();
 }
 
 ClaimsPrincipal principal = new ClaimsPrincipal(result.ClaimsIdentity);
@@ -111,7 +124,8 @@ Key points:
 - `result.ClaimsIdentity`, `result.SecurityToken`, `result.Issuer`, `result.Claims` and
   `result.TokenType` carry everything the old `out SecurityToken` + `ClaimsPrincipal` did.
 - `result.TokenOnFailedValidation` gives you the parsed token even when validation failed
-  (useful for logging `kid` / `iss` on failures).
+  (useful for logging `kid` / `iss` on failures). **This is opt-in:** it is `null` unless you set
+  `TokenValidationParameters.IncludeTokenOnFailedValidation = true`, which defaults to `false`.
 - Overloads taking a `CancellationToken` and an already-parsed `SecurityToken` are available.
 - `JsonWebTokenHandler.ValidateToken(string, TokenValidationParameters)` (the synchronous one) is
   itself already `[Obsolete]`. Do not migrate onto it.
@@ -131,16 +145,20 @@ URIs:
 
 | JWT claim | Mapped `Claim.Type` (old default) | `Claim.Type` (new default) |
 |---|---|---|
-| `sub` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier` | `sub` |
-| `email` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress` | `email` |
-| `name` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name` | `name` |
-| `roles` | `http://schemas.microsoft.com/ws/2008/06/identity/claims/role` | `roles` |
-| `unique_name` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name` | `unique_name` |
+| `sub` | `ClaimTypes.NameIdentifier`<br/>`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier` | `sub` |
+| `nameid` | `ClaimTypes.NameIdentifier`<br/>`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier` | `nameid` |
+| `email` | `ClaimTypes.Email`<br/>`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress` | `email` |
+| `unique_name` | **`ClaimTypes.Name`**<br/>`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name`<br/>← this is the default `NameClaimType`, so this fed `Identity.Name` | `unique_name` |
+| `roles` | `ClaimTypes.Role`<br/>`http://schemas.microsoft.com/ws/2008/06/identity/claims/role` | `roles` |
+| `name` | **not mapped** — stays `name` | `name` |
 
-Because `TokenValidationParameters.NameClaimType` and `RoleClaimType` default to the long
-`ClaimTypes.Name` / `ClaimTypes.Role` URIs, switching handlers can make
-`ClaimsPrincipal.Identity.Name` return `null` and `ClaimsPrincipal.IsInRole(...)` return `false`
-even though the token is identical.
+> ⚠️ Read the `unique_name` and `name` rows together: under the old handler
+> `ClaimsPrincipal.Identity.Name` returned **`unique_name`**, and `name` was never involved.
+
+Switching handlers can therefore make `ClaimsPrincipal.Identity.Name` return `null` and
+`ClaimsPrincipal.IsInRole(...)` return `false` even though the token is identical — the claims
+are still present, but under their short JWT names rather than the URIs `NameClaimType` and
+`RoleClaimType` are looking for.
 
 ### Option A — keep the short, standard claim names (recommended)
 
@@ -150,17 +168,29 @@ Point `NameClaimType` / `RoleClaimType` at the JWT names and read claims by thei
 var validationParameters = new TokenValidationParameters
 {
     // ...
-    NameClaimType = "name",   // or JwtRegisteredClaimNames.Name / "preferred_username"
+    // unique_name is what fed Identity.Name under the old handler. Keep it to preserve
+    // which claim identifies the user.
+    NameClaimType = JwtRegisteredClaimNames.UniqueName,   // "unique_name"
     RoleClaimType = "roles",
 };
 
 var handler = new JsonWebTokenHandler(); // MapInboundClaims is false by default
 ```
 
+> ⚠️ **Do not reflexively set `NameClaimType = "name"`.** `name` is a human-readable *display
+> name* and is not guaranteed unique; `unique_name` is an identifier. Switching
+> `Identity.Name` from one to the other is an **identity-selection change**, not a rename — it
+> can break authorization checks, audit logs, and any user lookup keyed on `Identity.Name`.
+> Choose deliberately based on what your application actually keys on (for Entra ID tokens
+> `preferred_username` or `oid` is often the correct choice).
+
 ```csharp
 // before: principal.FindFirst(ClaimTypes.NameIdentifier)
-// after:
-string sub = result.ClaimsIdentity.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+//   -- note this could have been produced by EITHER 'sub' OR 'nameid';
+//      both map inbound to ClaimTypes.NameIdentifier.
+// after: read whichever your issuer actually emits, e.g.
+string sub = result.ClaimsIdentity.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+          ?? result.ClaimsIdentity.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
 ```
 
 ### Option B — preserve the old behavior exactly
@@ -188,6 +218,8 @@ the `ClaimsIdentity`. `JsonWebTokenHandler` has no filter — every claim in the
 identity. If you populated the filter, drop the claims yourself after validation:
 
 ```csharp
+using System.Linq;   // for FindAll(...).ToList()
+
 var identity = result.ClaimsIdentity;
 foreach (var claim in identity.FindAll(c => filtered.Contains(c.Type)).ToList())
     identity.RemoveClaim(claim);
@@ -262,8 +294,14 @@ new Claim(ClaimTypes.NameIdentifier, "user-1")
 
 // after: emits {"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier":"user-1"}
 //   -> change it to:
-new Claim(JwtRegisteredClaimNames.Sub, "user-1")
+new Claim(JwtRegisteredClaimNames.NameId, "user-1")   // "nameid" — same wire format as before
 ```
+
+> ⚠️ **Use `NameId`, not `Sub`, if you are preserving the wire format.** The outbound map is the
+> inverse of the inbound map and resolves `ClaimTypes.NameIdentifier` to **`nameid`** (both
+> `nameid` and `sub` map *inbound* to `ClaimTypes.NameIdentifier`, and the inversion keeps the
+> first entry). Emitting `sub` instead would change the token your relying parties receive and
+> break any RP matching on `nameid`.
 
 Audit every `ClaimTypes.*` constant that reaches `SecurityTokenDescriptor.Subject` or
 `SecurityTokenDescriptor.Claims`. If you need the old table, it is still public:
