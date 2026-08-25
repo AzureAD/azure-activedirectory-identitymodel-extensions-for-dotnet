@@ -1391,6 +1391,113 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        // Locks in the intended 'aud' resolution for JsonWebTokenHandler: when SecurityTokenDescriptor.Audience and/or
+        // Audiences is set they are the only source for the 'aud' claim, so that a token's audiences can be overridden
+        // with a smaller subset than the claims it is created from. This intentionally differs from JwtSecurityTokenHandler,
+        // which combines the descriptor audiences with the 'aud' claims in Claims or Subject.
+        [Theory, MemberData(nameof(CreateTokenAudienceResolutionTheoryData), DisableDiscoveryEnumeration = true)]
+        public void CreateTokenAudienceResolution(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateTokenAudienceResolution", theoryData);
+
+            // Act
+            var jsonWebToken = new JsonWebToken(new JsonWebTokenHandler().CreateToken(theoryData.TokenDescriptor));
+
+            // Assert
+            IdentityComparer.AreEqual(theoryData.ExpectedClaims["aud"], jsonWebToken.Audiences, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> CreateTokenAudienceResolutionTheoryData
+        {
+            get
+            {
+                TheoryData<CreateTokenTheoryData> theoryData = new TheoryData<CreateTokenTheoryData>();
+
+                static ClaimsIdentity Subject(params string[] audiences)
+                {
+                    ClaimsIdentity identity = new CaseSensitiveClaimsIdentity();
+                    foreach (string audience in audiences)
+                        identity.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, audience));
+
+                    return identity;
+                }
+
+                static CreateTokenTheoryData Data(string testId, SecurityTokenDescriptor descriptor, params string[] expected)
+                {
+                    descriptor.SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials;
+                    return new CreateTokenTheoryData(testId)
+                    {
+                        TokenDescriptor = descriptor,
+                        ExpectedClaims = new Dictionary<string, object> { { "aud", new List<string>(expected) } }
+                    };
+                }
+
+                // Audiences wins over Subject. This is the scenario reported in issue #3535 and is by design.
+                SecurityTokenDescriptor audiencesAndSubject = new SecurityTokenDescriptor { Subject = Subject("aud-from-subject") };
+                audiencesAndSubject.Audiences.Add("aud-from-descriptor");
+                theoryData.Add(Data("AudiencesWinsOverSubject", audiencesAndSubject, "aud-from-descriptor"));
+
+                theoryData.Add(Data(
+                    "AudienceWinsOverSubject",
+                    new SecurityTokenDescriptor { Audience = "aud-from-descriptor", Subject = Subject("aud-from-subject") },
+                    "aud-from-descriptor"));
+
+                theoryData.Add(Data(
+                    "AudienceWinsOverClaims",
+                    new SecurityTokenDescriptor
+                    {
+                        Audience = "aud-from-descriptor",
+                        Claims = new Dictionary<string, object> { { JwtRegisteredClaimNames.Aud, "aud-from-claims" } }
+                    },
+                    "aud-from-descriptor"));
+
+                // The descriptor members allow narrowing the audiences to a subset of those in Subject.
+                SecurityTokenDescriptor narrowing = new SecurityTokenDescriptor { Subject = Subject("aud1", "aud2", "aud3") };
+                narrowing.Audiences.Add("aud2");
+                theoryData.Add(Data("AudiencesNarrowsSubjectAudiences", narrowing, "aud2"));
+
+                // Claims takes precedence over Subject when no descriptor audience is set.
+                theoryData.Add(Data(
+                    "ClaimsWinsOverSubjectWhenNoDescriptorAudience",
+                    new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object> { { JwtRegisteredClaimNames.Aud, "aud-from-claims" } },
+                        Subject = Subject("aud-from-subject")
+                    },
+                    "aud-from-claims"));
+
+                theoryData.Add(Data(
+                    "SubjectUsedWhenNoDescriptorAudienceOrClaims",
+                    new SecurityTokenDescriptor { Subject = Subject("aud-from-subject1", "aud-from-subject2") },
+                    "aud-from-subject1", "aud-from-subject2"));
+
+                // Audience and Audiences are always combined with each other.
+                SecurityTokenDescriptor audienceAndAudiences = new SecurityTokenDescriptor { Audience = "aud-from-audience" };
+                audienceAndAudiences.Audiences.Add("aud-from-audiences1");
+                audienceAndAudiences.Audiences.Add("aud-from-audiences2");
+                theoryData.Add(Data(
+                    "AudienceCombinedWithAudiences",
+                    audienceAndAudiences,
+                    "aud-from-audiences1", "aud-from-audiences2", "aud-from-audience"));
+
+                // Audience and Audiences are combined even when Subject also defines an 'aud' claim.
+                SecurityTokenDescriptor audienceAndAudiencesWithSubject = new SecurityTokenDescriptor
+                {
+                    Audience = "aud-from-audience",
+                    Subject = Subject("aud-from-subject")
+                };
+                audienceAndAudiencesWithSubject.Audiences.Add("aud-from-audiences");
+                theoryData.Add(Data(
+                    "AudienceCombinedWithAudiencesAndSubjectIgnored",
+                    audienceAndAudiencesWithSubject,
+                    "aud-from-audiences", "aud-from-audience"));
+
+                return theoryData;
+            }
+        }
+
         // This test checks to make sure that SecurityTokenDescriptor.Audience, Expires, IssuedAt, NotBefore, Issuer have priority over SecurityTokenDescriptor.Claims.
         [Theory, MemberData(nameof(CreateJWSWithSecurityTokenDescriptorClaimsTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateJWSWithSecurityTokenDescriptorClaims(CreateTokenTheoryData theoryData)
