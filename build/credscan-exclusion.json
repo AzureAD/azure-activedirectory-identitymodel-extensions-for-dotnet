@@ -60,6 +60,10 @@
         {
             "file": "References.cs",
             "_justification": "File contains tokens that are used only for testing purposes."
+        },
+        {
+            "file": "ComputedKeyReferences.cs",
+            "_justification": "File contains base64 PSHA1 key derivation test vectors that are used only for testing purposes."
         }
     ]
 }
