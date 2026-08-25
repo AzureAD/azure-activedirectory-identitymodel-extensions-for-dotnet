@@ -14,12 +14,18 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Logging.Tests
 {
+    [Collection("PIITests")]
     public class PIITests
     {
         // Used for formatting a message for testing with one parameter.
         private const string TestMessageOneParam = "This is the parameter: '{0}'.";
         // Used for formatting a message for testing with two parameters.
         private const string TestMessageTwoParams = "This is the first parameter '{0}'. This is the second parameter '{1}'.";
+
+        public PIITests()
+        {
+            IdentityModelEventSource.ShowPII = false;
+        }
 
         [Fact]
         public void LogOpenIdConnectProtocolExceptions()
@@ -192,6 +198,10 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(LogHelper.FormatInvariant("Main exception 1: {0}", new SecurityTokenCompressionFailedException("custom inner exception"))));
             LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(LogHelper.FormatInvariant("Main exception 2: {0}", new InvalidOperationException("system exception"))));
+
+            Console.WriteLine($"TraceBuffer: '{listener.TraceBuffer}'");
+            Console.WriteLine($"Expected1: Main exception 1: Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException: custom inner exception");
+            Console.WriteLine($"Expected2: Main exception 2: [PII of type 'System.InvalidOperationException' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]");
 
             Assert.Contains("Main exception 1: Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException: custom inner exception", listener.TraceBuffer);
             Assert.Contains("Main exception 2: [PII of type 'System.InvalidOperationException' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]", listener.TraceBuffer);

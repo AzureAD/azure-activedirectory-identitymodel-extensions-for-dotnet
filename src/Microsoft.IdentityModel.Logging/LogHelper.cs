@@ -7,6 +7,7 @@ using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Abstractions;
 #if NET8_0_OR_GREATER
 using System.Buffers;
@@ -60,6 +61,17 @@ namespace Microsoft.IdentityModel.Logging
         {
             get { return _isHeaderWritten; }
             set { _isHeaderWritten = value; }
+        }
+
+        /// <summary>
+        /// Gets a boolean indicating whether logging is enabled at the specified LogLevel.
+        /// </summary>
+        /// <param name="logLevel">The log level</param>
+        /// <param name="loggerContext">A <see cref="LoggerContext"/> that contains logging control including <see cref="ILogger"/>.</param>
+        /// <returns><see langword="true"/> if logging is enabled at the specified level; otherwise, <see langword="false"/>.</returns>
+        internal static bool IsEnabled(LogLevel logLevel, LoggerContext loggerContext)
+        {
+            return loggerContext?.Logger?.IsEnabled(logLevel) ?? false;
         }
 
         /// <summary>
@@ -289,7 +301,38 @@ namespace Microsoft.IdentityModel.Logging
 
             EventLogLevel eventLogLevel = EventLevelToEventLogLevel(eventLevel);
             if (Logger.IsEnabled(eventLogLevel))
-                Logger.Log(WriteEntry(eventLogLevel, exception.InnerException, exception.Message, null));
+                Logger.Log(WriteEntry(eventLogLevel, exception.InnerException, exception.Message));
+
+            return exception;
+        }
+
+        /// <summary>
+        /// Logs an exception using the listeners that have been enabled.
+        /// </summary>
+        /// <param name="exception">The exception to log.</param>
+        /// <param name="loggerContext">The <see cref="LoggerContext"/> contains information useful for logging and debugging.</param>
+        public static Exception LogExceptionMessage(Exception exception, LoggerContext loggerContext)
+        {
+            if (exception == null)
+                return null;
+
+            LogExceptionMessage(exception);
+
+            if (loggerContext?.Logger == null)
+                return exception;
+
+            if (!loggerContext.Logger.IsEnabled(LogLevel.Error))
+                return exception;
+
+            LogEntry entry = WriteEntry(
+                EventLogLevel.Error,
+                exception.InnerException,
+                exception.Message,
+                loggerContext.CorrelationId ?? loggerContext.ActivityId.ToString(),
+                exception.Message,
+                null);
+
+            Log(entry, loggerContext.Logger);
 
             return exception;
         }
@@ -305,7 +348,33 @@ namespace Microsoft.IdentityModel.Logging
                 IdentityModelEventSource.Logger.WriteInformation(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Informational))
-                Logger.Log(WriteEntry(EventLogLevel.Informational, null, message, args));
+                Logger.Log(WriteEntry(EventLogLevel.Informational, null, message, null, args));
+        }
+
+        /// <summary>
+        /// Logs at the information level to the listeners that have been enabled.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="loggerContext">A <see cref="LoggerContext"/> that contains logging control including <see cref="ILogger"/>.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void LogInformation(string message, LoggerContext loggerContext, params object[] args)
+        {
+            LogInformation(message, args);
+
+            if (loggerContext?.Logger == null)
+                return;
+
+            if (!loggerContext.Logger.IsEnabled(LogLevel.Information))
+                return;
+
+            LogEntry entry = WriteEntry(
+                EventLevelToEventLogLevel(EventLevel.Informational),
+                null,
+                message,
+                loggerContext.CorrelationId ?? loggerContext.ActivityId.ToString(),
+                null);
+
+            Log(entry, loggerContext.Logger);
         }
 
         /// <summary>
@@ -319,7 +388,33 @@ namespace Microsoft.IdentityModel.Logging
                 IdentityModelEventSource.Logger.WriteVerbose(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Verbose))
-                Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, args));
+                Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, null, args));
+        }
+
+        /// <summary>
+        /// Logs at the verbose level to the listeners that have been enabled.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="loggerContext">A <see cref="LoggerContext"/> that contains logging control including <see cref="ILogger"/>.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void LogVerbose(string message, LoggerContext loggerContext, params object[] args)
+        {
+            LogVerbose(message, args);
+
+            if (loggerContext?.Logger == null)
+                return;
+
+            if (!loggerContext.Logger.IsEnabled(LogLevel.Debug))
+                return;
+
+            LogEntry entry = WriteEntry(
+                EventLogLevel.Verbose,
+                null,
+                message,
+                loggerContext.CorrelationId ?? loggerContext.ActivityId.ToString(),
+                null);
+
+            Log(entry, loggerContext.Logger);
         }
 
         /// <summary>
@@ -333,7 +428,43 @@ namespace Microsoft.IdentityModel.Logging
                 IdentityModelEventSource.Logger.WriteWarning(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Warning))
-                Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, args));
+                Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, null, args));
+        }
+
+        /// <summary>
+        /// Logs at the warning level to the listeners that have been enabled.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="loggerContext">A <see cref="LoggerContext"/> that contains logging control including <see cref="ILogger"/>.</param>
+        public static void LogWarning(string message, LoggerContext loggerContext)
+        {
+            LogWarning(message, loggerContext, null);
+        }
+
+        /// <summary>
+        /// Logs at the warning level to the listeners that have been enabled.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="loggerContext">A <see cref="LoggerContext"/> that contains logging control including <see cref="ILogger"/>.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void LogWarning(string message, LoggerContext loggerContext, params object[] args)
+        {
+            LogWarning(message, args);
+
+            if (loggerContext?.Logger == null)
+                return;
+
+            if (!loggerContext.Logger.IsEnabled(LogLevel.Warning))
+                return;
+
+            LogEntry entry = WriteEntry(
+                EventLogLevel.Warning,
+                null,
+                message,
+                loggerContext.CorrelationId ?? loggerContext.ActivityId.ToString(),
+                null);
+
+            Log(entry, loggerContext.Logger);
         }
 
         /// <summary>
@@ -357,7 +488,7 @@ namespace Microsoft.IdentityModel.Logging
 
             EventLogLevel eventLogLevel = EventLevelToEventLogLevel(eventLevel);
             if (Logger.IsEnabled(eventLogLevel))
-                Logger.Log(WriteEntry(eventLogLevel, innerException, message, null));
+                Logger.Log(WriteEntry(eventLogLevel, innerException, message));
 
             if (innerException != null)
             {
@@ -507,7 +638,29 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="innerException"><see cref="Exception"/></param>
         /// <param name="message">The log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        private static LogEntry WriteEntry(EventLogLevel eventLogLevel, Exception innerException, string message, params object[] args)
+        private static LogEntry WriteEntry(
+            EventLogLevel eventLogLevel,
+            Exception innerException,
+            string message,
+            params object[] args)
+        {
+            return WriteEntry(eventLogLevel, innerException, message, (string)null, args);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="LogEntry"/> by using the provided event level, exception argument, string argument and arguments list.
+        /// </summary>
+        /// <param name="eventLogLevel"><see cref="EventLogLevel"/></param>
+        /// <param name="innerException"><see cref="Exception"/></param>
+        /// <param name="message">The log message.</param>
+        /// <param name="correlationId">The CorrelationId is set by caller to coordinate logs between services.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        private static LogEntry WriteEntry(
+            EventLogLevel eventLogLevel,
+            Exception innerException,
+            string message,
+            string correlationId,
+            params object[] args)
         {
             if (string.IsNullOrEmpty(message))
                 return null;
@@ -523,25 +676,76 @@ namespace Microsoft.IdentityModel.Logging
 
             message = args == null ? message : FormatInvariant(message, args);
 
-            LogEntry entry = new LogEntry();
-            entry.EventLogLevel = eventLogLevel;
+            LogEntry entry = new()
+            {
+                EventLogLevel = eventLogLevel,
+                CorrelationId = correlationId
+            };
 
             // Prefix header (library version, DateTime, whether PII is ON/OFF) to the first message logged by Wilson.
             if (!_isHeaderWritten)
             {
-                string headerMessage = string.Format(CultureInfo.InvariantCulture, "Microsoft.IdentityModel Version: {0}. Date {1}. {2}",
-                    typeof(IdentityModelEventSource).Assembly.GetName().Version.ToString(),
-                    DateTime.UtcNow,
-                    IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage);
-
-                entry.Message = headerMessage + Environment.NewLine + message;
+                entry.Message = (correlationId == null) ?
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Microsoft.IdentityModel Version: {0}. Date {1}. {2}  Message: {3}",
+                        typeof(IdentityModelEventSource).Assembly.GetName().Version.ToString(),
+                        DateTime.UtcNow,
+                        IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage,
+                        Environment.NewLine + message) :
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Microsoft.IdentityModel Version: {0}. Date {1}. {2} Message: {3}, CorrelationId: {4}.",
+                        typeof(IdentityModelEventSource).Assembly.GetName().Version.ToString(),
+                        DateTime.UtcNow,
+                        IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage,
+                        Environment.NewLine + message,
+                        correlationId);
 
                 _isHeaderWritten = true;
             }
             else
-                entry.Message = message;
+                entry.Message = (correlationId == null) ?
+                    message :
+                    string.Format(CultureInfo.InvariantCulture, "{0}, CorrelationId: {1}", message, correlationId);
 
             return entry;
+        }
+
+        private static void Log(LogEntry entry, ILogger logger)
+        {
+            if (entry != null)
+            {
+                switch (entry.EventLogLevel)
+                {
+                    case EventLogLevel.Critical:
+                        logger.LogCritical(message: entry.Message);
+                        break;
+
+                    case EventLogLevel.Error:
+                        logger.LogError(entry.Message);
+                        break;
+
+                    case EventLogLevel.Warning:
+                        logger.LogWarning(entry.Message);
+                        break;
+
+                    case EventLogLevel.Informational:
+                        logger.LogInformation(entry.Message);
+                        break;
+
+                    case EventLogLevel.Verbose:
+                        logger.LogDebug(entry.Message);
+                        break;
+
+                    case EventLogLevel.LogAlways:
+                        logger.LogTrace(entry.Message);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
         }
 
         /// <summary>
