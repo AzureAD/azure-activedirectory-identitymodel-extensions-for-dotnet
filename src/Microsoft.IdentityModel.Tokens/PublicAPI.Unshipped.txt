@@ -1,4 +1,6 @@
 #nullable enable
+~Microsoft.IdentityModel.Tokens.CallContext.CallContext(Microsoft.Extensions.Logging.ILogger logger) -> void
+~Microsoft.IdentityModel.Tokens.CallContext.CallContext(Microsoft.Extensions.Logging.ILogger logger, System.Guid activityId) -> void
 const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultAuthenticationType = "AuthenticationTypes.Federation" -> string!
 const Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultMaximumTokenSizeInBytes = 256000 -> int
 Microsoft.IdentityModel.Telemetry.CryptoTelemetry

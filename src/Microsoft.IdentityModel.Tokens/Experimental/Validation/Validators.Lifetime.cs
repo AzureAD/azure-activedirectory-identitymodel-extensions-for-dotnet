@@ -133,6 +133,8 @@ namespace Microsoft.IdentityModel.Tokens
                     expires);
 
             // if it reaches here, that means lifetime of the token is valid
+            callContext.GetLogger().LifetimeValidated();
+
             return new ValidatedLifetime(notBefore, expires);
         }
     }

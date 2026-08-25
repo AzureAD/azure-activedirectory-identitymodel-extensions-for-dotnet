@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -115,11 +115,13 @@ namespace Microsoft.IdentityModel.Tokens
                     validationParameters.ValidAudiences);
             }
 
+            ILogger logger = callContext.GetLogger();
             string? validAudience = ValidTokenAudience(
                 tokenAudiences,
                 validationParameters.ValidAudiences,
                 validationParameters.IgnoreTrailingSlashWhenValidatingAudience,
-                validationParameters.IgnoreCaseWhenValidatingAudience);
+                validationParameters.IgnoreCaseWhenValidatingAudience,
+                logger);
 
             if (validAudience != null)
                 return validAudience;
@@ -149,7 +151,8 @@ namespace Microsoft.IdentityModel.Tokens
             IList<string> tokenAudiences,
             IList<string> validAudiences,
             bool ignoreTrailingSlashWhenValidatingAudience,
-            bool ignoreCaseWhenValidatingAudience)
+            bool ignoreCaseWhenValidatingAudience,
+            ILogger logger)
         {
             StringComparison comparisonType = ignoreCaseWhenValidatingAudience
                 ? StringComparison.OrdinalIgnoreCase
@@ -165,18 +168,14 @@ namespace Microsoft.IdentityModel.Tokens
                     if (string.IsNullOrEmpty(validAudiences[j]))
                         continue;
 
-                    if (AudienceMatches(ignoreTrailingSlashWhenValidatingAudience, tokenAudiences[i], validAudiences[j], comparisonType))
+                    if (AudienceMatches(
+                        ignoreTrailingSlashWhenValidatingAudience,
+                        tokenAudiences[i],
+                        validAudiences[j],
+                        comparisonType,
+                        logger))
                     {
-                        if (AppContextSwitches.SuccessValidationLogsAsInformation)
-                        {
-                            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                                LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudiences[i]));
-                        }
-                        else
-                        {
-                            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                                LogHelper.LogVerbose(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudiences[i]));
-                        }
+                        logger.AudienceValidated(tokenAudiences[i]);
 
                         return tokenAudiences[i];
                     }
@@ -186,17 +185,27 @@ namespace Microsoft.IdentityModel.Tokens
             return null;
         }
 
-        private static bool AudienceMatches(bool ignoreTrailingSlashWhenValidatingAudience, string tokenAudience, string validAudience, StringComparison comparisonType)
+        private static bool AudienceMatches(
+            bool ignoreTrailingSlashWhenValidatingAudience,
+            string tokenAudience,
+            string validAudience,
+            StringComparison comparisonType,
+            ILogger logger)
         {
             if (validAudience.Length == tokenAudience.Length)
                 return string.Equals(validAudience, tokenAudience, comparisonType);
-            else if (ignoreTrailingSlashWhenValidatingAudience && AudienceMatchesIgnoringTrailingSlash(tokenAudience, validAudience, comparisonType))
+            else if (ignoreTrailingSlashWhenValidatingAudience &&
+                AudienceMatchesIgnoringTrailingSlash(tokenAudience, validAudience, comparisonType, logger))
                 return true;
 
             return false;
         }
 
-        private static bool AudienceMatchesIgnoringTrailingSlash(string tokenAudience, string validAudience, StringComparison comparisonType)
+        private static bool AudienceMatchesIgnoringTrailingSlash(
+            string tokenAudience,
+            string validAudience,
+            StringComparison comparisonType,
+            ILogger logger)
         {
             int length = -1;
 
@@ -211,16 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (string.Compare(validAudience, 0, tokenAudience, 0, length, comparisonType) == 0)
             {
-                if (AppContextSwitches.SuccessValidationLogsAsInformation)
-                {
-                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
-                }
-                else
-                {
-                    if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                        LogHelper.LogVerbose(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
-                }
+                logger.AudienceValidated(tokenAudience);
 
                 return true;
             }

@@ -105,6 +105,7 @@ namespace Microsoft.IdentityModel.Tokens
                     issuer,
                     null);
 
+            var logger = callContext.GetLogger();
             BaseConfiguration? configuration = null;
             if (validationParameters.ConfigurationManager != null)
                 configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
@@ -126,12 +127,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (string.Equals(configuration.Issuer, issuer))
                 {
-                    // TODO - how and when to log
-                    // Logs will have to be passed back to Wilson
-                    // so that they can be written to the correct place and in the correct format respecting PII.
-                    // Add to CallContext
-                    //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
+                    logger.IssuerValidated(issuer);
+
                     return new ValidatedIssuer(
                             issuer!,
                             IssuerValidationSource.IssuerMatchedConfiguration);
@@ -144,17 +141,18 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (string.IsNullOrEmpty(validationParameters.ValidIssuers[i]))
                     {
-                        // TODO: Add to CallContext
-                        //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        //    LogHelper.LogInformation(LogMessages.IDX10262);
-
+                        logger.EmptyIssuerInValidIssuers();
                         continue;
                     }
 
                     if (string.Equals(validationParameters.ValidIssuers[i], issuer))
+                    {
+                        logger.IssuerValidated(issuer);
+
                         return new ValidatedIssuer(
                             issuer!,
                             IssuerValidationSource.IssuerMatchedValidationParameters);
+                    }
                 }
             }
 
