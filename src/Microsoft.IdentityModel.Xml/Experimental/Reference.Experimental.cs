@@ -20,7 +20,7 @@ public partial class Reference : DSigElement
     /// <param name="key"> the <see cref="SecurityKey"/> associated with the signature being verified.</param>
     /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
     /// <param name="callContext"> contextual information for diagnostics.</param>
-    /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
+    /// <returns>A <see cref="ValidationResult{TResult, TError}"/> containing <paramref name="key"/> on success or a <see cref="ValidationError"/> on failure.</returns>
     internal ValidationResult<SecurityKey, ValidationError> Verify(
         SecurityKey key,
         CryptoProviderFactory cryptoProviderFactory,

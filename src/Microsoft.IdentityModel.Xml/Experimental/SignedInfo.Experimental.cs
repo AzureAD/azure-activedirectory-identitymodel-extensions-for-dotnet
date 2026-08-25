@@ -23,12 +23,12 @@ public partial class SignedInfo : DSigElement
         CryptoProviderFactory cryptoProviderFactory,
         CallContext callContext)
     {
-        if (key == null)
+        if (key is null)
             return ValidationError.NullParameter(
                 nameof(key),
                 ValidationError.GetCurrentStackFrame());
 
-        if (cryptoProviderFactory == null)
+        if (cryptoProviderFactory is null)
             return ValidationError.NullParameter(
                 nameof(cryptoProviderFactory),
                 ValidationError.GetCurrentStackFrame());
