@@ -3,12 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using Xunit;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Net;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {

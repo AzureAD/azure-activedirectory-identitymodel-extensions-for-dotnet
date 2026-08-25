@@ -524,7 +524,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// all available keys will be tried.
         /// </summary>
         [DefaultValue(true)]
-        public bool TryAllSigningKeys { get; set; }
+        public bool TryAllSigningKeys { get; set; } = true;
 
         /// <summary>
         /// Allows overriding the validator that will be used to validate the type of the token.
