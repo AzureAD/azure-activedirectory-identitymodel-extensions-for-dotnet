@@ -152,13 +152,19 @@ namespace Microsoft.IdentityModel.Validators
             {
                 string signingKeyCloudInstanceName = value as string;
                 if (string.IsNullOrWhiteSpace(signingKeyCloudInstanceName))
+                {
+                    LogHelper.LogWarning(LogMessages.IDX40014);
                     return;
+                }
 
                 if (openIdConnectConfiguration.AdditionalData.TryGetValue(AadIssuerValidatorConstants.CloudInstanceNameKey, out object configurationCloudInstanceNameObjectValue))
                 {
                     string configurationCloudInstanceName = configurationCloudInstanceNameObjectValue as string;
                     if (string.IsNullOrWhiteSpace(configurationCloudInstanceName))
+                    {
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX40013, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName)));
                         return;
+                    }
 
                     if (!string.Equals(signingKeyCloudInstanceName, configurationCloudInstanceName, StringComparison.Ordinal))
                         throw LogHelper.LogExceptionMessage(
@@ -169,6 +175,14 @@ namespace Microsoft.IdentityModel.Validators
                                 SigningKey = securityKey,
                             });
                 }
+                else
+                {
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX40013, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName)));
+                }
+            }
+            else
+            {
+                LogHelper.LogWarning(LogMessages.IDX40014);
             }
         }
 
