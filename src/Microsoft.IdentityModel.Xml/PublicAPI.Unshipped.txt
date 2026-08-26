@@ -1,1 +1,4 @@
 static Microsoft.IdentityModel.Xml.XmlSignatureConstants.Attributes.Type.get -> string
+virtual Microsoft.IdentityModel.Xml.DSigSerializer.ReadKeyInfo(System.Xml.XmlReader reader, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Xml.KeyInfo
+virtual Microsoft.IdentityModel.Xml.DSigSerializer.TryReadKeyInfoType(System.Xml.XmlReader reader, ref Microsoft.IdentityModel.Xml.KeyInfo keyInfo, Microsoft.IdentityModel.Tokens.CallContext callContext) -> bool
+virtual Microsoft.IdentityModel.Xml.DSigSerializer.TryReadX509Data(System.Xml.XmlReader reader, out Microsoft.IdentityModel.Xml.X509Data data, Microsoft.IdentityModel.Tokens.CallContext callContext) -> bool

@@ -2,3 +2,5 @@ Microsoft.IdentityModel.Xml.Reference.Verify(Microsoft.IdentityModel.Tokens.Cryp
 Microsoft.IdentityModel.Xml.Signature.Verify(Microsoft.IdentityModel.Tokens.SecurityKey key, Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError
 Microsoft.IdentityModel.Xml.SignedInfo.Verify(Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError
 Microsoft.IdentityModel.Xml.XmlValidationException.SetValidationError(Microsoft.IdentityModel.Tokens.Experimental.ValidationError validationError) -> void
+Microsoft.IdentityModel.Xml.XmlLogger
+static Microsoft.IdentityModel.Xml.XmlLogger.UnknownKeyInfoElementSkipped(this Microsoft.Extensions.Logging.ILogger logger, string element) -> void

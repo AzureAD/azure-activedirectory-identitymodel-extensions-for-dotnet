@@ -8,6 +8,8 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -77,6 +79,33 @@ namespace Microsoft.IdentityModel.Xml
         /// <remarks>Only handles IssuerSerial, Ski, SubjectName, Certificate. Unsupported types are skipped. Only a X509 data element is supported.</remarks>
         public virtual KeyInfo ReadKeyInfo(XmlReader reader)
         {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
+            return ReadKeyInfoCore(reader, null);
+        }
+
+        /// <summary>
+        /// Reads XML conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-KeyInfo.
+        /// </summary>
+        /// <param name="reader"><see cref="XmlReader"/> pointing positioned on a &lt;KeyInfo> element.</param>
+        /// <param name="callContext">The context used to log information about this call.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> or <paramref name="callContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">if there is a problem reading the XML.</exception>
+        /// <remarks>Only handles IssuerSerial, Ski, SubjectName, Certificate. Unsupported types are skipped. Only a X509 data element is supported.</remarks>
+        public virtual KeyInfo ReadKeyInfo(XmlReader reader, CallContext callContext)
+        {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
+            if (callContext == null)
+                throw LogArgumentNullException(nameof(callContext));
+
+            return ReadKeyInfoCore(reader, callContext);
+        }
+
+        private KeyInfo ReadKeyInfoCore(XmlReader reader, CallContext callContext)
+        {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
 
             var keyInfo = CreateKeyInfo(reader);
@@ -90,17 +119,12 @@ namespace Microsoft.IdentityModel.Xml
                 while (reader.IsStartElement())
                 {
                     // Skip the element since it is not one of elements handled by TryReadKeyInfoType
-                    if (!TryReadKeyInfoType(reader, ref keyInfo))
-                    {
-                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        {
-                            LogHelper.LogWarning(LogMessages.IDX30300, reader.ReadOuterXml());
-                        }
-                        else
-                        {
-                            reader.Skip();
-                        }
-                    }
+                    bool typeRead = callContext == null
+                        ? TryReadKeyInfoType(reader, ref keyInfo)
+                        : TryReadKeyInfoType(reader, ref keyInfo, callContext);
+
+                    if (!typeRead)
+                        SkipUnknownElement(reader, callContext);
                 }
 
                 // </KeyInfo>
@@ -161,6 +185,48 @@ namespace Microsoft.IdentityModel.Xml
             {
                 reader.ReadStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
                 if (!TryReadKeyValueType(reader, ref keyInfo)) return false;
+
+                // </KeyValue>
+                reader.ReadEndElement();
+            }
+            else
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to read the key info type which is the child of the &lt;KeyInfo> element.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned on a child of a <see cref="XmlSignatureConstants.Elements.KeyInfo"/> element.</param>
+        /// <param name="keyInfo">The <see cref="KeyInfo"/> object to populate.</param>
+        /// <param name="callContext">The context used to log information about this call.</param>
+        protected virtual bool TryReadKeyInfoType(XmlReader reader, ref KeyInfo keyInfo, CallContext callContext)
+        {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
+            if (keyInfo == null)
+                throw LogArgumentNullException(nameof(keyInfo));
+
+            if (callContext == null)
+                throw LogArgumentNullException(nameof(callContext));
+
+            // <X509Data>
+            if (TryReadX509Data(reader, out var x509Data, callContext))
+                keyInfo.X509Data.Add(x509Data);
+            // <RetrievalMethod>
+            else if (TryReadRetrievalMethod(reader, out var retreivalMethodUri))
+                keyInfo.RetrievalMethodUri = retreivalMethodUri;
+            // <KeyName>
+            else if (TryReadKeyName(reader, out var keyName))
+                keyInfo.KeyName = keyName;
+            // <KeyValue>
+            else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace))
+            {
+                reader.ReadStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
+                if (!TryReadKeyValueType(reader, ref keyInfo))
+                    return false;
 
                 // </KeyValue>
                 reader.ReadEndElement();
@@ -278,6 +344,23 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.X509Data"/> element.</param>
         /// <param name="data">The parsed <see cref="XmlSignatureConstants.Elements.X509Data"/> element.</param>
         protected virtual bool TryReadX509Data(XmlReader reader, out X509Data data)
+            => TryReadX509DataCore(reader, out data, null);
+
+        /// <summary>
+        /// Attempts to read the <see cref="XmlSignatureConstants.Elements.X509Data"/> element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.X509Data"/> element.</param>
+        /// <param name="data">The parsed <see cref="XmlSignatureConstants.Elements.X509Data"/> element.</param>
+        /// <param name="callContext">The context used to log information about this call.</param>
+        protected virtual bool TryReadX509Data(XmlReader reader, out X509Data data, CallContext callContext)
+        {
+            if (callContext == null)
+                throw LogArgumentNullException(nameof(callContext));
+
+            return TryReadX509DataCore(reader, out data, callContext);
+        }
+
+        private static bool TryReadX509DataCore(XmlReader reader, out X509Data data, CallContext callContext)
         {
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
@@ -327,14 +410,7 @@ namespace Microsoft.IdentityModel.Xml
                 else
                 {
                     // Skip the element since it is not one of  <X509Certificate>, <X509IssuerSerial>, <X509SKI>, <X509SubjectName>, <X509CRL>
-                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                    {
-                        LogHelper.LogWarning(LogMessages.IDX30300, reader.ReadOuterXml());
-                    }
-                    else
-                    {
-                        reader.Skip();
-                    }
+                    SkipUnknownElement(reader, callContext);
                 }
             }
 
@@ -342,6 +418,25 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadEndElement();
 
             return true;
+        }
+
+        private static void SkipUnknownElement(XmlReader reader, CallContext callContext)
+        {
+            if (callContext == null)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogMessages.IDX30300, reader.ReadOuterXml());
+                else
+                    reader.Skip();
+
+                return;
+            }
+
+            ILogger logger = callContext.Logger ?? NullLogger.Instance;
+            if (logger.IsEnabled(LogLevel.Warning))
+                logger.UnknownKeyInfoElementSkipped(reader.ReadOuterXml());
+            else
+                reader.Skip();
         }
 
         /// <summary>
