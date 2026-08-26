@@ -199,10 +199,6 @@ namespace Microsoft.IdentityModel.Logging.Tests
             LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(LogHelper.FormatInvariant("Main exception 1: {0}", new SecurityTokenCompressionFailedException("custom inner exception"))));
             LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(LogHelper.FormatInvariant("Main exception 2: {0}", new InvalidOperationException("system exception"))));
 
-            Console.WriteLine($"TraceBuffer: '{listener.TraceBuffer}'");
-            Console.WriteLine($"Expected1: Main exception 1: Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException: custom inner exception");
-            Console.WriteLine($"Expected2: Main exception 2: [PII of type 'System.InvalidOperationException' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]");
-
             Assert.Contains("Main exception 1: Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException: custom inner exception", listener.TraceBuffer);
             Assert.Contains("Main exception 2: [PII of type 'System.InvalidOperationException' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]", listener.TraceBuffer);
         }
