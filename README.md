@@ -56,19 +56,6 @@ __Not a recommended version__
 >
 >⚡Action: Move to 8.x.
 
-## Deprecations
-
-### `JwtSecurityTokenHandler` (System.IdentityModel.Tokens.Jwt)
-
-As of IdentityModel `9.x`, `System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler` is marked `[Obsolete]`. Use `Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler` instead — it is faster, allocates less, and is where new functionality lands.
-
-The type still ships and still works; the attribute produces a build **warning** (`CS0618`), not an error.
-
-⚡ Before you switch handlers, review the behavioral differences — most notably that inbound claim-type mapping is **on** by default for `JwtSecurityTokenHandler` and **off** by default for `JsonWebTokenHandler`:
-
-- [Migration guide](./docs/JwtSecurityTokenHandler-migration-guide.md) — what to change, with before/after code.
-- [Feature-parity audit](./docs/JwtSecurityTokenHandler-JsonWebTokenHandler-parity.md) — the full API-by-API comparison.
-
 ## Samples and Documentation
 
 The scenarios supported by IdentityModel extensions for .NET are described in [Scenarios](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/scenarios). The libraries are in particular used part of ASP.NET security to validate tokens in ASP.NET Web Apps and Web APIs. To learn more about token validation, and find samples, see:
