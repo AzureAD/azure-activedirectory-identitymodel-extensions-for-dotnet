@@ -1391,7 +1391,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
-        // Locks in the intended 'aud' resolution for JsonWebTokenHandler: when SecurityTokenDescriptor.Audience and/or
+        // Tests the intended 'aud' resolution for JsonWebTokenHandler: when SecurityTokenDescriptor.Audience and/or
         // Audiences is set they are the only source for the 'aud' claim, so that a token's audiences can be overridden
         // with a smaller subset than the claims it is created from. This intentionally differs from JwtSecurityTokenHandler,
         // which combines the descriptor audiences with the 'aud' claims in Claims or Subject.
