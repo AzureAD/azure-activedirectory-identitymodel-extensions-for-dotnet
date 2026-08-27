@@ -5,21 +5,22 @@
 using System;
 #endif
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    internal static partial class XmlLogger
+    /// <summary>
+    /// High-performance logging methods for XML operations.
+    /// </summary>
+    public static partial class LoggerExtensions
     {
-        internal static void UnknownKeyInfoElementSkipped(this ILogger logger, string element)
-        {
-            if (logger.IsEnabled(LogLevel.Warning))
-            {
-                UnknownKeyInfoElementSkippedCore(
-                    logger,
-                    LogHelper.FormatInvariant("{0}", element));
-            }
-        }
+        /// <summary>
+        /// Logs that an unknown child element in a KeyInfo element was skipped.
+        /// </summary>
+        /// <param name="logger">The logger used to write the message.</param>
+        /// <param name="element">The skipped XML element.</param>
+        [System.CLSCompliant(false)]
+        public static void UnknownKeyInfoElementSkipped(this ILogger logger, string element) =>
+            UnknownKeyInfoElementSkippedCore(logger, element);
 
 #if NET6_0_OR_GREATER
         [LoggerMessage(

@@ -434,7 +434,7 @@ namespace Microsoft.IdentityModel.Xml
 
             ILogger logger = callContext.Logger ?? NullLogger.Instance;
             if (logger.IsEnabled(LogLevel.Warning))
-                logger.UnknownKeyInfoElementSkipped(reader.ReadOuterXml());
+                logger.UnknownKeyInfoElementSkipped(LogHelper.FormatInvariant("{0}", reader.ReadOuterXml()));
             else
                 reader.Skip();
         }
