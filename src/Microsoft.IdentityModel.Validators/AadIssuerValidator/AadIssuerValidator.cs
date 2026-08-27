@@ -220,10 +220,11 @@ namespace Microsoft.IdentityModel.Validators
             _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            string tenantId = GetTenantIdFromToken(securityToken);
+            CallContext callContext = validationParameters.GetCallContext();
+            string tenantId = GetTenantIdFromToken(securityToken, callContext);
 
             if (string.IsNullOrWhiteSpace(tenantId))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40003));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40003), callContext);
 
             if (validationParameters.ValidIssuers != null)
             {
@@ -276,7 +277,8 @@ namespace Microsoft.IdentityModel.Validators
                         LogHelper.FormatInvariant(
                             LogMessages.IDX40001,
                             LogHelper.MarkAsNonPII(issuer)),
-                        ex));
+                        ex),
+                    callContext);
             }
 
             // If a valid issuer is not found, throw
@@ -284,7 +286,8 @@ namespace Microsoft.IdentityModel.Validators
                 new SecurityTokenInvalidIssuerException(
                     LogHelper.FormatInvariant(
                         LogMessages.IDX40001,
-                        LogHelper.MarkAsNonPII(issuer))));
+                        LogHelper.MarkAsNonPII(issuer))),
+                callContext);
         }
 
         /// <summary>
@@ -554,9 +557,10 @@ namespace Microsoft.IdentityModel.Validators
 
         /// <summary>Gets the tenant ID from a token.</summary>
         /// <param name="securityToken">A JWT token.</param>
+        /// <param name="callContext">The call context for logging.</param>
         /// <returns>A string containing the tenant ID, if found or <see cref="string.Empty"/>.</returns>
         /// <remarks>Only <see cref="JwtSecurityToken"/> and <see cref="JsonWebToken"/> are acceptable types.</remarks>
-        internal static string GetTenantIdFromToken(SecurityToken securityToken)
+        internal static string GetTenantIdFromToken(SecurityToken securityToken, CallContext callContext)
         {
             if (securityToken is JwtSecurityToken jwtSecurityToken)
             {
@@ -567,7 +571,7 @@ namespace Microsoft.IdentityModel.Validators
                     return (string)tenantId;
 
                 // Since B2C doesn't have "tid" as default, get it from issuer
-                return GetTenantIdFromIss(jwtSecurityToken.Issuer);
+                return GetTenantIdFromIss(jwtSecurityToken.Issuer, callContext);
             }
 
             if (securityToken is JsonWebToken jsonWebToken)
@@ -579,7 +583,7 @@ namespace Microsoft.IdentityModel.Validators
                     return tenantId;
 
                 // Since B2C doesn't have "tid" as default, get it from issuer
-                return GetTenantIdFromIss(jsonWebToken.Issuer);
+                return GetTenantIdFromIss(jsonWebToken.Issuer, callContext);
             }
 
             return string.Empty;
@@ -590,7 +594,7 @@ namespace Microsoft.IdentityModel.Validators
         // - {domain}/{tid}/v2.0
         // - {domain}/{tid}/v2.0/
         // - {domain}/{tfp}/{tid}/{userFlow}/v2.0/
-        private static string GetTenantIdFromIss(string iss)
+        private static string GetTenantIdFromIss(string iss, CallContext callContext)
         {
             if (string.IsNullOrEmpty(iss))
                 return string.Empty;
@@ -601,7 +605,7 @@ namespace Microsoft.IdentityModel.Validators
                 return uri.Segments[1].TrimEnd('/');
 
             if (uri.Segments.Length == 5 && uri.Segments[1].TrimEnd('/') == AadIssuerValidatorConstants.Tfp)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40002));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40002), callContext);
 
             return string.Empty;
         }
