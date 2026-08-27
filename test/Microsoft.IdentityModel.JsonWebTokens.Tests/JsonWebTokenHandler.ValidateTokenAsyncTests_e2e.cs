@@ -83,7 +83,8 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
         string token = testTokenCreator.CreateDefaultValidToken();
         ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
             audiences: ["http://Default.Audience.com"],
-            issuers: ["http://Default.Issuer.com"]);
+            issuers: ["http://Default.Issuer.com"],
+            tryAllSigningKeys: false);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
@@ -205,7 +206,8 @@ public class JsonWebTokenHandlerValidateTokenAsyncTestsE2e
         ValidationParameters validationParameters = ValidationUtils.CreateValidationParameters(
             audiences: ["http://Default.Audience.com"],
             issuers: ["http://Default.Issuer.com"],
-            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]);
+            signingKeys: [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key],
+            tryAllSigningKeys: false);
         CallContext callContext = new CallContext();
 
         ValidationResult<ValidatedToken, ValidationError> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
