@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\common.props" />
 
@@ -39,10 +39,5 @@
     <AdditionalFiles Include="InternalAPI.Shipped.txt" />
     <AdditionalFiles Include="InternalAPI.Unshipped.txt" />
   </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/InternalAPI.Shipped.txt" />
-    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/InternalAPI.Unshipped.txt" />
-  </ItemGroup>
-
+  
 </Project>
