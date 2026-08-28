@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -217,6 +218,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(null, null, tvp, GetConfigurationNoMatchingKeyMock());
             Assert.Null(resolvedKey);
         }
+
+        #region GetStringClaimValueType
+
+        [Fact]
+        public void GetStringClaimValueType_ReturnsDateTime_ForIso8601WithOrWithoutTrailingZeros()
+        {
+            var iso8601WithTrailingZeros = "2025-11-26T09:30:45.1234560Z";
+            var iso8601WithoutTrailingZeros = "2025-11-26T09:30:45.123456Z";
+            var resultWithTrailingZeros = JwtTokenUtilities.GetStringClaimValueType(iso8601WithTrailingZeros);
+            var resultWithoutTrailingZeros = JwtTokenUtilities.GetStringClaimValueType(iso8601WithoutTrailingZeros);
+            Assert.Equal(ClaimValueTypes.DateTime, resultWithTrailingZeros);
+            Assert.Equal(ClaimValueTypes.DateTime, resultWithoutTrailingZeros);
+        }
+
+        #endregion
 
         #region DecryptJwtToken Tests
         [Fact]
