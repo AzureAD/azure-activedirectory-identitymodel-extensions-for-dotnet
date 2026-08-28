@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -180,7 +181,12 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
             Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
             if (!_symmetricSignatureProvider.Value.Verify(macBytes, 0, macBytes.Length, authenticationTag, 0, _authenticatedkeys.Value.HmacKey.Key.Length, Algorithm))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
+                // Verifying the authentication tag can legitimately fail while probing multiple candidate
+                // decryption keys (JsonWebTokenHandler tries all keys when it cannot resolve one by kid/x5t).
+                // Log this per-key failure below Error so it is not surfaced as noise during otherwise-successful
+                // decryption; the terminal all-keys-failed case is still reported at Error via IDX10603/IDX10609,
+                // which aggregates each attempted key's exception detail.
+                throw LogHelper.LogExceptionMessage(EventLevel.Informational, new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
 
             using Aes aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
