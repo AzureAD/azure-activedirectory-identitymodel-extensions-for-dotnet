@@ -643,13 +643,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         private sealed class EventCaptureListener : EventListener
         {
+            private readonly EventLevel _originalLogLevel;
+
             public EventCaptureListener(EventLevel eventLevel)
             {
+                _originalLogLevel = IdentityModelEventSource.Logger.LogLevel;
                 IdentityModelEventSource.Logger.LogLevel = eventLevel;
                 EnableEvents(IdentityModelEventSource.Logger, eventLevel);
             }
 
             public List<string> Events { get; } = new();
+
+            public override void Dispose()
+            {
+                try
+                {
+                    base.Dispose();
+                }
+                finally
+                {
+                    IdentityModelEventSource.Logger.LogLevel = _originalLogLevel;
+                }
+            }
 
             protected override void OnEventWritten(EventWrittenEventArgs eventData)
             {
