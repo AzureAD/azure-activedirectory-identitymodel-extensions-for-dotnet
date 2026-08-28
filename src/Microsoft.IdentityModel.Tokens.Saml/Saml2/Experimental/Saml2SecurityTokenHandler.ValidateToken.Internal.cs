@@ -23,6 +23,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            // Issue #3455: scope the string entry point too, so the buffer is drained even if reading the
+            // token fails before the SecurityToken overload runs.
+            if (callContext is null)
+                return ValidationError.NullParameter(
+                    nameof(callContext),
+                    ValidationError.GetCurrentStackFrame());
+
+            using var logScope = callContext.BeginLogEmissionScope();
+
             if (token is null)
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
 
@@ -43,6 +52,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            // Issue #3455: drain the informational logs captured during validation on every completion path
+            // (success or failure) so they are emitted once and do not leak into a caller-reused CallContext.
+            // The using-scope keeps this to a single async state machine (no wrapper method).
+            if (callContext is null)
+                return ValidationError.NullParameter(
+                    nameof(callContext),
+                    ValidationError.GetCurrentStackFrame());
+
+            using var logScope = callContext.BeginLogEmissionScope();
+
             if (securityToken is null)
             {
                 return ValidationError.NullParameter(
@@ -201,7 +220,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 ValidatedAlgorithm = algorithmResult.Result,
                 ValidatedLifetime = lifetimeResult.Result,
                 ValidatedIssuer = issuerResult.Result,
-                ValidatedSignatureKey = signatureResult.Result
+                ValidatedSignatureKey = signatureResult.Result,
+                ValidationActivityId = callContext.ActivityId
             };
         }
 

@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.IdentityModel.Abstractions;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
@@ -116,8 +118,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             // if it reaches here, that means no token replay is detected.
-            // TODO: Move to CallContext
-            //LogHelper.LogInformation(LogMessages.IDX10240);
+            // Issue #3455: record on the CallContext instead of emitting directly; the handler drains and
+            // emits captured logs at the end of validation.
+            if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                callContext.AddLog(EventLogLevel.Informational, new MessageDetail(LogMessages.IDX10240));
+
             return expires;
         }
     }

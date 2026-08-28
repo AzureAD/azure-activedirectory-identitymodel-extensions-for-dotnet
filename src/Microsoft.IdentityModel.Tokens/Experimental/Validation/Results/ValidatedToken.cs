@@ -123,6 +123,13 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
+        /// The activity/correlation id of the validation <see cref="CallContext"/>, carried so the lazy
+        /// claims-identity log (IDX10245) is recorded on a context correlated with the original validation
+        /// call. Defaults to <see cref="Guid.Empty"/> (matching a default <see cref="CallContext"/>).
+        /// </summary>
+        internal Guid ValidationActivityId { get; set; }
+
+        /// <summary>
         /// The <see cref="ClaimsIdentity"/> created from the validated security token.
         /// </summary>
         public ClaimsIdentity ClaimsIdentity
@@ -163,7 +170,21 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
                 {
                     Debug.Assert(_claimsIdentity is null);
 
-                    _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer?.Issuer);
+                    // Issue #3455: use a dedicated CallContext for the lazy claims-creation log so that reusing
+                    // the validation CallContext for another validation cannot cross-contaminate this token's
+                    // IDX10245. Claims creation is lazy and runs after the handler's end-of-validation drain, so
+                    // the entry is emitted here, on every path (including if creation throws). The context is
+                    // seeded with the original validation activity id so lazy logs stay correlated with the
+                    // validation call (ValidationActivityId is Guid.Empty when the caller set no activity id).
+                    CallContext context = new(ValidationActivityId);
+                    try
+                    {
+                        _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer?.Issuer, context);
+                    }
+                    finally
+                    {
+                        context.EmitCapturedLogs();
+                    }
                     _claimsIdentityInitialized = true;
                 }
 

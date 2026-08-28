@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -133,6 +134,10 @@ namespace Microsoft.IdentityModel.Tokens
                     expires);
 
             // if it reaches here, that means lifetime of the token is valid
+            // Issue #3455: record informational success log on the CallContext; the handler emits it.
+            if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                callContext.AddLog(EventLogLevel.Informational, new MessageDetail(LogMessages.IDX10238));
+
             return new ValidatedLifetime(notBefore, expires);
         }
     }

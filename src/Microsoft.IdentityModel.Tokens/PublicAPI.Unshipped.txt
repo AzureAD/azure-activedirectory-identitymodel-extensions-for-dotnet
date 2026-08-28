@@ -273,7 +273,7 @@ static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureTyp
 static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DefaultClockSkew -> System.TimeSpan
 virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationError.GetException() -> System.Exception!
 virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.Clone() -> Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters!
-virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, string! issuer) -> System.Security.Claims.ClaimsIdentity!
+virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, string! issuer, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> System.Security.Claims.ClaimsIdentity!
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.Message.get -> string
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.MessageDetail(string formatString, params object[] parameters) -> void
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.MessageDetail(string message) -> void

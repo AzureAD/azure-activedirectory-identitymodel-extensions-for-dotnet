@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -22,6 +23,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            // Issue #3455: scope the string entry point too, so logs captured before/around token parsing
+            // are drained and the buffer is cleared even if parsing fails before the SecurityToken overload runs.
+            if (callContext is null)
+                return ValidationError.NullParameter(
+                    nameof(callContext),
+                    ValidationError.GetCurrentStackFrame());
+
+            using var logScope = callContext.BeginLogEmissionScope();
+
             if (string.IsNullOrEmpty(token))
             {
                 return ValidationError.NullParameter(
@@ -73,6 +83,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            // Issue #3455: drain the informational logs captured during validation on every completion path
+            // (success or failure) so they are emitted once, are not tied to whether the caller later accesses
+            // ClaimsIdentity, and do not leak into a caller-reused CallContext. The using-scope keeps this to a
+            // single async state machine (no wrapper method, no extra allocation on the hot path).
+            if (callContext is null)
+                return ValidationError.NullParameter(
+                    nameof(callContext),
+                    ValidationError.GetCurrentStackFrame());
+
+            using var logScope = callContext.BeginLogEmissionScope();
+
             if (token is null)
             {
                 return ValidationError.NullParameter(
@@ -96,7 +117,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             BaseConfiguration? currentConfiguration =
-                await GetCurrentConfigurationAsync(validationParameters, cancellationToken).ConfigureAwait(false);
+                await GetCurrentConfigurationAsync(validationParameters, callContext, cancellationToken).ConfigureAwait(false);
 
             ValidationResult<ValidatedToken, ValidationError> result = jsonWebToken.IsEncrypted ?
                 await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
@@ -135,6 +156,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                     if (lastConfig != currentConfiguration)
                     {
+                        // Issue #3455: discard the superseded attempt's captured logs so only the final
+                        // attempt's informational logs are emitted.
+                        callContext.ClearCapturedLogs();
                         result = jsonWebToken.IsEncrypted ?
                             await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
                             await ValidateJWSAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false);
@@ -160,6 +184,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if (TokenUtilities.IsRecoverableConfigurationAndExceptionType(
                             jsonWebToken.Kid, currentConfiguration, lkgConfiguration, failureType))
                         {
+                            // Issue #3455: discard the superseded attempt's captured logs so only the final
+                            // attempt's informational logs are emitted.
+                            callContext.ClearCapturedLogs();
                             result = jsonWebToken.IsEncrypted ?
                                 await ValidateJWEAsync(jsonWebToken, validationParameters, lkgConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
                                 await ValidateJWSAsync(jsonWebToken, validationParameters, lkgConfiguration, callContext, cancellationToken).ConfigureAwait(false);
@@ -343,11 +370,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidatedIssuer = issuerResult.Result,
                 ActorValidationResult = actorResult?.Result,
                 ValidatedTokenType = tokenTypeResult.Result,
-                ValidatedSignatureKey = signatureResult.Result
+                ValidatedSignatureKey = signatureResult.Result,
+                ValidationActivityId = callContext.ActivityId
             };
         }
 
-        private static async Task<BaseConfiguration?> GetCurrentConfigurationAsync(ValidationParameters validationParameters, CancellationToken cancellationToken)
+        private static async Task<BaseConfiguration?> GetCurrentConfigurationAsync(ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)
         {
             BaseConfiguration? currentConfiguration = null;
             if (validationParameters.ConfigurationManager is not null)
@@ -357,14 +385,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
-                catch
+                catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // The exception is tracked and dismissed as the ValidationParameters may have the issuer
                     // and signing key set directly on them, allowing the library to continue with token validation.
-                    // TODO: Move to CallContext.
-                    //if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                    //    LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                    // Issue #3455: record on the CallContext (drained by the handler) instead of emitting directly.
+                    if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Warning))
+                        callContext.AddLog(
+                            EventLogLevel.Warning,
+                            new MessageDetail(
+                                TokenLogMessages.IDX10261,
+                                LogHelper.MarkAsNonPII(validationParameters.ConfigurationManager.MetadataAddress),
+                                ex));
                 }
             }
 

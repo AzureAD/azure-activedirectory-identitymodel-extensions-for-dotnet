@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -96,7 +97,13 @@ namespace Microsoft.IdentityModel.Tokens
                     ValidationError.GetCurrentStackFrame());
 
             if (validationParameters.ValidTypes.Count == 0)
+            {
+                // Issue #3455: record on the CallContext; the handler emits it.
+                if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    callContext.AddLog(EventLogLevel.Verbose, new MessageDetail(LogMessages.IDX10255));
+
                 return new ValidatedTokenType(type ?? "null", validationParameters.ValidTypes.Count);
+            }
 
             if (string.IsNullOrEmpty(type))
                 return new TokenTypeValidationError(
@@ -116,6 +123,10 @@ namespace Microsoft.IdentityModel.Tokens
                     ValidationError.GetCurrentStackFrame(),
                     type);
             }
+
+            // Issue #3455: record informational success log on the CallContext; the handler emits it.
+            if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                callContext.AddLog(EventLogLevel.Informational, new MessageDetail(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type)));
 
             return new ValidatedTokenType(type!, validationParameters.ValidTypes.Count);
         }

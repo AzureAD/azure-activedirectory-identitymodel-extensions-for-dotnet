@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -126,12 +127,15 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (string.Equals(configuration.Issuer, issuer))
                 {
-                    // TODO - how and when to log
-                    // Logs will have to be passed back to Wilson
-                    // so that they can be written to the correct place and in the correct format respecting PII.
-                    // Add to CallContext
-                    //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
+                    // Issue #3455: record informational success logs on the CallContext instead of emitting
+                    // directly. The result-based validators are side-effect free; the handler drains and emits
+                    // these (respecting PII) at the end of validation. Guarded by IsEnabled so the MessageDetail
+                    // is not allocated when the Informational level is disabled.
+                    if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                        callContext.AddLog(
+                            EventLogLevel.Informational,
+                            new MessageDetail(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer)));
+
                     return new ValidatedIssuer(
                             issuer!,
                             IssuerValidationSource.IssuerMatchedConfiguration);
@@ -144,9 +148,11 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (string.IsNullOrEmpty(validationParameters.ValidIssuers[i]))
                     {
-                        // TODO: Add to CallContext
-                        //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        //    LogHelper.LogInformation(LogMessages.IDX10262);
+                        // Issue #3455: record on the CallContext instead of emitting directly.
+                        if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                            callContext.AddLog(
+                                EventLogLevel.Informational,
+                                new MessageDetail(LogMessages.IDX10262));
 
                         continue;
                     }

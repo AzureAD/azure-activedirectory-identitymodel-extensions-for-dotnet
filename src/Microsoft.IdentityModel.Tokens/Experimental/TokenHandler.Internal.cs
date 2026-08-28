@@ -72,18 +72,20 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">the <see cref="SecurityToken"/> that has the Claims.</param>
         /// <param name="validationParameters">the <see cref="ValidationParameters"/> that was used to validate the token.</param>
         /// <param name="issuer">the 'issuer' to use by default when creating a Claim.</param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>A <see cref="ClaimsIdentity"/>.</returns>
         /// <exception cref="NotImplementedException"></exception>
         internal virtual ClaimsIdentity CreateClaimsIdentityInternal(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            string issuer)
+            string issuer,
+            CallContext callContext)
         {
             throw LogExceptionMessage(
                 new NotImplementedException(
                     FormatInvariant(
                         LogMessages.IDX10267,
-                        MarkAsNonPII("internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer)"),
+                        MarkAsNonPII("internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer, CallContext callContext)"),
                         MarkAsNonPII(GetType().FullName))));
         }
     }

@@ -15,6 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// Tests for verifying that the LogValidationExceptions flag correctly controls
     /// whether validation exceptions are logged or not.
     /// </summary>
+    [Collection("LogHelper.Logger Tests")]
     public class LogValidationExceptionsTests : IDisposable
     {
         private readonly IIdentityLogger _originalLogger;

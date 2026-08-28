@@ -3,6 +3,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -127,6 +128,12 @@ namespace Microsoft.IdentityModel.Tokens
                         ValidationError.GetCurrentStackFrame(),
                         securityKey);
 
+                // Issue #3455: signing certificate is active. Record on the CallContext; the handler emits it.
+                if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                    callContext.AddLog(
+                        EventLogLevel.Informational,
+                        new MessageDetail(LogMessages.IDX10250, LogHelper.MarkAsNonPII(notBeforeUtc), LogHelper.MarkAsNonPII(utcNow)));
+
                 if (notAfterUtc < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate()))
                     return new SignatureKeyValidationError(
                         new MessageDetail(
@@ -136,6 +143,12 @@ namespace Microsoft.IdentityModel.Tokens
                         SignatureKeyValidationFailure.KeyExpired,
                         ValidationError.GetCurrentStackFrame(),
                         securityKey);
+
+                // Issue #3455: signing certificate is not expired. Record on the CallContext; the handler emits it.
+                if (callContext is not null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                    callContext.AddLog(
+                        EventLogLevel.Informational,
+                        new MessageDetail(LogMessages.IDX10251, LogHelper.MarkAsNonPII(notAfterUtc), LogHelper.MarkAsNonPII(utcNow)));
             }
 
             return new ValidatedSignatureKey(notBeforeUtc, notAfterUtc, utcNow);

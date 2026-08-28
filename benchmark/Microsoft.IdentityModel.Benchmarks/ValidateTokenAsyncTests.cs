@@ -9,7 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -263,6 +265,126 @@ namespace Microsoft.IdentityModel.Benchmarks
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync_TelemetryEnabledWithTracking()
         {
             return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsClaims, _tokenValidationParameters).ConfigureAwait(false);
+        }
+    }
+
+    // ===== Logging Impact Benchmarks (issue #3455) =====
+    // Measures the cost of the result-based validation logging contract: validators capture structured
+    // MessageDetail entries on the CallContext and the handler drains/emits them once, on completion.
+    // "LoggingDisabled" is the dominant production path (LogHelper.IsEnabled(Informational) == false), where
+    // the capture guards short-circuit so nothing is recorded, drained, or emitted. "LoggingEnabled" exercises
+    // the full capture + drain + emit path against a no-op sink, isolating the library overhead from sink I/O.
+    // The ClaimAccess pair additionally exercises the lazy IDX10245 emission during ClaimsIdentity creation.
+    [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+    public class ValidateTokenAsyncTests_LoggingImpact
+    {
+        private JsonWebTokenHandler _jsonWebTokenHandler;
+        private string _jwsExtendedClaims;
+        private ValidationParameters _validationParameters;
+        // Reused across iterations on purpose: the drain scope clears the buffer at the end of every
+        // ValidateTokenAsync, and lazy claims creation uses its own dedicated CallContext, so no state
+        // leaks between iterations.
+        private CallContext _callContext;
+
+        private static readonly IIdentityLogger s_enabledLogger = new NoOpLogger(isEnabled: true);
+        private static readonly IIdentityLogger s_disabledLogger = new NoOpLogger(isEnabled: false);
+        // Captured once at type initialization, before any GlobalSetup mutates the static logger, so
+        // GlobalCleanup always restores the true original regardless of target ordering within a process.
+        private static readonly IIdentityLogger s_originalLogger = LogHelper.Logger;
+
+        private void CommonSetup()
+        {
+            var tokenDescriptorExtendedClaims = new SecurityTokenDescriptor
+            {
+                Claims = BenchmarkUtils.ClaimsExtendedExample,
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
+            };
+
+            _jsonWebTokenHandler = new JsonWebTokenHandler();
+            _jwsExtendedClaims = _jsonWebTokenHandler.CreateToken(tokenDescriptorExtendedClaims);
+
+            _validationParameters = new ValidationParameters();
+            _validationParameters.ValidAudiences.Add(BenchmarkUtils.Audience);
+            _validationParameters.ValidIssuers.Add(BenchmarkUtils.Issuer);
+            _validationParameters.SigningKeys.Add(BenchmarkUtils.SigningCredentialsRsaSha256.Key);
+
+            _callContext = new CallContext();
+        }
+
+        // Logger state is established in GlobalSetup (once per benchmark, outside the measured region) so the
+        // measurement isolates the capture/drain/emit overhead and does not time the static logger assignment.
+        [GlobalSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingDisabled))]
+        public void SetupSuccessLoggingDisabled()
+        {
+            CommonSetup();
+            LogHelper.Logger = s_disabledLogger;
+        }
+
+        [GlobalSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingEnabled))]
+        public void SetupSuccessLoggingEnabled()
+        {
+            CommonSetup();
+            LogHelper.Logger = s_enabledLogger;
+        }
+
+        [GlobalSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims_LoggingDisabled))]
+        public void SetupClaimsLoggingDisabled()
+        {
+            CommonSetup();
+            LogHelper.Logger = s_disabledLogger;
+        }
+
+        [GlobalSetup(Target = nameof(JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims_LoggingEnabled))]
+        public void SetupClaimsLoggingEnabled()
+        {
+            CommonSetup();
+            LogHelper.Logger = s_enabledLogger;
+        }
+
+        [GlobalCleanup]
+        public void Cleanup() => LogHelper.Logger = s_originalLogger;
+
+        [BenchmarkCategory("LoggingImpact_Success"), Benchmark(Baseline = true)]
+        public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingDisabled()
+        {
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            return validationResult.Succeeded;
+        }
+
+        [BenchmarkCategory("LoggingImpact_Success"), Benchmark]
+        public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_LoggingEnabled()
+        {
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            return validationResult.Succeeded;
+        }
+
+        [BenchmarkCategory("LoggingImpact_ClaimAccess"), Benchmark(Baseline = true)]
+        public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims_LoggingDisabled()
+        {
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            return validationResult.Result.ClaimsIdentity.Claims.ToList();
+        }
+
+        [BenchmarkCategory("LoggingImpact_ClaimAccess"), Benchmark]
+        public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims_LoggingEnabled()
+        {
+            ValidationResult<ValidatedToken, ValidationError> validationResult = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            return validationResult.Result.ClaimsIdentity.Claims.ToList();
+        }
+
+        // A no-op IIdentityLogger used to toggle LogHelper.IsEnabled without incurring sink I/O cost,
+        // so the benchmark isolates the capture/drain/emit overhead of the logging contract itself.
+        private sealed class NoOpLogger : IIdentityLogger
+        {
+            private readonly bool _isEnabled;
+
+            public NoOpLogger(bool isEnabled) => _isEnabled = isEnabled;
+
+            public bool IsEnabled(EventLogLevel eventLogLevel) => _isEnabled;
+
+            public void Log(LogEntry entry)
+            {
+            }
         }
     }
 }

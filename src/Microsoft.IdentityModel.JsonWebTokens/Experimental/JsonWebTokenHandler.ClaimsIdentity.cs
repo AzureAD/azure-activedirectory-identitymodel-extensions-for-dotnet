@@ -18,13 +18,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
-        internal virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken? jwtToken, ValidationParameters validationParameters)
+        internal virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken? jwtToken, ValidationParameters validationParameters, CallContext callContext)
         {
             // TODO: Make protected once ValidationParameters is public.
             _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            return CreateClaimsIdentityPrivate(jwtToken, validationParameters, GetActualIssuer(jwtToken));
+            return CreateClaimsIdentityPrivate(jwtToken, validationParameters, GetActualIssuer(jwtToken), callContext);
         }
 
         /// <summary>
@@ -33,11 +34,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
         internal virtual ClaimsIdentity CreateClaimsIdentity(
             JsonWebToken? jwtToken,
             ValidationParameters validationParameters,
-            string issuer)
+            string issuer,
+            CallContext callContext)
         {
             // TODO: Make protected once ValidationParameters is public.
             _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
@@ -46,24 +49,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 issuer = GetActualIssuer(jwtToken);
 
             if (MapInboundClaims)
-                return CreateClaimsIdentityWithMapping(jwtToken, validationParameters, issuer);
+                return CreateClaimsIdentityWithMapping(jwtToken, validationParameters, issuer, callContext);
 
-            return CreateClaimsIdentityPrivate(jwtToken, validationParameters, issuer);
+            return CreateClaimsIdentityPrivate(jwtToken, validationParameters, issuer, callContext);
         }
 
         internal override ClaimsIdentity CreateClaimsIdentityInternal(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            string issuer)
+            string issuer,
+            CallContext callContext)
         {
-            return CreateClaimsIdentity(securityToken as JsonWebToken, validationParameters, issuer);
+            return CreateClaimsIdentity(securityToken as JsonWebToken, validationParameters, issuer, callContext);
         }
 
-        private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, ValidationParameters validationParameters, string issuer)
+        private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, ValidationParameters validationParameters, string issuer, CallContext callContext)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer, callContext);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 bool wasMapped = _inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out string? type);
@@ -83,7 +87,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (CanReadToken(jwtClaim.Value))
                     {
                         JsonWebToken? actor = ReadToken(jwtClaim.Value) as JsonWebToken;
-                        identity.Actor = CreateClaimsIdentity(actor, validationParameters);
+                        identity.Actor = CreateClaimsIdentity(actor, validationParameters, callContext);
                     }
                 }
 
@@ -110,11 +114,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return identity;
         }
 
-        private ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, ValidationParameters validationParameters, string issuer)
+        private ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, ValidationParameters validationParameters, string issuer, CallContext callContext)
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer, callContext);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
@@ -131,7 +135,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (CanReadToken(jwtClaim.Value))
                     {
                         JsonWebToken? actor = ReadToken(jwtClaim.Value) as JsonWebToken;
-                        identity.Actor = CreateClaimsIdentity(actor, validationParameters, issuer);
+                        identity.Actor = CreateClaimsIdentity(actor, validationParameters, issuer, callContext);
                     }
                 }
 
