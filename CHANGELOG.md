@@ -5,6 +5,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ## New Features
 - Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The default is case-sensitive; set the property to `false` for case-insensitive comparison. The previous `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext key is no longer honored. Applications upgrading from 8.22.0 that set the key to `false` must set this property to `false` instead. See [PR #3569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3569).
 
+## Documentation
+- Correct the `SecurityTokenDescriptor.Audience` and `SecurityTokenDescriptor.Audiences` documentation to describe the actual token creation behavior. The previous text stated that these members are combined with the `aud` claims in `Claims` or `Subject`, which only describes the legacy `JwtSecurityTokenHandler`. `JsonWebTokenHandler` intentionally uses `Audience`/`Audiences` as the only source for `aud` when either is set, so that a token's audiences can be overridden with a smaller subset than the claims it is created from. Applications migrating from `JwtSecurityTokenHandler` that set `aud` in more than one place should consolidate all intended audiences into `Audiences`. See [issue #3535](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3535).
+
 8.22.0
 ====
 ## New Features
