@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Requires Https secure channel for sending requests.. This is turned ON by default for security reasons. It is RECOMMENDED that you do not allow retrieval from http addresses by default.
+        /// Requires Https secure channel for sending requests. This is turned ON by default for security reasons. It is RECOMMENDED that you do not allow retrieval from http addresses by default.
         /// </summary>
         public bool RequireHttps { get; set; } = true;
 
