@@ -184,10 +184,12 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidIssuers.ge
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ValidTypes.get -> System.Collections.Generic.IList<string!>!
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.ValidationFailure.get -> Microsoft.IdentityModel.Tokens.ValidationFailure
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.ValidationFailure.set -> void
+Microsoft.IdentityModel.Tokens.TokenValidationParametersExtensions
 Microsoft.IdentityModel.Tokens.ValidationFailure
 Microsoft.IdentityModel.Tokens.ValidationFailure.InvalidIssuer = 2 -> Microsoft.IdentityModel.Tokens.ValidationFailure
 Microsoft.IdentityModel.Tokens.ValidationFailure.InvalidLifetime = 1 -> Microsoft.IdentityModel.Tokens.ValidationFailure
 Microsoft.IdentityModel.Tokens.ValidationFailure.None = 0 -> Microsoft.IdentityModel.Tokens.ValidationFailure
+Microsoft.IdentityModel.Tokens.ValidationParametersExtensions
 override Microsoft.IdentityModel.Tokens.Experimental.AlgorithmValidationError.GetException() -> System.Exception!
 override Microsoft.IdentityModel.Tokens.Experimental.AudienceValidationError.GetException() -> System.Exception!
 override Microsoft.IdentityModel.Tokens.Experimental.IssuerValidationError.GetException() -> System.Exception!
@@ -274,6 +276,9 @@ static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters
 virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationError.GetException() -> System.Exception!
 virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.Clone() -> Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters!
 virtual Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, string! issuer) -> System.Security.Claims.ClaimsIdentity!
+~Microsoft.IdentityModel.Tokens.CallContext.CallContext(Microsoft.Extensions.Logging.ILogger logger) -> void
+~Microsoft.IdentityModel.Tokens.CallContext.CallContext(Microsoft.Extensions.Logging.ILogger logger, string correlationId) -> void
+~Microsoft.IdentityModel.Tokens.CallContext.CallContext(Microsoft.Extensions.Logging.ILogger logger, System.Guid activityId) -> void
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.Message.get -> string
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.MessageDetail(string formatString, params object[] parameters) -> void
 ~Microsoft.IdentityModel.Tokens.Experimental.MessageDetail.MessageDetail(string message) -> void
@@ -330,6 +335,8 @@ Microsoft.IdentityModel.Tokens.Experimental.ITokenTypeValidator
 Microsoft.IdentityModel.Tokens.Experimental.ITokenTypeValidator.ValidateTokenType(string? type, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>
 *REMOVED*static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key, bool representAsRsaKey) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 ~static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key, bool extractKeyMaterial) -> Microsoft.IdentityModel.Tokens.JsonWebKey
+~static Microsoft.IdentityModel.Tokens.TokenValidationParametersExtensions.SetLogger(this Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters, Microsoft.Extensions.Logging.ILogger logger) -> void
+~static Microsoft.IdentityModel.Tokens.ValidationParametersExtensions.SetLogger(this Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.Extensions.Logging.ILogger logger) -> void
 ~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 ~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 Microsoft.IdentityModel.Tokens.ActClaimRetriever
