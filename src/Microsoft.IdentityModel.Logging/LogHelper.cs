@@ -329,7 +329,6 @@ namespace Microsoft.IdentityModel.Logging
                 exception.InnerException,
                 exception.Message,
                 loggerContext.CorrelationId ?? loggerContext.ActivityId.ToString(),
-                exception.Message,
                 null);
 
             Log(entry, loggerContext.Logger);
@@ -372,7 +371,7 @@ namespace Microsoft.IdentityModel.Logging
                 null,
                 message,
                 loggerContext.CorrelationId ?? loggerContext.ActivityId.ToString(),
-                null);
+                args);
 
             Log(entry, loggerContext.Logger);
         }
@@ -412,7 +411,7 @@ namespace Microsoft.IdentityModel.Logging
                 null,
                 message,
                 loggerContext.CorrelationId ?? loggerContext.ActivityId.ToString(),
-                null);
+                args);
 
             Log(entry, loggerContext.Logger);
         }
@@ -462,7 +461,7 @@ namespace Microsoft.IdentityModel.Logging
                 null,
                 message,
                 loggerContext.CorrelationId ?? loggerContext.ActivityId.ToString(),
-                null);
+                args);
 
             Log(entry, loggerContext.Logger);
         }
@@ -478,7 +477,7 @@ namespace Microsoft.IdentityModel.Logging
         private static T LogExceptionImpl<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(EventLevel eventLevel, string argumentName, Exception innerException, string format, params object[] args) where T : Exception
         {
             string message;
-            if (args != null)
+            if (args.IsNullOrEmpty())
                 message = string.Format(CultureInfo.InvariantCulture, format, args);
             else
                 message = format;
@@ -674,7 +673,7 @@ namespace Microsoft.IdentityModel.Logging
                     message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}. ", message, innerException.Message);
             }
 
-            message = args == null ? message : FormatInvariant(message, args);
+            message = args.IsNullOrEmpty() ? message : FormatInvariant(message, args);
 
             LogEntry entry = new()
             {
