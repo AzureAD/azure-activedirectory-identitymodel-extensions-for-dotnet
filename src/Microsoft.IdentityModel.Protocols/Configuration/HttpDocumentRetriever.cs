@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 var httpClient = _httpClient ?? _defaultHttpClient;
                 var uri = new Uri(address, UriKind.RelativeOrAbsolute);
-                response = await SendAndRetryOnNetworkErrorAsync(httpClient, uri).ConfigureAwait(false);
+                response = await SendAndRetryOnNetworkErrorAsync(httpClient, uri, cancel).ConfigureAwait(false);
 
                 var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (response.IsSuccessStatusCode)
@@ -141,6 +141,10 @@ namespace Microsoft.IdentityModel.Protocols
 
                 unsuccessfulHttpResponseException.Data.Add(StatusCode, response.StatusCode);
                 unsuccessfulHttpResponseException.Data.Add(ResponseContent, responseContent);
+            }
+            catch (OperationCanceledException) when (cancel.IsCancellationRequested)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -179,7 +183,10 @@ namespace Microsoft.IdentityModel.Protocols
 #endif
         }
 
-        private async Task<HttpResponseMessage> SendAndRetryOnNetworkErrorAsync(HttpClient httpClient, Uri uri)
+        private async Task<HttpResponseMessage> SendAndRetryOnNetworkErrorAsync(
+            HttpClient httpClient,
+            Uri uri,
+            CancellationToken cancellationToken)
         {
             int maxAttempt = 2;
             HttpResponseMessage response = null;
@@ -193,7 +200,7 @@ namespace Microsoft.IdentityModel.Protocols
                     if (SendAdditionalHeaderData)
                         IdentityModelTelemetryUtil.SetTelemetryData(message, AdditionalHeaderData);
 
-                    response = await httpClient.SendAsync(message).ConfigureAwait(false);
+                    response = await httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
                     if (response.IsSuccessStatusCode)
                         return response;
 
