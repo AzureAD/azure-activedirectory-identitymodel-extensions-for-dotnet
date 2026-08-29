@@ -9,6 +9,11 @@ using Xunit;
 // since we are in the System ns, we need to map to M.IM.Tokens
 using Token = Microsoft.IdentityModel.Tokens.SecurityToken;
 
+// This file exercises the obsolete JwtSecurityTokenHandler, which is the subject of this
+// test project. The suppression is file-scoped rather than per-call-site because the
+// legacy handler is the unit under test throughout.
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     /// <summary>

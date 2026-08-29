@@ -287,8 +287,10 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             TestUtilities.WriteHeader($"{this}.CompareJwtSecurityTokenHandlers", true);
             var context = new CompareContext($"{this}.CompareJwtSecurityHandlers");
+#pragma warning disable CS0618 // Type or member is obsolete
             var jwtSecurityTokenHandler1 = new JwtSecurityTokenHandler { TokenLifetimeInMinutes = 1 };
             var jwtSecurityTokenHandler2 = new JwtSecurityTokenHandler { TokenLifetimeInMinutes = 2 };
+#pragma warning restore CS0618 // Type or member is obsolete
             IdentityComparer.AreEqual(jwtSecurityTokenHandler1, jwtSecurityTokenHandler2, context);
 
             Assert.True(context.Diffs.Count(s => s == "TokenLifetimeInMinutes:") == 1);

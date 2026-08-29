@@ -74,7 +74,9 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(JwtHeader).ToString(), CompareAllPublicProperties },
                 { typeof(JwtPayload).ToString(), CompareAllPublicProperties },
                 { typeof(JwtSecurityToken).ToString(), CompareAllPublicProperties },
+#pragma warning disable CS0618 // Type or member is obsolete
                 { typeof(JwtSecurityTokenHandler).ToString(), CompareAllPublicProperties },
+#pragma warning restore CS0618 // Type or member is obsolete
                 { typeof(KeyInfo).ToString(), CompareAllPublicProperties },
                 { typeof(List<JsonWebKey>).ToString(), AreJsonWebKeyEnumsEqual },
                 { typeof(List<KeyInfo>).ToString(), AreKeyInfoEnumsEqual },
