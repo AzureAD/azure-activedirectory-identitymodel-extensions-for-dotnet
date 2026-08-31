@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -55,14 +56,15 @@ namespace Microsoft.IdentityModel.Xml
 
             try
             {
-                // TODO - follow JsonWebTokenHandler for IDX10511 parameters.
                 using (var memoryStream = new MemoryStream())
                 {
                     SignedInfo.GetCanonicalBytes(memoryStream);
                     if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
                     {
+                        StringBuilder keyAttempted = new StringBuilder().Append(key.ToString()).Append(", KeyId: ").AppendLine(key.KeyId);
                         validationError = new SignatureValidationError(
-                            new MessageDetail(Tokens.LogMessages.IDX10511, "1", "1", "1", "1", "1", cryptoProviderFactory, LogHelper.MarkAsNonPII(key.KeyId)),
+                            new MessageDetail(Tokens.LogMessages.IDX10520,
+                            LogHelper.MarkAsNonPII(keyAttempted.ToString())),
                             SignatureValidationFailure.ValidationFailed,
                             ValidationError.GetCurrentStackFrame());
                     }
