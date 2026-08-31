@@ -2,6 +2,10 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 9.0.0
 ====
+## Deprecations
+- `JwtSecurityTokenHandler` is now marked `[Obsolete]`. Use `Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler` instead. See the [migration guide](docs/JwtSecurityTokenHandler-migration-guide.md) and the [feature-parity audit](docs/JwtSecurityTokenHandler-JsonWebTokenHandler-parity.md).
+  - ⚠️ Migrating between the two handlers **does** change behavior in ways the compiler cannot catch. Read §4 of the migration guide before switching. The highest-impact differences are: inbound claim-type mapping (`MapInboundClaims` defaults to `true` on `JwtSecurityTokenHandler`, `false` on `JsonWebTokenHandler`) the removal of outbound claim-type and algorithm mapping, as well as, the actor claim moving from the legacy `actort` to RFC 8693 `act` on write.
+
 ## New Features
 - Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The default is case-sensitive; set the property to `false` for case-insensitive comparison. The previous `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext key is no longer honored. Applications upgrading from 8.22.0 that set the key to `false` must set this property to `false` instead. See [PR #3569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3569).
 
