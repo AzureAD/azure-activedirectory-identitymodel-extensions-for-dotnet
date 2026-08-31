@@ -257,8 +257,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         ValidationError.GetCurrentStackFrame());
                 }
 
-                var result = signature.SignedInfo.Verify(cryptoProviderFactory, callContext);
-                if (result == null)
+                var result = signature.SignedInfo.Verify(key, cryptoProviderFactory, callContext);
+                if (result.Error == null)
                 {
                     RecordSignatureValidationTelemetry(
                         telemetryClient,
