@@ -78,7 +78,9 @@ namespace Microsoft.IdentityModel.TestUtils
                         First = true,
                         TestId = $"ValidateTokenReplay: true, {nameof(ValidationDelegates.TokenReplayValidatorChecksExpirationTimeJwt)}",
                         SecurityToken = Default.AsymmetricJwt,
+#pragma warning disable CS0618 // Type or member is obsolete
                         SecurityTokenHandler = new JwtSecurityTokenHandler(),
+#pragma warning restore CS0618 // Type or member is obsolete
                         SigningKey = Default.AsymmetricSigningKey,
                         TokenReplayValidator = ValidationDelegates.TokenReplayValidatorChecksExpirationTimeJwt,
                         ValidateTokenReplay = true

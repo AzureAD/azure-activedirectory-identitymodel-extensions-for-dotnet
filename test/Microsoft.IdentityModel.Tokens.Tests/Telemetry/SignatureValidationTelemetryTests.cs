@@ -114,7 +114,9 @@ public class SignatureValidationTelemetryTests
     {
         // Arrange
         using var listener = new TestMeterListener();
+#pragma warning disable CS0618 // Type or member is obsolete
         var handler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
@@ -152,7 +154,9 @@ public class SignatureValidationTelemetryTests
     {
         // Arrange
         using var listener = new TestMeterListener();
+#pragma warning disable CS0618 // Type or member is obsolete
         var handler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
@@ -406,7 +410,9 @@ public class SignatureValidationTelemetryTests
     {
         // Arrange
         using var listener = new TestMeterListener();
+#pragma warning disable CS0618 // Type or member is obsolete
         var handler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
@@ -534,7 +540,9 @@ public class SignatureValidationTelemetryTests
     {
         // Arrange
         using var listener = new TestMeterListener();
+#pragma warning disable CS0618 // Type or member is obsolete
         var handler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),

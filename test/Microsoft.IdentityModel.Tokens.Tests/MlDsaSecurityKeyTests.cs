@@ -700,7 +700,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var signingKey = GetMlDsaKey(algorithm);
             var verifyKey = GetMlDsaPublicKey(algorithm);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var handler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
             handler.InboundClaimTypeMap.Clear();
             var descriptor = new SecurityTokenDescriptor
             {

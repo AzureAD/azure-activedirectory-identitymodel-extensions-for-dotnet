@@ -1115,7 +1115,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             token.Header[JwtHeaderParameterNames.X5t] = certHash;
             token.Header[JwtHeaderParameterNames.Kid] = certHash;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var handler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
             _ = handler.WriteToken(token);
 
             // Dispose() should stop the event queue task if it is running.
@@ -1157,7 +1159,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             token.Header[JwtHeaderParameterNames.X5t] = certHash;
             token.Header[JwtHeaderParameterNames.Kid] = certHash;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var handler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
             _ = handler.WriteToken(token);
 
             // Dispose() should stop the event queue task if it is running.
