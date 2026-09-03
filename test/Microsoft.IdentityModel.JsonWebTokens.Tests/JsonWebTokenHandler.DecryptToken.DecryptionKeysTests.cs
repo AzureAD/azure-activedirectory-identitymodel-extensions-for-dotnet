@@ -12,12 +12,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class JsonWebTokenHandlerDecryptTokenDecryptionKeysTests
     {
         [Fact]
-        public void GetContentEncryptionKeys_CombiningConfigurationKeys_DoesNotMutateValidationParameters()
+        public void DecryptToken_ConfigurationKeyIncludedWithoutMutatingValidationParameters()
         {
             // Arrange
             var handler = new JsonWebTokenHandler();
+            var encryptionKey = KeyingMaterial.RsaSecurityKey_2048;
             var encryptingCredentials = new EncryptingCredentials(
-                KeyingMaterial.RsaSecurityKey_2048,
+                encryptionKey,
                 SecurityAlgorithms.RsaPKCS1,
                 SecurityAlgorithms.Aes128CbcHmacSha256);
             string token = handler.CreateToken(new SecurityTokenDescriptor
@@ -36,19 +37,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var configuration = new OpenIdConnectConfiguration();
             configuration.TokenDecryptionKeys.Add(
-                new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_512)
+                new RsaSecurityKey(encryptionKey.Parameters)
                 {
                     KeyId = "ConfigurationKeyId"
                 });
 
             // Act
-            handler.GetContentEncryptionKeys(
+            ValidationResult<string, ValidationError> result = handler.DecryptToken(
                 new JsonWebToken(token),
                 validationParameters,
                 configuration,
                 callContext: null);
 
             // Assert
+            Assert.True(result.Succeeded);
+            Assert.NotEmpty(result.Result);
             Assert.Single(validationParameters.DecryptionKeys);
             Assert.Equal("UnmatchedKeyId", validationParameters.DecryptionKeys[0].KeyId);
         }
