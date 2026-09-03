@@ -282,6 +282,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10723 = "IDX10723: Unable to extract the private key from the X.509 certificate for algorithm '{0}' (Key: '{1}'). Private key extraction may not be supported on this platform.";
         public const string IDX10724 = "IDX10724: Unable to compute a JWK thumbprint, public key extraction from the X.509 certificate is not supported on this platform (Key: '{0}').";
         public const string IDX10725 = "IDX10725: Unable to create a SignatureProvider for algorithm '{0}' (Key: '{1}'). The X.509 certificate key could not be extracted. This may indicate the platform does not support the certificate's key type.";
+        public const string IDX10726 = "IDX10726: Composite ML-DSA signature validation failed for algorithm '{0}'. Signature length {1} is outside the expected range for this algorithm (max: {2} bytes).";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"

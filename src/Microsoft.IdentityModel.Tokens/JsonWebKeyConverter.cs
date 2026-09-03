@@ -7,6 +7,8 @@ using System.Security.Cryptography;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
+#pragma warning disable SYSLIB5006 // CompositeMLDsa is experimental
+
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -40,6 +42,8 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
             else if (key is MlDsaSecurityKey mlDsaSecurityKey)
                 return ConvertFromMlDsaSecurityKey(mlDsaSecurityKey);
+            else if (key is CompositeMLDsaSecurityKey compositeMLDsaSecurityKey)
+                return ConvertFromCompositeMLDsaSecurityKey(compositeMLDsaSecurityKey);
             else
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))));
         }
@@ -325,6 +329,10 @@ namespace Microsoft.IdentityModel.Tokens
                     if (string.IsNullOrEmpty(webKey.Alg))
                         return false;
 
+                    // Route composite ML-DSA algorithm strings to the composite converter.
+                    if (SupportedAlgorithms.IsSupportedCompositeMLDsaAlgorithm(webKey.Alg))
+                        return TryConvertToCompositeMLDsaSecurityKey(webKey, out key);
+
                     // Only proceed if the alg is a supported AKP algorithm.
                     if (!SupportedAlgorithms.IsSupportedMlDsaAlgorithm(webKey.Alg))
                         return false;
@@ -543,6 +551,64 @@ namespace Microsoft.IdentityModel.Tokens
             catch (Exception ex)
             {
                 string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(MlDsaSecurityKey)), LogHelper.MarkAsNonPII(webKey.KeyId), ex);
+                webKey.ConvertKeyInfo = convertKeyInfo;
+                if (LogHelper.IsEnabled(EventLogLevel.Error))
+                    LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Converts a <see cref="CompositeMLDsaSecurityKey"/> into a <see cref="JsonWebKey"/>.
+        /// </summary>
+        internal static JsonWebKey ConvertFromCompositeMLDsaSecurityKey(CompositeMLDsaSecurityKey key)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            string algorithmName = CompositeMLDsaSecurityKey.GetAlgorithmName(key.CompositeMLDsa.Algorithm);
+            byte[] publicKey = key.CompositeMLDsa.ExportCompositeMLDsaPublicKey();
+
+            var jsonWebKey = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Alg = algorithmName,
+                Pub = Base64UrlEncoder.Encode(publicKey),
+                Kid = key.KeyId
+            };
+
+            if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
+            {
+                byte[] privBytes = key.CompositeMLDsa.ExportCompositeMLDsaPrivateKey();
+                try
+                {
+                    jsonWebKey.Priv = Base64UrlEncoder.Encode(privBytes);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(privBytes);
+                }
+            }
+
+            return jsonWebKey;
+        }
+
+        internal static bool TryConvertToCompositeMLDsaSecurityKey(JsonWebKey webKey, out SecurityKey key)
+        {
+            key = null;
+
+            if (!SupportedAlgorithms.IsSupportedCompositeMLDsaAlgorithm(webKey.Alg))
+                return false;
+
+            try
+            {
+                key = new CompositeMLDsaSecurityKey(webKey, !string.IsNullOrEmpty(webKey.Priv));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(CompositeMLDsaSecurityKey)), LogHelper.MarkAsNonPII(webKey.KeyId), ex);
                 webKey.ConvertKeyInfo = convertKeyInfo;
                 if (LogHelper.IsEnabled(EventLogLevel.Error))
                     LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));

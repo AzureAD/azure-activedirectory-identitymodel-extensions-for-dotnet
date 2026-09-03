@@ -82,6 +82,11 @@ public static class CryptoTelemetry
         public const string MlDsa87 = "MLDSA-87";
         public const string MlDsaUnknown = "MLDSA-UNKNOWN";
 
+        public const string CompositeMlDsa44ES256 = "COMPOSITE-MLDSA-44-ES256";
+        public const string CompositeMlDsa65ES256 = "COMPOSITE-MLDSA-65-ES256";
+        public const string CompositeMlDsa87ES384 = "COMPOSITE-MLDSA-87-ES384";
+        public const string CompositeMlDsaUnknown = "COMPOSITE-MLDSA-UNKNOWN";
+
         public const string Unknown = "UNKNOWN"; // Key type is not recognized.
         public const string NoKey = "NO-KEY"; // Used when no key is found or provided to differentiate from unknown key types
     }
@@ -129,6 +134,13 @@ public static class CryptoTelemetry
                 "ML-DSA-87" => KeyAlgorithmIds.MlDsa87,
                 _ => KeyAlgorithmIds.MlDsaUnknown
             },
+
+#pragma warning disable SYSLIB5006 // CompositeMLDsa is marked experimental.
+            CompositeMLDsaSecurityKey compositeMLDsa when compositeMLDsa.CompositeMLDsa.Algorithm == CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256 => KeyAlgorithmIds.CompositeMlDsa44ES256,
+            CompositeMLDsaSecurityKey compositeMLDsa when compositeMLDsa.CompositeMLDsa.Algorithm == CompositeMLDsaAlgorithm.MLDsa65WithECDsaP256 => KeyAlgorithmIds.CompositeMlDsa65ES256,
+            CompositeMLDsaSecurityKey compositeMLDsa when compositeMLDsa.CompositeMLDsa.Algorithm == CompositeMLDsaAlgorithm.MLDsa87WithECDsaP384 => KeyAlgorithmIds.CompositeMlDsa87ES384,
+#pragma warning restore SYSLIB5006
+            CompositeMLDsaSecurityKey => KeyAlgorithmIds.CompositeMlDsaUnknown,
 
             // EdDSA and other key types can be added here when needed.
             _ => KeyAlgorithmIds.Unknown
@@ -199,6 +211,9 @@ public static class CryptoTelemetry
                 SecurityAlgorithms.MlDsa44 => KeyAlgorithmIds.MlDsa44,
                 SecurityAlgorithms.MlDsa65 => KeyAlgorithmIds.MlDsa65,
                 SecurityAlgorithms.MlDsa87 => KeyAlgorithmIds.MlDsa87,
+                SecurityAlgorithms.MlDsa44WithECDsaP256 => KeyAlgorithmIds.CompositeMlDsa44ES256,
+                SecurityAlgorithms.MlDsa65WithECDsaP256 => KeyAlgorithmIds.CompositeMlDsa65ES256,
+                SecurityAlgorithms.MlDsa87WithECDsaP384 => KeyAlgorithmIds.CompositeMlDsa87ES384,
                 _ => KeyAlgorithmIds.MlDsaUnknown
             },
             _ => KeyAlgorithmIds.Unknown

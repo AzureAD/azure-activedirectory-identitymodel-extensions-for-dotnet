@@ -1,3 +1,26 @@
 *REMOVED*const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonDefault = false -> bool
 *REMOVED*const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" -> string
 *REMOVED*static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparison.get -> bool
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.EnableCompositeMLDsaDraftSwitch = "Microsoft.IdentityModel.CompositeMLDsa.EnableDraft" -> string
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.EnableCompositeMLDsaDraft.get -> bool
+const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa44WithECDsaP256 = "ML-DSA-44-ES256" -> string
+const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa65WithECDsaP256 = "ML-DSA-65-ES256" -> string
+const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa87WithECDsaP384 = "ML-DSA-87-ES384" -> string
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.CompositeMLDsa.get -> System.Security.Cryptography.CompositeMLDsa
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.CompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, bool usePrivateKey) -> void
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.CompositeMLDsaSecurityKey(System.Security.Cryptography.CompositeMLDsa compositeMLDsa) -> void
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.Dispose() -> void
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.CanComputeJwkThumbprint() -> bool
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.ComputeJwkThumbprint() -> byte[]
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.HasPrivateKey.get -> bool
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.KeySize.get -> int
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.PrivateKeyStatus.get -> Microsoft.IdentityModel.Tokens.PrivateKeyStatus
+~internal static Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.GetAlgorithmName(System.Security.Cryptography.CompositeMLDsaAlgorithm algorithm) -> string
+static Microsoft.IdentityModel.Tokens.CompositeMLDsaAdapter.CloneCompositeMLDsa(System.Security.Cryptography.CompositeMLDsa source, bool includePrivateKey) -> System.Security.Cryptography.CompositeMLDsa
+static Microsoft.IdentityModel.Tokens.CompositeMLDsaAdapter.CreateCompositeMLDsa(Microsoft.IdentityModel.Tokens.JsonWebKey jsonWebKey, bool usePrivateKey) -> System.Security.Cryptography.CompositeMLDsa
+static Microsoft.IdentityModel.Tokens.CompositeMLDsaAdapter.GetCompositeMLDsaAlgorithm(string algorithm) -> System.Security.Cryptography.CompositeMLDsaAlgorithm
+static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromCompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
+static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToCompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, Microsoft.IdentityModel.Tokens.SecurityKey out key) -> bool
+static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsCompositeMLDsaAlgorithm(string algorithm) -> bool
+static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedCompositeMLDsaAlgorithm(string algorithm) -> bool

@@ -653,6 +653,19 @@ namespace Microsoft.IdentityModel.Tokens
                 return signatureProvider;
             }
 
+            // Preserve custom provider precedence while preventing the built-in cache from
+            // returning a Composite ML-DSA provider after the draft feature is disabled.
+            if (SupportedAlgorithms.IsCompositeMLDsaAlgorithm(algorithm) &&
+                !AppContextSwitches.EnableCompositeMLDsaDraft)
+            {
+                throw LogHelper.LogExceptionMessage(
+                    new NotSupportedException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10634,
+                            LogHelper.MarkAsNonPII(algorithm),
+                            LogHelper.MarkAsNonPII(key.KeyId))));
+            }
+
             // types are checked in order of expected occurrence
             string typeofSignatureProvider = null;
             bool createAsymmetric = true;
