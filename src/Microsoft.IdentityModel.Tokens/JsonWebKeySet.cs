@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
@@ -180,6 +181,13 @@ namespace Microsoft.IdentityModel.Tokens
                     else if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
                 }
+                else if (JsonWebAlgorithmsKeyTypes.Akp.Equals(webKey.Kty))
+                {
+                    if (JsonWebKeyConverter.TryConvertToSecurityKey(webKey, out SecurityKey securityKey))
+                        signingKeys.Add(securityKey);
+                    else if (ShouldPreserveUnresolvedMlDsaKey(webKey, MLDsa.IsSupported) || !SkipUnresolvedJsonWebKeys)
+                        signingKeys.Add(webKey);
+                }
                 else
                 {
                     string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10810, LogHelper.MarkAsNonPII(webKey.KeyId));
@@ -192,6 +200,28 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return signingKeys;
+        }
+
+        internal static bool ShouldPreserveUnresolvedMlDsaKey(JsonWebKey webKey, bool isMlDsaSupported)
+        {
+            if (isMlDsaSupported
+                || !JsonWebAlgorithmsKeyTypes.Akp.Equals(webKey.Kty)
+                || !SupportedAlgorithms.IsSupportedMlDsaAlgorithm(webKey.Alg)
+                || string.IsNullOrEmpty(webKey.Pub)
+                || !string.IsNullOrEmpty(webKey.Priv))
+            {
+                return false;
+            }
+
+            try
+            {
+                byte[] publicKey = Base64UrlEncoder.DecodeBytes(webKey.Pub);
+                return publicKey.Length == MlDsaAdapter.GetMLDsaAlgorithm(webKey.Alg).PublicKeySizeInBytes;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
         }
 
         private static bool IsValidX509SecurityKey(JsonWebKey webKey)

@@ -953,6 +953,45 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [MlDsaFact]
+        public void Dispose_OwnedKey_RemovesItselfFromJsonWebKeyCache()
+        {
+            using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            var jwk = new JsonWebKey
+            {
+                Alg = SecurityAlgorithms.MlDsa44,
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(mlDsa.ExportMLDsaPublicKey())
+            };
+            Assert.True(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out SecurityKey firstKey));
+
+            ((MlDsaSecurityKey)firstKey).Dispose();
+
+            Assert.Null(jwk.ConvertedSecurityKey);
+            Assert.True(JsonWebKeyConverter.TryConvertToSecurityKey(jwk, out SecurityKey secondKey));
+            Assert.NotSame(firstKey, secondKey);
+            ((MlDsaSecurityKey)secondKey).Dispose();
+        }
+
+        [MlDsaFact]
+        public void Dispose_OwnedKey_DoesNotRemoveReplacementFromJsonWebKeyCache()
+        {
+            using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa44);
+            var jwk = new JsonWebKey
+            {
+                Alg = SecurityAlgorithms.MlDsa44,
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(mlDsa.ExportMLDsaPublicKey())
+            };
+            var key = new MlDsaSecurityKey(jwk, usePrivateKey: false);
+            var replacement = new SymmetricSecurityKey(new byte[32]);
+            jwk.ConvertedSecurityKey = replacement;
+
+            key.Dispose();
+
+            Assert.Same(replacement, jwk.ConvertedSecurityKey);
+        }
+
+        [MlDsaFact]
         public void Dispose_BorrowedKey_DoesNotDisposeMLDsa()
         {
             // Arrange — public constructor does not own the MLDsa

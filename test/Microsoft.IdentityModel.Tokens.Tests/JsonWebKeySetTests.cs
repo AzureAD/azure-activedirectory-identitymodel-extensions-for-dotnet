@@ -239,6 +239,97 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory]
+        [InlineData(SecurityAlgorithms.MlDsa44, 1312)]
+        [InlineData(SecurityAlgorithms.MlDsa65, 1952)]
+        [InlineData(SecurityAlgorithms.MlDsa87, 2592)]
+        public void ShouldPreserveUnresolvedMlDsaKey_RecognizesValidPublicKey(string algorithm, int publicKeySize)
+        {
+            var webKey = new JsonWebKey
+            {
+                Alg = algorithm,
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(new byte[publicKeySize])
+            };
+
+            Assert.True(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: false));
+            Assert.False(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: true));
+        }
+
+        [Theory]
+        [InlineData(null, JsonWebAlgorithmsKeyTypes.Akp, "AA")]
+        [InlineData("unsupported", JsonWebAlgorithmsKeyTypes.Akp, "AA")]
+        [InlineData(SecurityAlgorithms.MlDsa44, JsonWebAlgorithmsKeyTypes.RSA, "AA")]
+        [InlineData(SecurityAlgorithms.MlDsa44, JsonWebAlgorithmsKeyTypes.Akp, null)]
+        [InlineData(SecurityAlgorithms.MlDsa44, JsonWebAlgorithmsKeyTypes.Akp, "invalid!")]
+        [InlineData(SecurityAlgorithms.MlDsa44, JsonWebAlgorithmsKeyTypes.Akp, "AA")]
+        public void ShouldPreserveUnresolvedMlDsaKey_RejectsInvalidKey(string algorithm, string keyType, string publicKey)
+        {
+            var webKey = new JsonWebKey
+            {
+                Alg = algorithm,
+                Kty = keyType,
+                Pub = publicKey
+            };
+
+            Assert.False(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: false));
+        }
+
+        [Fact]
+        public void ShouldPreserveUnresolvedMlDsaKey_RejectsPrivateKey()
+        {
+            var webKey = new JsonWebKey
+            {
+                Alg = SecurityAlgorithms.MlDsa44,
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(new byte[1312]),
+                Priv = Base64UrlEncoder.Encode(new byte[32])
+            };
+
+            Assert.False(JsonWebKeySet.ShouldPreserveUnresolvedMlDsaKey(webKey, isMlDsaSupported: false));
+        }
+
+        [MlDsaTheory]
+        [InlineData(SecurityAlgorithms.MlDsa44)]
+        [InlineData(SecurityAlgorithms.MlDsa65)]
+        [InlineData(SecurityAlgorithms.MlDsa87)]
+        public void GetSigningKeys_ConvertsMlDsaAkpKey(string algorithm)
+        {
+            using var mlDsa = MLDsa.GenerateKey(MlDsaAdapter.GetMLDsaAlgorithm(algorithm));
+            var webKey = new JsonWebKey
+            {
+                Alg = algorithm,
+                Kid = "ml-dsa-key",
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = Base64UrlEncoder.Encode(mlDsa.ExportMLDsaPublicKey())
+            };
+            var webKeySet = new JsonWebKeySet();
+            webKeySet.Keys.Add(webKey);
+
+            using var signingKey = Assert.IsType<MlDsaSecurityKey>(Assert.Single(webKeySet.GetSigningKeys()));
+
+            Assert.Equal(webKey.KeyId, signingKey.KeyId);
+            Assert.Equal(algorithm, MlDsaSecurityKey.GetAlgorithmName(signingKey.MLDsa.Algorithm));
+        }
+
+        [Fact]
+        public void GetSigningKeys_InvalidMlDsaAkpKeyRespectsSkipUnresolvedJsonWebKeys()
+        {
+            var webKey = new JsonWebKey
+            {
+                Alg = SecurityAlgorithms.MlDsa44,
+                Kty = JsonWebAlgorithmsKeyTypes.Akp,
+                Pub = "AA"
+            };
+            var webKeySet = new JsonWebKeySet();
+            webKeySet.Keys.Add(webKey);
+
+            Assert.Empty(webKeySet.GetSigningKeys());
+
+            webKeySet.SkipUnresolvedJsonWebKeys = false;
+            Assert.Same(webKey, Assert.Single(webKeySet.GetSigningKeys()));
+        }
+
         public static TheoryData<JsonWebKeySetTheoryData> GetSigningKeysTheoryData
         {
             get

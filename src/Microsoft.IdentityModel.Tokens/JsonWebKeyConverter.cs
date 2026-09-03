@@ -297,9 +297,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (webKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(webKey));
 
-            if (webKey.ConvertedSecurityKey != null)
+            SecurityKey convertedSecurityKey = webKey.ConvertedSecurityKey;
+            if (convertedSecurityKey != null)
             {
-                key = webKey.ConvertedSecurityKey;
+                key = convertedSecurityKey;
                 return true;
             }
 

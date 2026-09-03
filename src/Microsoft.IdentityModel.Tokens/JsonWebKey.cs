@@ -20,6 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         internal const string ClassName = "Microsoft.IdentityModel.Tokens.JsonWebKey";
         private Dictionary<string, object> _additionalData;
+        private SecurityKey _convertedSecurityKey;
         private List<string> _keyOps;
         private List<string> _oth;
         private List<string> _x5c;
@@ -75,7 +76,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// If this was converted to or from a SecurityKey, this field will be set.
         /// </summary>
         [JsonIgnore]
-        internal SecurityKey ConvertedSecurityKey { get; set; }
+        internal SecurityKey ConvertedSecurityKey
+        {
+            get => Volatile.Read(ref _convertedSecurityKey);
+            set => Volatile.Write(ref _convertedSecurityKey, value);
+        }
+
+        internal void ClearConvertedSecurityKey(SecurityKey expectedKey)
+        {
+            Interlocked.CompareExchange(ref _convertedSecurityKey, null, expectedKey);
+        }
 
         /// <summary>
         /// If this was failed converted to a SecurityKey, this field will be set.
@@ -626,4 +636,3 @@ namespace Microsoft.IdentityModel.Tokens
         }
     }
 }
-
