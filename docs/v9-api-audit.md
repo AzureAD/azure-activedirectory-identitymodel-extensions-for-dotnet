@@ -474,21 +474,21 @@ This is what the `IDX00001` version-mismatch check exists to catch.
 
 Changes that ship in 9.0.0.
 
-| ID | Change | Kind | Sev | Detection | Opt-out |
-|---|---|---|---|---|---|
-| A10 | 3-arg `ValidateTokenAsync` throws for 8.x handlers | Binary | **High** | `NotImplementedException` `IDX10267` | override the overload |
-| A4 | SHR `p` claim case-sensitive; 8.22.0 AppContext switch ignored | Behavior | **High** | SHR validation failures | `UseCaseSensitivePClaimComparison = false` |
-| A1 | Validation delegates -> interfaces | Source | **High** | compile error | none |
-| A2 | `TryAllSigningKeys` defaults to `true` | Behavior | Medium | **[SILENT]** | set to `false` |
-| A5 | Actor `act` write/read semantics | Behavior | Medium | **[SILENT]** | `MaxActorChainLength`, `ActClaimRetriever` |
-| A9 | `groups` inbound claim mapping | Behavior | Medium | **[SILENT]** authz change | remove map entry / disable mapping |
-| P1 | Version-mismatch build warning `IDX00001` | Build | Medium | new warnings/errors | `DisableIdentityModelVersionMismatchCheck` |
-| A6 | `IDX10239`/`IDX10234` -> Verbose | Diag | Medium | **[SILENT]** log loss | `SuccessValidationLogsAsInformation` switch |
-| A7 | `LogValidationExceptions` now honored | Diag | Low | **[SILENT]** log loss | leave flag `true` |
-| A8 | `PropertyBag` comparer lost on copy | Behavior | Low | **[SILENT]** lookup failures | rebuild bag manually |
-| A3 | `ConvertFromX509SecurityKey` param rename | Source | Low | compile error | rename argument |
-| A1b | `Default*` validators are `internal` | Source/usability | Low | compile error on `new Default*()` | shim over `Validators.Validate*` |
-| C1 | AES-GCM now BCL-backed on .NET 6+ | Behavior | Low | different exception text | none |
+| Change | Kind | Sev | Detection | Opt-out |
+|---|---|---|---|---|
+| 3-arg `ValidateTokenAsync` throws for 8.x handlers | Binary | **High** | `NotImplementedException` `IDX10267` | override the overload |
+| SHR `p` claim case-sensitive; 8.22.0 AppContext switch ignored | Behavior | **High** | SHR validation failures | `UseCaseSensitivePClaimComparison = false` |
+| Validation delegates -> interfaces | Source | **High** | compile error | none |
+| `TryAllSigningKeys` defaults to `true` | Behavior | Medium | **[SILENT]** | set to `false` |
+| Actor `act` write/read semantics | Behavior | Medium | **[SILENT]** | `MaxActorChainLength`, `ActClaimRetriever` |
+| `groups` inbound claim mapping | Behavior | Medium | **[SILENT]** authz change | remove map entry / disable mapping |
+| Version-mismatch build warning `IDX00001` | Build | Medium | new warnings/errors | `DisableIdentityModelVersionMismatchCheck` |
+| `IDX10239`/`IDX10234` -> Verbose | Diag | Medium | **[SILENT]** log loss | `SuccessValidationLogsAsInformation` switch |
+| `LogValidationExceptions` now honored | Diag | Low | **[SILENT]** log loss | leave flag `true` |
+| `PropertyBag` comparer lost on copy | Behavior | Low | **[SILENT]** lookup failures | rebuild bag manually |
+| `ConvertFromX509SecurityKey` param rename | Source | Low | compile error | rename argument |
+| `Default*` validators are `internal` | Source/usability | Low | compile error on `new Default*()` | shim over `Validators.Validate*` |
+| AES-GCM now BCL-backed on .NET 6+ | Behavior | Low | different exception text | none |
 
 ---
 
