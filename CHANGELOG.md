@@ -2,8 +2,25 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 9.0.0
 ====
+## New Features
+- Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The default is case-sensitive; set the property to `false` for case-insensitive comparison. The previous `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext key is no longer honored. Applications upgrading from 8.22.0 that set the key to `false` must set this property to `false` instead. See [PR #3569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3569).
+
+8.22.0
+====
+## New Features
+- Add `IgnoreCaseWhenValidatingAudience` flag to `TokenValidationParameters` (and the experimental `ValidationParameters`) to allow case-insensitive audience validation. The default remains case-sensitive (ordinal). See [PR #3563](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3563).
+
 ## Bug Fixes
-- Align Signed HTTP Request `p` (path) claim comparison with RFC 3986 section 3.3 by comparing the path case-sensitively; previously `/Admin/resource` matched `/admin/resource`. An AppContext opt out is available during transition. See [PR #3526](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3526).
+- Preserve the original metadata fetch exception in the `ConfigurationManager` blocking path so callers within the backoff window still receive the inner `IOException` (including the HTTP status code) instead of an `IDX20803` with a null `InnerException`. See [PR #3486](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3486).
+
+8.21.0
+====
+## Performance Improvements
+- Add JsonWebToken header-replacement path to avoid re-parsing payload. See [PR #3552](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3552).
+- Add claims dictionary preallocation. See [PR #3542](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3542).
+
+## Bug Fixes
+- Fix CI build failures: remove unused log message and add missing DPoP API entries. See [PR #3551](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3551).
 
 7.7.2
 ====

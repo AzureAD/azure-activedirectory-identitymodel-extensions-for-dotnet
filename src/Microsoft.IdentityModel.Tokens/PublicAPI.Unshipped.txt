@@ -332,6 +332,10 @@ Microsoft.IdentityModel.Tokens.Experimental.ITokenTypeValidator.ValidateTokenTyp
 ~static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key, bool extractKeyMaterial) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 ~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 ~virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
+Microsoft.IdentityModel.Tokens.ActClaimRetriever
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetriever.get -> Microsoft.IdentityModel.Tokens.ActClaimRetriever
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.ActClaimRetriever.set -> void
+~virtual Microsoft.IdentityModel.Tokens.ActClaimRetriever.Invoke(System.Text.Json.JsonElement actClaim, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters) -> System.Security.Claims.ClaimsIdentity
 ~const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jkt = "jkt" -> string
 ~Microsoft.IdentityModel.Tokens.Cnf.Jkt.get -> string
 ~const Microsoft.IdentityModel.Tokens.JsonWebAlgorithmsKeyTypes.Akp = "AKP" -> string

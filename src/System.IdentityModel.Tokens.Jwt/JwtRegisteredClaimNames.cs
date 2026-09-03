@@ -15,6 +15,11 @@ namespace System.IdentityModel.Tokens.Jwt
         // Please keep in alphabetical order
 
         /// <summary>
+        /// https://datatracker.ietf.org/doc/html/rfc8693#section-4.1
+        /// </summary>
+        public const string Act = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Act;
+
+        /// <summary>
         /// </summary>
         public const string Actort = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Actort;
 

@@ -112,6 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
             ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
+            ActClaimRetriever = other.ActClaimRetriever;
         }
 
         /// <summary>
@@ -770,5 +771,28 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the delegate that will be used to convert the 'act' claim JSON into a ClaimsIdentity.
+        /// <para>This delegate is invoked during token validation when an actor claim is encountered in a token.</para>
+        /// <para>The delegate receives a <see cref="System.Text.Json.JsonElement"/> representing the actor claim
+        /// and should return a <see cref="ClaimsIdentity"/> that represents the actor.</para>
+        /// </summary>
+        /// <remarks>
+        /// <para>When this delegate is provided, it replaces the default actor claim processing logic.</para>
+        /// <para>This is useful for custom actor claim formats or when special processing is needed for the actor claims.</para>
+        /// <para>The delegate can also handle nested actors by recursively creating actor identities and setting the Actor property.</para>
+        /// <code>
+        /// validationParameters.ActClaimRetriever = (JsonElement element,TokenValidationParameters tokenValidationParameters) => {
+        ///     var identity = new ClaimsIdentity("CustomActor");
+        ///     // Extract claims from the JsonElement
+        ///     if (element.TryGetProperty("sub", out var sub))
+        ///         identity.AddClaim(new Claim("sub", sub.GetString()));
+        ///     return identity;
+        /// };
+        /// </code>
+        /// </remarks>
+        public ActClaimRetriever ActClaimRetriever { get; set; }
+
     }
 }
