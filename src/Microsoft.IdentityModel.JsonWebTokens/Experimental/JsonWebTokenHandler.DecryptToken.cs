@@ -123,12 +123,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         configurationKeys = configuration.TokenDecryptionKeys.ToList();
 
                     if (keys != null)
-                    {
-                        if (keys is List<SecurityKey> keysList)
-                            keysList.AddRange(configurationKeys);
-                        else
-                            keys = keys.Concat(configurationKeys).ToList();
-                    }
+                        keys = keys.Concat(configurationKeys).ToList();
                     else
                         keys = configurationKeys;
                 }

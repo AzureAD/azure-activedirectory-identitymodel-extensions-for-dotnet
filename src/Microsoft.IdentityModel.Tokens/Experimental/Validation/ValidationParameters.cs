@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IgnoreCaseWhenValidatingAudience = other.IgnoreCaseWhenValidatingAudience;
             SignatureKeyResolver = other.SignatureKeyResolver;
-            _signingKeys = other.SigningKeys;
+            _signingKeys = new List<SecurityKey>(other.SigningKeys);
             SignatureKeyValidator = other.SignatureKeyValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
             LifetimeValidator = other.LifetimeValidator;
@@ -96,16 +96,16 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             TryAllDecryptionKeys = other.TryAllDecryptionKeys;
             TryAllSigningKeys = other.TryAllSigningKeys;
             DecryptionKeyResolver = other.DecryptionKeyResolver;
-            _decryptionKeys = other.DecryptionKeys;
+            _decryptionKeys = new List<SecurityKey>(other.DecryptionKeys);
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
             TokenTypeValidator = other.TokenTypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateWithLKG = other.ValidateWithLKG;
-            _validIssuers = other.ValidIssuers;
-            _validAudiences = other.ValidAudiences;
-            _validAlgorithms = other.ValidAlgorithms;
-            _validTokenTypes = other.ValidTypes;
+            _validIssuers = new List<string>(other.ValidIssuers);
+            _validAudiences = new List<string>(other.ValidAudiences);
+            _validAlgorithms = new List<string>(other.ValidAlgorithms);
+            _validTokenTypes = new List<string>(other.ValidTypes);
         }
 
         /// <summary>
