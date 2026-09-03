@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// A <see cref="FactAttribute"/> that skips the test when the specified Composite ML-DSA
-    /// algorithm is not supported on the current platform.
+    /// algorithm is not supported in the current environment.
     /// </summary>
     public sealed class CompositeMLDsaFactAttribute : FactAttribute
     {
@@ -19,19 +19,19 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             if (!CompositeMLDsa.IsSupported)
             {
-                Skip = "Composite ML-DSA is not supported on this platform.";
+                Skip = "Composite ML-DSA is not supported in the current environment.";
                 return;
             }
 
             var bcl = CompositeMLDsaKeyingMaterial.GetCompositeMLDsaAlgorithmOrNull(algorithm);
             if (bcl == null || !CompositeMLDsa.IsAlgorithmSupported(bcl))
-                Skip = $"Composite ML-DSA algorithm '{algorithm}' is not supported on this platform.";
+                Skip = $"Composite ML-DSA algorithm '{algorithm}' is not supported in the current environment.";
         }
     }
 
     /// <summary>
     /// A <see cref="TheoryAttribute"/> that skips the test when the specified Composite ML-DSA
-    /// algorithm is not supported on the current platform.
+    /// algorithm is not supported in the current environment.
     /// </summary>
     public sealed class CompositeMLDsaTheoryAttribute : TheoryAttribute
     {
@@ -39,13 +39,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             if (!CompositeMLDsa.IsSupported)
             {
-                Skip = "Composite ML-DSA is not supported on this platform.";
+                Skip = "Composite ML-DSA is not supported in the current environment.";
                 return;
             }
 
             var bcl = CompositeMLDsaKeyingMaterial.GetCompositeMLDsaAlgorithmOrNull(algorithm);
             if (bcl == null || !CompositeMLDsa.IsAlgorithmSupported(bcl))
-                Skip = $"Composite ML-DSA algorithm '{algorithm}' is not supported on this platform.";
+                Skip = $"Composite ML-DSA algorithm '{algorithm}' is not supported in the current environment.";
         }
     }
 }

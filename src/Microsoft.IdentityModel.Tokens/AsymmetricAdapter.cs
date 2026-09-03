@@ -6,6 +6,7 @@ using System;
 using System.Buffers;
 using System.Diagnostics;
 #endif
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -28,6 +29,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class AsymmetricAdapter : IDisposable
     {
+        private static readonly ConditionalWeakTable<CompositeMLDsa, object> s_compositeMLDsaSyncLocks = new();
+
 #if DESKTOP
         private bool _useRSAOeapPadding;
 #endif
@@ -214,7 +217,14 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void InitializeUsingCompositeMLDsa(CompositeMLDsa compositeMLDsa, bool includePrivateKey)
         {
-            CompositeMLDsa clone = CompositeMLDsaAdapter.CloneCompositeMLDsa(compositeMLDsa, includePrivateKey);
+            // The signature provider pools adapters. Clone exportable key material so each
+            // pooled adapter owns an independent CompositeMLDsa instance.
+            object syncLock = s_compositeMLDsaSyncLocks.GetValue(
+                compositeMLDsa,
+                static _ => new object());
+            CompositeMLDsa clone;
+            lock (syncLock)
+                clone = CompositeMLDsaAdapter.CloneCompositeMLDsa(compositeMLDsa, includePrivateKey);
 
             if (clone is not null)
             {
@@ -223,8 +233,10 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
+                // Non-exportable keys must share the source object. Use a lock shared by
+                // every adapter referencing this managed instance.
                 CompositeMLDsa = compositeMLDsa;
-                _compositeMLDsaSyncLock = new object();
+                _compositeMLDsaSyncLock = syncLock;
             }
 
             _signFunction = SignCompositeMLDsa;

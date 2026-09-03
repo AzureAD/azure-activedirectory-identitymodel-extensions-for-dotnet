@@ -17,6 +17,12 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
+    [CollectionDefinition(nameof(CompositeMLDsaSecurityKeyTests), DisableParallelization = true)]
+    public class CompositeMLDsaSecurityKeyTestCollection
+    {
+    }
+
+    [Collection(nameof(CompositeMLDsaSecurityKeyTests))]
     public class CompositeMLDsaSecurityKeyTests : IDisposable
     {
         public CompositeMLDsaSecurityKeyTests()
@@ -363,6 +369,60 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Empty(exceptions);
         }
 
+        [CompositeMLDsaFact(SecurityAlgorithms.MlDsa44WithECDsaP256)]
+        public void ConcurrentVerify_NonExportableKey_SerializesPooledAdapters()
+        {
+            using var composite = new NonExportableCompositeMLDsa();
+            var key = new CompositeMLDsaSecurityKey(composite);
+            var factory = new CryptoProviderFactory
+            {
+                CacheSignatureProviders = false,
+                SignatureProviderObjectPoolCacheSize = 8
+            };
+            key.CryptoProviderFactory = factory;
+
+            using var provider = new AsymmetricSignatureProvider(
+                key,
+                SecurityAlgorithms.MlDsa44WithECDsaP256,
+                willCreateSignatures: false);
+
+            byte[] signature = new byte[CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256.MaxSignatureSizeInBytes];
+            RunConcurrently(() => provider.Verify(new byte[] { 1, 2, 3 }, signature));
+
+            Assert.Equal(1, composite.MaximumConcurrentOperations);
+            Assert.Equal(8, composite.TotalOperations);
+            Assert.Equal(1, composite.MaximumConcurrentExports);
+            Assert.Equal(8, composite.TotalExports);
+        }
+
+        [CompositeMLDsaFact(SecurityAlgorithms.MlDsa44WithECDsaP256)]
+        public void ConcurrentSign_NonExportableKey_SerializesPooledAdapters()
+        {
+            using var composite = new NonExportableCompositeMLDsa();
+            var key = new CompositeMLDsaSecurityKey(composite);
+            var factory = new CryptoProviderFactory
+            {
+                CacheSignatureProviders = false,
+                SignatureProviderObjectPoolCacheSize = 8
+            };
+            key.CryptoProviderFactory = factory;
+
+            using var provider = new AsymmetricSignatureProvider(
+                key,
+                SecurityAlgorithms.MlDsa44WithECDsaP256,
+                willCreateSignatures: true);
+
+            // Provider construction probes the key for private material.
+            composite.ResetTracking();
+
+            RunConcurrently(() => provider.Sign(new byte[] { 1, 2, 3 }));
+
+            Assert.Equal(1, composite.MaximumConcurrentOperations);
+            Assert.Equal(8, composite.TotalOperations);
+            Assert.Equal(1, composite.MaximumConcurrentExports);
+            Assert.Equal(8, composite.TotalExports);
+        }
+
         #endregion
 
         #region AppSwitch Tests
@@ -401,6 +461,206 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AppContext.SetSwitch(AppContextSwitches.EnableCompositeMLDsaDraftSwitch, true);
         }
 
+        [CompositeMLDsaFact(SecurityAlgorithms.MlDsa44WithECDsaP256)]
+        public void CreateForVerifying_CachedProvider_SwitchOff_Throws()
+        {
+            CompositeMLDsaSecurityKey key = CompositeMLDsaKeyingMaterial.CompositeMLDsa44ES256Key_Public;
+            var factory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+            {
+                CacheSignatureProviders = true
+            };
+
+            SignatureProvider provider = factory.CreateForVerifying(
+                key,
+                SecurityAlgorithms.MlDsa44WithECDsaP256,
+                cacheProvider: true);
+
+            Assert.True(provider.IsCached);
+            factory.ReleaseSignatureProvider(provider);
+
+            AppContext.SetSwitch(AppContextSwitches.EnableCompositeMLDsaDraftSwitch, false);
+            try
+            {
+                Assert.Throws<NotSupportedException>(() =>
+                    factory.CreateForVerifying(
+                        key,
+                        SecurityAlgorithms.MlDsa44WithECDsaP256,
+                        cacheProvider: true));
+            }
+            finally
+            {
+                AppContext.SetSwitch(AppContextSwitches.EnableCompositeMLDsaDraftSwitch, true);
+            }
+        }
+
         #endregion
+
+        private sealed class NonExportableCompositeMLDsa : CompositeMLDsa
+        {
+            private int _activeOperations;
+            private int _activeExports;
+            private int _maximumConcurrentOperations;
+            private int _maximumConcurrentExports;
+            private int _totalOperations;
+            private int _totalExports;
+
+            public NonExportableCompositeMLDsa()
+                : base(CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256)
+            {
+            }
+
+            public int MaximumConcurrentOperations => _maximumConcurrentOperations;
+
+            public int MaximumConcurrentExports => _maximumConcurrentExports;
+
+            public int TotalOperations => _totalOperations;
+
+            public int TotalExports => _totalExports;
+
+            public void ResetTracking()
+            {
+                Volatile.Write(ref _activeOperations, 0);
+                Volatile.Write(ref _activeExports, 0);
+                Volatile.Write(ref _maximumConcurrentOperations, 0);
+                Volatile.Write(ref _maximumConcurrentExports, 0);
+                Volatile.Write(ref _totalOperations, 0);
+                Volatile.Write(ref _totalExports, 0);
+            }
+
+            protected override int SignDataCore(
+                ReadOnlySpan<byte> data,
+                ReadOnlySpan<byte> context,
+                Span<byte> destination)
+            {
+                TrackOperation();
+                try
+                {
+                    Thread.Sleep(20);
+                    destination.Clear();
+                    return Algorithm.MaxSignatureSizeInBytes;
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _activeOperations);
+                }
+            }
+
+            protected override bool VerifyDataCore(
+                ReadOnlySpan<byte> data,
+                ReadOnlySpan<byte> context,
+                ReadOnlySpan<byte> signature)
+            {
+                TrackOperation();
+                try
+                {
+                    Thread.Sleep(20);
+                    return true;
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _activeOperations);
+                }
+            }
+
+            protected override int ExportCompositeMLDsaPublicKeyCore(Span<byte> destination)
+            {
+                TrackExport();
+                try
+                {
+                    Thread.Sleep(20);
+                    throw new CryptographicException("The key is non-exportable.");
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _activeExports);
+                }
+            }
+
+            protected override int ExportCompositeMLDsaPrivateKeyCore(Span<byte> destination)
+            {
+                TrackExport();
+                try
+                {
+                    Thread.Sleep(20);
+                    throw new CryptographicException("The key is non-exportable.");
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _activeExports);
+                }
+            }
+
+            protected override bool TryExportPkcs8PrivateKeyCore(Span<byte> destination, out int bytesWritten)
+            {
+                bytesWritten = 0;
+                return false;
+            }
+
+            private void TrackOperation()
+            {
+                Interlocked.Increment(ref _totalOperations);
+                int activeOperations = Interlocked.Increment(ref _activeOperations);
+                int maximumConcurrentOperations = Volatile.Read(ref _maximumConcurrentOperations);
+
+                while (activeOperations > maximumConcurrentOperations)
+                {
+                    int observed = Interlocked.CompareExchange(
+                        ref _maximumConcurrentOperations,
+                        activeOperations,
+                        maximumConcurrentOperations);
+
+                    if (observed == maximumConcurrentOperations)
+                        break;
+
+                    maximumConcurrentOperations = observed;
+                }
+            }
+
+            private void TrackExport()
+            {
+                Interlocked.Increment(ref _totalExports);
+                int activeExports = Interlocked.Increment(ref _activeExports);
+                int maximumConcurrentExports = Volatile.Read(ref _maximumConcurrentExports);
+
+                while (activeExports > maximumConcurrentExports)
+                {
+                    int observed = Interlocked.CompareExchange(
+                        ref _maximumConcurrentExports,
+                        activeExports,
+                        maximumConcurrentExports);
+
+                    if (observed == maximumConcurrentExports)
+                        break;
+
+                    maximumConcurrentExports = observed;
+                }
+            }
+        }
+
+        private static void RunConcurrently(Action operation)
+        {
+            const int operationCount = 8;
+            using var ready = new CountdownEvent(operationCount);
+            using var start = new ManualResetEventSlim();
+            var tasks = new Task[operationCount];
+
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                tasks[i] = Task.Factory.StartNew(
+                    () =>
+                    {
+                        ready.Signal();
+                        start.Wait();
+                        operation();
+                    },
+                    CancellationToken.None,
+                    TaskCreationOptions.LongRunning,
+                    TaskScheduler.Default);
+            }
+
+            Assert.True(ready.Wait(TimeSpan.FromSeconds(10)), "Concurrent operations did not become ready.");
+            start.Set();
+            Task.WaitAll(tasks);
+        }
     }
 }

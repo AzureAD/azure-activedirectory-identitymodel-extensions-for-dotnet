@@ -22,4 +22,5 @@ static Microsoft.IdentityModel.Tokens.CompositeMLDsaAdapter.CreateCompositeMLDsa
 static Microsoft.IdentityModel.Tokens.CompositeMLDsaAdapter.GetCompositeMLDsaAlgorithm(string algorithm) -> System.Security.Cryptography.CompositeMLDsaAlgorithm
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromCompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToCompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, Microsoft.IdentityModel.Tokens.SecurityKey out key) -> bool
+static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsCompositeMLDsaAlgorithm(string algorithm) -> bool
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedCompositeMLDsaAlgorithm(string algorithm) -> bool

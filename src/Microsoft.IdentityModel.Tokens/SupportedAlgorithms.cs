@@ -341,9 +341,14 @@ namespace Microsoft.IdentityModel.Tokens
             return MlDsaSigningAlgorithms.Contains(algorithm);
         }
 
+        internal static bool IsCompositeMLDsaAlgorithm(string algorithm)
+        {
+            return CompositeMLDsaSigningAlgorithms.Contains(algorithm);
+        }
+
         internal static bool IsSupportedCompositeMLDsaAlgorithm(string algorithm)
         {
-            return AppContextSwitches.EnableCompositeMLDsaDraft && CompositeMLDsaSigningAlgorithms.Contains(algorithm);
+            return AppContextSwitches.EnableCompositeMLDsaDraft && IsCompositeMLDsaAlgorithm(algorithm);
         }
 
         internal static bool IsSupportedHashAlgorithm(string algorithm)

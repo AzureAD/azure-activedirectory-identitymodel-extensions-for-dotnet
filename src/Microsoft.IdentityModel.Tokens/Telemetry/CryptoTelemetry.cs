@@ -135,7 +135,7 @@ public static class CryptoTelemetry
                 _ => KeyAlgorithmIds.MlDsaUnknown
             },
 
-#pragma warning disable SYSLIB5006
+#pragma warning disable SYSLIB5006 // CompositeMLDsa is marked experimental.
             CompositeMLDsaSecurityKey compositeMLDsa when compositeMLDsa.CompositeMLDsa.Algorithm == CompositeMLDsaAlgorithm.MLDsa44WithECDsaP256 => KeyAlgorithmIds.CompositeMlDsa44ES256,
             CompositeMLDsaSecurityKey compositeMLDsa when compositeMLDsa.CompositeMLDsa.Algorithm == CompositeMLDsaAlgorithm.MLDsa65WithECDsaP256 => KeyAlgorithmIds.CompositeMlDsa65ES256,
             CompositeMLDsaSecurityKey compositeMLDsa when compositeMLDsa.CompositeMLDsa.Algorithm == CompositeMLDsaAlgorithm.MLDsa87WithECDsaP384 => KeyAlgorithmIds.CompositeMlDsa87ES384,
