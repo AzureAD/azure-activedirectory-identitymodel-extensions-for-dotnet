@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <MicrosoftIdentityModelCurrentVersion>5.0.0</MicrosoftIdentityModelCurrentVersion>
+    <MicrosoftIdentityModelCurrentVersion>5.7.2</MicrosoftIdentityModelCurrentVersion>
 
     <PreviewVersionSuffix Condition="'$(PreviewVersionSuffix)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">preview-$([System.DateTime]::Now.AddYears(-2019).Year)$([System.DateTime]::Now.ToString("MMddHHmmss"))</PreviewVersionSuffix>
     <!--VS re-evaluates the variables, so having seconds or minutes creates an infinite loop of package updates-->
@@ -9,7 +9,11 @@
     <Version Condition="'$(MicrosoftIdentityModelVersion)' != ''">$(MicrosoftIdentityModelVersion)</Version>
     <VersionSuffix Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(PreviewVersionSuffix)</VersionSuffix>
     <VersionPrefix Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(MicrosoftIdentityModelCurrentVersion)</VersionPrefix>
+    <IdentityModelBaseVersion Condition="'$(MicrosoftIdentityModelVersion)' != ''">$([System.Text.RegularExpressions.Regex]::Match('$(MicrosoftIdentityModelVersion)', '^\d+\.\d+\.\d+').Value)</IdentityModelBaseVersion>
+    <IdentityModelBaseVersion Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(MicrosoftIdentityModelCurrentVersion)</IdentityModelBaseVersion>
+    <AssemblyVersion>$([System.Text.RegularExpressions.Regex]::Match('$(IdentityModelBaseVersion)', '^\d+\.\d+').Value).0.0</AssemblyVersion>
     <FileVersion Condition="'$(MicrosoftIdentityModelVersion)' != '' and '$(IsCustomPreview)' != 'true' ">$(MicrosoftIdentityModelVersion).$([System.DateTime]::Now.ToString("yy"))$([System.DateTime]::Now.DayOfYear.ToString("000"))</FileVersion>
     <FileVersion Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(MicrosoftIdentityModelCurrentVersion).$([System.DateTime]::Now.ToString("yy"))$([System.DateTime]::Now.DayOfYear.ToString("000"))</FileVersion>
+    <FileVersion Condition="'$(MicrosoftIdentityModelVersion)' != '' and '$(IsCustomPreview)' == 'true'">$(IdentityModelBaseVersion).$([System.DateTime]::Now.ToString("yy"))$([System.DateTime]::Now.DayOfYear.ToString("000"))</FileVersion>
   </PropertyGroup>
 </Project>
