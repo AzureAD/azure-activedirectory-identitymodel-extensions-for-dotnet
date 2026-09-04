@@ -82,10 +82,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             JwtPayload jwtPayload = new JwtPayload();
             Type type = typeof(JwtPayload);
-            PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 23)
-                Assert.True(false, "Number of properties has changed from 23 to: " + properties.Length + ", adjust tests");
 
+//Check: Excludes inherited  Dictionary<string, object>  properties. It will still fail when Wilson adds or removes a property declared directly by  JwtPayload
+             PropertyInfo[] properties = type.GetProperties(
+            BindingFlags.Public |
+            BindingFlags.Instance |
+            BindingFlags.DeclaredOnly);
+            if (properties.Length != 18)
+             Assert.True(false, "Number of declared properties has changed from 18 to: " + properties.Length + ", adjust tests");
             GetSetContext context =
                 new GetSetContext
                 {
