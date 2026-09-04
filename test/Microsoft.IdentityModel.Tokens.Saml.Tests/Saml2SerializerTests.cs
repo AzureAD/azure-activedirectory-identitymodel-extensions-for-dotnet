@@ -538,7 +538,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 };
             }
         }
-        #endregion
 
         private class Saml2SerializerPublic : Saml2Serializer
         {
