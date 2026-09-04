@@ -183,12 +183,18 @@ namespace Microsoft.IdentityModel.TestUtils
         public override string SignatureAlgorithm => throw new NotImplementedException();
 
         public override string KeyExchangeAlgorithm => throw new NotImplementedException();
-
+        
+        #if NET_CORE
+        [Obsolete("RSA.DecryptValue is obsolete. Use Decrypt instead.")]     
+        #endif
         public override byte[] DecryptValue(byte[] rgb)
         {
             throw new NotImplementedException();
         }
 
+        #if NET_CORE
+        [Obsolete("RSA.DecryptValue is obsolete. Use Decrypt instead.")]     
+        #endif        
         public override byte[] EncryptValue(byte[] rgb)
         {
             throw new NotImplementedException();

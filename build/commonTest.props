@@ -22,6 +22,7 @@
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);SYSLIB0013;SYSLIB0027;SYSLIB0028;SYSLIB0057</WarningsNotAsErrors>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
