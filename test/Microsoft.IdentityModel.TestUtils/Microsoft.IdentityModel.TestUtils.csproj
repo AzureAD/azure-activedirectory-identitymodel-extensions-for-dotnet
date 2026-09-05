@@ -34,7 +34,7 @@
     <PackageReference Include="NETStandard.Library" Version="$(NetStandardVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
