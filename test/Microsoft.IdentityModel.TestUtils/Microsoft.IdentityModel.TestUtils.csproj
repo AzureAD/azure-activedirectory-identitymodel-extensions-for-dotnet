@@ -11,7 +11,7 @@
     <PackageId>Microsoft.IdentityModel.TestUtils</PackageId>
     <SignAssembly>true</SignAssembly>
     <IsTestProject>false</IsTestProject>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets);net45</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets)</TargetFrameworks>
     <NoWarn>$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 
