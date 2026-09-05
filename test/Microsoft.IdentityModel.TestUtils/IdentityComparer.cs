@@ -526,11 +526,6 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        public static bool AreEqual(object object1, object object2)
-        {
-            return AreEqual(object1, object2, CompareContext.Default);
-        }
-
         public static bool AreEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);

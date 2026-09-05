@@ -674,14 +674,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var jwtTokenFromJsonHandlerWithKid = new JsonWebToken(jweFromJsonHandlerWithKid);
                 var encryptionKeysFromJsonHandlerWithKid = theoryData.JsonWebTokenHandler.GetContentEncryptionKeys(jwtTokenFromJsonHandlerWithKid, theoryData.ValidationParameters, theoryData.Configuration);
 
-                Assert.True(IdentityComparer.AreEqual(encryptionKeysFromJsonHandlerWithKid, theoryData.ExpectedDecryptionKeys));
+                IdentityComparer.AreEqual(encryptionKeysFromJsonHandlerWithKid, theoryData.ExpectedDecryptionKeys, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
-
             TestUtilities.AssertFailIfErrors(context);
         }
 

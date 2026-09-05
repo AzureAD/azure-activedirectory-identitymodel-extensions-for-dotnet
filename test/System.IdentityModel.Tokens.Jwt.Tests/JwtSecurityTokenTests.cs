@@ -185,6 +185,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             JwtSecurityToken outerJwt = null;
             JwtSecurityToken innerJwt = null;
+            var testContext = new CompareContext($"{this}.EmbeddedTokenConstructor1");
 
             // create inner token
             try
@@ -229,7 +230,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 if (null != outerTokenVariation.ExpectedJwtSecurityToken)
                 {
-                    Assert.True(IdentityComparer.AreEqual(outerTokenVariation.ExpectedJwtSecurityToken, outerJwt));
+                    Assert.True(IdentityComparer.AreEqual(outerTokenVariation.ExpectedJwtSecurityToken, outerJwt, testContext));
                 }
             }
             catch (Exception ex)
@@ -247,7 +248,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 if (null != innerTokenVariation && null != innerTokenVariation.ExpectedJwtSecurityToken)
                 {
-                    Assert.True(IdentityComparer.AreEqual(innerTokenVariation.ExpectedJwtSecurityToken, innerJwt));
+                    Assert.True(IdentityComparer.AreEqual(innerTokenVariation.ExpectedJwtSecurityToken, innerJwt, testContext));
                 }
             }
             catch (Exception ex)
@@ -394,6 +395,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         private void RunConstructionTest(JwtSecurityTokenTestVariation variation)
         {
             JwtSecurityToken jwt = null;
+            var testContext = new CompareContext($"{this}.RunConstructionTest");
+
             try
             {
                 jwt = CreateToken(variation);
@@ -414,7 +417,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 if (null != variation.ExpectedJwtSecurityToken)
                 {
-                    Assert.True(IdentityComparer.AreEqual(variation.ExpectedJwtSecurityToken, jwt));
+                    Assert.True(IdentityComparer.AreEqual(variation.ExpectedJwtSecurityToken, jwt, testContext));
                 }
             }
             catch (Exception ex)
