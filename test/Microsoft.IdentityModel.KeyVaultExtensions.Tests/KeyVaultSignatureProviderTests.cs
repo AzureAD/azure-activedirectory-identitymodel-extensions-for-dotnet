@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.KeyVault;
 using Microsoft.IdentityModel.TestUtils;
@@ -129,7 +130,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
 
                 foreach (var data in SignatureProviderTheoryData)
                 {
-                    var newAlgorithm = (data.Single() as SignatureProviderTheoryData)?.Algorithm;
+                    var newAlgorithm = (((IEnumerable<object>)data).Single() as SignatureProviderTheoryData)?.Algorithm;
                     if (string.IsNullOrEmpty(newAlgorithm))
                         continue; // Skip invalid input
 

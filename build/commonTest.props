@@ -17,12 +17,22 @@
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(TestOnlyCoreTargets)</TargetFrameworks>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <NoWarn>$(NoWarn);NETSDK1138;NETSDK1215</NoWarn>
+    <!-- dev5x test code predates the modern xunit analyzers (2.9.x); disable analyzers on these legacy test projects instead of rewriting assertions. -->
+    <RunAnalyzers>false</RunAnalyzers>
 
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
     <WarningsNotAsErrors>$(WarningsNotAsErrors);SYSLIB0013;SYSLIB0027;SYSLIB0028;SYSLIB0057</WarningsNotAsErrors>
+  </PropertyGroup>
+
+  <!-- net462/net472 were added to the test matrix (net452/net461 dropped, since the modern xunit
+       runner requires net462+). The legacy test code branches on NET45/NET452/NET461 for its
+       .NET Framework paths; net462/net472 are supersets, so alias them to the NET461 paths to
+       avoid rewriting many #if conditions across the test code. -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net472' ">
+    <DefineConstants>$(DefineConstants);NET461</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
