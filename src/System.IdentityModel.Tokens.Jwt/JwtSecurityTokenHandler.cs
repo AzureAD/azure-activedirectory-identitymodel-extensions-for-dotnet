@@ -1381,7 +1381,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 keys = validationParameters.IssuerSigningKeyResolverUsingConfiguration(token, jwtToken, jwtToken.Header.Kid, validationParameters, configuration);
             }
-            if (validationParameters.IssuerSigningKeyResolver != null)
+            else if (validationParameters.IssuerSigningKeyResolver != null)
             {
                 keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Header.Kid, validationParameters);
             }
