@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         // The enforcement previously became unreachable when the net45-only code path was removed,
         // leaving sub-floor keys silently accepted; it is restored in the constructor and must throw.
         [Fact]
+        [ResetAppContextSwitches]
         public void ConstructorEnforcesAsymmetricKeySizeFloor()
         {
             var context = new CompareContext("ConstructorEnforcesAsymmetricKeySizeFloor");
@@ -73,6 +74,36 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     SecurityAlgorithms.RsaSha256,
                     false));
 
+            // Signing floor for PS512 is 1040 bits.
+            RunCase(
+                context,
+                "RsaPssSigningBelowFloor_1024",
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                () => new AsymmetricSignatureProvider(
+                    KeyingMaterial.RsaSecurityKey_1024,
+                    SecurityAlgorithms.RsaSsaPssSha512,
+                    true));
+
+            // Signing floor for ES256 is 256 bits.
+            RunCase(
+                context,
+                "EcdsaSigningBelowFloor_128",
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                () => new AsymmetricSignatureProvider(
+                    new ReportedSizeEcdsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa, 128),
+                    SecurityAlgorithms.EcdsaSha256,
+                    true));
+
+            // JsonWebKey inputs must be converted before applying the RSA floor.
+            RunCase(
+                context,
+                "JsonWebKeySigningBelowFloor_1024",
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                () => new AsymmetricSignatureProvider(
+                    KeyingMaterial.JsonWebKeyRsa_1024,
+                    SecurityAlgorithms.RsaSha256,
+                    true));
+
             // A compliant 2048-bit key must be accepted for both signing and verifying.
             RunCase(
                 context,
@@ -89,6 +120,55 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        [ResetAppContextSwitches]
+        public void AppContextSwitchDisablesMinimumAsymmetricKeySizeEnforcement()
+        {
+            AppContext.SetSwitch(AppContextSwitches.DoNotEnforceMinimumAsymmetricKeySizeSwitch, true);
+
+            var provider = new AsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            byte[] signature = provider.Sign(Guid.NewGuid().ToByteArray());
+
+            Assert.NotEmpty(signature);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void AppContextSwitchDoesNotDisableDerivedKeySizeValidation()
+        {
+            AppContext.SetSwitch(AppContextSwitches.DoNotEnforceMinimumAsymmetricKeySizeSwitch, true);
+
+            var provider = new RejectingAsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void VirtualKeySizeValidationRunsBeforeFirstOperation()
+        {
+            var provider = new RejectingAsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            Assert.Equal(0, provider.ValidationCallCount);
+
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+        }
+
         private static void RunCase(CompareContext context, string caseId, ExpectedException expectedException, Action construct)
         {
             try
@@ -99,6 +179,42 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch (Exception ex)
             {
                 expectedException.ProcessException(ex, context);
+            }
+        }
+
+        private sealed class ReportedSizeEcdsaSecurityKey : ECDsaSecurityKey
+        {
+            private readonly int _keySize;
+
+            public ReportedSizeEcdsaSecurityKey(ECDsa ecdsa, int keySize)
+                : base(ecdsa)
+            {
+                _keySize = keySize;
+            }
+
+            public override int KeySize => _keySize;
+        }
+
+        private sealed class RejectingAsymmetricSignatureProvider : AsymmetricSignatureProvider
+        {
+            public RejectingAsymmetricSignatureProvider(
+                SecurityKey key,
+                string algorithm,
+                bool willCreateSignatures)
+                : base(key, algorithm, willCreateSignatures)
+            {
+            }
+
+            public int ValidationCallCount { get; private set; }
+
+            public override void ValidateAsymmetricSecurityKeySize(
+                SecurityKey key,
+                string algorithm,
+                bool willCreateSignatures)
+            {
+                ValidationCallCount++;
+                base.ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
+                throw new InvalidOperationException("Custom key-size validation rejected the operation.");
             }
         }
 
