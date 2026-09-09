@@ -814,7 +814,7 @@ namespace Microsoft.IdentityModel.TestUtils
             };
 
             tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters();
-            validationParameters = ValidationUtils.CreateValidationParameters();
+            validationParameters = ValidationUtils.CreateValidationParameters(tryAllSigningKeys: false);
 
             theoryData.Add(
                 new ValidateTokenTheoryData("KeyNotAvailable")
@@ -830,7 +830,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
             // Token signed with a key that is not available, multiple siging signingKeys, KeyId present
             tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(keys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
-            validationParameters = ValidationUtils.CreateValidationParameters(signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
+            validationParameters = ValidationUtils.CreateValidationParameters(
+                signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey],
+                tryAllSigningKeys: false);
             ExpectedException expectedException;
 
             if (tokenHandler is SamlSecurityTestingTokenHandler || tokenHandler is Saml2SecurityTestingTokenHandler)
@@ -881,8 +883,9 @@ namespace Microsoft.IdentityModel.TestUtils
             // Token signed with a key that is not available, multiple siging signingKeys, KeyId NOT present, TryAllSigningKeys false
             tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(keys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
             tokenValidationParameters.TryAllIssuerSigningKeys = false;
-            validationParameters = ValidationUtils.CreateValidationParameters(signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey]);
-            validationParameters.TryAllSigningKeys = false;
+            validationParameters = ValidationUtils.CreateValidationParameters(
+                signingKeys: [Default.AsymmetricSigningKey, Default.AsymmetricSigningKey],
+                tryAllSigningKeys: false);
 
             if (tokenHandler is SamlSecurityTestingTokenHandler)
                 expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:");
@@ -924,7 +927,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
             // No signingKeys available, KeyId NOT present
             tokenValidationParameters = ValidationUtils.CreateTokenValidationParameters(keys: []);
-            validationParameters = ValidationUtils.CreateValidationParameters(signingKeys: []);
+            validationParameters = ValidationUtils.CreateValidationParameters(
+                signingKeys: [],
+                tryAllSigningKeys: false);
             theoryData.Add(
                 new ValidateTokenTheoryData("NoValidationKeys_NoKid_DontTryAllKeys")
                 {

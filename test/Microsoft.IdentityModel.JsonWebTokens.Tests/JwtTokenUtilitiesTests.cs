@@ -454,6 +454,73 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Contains(partialExceptionMessage, exception.Message);
         }
 
+        [Fact]
+        public void DecryptJwtTokenResult_WhenDecryptionFails_LogsAggregateError()
+        {
+            var securityKey = NotDefault.SymmetricSigningKey256;
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var securityToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(
+                Default.PayloadString,
+                Default.SymmetricSigningCredentials,
+                Default.SymmetricEncryptingCredentials));
+
+            using var listener = new EventCaptureListener(EventLevel.Error);
+            var decryptionParameters = new JwtTokenDecryptionParameters
+            {
+                Alg = securityToken.Alg,
+                AuthenticationTagBytes = securityToken.AuthenticationTagBytes,
+                CipherTextBytes = securityToken.CipherTextBytes,
+                DecompressionFunction = JwtTokenUtilities.DecompressToken,
+                Enc = securityToken.Enc,
+                EncodedToken = securityToken.EncodedToken,
+                HeaderAsciiBytes = securityToken.HeaderAsciiBytes,
+                InitializationVectorBytes = securityToken.InitializationVectorBytes,
+                MaximumDeflateSize = jsonWebTokenHandler.MaximumTokenSizeInBytes,
+                Keys = new List<SecurityKey> { securityKey },
+                Zip = securityToken.Zip,
+            };
+            var validationParameters = new ValidationParameters
+            {
+                AlgorithmValidator = SkipValidationValidators.SkipAlgorithmValidation,
+            };
+
+            ValidationResult<string, ValidationError> result = JwtTokenUtilities.DecryptJwtToken(
+                securityToken,
+                validationParameters,
+                decryptionParameters,
+                new CallContext());
+
+            Assert.False(result.Succeeded);
+            Assert.Contains("IDX10603:", result.Error.Message);
+            string errorEvent = Assert.Single(listener.Events);
+            Assert.Contains("IDX10603:", errorEvent);
+        }
+
+        [Fact]
+        public void DecryptTokenResult_WhenNoKeys_LogsAggregateError()
+        {
+            var securityToken = new JsonWebToken(new JsonWebTokenHandler().CreateToken(
+                Default.PayloadString,
+                Default.SymmetricSigningCredentials,
+                Default.SymmetricEncryptingCredentials));
+
+            using var listener = new EventCaptureListener(EventLevel.Error);
+            var validationParameters = new ValidationParameters
+            {
+                AlgorithmValidator = SkipValidationValidators.SkipAlgorithmValidation,
+            };
+
+            ValidationResult<string, ValidationError> result = new JsonWebTokenHandler().DecryptToken(
+                securityToken,
+                validationParameters,
+                null,
+                new CallContext());
+
+            Assert.False(result.Succeeded);
+            Assert.Contains("IDX10609:", result.Error.Message);
+            Assert.Contains("IDX10609:", Assert.Single(listener.Events));
+        }
+
         [Theory, MemberData(nameof(DecompressionFailTheoryData), DisableDiscoveryEnumeration = true)]
         public void DecryptJwtToken_WhenDecompressionFails_ThrowsException(DecompressionFailureTheoryData theoryData)
         {
@@ -572,6 +639,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             config.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey2);
 
             return config;
+        }
+
+        private sealed class EventCaptureListener : EventListener
+        {
+            private readonly EventLevel _originalLogLevel;
+
+            public EventCaptureListener(EventLevel eventLevel)
+            {
+                _originalLogLevel = IdentityModelEventSource.Logger.LogLevel;
+                IdentityModelEventSource.Logger.LogLevel = eventLevel;
+                EnableEvents(IdentityModelEventSource.Logger, eventLevel);
+            }
+
+            public List<string> Events { get; } = new();
+
+            public override void Dispose()
+            {
+                try
+                {
+                    base.Dispose();
+                }
+                finally
+                {
+                    IdentityModelEventSource.Logger.LogLevel = _originalLogLevel;
+                }
+            }
+
+            protected override void OnEventWritten(EventWrittenEventArgs eventData)
+            {
+                if (eventData?.Level == EventLevel.Error && eventData.Payload?.Count > 0)
+                    Events.Add(eventData.Payload[0]?.ToString() ?? string.Empty);
+            }
         }
     }
 }

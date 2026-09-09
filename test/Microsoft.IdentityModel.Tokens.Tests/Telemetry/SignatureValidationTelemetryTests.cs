@@ -502,7 +502,7 @@ public class SignatureValidationTelemetryTests
         };
 
         var token = handler.CreateToken(tokenDescriptor);
-        var validationParameters = new ValidationParameters();
+        var validationParameters = new ValidationParameters { TryAllSigningKeys = false };
         // Don't provide any signing keys
 
         // Skip validations that require additional setup

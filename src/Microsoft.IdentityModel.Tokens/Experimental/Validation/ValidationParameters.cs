@@ -94,6 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             _signatureValidator = other.SignatureValidator;
             TimeProvider = other.TimeProvider;
             TryAllDecryptionKeys = other.TryAllDecryptionKeys;
+            TryAllSigningKeys = other.TryAllSigningKeys;
             DecryptionKeyResolver = other.DecryptionKeyResolver;
             _decryptionKeys = other.DecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
@@ -522,8 +523,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// If the SignatureKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,
         /// all available keys will be tried.
         /// </summary>
-        [DefaultValue(false)]
-        public bool TryAllSigningKeys { get; set; }
+        [DefaultValue(true)]
+        public bool TryAllSigningKeys { get; set; } = true;
 
         /// <summary>
         /// Allows overriding the validator that will be used to validate the type of the token.
