@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Dpop.Experimental;
@@ -15,6 +16,9 @@ namespace Microsoft.IdentityModel.Dpop;
 
 public partial class DpopProofValidator
 {
+    private const string SignatureProviderReleaseExceptionKey =
+        "Microsoft.IdentityModel.Dpop.SignatureProviderReleaseException";
+
     private static readonly DpopPassThroughValidators s_passThroughValidators = new();
     private static readonly ISignatureValidator s_dpopSignatureValidator =
         new DpopSignatureValidator();
@@ -185,6 +189,7 @@ public partial class DpopProofValidator
 
             // Never let the result-based handler enter ValidateJWEAsync. Preserve the current
             // signature-validation outcome for five-part tokens that pass typ/alg/JWK checks.
+            var callContext = new CallContext();
             if (proofToken.IsEncrypted)
             {
                 ValidationResult<SecurityKey, ValidationError> encryptedSignatureResult;
@@ -194,16 +199,19 @@ public partial class DpopProofValidator
                         proofToken,
                         validationParameters,
                         configuration: null,
-                        new CallContext());
+                        callContext);
                 }
                 catch (Exception ex)
                 {
-                    return new SignatureValidationError(
+                    encryptedSignatureResult = new SignatureValidationError(
                         new MessageDetail("DPoP proof signature validation failed."),
                         SignatureValidationFailure.ValidatorThrew,
                         ValidationError.GetCurrentStackFrame(),
                         ex);
                 }
+
+                if (ConsumeSignatureProviderReleaseException(callContext) is ValidationError releaseError)
+                    return releaseError;
 
                 if (!encryptedSignatureResult.Succeeded)
                     return encryptedSignatureResult.Error!;
@@ -216,8 +224,11 @@ public partial class DpopProofValidator
                     await handler.ValidateTokenAsync(
                         proofToken,
                         validationParameters,
-                        new CallContext(),
+                        callContext,
                         cancellationToken).ConfigureAwait(false);
+
+                if (ConsumeSignatureProviderReleaseException(callContext) is ValidationError releaseError)
+                    return releaseError;
 
                 if (!tokenResult.Succeeded)
                     return tokenResult.Error!;
@@ -485,8 +496,45 @@ public partial class DpopProofValidator
             finally
             {
                 if (provider is not null)
-                    factory.ReleaseSignatureProvider(provider);
+                {
+                    try
+                    {
+                        factory.ReleaseSignatureProvider(provider);
+                    }
+#pragma warning disable CA1031 // Do not catch general exception types
+                    catch (Exception ex)
+#pragma warning restore CA1031
+                    {
+                        RecordSignatureProviderReleaseException(callContext, ex);
+                    }
+                }
             }
         }
+    }
+
+    private static void RecordSignatureProviderReleaseException(CallContext callContext, Exception exception)
+    {
+        callContext.PropertyBag ??= new Dictionary<string, object>();
+        callContext.PropertyBag[SignatureProviderReleaseExceptionKey] = exception;
+    }
+
+    private static ValidationError? ConsumeSignatureProviderReleaseException(CallContext callContext)
+    {
+        if (callContext.PropertyBag is null
+            || !callContext.PropertyBag.TryGetValue(SignatureProviderReleaseExceptionKey, out object? boxed)
+            || boxed is not Exception exception)
+        {
+            return null;
+        }
+
+        callContext.PropertyBag.Remove(SignatureProviderReleaseExceptionKey);
+
+        if (exception is OperationCanceledException)
+            ExceptionDispatchInfo.Capture(exception).Throw();
+
+        return new DpopProofValidationError(
+            "DPoP proof validation failed.",
+            DpopValidationFailureType.UnexpectedError,
+            exception);
     }
 }

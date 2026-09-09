@@ -1342,6 +1342,39 @@ namespace Microsoft.IdentityModel.Dpop.Tests
                 => throw new OperationCanceledException();
         }
 
+        private sealed class ThrowingReleaseCryptoProviderFactory : CryptoProviderFactory
+        {
+            private readonly Exception _releaseException;
+
+            public ThrowingReleaseCryptoProviderFactory(Exception releaseException)
+            {
+                _releaseException = releaseException;
+                CacheSignatureProviders = false;
+            }
+
+            public override void ReleaseSignatureProvider(SignatureProvider signatureProvider)
+            {
+                throw _releaseException;
+            }
+        }
+
+        private static async Task WithCryptoProviderFactory(CryptoProviderFactory factory, Func<Task> test)
+        {
+            var original = CryptoProviderFactory.Default;
+            CryptoProviderFactory.Default = factory;
+            try
+            {
+                await test();
+            }
+            finally
+            {
+                CryptoProviderFactory.Default = original;
+            }
+        }
+
+        private static string CreateFivePartAllowedJwsProof(string proof)
+            => proof + "." + Base64UrlEncoder.Encode(new byte[] { 1 }) + "." + Base64UrlEncoder.Encode(new byte[] { 2 });
+
         #endregion
 
         #region FailureType Coverage
@@ -1896,7 +1929,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public async Task ValidateAsync_FivePartTokenWithAllowedJwsAlg_ReturnsSignatureInvalid()
         {
             var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
-            var fivePart = proof + "." + Base64UrlEncoder.Encode(new byte[] { 1 }) + "." + Base64UrlEncoder.Encode(new byte[] { 2 });
+            var fivePart = CreateFivePartAllowedJwsProof(proof);
             Assert.Equal(5, fivePart.Split('.').Length);
 
             var parsed = new JsonWebToken(fivePart);
@@ -1910,6 +1943,92 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             Assert.Same(DpopValidationFailureType.SignatureInvalid, result.Error.FailureType);
             Assert.Equal("DPoP proof signature validation failed.", result.Error.Message);
             Assert.DoesNotContain("IDX", result.Error.Message ?? string.Empty, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public async Task Validate_Jws_ReleaseThrowsInvalidOperation_ReturnsUnexpectedError()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var factory = new ThrowingReleaseCryptoProviderFactory(new InvalidOperationException("release failed"));
+
+            await WithCryptoProviderFactory(factory, async () =>
+            {
+                var publicResult = await _validator.ValidateAsync(
+                    proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
+
+                Assert.False(publicResult.IsValid);
+                Assert.Same(DpopValidationFailureType.UnexpectedError, publicResult.Error.FailureType);
+                Assert.Equal("DPoP proof validation failed.", publicResult.Error.Message);
+                Assert.IsType<InvalidOperationException>(publicResult.Error.Exception);
+                Assert.Equal(DpopErrorCodes.InvalidToken, publicResult.ErrorCode);
+
+                var typedResult = await ValidateInternalAsync(proof, accessToken, cnfJkt);
+                Assert.False(typedResult.Succeeded);
+                var error = Assert.IsType<DpopProofValidationError>(typedResult.Error);
+                Assert.Same(DpopValidationFailureType.UnexpectedError, error.DpopFailureType);
+                Assert.IsType<InvalidOperationException>(error.InnerException);
+            });
+        }
+
+        [Fact]
+        public async Task Validate_Jws_ReleaseThrowsOperationCanceled_Propagates()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var factory = new ThrowingReleaseCryptoProviderFactory(new OperationCanceledException());
+
+            await WithCryptoProviderFactory(factory, async () =>
+            {
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                    _validator.ValidateAsync(
+                        proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions()));
+
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                    ValidateInternalAsync(proof, accessToken, cnfJkt));
+            });
+        }
+
+        [Fact]
+        public async Task Validate_FivePartJwe_ReleaseThrowsInvalidOperation_ReturnsUnexpectedError()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var fivePart = CreateFivePartAllowedJwsProof(proof);
+            var factory = new ThrowingReleaseCryptoProviderFactory(new InvalidOperationException("release failed"));
+
+            await WithCryptoProviderFactory(factory, async () =>
+            {
+                var publicResult = await _validator.ValidateAsync(
+                    fivePart, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
+
+                Assert.False(publicResult.IsValid);
+                Assert.Same(DpopValidationFailureType.UnexpectedError, publicResult.Error.FailureType);
+                Assert.Equal("DPoP proof validation failed.", publicResult.Error.Message);
+                Assert.IsType<InvalidOperationException>(publicResult.Error.Exception);
+                Assert.Equal(DpopErrorCodes.InvalidToken, publicResult.ErrorCode);
+
+                var typedResult = await ValidateInternalAsync(fivePart, accessToken, cnfJkt);
+                Assert.False(typedResult.Succeeded);
+                var error = Assert.IsType<DpopProofValidationError>(typedResult.Error);
+                Assert.Same(DpopValidationFailureType.UnexpectedError, error.DpopFailureType);
+                Assert.IsType<InvalidOperationException>(error.InnerException);
+            });
+        }
+
+        [Fact]
+        public async Task Validate_FivePartJwe_ReleaseThrowsOperationCanceled_Propagates()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var fivePart = CreateFivePartAllowedJwsProof(proof);
+            var factory = new ThrowingReleaseCryptoProviderFactory(new OperationCanceledException());
+
+            await WithCryptoProviderFactory(factory, async () =>
+            {
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                    _validator.ValidateAsync(
+                        fivePart, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions()));
+
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                    ValidateInternalAsync(fivePart, accessToken, cnfJkt));
+            });
         }
 
         [Fact]
@@ -2394,7 +2513,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         public async Task ValidateInternalAsync_FivePartAllowedJwsAlg_ReturnsSignatureValidationError()
         {
             var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
-            var fivePart = proof + "." + Base64UrlEncoder.Encode(new byte[] { 1 }) + "." + Base64UrlEncoder.Encode(new byte[] { 2 });
+            var fivePart = CreateFivePartAllowedJwsProof(proof);
             var result = await ValidateInternalAsync(fivePart, accessToken, cnfJkt);
 
             Assert.False(result.Succeeded);
