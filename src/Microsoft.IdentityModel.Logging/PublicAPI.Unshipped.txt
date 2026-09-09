@@ -1,0 +1,14 @@
+Microsoft.IdentityModel.Logging.LoggerContext.CorrelationId.get -> string
+Microsoft.IdentityModel.Logging.LoggerContext.CorrelationId.set -> void
+Microsoft.IdentityModel.Logging.LoggerContext.LogCorrelationId.get -> bool
+Microsoft.IdentityModel.Logging.LoggerContext.LogCorrelationId.set -> void
+Microsoft.IdentityModel.Logging.LoggerContext.Logger.get -> Microsoft.Extensions.Logging.ILogger
+Microsoft.IdentityModel.Logging.LoggerContext.LoggerContext(Microsoft.Extensions.Logging.ILogger logger) -> void
+Microsoft.IdentityModel.Logging.LoggerContext.LoggerContext(Microsoft.Extensions.Logging.ILogger logger, string correlationId) -> void
+Microsoft.IdentityModel.Logging.LoggerContext.LoggerContext(Microsoft.Extensions.Logging.ILogger logger, System.Guid activityId) -> void
+Microsoft.IdentityModel.Logging.LoggerContext.LoggerContext(Microsoft.IdentityModel.Logging.LoggerContext other) -> void
+static Microsoft.IdentityModel.Logging.LogHelper.LogExceptionMessage(System.Exception exception, Microsoft.IdentityModel.Logging.LoggerContext loggerContext) -> System.Exception
+static Microsoft.IdentityModel.Logging.LogHelper.LogInformation(string message, Microsoft.IdentityModel.Logging.LoggerContext loggerContext, params object[] args) -> void
+static Microsoft.IdentityModel.Logging.LogHelper.LogVerbose(string message, Microsoft.IdentityModel.Logging.LoggerContext loggerContext, params object[] args) -> void
+static Microsoft.IdentityModel.Logging.LogHelper.LogWarning(string message, Microsoft.IdentityModel.Logging.LoggerContext loggerContext) -> void
+static Microsoft.IdentityModel.Logging.LogHelper.LogWarning(string message, Microsoft.IdentityModel.Logging.LoggerContext loggerContext, params object[] args) -> void
