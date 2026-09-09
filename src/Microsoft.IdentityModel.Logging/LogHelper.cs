@@ -316,10 +316,16 @@ namespace Microsoft.IdentityModel.Logging
             if (exception == null)
                 return null;
 
-            LogExceptionMessage(exception);
+            if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Error, EventKeywords.All))
+                IdentityModelEventSource.Logger.Write(EventLevel.Error, exception.InnerException, exception.Message);
 
             if (loggerContext?.Logger == null)
+            {
+                if (Logger.IsEnabled(EventLogLevel.Error))
+                    Logger.Log(WriteEntry(EventLogLevel.Error, exception.InnerException, exception.Message));
+
                 return exception;
+            }
 
             if (!loggerContext.Logger.IsEnabled(LogLevel.Error))
                 return exception;
@@ -366,10 +372,16 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void LogInformation(string message, LoggerContext loggerContext, params object[] args)
         {
-            LogInformation(message, args);
+            if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Informational, EventKeywords.All))
+                IdentityModelEventSource.Logger.WriteInformation(message, args);
 
             if (loggerContext?.Logger == null)
+            {
+                if (Logger.IsEnabled(EventLogLevel.Informational))
+                    Logger.Log(WriteEntry(EventLogLevel.Informational, null, message, null, args));
+
                 return;
+            }
 
             if (!loggerContext.Logger.IsEnabled(LogLevel.Information))
                 return;
@@ -406,10 +418,16 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void LogVerbose(string message, LoggerContext loggerContext, params object[] args)
         {
-            LogVerbose(message, args);
+            if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Verbose, EventKeywords.All))
+                IdentityModelEventSource.Logger.WriteVerbose(message, args);
 
             if (loggerContext?.Logger == null)
+            {
+                if (Logger.IsEnabled(EventLogLevel.Verbose))
+                    Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, null, args));
+
                 return;
+            }
 
             if (!loggerContext.Logger.IsEnabled(LogLevel.Debug))
                 return;
@@ -456,10 +474,16 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void LogWarning(string message, LoggerContext loggerContext, params object[] args)
         {
-            LogWarning(message, args);
+            if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Warning, EventKeywords.All))
+                IdentityModelEventSource.Logger.WriteWarning(message, args);
 
             if (loggerContext?.Logger == null)
+            {
+                if (Logger.IsEnabled(EventLogLevel.Warning))
+                    Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, null, args));
+
                 return;
+            }
 
             if (!loggerContext.Logger.IsEnabled(LogLevel.Warning))
                 return;

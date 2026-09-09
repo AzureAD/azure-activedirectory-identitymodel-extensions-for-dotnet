@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
@@ -231,6 +232,98 @@ namespace Microsoft.IdentityModel.Logging.Tests
             // Assert
             Assert.NotEmpty(logger.Messages);
             Assert.All(logger.Messages, message => Assert.DoesNotContain("CorrelationId", message));
+        }
+
+        [Theory]
+        [InlineData(LoggingPath.Information)]
+        [InlineData(LoggingPath.Verbose)]
+        [InlineData(LoggingPath.Warning)]
+        [InlineData(LoggingPath.Exception)]
+        public void ContextLogger_IsAuthoritative_WhenProvided(LoggingPath loggingPath)
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            bool originalHeaderWritten = LogHelper.HeaderWritten;
+            var staticLogger = new TestLogger();
+            var contextLogger = new CapturingLogger();
+            string message = $"IDXTEST: contextual {loggingPath} message.";
+
+            try
+            {
+                LogHelper.Logger = staticLogger;
+                LogHelper.HeaderWritten = true;
+
+                // Act
+                Log(loggingPath, message, new LoggerContext(contextLogger));
+
+                // Assert
+                Assert.Single(contextLogger.Messages);
+                Assert.Contains(message, contextLogger.Messages[0]);
+                Assert.False(staticLogger.ContainsLog(message));
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+                LogHelper.HeaderWritten = originalHeaderWritten;
+            }
+        }
+
+        [Theory]
+        [InlineData(LoggingPath.Information)]
+        [InlineData(LoggingPath.Verbose)]
+        [InlineData(LoggingPath.Warning)]
+        [InlineData(LoggingPath.Exception)]
+        public void StaticLogger_IsFallback_WhenContextLoggerNotProvided(LoggingPath loggingPath)
+        {
+            // Arrange
+            IIdentityLogger originalLogger = LogHelper.Logger;
+            bool originalHeaderWritten = LogHelper.HeaderWritten;
+            var staticLogger = new TestLogger();
+            string message = $"IDXTEST: fallback {loggingPath} message.";
+
+            try
+            {
+                LogHelper.Logger = staticLogger;
+                LogHelper.HeaderWritten = true;
+
+                // Act
+                Log(loggingPath, message, new LoggerContext());
+
+                // Assert
+                Assert.True(staticLogger.ContainsLog(message));
+            }
+            finally
+            {
+                LogHelper.Logger = originalLogger;
+                LogHelper.HeaderWritten = originalHeaderWritten;
+            }
+        }
+
+        private static void Log(LoggingPath loggingPath, string message, LoggerContext context)
+        {
+            switch (loggingPath)
+            {
+                case LoggingPath.Information:
+                    LogHelper.LogInformation(message, context);
+                    break;
+                case LoggingPath.Verbose:
+                    LogHelper.LogVerbose(message, context);
+                    break;
+                case LoggingPath.Warning:
+                    LogHelper.LogWarning(message, context);
+                    break;
+                case LoggingPath.Exception:
+                    LogHelper.LogExceptionMessage(new InvalidOperationException(message), context);
+                    break;
+            }
+        }
+
+        public enum LoggingPath
+        {
+            Information,
+            Verbose,
+            Warning,
+            Exception,
         }
 
         // Exposes the protected LoggerContext copy constructor for testing.
