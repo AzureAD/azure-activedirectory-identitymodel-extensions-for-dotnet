@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_NoKeyId_DontTryAllKeys")
                     {
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
-                        ValidationParameters = new ValidationParameters(),
+                        ValidationParameters = new ValidationParameters { TryAllSigningKeys = false },
                         KeyToAddToValidationParameters = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10526:"),
                         OperationResult = new ValidationError(
@@ -194,7 +194,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_NoKeys")
                     {
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
-                        ValidationParameters = new ValidationParameters(),
+                        ValidationParameters = new ValidationParameters { TryAllSigningKeys = false },
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10527:"),
                         OperationResult = new ValidationError(
                             new MessageDetail(TokenLogMessages.IDX10500),
