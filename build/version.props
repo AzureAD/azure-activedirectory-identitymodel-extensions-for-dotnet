@@ -9,9 +9,6 @@
     <Version Condition="'$(MicrosoftIdentityModelVersion)' != ''">$(MicrosoftIdentityModelVersion)</Version>
     <VersionSuffix Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(PreviewVersionSuffix)</VersionSuffix>
     <VersionPrefix Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(MicrosoftIdentityModelCurrentVersion)</VersionPrefix>
-    <IdentityModelBaseVersion Condition="'$(MicrosoftIdentityModelVersion)' != ''">$([System.Text.RegularExpressions.Regex]::Match('$(MicrosoftIdentityModelVersion)', '^\d+\.\d+').Value)</IdentityModelBaseVersion>
-    <IdentityModelBaseVersion Condition="'$(MicrosoftIdentityModelVersion)' == ''">$([System.Text.RegularExpressions.Regex]::Match('$(MicrosoftIdentityModelCurrentVersion)', '^\d+\.\d+').Value)</IdentityModelBaseVersion>
-    <AssemblyVersion>$(IdentityModelBaseVersion).0.0</AssemblyVersion>
     <FileVersion Condition="'$(MicrosoftIdentityModelVersion)' != '' and '$(IsCustomPreview)' != 'true' ">$(MicrosoftIdentityModelVersion).$([System.DateTime]::Now.ToString("yy"))$([System.DateTime]::Now.DayOfYear.ToString("000"))</FileVersion>
     <FileVersion Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(MicrosoftIdentityModelCurrentVersion).$([System.DateTime]::Now.ToString("yy"))$([System.DateTime]::Now.DayOfYear.ToString("000"))</FileVersion>
   </PropertyGroup>
