@@ -13,13 +13,15 @@ namespace Microsoft.IdentityModel.Benchmarks
 {
     // dotnet run -c release -f net9.0 --no-restore /p:NuGetAudit=false --filter Microsoft.IdentityModel.Benchmarks.CorrelationLoggingBenchmarks*
     //
-    // Isolates the correlation-id resolution cost on the ILogger warning path in LogHelper.
-    // Validates the engine change for issue #3361: the ActivityId->string fallback was removed and
-    // correlation logging is gated by LoggerContext.LogCorrelationId (default true, kill switch).
+    // Measures the operation-level correlation scope introduced for issue #3361.
+    // ActivityId is never converted for ILogger, and storing a CorrelationId on LoggerContext adds no
+    // per-event formatting cost. Scope creation is paid once at the operation boundary.
     //
     // Reliable signal is Allocated. Key comparisons:
-    //   New_Warning_ActivityIdOnly (real, fixed path)  vs  Old_Warning_ActivityIdOnly_Simulated (pre-fix cost)
-    //   => the delta is the per-log Guid->string + correlation string.Format the fix eliminates.
+    //   Warning_CorrelationMetadataOnly vs Warning_NoCorrelation
+    //   => supplying correlation metadata adds no cost to individual log events.
+    //   OperationScope_CorrelationIdSet
+    //   => measures the one-time scope cost for a single-event operation.
     //
     // Uses the in-process toolchain so BenchmarkDotNet does not generate/restore a child project
     // (avoids offline NuGet audit failures).
@@ -43,7 +45,6 @@ namespace Microsoft.IdentityModel.Benchmarks
         private LoggerContext _noCorrelation;
         private LoggerContext _activityIdOnly;
         private LoggerContext _correlationIdSet;
-        private LoggerContext _killSwitchOff;
 
         [GlobalSetup]
         public void Setup()
@@ -54,49 +55,36 @@ namespace Microsoft.IdentityModel.Benchmarks
             // Only ActivityId set (ETW). Post-fix this must NOT be promoted into the ILogger message.
             _activityIdOnly = new LoggerContext(_logger) { ActivityId = Guid.NewGuid() };
 
-            // Explicitly supplied correlation string (the supported opt-in path).
+            // Explicitly supplied correlation string. It is consumed once by BeginCorrelationScope,
+            // not formatted by each LogHelper call.
             _correlationIdSet = new LoggerContext(_logger) { CorrelationId = CorrelationId };
-
-            // Kill switch: correlation supplied but LogCorrelationId disabled -> nothing appended.
-            _killSwitchOff = new LoggerContext(_logger) { CorrelationId = CorrelationId, LogCorrelationId = false };
         }
 
-        // --- Real (fixed) LogHelper paths ---
-
         [Benchmark(Baseline = true)]
-        public void New_Warning_NoCorrelation()
+        public void Warning_NoCorrelation()
         {
             LogHelper.LogWarning(Message, _noCorrelation);
         }
 
         [Benchmark]
-        public void New_Warning_ActivityIdOnly()
+        public void Warning_ActivityIdOnly()
         {
             LogHelper.LogWarning(Message, _activityIdOnly);
         }
 
         [Benchmark]
-        public void New_Warning_CorrelationIdSet()
+        public void Warning_CorrelationMetadataOnly()
         {
             LogHelper.LogWarning(Message, _correlationIdSet);
         }
 
         [Benchmark]
-        public void New_Warning_KillSwitchOff()
+        public void OperationScope_CorrelationIdSet()
         {
-            LogHelper.LogWarning(Message, _killSwitchOff);
-        }
-
-        // --- Control: reproduces the pre-fix ActivityId->string fallback cost per log ---
-
-        [Benchmark]
-        public void Old_Warning_ActivityIdOnly_Simulated()
-        {
-            // The removed behavior materialized ActivityId as a string and fed it as the correlation id,
-            // forcing a Guid->string allocation plus the correlation string.Format in WriteEntry on every log.
-            var ctx = new LoggerContext(_logger) { ActivityId = _activityIdOnly.ActivityId };
-            ctx.CorrelationId = ctx.ActivityId.ToString();
-            LogHelper.LogWarning(Message, ctx);
+            using (_correlationIdSet.BeginCorrelationScope())
+            {
+                LogHelper.LogWarning(Message, _correlationIdSet);
+            }
         }
 
         private sealed class NullSinkLogger : ILogger

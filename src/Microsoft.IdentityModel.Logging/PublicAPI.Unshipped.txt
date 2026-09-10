@@ -1,3 +1,4 @@
+Microsoft.IdentityModel.Logging.LoggerContext.BeginCorrelationScope() -> System.IDisposable
 Microsoft.IdentityModel.Logging.LoggerContext.CorrelationId.get -> string
 Microsoft.IdentityModel.Logging.LoggerContext.CorrelationId.set -> void
 Microsoft.IdentityModel.Logging.LoggerContext.LogCorrelationId.get -> bool

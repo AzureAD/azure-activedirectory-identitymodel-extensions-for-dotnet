@@ -98,19 +98,39 @@ namespace Microsoft.IdentityModel.Logging
 #pragma warning restore CS3003 // ILogger is not CLSCompliant
 
         /// <summary>
-        /// Gets or sets a <see cref="string"/> correlation id that is written to logs emitted through <see cref="ILogger"/>
-        /// when <see cref="LogCorrelationId"/> is <see langword="true"/> (the default). Supplying a value is the opt-in.
+        /// Gets or sets an optional caller-supplied correlation id that can be added to an <see cref="ILogger"/> scope
+        /// by calling <see cref="BeginCorrelationScope"/>.
         /// </summary>
         /// <remarks>Only this explicitly supplied value is logged; <see cref="ActivityId"/> is never promoted into ILogger messages.
-        /// It is treated as a non-PII correlation token and is emitted verbatim (not redacted when PII display is off), so callers must not place PII in it.</remarks>
+        /// It is treated as a non-PII correlation token and is emitted verbatim, so callers must not place PII in it.</remarks>
         public string CorrelationId { get; set; }
 
         /// <summary>
-        /// Gets or sets a boolean that controls whether <see cref="CorrelationId"/> is written to logs emitted through <see cref="ILogger"/>.
-        /// Defaults to <see langword="true"/>. Set to <see langword="false"/> as a kill switch to suppress correlation-id logging and restore the prior behavior.
+        /// Gets or sets a boolean that controls whether <see cref="BeginCorrelationScope"/> includes
+        /// <see cref="CorrelationId"/> in an <see cref="ILogger"/> scope.
+        /// Defaults to <see langword="true"/>. Set to <see langword="false"/> to suppress the correlation scope.
         /// </summary>
         /// <remarks>This flag gates only the explicitly supplied <see cref="CorrelationId"/> string. It has no effect on <see cref="ActivityId"/>.</remarks>
         public bool LogCorrelationId { get; set; } = true;
+
+        /// <summary>
+        /// Begins an <see cref="ILogger"/> scope containing the explicitly supplied <see cref="CorrelationId"/>.
+        /// </summary>
+        /// <returns>
+        /// The scope returned by <see cref="ILogger.BeginScope{TState}(TState)"/>, or a no-op scope when no logger
+        /// or correlation id was supplied, or when <see cref="LogCorrelationId"/> is <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        /// Call this once at the operation boundary so all logs emitted during the operation, including
+        /// source-generated LoggerMessage events, inherit the same structured correlation metadata.
+        /// </remarks>
+        public IDisposable BeginCorrelationScope()
+        {
+            if (Logger is null || !LogCorrelationId || string.IsNullOrEmpty(CorrelationId))
+                return NullScope.Instance;
+
+            return Logger.BeginScope("CorrelationId: {CorrelationId}", CorrelationId) ?? NullScope.Instance;
+        }
 
         /// <summary>
         /// Gets or set a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
@@ -139,11 +159,13 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; set; }
 
-        /// <summary>
-        /// Resolves the correlation id to write to an <see cref="ILogger"/> message: the explicitly supplied
-        /// <see cref="CorrelationId"/> when <see cref="LogCorrelationId"/> is enabled and the value is non-empty;
-        /// otherwise <see langword="null"/>. <see cref="ActivityId"/> is intentionally never used here.
-        /// </summary>
-        internal string ResolveCorrelationId() => LogCorrelationId && !string.IsNullOrEmpty(CorrelationId) ? CorrelationId : null;
+        private sealed class NullScope : IDisposable
+        {
+            internal static readonly NullScope Instance = new NullScope();
+
+            public void Dispose()
+            {
+            }
+        }
     }
 }

@@ -10,8 +10,8 @@ using Xunit;
 namespace Microsoft.IdentityModel.Logging.Tests
 {
     // Covers the #3361 logging-engine correlation behavior:
-    //   - correlation id is opt-in and gated by LoggerContext.LogCorrelationId (default true, kill switch)
-    //   - ActivityId is never promoted into ILogger messages
+    //   - correlation id is added once as operation-level scope metadata
+    //   - ActivityId is never promoted into ILogger scope metadata
     //   - the protected LoggerContext copy constructor carries logging state
     [Collection("Relying on ShowPII and LogCompleteSecurityArtifact")]
     public class CorrelationLoggingTests
@@ -27,55 +27,87 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
 
         [Fact]
-        public void ResolveCorrelationId_ReturnsCorrelationId_WhenSet()
+        public void BeginCorrelationScope_AddsCorrelationId_WhenSet()
         {
             // Arrange
-            var context = new LoggerContext { CorrelationId = "corr-123" };
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger) { CorrelationId = "corr-123" };
 
-            // Act & Assert
-            Assert.Equal("corr-123", context.ResolveCorrelationId());
+            // Act
+            using (context.BeginCorrelationScope())
+            {
+            }
+
+            // Assert
+            IEnumerable<KeyValuePair<string, object>> scope =
+                Assert.IsAssignableFrom<IEnumerable<KeyValuePair<string, object>>>(Assert.Single(logger.Scopes));
+            Assert.Contains(scope, item => item.Key == "CorrelationId" && (string)item.Value == "corr-123");
         }
 
         [Fact]
-        public void ResolveCorrelationId_ReturnsNull_WhenNotSet()
+        public void BeginCorrelationScope_DoesNotCreateScope_WhenNotSet()
         {
             // Arrange
-            var context = new LoggerContext();
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger);
 
-            // Act & Assert
-            Assert.Null(context.ResolveCorrelationId());
+            // Act
+            using (context.BeginCorrelationScope())
+            {
+            }
+
+            // Assert
+            Assert.Empty(logger.Scopes);
         }
 
         [Fact]
-        public void ResolveCorrelationId_ReturnsNull_WhenKillSwitchOff()
+        public void BeginCorrelationScope_DoesNotCreateScope_WhenKillSwitchOff()
         {
             // Arrange
-            var context = new LoggerContext { CorrelationId = "corr-123", LogCorrelationId = false };
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger) { CorrelationId = "corr-123", LogCorrelationId = false };
 
-            // Act & Assert
-            Assert.Null(context.ResolveCorrelationId());
+            // Act
+            using (context.BeginCorrelationScope())
+            {
+            }
+
+            // Assert
+            Assert.Empty(logger.Scopes);
         }
 
         [Fact]
-        public void ResolveCorrelationId_DoesNotPromoteActivityId()
+        public void BeginCorrelationScope_DoesNotPromoteActivityId()
         {
-            // Arrange: ActivityId set but no CorrelationId - must not be promoted.
-            var context = new LoggerContext { ActivityId = Guid.NewGuid() };
+            // Arrange
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger) { ActivityId = Guid.NewGuid() };
 
-            // Act & Assert
-            Assert.Null(context.ResolveCorrelationId());
+            // Act
+            using (context.BeginCorrelationScope())
+            {
+            }
+
+            // Assert
+            Assert.Empty(logger.Scopes);
         }
 
         [Theory]
         [InlineData("")]
         [InlineData(null)]
-        public void ResolveCorrelationId_ReturnsNull_WhenCorrelationIdNullOrEmpty(string correlationId)
+        public void BeginCorrelationScope_DoesNotCreateScope_WhenCorrelationIdNullOrEmpty(string correlationId)
         {
-            // Arrange: an empty/null correlation id must not produce a trailing "CorrelationId: ." fragment.
-            var context = new LoggerContext { CorrelationId = correlationId };
+            // Arrange
+            var logger = new CapturingLogger();
+            var context = new LoggerContext(logger) { CorrelationId = correlationId };
 
-            // Act & Assert
-            Assert.Null(context.ResolveCorrelationId());
+            // Act
+            using (context.BeginCorrelationScope())
+            {
+            }
+
+            // Assert
+            Assert.Empty(logger.Scopes);
         }
 
         [Fact]
@@ -114,26 +146,11 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
 
         [Fact]
-        public void LogWarning_WritesCorrelationId_WhenSet()
+        public void LogWarning_DoesNotAppendCorrelationId_WhenSet()
         {
             // Arrange
             var logger = new CapturingLogger();
             var context = new LoggerContext(logger) { CorrelationId = "corr-123" };
-
-            // Act
-            LogHelper.LogWarning("IDXTEST: correlation test.", context);
-
-            // Assert
-            Assert.NotEmpty(logger.Messages);
-            Assert.Contains(logger.Messages, message => message.Contains("CorrelationId: corr-123"));
-        }
-
-        [Fact]
-        public void LogWarning_OmitsCorrelationId_WhenKillSwitchOff()
-        {
-            // Arrange
-            var logger = new CapturingLogger();
-            var context = new LoggerContext(logger) { CorrelationId = "corr-123", LogCorrelationId = false };
 
             // Act
             LogHelper.LogWarning("IDXTEST: correlation test.", context);
@@ -159,39 +176,9 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
 
         [Fact]
-        public void LogWarning_OmitsCorrelationId_ByDefault()
+        public void LogWarning_FormatsArguments_WithoutAppendingCorrelationId()
         {
-            // Arrange: nothing supplied.
-            var logger = new CapturingLogger();
-            var context = new LoggerContext(logger);
-
-            // Act
-            LogHelper.LogWarning("IDXTEST: correlation test.", context);
-
-            // Assert
-            Assert.NotEmpty(logger.Messages);
-            Assert.All(logger.Messages, message => Assert.DoesNotContain("CorrelationId", message));
-        }
-
-        [Fact]
-        public void LogWarning_OmitsCorrelationId_WhenCorrelationIdEmpty()
-        {
-            // Arrange: an empty correlation id must not append a "CorrelationId: ." fragment.
-            var logger = new CapturingLogger();
-            var context = new LoggerContext(logger) { CorrelationId = string.Empty };
-
-            // Act
-            LogHelper.LogWarning("IDXTEST: correlation test.", context);
-
-            // Assert
-            Assert.NotEmpty(logger.Messages);
-            Assert.All(logger.Messages, message => Assert.DoesNotContain("CorrelationId", message));
-        }
-
-        [Fact]
-        public void LogWarning_AppendsCorrelationId_AfterFormattingArgs()
-        {
-            // Arrange: correlation id is appended after the message is formatted with its args.
+            // Arrange
             var logger = new CapturingLogger();
             var context = new LoggerContext(logger) { CorrelationId = "corr-123" };
 
@@ -199,31 +186,15 @@ namespace Microsoft.IdentityModel.Logging.Tests
             LogHelper.LogWarning("IDXTEST: value is {0}.", context, LogHelper.MarkAsNonPII("formatted-arg"));
 
             // Assert
-            Assert.Contains(logger.Messages, message => message.Contains("formatted-arg") && message.Contains("CorrelationId: corr-123"));
+            Assert.Contains(logger.Messages, message => message.Contains("formatted-arg") && !message.Contains("CorrelationId"));
         }
 
         [Fact]
-        public void LogExceptionMessage_WritesCorrelationId_WhenSet()
+        public void LogExceptionMessage_DoesNotAppendCorrelationId_WhenSet()
         {
             // Arrange
             var logger = new CapturingLogger();
             var context = new LoggerContext(logger) { CorrelationId = "corr-123" };
-            var exception = new InvalidOperationException("IDXTEST: exception path.");
-
-            // Act
-            LogHelper.LogExceptionMessage(exception, context);
-
-            // Assert
-            Assert.NotEmpty(logger.Messages);
-            Assert.Contains(logger.Messages, message => message.Contains("CorrelationId: corr-123"));
-        }
-
-        [Fact]
-        public void LogExceptionMessage_OmitsCorrelationId_WhenKillSwitchOff()
-        {
-            // Arrange
-            var logger = new CapturingLogger();
-            var context = new LoggerContext(logger) { CorrelationId = "corr-123", LogCorrelationId = false };
             var exception = new InvalidOperationException("IDXTEST: exception path.");
 
             // Act
@@ -339,9 +310,15 @@ namespace Microsoft.IdentityModel.Logging.Tests
         {
             public List<string> Messages { get; } = new List<string>();
 
+            public List<object> Scopes { get; } = new List<object>();
+
             public bool Enabled { get; set; } = true;
 
-            public IDisposable BeginScope<TState>(TState state) => NullScope.Instance;
+            public IDisposable BeginScope<TState>(TState state)
+            {
+                Scopes.Add(state);
+                return NullScope.Instance;
+            }
 
             public bool IsEnabled(LogLevel logLevel) => Enabled;
 

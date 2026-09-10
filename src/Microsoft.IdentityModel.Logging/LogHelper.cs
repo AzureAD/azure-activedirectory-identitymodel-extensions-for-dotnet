@@ -330,11 +330,6 @@ namespace Microsoft.IdentityModel.Logging
             if (!loggerContext.Logger.IsEnabled(LogLevel.Error))
                 return exception;
 
-            // Correlation id is opt-in: only the explicitly supplied CorrelationId is logged, and only when
-            // LogCorrelationId is enabled (the default kill switch). ActivityId is never promoted into ILogger
-            // messages, avoiding a per-log Guid->string allocation for an all-zero ActivityId.
-            string correlationId = loggerContext.ResolveCorrelationId();
-
             // Prototype: the ILogger exception path previously passed 'exception.Message' again as a
             // format arg, forcing an object[] allocation + FormatInvariant (LINQ Select().ToArray() +
             // string.Format) on every logged exception. The message is already complete, so pass no args.
@@ -342,7 +337,6 @@ namespace Microsoft.IdentityModel.Logging
                 EventLogLevel.Error,
                 exception.InnerException,
                 exception.Message,
-                correlationId,
                 (object[])null);
 
             Log(entry, loggerContext.Logger);
@@ -361,7 +355,7 @@ namespace Microsoft.IdentityModel.Logging
                 IdentityModelEventSource.Logger.WriteInformation(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Informational))
-                Logger.Log(WriteEntry(EventLogLevel.Informational, null, message, null, args));
+                Logger.Log(WriteEntry(EventLogLevel.Informational, null, message, args));
         }
 
         /// <summary>
@@ -378,7 +372,7 @@ namespace Microsoft.IdentityModel.Logging
             if (loggerContext?.Logger == null)
             {
                 if (Logger.IsEnabled(EventLogLevel.Informational))
-                    Logger.Log(WriteEntry(EventLogLevel.Informational, null, message, null, args));
+                    Logger.Log(WriteEntry(EventLogLevel.Informational, null, message, args));
 
                 return;
             }
@@ -390,7 +384,6 @@ namespace Microsoft.IdentityModel.Logging
                 EventLevelToEventLogLevel(EventLevel.Informational),
                 null,
                 message,
-                loggerContext.ResolveCorrelationId(),
                 args);
 
             Log(entry, loggerContext.Logger);
@@ -407,7 +400,7 @@ namespace Microsoft.IdentityModel.Logging
                 IdentityModelEventSource.Logger.WriteVerbose(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Verbose))
-                Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, null, args));
+                Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, args));
         }
 
         /// <summary>
@@ -424,7 +417,7 @@ namespace Microsoft.IdentityModel.Logging
             if (loggerContext?.Logger == null)
             {
                 if (Logger.IsEnabled(EventLogLevel.Verbose))
-                    Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, null, args));
+                    Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, args));
 
                 return;
             }
@@ -436,7 +429,6 @@ namespace Microsoft.IdentityModel.Logging
                 EventLogLevel.Verbose,
                 null,
                 message,
-                loggerContext.ResolveCorrelationId(),
                 args);
 
             Log(entry, loggerContext.Logger);
@@ -453,7 +445,7 @@ namespace Microsoft.IdentityModel.Logging
                 IdentityModelEventSource.Logger.WriteWarning(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Warning))
-                Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, null, args));
+                Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, args));
         }
 
         /// <summary>
@@ -480,7 +472,7 @@ namespace Microsoft.IdentityModel.Logging
             if (loggerContext?.Logger == null)
             {
                 if (Logger.IsEnabled(EventLogLevel.Warning))
-                    Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, null, args));
+                    Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, args));
 
                 return;
             }
@@ -492,7 +484,6 @@ namespace Microsoft.IdentityModel.Logging
                 EventLogLevel.Warning,
                 null,
                 message,
-                loggerContext.ResolveCorrelationId(),
                 args);
 
             Log(entry, loggerContext.Logger);
@@ -675,24 +666,6 @@ namespace Microsoft.IdentityModel.Logging
             string message,
             params object[] args)
         {
-            return WriteEntry(eventLogLevel, innerException, message, (string)null, args);
-        }
-
-        /// <summary>
-        /// Creates a <see cref="LogEntry"/> by using the provided event level, exception argument, string argument and arguments list.
-        /// </summary>
-        /// <param name="eventLogLevel"><see cref="EventLogLevel"/></param>
-        /// <param name="innerException"><see cref="Exception"/></param>
-        /// <param name="message">The log message.</param>
-        /// <param name="correlationId">The CorrelationId is set by caller to coordinate logs between services.</param>
-        /// <param name="args">An object array that contains zero or more objects to format.</param>
-        private static LogEntry WriteEntry(
-            EventLogLevel eventLogLevel,
-            Exception innerException,
-            string message,
-            string correlationId,
-            params object[] args)
-        {
             if (string.IsNullOrEmpty(message))
                 return null;
 
@@ -709,34 +682,22 @@ namespace Microsoft.IdentityModel.Logging
 
             LogEntry entry = new LogEntry();
             entry.EventLogLevel = eventLogLevel;
-            entry.CorrelationId = correlationId;
 
             // Prefix header (library version, DateTime, whether PII is ON/OFF) to the first message logged by Wilson.
             if (!_isHeaderWritten)
             {
-                entry.Message = (correlationId == null) ?
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Microsoft.IdentityModel Version: {0}. Date {1}. {2}  Message: {3}",
-                        typeof(IdentityModelEventSource).Assembly.GetName().Version.ToString(),
-                        DateTime.UtcNow,
-                        IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage,
-                        Environment.NewLine + message) :
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Microsoft.IdentityModel Version: {0}. Date {1}. {2} Message: {3}, CorrelationId: {4}.",
-                        typeof(IdentityModelEventSource).Assembly.GetName().Version.ToString(),
-                        DateTime.UtcNow,
-                        IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage,
-                        Environment.NewLine + message,
-                        correlationId);
+                entry.Message = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Microsoft.IdentityModel Version: {0}. Date {1}. {2}  Message: {3}",
+                    typeof(IdentityModelEventSource).Assembly.GetName().Version.ToString(),
+                    DateTime.UtcNow,
+                    IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage,
+                    Environment.NewLine + message);
 
                 _isHeaderWritten = true;
             }
             else
-                entry.Message = (correlationId == null) ?
-                    message :
-                    string.Format(CultureInfo.InvariantCulture, "{0}, CorrelationId: {1}.", message, correlationId);
+                entry.Message = message;
 
             return entry;
         }
