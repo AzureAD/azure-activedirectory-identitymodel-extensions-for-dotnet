@@ -126,12 +126,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (string.Equals(configuration.Issuer, issuer))
                 {
-                    // TODO - how and when to log
-                    // Logs will have to be passed back to Wilson
-                    // so that they can be written to the correct place and in the correct format respecting PII.
-                    // Add to CallContext
-                    //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
+                    LogIssuerValidated(callContext, issuer);
+
                     return new ValidatedIssuer(
                             issuer!,
                             IssuerValidationSource.IssuerMatchedConfiguration);
@@ -152,9 +148,13 @@ namespace Microsoft.IdentityModel.Tokens
                     }
 
                     if (string.Equals(validationParameters.ValidIssuers[i], issuer))
+                    {
+                        LogIssuerValidated(callContext, issuer);
+
                         return new ValidatedIssuer(
                             issuer!,
                             IssuerValidationSource.IssuerMatchedValidationParameters);
+                    }
                 }
             }
 

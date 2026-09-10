@@ -33,13 +33,12 @@ namespace Microsoft.IdentityModel.Logging
             ActivityId = activityId;
         }
 
-#pragma warning disable CS3001 // ILogger is not CLSCompliant
-#pragma warning disable CS3003 // ILogger is not CLSCompliant
         /// <summary>
         /// Instantiates a new <see cref="LoggerContext"/>.
         /// </summary>
         /// <param name="logger"><see cref="ILogger"/> to record logs.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="logger"/> is null.</exception>
+        [CLSCompliant(false)]
         public LoggerContext(ILogger logger)
         {
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -51,6 +50,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="logger"><see cref="ILogger"/> to record logs.</param>
         /// <param name="activityId">activity id to include in logs.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="logger"/> is null.</exception>
+        [CLSCompliant(false)]
         public LoggerContext(ILogger logger, Guid activityId)
         {
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -63,6 +63,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="logger"><see cref="ILogger"/> to record logs.</param>
         /// <param name="correlationId">correlation id to include in logs.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="logger"/> is null.</exception>
+        [CLSCompliant(false)]
         public LoggerContext(ILogger logger, string correlationId)
         {
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -92,45 +93,25 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Gets the <see cref="ILogger"/> that will be used to log messages.
         /// </summary>
+        [CLSCompliant(false)]
         public ILogger Logger { get; }
 
-#pragma warning restore CS3001 // ILogger is not CLSCompliant
-#pragma warning restore CS3003 // ILogger is not CLSCompliant
-
         /// <summary>
-        /// Gets or sets an optional caller-supplied correlation id that can be added to an <see cref="ILogger"/> scope
-        /// by calling <see cref="BeginCorrelationScope"/>.
+        /// Gets or sets an optional caller-supplied correlation id that can be included in <see cref="ILogger"/> messages.
         /// </summary>
-        /// <remarks>Only this explicitly supplied value is logged; <see cref="ActivityId"/> is never promoted into ILogger messages.
-        /// It is treated as a non-PII correlation token and is emitted verbatim, so callers must not place PII in it.</remarks>
+        /// <remarks>
+        /// Only this explicitly supplied value is logged; <see cref="ActivityId"/> is never promoted into ILogger messages.
+        /// It is treated as a non-PII correlation token and is emitted verbatim, so callers must not place PII in it.
+        /// </remarks>
         public string CorrelationId { get; set; }
 
         /// <summary>
-        /// Gets or sets a boolean that controls whether <see cref="BeginCorrelationScope"/> includes
-        /// <see cref="CorrelationId"/> in an <see cref="ILogger"/> scope.
-        /// Defaults to <see langword="true"/>. Set to <see langword="false"/> to suppress the correlation scope.
+        /// Gets or sets a boolean that controls whether <see cref="CorrelationId"/> is included in
+        /// <see cref="ILogger"/> messages.
+        /// Defaults to <see langword="true"/>. Set to <see langword="false"/> to suppress correlation logging.
         /// </summary>
         /// <remarks>This flag gates only the explicitly supplied <see cref="CorrelationId"/> string. It has no effect on <see cref="ActivityId"/>.</remarks>
         public bool LogCorrelationId { get; set; } = true;
-
-        /// <summary>
-        /// Begins an <see cref="ILogger"/> scope containing the explicitly supplied <see cref="CorrelationId"/>.
-        /// </summary>
-        /// <returns>
-        /// The scope returned by <see cref="ILogger.BeginScope{TState}(TState)"/>, or a no-op scope when no logger
-        /// or correlation id was supplied, or when <see cref="LogCorrelationId"/> is <see langword="false"/>.
-        /// </returns>
-        /// <remarks>
-        /// Call this once at the operation boundary so all logs emitted during the operation, including
-        /// source-generated LoggerMessage events, inherit the same structured correlation metadata.
-        /// </remarks>
-        public IDisposable BeginCorrelationScope()
-        {
-            if (Logger is null || !LogCorrelationId || string.IsNullOrEmpty(CorrelationId))
-                return NullScope.Instance;
-
-            return Logger.BeginScope("CorrelationId: {CorrelationId}", CorrelationId) ?? NullScope.Instance;
-        }
 
         /// <summary>
         /// Gets or set a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
@@ -159,13 +140,5 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; set; }
 
-        private sealed class NullScope : IDisposable
-        {
-            internal static readonly NullScope Instance = new NullScope();
-
-            public void Dispose()
-            {
-            }
-        }
     }
 }
