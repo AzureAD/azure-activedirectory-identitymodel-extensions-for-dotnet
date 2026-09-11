@@ -81,9 +81,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenValidationParameters = CreateTokenValidationParameters(KeyingMaterial.DefaultRsaSecurityKey1),
                         ValidationParameters = CreateValidationParameters(KeyingMaterial.DefaultRsaSecurityKey1),
                         ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10618:"),
+                        // Unwrap failures now surface as decryption failures (IDX10603)
+                        // rather than key-wrap exceptions (IDX10618).
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:"),
                         // Avoid comparing the full exception message as the stack traces for the inner exceptions are different.
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenKeyWrapException("IDX10618:"),
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:"),
                     },
                     new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithKeyId_OnTokenDecryptFailure_KeysInConfig_SuccessOnRetry")
                     {

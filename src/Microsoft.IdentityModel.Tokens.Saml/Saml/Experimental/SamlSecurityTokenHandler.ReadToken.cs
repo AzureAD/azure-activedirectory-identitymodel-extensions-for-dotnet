@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             try
             {
-                using (var reader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max))
+                using (var reader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), BoundedXmlDictionaryReaderQuotas.Quotas))
                 {
                     return ReadSamlToken(reader);
                 }
