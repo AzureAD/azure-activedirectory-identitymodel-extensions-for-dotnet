@@ -20,19 +20,46 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
         /// <param name="callContext"> contextual information for diagnostics.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
-        internal ValidationError? Verify(
+        /// <returns>
+        /// A <see cref="ValidationResult{TResult, TError}"/> containing this <see cref="Reference"/> if the digest is valid;
+        /// otherwise, a <see cref="ValidationError"/>.
+        /// </returns>
+        /// <remarks>
+        /// Expected XML, hashing, hash-provider, and digest-decoding failures are returned as
+        /// <see cref="SignatureValidationFailure.ReferenceDigestValidationFailed"/> with the underlying
+        /// exception preserved in <see cref="ValidationError.InnerException"/>.
+        /// </remarks>
+        internal ValidationResult<Reference, ValidationError> Verify(
             CryptoProviderFactory cryptoProviderFactory,
 #pragma warning disable CA1801 // Review unused parameters
             CallContext callContext)
 #pragma warning restore CA1801
         {
-            if (cryptoProviderFactory == null)
+            if (cryptoProviderFactory is null)
                 return ValidationError.NullParameter(
                     nameof(cryptoProviderFactory),
                     ValidationError.GetCurrentStackFrame());
 
-            if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory), Convert.FromBase64String(DigestValue)))
+            byte[] digest;
+            byte[] expectedDigest;
+            try
+            {
+                digest = ComputeDigest(cryptoProviderFactory);
+                expectedDigest = Convert.FromBase64String(DigestValue);
+            }
+            catch (Exception ex) when (ex is XmlException or System.Xml.XmlException or CryptographicException
+                or ArgumentException or FormatException or InvalidOperationException or NotSupportedException)
+            {
+                return new SignatureValidationError(
+                    new MessageDetail(
+                        LogMessages.IDX30201,
+                        Uri ?? Id),
+                    SignatureValidationFailure.ReferenceDigestValidationFailed,
+                    ValidationError.GetCurrentStackFrame(),
+                    ex);
+            }
+
+            if (!Utility.AreEqual(digest, expectedDigest))
                 return new SignatureValidationError(
                     new MessageDetail(
                         LogMessages.IDX30201,
@@ -40,7 +67,7 @@ namespace Microsoft.IdentityModel.Xml
                     SignatureValidationFailure.ReferenceDigestValidationFailed,
                     ValidationError.GetCurrentStackFrame());
 
-            return null;
+            return this;
         }
 #nullable restore
     }
