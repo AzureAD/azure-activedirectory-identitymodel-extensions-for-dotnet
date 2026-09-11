@@ -2,5 +2,21 @@ static Microsoft.IdentityModel.Dpop.DpopProofValidator.ComputeAccessTokenHash(st
 static Microsoft.IdentityModel.Dpop.DpopProofValidator.ComputeJwkThumbprint(Microsoft.IdentityModel.Tokens.JsonWebKey jwk) -> string
 static Microsoft.IdentityModel.Dpop.DpopProofValidator.ContainsPrivateKeyMaterial(Microsoft.IdentityModel.Tokens.JsonWebKey jwk) -> bool
 static Microsoft.IdentityModel.Dpop.DpopProofValidator.TryConvertToAsymmetricKeyFromBareParameters(Microsoft.IdentityModel.Tokens.JsonWebKey jwk, out Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
+Microsoft.IdentityModel.Dpop.DpopProofValidator.ValidateInternalAsync(string dpopProofJwt, string httpMethod, System.Uri requestUri, string accessToken, string expectedCnfJkt, Microsoft.IdentityModel.Dpop.DpopValidationOptions options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Dpop.Experimental.ValidatedDpopProof, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
+Microsoft.IdentityModel.Dpop.Experimental.DpopCnfThumbprintMismatchError
+Microsoft.IdentityModel.Dpop.Experimental.DpopCnfThumbprintMismatchError.DpopCnfThumbprintMismatchError(string message, System.Exception innerException = null) -> void
+Microsoft.IdentityModel.Dpop.Experimental.DpopNonceRequiredError
+Microsoft.IdentityModel.Dpop.Experimental.DpopNonceRequiredError.DpopNonceRequiredError(string message, System.Exception innerException = null) -> void
+Microsoft.IdentityModel.Dpop.Experimental.DpopProofClaimValidationError
+Microsoft.IdentityModel.Dpop.Experimental.DpopProofClaimValidationError.ClaimName.get -> string
+Microsoft.IdentityModel.Dpop.Experimental.DpopProofClaimValidationError.DpopProofClaimValidationError(string claimName, string message, Microsoft.IdentityModel.Dpop.DpopValidationFailureType failureType, System.Exception innerException = null) -> void
+Microsoft.IdentityModel.Dpop.Experimental.DpopProofValidationError
+Microsoft.IdentityModel.Dpop.Experimental.DpopProofValidationError.DpopFailureType.get -> Microsoft.IdentityModel.Dpop.DpopValidationFailureType
+Microsoft.IdentityModel.Dpop.Experimental.DpopProofValidationError.DpopProofValidationError(string message, Microsoft.IdentityModel.Dpop.DpopValidationFailureType dpopFailureType, System.Exception innerException = null) -> void
+Microsoft.IdentityModel.Dpop.Experimental.DpopProofValidationError.DpopProofValidationError(string message, Microsoft.IdentityModel.Dpop.DpopValidationFailureType dpopFailureType, Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType validationFailureType, System.Exception innerException) -> void
+Microsoft.IdentityModel.Dpop.Experimental.ValidatedDpopProof
+Microsoft.IdentityModel.Dpop.Experimental.ValidatedDpopProof.Jkt.get -> string
+Microsoft.IdentityModel.Dpop.Experimental.ValidatedDpopProof.Nonce.get -> string
+Microsoft.IdentityModel.Dpop.Experimental.ValidatedDpopProof.ValidatedDpopProof(string jkt, string nonce) -> void
 Microsoft.IdentityModel.Dpop.UriComparer
 static Microsoft.IdentityModel.Dpop.UriComparer.AreEquivalent(System.Uri uri, string uriToCompareTo) -> bool
