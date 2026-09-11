@@ -167,8 +167,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
                 else if (validationParameters.TryAllSigningKeys)
                     return ValidateSignatureUsingAllKeys(
-                        canonicalBytes,
-                        signatureValueBytes,
+                        signatureValueBytes: signatureValueBytes,
+                        canonicalBytes: canonicalBytes,
                         securityToken,
                         signature,
                         canonicalString,
@@ -214,8 +214,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 #pragma warning restore CA1801 // Review unused parameters
             Microsoft.IdentityModel.Telemetry.ITelemetryClient telemetryClient)
         {
-            // TODO - this is not an AlgorithmValidationFailure, but a CryptoProviderFactory failure.
-            // TODO we need tests across token handlers
             CryptoProviderFactory cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(signature.SignedInfo.SignatureMethod, key))
             {
@@ -224,7 +222,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         Tokens.LogMessages.IDX10652,
                         LogHelper.MarkAsNonPII(signature.SignedInfo.SignatureMethod),
                         key),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    ValidationFailureType.CryptoProviderFactoryDoesNotSupportAlgorithm,
                     ValidationError.GetCurrentStackFrame());
             }
 
@@ -257,28 +255,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         ValidationError.GetCurrentStackFrame());
                 }
 
-                var result = signature.SignedInfo.Verify(cryptoProviderFactory, callContext);
-                if (result == null)
+                ValidationResult<SecurityKey, ValidationError> signedInfoResult =
+                    signature.SignedInfo.Verify(key, cryptoProviderFactory, callContext);
+
+                if (!signedInfoResult.Succeeded)
                 {
                     RecordSignatureValidationTelemetry(
                         telemetryClient,
-                        TelemetryConstants.SignatureValidationErrors.None,
+                        TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
                         securityToken,
                         signature.SignedInfo.SignatureMethod,
                         key);
 
-                    securityToken.SigningKey = key;
-                    return key;
+                    return signedInfoResult.Error!.AddCurrentStackFrame();
                 }
 
                 RecordSignatureValidationTelemetry(
                     telemetryClient,
-                    TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                    TelemetryConstants.SignatureValidationErrors.None,
                     securityToken,
                     signature.SignedInfo.SignatureMethod,
                     key);
 
-                return result;
+                securityToken.SigningKey = signedInfoResult.Result;
+                return signedInfoResult;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)

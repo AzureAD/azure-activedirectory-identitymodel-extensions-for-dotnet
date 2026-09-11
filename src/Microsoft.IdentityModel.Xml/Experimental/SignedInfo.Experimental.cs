@@ -13,35 +13,41 @@ namespace Microsoft.IdentityModel.Xml
     {
 #nullable enable
         /// <summary>
-        /// Verifies the digest of all <see cref="References"/>
+        /// Verifies the digest of all <see cref="References"/>.
         /// </summary>
+        /// <param name="key">The candidate <see cref="SecurityKey"/> associated with this validation attempt. Returned unchanged on success.</param>
         /// <param name="cryptoProviderFactory">supplies any required cryptographic operators.</param>
         /// <param name="callContext"> contextual information for diagnostics.</param>
-        internal ValidationError? Verify(
+        /// <returns>
+        /// A <see cref="ValidationResult{TResult, TError}"/> containing <paramref name="key"/> if every reference digest is valid;
+        /// otherwise, the first reference validation error. Success means the reference digests passed for this enclosing
+        /// validation attempt, not that this method independently verified the signature.
+        /// </returns>
+        internal ValidationResult<SecurityKey, ValidationError> Verify(
+            SecurityKey key,
             CryptoProviderFactory cryptoProviderFactory,
             CallContext callContext)
         {
-            // TODO needs to return ValidationResult<SecurityKey, ValidationError>
-            if (cryptoProviderFactory == null)
+            if (key is null)
+                return ValidationError.NullParameter(
+                    nameof(key),
+                    ValidationError.GetCurrentStackFrame());
+
+            if (cryptoProviderFactory is null)
                 return ValidationError.NullParameter(
                     nameof(cryptoProviderFactory),
                     ValidationError.GetCurrentStackFrame());
 
-            ValidationError? validationError = null;
-
             for (int i = 0; i < References.Count; i++)
             {
-                var reference = References[i];
-                validationError = reference.Verify(cryptoProviderFactory, callContext);
+                ValidationResult<Reference, ValidationError> referenceResult =
+                    References[i].Verify(cryptoProviderFactory, callContext);
 
-                if (validationError is not null)
-                {
-                    validationError.AddCurrentStackFrame();
-                    break;
-                }
+                if (!referenceResult.Succeeded)
+                    return referenceResult.Error!.AddCurrentStackFrame();
             }
 
-            return validationError;
+            return key;
         }
 #nullable restore
     }
