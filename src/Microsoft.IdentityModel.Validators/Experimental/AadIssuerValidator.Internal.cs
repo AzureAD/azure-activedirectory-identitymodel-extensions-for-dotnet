@@ -31,8 +31,8 @@ namespace Microsoft.IdentityModel.Validators
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-#pragma warning disable CA1801 // Review unused parameters
             CallContext callContext,
+#pragma warning disable CA1801 // Review unused parameters
             CancellationToken cancellationToken)
 #pragma warning restore CA1801 // Review unused parameters
         {
@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                tenantId = GetTenantIdFromToken(securityToken);
+                tenantId = GetTenantIdFromToken(securityToken, callContext);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -60,6 +60,8 @@ namespace Microsoft.IdentityModel.Validators
             }
 
             if (string.IsNullOrWhiteSpace(tenantId))
+            {
+                callContext.Logger?.MissingTenantIdClaim();
                 return new IssuerValidationError(
                     new MessageDetail(
                         LogMessages.IDX40003,
@@ -67,6 +69,7 @@ namespace Microsoft.IdentityModel.Validators
                         IssuerValidationFailure.ValidationFailed,
                         new StackFrame(true),
                         issuer);
+            }
 
             for (int i = 0; i < validationParameters.ValidIssuers.Count; i++)
             {
@@ -107,6 +110,8 @@ namespace Microsoft.IdentityModel.Validators
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
+                callContext.Logger?.NoValidIssuerMatch(issuer);
+
                 return new IssuerValidationError(
                     new MessageDetail(
                         LogMessages.IDX40001,
@@ -118,6 +123,8 @@ namespace Microsoft.IdentityModel.Validators
             }
 
             // If a valid issuer is not found, return an error.
+            callContext.Logger?.NoValidIssuerMatch(issuer);
+
             return new IssuerValidationError(
                 new MessageDetail(
                     LogMessages.IDX40001,

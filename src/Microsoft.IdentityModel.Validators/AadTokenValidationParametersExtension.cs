@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Validators
 
             tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) =>
             {
-                ValidateSigningKeyCloudInstance(securityKey, config);
+                ValidateSigningKeyCloudInstance(securityKey, config, tvp.GetCallContext());
 
                 // preserve and run provided logic
                 if (userProvidedIssuerSigningKeyValidatorUsingConfiguration != null)
@@ -57,7 +57,8 @@ namespace Microsoft.IdentityModel.Validators
 
             tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) =>
             {
-                ValidateIssuerSigningKey(securityKey, securityToken, config);
+                CallContext callContext = tvp.GetCallContext();
+                ValidateIssuerSigningKey(securityKey, securityToken, config, callContext);
 
                 // preserve and run provided logic
                 if (userProvidedIssuerSigningKeyValidatorUsingConfiguration != null)
@@ -66,7 +67,7 @@ namespace Microsoft.IdentityModel.Validators
                 if (userProvidedIssuerSigningKeyValidator != null)
                     return userProvidedIssuerSigningKeyValidator(securityKey, securityToken, tvp);
 
-                return ValidateIssuerSigningKeyCertificate(securityKey, tvp);
+                return ValidateIssuerSigningKeyCertificate(securityKey, tvp, callContext);
             };
         }
 
@@ -78,6 +79,15 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="configuration">The <see cref="BaseConfiguration"/> provided.</param>
         /// <returns><c>true</c> if the issuer of the signing key is valid; otherwise, <c>false</c>.</returns>
         internal static bool ValidateIssuerSigningKey(SecurityKey securityKey, SecurityToken securityToken, BaseConfiguration configuration)
+        {
+            return ValidateIssuerSigningKey(securityKey, securityToken, configuration, new CallContext());
+        }
+
+        internal static bool ValidateIssuerSigningKey(
+            SecurityKey securityKey,
+            SecurityToken securityToken,
+            BaseConfiguration configuration,
+            CallContext callContext)
         {
             if (securityKey == null)
                 return true;
@@ -95,27 +105,27 @@ namespace Microsoft.IdentityModel.Validators
                 if (string.IsNullOrWhiteSpace(signingKeyIssuer))
                     return true;
 
-                string tenantIdFromToken = GetTid(securityToken);
+                string tenantIdFromToken = GetTid(securityToken, callContext);
                 if (string.IsNullOrEmpty(tenantIdFromToken))
                 {
                     if (AppContextSwitches.DontFailOnMissingTid)
                         return true;
 
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009), callContext);
                 }
 
                 string tokenIssuer = securityToken.Issuer;
 
 #if NET6_0_OR_GREATER
                 if (!string.IsNullOrEmpty(tokenIssuer) && !tokenIssuer.Contains(tenantIdFromToken, StringComparison.Ordinal))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40004, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(tenantIdFromToken))));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40004, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(tenantIdFromToken))), callContext);
 
                 // creating an effectiveSigningKeyIssuer is required as signingKeyIssuer might contain {tenantid}
                 string effectiveSigningKeyIssuer = signingKeyIssuer.Replace(AadIssuerValidator.TenantIdTemplate, tenantIdFromToken, StringComparison.Ordinal);
                 string v2TokenIssuer = openIdConnectConfiguration.Issuer?.Replace(AadIssuerValidator.TenantIdTemplate, tenantIdFromToken, StringComparison.Ordinal);
 #else
                 if (!string.IsNullOrEmpty(tokenIssuer) && !tokenIssuer.Contains(tenantIdFromToken))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40004, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(tenantIdFromToken))));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40004, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(tenantIdFromToken))), callContext);
 
                 // creating an effectiveSigningKeyIssuer is required as signingKeyIssuer might contain {tenantid}
                 string effectiveSigningKeyIssuer = signingKeyIssuer.Replace(AadIssuerValidator.TenantIdTemplate, tenantIdFromToken);
@@ -128,7 +138,7 @@ namespace Microsoft.IdentityModel.Validators
                 // 3. signing key issuers will never match sts.windows.net as v1 endpoint doesn't have issuers attached to keys
                 // v2TokenIssuer is the representation of Token.Issuer (if it was a v2 issuer)
                 if (effectiveSigningKeyIssuer != tokenIssuer && effectiveSigningKeyIssuer != v2TokenIssuer)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40005, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(effectiveSigningKeyIssuer))));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40005, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(effectiveSigningKeyIssuer))), callContext);
             }
 
             return true;
@@ -140,6 +150,14 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> provided.</param>
         internal static void ValidateSigningKeyCloudInstance(SecurityKey securityKey, BaseConfiguration configuration)
+        {
+            ValidateSigningKeyCloudInstance(securityKey, configuration, new CallContext());
+        }
+
+        internal static void ValidateSigningKeyCloudInstance(
+            SecurityKey securityKey,
+            BaseConfiguration configuration,
+            CallContext callContext)
         {
             if (securityKey == null)
                 return;
@@ -167,7 +185,8 @@ namespace Microsoft.IdentityModel.Validators
                                 ConfigurationCloudInstanceName = configurationCloudInstanceName,
                                 SigningKeyCloudInstanceName = signingKeyCloudInstanceName,
                                 SigningKey = securityKey,
-                            });
+                            },
+                            callContext);
                 }
             }
         }
@@ -186,14 +205,14 @@ namespace Microsoft.IdentityModel.Validators
             return null;
         }
 
-        private static string GetTid(SecurityToken securityToken)
+        private static string GetTid(SecurityToken securityToken, CallContext callContext)
         {
             switch (securityToken)
             {
                 case JsonWebToken jsonWebToken:
                     if (jsonWebToken.TryGetPayloadValue<string>(AadIssuerValidatorConstants.Tid, out string tid))
                     {
-                        EnforceSingleClaimCaseInsensitive(jsonWebToken.PayloadClaimNames, AadIssuerValidatorConstants.Tid);
+                        EnforceSingleClaimCaseInsensitive(jsonWebToken.PayloadClaimNames, AadIssuerValidatorConstants.Tid, callContext);
                         return tid;
                     }
 
@@ -202,18 +221,18 @@ namespace Microsoft.IdentityModel.Validators
                 case JwtSecurityToken jwtSecurityToken:
                     if ((jwtSecurityToken.Payload.TryGetValue(AadIssuerValidatorConstants.Tid, out object tidObject) && tidObject is string jwtTid))
                     {
-                        EnforceSingleClaimCaseInsensitive(jwtSecurityToken.Payload.Keys, AadIssuerValidatorConstants.Tid);
+                        EnforceSingleClaimCaseInsensitive(jwtSecurityToken.Payload.Keys, AadIssuerValidatorConstants.Tid, callContext);
                         return jwtTid;
                     }
 
                     return string.Empty;
 
                 default:
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40010));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40010), callContext);
             }
         }
 
-        private static void EnforceSingleClaimCaseInsensitive(IEnumerable<string> keys, string claimType)
+        private static void EnforceSingleClaimCaseInsensitive(IEnumerable<string> keys, string claimType, CallContext callContext)
         {
             bool claimSeen = false;
             foreach (var key in keys)
@@ -221,7 +240,7 @@ namespace Microsoft.IdentityModel.Validators
                 if (string.Equals(key, claimType, StringComparison.OrdinalIgnoreCase))
                 {
                     if (claimSeen)
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40011, claimType)));
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40011, claimType)), callContext);
 
                     claimSeen = true;
                 }
@@ -236,6 +255,14 @@ namespace Microsoft.IdentityModel.Validators
         /// <returns><c>true</c> if the issuer signing key certificate is valid; otherwise, <c>false</c>.</returns>
         internal static bool ValidateIssuerSigningKeyCertificate(SecurityKey securityKey, TokenValidationParameters validationParameters)
         {
+            return ValidateIssuerSigningKeyCertificate(securityKey, validationParameters, validationParameters.GetCallContext());
+        }
+
+        internal static bool ValidateIssuerSigningKeyCertificate(
+            SecurityKey securityKey,
+            TokenValidationParameters validationParameters,
+            CallContext callContext)
+        {
             if (!validationParameters.RequireSignedTokens && securityKey == null)
             {
                 LogHelper.LogInformation(Tokens.LogMessages.IDX10252);
@@ -243,7 +270,7 @@ namespace Microsoft.IdentityModel.Validators
             }
             else if (securityKey == null)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(securityKey), LogMessages.IDX40007));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(securityKey), LogMessages.IDX40007), callContext);
             }
 
             if (!validationParameters.ValidateIssuerSigningKey)

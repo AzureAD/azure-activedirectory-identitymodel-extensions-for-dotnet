@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Validators
                 if (validationParameters.ConfigurationManager != null)
                     configuration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
-                ValidateSigningKeyCloudInstance(securityKey, configuration);
+                ValidateSigningKeyCloudInstance(securityKey, configuration, callContext);
 
                 // preserve and run provided logic
                 if (_originalValidator != null)
@@ -93,13 +93,13 @@ namespace Microsoft.IdentityModel.Validators
                 if (vp.ConfigurationManager != null)
                     baseConfiguration = vp.ConfigurationManager.GetBaseConfigurationAsync(System.Threading.CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
-                AadTokenValidationParametersExtension.ValidateIssuerSigningKey(securityKey, securityToken, baseConfiguration);
+                AadTokenValidationParametersExtension.ValidateIssuerSigningKey(securityKey, securityToken, baseConfiguration, callContext);
 
                 // preserve and run provided logic
                 if (_originalValidator != null)
                     return _originalValidator.ValidateSignatureKey(securityKey, securityToken, vp, callContext);
 
-                return ValidateIssuerSigningKeyCertificate(securityKey, _validationParameters);
+                return ValidateIssuerSigningKeyCertificate(securityKey, _validationParameters, callContext);
             }
         }
 
@@ -109,6 +109,14 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> provided.</param>
         internal static void ValidateSigningKeyCloudInstance(SecurityKey securityKey, BaseConfiguration configuration)
+        {
+            ValidateSigningKeyCloudInstance(securityKey, configuration, new CallContext());
+        }
+
+        internal static void ValidateSigningKeyCloudInstance(
+            SecurityKey securityKey,
+            BaseConfiguration configuration,
+            CallContext callContext)
         {
             if (securityKey == null)
                 return;
@@ -140,7 +148,8 @@ namespace Microsoft.IdentityModel.Validators
                                 ConfigurationCloudInstanceName = configurationCloudInstanceName,
                                 SigningKeyCloudInstanceName = signingKeyCloudInstanceName,
                                 SigningKey = securityKey,
-                            });
+                            },
+                            callContext);
                 }
             }
         }
@@ -149,16 +158,20 @@ namespace Microsoft.IdentityModel.Validators
         /// Validates the issuer signing key certificate.
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
-        /// <param name="validationParameters">The <see cref="ValidationParameters"/> that are used to validate the token.</param>
+        /// <param name="validationParameters">The <see cref="CallContext"/> used for logging.</param>
+        /// <param name="callContext">The <see cref="ValidationParameters"/> that are used to validate the token.</param>
         /// <returns><c>true</c> if the issuer signing key certificate is valid; otherwise, <c>false</c>.</returns>
-        private static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateIssuerSigningKeyCertificate(SecurityKey securityKey, ValidationParameters validationParameters)
+        private static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateIssuerSigningKeyCertificate(
+            SecurityKey securityKey,
+            ValidationParameters validationParameters,
+            CallContext callContext)
         {
             if (securityKey == null)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(securityKey), LogMessages.IDX40007));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(securityKey), LogMessages.IDX40007), callContext);
             }
 
-            return Tokens.Validators.ValidateSignatureKey(securityKey, validationParameters, new CallContext());
+            return Tokens.Validators.ValidateSignatureKey(securityKey, validationParameters, callContext);
         }
     }
 }
