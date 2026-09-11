@@ -148,10 +148,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_SignatureValidationResult_Success_X5tMatches")
                     {
-                        SigningCredentials = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2,
+                        SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
                         ValidationParameters = new ValidationParameters(),
-                        KeyToAddToValidationParameters = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key,
-                        OperationResult = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key,
+                        KeyToAddToValidationParameters = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                        OperationResult = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_IssuerSigningKeyResolverReturnsKeyThatMatches")
                     {
