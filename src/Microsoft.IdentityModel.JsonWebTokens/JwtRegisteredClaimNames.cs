@@ -16,6 +16,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // Please keep in alphabetical order
 
         /// <summary>
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc8693#section-4.1"/>.
+        /// </summary>
+        public const string Act = "act";
+
+        /// <summary>
         /// </summary>
         public const string Actort = "actort";
 

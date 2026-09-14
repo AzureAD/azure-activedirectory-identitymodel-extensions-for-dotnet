@@ -1,5 +1,253 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+9.0.0
+====
+## New Features
+- Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The default is case-sensitive; set the property to `false` for case-insensitive comparison. The previous `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext key is no longer honored. Applications upgrading from 8.22.0 that set the key to `false` must set this property to `false` instead. See [PR #3569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3569).
+
+## Bug Fixes
+- Enforce the minimum asymmetric key sizes configured by `AsymmetricSignatureProvider`. This can introduce new constructor-time failures for applications using undersized keys on modern .NET targets. Applications that need time to rotate legacy keys can temporarily restore the previous behavior by enabling the `Switch.Microsoft.IdentityModel.DoNotEnforceMinimumAsymmetricKeySize` AppContext switch before first use. See [PR #3594](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3594).
+
+8.22.0
+====
+## New Features
+- Add `IgnoreCaseWhenValidatingAudience` flag to `TokenValidationParameters` (and the experimental `ValidationParameters`) to allow case-insensitive audience validation. The default remains case-sensitive (ordinal). See [PR #3563](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3563).
+
+## Bug Fixes
+- Preserve the original metadata fetch exception in the `ConfigurationManager` blocking path so callers within the backoff window still receive the inner `IOException` (including the HTTP status code) instead of an `IDX20803` with a null `InnerException`. See [PR #3486](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3486).
+
+8.21.0
+====
+## Performance Improvements
+- Add JsonWebToken header-replacement path to avoid re-parsing payload. See [PR #3552](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3552).
+- Add claims dictionary preallocation. See [PR #3542](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3542).
+
+## Bug Fixes
+- Fix CI build failures: remove unused log message and add missing DPoP API entries. See [PR #3551](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3551).
+
+7.7.2
+====
+## Bug Fixes
+- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` to take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
+- Improve validation of `jku` claim. See [PR #3480](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3480).
+
+## Dependency Updates
+- Update System.Text.Json to 8.0.5 on all target frameworks except .NET 461. See [PR #3499](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3499).
+
+8.19.1
+====
+## Bug Fixes
+- Update `JwtSecurityTokenHandler` for `IssuerSigningKeyResolverUsingConfiguration` to take priority over `IssuerSigningKeyResolver`, matching the documented contract and the correct behavior already present in `JsonWebTokenHandler`. See [PR #3519](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3519).
+
+8.19.0
+====
+## New Features
+- Add ML-DSA (FIPS 204) post-quantum signature support. See [PR #3479](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3479).
+- Cache custom crypto providers in CryptoProviderFactory. See [PR #3489](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3489).
+
+## Bug Fixes
+- Disable automatic redirects on default HttpClient for JKU retrieval. See [PR #3494](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3494).
+- Adjust rented buffer handling in claim set parsing. See [PR #3493](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3493).
+- Tidy null handling in SAML conditions validation. See [PR #3491](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3491).
+- Improve validation of `jku` claim. See [PR #3481](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3481).
+- Limit telemetry algorithm dimension cardinality. See [PR #3490](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3490).
+- Add defensive copy of collections in ValidationParameters. See [PR #3492](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3492).
+- Update TokenValidationParameter copy constructor to make a deep copy. See [PR #3488](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3488).
+- Update to fail-closed when replay protection isn't configured and other DPoP hardening. See [PR #3505](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3505).
+- Apply RFC 3986 section 6.2.2 normalization to DPoP `htu` comparison. See [PR #3509](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3509).
+
+8.18.0
+====
+## New Features
+- Introduced a new interface `IConfigurationEventHandlerContextAware<T>` that provides context to the configuration event handler implementation, allowing it to optionally bypass a cache lookup. See [PR #3444](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3444).
+- Added Microsoft.IdentityModel.Dpop — a new package implementing DPoP (Demonstrating Proof-of-Possession) per RFC 9449. Provides both client-side and server-side proof validation with no System.Net.Http dependency. See [PR #3443](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3443).
+
+8.17.0
+====
+## Dependencies
+- Downgrade Microsoft.Extensions.Logging.Abstractions to 8.0.0 on .NET 10 to match the version on .NET 8 and .NET 9. See [PR #3435](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3435).
+
+8.16.0
+====
+## New Features
+- Add telemetry around signature validation. See [PR #3415](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3415) for details.
+
+## Fundamentals
+- Fix FileVersion format to use two-digit year and day of year. See [PR #3389](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3389) for details.
+
+8.15.0
+====
+## New Features
+- **Add ECDsa support in `X509SecurityKey` and `JsonWebKeyConverter.ConvertFromX509SecurityKey`**  
+  Extended `X509SecurityKey` and `JsonWebKeyConverter.ConvertFromX509SecurityKey` to support ECDSA keys.  
+  See PR [#2377](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2377) for details.
+
+## Bug Fixes
+- **Sanitize logs to avoid leaking sensitive data**  
+  Updated logging to sanitize sensitive values, reducing the risk of inadvertently exposing secrets or PII in logs.  
+  See PR [#3316](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3316) for details.
+- **Optimize log sanitization with `SearchValues`**  
+  Improved the performance of the log sanitization logic introduced earlier by using `SearchValues`, making sanitization more efficient in high-throughput scenarios.  
+  See PR [#3341](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3341) for details.
+- **Update test for `IDX10400`**  
+  Adjusted the `IDX10400` test to align with the current behavior and error messaging.  
+  See PR [#3314](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3314) for details.
+
+## Fundamentals
+- **Add supported algorithm tests**  
+  Added new tests to validate the set of supported cryptographic algorithms, increasing confidence in algorithm coverage and compatibility.  
+  See PR [#3296](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3296) for details.
+- **Migrate repository agent rules from `.clinerules` to `agents.md`**  
+  Moved repository agent/AI-assist rules into markdown documentation to make them more visible and easier to maintain.  
+  See PR [#3313](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3313) for details.
+- **Migrate `Microsoft.IdentityModel.TestExtensions` from Newtonsoft.Json to System.Text.Json**  
+  Updated `Microsoft.IdentityModel.TestExtensions` to use `System.Text.Json` instead of `Newtonsoft.Json`, aligning tests with the runtime serialization stack.  
+  See PR [#3356](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3356) for details.
+- **Disable code coverage comments**  
+  Turned off automated code coverage comments on PRs to reduce noise while retaining coverage data elsewhere.  
+  See PR [#3349](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3349) for details.
+- **Fix CodeQL alerts**  
+  Addressed CodeQL-reported issues to improve security posture and static analysis cleanliness.  
+  See PR [#3364](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3364) for details.
+
+### .NET 10 / SDK and tooling updates
+- **Building with .NET 10 preview / RC 1**  
+  Updated the repository to build and test against .NET 10.0 preview/RC1, ensuring early compatibility with the upcoming runtime.  
+  See PRs [#3287](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3287), [#3357](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3357), and [#3358](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3358) for details.
+- **Fix .NET 10 test execution consistency**  
+  Ensured consistent use of the `TargetNetNext` parameter across build, test, and pack phases so .NET 10.0 tests execute reliably.  
+  See PR [#3337](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3337) for details.
+- **Update project files and workflows for .NET 10.0 compatibility**  
+  Adjusted project files and CI workflows to correctly target and run on .NET 10.0, including test and pack scenarios.  
+  See PR [#3363](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3363) for details.
+- **Update .NET version to meet CG compliance**  
+  Updated the .NET version references to be compliant with corporate governance (CG) requirements.  
+  See PR [#3353](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3353) for details.
+- **Update Coverlet collector and test SDK**  
+  - Bumped `CoverletCollectorVersion` to 6.0.4.  
+    See PR [#3333](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3333) for details.  
+  - Upgraded `Microsoft.NET.Test.Sdk` to a newer version for improved test reliability and tooling support.  
+    See PR [#3336](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3336) for details.
+- **Update `runTests.ps1` to specify dotnet directory**  
+  Updated `runTests.ps1` to accept an explicit dotnet directory, improving test execution robustness in environments with multiple SDK installations.  
+  See PR [#3368](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3368) for details.
+- **Adjust dotnetcore workflow targeting for .NET 10 SDK**  
+  Iterated on the CI workflow configuration to correctly target the .NET 10 SDK:  
+  - Temporarily removed targeting of the .NET 10 SDK in `dotnetcore.yml`.  
+    See PR [#3335](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3335).  
+  - Reverted that change to restore .NET 10 SDK targeting.  
+    See PR [#3339](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3339) for details.
+
+### Documentation
+- **Update support policy documentation**  
+  Refreshed `supportPolicy.md` to reflect the latest support policy for IdentityModel.  
+  See PR [#3367](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3367) for details.
+  
+8.14.0
+====
+## Bug Fixes
+- Switch back to use `ValidationResult` instead of `OperationResult` when validating a token in a new experimental validation flow. Additionally removed the dependency on Microsoft.IdentityModel.Abstractions. See [#3299](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3299) for details.
+
+8.13.1
+====
+## Dependencies
+Microsoft.IdentityModel now depends on Microsoft.Identity.Abstractions 9.3.0
+
+## Bug Fixes
+- Fixed a decompression failure happening for large JWE payloads. See [#3286](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3286) for details.
+
+### Work related to redesign of IdentityModel's token validation logic [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
+- Update the validation methods to return Microsoft.Identity.Abstractions.OperationResult. See [#3284](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3284) for details.
+
+8.13.0
+====
+### Fundamentals
+- `CaseSensitiveClaimsIdentity.SecurityToken` setter is now protected internal (was internal). See PR [#3278](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3278) for details.
+- Update .NET SDK version to 9.0.108 used when building or running the code. See PR [#3274](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3274) for details.
+- Update RsaSecurityKey.cs to replace the Pkcs1 padding by Pss from HasPrivateKey check. See [#3280](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3280) for details.
+
+8.12.1
+====
+### Fundamentals
+- Update .NET SDK version to 9.0.107 used when building or running the code. See [#3385](https://github.com/AzureAD/microsoft-identity-web/pull/3385) for details.
+- To keep our experimental code separate from production code, all files associated with experimental features have been moved to the Experimental folders. See PR [#3261](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3261) for details.
+- Experimental code leaked into TokenValidationResult from early prototypes. See PR [#3259](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3259) for details.
+
+8.12.0
+====
+## New Features
+- **Enhance ConfigurationManager with event handling**  
+  Added event handling capabilities to the `ConfigurationManager`, enabling consumers to subscribe to configuration change events. This enhancement improves extensibility and allows more responsive applications. For details see [#3253](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3253)  
+
+## Bug Fixes
+- **Add expected Base64UrlEncoder.Decode overload for NET6 and 8**  
+  Introduced the expected overload of `Base64UrlEncoder.Decode` for .NET 6 and 8, ensuring compatibility and preventing missing method issues on these frameworks.  
+  For details see [#3249](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3249)  
+
+## Fundamentals
+- **Add AI assist rules**  
+  Incorporated AI assist rules to enhance AI agents effectiveness.  
+  For details see [#3255](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3255)  
+- **Update PublicApiAnalyzers and BannedApiAnalyzers to 4.14.0**  
+  Upgraded analyzer packages for improved diagnostics and code consistency (in particular delegates are added).  
+  For details see [#3256](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3256)  
+- **Move suppression of RS006 to csproj**  
+  Centralized suppression of RS006 warnings in project files for easier management.  
+  For details see [#3230](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3230)  
+
+8.11.0
+=====
+## New Features:
+- Microsoft.IdentityModel now exposes the AadIssuerValidator factory method publicly to enable caching functionality for AadIssuerValidator instances. See issue [#3245](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3245) for details.
+- Added a new public async API: `JsonWebTokenHandler.DecryptTokenWithConfigurationAsync`, which decrypts a JWE token using keys from either `TokenValidationParameters` or, if not present, from configuration (such as via a ConfigurationManager). This enhancement improves developer experience by enabling asynchronous, cancellation-aware JWE decryption scenarios, aligning with modern .NET async patterns and making integration with external key/configuration sources more robust and observable. See PR [#3243](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3243) for details.
+
+8.10.0
+=====
+## Bug Fixes
+- Corrected casing of the Type attribute in SubjectConfirmationData. See [#3206](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3206).
+- Removed Microsoft.Bcl.Memory dependency for pre-.NET 9.0 targets. See [#3220](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/33784b8ec0ff4300efad788535f90b3adc5bdfd1) to avoid build warnings with the other target frameworks
+- Aligned Microsoft.Extensions.Logging.Abstractions version to 8.0.0 for .NET 9 to match other targets. See [#3226](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/793bd34e945eb8ba7528cf87c4a29a29c4704a65).
+
+## Fundamentals
+- Introduced Long-Term Support (LTS) policy. See [#3228](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/946bec18cdeb26b8133a04e8c056dd5f17588f89) and [#3232](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/14842aedb3d57c32b9ce784061cd9beccbdd1eb1).
+
+8.9.0
+=====
+## Bug Fixes
+- syncAfter has been updated to preserve UTC information, addressing a bug where GetConfigurationAsync does not refresh configuration in ConfigurationManager. See [#3213](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3213).
+- Fixed a null reference issue in KeyInfo. See (#3203)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3203].
+
+## New Features
+- Introduced a new delegate for reading custom token payload values on JsonWebToken. See [#2981](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2981).
+- Added an overload for ReadJsonWebToken to take a ReadOnlyMemory. See [#3205](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/48cdc0ca10e81cf9d6d7071801112d63189a44a7#diff-03e8a19f3b3aeb7f65b778b988b6bf792d118ca00b6dbda337526e8678e0ef7f). 
+
+## Fundamentals
+- Utilized IList to avoid enumerator allocation during audience validation. See [#3204](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3204).
+
+8.8.0
+=====
+## New Features
+- Adds the ability for the metadata refresh to be done as a blocking call, as per 8.0.1 behavior. This is done through the `Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking` switch. If set, configuration calls will be blocking when metadata is updated, otherwise, if token arrive with a new signing keys, validation errors will be returned to the caller. See PR [#3193](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3193) for details.
+- Identity.Model updates some log and error messages (IDX10214, IDX10215). If the information is needed for debugging purposes, it can be reverted via the `Switch.Microsoft.IdentityModel.DoNotScrubExceptions` AppContextSwitch. See PR [#3195](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3195) and https://aka.ms/identitymodel/app-context-switches for details.
+- Change all plain object locks to `System.Thread.Lock` objects for .NET 9 or greater. See PRs [#3185](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3185) and [#3189](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3189) for details.
+
+8.7.0
+=====
+## Bug Fixes
+- Add back internal methods `IsRecoverableException` and `IsRecoverableExceptionType` whose signatures were changed in the previous version. See [#3181](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3181).
+
+## New Features
+- Make `Cnf` class public and move it to Microsoft.IdentityModel.Tokens package. See [#3165](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3165).
+  
+8.6.1
+=====
+## Bug fix
+- Microsoft.IdentityModel now triggers a configuration refresh if token decryption fails. See issue [#3148](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3148) for details.
+- Fix a bug in `JsonWebTokenHandler` where `JwtTokenDecryptionParameters`'s `Alg` and `Enc` were not set during token decryption, causing `IDX10611` and `IDX10619` errors to show null values in the messages. See issue [#3003](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3003) for details.
+
+## Fundamentals
+- For development, IdentityModel now has a global.json file to specify the .NET SDK version. See issue [#2995](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2995) for details.
+
 8.6.0
 =====
 ## New Features

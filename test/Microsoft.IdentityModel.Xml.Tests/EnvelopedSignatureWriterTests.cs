@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512, null, SecurityAlgorithms.RsaSha512 + "_DigestNULL"));
                 theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, null, SecurityAlgorithms.RsaSha512Signature + "_DigestNULL"));
 
-#if NET_CORE
+#if NET
                 theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha256, null, SecurityAlgorithms.RsaSsaPssSha256 + "_DigestNULL"));
                 theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha256Signature, null, SecurityAlgorithms.RsaSsaPssSha256Signature + "_DigestNULL"));
                 theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha384, null, SecurityAlgorithms.RsaSsaPssSha384 + "_DigestNULL"));

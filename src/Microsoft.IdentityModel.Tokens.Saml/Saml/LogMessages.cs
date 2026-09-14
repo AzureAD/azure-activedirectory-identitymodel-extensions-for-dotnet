@@ -21,6 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11312 = "IDX11312: Unable to validate token. A SamlSamlAttributeStatement can only have one SamlAttribute of type 'Actor'. This special SamlAttribute is used in delegation scenarios.";
         internal const string IDX11313 = "IDX11313: Unable to process Saml attribute. A SamlSubject must contain either or both of Name and ConfirmationMethod.";
         internal const string IDX11314 = "IDX11314: The AttributeValueXsiType of a SAML Attribute must be a string of the form 'prefix#suffix', where prefix and suffix are non-empty strings. Found: '{0}'";
+        internal const string IDX11315 = "IDX11315: Unable to validate token. SamlSecurityToken.Assertion is null or empty.";
 
         // SamlSerializer reading
         internal const string IDX11100 = "IDX11100: Saml Only one element of type '{0}' is supported.";

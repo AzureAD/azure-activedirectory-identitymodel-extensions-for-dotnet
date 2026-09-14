@@ -15,8 +15,6 @@ namespace Microsoft.IdentityModel.Tokens
         // general
         public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object. ";
         public const string IDX10001 = "IDX10001: Invalid argument '{0}'. Argument must be of type '{1}'.";
-        // TODO: Confirm the wording of this message. Possibly create a wiki page to refer users to for more information.
-        public const string IDX10002 = "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'.";
 
         // properties, configuration 
         public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
@@ -38,10 +36,14 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10207 = "IDX10207: Unable to validate audience. The 'audiences' parameter is null.";
         public const string IDX10208 = "IDX10208: Unable to validate audience. validationParameters.ValidAudience is null or whitespace and validationParameters.ValidAudiences is null.";
         public const string IDX10209 = "IDX10209: Token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
-        public const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace.";
-        public const string IDX10212 = "IDX10212: Issuer validation failed. Issuer: '{0}'. Did not match any: validationParameters.ValidIssuers: '{1}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{2}'. For more details, see https://aka.ms/IdentityModel/issuer-validation. ";
+        public const string IDX10211 = "IDX10211: Issuer validation failed. Unable to validate issuer. The 'issuer' parameter is null or whitespace.";
+        public const string IDX10212 = "IDX10212: Issuer validation failed. Issuer: '{0}'. Did not match any of: " +
+            "validationParameters.ValidIssuers: '{1}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{2}'." +
+            "\nFor more details, see https://aka.ms/IdentityModel/issuer-validation.";
         public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'.";
+        public const string IDX10214S = "IDX10214: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches";
         public const string IDX10215 = "IDX10215: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudiences: '{1}'.";
+        public const string IDX10215S = "IDX10215: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches";
         public const string IDX10222 = "IDX10222: Lifetime validation failed. The token is not yet valid. ValidFrom (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10223 = "IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10224 = "IDX10224: Lifetime validation failed. The NotBefore (UTC): '{0}' is after Expires (UTC): '{1}'.";
@@ -72,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10250 = "IDX10250: The associated certificate is valid. ValidFrom (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10251 = "IDX10251: The associated certificate is valid. ValidTo (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10252 = "IDX10252: RequireSignedTokens property on ValidationParameters is set to false and the issuer signing key is null. Exiting without validating the issuer signing key.";
-        public const string IDX10253 = "IDX10253: RequireSignedTokens property on ValidationParameters is set to true, but the issuer signing key is null.";
+        public const string IDX10253 = "IDX10253: Signature key validation failed. The security key is null. A valid signing key is required for validation.";
         public const string IDX10254 = "IDX10254: '{0}.{1}' failed. The virtual method '{2}.{3}' returned null. If this method was overridden, ensure a valid '{4}' is returned.";
         public const string IDX10255 = "IDX10255: TypeValidator property on ValidationParameters is null and ValidTypes is either null or empty. Exiting without validating the token type.";
         public const string IDX10256 = "IDX10256: Unable to validate the token type. TokenValidationParameters.ValidTypes is set, but the 'typ' header claim is null or empty.";
@@ -96,31 +98,58 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10275 = "IDX10275: TokenTypeValidationDelegate threw an exception, see inner exception.";
         public const string IDX10276 = "IDX10276: TokenReplayValidationDelegate threw an exception, see inner exception.";
         public const string IDX10277 = "IDX10277: RequireAudience property on ValidationParameters is set to false. Exiting without validating the audience.";
+        public const string IDX10278 = "IDX10278: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token decryption in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}. See https://aka.ms/validate-using-configuration-manager for additional information.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
-        //public const string IDX10501 = "IDX10501: Signature validation failed. Unable to match key: \nkid: '{0}'. \nNumber of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'. \ntoken: '{4}'.";
-        public const string IDX10502 = "IDX10502: Signature validation failed. The token's kid is: '{0}', but did not match any keys in ValidationParameters or Configuration and TryAllIssuerSigningKeys is false. Number of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'.";
-        public const string IDX10503 = "IDX10503: Signature validation failed. The token's kid is: '{0}', but did not match any keys in TokenValidationParameters or Configuration. Keys tried: '{1}'. Number of keys in TokenValidationParameters: '{2}'. \nNumber of keys in Configuration: '{3}'. \nExceptions caught:\n '{4}'.\ntoken: '{5}'. See https://aka.ms/IDX10503 for details.";
+        // public const string IDX10501 = "IDX10501:
+        // public const string IDX10502 = "IDX10502:
+        public const string IDX10503 = "IDX10503: Signature validation failed. The token's kid is: '{0}', " +
+            "but did not match any keys in TokenValidationParameters or Configuration. Keys tried: '{1}'." +
+            "\nNumber of keys in TokenValidationParameters: '{2}'. \nNumber of keys in Configuration: '{3}'." +
+            "\nExceptions caught:\n '{4}'.\ntoken: '{5}'. See https://aka.ms/IDX10503 for details.";
         public const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'.";
         public const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";
         // Provide a message more specific to JsonWebTokens while allowing people searching the ID to search solutions provided for the old message like those at https://stackoverflow.com/questions/77515249/custom-token-validator-not-working-in-net-8
-        public const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'. If you are using ASP.NET Core 8 or later, see https://learn.microsoft.com/en-us/dotnet/core/compatibility/aspnet-core/8.0/securitytoken-events for more details.";
+        public const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}'," +
+            " but returned a '{1}' when validating token: '{2}'." +
+            "\nIf you are using ASP.NET Core 8 or later, see https://learn.microsoft.com/en-us/dotnet/core/compatibility/aspnet-core/8.0/securitytoken-events for more details.";
         // public const string IDX10507 = "IDX10507:";
         public const string IDX10508 = "IDX10508: Signature validation failed. Signature is improperly formatted.";
-        public const string IDX10509 = "IDX10509: Token validation failed. The user defined 'Delegate' set on TokenValidationParameters.TokenReader did not return a '{0}', but returned a '{1}' when reading token: '{2}'.";
+        public const string IDX10509 = "IDX10509: Token validation failed. The user defined 'Delegate' set on TokenValidationParameters.TokenReader did not return a '{0}'," +
+            " but returned a '{1}' when reading token: '{2}'.";
         public const string IDX10510 = "IDX10510: Token validation failed. The user defined 'Delegate' set on TokenValidationParameters.TokenReader returned null when reading token: '{0}'.";
         public const string IDX10511 = "IDX10511: Signature validation failed. Keys tried: '{0}'. \nNumber of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nMatched key was in '{3}'. \nkid: '{4}'. \nExceptions caught:\n '{5}'.\ntoken: '{6}'. See https://aka.ms/IDX10511 for details.";
         public const string IDX10512 = "IDX10512: Signature validation failed. Token does not have KeyInfo. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
-        //public const string IDX10513 = "IDX10513: Signature validation failed. Unable to match key: \nKeyInfo: '{0}'.\nExceptions caught:\n '{1}'. \ntoken: '{2}'.";
+        // public const string IDX10513 = "IDX10513:
         public const string IDX10514 = "IDX10514: Signature validation failed. Keys tried: '{0}'. \nKeyInfo: '{1}'. \nExceptions caught:\n '{2}'.\ntoken: '{3}'.";
-        //public const string IDX10515 = "IDX10515: Signature validation failed. Unable to match key: \nKeyInfo: '{0}'.\nExceptions caught:\n '{1}'. \ntoken: '{2}'. Valid Lifetime: '{3}'. Valid Issuer: '{4}'";
-        //public const string IDX10516 = "IDX10516: Signature validation failed. Unable to match key: \nkid: '{0}'. \nNumber of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'. \ntoken: '{4}'. Valid Lifetime: '{5}'. Valid Issuer: '{6}'";
-        public const string IDX10517 = "IDX10517: Signature validation failed. The token's kid is missing. Keys tried: '{0}'. Number of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details.";
-        public const string IDX10518 = "IDX10518: Signature validation failed. Algorithm validation failed with error: '{0}'.";
-        public const string IDX10519 = "IDX10519: Signature validation failed. The token's kid is missing and ValidationParameters.TryAllIssuerSigningKeys is set to false.";
+        // public const string IDX10515 = "IDX10515:
+        // public const string IDX10516 = "IDX10516:
+        public const string IDX10517 = "IDX10517: Signature validation failed. The token's kid is missing. Keys tried: '{0}'." +
+            "\nNumber of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'." +
+            "\nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details.";
         public const string IDX10520 = "IDX10520: Signature validation failed. The key provided could not validate the signature. Key tried: '{0}'.";
-        public const string IDX10521 = "IDX10521: Signature validation failed. An exception was thrown when trying to validate the signature. Key tried: '{0}'. Exception: '{1}'.";
+        public const string IDX10521 = "IDX10521: Signature validation failed." +
+            "An exception was thrown when trying to validate the signature. Key tried: '{0}'. Exception: '{1}'.";
+        public const string IDX10522 = "IDX10522: Signature validation failed. The token's kid: '{0}' did not match any keys in ValidationParameters or Configuration." +
+            "\nAll keys in ValidationParameters and Configuration were tried. " +
+            "\nNumber of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'.";
+        public const string IDX10523 = "IDX10523: Signature validation failed. The token's kid is empty." +
+            "\nAll keys in ValidationParameters and Configuration were tried. " +
+            "\nNumber of keys in ValidationParameters: '{0}'. \nNumber of keys in Configuration: '{1}'.\ntoken: '{2}'.";
+        public const string IDX10524 = "IDX10524: Signature validation failed. The token's kid: '{0}' did not match any keys in ValidationParameters or Configuration." +
+            "\nAll keys in ValidationParameters and Configuration were tried. No non-null keys were found. " +
+            "\nNumber of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'.";
+        public const string IDX10525 = "IDX10525: Signature validation failed. The token's kid is missing." +
+            "\nAll keys in ValidationParameters and Configuration were tried. No non-null keys were found. " +
+            "\nNumber of keys in ValidationParameters: '{0}'. \nNumber of keys in Configuration: '{1}'.\ntoken: '{2}'.";
+        public const string IDX10526 = "IDX10526: Signature validation failed. The token's kid is missing." +
+            "\nValidationParameters.TryAllIssuerSigningKeys is set to false. All keys will not be tried. " +
+            "\nNumber of keys in ValidationParameters: '{0}'. \nNumber of keys in Configuration: '{1}'.\ntoken: '{2}'.";
+        public const string IDX10527 = "IDX10527: Signature validation failed. The token's kid is: '{0}', " +
+            "but did not match any keys in ValidationParameters or Configuration and TryAllIssuerSigningKeys is false." +
+            "\nNumber of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'.";
+
 
         // encryption / decryption
         // public const string IDX10600 = "IDX10600:";
@@ -248,6 +277,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10718 = "IDX10718: AlgorithmToValidate is not supported: '{0}'. Algorithm '{1}'.";
         public const string IDX10719 = "IDX10719: SignatureSize (in bytes) was expected to be '{0}', was '{1}'.";
         public const string IDX10720 = "IDX10720: Unable to create KeyedHashAlgorithm for algorithm '{0}', the key size must be greater than: '{1}' bits, key has '{2}' bits.";
+        public const string IDX10721 = "IDX10721: Unable to create a key from the AKP JsonWebKey (alg: '{0}'). The required parameter '{1}' is missing or empty.";
+        public const string IDX10722 = "IDX10722: The AKP JsonWebKey (alg: '{0}') has inconsistent key material. The 'pub' parameter does not match the public key derived from 'priv'.";
+        public const string IDX10723 = "IDX10723: Unable to extract the private key from the X.509 certificate for algorithm '{0}' (Key: '{1}'). Private key extraction may not be supported on this platform.";
+        public const string IDX10724 = "IDX10724: Unable to compute a JWK thumbprint, public key extraction from the X.509 certificate is not supported on this platform (Key: '{0}').";
+        public const string IDX10725 = "IDX10725: Unable to create a SignatureProvider for algorithm '{0}' (Key: '{1}'). The X.509 certificate key could not be extracted. This may indicate the platform does not support the certificate's key type.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
@@ -272,6 +306,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10902 = "IDX10902: Exception caught while removing expired items: '{0}', Exception: '{1}'";
         public const string IDX10906 = "IDX10906: Exception caught while compacting items: '{0}', Exception: '{1}'";
 
+
+        // Base64UrlEncoding
+        public const string IDX10820 = "IDX10820: Invalid character found in Base64UrlEncoding. Character: '{0}', Encoding: '{1}'.";
+        public const string IDX10821 = "IDX10821: Incorrect padding detected in Base64UrlEncoding. Encoding: '{0}'.";
+
         // Crypto Errors
         public const string IDX11000 = "IDX11000: Cannot create EcdhKeyExchangeProvider. '{0}'\'s Curve '{1}' does not match with '{2}'\'s curve '{3}'.";
         public const string IDX11001 = "IDX11001: Cannot generate KDF. '{0}':'{1}' and '{2}':'{3}' must be different.";
@@ -283,6 +322,9 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX11023 = "IDX11023: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}', Position: '{3}', CurrentDepth: '{4}', BytesConsumed: '{5}'.";
         public const string IDX11025 = "IDX11025: Cannot serialize object of type: '{0}' into property: '{1}'.";
         public const string IDX11026 = "IDX11026: Unable to get claim value as a string from claim type:'{0}', value type was:'{1}'. Acceptable types are String, IList<String>, and System.Text.Json.JsonElement.";
+
+        // SignatureProvider creation (continued from IDX10630-10638; appended here as IDX1063x slots are retired numbers)
+        public const string IDX11028 = "IDX11028: CryptoProviderFactory.CreateForVerifying threw an exception for key: '{0}', signatureAlgorithm: '{1}'. The platform may not support the algorithm or extracting the key material for it (for example, ML-DSA on a platform without post-quantum support). See the inner exception for details.";
 
 #pragma warning restore 1591
     }

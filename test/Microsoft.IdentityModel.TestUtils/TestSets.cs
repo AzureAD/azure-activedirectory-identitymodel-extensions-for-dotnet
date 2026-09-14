@@ -862,6 +862,7 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 var digestValue = Guid.NewGuid().ToString();
                 var reference = Default.ReferenceWithNullTokenStreamNS;
+                string typeAttr = AppContextSwitches.UseCapitalizedXMLTypeAttr ? "Type" : "type";
                 reference.DigestValue = digestValue;
                 var signedInfo = Default.SignedInfoNS;
                 signedInfo.References.Clear();
@@ -883,7 +884,8 @@ namespace Microsoft.IdentityModel.TestUtils
                                 SecurityAlgorithms.EnvelopedSignature,
                                 SecurityAlgorithms.ExclusiveC14n,
                                 Default.ReferenceDigestMethod,
-                                digestValue))
+                                digestValue,
+                                typeAttr))
                 };
             }
         }
@@ -974,6 +976,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform();
                 signedInfo.References.Clear();
                 signedInfo.References.Add(reference);
+                string typeAttr = AppContextSwitches.UseCapitalizedXMLTypeAttr ? "Type" : "type";
                 return new SignedInfoTestSet
                 {
                     SignedInfo = signedInfo,
@@ -990,7 +993,8 @@ namespace Microsoft.IdentityModel.TestUtils
                                 unknownTransform,
                                 SecurityAlgorithms.ExclusiveC14n,
                                 SecurityAlgorithms.Sha256Digest,
-                                Default.ReferenceDigestValue))
+                                Default.ReferenceDigestValue,
+                                typeAttr))
 
                 };
             }

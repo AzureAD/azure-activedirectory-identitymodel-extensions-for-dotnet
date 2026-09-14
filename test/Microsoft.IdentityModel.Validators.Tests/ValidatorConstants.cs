@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
         public const string ValidationParameters = "validationParameters";
         public const string TenantId = "http://schemas.microsoft.com/identity/claims/tenantid";
 
-        public const string TenantIdAsGuid = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
+        public const string TenantIdAsGuid = "10c419d4-4a50-45b2-aa4e-919fb84df24f";
         public const string ProductionPrefNetworkUSEnvironment = "login.microsoftonline.us";
         public const string AadInstance = "https://login.microsoftonline.com";
         public const string AadInstancePPE = "https://login.windows-ppe.net";
@@ -39,9 +39,9 @@ namespace Microsoft.IdentityModel.Validators.Tests
         public const string AadIssuerV11PPE = AadInstancePPE + "/" + TenantIdAsGuid + "/v1.1";
         public const string UsGovIssuer = "https://login.microsoftonline.us/" + UsGovTenantId + "/v2.0";
         public const string UsGovTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-        public const string V1Issuer = "https://sts.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/";
-        public const string V1IssuerWithoutTrailingSlash = "https://sts.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
-        public const string V1IssuerPPE = "https://sts.windows-ppe.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/";
+        public const string V1Issuer = "https://sts.windows.net/10c419d4-4a50-45b2-aa4e-919fb84df24f/";
+        public const string V1IssuerWithoutTrailingSlash = "https://sts.windows.net/10c419d4-4a50-45b2-aa4e-919fb84df24f";
+        public const string V1IssuerPPE = "https://sts.windows-ppe.net/10c419d4-4a50-45b2-aa4e-919fb84df24f/";
         public const string AadIssuerV1CommonAuthority = "https://sts.windows.net/{tenantid}/";
         public const string AadIssuerV1CommonAuthorityWithoutTrailingSlash = "https://sts.windows.net/{tenantid}";
         public const string AadIssuerV11CommonAuthority = AadInstance + "/{tenantid}/v1.1";

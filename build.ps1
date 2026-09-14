@@ -83,6 +83,7 @@ Write-Host "msbuildexe:     " $msbuildexe;
 Write-Host "nugetVersion:   " $nugetVersion;
 Write-Host "releaseVersion: " $releaseVersion;
 Write-Host "nugetPreview:   " $nugetPreview;
+Write-Host "targetNetNext:  " $env:TargetNetNext
 WriteSectionFooter("End Environment");
 
 $ErrorActionPreference = "Stop"

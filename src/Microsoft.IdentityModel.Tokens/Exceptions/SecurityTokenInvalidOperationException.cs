@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -37,5 +38,33 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
         protected SecurityTokenInvalidOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+        #region Experimental
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidOperationException"/> class.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
+        internal SecurityTokenInvalidOperationException(string message, ValidationError validationError)
+            : base(message)
+        {
+            ValidationError = validationError;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidOperationException"/> class.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">An <see cref="Exception"/> that represents the root cause of the exception.</param>
+        /// <param name="validationError">The <see cref="ValidationError"/> that is associated with the exception.</param>
+        internal SecurityTokenInvalidOperationException(string message, Exception innerException, ValidationError validationError)
+            : base(message, innerException)
+        {
+            ValidationError = validationError;
+        }
+
+        public ValidationError ValidationError { get; }
+
+        #endregion
     }
 }

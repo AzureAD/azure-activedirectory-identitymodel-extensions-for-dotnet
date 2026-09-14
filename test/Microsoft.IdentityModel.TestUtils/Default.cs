@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -32,6 +34,11 @@ namespace Microsoft.IdentityModel.TestUtils
         static Default()
         {
             _referenceDigestValue = Convert.ToBase64String(XmlUtilities.CreateDigestBytes("<OuterXml></OuterXml>", false));
+        }
+
+        public static StackFrame GetStackFrame()
+        {
+            return new StackFrame("StackFrameName", 0, 0);
         }
 
         public static string AadV1Authority
@@ -72,6 +79,14 @@ namespace Microsoft.IdentityModel.TestUtils
         public static SigningCredentials AsymmetricSigningCredentials
         {
             get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Digest);
+        }
+
+        public static SigningCredentials RsaSigningCredentials
+        {
+            get => new SigningCredentials(
+                    new RsaSecurityKey(KeyingMaterial.RsaParameters_2048) { KeyId = Guid.NewGuid().ToString() },
+                    SecurityAlgorithms.RsaSha256,
+                    SecurityAlgorithms.Sha256);
         }
 
         public static SigningCredentials AsymmetricSigningCredentialsWithoutSpecifyingDigest
@@ -214,6 +229,11 @@ namespace Microsoft.IdentityModel.TestUtils
             get => new CaseSensitiveClaimsIdentity(Claims, AuthenticationType);
         }
 
+        public static ClaimsIdentity ClaimsIdentityLongNames
+        {
+            get => new CaseSensitiveClaimsIdentity(ClaimSets.ClaimsWithLongName, AuthenticationType);
+        }
+
         public static string ClaimsIdentityLabel
         {
             get => "Default.ClaimsIdentityLabel";
@@ -314,6 +334,47 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string Jwt(SecurityTokenDescriptor tokenDescriptor)
         {
             return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
+        }
+
+        public static JsonWebTokens.JsonWebToken JsonWebToken()
+        {
+            JsonWebTokens.JsonWebTokenHandler tokenHandler = new JsonWebTokens.JsonWebTokenHandler();
+            return new JsonWebTokens.JsonWebToken(tokenHandler.CreateToken(new SecurityTokenDescriptor()
+            {
+                Issuer = Issuer,
+                SigningCredentials = SigningCredentials,
+                Subject = ClaimsIdentity,
+            }));
+        }
+
+        public static Saml2SecurityToken Saml2SecurityToken()
+        {
+            var tokenHandler = new Saml2SecurityTokenHandler();
+            SecurityToken securityToken = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Audience = Audience,
+                Issuer = Issuer,
+                SigningCredentials = SigningCredentials,
+                Subject = SamlClaimsIdentity,
+            });
+
+            string token = tokenHandler.WriteToken(securityToken);
+            return tokenHandler.ReadSaml2Token(token);
+        }
+
+        public static SamlSecurityToken SamlSecurityToken()
+        {
+            var tokenHandler = new SamlSecurityTokenHandler();
+            SecurityToken securityToken = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Audience = Audience,
+                Issuer = Issuer,
+                SigningCredentials = SigningCredentials,
+                Subject = SamlClaimsIdentity,
+            });
+
+            string token = tokenHandler.WriteToken(securityToken);
+            return tokenHandler.ReadSamlToken(token);
         }
 
         public static string Location
@@ -1021,7 +1082,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     KeyInfo = KeyInfo,
                     SignedInfo = SignedInfo,
-                    SignatureValue = "kzGIa0ZwE1Y7CYZ3hZHdFLGEQ6LvTdoKYSr+jClEdoL8l0bRf0Mkp7zsp0uCPyoZHKVBatU7otEmbciu9FWNMSXmpiDj9eSL/eNqpJ0sRkaNPyM3AqR2zy7TG2481K4SWZfo5EahrSat0glEUC6i3sxojjLb8DRq8ETYO1JsNhLOHQjKWlBEBZ04rAcz/kWXt0N1CQne4+GozQtiaMDvN/PXeqwiEYHbS1Gr5G16wHdiFZNYylH2pW14+t5t/eIZX8c/VJNT5uM09KHeBSMEn7Uksp2qx1brKP1K9SULzke0Pgx+lIJZgVndGbviGd5UP4ufovexs4F5TkhI7Pel6A=="
+                    SignatureValue = AppContextSwitches.UseCapitalizedXMLTypeAttr ? "OaTq3jGqbPLUVROvhiqV+PneMwdu6iZgVv7vbW++wEk4tSXoqEUkY+b/M2ZzHFy0M/k33migp3s0w+Ff1vNHRI0uT8Zs1D+EdI/Oz4Pu3FwPA/UK+8qe+JTRAOhdN5H7Wv4c0p1nrWJlVlT5WWCUe2uRSpojS2+D+KC1gG/DiDqK5gWgQt/7Z0HV8ml6C0PTqXWvZcYc1u49Y3tNEPOUuSXGzSZOAfhEAMdQ6+qC+126wcbSFK5ww1aOI2K6Nk3u8sxJUXHdUXs92DKvLemcaHXw0yDNUNi/izVldy3yu6VEDEflCJkj1+yvB52U+EpvG/7IGwY66QceVbu/1FFLFA==" : "kzGIa0ZwE1Y7CYZ3hZHdFLGEQ6LvTdoKYSr+jClEdoL8l0bRf0Mkp7zsp0uCPyoZHKVBatU7otEmbciu9FWNMSXmpiDj9eSL/eNqpJ0sRkaNPyM3AqR2zy7TG2481K4SWZfo5EahrSat0glEUC6i3sxojjLb8DRq8ETYO1JsNhLOHQjKWlBEBZ04rAcz/kWXt0N1CQne4+GozQtiaMDvN/PXeqwiEYHbS1Gr5G16wHdiFZNYylH2pW14+t5t/eIZX8c/VJNT5uM09KHeBSMEn7Uksp2qx1brKP1K9SULzke0Pgx+lIJZgVndGbviGd5UP4ufovexs4F5TkhI7Pel6A=="
                 };
                 return signature;
             }
@@ -1035,7 +1096,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     KeyInfo = KeyInfo,
                     SignedInfo = SignedInfoReferenceWithoutPrefix,
-                    SignatureValue = "OaTq3jGqbPLUVROvhiqV+PneMwdu6iZgVv7vbW++wEk4tSXoqEUkY+b/M2ZzHFy0M/k33migp3s0w+Ff1vNHRI0uT8Zs1D+EdI/Oz4Pu3FwPA/UK+8qe+JTRAOhdN5H7Wv4c0p1nrWJlVlT5WWCUe2uRSpojS2+D+KC1gG/DiDqK5gWgQt/7Z0HV8ml6C0PTqXWvZcYc1u49Y3tNEPOUuSXGzSZOAfhEAMdQ6+qC+126wcbSFK5ww1aOI2K6Nk3u8sxJUXHdUXs92DKvLemcaHXw0yDNUNi/izVldy3yu6VEDEflCJkj1+yvB52U+EpvG/7IGwY66QceVbu/1FFLFA=="
+                    SignatureValue = AppContextSwitches.UseCapitalizedXMLTypeAttr ? "OaTq3jGqbPLUVROvhiqV+PneMwdu6iZgVv7vbW++wEk4tSXoqEUkY+b/M2ZzHFy0M/k33migp3s0w+Ff1vNHRI0uT8Zs1D+EdI/Oz4Pu3FwPA/UK+8qe+JTRAOhdN5H7Wv4c0p1nrWJlVlT5WWCUe2uRSpojS2+D+KC1gG/DiDqK5gWgQt/7Z0HV8ml6C0PTqXWvZcYc1u49Y3tNEPOUuSXGzSZOAfhEAMdQ6+qC+126wcbSFK5ww1aOI2K6Nk3u8sxJUXHdUXs92DKvLemcaHXw0yDNUNi/izVldy3yu6VEDEflCJkj1+yvB52U+EpvG/7IGwY66QceVbu/1FFLFA==" : "kzGIa0ZwE1Y7CYZ3hZHdFLGEQ6LvTdoKYSr+jClEdoL8l0bRf0Mkp7zsp0uCPyoZHKVBatU7otEmbciu9FWNMSXmpiDj9eSL/eNqpJ0sRkaNPyM3AqR2zy7TG2481K4SWZfo5EahrSat0glEUC6i3sxojjLb8DRq8ETYO1JsNhLOHQjKWlBEBZ04rAcz/kWXt0N1CQne4+GozQtiaMDvN/PXeqwiEYHbS1Gr5G16wHdiFZNYylH2pW14+t5t/eIZX8c/VJNT5uM09KHeBSMEn7Uksp2qx1brKP1K9SULzke0Pgx+lIJZgVndGbviGd5UP4ufovexs4F5TkhI7Pel6A=="
                 };
                 return signature;
             }
@@ -1049,7 +1110,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     KeyInfo = KeyInfo,
                     SignedInfo = SignedInfoReferenceWithId,
-                    SignatureValue = "BOMo5aCr+YIjOq+lmPj8be8/6u8iXJFXuJskeWaYk1iNadUhhUPcSHeFv8XmOBIXV7Yrvk2WiVoBKawJh79iqRrVpJmdpHTxuukUua6iijxEEhwjYGLneleVgBzDTnk2os21WThYSEXmhi52z4Or0eq29vObOlRN3c2VlqDba8avu8jMNqZuKWsptxLDS1q0JfE8zu7Srs9y2GD7SULbWYpsl2VIO3ZCV+0/YWnBHQ09Ee1QKP18HMNr3jgrmpNj165olYKnn+Vr2YDEBSuNX1mxdw2bqAbpEeWITmmIkW2KDivxOtL2lOZEC6QnEVidWr1oyFUb+srKAlmksiy3wA=="
+                    SignatureValue = AppContextSwitches.UseCapitalizedXMLTypeAttr ? "fqbb3WVUTLu/ihWXHUYgPWO5rgnm9AuwAT8YeiWiood/z+ObWpTwxs42be4HIDac9U94hR05rfLOR+0WxmlzhJp7/fye50VHMKex5kAAp9aCMAzCvDkfNzhMUN3WOHGEFOs4tmxrR0TBV6j+KNnjyDs3AUtdzZnZB+QmOJAlZubdOzWk/D0CGSXSgMmqYgmvH/GZGQWxQtbGMFuB29VCR7moegGN/9VAo/K7Z22xmfUWNKWVHB0OUC8FI36sadVnnUvcKnUo3M3pnQwbEWYz/+rMSYYrboM4dOKEqxZCgFXKou08Pz0MtNe2VwketLbJrKSmuEJOgVnXrzPTwlVSpw==" : "BOMo5aCr+YIjOq+lmPj8be8/6u8iXJFXuJskeWaYk1iNadUhhUPcSHeFv8XmOBIXV7Yrvk2WiVoBKawJh79iqRrVpJmdpHTxuukUua6iijxEEhwjYGLneleVgBzDTnk2os21WThYSEXmhi52z4Or0eq29vObOlRN3c2VlqDba8avu8jMNqZuKWsptxLDS1q0JfE8zu7Srs9y2GD7SULbWYpsl2VIO3ZCV+0/YWnBHQ09Ee1QKP18HMNr3jgrmpNj165olYKnn+Vr2YDEBSuNX1mxdw2bqAbpEeWITmmIkW2KDivxOtL2lOZEC6QnEVidWr1oyFUb+srKAlmksiy3wA=="
                 };
                 return signature;
             }
@@ -1092,6 +1153,22 @@ namespace Microsoft.IdentityModel.TestUtils
                 CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
                 SignatureMethod = SecurityAlgorithms.RsaSha256Signature
             };
+        }
+
+        public static IList<SecurityKey> SigningKeys
+        {
+            get
+            {
+                return new List<SecurityKey>
+                {
+                    AsymmetricSigningKeyPublic
+                };
+            }
+        }
+
+        public static SigningCredentials SigningCredentials
+        {
+            get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Digest);
         }
 
         public static SignedInfo SignedInfoReferenceWithId

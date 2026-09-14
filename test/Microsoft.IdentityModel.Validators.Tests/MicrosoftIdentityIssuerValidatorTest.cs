@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading;
@@ -13,16 +14,25 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using NSubstitute;
 using Xunit;
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Validators.Tests
 {
     public class MicrosoftIdentityIssuerValidatorTest
     {
         private readonly HttpClient _httpClient;
+
+        // URL markers and fixtures for the offline metadata-mocking tests below. The mock handler routes
+        // requests by these path fragments, and PlaceholderJwksUri is the jwks_uri advertised in the mock
+        // metadata so the key-set fetch is routed back to the handler. Issuer validation itself only reads
+        // the metadata issuer ({tenantid} template) and JwksUri.
+        private const string OpenIdConfigurationPath = "/.well-known/openid-configuration";
+        private const string DiscoveryPathMarker = "/discovery/";
+        private const string KeysPathMarker = "/keys";
+        private const string UnexpectedUrlMessagePrefix = "Unexpected URL in offline test: ";
+        private const string PlaceholderJwksUri = "https://example.com/discovery/keys";
 
         public MicrosoftIdentityIssuerValidatorTest()
         {
@@ -153,8 +163,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await ValidateIssuerAsync(null, jwtSecurityToken, validator));
 
             var exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() => validator.Validate(string.Empty, jwtSecurityToken, validationParams));
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(string.Empty, jwtSecurityToken, validator);
-            Assert.False(validatedIssuer.IsValid);
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(string.Empty, jwtSecurityToken, validator);
+            Assert.False(validationResult.Succeeded);
 
             IdentityComparer.AreEqual(LogMessages.IDX40003, exception.Message);
 
@@ -213,9 +223,9 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
 
             var actualIssuer = validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters() { ValidIssuer = issuer });
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(issuer, issuer, jwtSecurityToken, validator);
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(issuer, issuer, jwtSecurityToken, validator);
 
-            IdentityComparer.AreEqual(validatedIssuer.Result.Issuer, actualIssuer, context);
+            IdentityComparer.AreEqual(validationResult.Result.Issuer, actualIssuer, context);
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -238,9 +248,9 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = issuer });
 
             var tokenValidationParams = new TokenValidationParameters() { ConfigurationManager = configurationManager };
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(issuer, configurationManager, jwtSecurityToken, validator);
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(issuer, configurationManager, jwtSecurityToken, validator);
 
-            IdentityComparer.AreEqual(issuer, validatedIssuer.Result.Issuer, context);
+            IdentityComparer.AreEqual(issuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(issuer, validator.Validate(issuer, jwtSecurityToken, tokenValidationParams), context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -266,9 +276,9 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
 
             var actualIssuer = validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters() { ValidIssuer = issuer });
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(issuer, issuer, jwtSecurityToken, validator);
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(issuer, issuer, jwtSecurityToken, validator);
 
-            IdentityComparer.AreEqual(issuer, validatedIssuer.Result.Issuer, context);
+            IdentityComparer.AreEqual(issuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
 
             var actualIssuers = validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters() { ValidIssuers = new[] { issuer } });
@@ -300,16 +310,16 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var actualIssuers = validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, new TokenValidationParameters() { ValidIssuers = new[] { ValidatorConstants.AadIssuer } });
             IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, actualIssuers, context);
 
-            ValidationResult<ValidatedIssuer> validatedIssuerResult = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.AadIssuer,
                 ValidatorConstants.AadIssuer,
                 jwtSecurityToken,
                 validator);
 
-            Assert.True(validatedIssuerResult.IsValid);
+            Assert.True(validationResult.Succeeded);
             var actualIssuer = validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, new TokenValidationParameters() { ValidIssuer = ValidatorConstants.AadIssuer });
 
-            IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, validatedIssuerResult.Result.Issuer, context);
+            IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -366,13 +376,13 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor(Default.SymmetricSigningCredentials, claims)));
             var actualIssuer = validator.Validate(issuer, jsonWebToken, new TokenValidationParameters());
-            ValidationResult<ValidatedIssuer> validatedIssuerResult = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 issuer,
                 jsonWebToken,
                 validator);
 
-            Assert.True(validatedIssuerResult.IsValid);
-            IdentityComparer.AreEqual(issuer, validatedIssuerResult.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(issuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -397,13 +407,13 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: ValidatorConstants.V1Issuer, claims: new[] { issClaim, tidClaim });
 
             var actualIssuer = validator.Validate(ValidatorConstants.V1Issuer, jwtSecurityToken, new TokenValidationParameters());
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.V1Issuer,
                 jwtSecurityToken,
                 validator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(ValidatorConstants.V1Issuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(ValidatorConstants.V1Issuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.V1Issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -417,14 +427,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: ValidatorConstants.AadIssuer, claims: new[] { issClaim });
 
             var actualIssuer = validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, new TokenValidationParameters() { ValidIssuer = ValidatorConstants.AadIssuer });
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                ValidatorConstants.AadIssuer,
                ValidatorConstants.AadIssuer,
                jwtSecurityToken,
                validator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -440,27 +450,27 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jsonWebToken = new JsonWebToken($"{{}}", $"{{\"{ValidatorConstants.ClaimNameIss}\":\"{ValidatorConstants.AadIssuer}\",\"{ValidatorConstants.ClaimNameTid}\":\"{ValidatorConstants.TenantIdAsGuid}\"}}");
 
             var actualIssuer = validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, new TokenValidationParameters() { ValidIssuer = ValidatorConstants.AadIssuer });
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.AadIssuer,
                 ValidatorConstants.AadIssuer,
                 jwtSecurityToken,
                 validator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, actualIssuer, context);
 
             IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, actualIssuer, context);
 
             actualIssuer = validator.Validate(ValidatorConstants.AadIssuer, jsonWebToken, new TokenValidationParameters() { ValidIssuer = ValidatorConstants.AadIssuer });
-            validatedIssuer = await ValidateIssuerAsync(
+            validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.AadIssuer,
                 ValidatorConstants.AadIssuer,
                 jsonWebToken,
                 validator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -484,15 +494,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() =>
                 validator.Validate(invalidIssuerToValidate, jwtSecurityToken, new TokenValidationParameters() { ValidIssuers = new[] { ValidatorConstants.AadIssuer } }));
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 invalidIssuerToValidate,
                 ValidatorConstants.AadIssuer,
                 jwtSecurityToken,
                 validator);
 
-            Assert.False(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(typeof(SecurityTokenInvalidIssuerException).ToString(), validatedIssuer.Error.ExceptionType.ToString(), context);
-            IdentityComparer.AreEqual(expectedErrorMessage, validatedIssuer.Error.MessageDetail.Message, context);
+            Assert.False(validationResult.Succeeded);
+            IdentityComparer.AreEqual(expectedErrorMessage, validationResult.Error.MessageDetail.Message, context);
 
             IdentityComparer.AreEqual(expectedErrorMessage, exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
@@ -516,14 +525,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     ValidIssuers = new[] { ValidatorConstants.B2CIssuer },
                 });
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.B2CIssuer,
                 ValidatorConstants.B2CIssuer,
                 jwtSecurityToken,
                 validator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, issuer, context);
 
             IdentityComparer.AreEqual(ValidatorConstants.B2CAuthority, validator.AadAuthorityV1, context);
@@ -556,14 +565,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 jwtSecurityToken,
                 tokenValidationParams);
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.B2CIssuer,
                 configurationManager,
                 jwtSecurityToken,
                 validator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, issuer, context);
 
             TestUtilities.AssertFailIfErrors(context);
@@ -588,14 +597,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     ValidIssuers = new[] { ValidatorConstants.B2CIssuer },
                 });
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.B2CIssuer,
                 ValidatorConstants.B2CIssuer,
                 jwtSecurityToken,
                 validator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.B2CIssuer, issuer, context);
 
             IdentityComparer.AreEqual(ValidatorConstants.B2CAuthority, validator.AadAuthorityV1, context);
@@ -623,15 +632,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                         ValidIssuers = new[] { ValidatorConstants.B2CIssuer },
                     }));
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.B2CIssuer2,
                 ValidatorConstants.B2CIssuer,
                 jwtSecurityToken,
                 validator);
 
             string expectedMessage = string.Format(LogMessages.IDX40001, ValidatorConstants.B2CIssuer2);
-            IdentityComparer.AreEqual(typeof(SecurityTokenInvalidIssuerException).ToString(), validatedIssuer.Error.ExceptionType.ToString(), context);
-            IdentityComparer.AreEqual(expectedMessage, validatedIssuer.Error.MessageDetail.Message, context);
+            IdentityComparer.AreEqual(expectedMessage, validationResult.Error.MessageDetail.Message, context);
             IdentityComparer.AreEqual(expectedMessage, exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -656,15 +664,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                         ValidIssuers = new[] { ValidatorConstants.B2CIssuer },
                     }));
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                     issuerWithInvalidTid,
                     ValidatorConstants.B2CIssuer,
                     jwtSecurityToken,
                     validator);
 
             string expectedMessage = string.Format(LogMessages.IDX40001, issuerWithInvalidTid);
-            IdentityComparer.AreEqual(typeof(SecurityTokenInvalidIssuerException).ToString(), validatedIssuer.Error.ExceptionType.ToString(), context);
-            IdentityComparer.AreEqual(expectedMessage, validatedIssuer.Error.MessageDetail.Message, context);
+            IdentityComparer.AreEqual(expectedMessage, validationResult.Error.MessageDetail.Message, context);
             IdentityComparer.AreEqual(expectedMessage, exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -687,14 +694,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     ValidIssuers = new[] { ValidatorConstants.B2CCustomDomainIssuer },
                 });
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.B2CCustomDomainIssuer,
                 ValidatorConstants.B2CCustomDomainIssuer,
                 jwtSecurityToken,
                 validator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(ValidatorConstants.B2CCustomDomainIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(ValidatorConstants.B2CCustomDomainIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(ValidatorConstants.B2CCustomDomainIssuer, issuer, context);
 
             IdentityComparer.AreEqual(ValidatorConstants.B2CCustomDomainAuthority, validator.AadAuthorityV1, context);
@@ -721,15 +728,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                         ValidIssuers = new[] { ValidatorConstants.B2CIssuerTfp },
                     }));
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 ValidatorConstants.B2CIssuerTfp,
                 ValidatorConstants.B2CIssuerTfp,
                 jwtSecurityToken,
                 validator);
 
-            Assert.False(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(typeof(SecurityTokenInvalidIssuerException).ToString(), validatedIssuer.Error.ExceptionType.ToString(), context);
-            IdentityComparer.AreEqual(LogMessages.IDX40002, validatedIssuer.Error.MessageDetail.Message, context);
+            Assert.False(validationResult.Succeeded);
+            IdentityComparer.AreEqual(LogMessages.IDX40002, validationResult.Error.MessageDetail.Message, context);
             IdentityComparer.AreEqual(LogMessages.IDX40002, exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -812,13 +818,13 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient, configurationManagerProvider);
 
             var actualIssuer = aadIssuerValidator.Validate(tokenIssuer, jwtSecurityToken, new TokenValidationParameters());
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                 tokenIssuer,
                 jwtSecurityToken,
                 aadIssuerValidator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(tokenIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(tokenIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(tokenIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -919,13 +925,13 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             // set LKG
             var actualIssuer = aadIssuerValidator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters());
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                           issuer,
                           jwtSecurityToken,
                           aadIssuerValidator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(issuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(issuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
 
@@ -933,14 +939,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
             configurationManagerSetter(aadIssuerValidator, true);
 
             actualIssuer = aadIssuerValidator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters { ValidateWithLKG = true });
-            validatedIssuer = await ValidateIssuerAsync(
+            validationResult = await ValidateIssuerAsync(
                           issuer,
                           jwtSecurityToken,
                           aadIssuerValidator,
                           true);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(issuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(issuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -987,14 +993,88 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
 
             var authority = authorityUrlProvider(authorityVersion);
-            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient);
 
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(issuer, jwtSecurityToken, validator);
+            // Serve OpenID Connect metadata and a JWKS from in-memory fixtures through a mock HTTP handler
+            // instead of calling the live pre-production metadata endpoint, which is not reachable from CI
+            // runners. Every layer below the HTTP transport stays real, so the retriever, serializer, and
+            // key-set parsing run exactly as they would against the live document.
+            // The metadata issuer is the same {tenantid} template the live endpoint returns, so the validator
+            // still matches the token issuer through its normal tenant-substitution logic. Issuer validation
+            // only reads Issuer and JwksUri, so a minimal metadata document is sufficient.
+            string issuerTemplate = issuer.Replace(ValidatorConstants.TenantIdAsGuid, AadIssuerValidator.TenantIdTemplate);
+            string metadataJson = OpenIdConnectConfiguration.Write(
+                new OpenIdConnectConfiguration { Issuer = issuerTemplate, JwksUri = PlaceholderJwksUri });
+            string jwksJson = KeyingMaterial.AADJWKS;
+
+            var handler = new DelegateHttpMessageHandler((request, ct) =>
+            {
+                string url = request.RequestUri.AbsoluteUri;
+
+                if (url.EndsWith(OpenIdConfigurationPath, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(metadataJson));
+
+                if (url.IndexOf(DiscoveryPathMarker, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    url.EndsWith(KeysPathMarker, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(jwksJson));
+
+                throw new InvalidOperationException(UnexpectedUrlMessagePrefix + url);
+            });
+
+            using var mockHttpClient = new HttpClient(handler);
+            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, mockHttpClient);
+
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(issuer, jwtSecurityToken, validator);
             var actualIssuer = validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters());
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(issuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(issuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Negative coverage for the metadata-fetch-failure path. When the mock handler rejects the discovery
+        // request (for example, a 403), the validator surfaces IDX40001. This deterministically exercises
+        // HttpDocumentRetriever's failure path and AadIssuerValidator's catch that maps the fetch failure to
+        // IDX40001, which previously ran only when the live endpoint happened to fail.
+        [Fact]
+        public void Validate_WithoutConfigurationProvider_MetadataFetchForbidden_ThrowsIDX40001()
+        {
+            var context = new CompareContext();
+            var issuer = ValidatorConstants.AadIssuerPPE;
+            var authority = ValidatorConstants.AuthorityCommonTenantWithV2PPE;
+
+            // Build a token whose issuer and tenant id match the authority, so validation gets past the
+            // issuer/tenant checks and reaches the on-demand metadata fetch.
+            var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
+            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
+            var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
+
+            // Reject the OpenID Connect discovery request with 403 to simulate an unreachable metadata
+            // endpoint. Validation fails before the JWKS is requested, so any other URL is unexpected here.
+            var handler = new DelegateHttpMessageHandler((request, ct) =>
+            {
+                string url = request.RequestUri.AbsoluteUri;
+
+                if (url.EndsWith(OpenIdConfigurationPath, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(string.Empty, HttpStatusCode.Forbidden));
+
+                throw new InvalidOperationException(UnexpectedUrlMessagePrefix + url);
+            });
+
+            using var mockHttpClient = new HttpClient(handler);
+            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, mockHttpClient);
+
+            // The failed metadata fetch leaves the validator without issuer metadata, so it reports IDX40001.
+            var expectedErrorMessage = string.Format(
+                CultureInfo.InvariantCulture,
+                LogMessages.IDX40001,
+                issuer);
+
+            // Validate surfaces the failure as SecurityTokenInvalidIssuerException carrying the IDX40001 message.
+            var exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() =>
+                validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters()));
+
+            IdentityComparer.AreEqual(expectedErrorMessage, exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -1055,13 +1135,13 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             // set LKG
             var actualIssuer = aadIssuerValidator.Validate(v2TokenIssuer, jwtSecurityToken, new TokenValidationParameters());
-            ValidationResult<ValidatedIssuer> validatedIssuer = await ValidateIssuerAsync(
+            ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(
                v2TokenIssuer,
                jwtSecurityToken,
                aadIssuerValidator);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(v2TokenIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(v2TokenIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(v2TokenIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
 
@@ -1070,14 +1150,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
             v2ConfigurationManager.RequestRefresh();
 
             actualIssuer = aadIssuerValidator.Validate(v2TokenIssuer, jwtSecurityToken, new TokenValidationParameters { ValidateWithLKG = true });
-            validatedIssuer = await ValidateIssuerAsync(
+            validationResult = await ValidateIssuerAsync(
                v2TokenIssuer,
                jwtSecurityToken,
                aadIssuerValidator,
                true);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(v2TokenIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(v2TokenIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(v2TokenIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
 
@@ -1094,12 +1174,12 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             // V1 token and authority behaves like v2 token and authority
             actualIssuer = v1AadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters());
-            validatedIssuer = await ValidateIssuerAsync(
+            validationResult = await ValidateIssuerAsync(
                v1TokenIssuer,
                v1JwtSecurityToken,
                aadIssuerValidator);
 
-            IdentityComparer.AreEqual(validatedIssuer.Result.Issuer, v1TokenIssuer, context);
+            IdentityComparer.AreEqual(validationResult.Result.Issuer, v1TokenIssuer, context);
             IdentityComparer.AreEqual(v1TokenIssuer, actualIssuer, context);
             IdentityComparer.AreEqual(null, v1ConfigurationManager.LastKnownGoodConfiguration, context);
             TestUtilities.AssertFailIfErrors(context);
@@ -1109,27 +1189,27 @@ namespace Microsoft.IdentityModel.Validators.Tests
             v1ConfigurationManager.RequestRefresh();
 
             actualIssuer = v1AadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters { ValidateWithLKG = true });
-            validatedIssuer = await ValidateIssuerAsync(
+            validationResult = await ValidateIssuerAsync(
                v1TokenIssuer,
                v1JwtSecurityToken,
                aadIssuerValidator,
                true);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(v1TokenIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(v1TokenIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(v1TokenIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
 
             // validating cross versions also validates with LKG
             actualIssuer = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters { ValidateWithLKG = true });
-            validatedIssuer = await ValidateIssuerAsync(
+            validationResult = await ValidateIssuerAsync(
                v1TokenIssuer,
                v1JwtSecurityToken,
                aadIssuerValidator,
                true);
 
-            Assert.True(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(v1TokenIssuer, validatedIssuer.Result.Issuer, context);
+            Assert.True(validationResult.Succeeded);
+            IdentityComparer.AreEqual(v1TokenIssuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(v1TokenIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
 
@@ -1142,7 +1222,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             v1ConfigurationManager.LastKnownGoodLifetime = TimeSpan.FromMilliseconds(1);
             actualIssuer = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters());
-            validatedIssuer = await ValidateIssuerAsync(
+            validationResult = await ValidateIssuerAsync(
                v1TokenIssuer,
                v1JwtSecurityToken,
                aadIssuerValidator);
@@ -1153,7 +1233,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var exceptionMessage = string.Empty;
             try
             {
-                validatedIssuer = await ValidateIssuerAsync(
+                validationResult = await ValidateIssuerAsync(
                    v1TokenIssuer,
                    v1JwtSecurityToken,
                    aadIssuerValidator,
@@ -1167,15 +1247,20 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 exceptionMessage = securityException.Message;
             }
 
-            Assert.False(validatedIssuer.IsValid);
-            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40001, "https://sts.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/"), validatedIssuer.Error.MessageDetail.Message, context);
-
+            Assert.False(validationResult.Succeeded);
+            IdentityComparer.AreEqual(
+                string.Format(LogMessages.IDX40001, "https://sts.windows.net/10c419d4-4a50-45b2-aa4e-919fb84df24f/"),
+                validationResult.Error.MessageDetail.Message,
+                context);
             IdentityComparer.AreEqual(true, securityExceptionThrown, context);
-            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40001, "https://sts.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/"), exceptionMessage, context);
+            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40001, "https://sts.windows.net/10c419d4-4a50-45b2-aa4e-919fb84df24f/"),
+                exceptionMessage,
+                context);
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        private static async Task<ValidationResult<ValidatedIssuer>> ValidateIssuerAsync(
+        private static async Task<ValidationResult<ValidatedIssuer, IssuerValidationError>> ValidateIssuerAsync(
             string issuerFromToken,
             SecurityToken securityToken,
             AadIssuerValidator validator,
@@ -1192,7 +1277,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 CancellationToken.None);
         }
 
-        private static async Task<ValidationResult<ValidatedIssuer>> ValidateIssuerAsync(
+        private static async Task<ValidationResult<ValidatedIssuer, IssuerValidationError>> ValidateIssuerAsync(
             string issuerFromToken,
             string addIssuerToValidationParameters,
             SecurityToken securityToken,
@@ -1210,7 +1295,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 CancellationToken.None);
         }
 
-        private static async Task<ValidationResult<ValidatedIssuer>> ValidateIssuerAsync(
+        private static async Task<ValidationResult<ValidatedIssuer, IssuerValidationError>> ValidateIssuerAsync(
             string issuerFromToken,
             BaseConfigurationManager configurationManager,
             SecurityToken securityToken,
@@ -1228,4 +1313,3 @@ namespace Microsoft.IdentityModel.Validators.Tests
         }
     }
 }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

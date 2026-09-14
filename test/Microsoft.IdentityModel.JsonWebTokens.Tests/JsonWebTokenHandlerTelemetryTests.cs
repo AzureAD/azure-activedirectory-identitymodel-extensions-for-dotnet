@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var handler = new JsonWebTokenHandler()
                 {
-                    _telemetryClient = testTelemetryClient
+                    TelemetryClient = testTelemetryClient
                 };
                 var jwt = handler.ReadJsonWebToken(Default.AsymmetricJws);
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = validationParameters.ConfigurationManager;
@@ -60,7 +60,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 // metadata address is null because the configuration manager is made using an invalid config to trigger an exception
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.MetadataAddressTag, null },
-                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Lkg }
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Lkg },
+                { TelemetryConstants.ConfigurationSourceTag, TelemetryConstants.Protocols.ConfigurationSourceUnknown }
             };
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);

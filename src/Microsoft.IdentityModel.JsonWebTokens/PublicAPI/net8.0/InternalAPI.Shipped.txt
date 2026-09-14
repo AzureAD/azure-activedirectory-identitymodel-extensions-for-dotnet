@@ -1,1 +1,4 @@
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.TryReadJwtClaim.get -> Microsoft.IdentityModel.Tokens.TryReadJwtClaim
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.TryReadJwtClaim.set -> void
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.CreateSignature(System.ReadOnlySpan<byte> data, System.Span<byte> destination, Microsoft.IdentityModel.Tokens.SigningCredentials signingCredentials, out int bytesWritten) -> bool
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadHeaderValue(ref System.Text.Json.Utf8JsonReader reader, System.Collections.Generic.IDictionary<string, object> claims) -> void

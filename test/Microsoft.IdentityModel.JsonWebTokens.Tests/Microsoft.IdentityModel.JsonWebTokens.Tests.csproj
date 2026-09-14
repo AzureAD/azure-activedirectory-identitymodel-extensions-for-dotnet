@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
   </ItemGroup>
 
   <ItemGroup>

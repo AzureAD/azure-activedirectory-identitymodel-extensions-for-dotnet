@@ -1,0 +1,1 @@
+const System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Act = "act" -> string

@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -63,11 +64,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
         {
+            return ValidateTokenAsync(token, validationParameters, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Validates a token.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
+        /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
+        /// </summary>
+        /// <param name="token">The token to be validated.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
+        {
             throw LogExceptionMessage(
                 new NotImplementedException(
                     FormatInvariant(
                         LogMessages.IDX10267,
-                        MarkAsNonPII("public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)"),
+                        MarkAsNonPII("public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)"),
                         MarkAsNonPII(GetType().FullName))));
         }
 
@@ -81,11 +96,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)
         {
+            return ValidateTokenAsync(token, validationParameters, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Validates a token.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
+        /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
+        /// </summary>
+        /// <param name="token">The <see cref="SecurityToken"/> to be validated.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
+        {
             throw LogExceptionMessage(
                 new NotImplementedException(
                     FormatInvariant(
                         LogMessages.IDX10267,
-                        MarkAsNonPII("public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)"),
+                        MarkAsNonPII("public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)"),
                         MarkAsNonPII(GetType().FullName))));
         }
 
@@ -122,25 +151,6 @@ namespace Microsoft.IdentityModel.Tokens
                     FormatInvariant(
                         LogMessages.IDX10267,
                         MarkAsNonPII("internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, TokenValidationParameters tokenValidationParameters, string issuer)"),
-                        MarkAsNonPII(GetType().FullName))));
-        }
-
-        /// <summary>
-        /// Called by base class to create a <see cref="ClaimsIdentity"/>.
-        /// Currently only used by the JsonWebTokenHandler when called with ValidationParameters to allow for a Lazy creation.
-        /// </summary>
-        /// <param name="securityToken">the <see cref="SecurityToken"/> that has the Claims.</param>
-        /// <param name="validationParameters">the <see cref="ValidationParameters"/> that was used to validate the token.</param>
-        /// <param name="issuer">the 'issuer' to use by default when creating a Claim.</param>
-        /// <returns>A <see cref="ClaimsIdentity"/>.</returns>
-        /// <exception cref="NotImplementedException"></exception>
-        internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer)
-        {
-            throw LogExceptionMessage(
-                new NotImplementedException(
-                    FormatInvariant(
-                        LogMessages.IDX10267,
-                        MarkAsNonPII("internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, ValidationParameters validationParameters, string issuer)"),
                         MarkAsNonPII(GetType().FullName))));
         }
         #endregion

@@ -70,6 +70,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             { "endpointpath", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-endpoint-absolute-path" },
             { "forwardedclientip", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip" },
             { "group", "http://schemas.xmlsoap.org/claims/Group" },
+            { "groups", "http://schemas.microsoft.com/ws/2008/06/identity/claims/groups"},
             { "groupsid", ClaimTypes.GroupSid },
             { "idp", "http://schemas.microsoft.com/identity/claims/identityprovider" },
             { "insidecorporatenetwork", "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork" },

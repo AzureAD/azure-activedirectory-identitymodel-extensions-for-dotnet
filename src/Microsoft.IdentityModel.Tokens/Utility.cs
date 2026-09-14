@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.Tokens
                 a2 = b.AsSpan();
             }
 
-#if NETCOREAPP
+#if NET
             return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(a1, a2);
 #else
             int result = 0;
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Tokens
                 b = b.Slice(0, length);
             }
 
-#if NETCOREAPP
+#if NET
             return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(a, b);
 #else
             int result = 0;

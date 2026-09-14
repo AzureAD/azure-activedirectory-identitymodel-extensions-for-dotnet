@@ -4,8 +4,8 @@
     <AssemblyName>Microsoft.IdentityModel.Benchmarks</AssemblyName>
     <PackageId>Microsoft.IdentityModel.Benchmarks</PackageId>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks); </TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks);</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
@@ -23,6 +23,12 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.5" />
   </ItemGroup>-->
+
+  <!-- Suppress NETSDK1138 ("target framework is out of support") only for net6.0 -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+  </PropertyGroup>
   
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
@@ -45,11 +51,7 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.SignedHttpRequest\Microsoft.IdentityModel.Protocols.SignedHttpRequest.csproj" />
+    <ProjectReference Include="..\..\test\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <!-- Suprpess the "Microsoft.Bcl.Memory 9.0.0 doesn't support net6.0 and has not been tested with it" warning -->
-    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-  </PropertyGroup>
 
 </Project>

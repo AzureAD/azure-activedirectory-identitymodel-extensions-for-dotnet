@@ -23,11 +23,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // internal const string IDX14106 = "IDX14106:";
         internal const string IDX14107 = "IDX14107: Token string does not match the token formats: JWE (header.encryptedKey.iv.ciphertext.tag) or JWS (header.payload.signature)";
         //internal const string IDX14111 = "IDX14111: JWT: '{0}' must have three segments (JWS) or five segments (JWE).";
-        internal const string IDX14112 = "IDX14112: Only a single 'Actor' is supported. Found second claim of type: '{0}'";
+        //internal const string IDX14112 = "IDX14112: Only a single 'Actor' is supported. Found second claim of type: '{0}'"; // Retired: duplicate act/actort members now collapse in the payload, so the duplicate-actor throw is unreachable.
         internal const string IDX14113 = "IDX14113: A duplicate value for 'SecurityTokenDescriptor.{0}' exists in 'SecurityTokenDescriptor.Claims'. \nThe value of 'SecurityTokenDescriptor.{0}' is used.";
         internal const string IDX14114 = "IDX14114: Both '{0}.{1}' and '{0}.{2}' are null or empty.";
         // internal const string IDX14115 = "IDX14115:";
         internal const string IDX14116 = "IDX14116: '{0}' cannot contain the following claims: '{1}'. These values are added by default (if necessary) during security token creation.";
+        internal const string IDX14117 = "IDX14117: Cannot create a 'JsonWebToken' with a replaced header from an encrypted (JWE) token. The provided token must be a JWS so that its decoded payload can be reused.";
         // number of sections 'dots' is not correct
         internal const string IDX14120 = "IDX14120: JWT is not well formed, there is only one dot (.).\nThe token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EncodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.";
         internal const string IDX14121 = "IDX14121: JWT is not a well formed JWE, there must be four dots (.).\nThe token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EncodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.";
@@ -51,5 +52,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14310 = "IDX14310: JWE authentication tag is missing.";
         internal const string IDX14311 = "IDX14311: Unable to decode the authentication tag as a Base64Url encoded string.";
         internal const string IDX14312 = "IDX14312: Unable to decode the cipher text as a Base64Url encoded string.";
+        internal const string IDX14313 = "IDX14313: Unable to deserialize the 'act' claim. Exception faced while using the custom delegate to deserialize the 'act' claim. Nested exception is: {0}";
+        internal const string IDX14314 = "IDX14314: The 'act' claim must be a JSON object.";
+        internal const string IDX14317 = "IDX14317: JsonWebTokenHandler.MaxActorChainLength must be greater than or equal to 1. Value provided was: '{0}'.";
     }
 }

@@ -38,7 +38,6 @@
 
   <ItemGroup>
     <AdditionalFiles Include="InternalAPI.Shipped.txt" />
-    <AdditionalFiles Include="InternalAPI.Unshipped.txt" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Telemetry;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -29,6 +30,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private SamlSerializer _serializer = new SamlSerializer();
+
+        internal Telemetry.ITelemetryClient TelemetryClient = new Telemetry.TelemetryClient();
 
         #region fields
         /// <summary>
@@ -1092,6 +1095,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
 
+                        RecordSignatureValidationTelemetry(
+                            TelemetryClient,
+                            TelemetryConstants.SignatureValidationErrors.None,
+                            samlToken,
+                            samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
+                            key);
+
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
                             LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
 
@@ -1100,6 +1110,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     }
                     catch (Exception ex)
                     {
+                        RecordSignatureValidationTelemetry(
+                            TelemetryClient,
+                            TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                            samlToken,
+                            samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
+                            key);
+
                         exceptionStrings.AppendLine(ex.ToString());
                     }
 
@@ -1328,6 +1345,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogArgumentNullException(nameof(samlToken.Assertion));
 
             Serializer.WriteAssertion(writer, samlToken.Assertion);
+        }
+        private static void RecordSignatureValidationTelemetry(
+            Telemetry.ITelemetryClient telemetryClient,
+            string errorType,
+            SecurityToken securityToken,
+            string algorithm,
+            SecurityKey key)
+        {
+            if (CryptoTelemetry.RecordSignatureValidationTelemetry)
+            {
+                telemetryClient.IncrementSignatureValidationCounter(
+                    errorType,
+                    securityToken.Issuer,
+                    algorithm,
+                    key);
+            }
         }
 
         #endregion methods

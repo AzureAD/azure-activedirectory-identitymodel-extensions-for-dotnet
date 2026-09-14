@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Initializes a new instance of the <see cref="Saml2SecurityTokenReadException"/> class.
         /// </summary>
-        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         public Saml2SecurityTokenReadException(string message)
             : base(message)
         { }
@@ -30,8 +30,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Initializes a new instance of the <see cref="Saml2SecurityTokenReadException"/> class.
         /// </summary>
-        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">An <see cref="Exception"/> that represents the root cause of the exception.</param>
         public Saml2SecurityTokenReadException(string message, Exception innerException)
             : base(message, innerException)
         { }

@@ -991,6 +991,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             adfsStrings.Add(new KeyValuePair<string, string>("commonname", "http://schemas.xmlsoap.org/claims/CommonName"));
             adfsStrings.Add(new KeyValuePair<string, string>("adfs1email", "http://schemas.xmlsoap.org/claims/EmailAddress"));
             adfsStrings.Add(new KeyValuePair<string, string>("group", "http://schemas.xmlsoap.org/claims/Group"));
+            adfsStrings.Add(new KeyValuePair<string, string>("groups", "http://schemas.microsoft.com/ws/2008/06/identity/claims/groups"));
             adfsStrings.Add(new KeyValuePair<string, string>("adfs1upn", "http://schemas.xmlsoap.org/claims/UPN"));
             adfsStrings.Add(new KeyValuePair<string, string>("role", "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"));
             adfsStrings.Add(new KeyValuePair<string, string>("family_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"));
@@ -1127,9 +1128,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void MapInboundClaims()
         {
             var handler = new JwtSecurityTokenHandler();
+            const int expectedDefaultMappingCount = 74;
 
             // By default, JwtSecurityTokenHandler.DefaultMapInboundClaims should be true so make sure we initialize the InboundClaimTypeMap with the default mappings.
-            Assert.Equal(73, handler.InboundClaimTypeMap.Count);
+            Assert.Equal(expectedDefaultMappingCount, handler.InboundClaimTypeMap.Count);
 
             JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
             handler = new JwtSecurityTokenHandler();
@@ -1152,7 +1154,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler.MapInboundClaims = true;
 
             // Check to make sure that setting MapInboundClaims to true initializes the InboundClaimType map with the default mappings if it was previously empty.
-            Assert.Equal(73, handler.InboundClaimTypeMap.Count);
+            Assert.Equal(expectedDefaultMappingCount, handler.InboundClaimTypeMap.Count);
 
             // Check to make sure that changing the instance property did not alter the static property.
             Assert.True(JwtSecurityTokenHandler.DefaultMapInboundClaims == false);
@@ -1795,6 +1797,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Theory, MemberData(nameof(ValidateAudienceTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateAudience(JwtTheoryData theoryData)
         {
+            AppContext.SetSwitch(AppContextSwitches.DoNotScrubExceptionsSwitch, theoryData.DoNotScrubErrorMessages);
+
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
 
             try
@@ -1806,6 +1810,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
+            }
+            finally
+            {
+                AppContextSwitches.ResetAllSwitches();
             }
         }
 
@@ -1846,10 +1854,18 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10214", propertiesExpected: new Dictionary<string, object>{ { "InvalidAudience", null } }),
+                        TestId = "'Audience == NotDefault.Audience' ScrubbedMessage",
+                        SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
+                        ValidationParameters = ValidateAudienceValidationParameters(NotDefault.Audience, null, null, true),
+                    },
+                    new JwtTheoryData
+                    {
                         ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10214", propertiesExpected: new Dictionary<string, object>{ { "InvalidAudience", Default.Audience } }),
                         TestId = "'Audience == NotDefault.Audience'",
                         SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
                         ValidationParameters = ValidateAudienceValidationParameters(NotDefault.Audience, null, null, true),
+                        DoNotScrubErrorMessages = true,
                     },
                     new JwtTheoryData
                     {
@@ -3245,6 +3261,111 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:")
                 },
             };
+        }
+
+        [Theory, MemberData(nameof(GroupsClaimMappingTheoryData), DisableDiscoveryEnumeration = true)]
+        public void ValidateGroupsClaimMapping(JwtTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}. ValidateGroupsClaimMapping", theoryData);
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                SecurityToken validatedToken;
+                var claimsPrincipal = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out validatedToken);
+
+                Assert.NotNull(claimsPrincipal);
+
+                var identity = claimsPrincipal.Identity as ClaimsIdentity;
+                Assert.NotNull(identity);
+
+                // Verify the groups claim is mapped to the expected long claim type
+                var groupsClaims = identity.FindAll("http://schemas.microsoft.com/ws/2008/06/identity/claims/groups").ToList();
+                Assert.NotEmpty(groupsClaims);
+
+                // Verify the short claim type is preserved in properties
+                foreach (var claim in groupsClaims)
+                {
+                    Assert.True(claim.Properties.ContainsKey(JwtSecurityTokenHandler.ShortClaimTypeProperty));
+                    Assert.Equal("groups", claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty]);
+                }
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<JwtTheoryData> GroupsClaimMappingTheoryData()
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var theoryData = new TheoryData<JwtTheoryData>();
+
+            // Test Case 1: Single groups claim
+            var identity = new CaseSensitiveClaimsIdentity(new List<Claim>
+            {
+                new Claim("groups", "Admin")
+            });
+
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                Audience = Default.Audience,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Subject = identity
+            };
+
+            var token = handler.CreateEncodedJwt(descriptor);
+
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "SingleGroupsClaim",
+                Token = token,
+                ValidationParameters = new TokenValidationParameters
+                {
+                    RequireSignedTokens = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
+                }
+            });
+
+            // Test Case 2: Multiple groups claims
+            var multiIdentity = new CaseSensitiveClaimsIdentity(new List<Claim>
+            {
+                new Claim("groups", "Admin"),
+                new Claim("groups", "Users"),
+                new Claim("groups", "Developers")
+            });
+
+            var multiDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                Audience = Default.Audience,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Subject = multiIdentity
+            };
+
+            var multiToken = handler.CreateEncodedJwt(multiDescriptor);
+
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "MultipleGroupsClaims",
+                Token = multiToken,
+                ValidationParameters = new TokenValidationParameters
+                {
+                    RequireSignedTokens = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
+                }
+            });
+
+            return theoryData;
         }
     }
 

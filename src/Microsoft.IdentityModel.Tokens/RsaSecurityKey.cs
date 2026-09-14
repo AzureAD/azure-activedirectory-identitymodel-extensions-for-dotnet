@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         // imitate signing
                         byte[] hash = new byte[20];
-                        Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                        Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
                         _hasPrivateKey = true;
                     }
                     catch (CryptographicException)

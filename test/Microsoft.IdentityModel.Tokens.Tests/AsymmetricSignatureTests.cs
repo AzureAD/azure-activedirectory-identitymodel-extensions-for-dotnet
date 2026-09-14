@@ -21,9 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext("UnsupportedRSATypes");
             TestUtilities.WriteHeader($"{this}.UnsupportedRSATypes");
 
-#if NET462 || NET472 || NET_CORE
             var expectedException = ExpectedException.NoExceptionExpected;
-#endif
             try
             {
                 new AsymmetricAdapter(new RsaSecurityKey(new DerivedRsa(2048)), SecurityAlgorithms.RsaSha256, false);
@@ -34,9 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 expectedException.ProcessException(ex, context);
             }
 
-#if NET462 || NET472 || NET_CORE
             expectedException = ExpectedException.NoExceptionExpected;
-#endif
 
             try
             {
@@ -49,6 +45,177 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Guards that the asymmetric key-size floor is enforced at construction time.
+        // The enforcement previously became unreachable when the net45-only code path was removed,
+        // leaving sub-floor keys silently accepted; it is restored in the constructor and must throw.
+        [Fact]
+        [ResetAppContextSwitches]
+        public void ConstructorEnforcesAsymmetricKeySizeFloor()
+        {
+            var context = new CompareContext("ConstructorEnforcesAsymmetricKeySizeFloor");
+            TestUtilities.WriteHeader($"{this}.ConstructorEnforcesAsymmetricKeySizeFloor");
+
+            // Signing floor for RS256 is 2048 bits: a 1024-bit key must be rejected (IDX10630).
+            RunCase(
+                context,
+                "SigningBelowFloor_1024",
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                () => new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256, true));
+
+            // Verifying floor for RS256 is 1024 bits: a key reporting 512 bits must be rejected (IDX10631).
+            RunCase(
+                context,
+                "VerifyingBelowFloor_512",
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"),
+                () => new AsymmetricSignatureProvider(
+                    new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024),
+                    SecurityAlgorithms.RsaSha256,
+                    false));
+
+            // Signing floor for PS512 is 1040 bits.
+            RunCase(
+                context,
+                "RsaPssSigningBelowFloor_1024",
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                () => new AsymmetricSignatureProvider(
+                    KeyingMaterial.RsaSecurityKey_1024,
+                    SecurityAlgorithms.RsaSsaPssSha512,
+                    true));
+
+            // Signing floor for ES256 is 256 bits.
+            RunCase(
+                context,
+                "EcdsaSigningBelowFloor_128",
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                () => new AsymmetricSignatureProvider(
+                    new ReportedSizeEcdsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa, 128),
+                    SecurityAlgorithms.EcdsaSha256,
+                    true));
+
+            // JsonWebKey inputs must be converted before applying the RSA floor.
+            RunCase(
+                context,
+                "JsonWebKeySigningBelowFloor_1024",
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                () => new AsymmetricSignatureProvider(
+                    KeyingMaterial.JsonWebKeyRsa_1024,
+                    SecurityAlgorithms.RsaSha256,
+                    true));
+
+            // A compliant 2048-bit key must be accepted for both signing and verifying.
+            RunCase(
+                context,
+                "SigningAtFloor_2048",
+                ExpectedException.NoExceptionExpected,
+                () => new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, true));
+
+            RunCase(
+                context,
+                "VerifyingAtFloor_2048",
+                ExpectedException.NoExceptionExpected,
+                () => new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, false));
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void AppContextSwitchDisablesMinimumAsymmetricKeySizeEnforcement()
+        {
+            AppContext.SetSwitch(AppContextSwitches.DoNotEnforceMinimumAsymmetricKeySizeSwitch, true);
+
+            var provider = new AsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            byte[] signature = provider.Sign(Guid.NewGuid().ToByteArray());
+
+            Assert.NotEmpty(signature);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void AppContextSwitchDoesNotDisableDerivedKeySizeValidation()
+        {
+            AppContext.SetSwitch(AppContextSwitches.DoNotEnforceMinimumAsymmetricKeySizeSwitch, true);
+
+            var provider = new RejectingAsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void VirtualKeySizeValidationRunsBeforeFirstOperation()
+        {
+            var provider = new RejectingAsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            Assert.Equal(0, provider.ValidationCallCount);
+
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+        }
+
+        private static void RunCase(CompareContext context, string caseId, ExpectedException expectedException, Action construct)
+        {
+            try
+            {
+                construct();
+                expectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex, context);
+            }
+        }
+
+        private sealed class ReportedSizeEcdsaSecurityKey : ECDsaSecurityKey
+        {
+            private readonly int _keySize;
+
+            public ReportedSizeEcdsaSecurityKey(ECDsa ecdsa, int keySize)
+                : base(ecdsa)
+            {
+                _keySize = keySize;
+            }
+
+            public override int KeySize => _keySize;
+        }
+
+        private sealed class RejectingAsymmetricSignatureProvider : AsymmetricSignatureProvider
+        {
+            public RejectingAsymmetricSignatureProvider(
+                SecurityKey key,
+                string algorithm,
+                bool willCreateSignatures)
+                : base(key, algorithm, willCreateSignatures)
+            {
+            }
+
+            public int ValidationCallCount { get; private set; }
+
+            public override void ValidateAsymmetricSecurityKeySize(
+                SecurityKey key,
+                string algorithm,
+                bool willCreateSignatures)
+            {
+                ValidationCallCount++;
+                base.ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
+                throw new InvalidOperationException("Custom key-size validation rejected the operation.");
+            }
         }
 
         [Theory, MemberData(nameof(SignVerifyTheoryData), DisableDiscoveryEnumeration = true)]
@@ -107,7 +274,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-#if NET462 || NET472 || NET_CORE
                 theoryData.Add(new SignatureProviderTheoryData()
                 {
                     SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
@@ -153,7 +319,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NET_CORE
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -167,7 +333,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey()),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NET_CORE
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -181,7 +347,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
 #if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NET_CORE
+#elif NET
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -222,7 +388,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = x509KeyTuple.Item2
                     },
                     theoryData);
-#endif
 
                 foreach (var ecdsaKeyTuple in AsymmetricSignatureTestData.ECDsaSecurityKeys)
                     AsymmetricSignatureTestData.AddECDsaAlgorithmVariations(new SignatureProviderTheoryData
@@ -241,6 +406,44 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = jsonKeyTuple.Item2
                     },
                     theoryData);
+
+                if (MLDsa.IsSupported)
+                {
+                    foreach (var mlDsaKeyTuple in AsymmetricSignatureTestData.MlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = mlDsaKeyTuple.Item1,
+                            TestId = mlDsaKeyTuple.Item3,
+                            VerifyKey = mlDsaKeyTuple.Item2
+                        },
+                        mlDsaKeyTuple.Item4,
+                        theoryData);
+
+                    foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonMlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = jsonKeyTuple.Item1,
+                            TestId = jsonKeyTuple.Item3,
+                            VerifyKey = jsonKeyTuple.Item2
+                        },
+                        jsonKeyTuple.Item4,
+                        theoryData);
+                }
+
+                // X509 ML-DSA sign/verify requires private key extraction from PFX.
+                // GetMLDsaPrivateKey() throws PlatformNotSupportedException on .NET 6.
+                if (MLDsa.IsSupported && MlDsaKeyingMaterial.CanExtractMlDsaPrivateKeyFromX509())
+                {
+                    foreach (var x509MlDsaKeyTuple in AsymmetricSignatureTestData.X509MlDsaSecurityKeys)
+                        AsymmetricSignatureTestData.AddMlDsaAlgorithmVariations(new SignatureProviderTheoryData
+                        {
+                            SigningKey = x509MlDsaKeyTuple.Item1,
+                            TestId = x509MlDsaKeyTuple.Item3,
+                            VerifyKey = x509MlDsaKeyTuple.Item2
+                        },
+                        x509MlDsaKeyTuple.Item4,
+                        theoryData);
+                }
 
                 foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonRsaSecurityKeys)
                     AsymmetricSignatureTestData.AddRsaAlgorithmVariations(new SignatureProviderTheoryData
@@ -423,6 +626,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             TestId = algorithm
                         });
 
+                if (MLDsa.IsSupported)
+                {
+                    foreach (var algorithm in SupportedAlgorithms.MlDsaSigningAlgorithms)
+                        theoryData.Add(
+                            new AsymmetricSignatureProviderTheoryData
+                            {
+                                Algorithm = algorithm,
+                                SecurityKey = MlDsaKeyingMaterial.MlDsa44Key,
+                                TestId = algorithm
+                            });
+                }
+
                 return theoryData;
             }
         }
@@ -441,16 +656,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.VerifyDefaultMinimumAsymmetricKeySizeAreSupported", theoryData);
 
             foreach (var algorithm in AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForSigningMap.Keys)
-                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm)))
+                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.MlDsaSigningAlgorithms.Contains(algorithm)))
                 {
-                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForSigningMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms.");
+                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForSigningMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms || SupportedAlgorithms.MlDsaSigningAlgorithms.");
                     context.AddDiff($"seems like algorithm was added somewhere: '{algorithm}'.");
                 }
 
             foreach (var algorithm in AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap.Keys)
-                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm)))
+                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.MlDsaSigningAlgorithms.Contains(algorithm)))
                 {
-                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms");
+                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms || SupportedAlgorithms.MlDsaSigningAlgorithms");
                     context.AddDiff($"seems like algorithm was added somewhere: '{algorithm}'.");
                 }
 

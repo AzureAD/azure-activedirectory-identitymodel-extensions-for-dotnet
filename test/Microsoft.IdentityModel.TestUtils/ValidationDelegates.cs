@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -239,9 +240,20 @@ namespace Microsoft.IdentityModel.TestUtils
             return token;
         }
 
+        public static bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegmentType jwtSegmentType, string claimName, out object claimValue)
+        {
+            claimValue = null;
+            return false;
+        }
+
         public static string TypeValidator(string type, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             return type;
         }
+
+        public static readonly ActClaimRetriever ActClaimRetriever = (actorClaim, tokenValidationParameters) =>
+        {
+            return null;
+        };
     }
 }

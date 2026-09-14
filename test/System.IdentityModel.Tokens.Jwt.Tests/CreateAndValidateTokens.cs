@@ -611,8 +611,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
-#if NET462 || NET_CORE
-            // RsaPss is not supported on .NET < 4.6
             var rsaPssSigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256);
             theoryData.Add(new JwtTheoryData
             {
@@ -631,7 +629,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateIssuer = false,
                 }
             });
-#endif
 
             return theoryData;
         }

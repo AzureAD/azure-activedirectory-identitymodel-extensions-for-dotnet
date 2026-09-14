@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Runtime.InteropServices;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -67,6 +69,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void AesGcmEncryptionOnWindows()
         {
+#if NET6_0_OR_GREATER
+            // AES-GCM is now supported on all platforms in .NET 6+
+            var context = new CompareContext();
+            try
+            {
+                var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
+            }
+            catch (Exception ex)
+            {
+                context.AddDiff($"AuthenticatedEncryptionProvider is not supposed to throw an exception, Exception:{ex.ToString()}");
+            }
+            TestUtilities.AssertFailIfErrors(context);
+#else
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
@@ -84,14 +99,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 }
                 TestUtilities.AssertFailIfErrors(context);
             }
+#endif
         }
 
-#if NET_CORE
+#if NET
         [Fact]
         public void AesGcm_Dispose()
         {
+#if !NET6_0_OR_GREATER
+            // In .NET versions below .NET 6, AES-GCM is only supported on Windows
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
+#endif
 
             AuthenticatedEncryptionProvider encryptionProvider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
             encryptionProvider.Dispose();
@@ -173,6 +192,55 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Regression test: a per-key authentication-tag verification failure (IDX10650) is expected noise while
+        // JsonWebTokenHandler probes multiple candidate decryption keys, and must not be logged at Error. It must
+        // still be retrievable at a lower level for diagnostics. See AuthenticatedEncryptionProvider.DecryptWithAesCbc.
+        [Fact]
+        public void DecryptAuthTagFailureIsNotLoggedAtError()
+        {
+            var context = new CompareContext($"{this}.DecryptAuthTagFailureIsNotLoggedAtError");
+
+            var key = Default.SymmetricEncryptionKey256;
+            var algorithm = SecurityAlgorithms.Aes128CbcHmacSha256;
+            var authenticatedData = Guid.NewGuid().ToByteArray();
+            var plainText = Guid.NewGuid().ToByteArray();
+            var provider = new AuthenticatedEncryptionProvider(key, algorithm);
+            var results = provider.Encrypt(plainText, authenticatedData);
+
+            // Tamper the authentication tag so verification fails with IDX10650.
+            TestUtilities.XORBytes(results.AuthenticationTag);
+
+            EventLevel originalLogLevel = IdentityModelEventSource.Logger.LogLevel;
+            try
+            {
+                // With the listener at Error level, IDX10650 must NOT be logged (it is below Error).
+                using (var errorListener = SampleListener.CreateLoggerListener(EventLevel.Error))
+                {
+                    Assert.Throws<SecurityTokenDecryptionFailedException>(() =>
+                        provider.Decrypt(results.Ciphertext, authenticatedData, results.IV, results.AuthenticationTag));
+
+                    if (errorListener.TraceBuffer.Contains("IDX10650"))
+                        context.AddDiff("IDX10650 was logged at Error level; per-key decryption-tag failures must be logged below Error.");
+                }
+
+                // With the listener at Informational level, IDX10650 MUST still be logged for diagnostics.
+                using (var infoListener = SampleListener.CreateLoggerListener(EventLevel.Informational))
+                {
+                    Assert.Throws<SecurityTokenDecryptionFailedException>(() =>
+                        provider.Decrypt(results.Ciphertext, authenticatedData, results.IV, results.AuthenticationTag));
+
+                    if (!infoListener.TraceBuffer.Contains("IDX10650"))
+                        context.AddDiff("IDX10650 was not logged at Informational level; the per-key failure detail should remain available for diagnostics.");
+                }
+            }
+            finally
+            {
+                IdentityModelEventSource.Logger.LogLevel = originalLogLevel;
             }
 
             TestUtilities.AssertFailIfErrors(context);

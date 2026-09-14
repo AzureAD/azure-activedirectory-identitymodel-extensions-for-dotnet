@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 tvpWrongIssuerSigningKey.IssuerSigningKey = KeyingMaterial.RsaSecurityKey2;
                 var ecdsaSigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256);
 
-#if NET_CORE
+#if NET
                 var adHocRsa = RSA.Create();
                 adHocRsa.KeySize = 2048;
 #else
@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
                         TestId = "ValidRsaThumbprint",
                     },
-#if NET_CORE
+#if NET
                     new RoundtripSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestCreationParameters = creationParameters,

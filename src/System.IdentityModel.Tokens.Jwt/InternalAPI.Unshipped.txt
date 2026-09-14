@@ -1,0 +1,1 @@
+System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.TelemetryClient -> Microsoft.IdentityModel.Telemetry.ITelemetryClient

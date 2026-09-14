@@ -5,6 +5,10 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
+#if NET9_0_OR_GREATER
+using System.Threading;
+#endif
+
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -15,9 +19,13 @@ namespace Microsoft.IdentityModel.Tokens
         private static readonly byte[] _defaultIV = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
         private const int _blockSizeInBits = 64;
         private const int _blockSizeInBytes = _blockSizeInBits >> 3;
-        private static readonly object _encryptorLock = new object();
-        private static readonly object _decryptorLock = new object();
-
+#if NET9_0_OR_GREATER
+        private static readonly Lock s_encryptorLock = new();
+        private static readonly Lock s_decryptorLock = new();
+#else
+        private static readonly object s_encryptorLock = new();
+        private static readonly object s_decryptorLock = new();
+#endif
         private Lazy<SymmetricAlgorithm> _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
         private ICryptoTransform _symmetricAlgorithmDecryptor;
@@ -158,16 +166,19 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 // Create the AES provider
                 SymmetricAlgorithm symmetricAlgorithm = Aes.Create();
-                symmetricAlgorithm.Mode = CipherMode.ECB;
+#if !NET10_0_OR_GREATER
+                symmetricAlgorithm.Mode = CipherMode.ECB; // CodeQL [SM02199] Approved necessary usage of AES-ECB for implementing AES-KW
                 symmetricAlgorithm.Padding = PaddingMode.None;
+#endif
                 symmetricAlgorithm.KeySize = keyBytes.Length * 8;
                 symmetricAlgorithm.Key = keyBytes;
 
+#if !NET10_0_OR_GREATER
                 // Set the AES IV to Zeroes
                 var aesIv = new byte[symmetricAlgorithm.BlockSize >> 3];
                 Utility.Zero(aesIv);
                 symmetricAlgorithm.IV = aesIv;
-
+#endif
                 return symmetricAlgorithm;
             }
             catch (Exception ex)
@@ -209,7 +220,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
+#if NET10_0_OR_GREATER
+                return ((Aes)_symmetricAlgorithm.Value).DecryptEcb(keyBytes, PaddingMode.None);
+#else
                 return UnwrapKeyPrivate(keyBytes, 0, keyBytes.Length);
+#endif
             }
             catch (Exception ex)
             {
@@ -259,7 +274,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_symmetricAlgorithmDecryptor == null)
             {
-                lock (_decryptorLock)
+                lock (s_decryptorLock)
                 {
                     if (_symmetricAlgorithmDecryptor == null)
                         _symmetricAlgorithmDecryptor = _symmetricAlgorithm.Value.CreateDecryptor();
@@ -364,7 +379,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
+#if NET10_0_OR_GREATER
+                return ((Aes)_symmetricAlgorithm.Value).EncryptEcb(keyBytes, PaddingMode.None);
+#else
                 return WrapKeyPrivate(keyBytes, 0, keyBytes.Length);
+#endif
             }
             catch (Exception ex)
             {
@@ -409,7 +428,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_symmetricAlgorithmEncryptor == null)
             {
-                lock (_encryptorLock)
+                lock (s_encryptorLock)
                 {
                     if (_symmetricAlgorithmEncryptor == null)
                         _symmetricAlgorithmEncryptor = _symmetricAlgorithm.Value.CreateEncryptor();

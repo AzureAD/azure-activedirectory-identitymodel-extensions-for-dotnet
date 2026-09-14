@@ -9,7 +9,6 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -166,6 +165,27 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory, MemberData(nameof(ReadSignatureTheoryDataTypeCapitalized), DisableDiscoveryEnumeration = true)]
+        public void ReadSignatureTypeCapitalized(DSigSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadSignature", theoryData);
+            bool switchValue;
+            AppContext.TryGetSwitch("Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr", out switchValue);
+            AppContext.SetSwitch("Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr", true);
+            try
+            {
+                var signature = theoryData.Serializer.ReadSignature(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(signature, theoryData.Signature, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            AppContext.SetSwitch("Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr", switchValue);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<DSigSerializerTheoryData> ReadSignatureTheoryData
         {
             get
@@ -232,6 +252,79 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     Xml = "<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"></Signature>"
                 });
 
+                return theoryData;
+            }
+        }
+
+        public static TheoryData<DSigSerializerTheoryData> ReadSignatureTheoryDataTypeCapitalized
+        {
+            get
+            {
+                bool switchValue;
+                AppContext.TryGetSwitch("Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr", out switchValue);
+                AppContext.SetSwitch("Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr", true);
+                var signature = Default.Signature;
+                signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStream;
+
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+                var theoryData = new TheoryData<DSigSerializerTheoryData>
+                {
+                    new DSigSerializerTheoryData
+                    {
+                        First = true,
+                        Signature = signature,
+                        TestId = nameof(Default.Signature),
+                        Xml =  XmlGenerator.Generate(Default.Signature),
+                    }
+                };
+
+                signature = Default.SignatureReferenceWithId;
+                signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStreamAndId;
+                theoryData.Add(new DSigSerializerTheoryData
+                {
+                    Signature = signature,
+                    TestId = nameof(Default.SignatureReferenceWithId),
+                    Xml = XmlGenerator.Generate(Default.SignatureReferenceWithId),
+                });
+
+                signature = Default.Signature;
+                signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStream;
+                theoryData.Add(new DSigSerializerTheoryData
+                {
+                    Signature = signature,
+                    TestId = nameof(Default.Signature) + "ReferenceWithoutPrefix",
+                    Xml = XmlGenerator.Generate(Default.SignatureReferenceWithoutPrefix),
+                });
+
+                signature = Default.Signature;
+                signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStream;
+                signature.SignedInfo.References[0].DigestMethod = $"_{SecurityAlgorithms.Sha256Digest}";
+                theoryData.Add(new DSigSerializerTheoryData
+                {
+                    Signature = signature,
+                    TestId = "UnknownDigestAlgorithm",
+                    Xml = XmlGenerator.Generate(Default.Signature).Replace(SecurityAlgorithms.Sha256Digest, $"_{SecurityAlgorithms.Sha256Digest}")
+                });
+
+                signature = Default.Signature;
+                signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStream;
+                signature.SignedInfo.SignatureMethod = $"_{SecurityAlgorithms.RsaSha256Signature}";
+                theoryData.Add(new DSigSerializerTheoryData
+                {
+                    Signature = signature,
+                    TestId = "UnknownSignatureAlgorithm",
+                    Xml = XmlGenerator.Generate(Default.Signature).Replace(SecurityAlgorithms.RsaSha256Signature, $"_{SecurityAlgorithms.RsaSha256Signature}")
+                });
+
+                theoryData.Add(new DSigSerializerTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30022:"),
+                    Signature = new Signature(),
+                    TestId = "EmptySignature",
+                    Xml = "<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"></Signature>"
+                });
+                AppContext.SetSwitch("Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr", switchValue);
                 return theoryData;
             }
         }

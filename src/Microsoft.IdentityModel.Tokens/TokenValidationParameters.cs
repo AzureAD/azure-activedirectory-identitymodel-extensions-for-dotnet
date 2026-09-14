@@ -58,10 +58,11 @@ namespace Microsoft.IdentityModel.Tokens
             DebugId = other.DebugId;
             IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
+            IgnoreCaseWhenValidatingAudience = other.IgnoreCaseWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeyResolverUsingConfiguration = other.IssuerSigningKeyResolverUsingConfiguration;
-            IssuerSigningKeys = other.IssuerSigningKeys;
+            IssuerSigningKeys = other.IssuerSigningKeys is not null ? new List<SecurityKey>(other.IssuerSigningKeys) : null;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerSigningKeyValidatorUsingConfiguration = other.IssuerSigningKeyValidatorUsingConfiguration;
             IssuerValidator = other.IssuerValidator;
@@ -72,9 +73,11 @@ namespace Microsoft.IdentityModel.Tokens
             LogValidationExceptions = other.LogValidationExceptions;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
-            PropertyBag = other.PropertyBag;
+            PropertyBag = other.PropertyBag is not null ? new Dictionary<string, object>(other.PropertyBag) : null;
+            TryReadJwtClaim = other.TryReadJwtClaim;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
+            // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             RequireExpirationTime = other.RequireExpirationTime;
             RequireSignedTokens = other.RequireSignedTokens;
             RoleClaimType = other.RoleClaimType;
@@ -84,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens
             SignatureValidatorUsingConfiguration = other.SignatureValidatorUsingConfiguration;
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
-            TokenDecryptionKeys = other.TokenDecryptionKeys;
+            TokenDecryptionKeys = other.TokenDecryptionKeys is not null ? new List<SecurityKey>(other.TokenDecryptionKeys) : null;
             TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
@@ -93,19 +96,23 @@ namespace Microsoft.IdentityModel.Tokens
             TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
+            // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             ValidateAudience = other.ValidateAudience;
+            // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             ValidateIssuer = other.ValidateIssuer;
             ValidateIssuerSigningKey = other.ValidateIssuerSigningKey;
+            // CodeQL [SM03926] intentional: Value is copied regardless of whether it is true or false.
             ValidateLifetime = other.ValidateLifetime;
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateTokenReplay = other.ValidateTokenReplay;
             ValidateWithLKG = other.ValidateWithLKG;
-            ValidAlgorithms = other.ValidAlgorithms;
+            ValidAlgorithms = other.ValidAlgorithms is not null ? new List<string>(other.ValidAlgorithms) : null;
             ValidAudience = other.ValidAudience;
-            ValidAudiences = other.ValidAudiences;
+            ValidAudiences = other.ValidAudiences is not null ? new List<string>(other.ValidAudiences) : null;
             ValidIssuer = other.ValidIssuer;
-            ValidIssuers = other.ValidIssuers;
-            ValidTypes = other.ValidTypes;
+            ValidIssuers = other.ValidIssuers is not null ? new List<string>(other.ValidIssuers) : null;
+            ValidTypes = other.ValidTypes is not null ? new List<string>(other.ValidTypes) : null;
+            ActClaimRetriever = other.ActClaimRetriever;
         }
 
         /// <summary>
@@ -199,11 +206,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns a new instance of <see cref="TokenValidationParameters"/> with values copied from this object.
         /// </summary>
-        /// <returns>A new <see cref="TokenValidationParameters"/> object copied from this object</returns>
-        /// <remarks>This is a shallow Clone.</remarks>
+        /// <returns>A new <see cref="TokenValidationParameters"/> object copied from this object.</returns>
+        /// <remarks>This is a deep Clone.</remarks>
         public virtual TokenValidationParameters Clone()
         {
-            return new(this)
+            return new TokenValidationParameters(this)
             {
                 IsClone = true
             };
@@ -270,6 +277,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public bool IgnoreTrailingSlashWhenValidatingAudience { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a boolean that controls if case is ignored when validating the audience.
+        /// The default is <c>false</c>, meaning audience comparison is case-sensitive (ordinal).
+        /// </summary>
+        [DefaultValue(false)]
+        public bool IgnoreCaseWhenValidatingAudience { get; set; }
 
         /// <summary>
         /// Gets or sets the flag that indicates whether to include the <see cref="SecurityToken"/> when the validation fails.
@@ -450,6 +464,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; set; }
+
+        /// <summary>
+        /// Gets or sets the delegate that will be called when reading JSON Web Token header and payload claims.
+        /// </summary>
+        public TryReadJwtClaim TryReadJwtClaim { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
@@ -752,5 +771,28 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the delegate that will be used to convert the 'act' claim JSON into a ClaimsIdentity.
+        /// <para>This delegate is invoked during token validation when an actor claim is encountered in a token.</para>
+        /// <para>The delegate receives a <see cref="System.Text.Json.JsonElement"/> representing the actor claim
+        /// and should return a <see cref="ClaimsIdentity"/> that represents the actor.</para>
+        /// </summary>
+        /// <remarks>
+        /// <para>When this delegate is provided, it replaces the default actor claim processing logic.</para>
+        /// <para>This is useful for custom actor claim formats or when special processing is needed for the actor claims.</para>
+        /// <para>The delegate can also handle nested actors by recursively creating actor identities and setting the Actor property.</para>
+        /// <code>
+        /// validationParameters.ActClaimRetriever = (JsonElement element,TokenValidationParameters tokenValidationParameters) => {
+        ///     var identity = new ClaimsIdentity("CustomActor");
+        ///     // Extract claims from the JsonElement
+        ///     if (element.TryGetProperty("sub", out var sub))
+        ///         identity.AddClaim(new Claim("sub", sub.GetString()));
+        ///     return identity;
+        /// };
+        /// </code>
+        /// </remarks>
+        public ActClaimRetriever ActClaimRetriever { get; set; }
+
     }
 }

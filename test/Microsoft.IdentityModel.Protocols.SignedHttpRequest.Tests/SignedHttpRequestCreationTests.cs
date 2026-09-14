@@ -449,6 +449,24 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedClaimValue = $@"{{""p"":""/pa%20th1""}}",
                         HttpRequestUri = new Uri("http://www.contoso.com:81/pa th1")
                     },
+                    new CreateSignedHttpRequestTheoryData("ValidPLowerHexPreserved")
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.P,
+                        ExpectedClaimValue = $@"{{""p"":""/foo%2fbar""}}",
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%2fbar")
+                    },
+                    new CreateSignedHttpRequestTheoryData("ValidPUpperHexPreserved")
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.P,
+                        ExpectedClaimValue = $@"{{""p"":""/foo%2Fbar""}}",
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%2Fbar")
+                    },
+                    new CreateSignedHttpRequestTheoryData("ValidPDoubleEncodingPreserved")
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.P,
+                        ExpectedClaimValue = $@"{{""p"":""/foo%252Fbar""}}",
+                        HttpRequestUri = new Uri("https://www.contoso.com/foo%252Fbar")
+                    },
                     new CreateSignedHttpRequestTheoryData("NoPath")
                     {
                         ExpectedClaim = SignedHttpRequestClaimTypes.P,
@@ -910,7 +928,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKey1, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
                         ExpectedClaimValue = $@"{{""cnf"":{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(rsaJwkFromX509Key.ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.E}"":""{rsaJwkFromX509Key.E}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{rsaJwkFromX509Key.N}""}}}}}}"
                     },
-#if NET472 || NET_CORE
+#if NET472 || NET
                     new CreateSignedHttpRequestTheoryData("ValidEcdsaKey")
                     {
                         ExpectedClaim = ConfirmationClaimTypes.Cnf,

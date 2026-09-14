@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 61;
+        int ExpectedPropertyCount = 64;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
@@ -83,6 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 PropertyBag = propertyBag,
                 SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs,
                 SaveSigninToken = true,
+                TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim,
                 TypeValidator = typeValidator,
                 ValidAlgorithms = validAlgorithms,
                 ValidateAudience = false,
@@ -122,6 +123,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.PropertyBag = propertyBag;
             validationParametersSets.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
             validationParametersSets.SaveSigninToken = true;
+            validationParametersSets.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParametersSets.TypeValidator = typeValidator;
             validationParametersSets.ValidateAudience = false;
             validationParametersSets.ValidateIssuer = false;
@@ -203,6 +205,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new KeyValuePair<string, List<object>>("CryptoProviderFactory", new List<object>{(CryptoProviderFactory)null, new CryptoProviderFactory(), new CryptoProviderFactory() }),
                     new KeyValuePair<string, List<object>>("DebugId", new List<object>{(string)null, "DebugId", "DebugId" }),
                     new KeyValuePair<string, List<object>>("IgnoreTrailingSlashWhenValidatingAudience",  new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("IgnoreCaseWhenValidatingAudience",  new List<object>{false, true, false}),
                     new KeyValuePair<string, List<object>>("IncludeTokenOnFailedValidation",  new List<object>{false, true, true}),
                     new KeyValuePair<string, List<object>>("IsClone",  new List<object>{ false, true, true }),
                     new KeyValuePair<string, List<object>>("InstancePropertyBag",  new List<object>{ new Dictionary<string, object>(), new Dictionary<string, object>(), new Dictionary<string, object>()}),
@@ -275,13 +278,21 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParametersClone = validationParameters.Clone();
             IdentityComparer.AreEqual(validationParametersClone, validationParameters, compareContext);
             if (validationParameters.IsClone)
-                compareContext.AddDiff("if (validationParameters.IsClone), IsCone should be false");
+                compareContext.AddDiff("if (validationParameters.IsClone), IsClone should be false");
 
             if (!validationParametersClone.IsClone)
-                compareContext.AddDiff("if (!validationParametersClone.IsClone), IsCone should be true");
+                compareContext.AddDiff("if (!validationParametersClone.IsClone), IsClone should be true");
 
             if (validationParametersClone.InstancePropertyBag.Count != 0)
                 compareContext.AddDiff("validationParametersClone.InstancePropertyBag.Count != 0), should be empty.");
+
+            validationParameters.AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false);
+            if (validationParameters.AlgorithmValidator.Equals(validationParametersClone.AlgorithmValidator))
+                compareContext.AddDiff("validationParameters.AlgorithmValidator.Equals(validationParametersClone.AlgorithmValidator)), should not be equal after change.");
+
+            validationParameters.AudienceValidator = ValidationDelegates.AudienceValidatorReturnsFalse;
+            if (validationParameters.AudienceValidator.Equals(validationParametersClone.AudienceValidator))
+                compareContext.AddDiff("validationParameters.AudienceValidator.Equals(validationParametersClone.AudienceValidator)), should not be equal after change.");
 
             TestUtilities.AssertFailIfErrors(compareContext);
         }
@@ -308,7 +319,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.TokenReader = ValidationDelegates.TokenReaderReturnsJsonWebToken;
             validationParameters.TokenReplayValidator = ValidationDelegates.TokenReplayValidatorReturnsTrue;
             validationParameters.TransformBeforeSignatureValidation = ValidationDelegates.TransformBeforeSignatureValidation;
+            validationParameters.TryReadJwtClaim = ValidationDelegates.TryReadJwtClaim;
             validationParameters.TypeValidator = ValidationDelegates.TypeValidator;
+            validationParameters.ActClaimRetriever = ValidationDelegates.ActClaimRetriever;
 
             validationParameters.ActorValidationParameters = new TokenValidationParameters();
             validationParameters.ClockSkew = TimeSpan.FromSeconds(42);

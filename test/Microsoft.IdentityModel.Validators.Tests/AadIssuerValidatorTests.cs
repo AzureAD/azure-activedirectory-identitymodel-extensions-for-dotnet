@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.Net.Http;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -19,6 +22,35 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             // Assert
             Assert.Equal(theoryData.ExpectedResult, validationResult);
+        }
+
+        [Fact]
+        public void GetAadIssuerValidator_ThrowsOnNullOrEmptyAuthority()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                AadIssuerValidator.GetAadIssuerValidator(null, null, null));
+            Assert.Throws<ArgumentNullException>(() =>
+                AadIssuerValidator.GetAadIssuerValidator("", null, null));
+        }
+
+        [Fact]
+        public void GetAadIssuerValidator_ReturnsInstance_WithAndWithoutProvider()
+        {
+            string authority = "https://login.microsoftonline.com/common";
+            HttpClient httpClient = new HttpClient();
+
+            // Without provider
+            var validator1 = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient, null);
+            Assert.NotNull(validator1);
+
+            // With provider
+            Func<string, BaseConfigurationManager> provider = (auth) => new MockBaseConfigurationManager();
+            var validator2 = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient, provider);
+            Assert.NotNull(validator2);
+
+            // Should return the same instance for the same authority when provider is null
+            var validator3 = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient, null);
+            Assert.Same(validator1, validator3);
         }
 
         public static TheoryData<AadIssuerValidatorTheoryData> AadIssuerValidationTestCases()
@@ -108,6 +140,11 @@ namespace Microsoft.IdentityModel.Validators.Tests
             };
 
             return theoryData;
+        }
+
+        private class MockBaseConfigurationManager : BaseConfigurationManager
+        {
+            public override void RequestRefresh() { }
         }
     }
 

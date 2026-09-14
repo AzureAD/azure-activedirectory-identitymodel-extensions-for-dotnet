@@ -84,6 +84,19 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public bool ExpectRawData { get; set; }
 
+        public bool ValidateProperty(Type type, string propertyName)
+        {
+            if (PropertiesToIgnoreWhenComparing != null
+            && PropertiesToIgnoreWhenComparing.TryGetValue(type, out List<string> propertiesToIgnore))
+            {
+                foreach (var val in propertiesToIgnore)
+                    if (string.Equals(val, propertyName, StringComparison.OrdinalIgnoreCase))
+                        return false;
+            }
+
+            return true;
+        }
+
         public Dictionary<Type, List<string>> PropertiesToIgnoreWhenComparing { get; set; } = new Dictionary<Type, List<string>>();
 
         /// <summary>
