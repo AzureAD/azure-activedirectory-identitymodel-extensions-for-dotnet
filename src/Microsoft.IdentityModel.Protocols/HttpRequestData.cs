@@ -17,6 +17,8 @@ namespace Microsoft.IdentityModel.Protocols
     {
         private IDictionary<string, IEnumerable<string>> _headers = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
         private X509Certificate2Collection _clientCertificates;
+        private Action<X509Certificate2Collection> _lazyClientCertificates;
+        private readonly object _lazyClientCertificatesLock = new object();
 
         /// <summary>
         /// Gets or sets the http request URI. 
@@ -51,9 +53,29 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets the certificate collection involved in authenticating the client against the server.
         /// </summary>
-        public X509Certificate2Collection ClientCertificates => _clientCertificates ??
-            Interlocked.CompareExchange(ref _clientCertificates, [], null) ??
-            _clientCertificates;
+        public X509Certificate2Collection ClientCertificates
+        {
+            get
+            {
+                _clientCertificates ??=
+                    Interlocked.CompareExchange(ref _clientCertificates, [], null) ??
+                    _clientCertificates;
+
+                if (_lazyClientCertificates != null)
+                {
+                    lock (_lazyClientCertificatesLock)
+                    {
+                        if (_lazyClientCertificates != null)
+                        {
+                            _lazyClientCertificates(_clientCertificates);
+                            _lazyClientCertificates = null;
+                        }
+                    }
+                }
+
+                return _clientCertificates;
+            }
+        }
 
         /// <summary>
         /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
@@ -76,6 +98,18 @@ namespace Microsoft.IdentityModel.Protocols
                 else
                     Headers.Add(header.Key, header.Value);
             }
+        }
+
+        /// <summary>
+        /// Sets an action to lazily populate the <see cref="ClientCertificates"/> property.
+        /// </summary>
+        /// <param name="lazyClientCertificates">The action to lazily populate the property.</param>
+        public void SetLazyClientCertificates(Action<X509Certificate2Collection> lazyClientCertificates)
+        {
+            if (lazyClientCertificates == null)
+                return;
+
+            _lazyClientCertificates = lazyClientCertificates;
         }
     }
 }
