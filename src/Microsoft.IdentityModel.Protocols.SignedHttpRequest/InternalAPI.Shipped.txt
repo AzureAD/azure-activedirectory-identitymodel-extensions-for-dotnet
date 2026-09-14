@@ -36,6 +36,7 @@ const Microsoft.IdentityModel.Protocols.SignedHttpRequest.LogMessages.IDX23035 =
 const Microsoft.IdentityModel.Protocols.SignedHttpRequest.LogMessages.IDX23036 = "IDX23036: Signed http request nonce validation failed. Exceptions caught: '{0}'." -> string
 const Microsoft.IdentityModel.Protocols.SignedHttpRequest.LogMessages.IDX23037 = "IDX23037: Resolving a PoP key from the 'jku' claim is not allowed. To allow it, set AllowResolvingPopKeyFromJku property on SignedHttpRequestValidationParameters to true and provide a list of trusted domains via AllowedDomainsForJkuRetrieval." -> string
 const Microsoft.IdentityModel.Protocols.SignedHttpRequest.LogMessages.IDX23038 = "IDX23038: Resolving a PoP key from the 'jku' claim is not allowed as '{0}' is not present in the list of allowed domains for 'jku' retrieval: '{1}'. If '{0}' belongs to a trusted domain, add it to AllowedDomainsForJkuRetrieval property on SignedHttpRequestValidationParameters." -> string
+const Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.DefaultUseCaseSensitivePClaimComparison = false -> bool
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.Cnf
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.Cnf.Cnf() -> void
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.Cnf.Cnf(string json) -> void
