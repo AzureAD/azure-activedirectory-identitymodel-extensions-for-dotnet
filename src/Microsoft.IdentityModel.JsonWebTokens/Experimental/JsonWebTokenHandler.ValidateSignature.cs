@@ -353,7 +353,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             finally
             {
-                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+                if (signatureProvider is not null)
+                    cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
         }
 

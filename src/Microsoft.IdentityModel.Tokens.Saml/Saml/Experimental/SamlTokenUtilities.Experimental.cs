@@ -302,7 +302,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
             finally
             {
-                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+                if (signatureProvider is not null)
+                    cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
         }
 

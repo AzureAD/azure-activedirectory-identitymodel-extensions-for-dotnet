@@ -230,6 +230,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Null(securityToken.SigningKey);
             Assert.Equal(ValidationFailureType.CryptoProviderReturnedNull, result.Error.FailureType);
             Assert.Contains("IDX10636", result.Error.Message, StringComparison.Ordinal);
+            Assert.Equal(0, factory.ReleaseSignatureProviderCount);
         }
 
         [Theory, MemberData(nameof(HandlerKinds), DisableDiscoveryEnumeration = true)]
@@ -604,11 +605,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             public override void ReleaseSignatureProvider(SignatureProvider signatureProvider)
             {
-                if (signatureProvider != null)
-                {
-                    ReleaseSignatureProviderCount++;
-                    base.ReleaseSignatureProvider(signatureProvider);
-                }
+                ReleaseSignatureProviderCount++;
+                base.ReleaseSignatureProvider(signatureProvider);
             }
 
             public override HashAlgorithm CreateHashAlgorithm(string algorithm)
