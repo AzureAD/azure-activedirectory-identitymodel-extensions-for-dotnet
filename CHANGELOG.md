@@ -5,6 +5,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ## New Features
 - Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The default is case-sensitive; set the property to `false` for case-insensitive comparison. The previous `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext key is no longer honored. Applications upgrading from 8.22.0 that set the key to `false` must set this property to `false` instead. See [PR #3569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3569).
 
+## Bug Fixes
+- Enforce the minimum asymmetric key sizes configured by `AsymmetricSignatureProvider`. This can introduce new constructor-time failures for applications using undersized keys on modern .NET targets. Applications that need time to rotate legacy keys can temporarily restore the previous behavior by enabling the `Switch.Microsoft.IdentityModel.DoNotEnforceMinimumAsymmetricKeySize` AppContext switch before first use. See [PR #3594](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3594).
+
 8.22.0
 ====
 ## New Features
