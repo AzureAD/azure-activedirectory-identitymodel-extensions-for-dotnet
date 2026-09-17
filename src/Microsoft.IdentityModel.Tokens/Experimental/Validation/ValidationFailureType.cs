@@ -35,6 +35,18 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         private class CryptoProviderReturnedNullFailure : ValidationFailureType { internal CryptoProviderReturnedNullFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// The selected crypto provider factory does not support the requested signature algorithm with the supplied key.
+        /// </summary>
+        public static readonly ValidationFailureType CryptoProviderFactoryDoesNotSupportAlgorithm =
+            new CryptoProviderFactoryDoesNotSupportAlgorithmFailure(
+                "CryptoProviderFactoryDoesNotSupportAlgorithm");
+
+        private class CryptoProviderFactoryDoesNotSupportAlgorithmFailure : ValidationFailureType
+        {
+            internal CryptoProviderFactoryDoesNotSupportAlgorithmFailure(string name) : base(name) { }
+        }
+
+        /// <summary>
         /// A token could not be read.
         /// </summary>
         public static readonly ValidationFailureType TokenReadingFailed = new TokenReadingFailure("TokenReadingFailed");
