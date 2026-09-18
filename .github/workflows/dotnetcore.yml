@@ -6,16 +6,14 @@ permissions:
 
 on:
   push:
-    branches:
-      - dev
+    branches: [ "dev", "dev8x", "dev7x", "dev5x" ]
   pull_request:
     types:
       - opened
       - synchronize
       - reopened
       - ready_for_review
-    branches:
-      - dev
+    branches: [ "dev", "dev8x", "dev7x", "dev5x" ]
 
 env:
   TargetNetNext: False
