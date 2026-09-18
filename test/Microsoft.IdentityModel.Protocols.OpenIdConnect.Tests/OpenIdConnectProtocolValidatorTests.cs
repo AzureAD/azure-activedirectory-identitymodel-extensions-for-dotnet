@@ -486,7 +486,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "(JWT) UserInfoResponse.sub == ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
+#pragma warning disable CS0618 // Type or member is obsolete
                         UserInfoEndpointResponse = (new JwtSecurityTokenHandler()).WriteToken(CreateValidatedIdToken("sub", "sub")),
+#pragma warning restore CS0618 // Type or member is obsolete
                         ValidatedIdToken = CreateValidatedIdToken("sub", "sub")
                     }
                 });
