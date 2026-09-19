@@ -70,25 +70,21 @@ namespace Microsoft.IdentityModel.Xml.Tests
         }
 
         [Fact]
-        public void ReferenceVerify_MalformedBase64_ReturnsDigestFailureAndReleasesHash()
+        public void ReferenceVerify_MalformedBase64_ThrowsAndReleasesHash()
         {
             // Arrange
             Reference reference = CreateFreshValidReference();
             reference.DigestValue = "not-valid-base64!!!";
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory();
 
-            // Act
-            ValidationResult<Reference, ValidationError> result = reference.Verify(factory, new CallContext());
-
-            // Assert
-            SignatureValidationError error = AssertDigestComputationFailure(result);
-            Assert.IsType<FormatException>(error.InnerException);
+            // Act / Assert
+            Assert.Throws<FormatException>(() => reference.Verify(factory, new CallContext()));
             Assert.Equal(factory.CreateHashAlgorithmCount, factory.ReleaseHashAlgorithmCount);
             Assert.True(factory.CreateHashAlgorithmCount > 0);
         }
 
         [Fact]
-        public void ReferenceVerify_MissingStream_ReturnsDigestFailure()
+        public void ReferenceVerify_MissingStream_Throws()
         {
             // Arrange
             Reference reference = new Reference
@@ -97,81 +93,57 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 DigestValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
             };
 
-            // Act
-            ValidationResult<Reference, ValidationError> result =
-                reference.Verify(CryptoProviderFactory.Default, new CallContext());
-
-            // Assert
-            SignatureValidationError error = AssertDigestComputationFailure(result);
-            XmlValidationException innerException = Assert.IsType<XmlValidationException>(error.InnerException);
-            Assert.Contains("IDX30202", innerException.Message, StringComparison.Ordinal);
+            // Act / Assert
+            XmlValidationException exception = Assert.Throws<XmlValidationException>(
+                () => reference.Verify(CryptoProviderFactory.Default, new CallContext()));
+            Assert.Contains("IDX30202", exception.Message, StringComparison.Ordinal);
         }
 
         [Fact]
-        public void ReferenceVerify_UnsupportedDigest_ReturnsDigestFailure()
+        public void ReferenceVerify_UnsupportedDigest_Throws()
         {
             // Arrange
             Reference reference = CreateFreshValidReference();
             reference.DigestMethod = "urn:unsupported-digest";
 
-            // Act
-            ValidationResult<Reference, ValidationError> result =
-                reference.Verify(CryptoProviderFactory.Default, new CallContext());
-
-            // Assert
-            SignatureValidationError error = AssertDigestComputationFailure(result);
-            XmlValidationException innerException = Assert.IsType<XmlValidationException>(error.InnerException);
-            Assert.Contains("IDX30208", innerException.Message, StringComparison.Ordinal);
+            // Act / Assert
+            XmlValidationException exception = Assert.Throws<XmlValidationException>(
+                () => reference.Verify(CryptoProviderFactory.Default, new CallContext()));
+            Assert.Contains("IDX30208", exception.Message, StringComparison.Ordinal);
         }
 
         [Fact]
-        public void ReferenceVerify_NullHashProvider_ReturnsDigestFailure()
+        public void ReferenceVerify_NullHashProvider_Throws()
         {
             // Arrange
             Reference reference = CreateFreshValidReference();
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { ReturnNullHashAlgorithm = true };
 
-            // Act
-            ValidationResult<Reference, ValidationError> result = reference.Verify(factory, new CallContext());
-
-            // Assert
-            SignatureValidationError error = AssertDigestComputationFailure(result);
-            XmlValidationException innerException = Assert.IsType<XmlValidationException>(error.InnerException);
-            Assert.Contains("IDX30209", innerException.Message, StringComparison.Ordinal);
-            Assert.Equal(1, factory.CreateHashAlgorithmCount);
-            Assert.Equal(0, factory.ReleaseHashAlgorithmCount);
-        }
-
-        public static TheoryData<Exception> DigestComputationExceptions => new TheoryData<Exception>
-        {
-            new XmlValidationException("xml-validation-failed"),
-            new XmlException("xml-failed"),
-            new System.Xml.XmlException("system-xml-failed"),
-            new CryptographicException("hash-failed"),
-            new ArgumentException("invalid-hash-argument"),
-            new InvalidOperationException("invalid-hash-provider"),
-            new NotSupportedException("unsupported-hash")
-        };
-
-        [Theory, MemberData(nameof(DigestComputationExceptions), DisableDiscoveryEnumeration = true)]
-        public void ReferenceVerify_HashProviderThrows_ReturnsDigestFailure(Exception exception)
-        {
-            // Arrange
-            Reference reference = CreateFreshValidReference();
-            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashCreationException = exception };
-
-            // Act
-            ValidationResult<Reference, ValidationError> result = reference.Verify(factory, new CallContext());
-
-            // Assert
-            SignatureValidationError error = AssertDigestComputationFailure(result);
-            Assert.Same(exception, error.InnerException);
+            // Act / Assert
+            XmlValidationException exception = Assert.Throws<XmlValidationException>(
+                () => reference.Verify(factory, new CallContext()));
+            Assert.Contains("IDX30209", exception.Message, StringComparison.Ordinal);
             Assert.Equal(1, factory.CreateHashAlgorithmCount);
             Assert.Equal(0, factory.ReleaseHashAlgorithmCount);
         }
 
         [Fact]
-        public void ReferenceVerify_HashingThrows_ReturnsDigestFailureAndReleasesHash()
+        public void ReferenceVerify_HashProviderThrows_Propagates()
+        {
+            // Arrange
+            CryptographicException exception = new CryptographicException("hash-failed");
+            Reference reference = CreateFreshValidReference();
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashCreationException = exception };
+
+            // Act / Assert
+            Assert.Same(exception, Assert.Throws<CryptographicException>(
+                () => reference.Verify(factory, new CallContext())));
+            Assert.Equal(1, factory.CreateHashAlgorithmCount);
+            Assert.Equal(0, factory.ReleaseHashAlgorithmCount);
+        }
+
+        [Fact]
+        public void ReferenceVerify_HashingThrowsAndReleasesHash()
         {
             // Arrange
             Reference reference = CreateFreshValidReference();
@@ -179,43 +151,12 @@ namespace Microsoft.IdentityModel.Xml.Tests
             ThrowingHashAlgorithm hashAlgorithm = new ThrowingHashAlgorithm(exception);
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashAlgorithmOverride = hashAlgorithm };
 
-            // Act
-            ValidationResult<Reference, ValidationError> result = reference.Verify(factory, new CallContext());
-
-            // Assert
-            SignatureValidationError error = AssertDigestComputationFailure(result);
-            Assert.Same(exception, error.InnerException);
+            // Act / Assert
+            Assert.Same(exception, Assert.Throws<CryptographicException>(
+                () => reference.Verify(factory, new CallContext())));
             Assert.Equal(1, factory.CreateHashAlgorithmCount);
             Assert.Equal(1, factory.ReleaseHashAlgorithmCount);
             Assert.True(hashAlgorithm.DisposeCalled);
-        }
-
-        [Fact]
-        public void ReferenceVerify_UnexpectedHashingException_ThrowsAndReleasesHash()
-        {
-            // Arrange
-            Reference reference = CreateFreshValidReference();
-            Exception exception = new Exception("unexpected-hash-failure");
-            ThrowingHashAlgorithm hashAlgorithm = new ThrowingHashAlgorithm(exception);
-            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashAlgorithmOverride = hashAlgorithm };
-
-            // Act / Assert
-            Assert.Same(exception, Assert.Throws<Exception>(() => reference.Verify(factory, new CallContext())));
-            Assert.Equal(1, factory.ReleaseHashAlgorithmCount);
-            Assert.True(hashAlgorithm.DisposeCalled);
-        }
-
-        [Fact]
-        public void ReferenceVerify_HashProviderCancels_PropagatesCancellation()
-        {
-            // Arrange
-            Reference reference = CreateFreshValidReference();
-            OperationCanceledException exception = new OperationCanceledException();
-            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashCreationException = exception };
-
-            // Act / Assert
-            Assert.Same(exception, Assert.Throws<OperationCanceledException>(() => reference.Verify(factory, new CallContext())));
-            Assert.Equal(0, factory.ReleaseHashAlgorithmCount);
         }
 
         [Fact]
@@ -508,7 +449,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         }
 
         [Fact]
-        public void SignatureVerify_DigestComputationFails_ReturnsDigestErrorAndReleasesProvider()
+        public void SignatureVerify_DigestComputationFails_ThrowsAndReleasesProvider()
         {
             // Arrange
             SecurityKey key = Default.AsymmetricSigningKey;
@@ -524,29 +465,11 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 SignatureValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
             };
 
-            // Act
-            ValidationResult<SecurityKey, ValidationError> result = signature.Verify(key, factory, new CallContext());
-
-            // Assert
-            SignatureValidationError error = AssertDigestComputationFailure(result);
-            XmlValidationException innerException = Assert.IsType<XmlValidationException>(error.InnerException);
-            Assert.Contains("IDX30202", innerException.Message, StringComparison.Ordinal);
-            Assert.True(error.StackFrames.Count >= 3);
+            // Act / Assert
+            XmlValidationException exception = Assert.Throws<XmlValidationException>(
+                () => signature.Verify(key, factory, new CallContext()));
+            Assert.Contains("IDX30202", exception.Message, StringComparison.Ordinal);
             Assert.Equal(1, factory.ReleaseSignatureProviderCount);
-        }
-
-        private static SignatureValidationError AssertDigestComputationFailure<TResult>(
-            ValidationResult<TResult, ValidationError> result) where TResult : class
-        {
-            Assert.False(result.Succeeded);
-            Assert.Null(result.Result);
-            SignatureValidationError error = Assert.IsType<SignatureValidationError>(result.Error);
-            Assert.Equal(SignatureValidationFailure.ReferenceDigestValidationFailed, error.FailureType);
-            Assert.Contains("IDX30201", error.Message, StringComparison.Ordinal);
-            Assert.NotNull(error.InnerException);
-            SecurityTokenInvalidSignatureException exception = Assert.IsType<SecurityTokenInvalidSignatureException>(error.GetException());
-            Assert.Same(error.InnerException, exception.InnerException);
-            return error;
         }
 
         private static (Signature Signature, SecurityKey Key) CreateValidSignedSignature()

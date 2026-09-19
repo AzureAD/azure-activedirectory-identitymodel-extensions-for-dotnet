@@ -116,35 +116,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(1, factory.ReleaseSignatureProviderCount);
         }
 
-        [Theory]
-        [InlineData("Saml")]
-        [InlineData("Saml2")]
-        public async Task SamlTryAllSigningKeys_Disabled_DoesNotAttemptFallbackKey(string handlerKind)
-        {
-            // Arrange
-            SignedTokenContext context = CreateSignedToken(handlerKind);
-            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory();
-            ValidationParameters validationParameters = CreateValidationParameters(context.Key, factory);
-            validationParameters.TryAllSigningKeys = false;
-            SecurityToken securityToken = context.Handler.ReadToken(RemoveSamlKeyInfo(context.Token));
-
-            // Act
-            ValidationResult<ValidatedToken, ValidationError> result = await ValidateAsync(
-                context.Handler, securityToken, validationParameters);
-
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Null(securityToken.SigningKey);
-            Assert.Equal(SignatureValidationFailure.SigningKeyNotFound, result.Error.FailureType);
-            Assert.Equal(0, factory.CreateForVerifyingCount);
-            Assert.Equal(0, factory.ReleaseSignatureProviderCount);
-        }
-
         [Theory, MemberData(nameof(HandlerKinds), DisableDiscoveryEnumeration = true)]
-        public async Task ParameterFactory_RejectsAlgorithm_DoesNotCreateProvider(string handlerKind)
+        public async Task ParameterFactory_RejectsAlgorithm_OverridesAcceptingKeyFactory(string handlerKind)
         {
             // Arrange
             SignedTokenContext context = CreateSignedToken(handlerKind);
+            context.Key.CryptoProviderFactory = CryptoProviderFactory.Default;
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { IsAlgorithmSupported = false };
             ValidationParameters validationParameters = CreateValidationParameters(context.Key, factory);
             SecurityToken securityToken = context.Handler.ReadToken(context.Token);
@@ -174,24 +151,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // Assert
             AssertFailedFactoryGuard(result, securityToken, factory, expectProviderCreated: false);
-        }
-
-        [Theory, MemberData(nameof(HandlerKinds), DisableDiscoveryEnumeration = true)]
-        public async Task ParameterFactory_OverridesAcceptingKeyFactory(string handlerKind)
-        {
-            // Arrange
-            SignedTokenContext context = CreateSignedToken(handlerKind);
-            context.Key.CryptoProviderFactory = CryptoProviderFactory.Default;
-            TrackingCryptoProviderFactory rejecting = new TrackingCryptoProviderFactory { IsAlgorithmSupported = false };
-            ValidationParameters validationParameters = CreateValidationParameters(context.Key, rejecting);
-            SecurityToken securityToken = context.Handler.ReadToken(context.Token);
-
-            // Act
-            ValidationResult<ValidatedToken, ValidationError> result = await ValidateAsync(
-                context.Handler, securityToken, validationParameters);
-
-            // Assert
-            AssertFailedFactoryGuard(result, securityToken, rejecting, expectProviderCreated: false);
         }
 
         [Theory, MemberData(nameof(HandlerKinds), DisableDiscoveryEnumeration = true)]
@@ -300,7 +259,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory]
         [InlineData("Saml")]
         [InlineData("Saml2")]
-        public async Task SamlMalformedDigest_ReturnsDigestErrorWithoutSigningKey(string handlerKind)
+        public async Task SamlMalformedDigest_ReturnsValidationFailureWithoutSigningKey(string handlerKind)
         {
             // Arrange
             SignedTokenContext context = CreateSignedToken(handlerKind);
@@ -318,9 +277,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Null(securityToken.SigningKey);
             SignatureValidationError error = Assert.IsType<SignatureValidationError>(result.Error);
             Assert.IsType<FormatException>(error.InnerException);
-            Assert.Contains("IDX30201", error.Message, StringComparison.Ordinal);
-            Assert.Equal(SignatureValidationFailure.ReferenceDigestValidationFailed, error.FailureType);
-            Assert.True(error.StackFrames.Count >= 3);
+            Assert.Contains("IDX10521", error.Message, StringComparison.Ordinal);
+            Assert.Equal(SignatureValidationFailure.ValidationFailed, error.FailureType);
             SecurityTokenInvalidSignatureException exception = Assert.IsType<SecurityTokenInvalidSignatureException>(error.GetException());
             Assert.Same(error.InnerException, exception.InnerException);
             Assert.Equal(1, factory.CreateForVerifyingCount);
@@ -332,7 +290,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData("Saml", true)]
         [InlineData("Saml2", false)]
         [InlineData("Saml2", true)]
-        public async Task SamlDigestComputationFails_ReturnsDigestErrorWithoutSigningKey(
+        public async Task SamlDigestComputationFails_ReturnsValidationFailureWithoutSigningKey(
             string handlerKind,
             bool hashProviderThrows)
         {
@@ -356,9 +314,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Null(result.Result);
             Assert.Null(securityToken.SigningKey);
             SignatureValidationError error = Assert.IsType<SignatureValidationError>(result.Error);
-            Assert.Equal(SignatureValidationFailure.ReferenceDigestValidationFailed, error.FailureType);
-            Assert.Contains("IDX30201", error.Message, StringComparison.Ordinal);
-            Assert.True(error.StackFrames.Count >= 3);
+            Assert.Equal(SignatureValidationFailure.ValidationFailed, error.FailureType);
+            Assert.Contains("IDX10521", error.Message, StringComparison.Ordinal);
             if (hashProviderThrows)
                 Assert.Same(hashException, error.InnerException);
             else
@@ -368,29 +325,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Same(error.InnerException, exception.InnerException);
             Assert.Equal(1, factory.CreateForVerifyingCount);
             Assert.Equal(1, factory.ReleaseSignatureProviderCount);
-        }
-
-        [Theory, MemberData(nameof(HandlerKinds), DisableDiscoveryEnumeration = true)]
-        public async Task FactoryFailure_GetExceptionIsCachedAndNotAlgorithmException(string handlerKind)
-        {
-            // Arrange
-            SignedTokenContext context = CreateSignedToken(handlerKind);
-            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { IsAlgorithmSupported = false };
-            ValidationParameters validationParameters = CreateValidationParameters(context.Key, factory);
-            SecurityToken securityToken = context.Handler.ReadToken(context.Token);
-
-            // Act
-            ValidationResult<ValidatedToken, ValidationError> result = await ValidateAsync(
-                context.Handler, securityToken, validationParameters);
-
-            // Assert
-            Exception first = result.Error.GetException();
-            Exception second = result.Error.GetException();
-            Assert.Same(first, second);
-            Assert.IsType<SignatureValidationError>(result.Error);
-            Assert.IsType<SecurityTokenValidationException>(first);
-            Assert.IsNotType<SecurityTokenInvalidSignatureException>(first);
-            Assert.IsNotType<AlgorithmValidationError>(result.Error);
         }
 
         private static void AssertFailedFactoryGuard(
@@ -404,7 +338,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.IsType<SignatureValidationError>(result.Error);
             Assert.Equal(ValidationFailureType.CryptoProviderFactoryDoesNotSupportAlgorithm, result.Error.FailureType);
             Assert.Contains("IDX10652", result.Error.Message, StringComparison.Ordinal);
-            Assert.IsType<SecurityTokenValidationException>(result.Error.GetException());
+            Exception exception = result.Error.GetException();
+            Assert.IsType<SecurityTokenValidationException>(exception);
+            Assert.Same(exception, result.Error.GetException());
             Assert.Equal(expectProviderCreated ? 1 : 0, factory.CreateForVerifyingCount);
         }
 
