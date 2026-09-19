@@ -74,6 +74,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public void TryConvertToSecurityKey_RsaJsonWebKeyWithPrivateKeyAndX5c_ConvertsToRsaSecurityKey()
+        {
+            // A JWK that carries BOTH private RSA parameters AND x5c must convert to an
+            // RsaSecurityKey, not an X509SecurityKey built from the public-only x5c[0]
+            // (which discards the private key and throws a NullReferenceException when signing).
+            // See https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3260.
+            var jsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_As_RSA;
+            jsonWebKey.X5c.Add(Convert.ToBase64String(KeyingMaterial.DefaultCert_2048.RawData));
+
+            Assert.True(JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey securityKey));
+            Assert.IsType<RsaSecurityKey>(securityKey);
+        }
+
         public static TheoryData<JsonWebKeyConverterTheoryData> ConversionKeyTheoryData
         {
             get
