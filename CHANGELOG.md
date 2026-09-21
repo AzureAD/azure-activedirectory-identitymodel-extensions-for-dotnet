@@ -1,5 +1,16 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.23.0
+====
+## New Features
+- Reinstate `Microsoft.IdentityModel.Protocols.WsTrust` as a supported 8.x package, preserving the 6.8 public API while adding current target frameworks, compatibility corrections, parser and serializer fixes, and XML resource limits. See [PR #3547](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3547).
+- Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The 8.x default remains case-insensitive unless callers explicitly opt into case-sensitive comparison. See [PR #3577](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3577).
+- Resolve supported ML-DSA AKP keys from `JsonWebKeySet` and preserve structurally valid public keys for downstream cryptographic extensibility when the current runtime cannot materialize them. See [PR #3597](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3597).
+
+## Bug Fixes
+- Normalize hexadecimal letter casing inside percent-encoded triplets during Signed HTTP Request `p` claim validation. Literal path-letter comparison remains controlled by `UseCaseSensitivePClaimComparison`, and `p` claim creation output is unchanged. See [PR #3579](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3579).
+- Log expected per-key `IDX10650` authentication-tag failures at Informational instead of Error during multi-key JWE decryption. Terminal all-keys-failed results continue to be reported at Error. See [PR #3582](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3582).
+
 9.0.0
 ====
 ## Deprecations
@@ -8,6 +19,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 ## New Features
 - Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The default is case-sensitive; set the property to `false` for case-insensitive comparison. The previous `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext key is no longer honored. Applications upgrading from 8.22.0 that set the key to `false` must set this property to `false` instead. See [PR #3569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3569).
+
+## Bug Fixes
+- Enforce the minimum asymmetric key sizes configured by `AsymmetricSignatureProvider`. This can introduce new constructor-time failures for applications using undersized keys on modern .NET targets. Applications that need time to rotate legacy keys can temporarily restore the previous behavior by enabling the `Switch.Microsoft.IdentityModel.DoNotEnforceMinimumAsymmetricKeySize` AppContext switch before first use. See [PR #3594](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3594).
 
 8.22.0
 ====
