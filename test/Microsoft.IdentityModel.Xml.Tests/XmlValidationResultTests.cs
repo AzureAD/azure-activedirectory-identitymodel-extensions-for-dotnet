@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void ReferenceVerify_ValidDigest_ReturnsSameReference()
         {
             // Arrange
-            Reference reference = CreateFreshValidReference();
+            Reference reference = Default.Reference;
             CallContext callContext = new CallContext();
 
             // Act
@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void ReferenceVerify_NullFactory_ReturnsNullArgument()
         {
             // Arrange
-            Reference reference = CreateFreshValidReference();
+            Reference reference = Default.Reference;
 
             // Act
             ValidationResult<Reference, ValidationError> result =
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void ReferenceVerify_DigestMismatch_ReturnsDigestFailure()
         {
             // Arrange
-            Reference reference = CreateFreshValidReference();
+            Reference reference = Default.Reference;
             reference.DigestValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 });
 
             // Act
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void ReferenceVerify_MalformedBase64_ThrowsAndReleasesHash()
         {
             // Arrange
-            Reference reference = CreateFreshValidReference();
+            Reference reference = Default.Reference;
             reference.DigestValue = "not-valid-base64!!!";
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory();
 
@@ -87,11 +87,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void ReferenceVerify_MissingStream_Throws()
         {
             // Arrange
-            Reference reference = new Reference
-            {
-                DigestMethod = SecurityAlgorithms.Sha256Digest,
-                DigestValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
-            };
+            Reference reference = Default.ReferenceWithNullTokenStream;
 
             // Act / Assert
             XmlValidationException exception = Assert.Throws<XmlValidationException>(
@@ -103,7 +99,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void ReferenceVerify_UnsupportedDigest_Throws()
         {
             // Arrange
-            Reference reference = CreateFreshValidReference();
+            Reference reference = Default.Reference;
             reference.DigestMethod = "urn:unsupported-digest";
 
             // Act / Assert
@@ -116,7 +112,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void ReferenceVerify_NullHashProvider_Throws()
         {
             // Arrange
-            Reference reference = CreateFreshValidReference();
+            Reference reference = Default.Reference;
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { ReturnNullHashAlgorithm = true };
 
             // Act / Assert
@@ -132,7 +128,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             // Arrange
             CryptographicException exception = new CryptographicException("hash-failed");
-            Reference reference = CreateFreshValidReference();
+            Reference reference = Default.Reference;
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashCreationException = exception };
 
             // Act / Assert
@@ -146,7 +142,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void ReferenceVerify_HashingThrowsAndReleasesHash()
         {
             // Arrange
-            Reference reference = CreateFreshValidReference();
+            Reference reference = Default.Reference;
             CryptographicException exception = new CryptographicException("hash-failed");
             ThrowingHashAlgorithm hashAlgorithm = new ThrowingHashAlgorithm(exception);
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashAlgorithmOverride = hashAlgorithm };
@@ -202,7 +198,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             SecurityKey key = Default.AsymmetricSigningKey;
             SignedInfo signedInfo = new SignedInfo();
             for (int i = 0; i < referenceCount; i++)
-                signedInfo.References.Add(CreateFreshValidReference());
+                signedInfo.References.Add(Default.Reference);
 
             // Act
             ValidationResult<SecurityKey, ValidationError> result =
@@ -220,10 +216,10 @@ namespace Microsoft.IdentityModel.Xml.Tests
             // Arrange
             SecurityKey key = Default.AsymmetricSigningKey;
             SignedInfo signedInfo = new SignedInfo();
-            Reference failing = CreateFreshValidReference();
+            Reference failing = Default.Reference;
             failing.DigestValue = Convert.ToBase64String(new byte[] { 9, 9, 9, 9 });
             signedInfo.References.Add(failing);
-            signedInfo.References.Add(CreatePoisonReference());
+            signedInfo.References.Add(Default.ReferenceWithNullTokenStream);
 
             // Act
             ValidationResult<SecurityKey, ValidationError> result =
@@ -241,11 +237,11 @@ namespace Microsoft.IdentityModel.Xml.Tests
             // Arrange
             SecurityKey key = Default.AsymmetricSigningKey;
             SignedInfo signedInfo = new SignedInfo();
-            signedInfo.References.Add(CreateFreshValidReference());
-            Reference failing = CreateFreshValidReference();
+            signedInfo.References.Add(Default.Reference);
+            Reference failing = Default.Reference;
             failing.DigestValue = Convert.ToBase64String(new byte[] { 9, 9, 9, 9 });
             signedInfo.References.Add(failing);
-            signedInfo.References.Add(CreatePoisonReference());
+            signedInfo.References.Add(Default.ReferenceWithNullTokenStream);
 
             // Act
             ValidationResult<SecurityKey, ValidationError> result =
@@ -459,7 +455,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
             TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { SignatureProviderOverride = provider };
             SignedInfo signedInfo = new SignedInfo { SignatureMethod = SecurityAlgorithms.RsaSha256Signature };
-            signedInfo.References.Add(CreatePoisonReference());
+            signedInfo.References.Add(Default.ReferenceWithNullTokenStream);
             Signature signature = new Signature(signedInfo)
             {
                 SignatureValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
@@ -477,21 +473,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
             SigningCredentials credentials = Default.AsymmetricSigningCredentials;
             string xml = CreateSignedXml(credentials, "issuer", Guid.NewGuid().ToString());
             return (ReadSignature(xml), credentials.Key);
-        }
-
-        private static Reference CreateFreshValidReference()
-        {
-            string xml = CreateSignedXml(Default.AsymmetricSigningCredentials, Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-            return ReadSignature(xml).SignedInfo.References[0];
-        }
-
-        private static Reference CreatePoisonReference()
-        {
-            return new Reference
-            {
-                DigestMethod = SecurityAlgorithms.Sha256Digest,
-                DigestValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
-            };
         }
 
         private static string CreateSignedXml(SigningCredentials credentials, string entityId, string referenceId)

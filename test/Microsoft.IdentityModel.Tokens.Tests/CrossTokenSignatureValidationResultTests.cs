@@ -356,7 +356,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 CancellationToken.None);
         }
 
-        private static ValidationParameters CreateValidationParameters(
+        internal static ValidationParameters CreateValidationParameters(
             SecurityKey key,
             CryptoProviderFactory factory = null,
             bool skipAlgorithm = true)
@@ -378,7 +378,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return validationParameters;
         }
 
-        private static SignedTokenContext CreateSignedToken(string handlerKind, string uniqueClaimValue = "cross-token-payload")
+        internal static SignedTokenContext CreateSignedToken(string handlerKind, string uniqueClaimValue = "cross-token-payload")
         {
             X509SecurityKey key = new X509SecurityKey(KeyingMaterial.DefaultCert_2048);
             SigningCredentials jwtCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
@@ -504,7 +504,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return builder.ToString();
         }
 
-        private sealed class SignedTokenContext
+        internal sealed class SignedTokenContext
         {
             public SignedTokenContext(TokenHandler handler, string token, SecurityKey key)
             {
@@ -571,8 +571,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             // Arrange
             using TestMeterListener listener = new TestMeterListener();
-            SignedTokenContextAccessor context = SignedTokenContextAccessor.Create(handlerKind);
-            ValidationParameters validationParameters = CreateValidationParameters(context.Key);
+            CrossTokenSignatureValidationResultTests.SignedTokenContext context =
+                CrossTokenSignatureValidationResultTests.CreateSignedToken(handlerKind);
+            ValidationParameters validationParameters =
+                CrossTokenSignatureValidationResultTests.CreateValidationParameters(context.Key);
             SecurityToken securityToken = context.Handler.ReadToken(context.Token);
 
             // Act
@@ -598,10 +600,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             // Arrange
             using TestMeterListener listener = new TestMeterListener();
-            SignedTokenContextAccessor context = SignedTokenContextAccessor.Create(
-                handlerKind, uniqueClaimValue: "UNIQUE_DIGEST_PAYLOAD_VALUE");
+            CrossTokenSignatureValidationResultTests.SignedTokenContext context =
+                CrossTokenSignatureValidationResultTests.CreateSignedToken(
+                    handlerKind, uniqueClaimValue: "UNIQUE_DIGEST_PAYLOAD_VALUE");
             string tampered = context.Token.Replace("UNIQUE_DIGEST_PAYLOAD_VALUE", "TAMPERED_DIGEST_PAYLOAD_VALUE");
-            ValidationParameters validationParameters = CreateValidationParameters(context.Key);
+            ValidationParameters validationParameters =
+                CrossTokenSignatureValidationResultTests.CreateValidationParameters(context.Key);
             SecurityToken securityToken = context.Handler.ReadToken(tampered);
 
             // Act
@@ -630,64 +634,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             StringComparison.Ordinal)));
         }
 
-        private static ValidationParameters CreateValidationParameters(SecurityKey key)
-        {
-            ValidationParameters validationParameters = new ValidationParameters();
-            validationParameters.SigningKeys.Add(key);
-            validationParameters.AudienceValidator = SkipValidationValidators.SkipAudienceValidation;
-            validationParameters.SignatureKeyValidator = SkipValidationValidators.SkipIssuerSigningKeyValidation;
-            validationParameters.IssuerValidatorAsync = SkipValidationValidators.SkipIssuerValidation;
-            validationParameters.LifetimeValidator = SkipValidationValidators.SkipLifetimeValidation;
-            validationParameters.TokenReplayValidator = SkipValidationValidators.SkipTokenReplayValidation;
-            validationParameters.TokenTypeValidator = SkipValidationValidators.SkipTokenTypeValidation;
-            validationParameters.AlgorithmValidator = SkipValidationValidators.SkipAlgorithmValidation;
-            return validationParameters;
-        }
-
-        private sealed class SignedTokenContextAccessor
-        {
-            public TokenHandler Handler { get; set; }
-            public string Token { get; set; }
-            public SecurityKey Key { get; set; }
-
-            public static SignedTokenContextAccessor Create(string handlerKind, string uniqueClaimValue = "cross-token-payload")
-            {
-                X509SecurityKey key = new X509SecurityKey(KeyingMaterial.DefaultCert_2048);
-                SigningCredentials xmlCredentials = new SigningCredentials(
-                    key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
-                SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
-                {
-                    Audience = Default.Audience,
-                    Issuer = Default.Issuer,
-                    SigningCredentials = xmlCredentials,
-                    Subject = new CaseSensitiveClaimsIdentity(new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, "Bob"),
-                        new Claim(ClaimTypes.Email, uniqueClaimValue)
-                    })
-                };
-
-                if (handlerKind == "Saml")
-                {
-                    SamlSecurityTokenHandler handler = new SamlSecurityTokenHandler();
-                    SecurityToken securityToken = handler.CreateToken(descriptor);
-                    return new SignedTokenContextAccessor
-                    {
-                        Handler = handler,
-                        Token = handler.WriteToken(securityToken),
-                        Key = key
-                    };
-                }
-
-                Saml2SecurityTokenHandler saml2Handler = new Saml2SecurityTokenHandler();
-                SecurityToken saml2Token = saml2Handler.CreateToken(descriptor);
-                return new SignedTokenContextAccessor
-                {
-                    Handler = saml2Handler,
-                    Token = saml2Handler.WriteToken(saml2Token),
-                    Key = key
-                };
-            }
-        }
     }
 }
