@@ -183,6 +183,8 @@ Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationP
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.SignedHttpRequestValidationParameters() -> void
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.TokenHandler.get -> Microsoft.IdentityModel.Tokens.TokenHandler
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.TokenHandler.set -> void
+Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison.get -> bool
+Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison.set -> void
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.ValidateB.get -> bool
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.ValidateB.set -> void
 Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.ValidateH.get -> bool

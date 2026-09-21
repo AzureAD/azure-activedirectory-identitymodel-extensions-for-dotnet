@@ -1,3 +1,4 @@
+~internal static Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.GetAlgorithmName(System.Security.Cryptography.CompositeMLDsaAlgorithm algorithm) -> string
 ~Microsoft.IdentityModel.Tokens.MlDsaSecurityKey.MlDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, bool usePrivateKey) -> void
 ~virtual Microsoft.IdentityModel.Tokens.IssuerValidatorAsync.Invoke(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Threading.Tasks.ValueTask<string>
 const Microsoft.IdentityModel.Telemetry.TelemetryConstants.AlgorithmTag = "Algorithm" -> string
@@ -39,11 +40,10 @@ const Microsoft.IdentityModel.Tokens.AesGcm.NonceSize = 12 -> int
 const Microsoft.IdentityModel.Tokens.AesGcm.TagSize = 16 -> int
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotScrubExceptionsSwitch = "Switch.Microsoft.IdentityModel.DoNotScrubExceptions" -> string
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.EnableCompositeMLDsaDraftSwitch = "Microsoft.IdentityModel.CompositeMLDsa.EnableDraft" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTimeSwitch = "Switch.Microsoft.IdentityModel.TryAllStringClaimsAsDateTime" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr" -> string
-const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonDefault = false -> bool
-const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparisonSwitch = "Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseRfcDefinitionOfEpkAndKidSwitch = "Switch.Microsoft.IdentityModel.UseRfcDefinitionOfEpkAndKid" -> string
 const Microsoft.IdentityModel.Tokens.Cng.BCRYPT_AES_ALGORITHM = "AES" -> string
@@ -269,6 +269,9 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX11025 = "IDX11025: Cannot se
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX11026 = "IDX11026: Unable to get claim value as a string from claim type:'{0}', value type was:'{1}'. Acceptable types are String, IList<String>, and System.Text.Json.JsonElement." -> string
 const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.DefaultAsymmetricKeyWrapAlgorithm = "http://www.w3.org/2001/04/xmlenc#rsa-oaep" -> string
 const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.DefaultSymmetricEncryptionAlgorithm = "A128CBC-HS256" -> string
+const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa44WithECDsaP256 = "ML-DSA-44-ES256" -> string
+const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa65WithECDsaP256 = "ML-DSA-65-ES256" -> string
+const Microsoft.IdentityModel.Tokens.SecurityAlgorithms.MlDsa87WithECDsaP384 = "ML-DSA-87-ES384" -> string
 const Microsoft.IdentityModel.Tokens.TokenUtilities.Json = "JSON" -> string
 const Microsoft.IdentityModel.Tokens.TokenUtilities.JsonArray = "JSON_ARRAY" -> string
 const Microsoft.IdentityModel.Tokens.TokenUtilities.JsonNull = "JSON_NULL" -> string
@@ -377,6 +380,11 @@ Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags.BCRYPT_ALG_HANDLE_HMAC_FLAG = 8 -> Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags.NONE = 0 -> Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.CollectionUtilities
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.CompositeMLDsa.get -> System.Security.Cryptography.CompositeMLDsa
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.CompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, bool usePrivateKey) -> void
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.CompositeMLDsaSecurityKey(System.Security.Cryptography.CompositeMLDsa compositeMLDsa) -> void
+Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.Dispose() -> void
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
@@ -830,6 +838,11 @@ override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.ObjectPoolSi
 override Microsoft.IdentityModel.Tokens.AudienceValidationError.AddAdditionalInformation(Microsoft.IdentityModel.Tokens.ISecurityTokenException exception) -> void
 override Microsoft.IdentityModel.Tokens.AudienceValidationError.CreateException() -> System.Exception
 override Microsoft.IdentityModel.Tokens.AudienceValidationError.GetException() -> System.Exception
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.CanComputeJwkThumbprint() -> bool
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.ComputeJwkThumbprint() -> byte[]
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.HasPrivateKey.get -> bool
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.KeySize.get -> int
+override Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey.PrivateKeyStatus.get -> Microsoft.IdentityModel.Tokens.PrivateKeyStatus
 override Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError.CreateException() -> System.Exception
 override Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError.GetException() -> System.Exception
 override Microsoft.IdentityModel.Tokens.IssuerValidationError.CreateException() -> System.Exception
@@ -880,11 +893,11 @@ static Microsoft.IdentityModel.Tokens.AesBCryptModes.OpenAesAlgorithm(string cip
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotFailOnMissingTid.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotScrubExceptions.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DontFailOnMissingTid.get -> bool
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.EnableCompositeMLDsaDraft.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.ResetAllSwitches() -> void
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTime.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UpdateConfigAsBlocking.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttr.get -> bool
-static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCaseSensitivePClaimComparison.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseClaimsIdentityType.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseRfcDefinitionOfEpkAndKid.get -> bool
 static Microsoft.IdentityModel.Tokens.AsymmetricAdapter.DecryptFunctionNotFound(byte[] _) -> byte[]
@@ -908,6 +921,9 @@ static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(System.Collec
 static Microsoft.IdentityModel.Tokens.Cng.BCryptOpenAlgorithmProvider(string pszAlgId, string pszImplementation, Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags dwFlags) -> Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle
 static Microsoft.IdentityModel.Tokens.Cng.SetCipherMode(this Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle hAlg, string cipherMode) -> void
 static Microsoft.IdentityModel.Tokens.CollectionUtilities.IsNullOrEmpty<T>(this System.Collections.Generic.IEnumerable<T> enumerable) -> bool
+static Microsoft.IdentityModel.Tokens.CompositeMLDsaAdapter.CloneCompositeMLDsa(System.Security.Cryptography.CompositeMLDsa source, bool includePrivateKey) -> System.Security.Cryptography.CompositeMLDsa
+static Microsoft.IdentityModel.Tokens.CompositeMLDsaAdapter.CreateCompositeMLDsa(Microsoft.IdentityModel.Tokens.JsonWebKey jsonWebKey, bool usePrivateKey) -> System.Security.Cryptography.CompositeMLDsa
+static Microsoft.IdentityModel.Tokens.CompositeMLDsaAdapter.GetCompositeMLDsaAlgorithm(string algorithm) -> System.Security.Cryptography.CompositeMLDsaAlgorithm
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jkt.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
@@ -970,6 +986,8 @@ static Microsoft.IdentityModel.Tokens.Json.JsonWebKeySetSerializer.Read(string j
 static Microsoft.IdentityModel.Tokens.Json.JsonWebKeySetSerializer.ReadKeys(ref System.Text.Json.Utf8JsonReader reader, Microsoft.IdentityModel.Tokens.JsonWebKeySet jsonWebKeySet) -> void
 static Microsoft.IdentityModel.Tokens.Json.JsonWebKeySetSerializer.Write(Microsoft.IdentityModel.Tokens.JsonWebKeySet jsonWebKeySet) -> string
 static Microsoft.IdentityModel.Tokens.Json.JsonWebKeySetSerializer.Write(ref System.Text.Json.Utf8JsonWriter writer, Microsoft.IdentityModel.Tokens.JsonWebKeySet jsonWebKeySet) -> void
+static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromCompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.CompositeMLDsaSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
+static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToCompositeMLDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, Microsoft.IdentityModel.Tokens.SecurityKey out key) -> bool
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToECDsaSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, out Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, out Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, out Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
@@ -1007,7 +1025,9 @@ static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.GetHashAlgorithmName(s
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.GetMaxByteCount(string algorithm) -> int
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsAesCbc(string algorithm) -> bool
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsAesGcm(string algorithm) -> bool
+static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsCompositeMLDsaAlgorithm(string algorithm) -> bool
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedAlgorithm(string algorithm, Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
+static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedCompositeMLDsaAlgorithm(string algorithm) -> bool
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedEncryptionAlgorithm(string algorithm, Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedHashAlgorithm(string algorithm) -> bool
 static Microsoft.IdentityModel.Tokens.SupportedAlgorithms.IsSupportedMlDsaAlgorithm(string algorithm) -> bool

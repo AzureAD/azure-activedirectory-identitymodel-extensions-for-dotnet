@@ -1,1 +1,0 @@
-const Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestValidationParameters.DefaultUseCaseSensitivePClaimComparison = false -> bool
