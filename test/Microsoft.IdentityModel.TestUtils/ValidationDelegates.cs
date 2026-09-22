@@ -208,7 +208,9 @@ namespace Microsoft.IdentityModel.TestUtils
             if (expires == null)
                 return false;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var jwtToken = new JwtSecurityTokenHandler().ReadToken(token);
+#pragma warning restore CS0618 // Type or member is obsolete
             return jwtToken.ValidTo == expires;
         }
 

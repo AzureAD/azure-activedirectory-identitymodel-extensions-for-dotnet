@@ -65,7 +65,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
                 var jsonWebTokenHandler = new JsonWebTokenHandler();
 
                 // ECD
@@ -268,7 +270,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public JsonWebTokenHandler JsonWebTokenHandler { get; set; }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         public TokenValidationParameters ValidationParameters { get; set; }
     }

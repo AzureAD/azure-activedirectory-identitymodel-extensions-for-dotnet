@@ -56,7 +56,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var jwtTokenHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
                 var samlTokenHandler = new SamlSecurityTokenHandler();
                 var saml2TokenHandler = new Saml2SecurityTokenHandler();
                 jwtTokenHandler.InboundClaimFilter.Add("aud");
@@ -125,6 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new TokenHandlerTheoryData
                     {
                         First = true,
+#pragma warning disable CS0618 // Type or member is obsolete
                         TokenHandler = new JwtSecurityTokenHandler(),
                         Token = Default.AsymmetricJwt,
                         CanReadToken = true,
@@ -134,6 +137,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new TokenHandlerTheoryData
                     {
                         TokenHandler = new JwtSecurityTokenHandler(),
+#pragma warning restore CS0618 // Type or member is obsolete
                         Token = largeToken,
                         CanReadToken = false,
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -202,7 +206,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class CrossTokenTheoryData : TheoryDataBase
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         public JwtSecurityTokenHandler JwtTokenHandler { get; set; }
+#pragma warning restore CS0618 // Type or member is obsolete
         public SamlSecurityTokenHandler SamlTokenHandler { get; set; }
         public Saml2SecurityTokenHandler Saml2TokenHandler { get; set; }
         public SecurityTokenDescriptor SecurityTokenDescriptor { get; set; }
