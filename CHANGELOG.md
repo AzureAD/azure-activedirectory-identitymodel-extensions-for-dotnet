@@ -1,5 +1,17 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+5.7.2
+=====
+
+## Bug Fixes
+
+- Fixed assembly-version generation so 5.7.2 packages no longer retain the legacy `0.0.1.0` placeholder and instead use the SDK-generated `5.7.2.0` assembly identity. See [#3625](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3625).
+- Updated `Microsoft.Rest.ClientRuntime` to patched version 2.3.24 in `Microsoft.IdentityModel.KeyVaultExtensions`, addressing [GHSA-whph-446h-6m9v](https://github.com/advisories/GHSA-whph-446h-6m9v). See [#3634](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3634).
+
+## Build and Test
+
+- Removed the unsupported .NET Core 2.2 target from the Windows test matrix because runtime 2.2.3 is no longer available on hosted build agents. Shipped package target frameworks are unchanged. See [#3622](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3622).
+
 8.23.0
 ====
 ## New Features
@@ -520,7 +532,6 @@ Microsoft.IdentityModel now depends on Microsoft.Identity.Abstractions 9.3.0
 ### New Features:
 - Added an Audiences member to the SecurityTokenDescriptor to make it easier to define multiple audiences in JWT and SAML tokens. Addresses issue [#1479](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1479) with PR [#2575](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2575)
 - Add  missing metadata parameters to OpenIdConnectConfiguration. See issue [#2498](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2498) for details. 
-
 
 ### Bug Fixes:
 - Fix over-reporting of `IDX14100`. See issue [#2058](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2058) and PR [#2618](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2618) for details.
