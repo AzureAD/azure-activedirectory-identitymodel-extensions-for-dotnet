@@ -110,6 +110,8 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType
 Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.Name.get -> string!
 Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.ValidationFailureType(string! name) -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ActClaimRetriever.get -> System.Func<System.Text.Json.JsonElement, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters!, System.Security.Claims.ClaimsIdentity!>?
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ActClaimRetriever.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ActorValidationParameters.get -> Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters?
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.ActorValidationParameters.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.AlgorithmValidator.get -> Microsoft.IdentityModel.Tokens.Experimental.IAlgorithmValidator!

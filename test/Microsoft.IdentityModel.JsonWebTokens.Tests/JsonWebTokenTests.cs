@@ -1829,7 +1829,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             DateTime dateTime = DateTime.UtcNow;
             string token = JsonUtilities.CreateUnsignedToken("dateTime", dateTime);
+#pragma warning disable CS0618 // Type or member is obsolete
             var claimA = new JwtSecurityTokenHandler().ReadJwtToken(token).Claims.First();
+#pragma warning restore CS0618 // Type or member is obsolete
             var claimB = new JsonWebTokenHandler().ReadJsonWebToken(token).Claims.First();
 
             // both claims should be equal

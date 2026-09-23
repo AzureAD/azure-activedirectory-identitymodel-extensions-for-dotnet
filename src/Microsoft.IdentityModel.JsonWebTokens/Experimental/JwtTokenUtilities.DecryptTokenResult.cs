@@ -130,8 +130,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
+            ValidationError validationError;
+
             if (keysAttempted is not null)
-                return new ValidationError(
+                validationError = new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10603,
                         LogHelper.MarkAsNonPII(keysAttempted.ToString()),
@@ -141,7 +143,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
 
             else if (algorithmNotSupportedByCryptoProvider)
-                return new ValidationError(
+                validationError = new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10619,
                         LogHelper.MarkAsNonPII(decryptionParameters.Alg),
@@ -150,12 +152,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
 
             else
-                return new ValidationError(
+                validationError = new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
                     ValidationError.GetCurrentStackFrame());
+
+            LogHelper.LogExceptionMessage(validationError.GetException());
+            return validationError;
         }
     }
 }

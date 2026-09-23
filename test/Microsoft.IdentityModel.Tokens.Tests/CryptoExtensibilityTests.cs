@@ -21,7 +21,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(SecurityTokenDescriptorDataSet), DisableDiscoveryEnumeration = true)]
         public void CryptoProviderOrderingWhenSigning(SecurityTokenDescriptor tokenDescriptor)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var tokenHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
             var jwt = tokenHandler.CreateEncodedJwt(tokenDescriptor);
 
             if (tokenDescriptor.SigningCredentials.CryptoProviderFactory == null)
@@ -84,7 +86,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CryptoProviderOrderingWhenVerifying(string testId, TokenValidationParameters validationParameters, string jwt)
         {
             TestUtilities.WriteHeader("CryptoProviderOrderingWhenVerifying - " + testId, true);
+#pragma warning disable CS0618 // Type or member is obsolete
             var tokenHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
             SecurityToken token = null;
             tokenHandler.ValidateToken(jwt, validationParameters, out token);
 
