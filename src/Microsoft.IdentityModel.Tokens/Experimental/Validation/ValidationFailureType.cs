@@ -37,14 +37,8 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <summary>
         /// The selected crypto provider factory does not support the requested signature algorithm with the supplied key.
         /// </summary>
-        public static readonly ValidationFailureType CryptoProviderFactoryDoesNotSupportAlgorithm =
-            new CryptoProviderFactoryDoesNotSupportAlgorithmFailure(
-                "CryptoProviderFactoryDoesNotSupportAlgorithm");
-
-        private class CryptoProviderFactoryDoesNotSupportAlgorithmFailure : ValidationFailureType
-        {
-            internal CryptoProviderFactoryDoesNotSupportAlgorithmFailure(string name) : base(name) { }
-        }
+        public static readonly ValidationFailureType CryptoProviderFactoryDoesNotSupportAlgorithm = new CryptoProviderFactoryDoesNotSupportAlgorithmFailure("CryptoProviderFactoryDoesNotSupportAlgorithm");
+        private class CryptoProviderFactoryDoesNotSupportAlgorithmFailure : ValidationFailureType { internal CryptoProviderFactoryDoesNotSupportAlgorithmFailure(string name) : base(name) { } }
 
         /// <summary>
         /// A token could not be read.

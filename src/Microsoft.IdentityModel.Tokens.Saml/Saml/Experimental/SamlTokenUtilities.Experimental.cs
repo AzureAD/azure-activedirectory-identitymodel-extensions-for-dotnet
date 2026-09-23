@@ -255,30 +255,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         ValidationError.GetCurrentStackFrame());
                 }
 
-                ValidationResult<SecurityKey, ValidationError> signedInfoResult =
-                    signature.SignedInfo.Verify(key, cryptoProviderFactory, callContext);
-
-                if (!signedInfoResult.Succeeded)
+                var result = signature.SignedInfo.Verify(key, cryptoProviderFactory, callContext);
+                if (result.Succeeded)
                 {
                     RecordSignatureValidationTelemetry(
                         telemetryClient,
-                        TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
+                        TelemetryConstants.SignatureValidationErrors.None,
                         securityToken,
                         signature.SignedInfo.SignatureMethod,
                         key);
 
-                    return signedInfoResult.Error!.AddCurrentStackFrame();
+                    securityToken.SigningKey = key;
+                    return key;
                 }
 
                 RecordSignatureValidationTelemetry(
                     telemetryClient,
-                    TelemetryConstants.SignatureValidationErrors.None,
+                    TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed,
                     securityToken,
                     signature.SignedInfo.SignatureMethod,
                     key);
 
-                securityToken.SigningKey = signedInfoResult.Result;
-                return signedInfoResult;
+                return result;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)

@@ -38,14 +38,22 @@ namespace Microsoft.IdentityModel.Xml
                     nameof(cryptoProviderFactory),
                     ValidationError.GetCurrentStackFrame());
 
+            ValidationError? validationError = null;
+
             for (int i = 0; i < References.Count; i++)
             {
-                ValidationResult<Reference, ValidationError> referenceResult =
-                    References[i].Verify(cryptoProviderFactory, callContext);
+                var reference = References[i];
+                validationError = reference.Verify(cryptoProviderFactory, callContext).Error;
 
-                if (!referenceResult.Succeeded)
-                    return referenceResult.Error!.AddCurrentStackFrame();
+                if (validationError is not null)
+                {
+                    validationError.AddCurrentStackFrame();
+                    break;
+                }
             }
+
+            if (validationError is not null)
+                return validationError;
 
             return key;
         }

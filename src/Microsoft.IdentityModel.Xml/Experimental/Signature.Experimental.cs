@@ -62,6 +62,8 @@ namespace Microsoft.IdentityModel.Xml
                     ValidationFailureType.CryptoProviderReturnedNull,
                     ValidationError.GetCurrentStackFrame());
 
+            ValidationError? validationError = null;
+
             try
             {
                 using (var memoryStream = new MemoryStream())
@@ -70,7 +72,7 @@ namespace Microsoft.IdentityModel.Xml
                     if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
                     {
                         StringBuilder keyAttempted = new StringBuilder().Append(key.ToString()).Append(", KeyId: ").AppendLine(key.KeyId);
-                        return new SignatureValidationError(
+                        validationError = new SignatureValidationError(
                             new MessageDetail(Tokens.LogMessages.IDX10520,
                             LogHelper.MarkAsNonPII(keyAttempted.ToString())),
                             SignatureValidationFailure.ValidationFailed,
@@ -78,19 +80,22 @@ namespace Microsoft.IdentityModel.Xml
                     }
                 }
 
-                ValidationResult<SecurityKey, ValidationError> signedInfoResult =
-                    SignedInfo.Verify(key, cryptoProviderFactory, callContext);
-
-                if (!signedInfoResult.Succeeded)
-                    return signedInfoResult.Error!.AddCurrentStackFrame();
-
-                return signedInfoResult;
+                if (validationError is null)
+                {
+                    validationError = SignedInfo.Verify(key, cryptoProviderFactory, callContext).Error;
+                    validationError?.AddCurrentStackFrame();
+                }
             }
             finally
             {
                 if (signatureProvider is not null)
                     cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
+
+            if (validationError is not null)
+                return validationError;
+
+            return key;
         }
 #nullable restore
     }
