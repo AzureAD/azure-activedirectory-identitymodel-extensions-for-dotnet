@@ -2,14 +2,14 @@ name: "AOT Check"
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev", "dev8x", "dev7x", "dev5x" ]
   pull_request:
     types:
       - opened
       - synchronize
       - reopened
       - ready_for_review
-    branches: [ "dev" ]
+    branches: [ "dev", "dev8x", "dev7x", "dev5x" ]
 
 jobs:
   analyze:
@@ -18,7 +18,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         fetch-depth: 1
 
