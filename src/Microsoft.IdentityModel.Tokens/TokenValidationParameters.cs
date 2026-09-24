@@ -73,7 +73,12 @@ namespace Microsoft.IdentityModel.Tokens
             LogValidationExceptions = other.LogValidationExceptions;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
-            PropertyBag = other.PropertyBag is not null ? new Dictionary<string, object>(other.PropertyBag) : null;
+            PropertyBag = other.PropertyBag switch
+            {
+                null => null,
+                Dictionary<string, object> dictionary => new Dictionary<string, object>(dictionary, dictionary.Comparer),
+                _ => new Dictionary<string, object>(other.PropertyBag)
+            };
             TryReadJwtClaim = other.TryReadJwtClaim;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
