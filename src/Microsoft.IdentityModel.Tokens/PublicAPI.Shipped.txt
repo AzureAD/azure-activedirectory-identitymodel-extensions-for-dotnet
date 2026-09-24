@@ -441,6 +441,8 @@ Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.CryptoProviderF
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DebugId.get -> string?
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DebugId.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DecryptionKeys.get -> System.Collections.Generic.IList<Microsoft.IdentityModel.Tokens.SecurityKey!>!
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreCaseWhenValidatingAudience.get -> bool
+Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreTrailingSlashWhenValidatingAudience.get -> bool
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IgnoreTrailingSlashWhenValidatingAudience.set -> void
 Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.IncludeTokenOnFailedValidation.get -> bool
@@ -867,6 +869,8 @@ Microsoft.IdentityModel.Tokens.TokenValidationParameters.CryptoProviderFactory.g
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.CryptoProviderFactory.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.DebugId.get -> string
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.DebugId.set -> void
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.get -> bool
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreTrailingSlashWhenValidatingAudience.get -> bool
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreTrailingSlashWhenValidatingAudience.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IncludeTokenOnFailedValidation.get -> bool
