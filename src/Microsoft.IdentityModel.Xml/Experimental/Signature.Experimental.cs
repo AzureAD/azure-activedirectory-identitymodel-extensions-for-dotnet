@@ -16,7 +16,17 @@ namespace Microsoft.IdentityModel.Xml
     public partial class Signature : DSigElement
     {
 #nullable enable
-        internal ValidationError? Verify(
+        /// <summary>
+        /// Verifies the signature over <see cref="SignedInfo"/> and then the reference digests.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use for cryptographic operations.</param>
+        /// <param name="cryptoProviderFactory">the <see cref="CryptoProviderFactory"/> to obtain cryptographic operators.</param>
+        /// <param name="callContext"> contextual information for diagnostics.</param>
+        /// <returns>
+        /// A <see cref="ValidationResult{TResult, TError}"/> containing <paramref name="key"/> if the signature and all
+        /// reference digests are valid; otherwise, a <see cref="ValidationError"/>.
+        /// </returns>
+        internal ValidationResult<SecurityKey, ValidationError> Verify(
             SecurityKey key,
             CryptoProviderFactory cryptoProviderFactory,
 #pragma warning disable CA1801 // Review unused parameters
@@ -42,7 +52,7 @@ namespace Microsoft.IdentityModel.Xml
             if (!cryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
                 return new SignatureValidationError(
                     new MessageDetail(LogMessages.IDX30207, SignedInfo.SignatureMethod, cryptoProviderFactory.GetType()),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    ValidationFailureType.CryptoProviderFactoryDoesNotSupportAlgorithm,
                     ValidationError.GetCurrentStackFrame());
 
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
@@ -72,7 +82,7 @@ namespace Microsoft.IdentityModel.Xml
 
                 if (validationError is null)
                 {
-                    validationError = SignedInfo.Verify(cryptoProviderFactory, callContext);
+                    validationError = SignedInfo.Verify(key, cryptoProviderFactory, callContext).Error;
                     validationError?.AddCurrentStackFrame();
                 }
             }
@@ -85,7 +95,7 @@ namespace Microsoft.IdentityModel.Xml
             if (validationError is not null)
                 return validationError;
 
-            return null; // no error
+            return key;
         }
 #nullable restore
     }
