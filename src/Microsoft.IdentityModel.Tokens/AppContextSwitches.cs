@@ -116,6 +116,14 @@ namespace Microsoft.IdentityModel.Tokens
             AppContext.TryGetSwitch(EnableCompositeMLDsaDraftSwitch, out bool enabled) && enabled;
 
         /// <summary>
+        /// When enabled, restores the previous behavior of allowing asymmetric keys below the
+        /// minimum size configured by <see cref="AsymmetricSignatureProvider"/>.
+        /// </summary>
+        internal const string DoNotEnforceMinimumAsymmetricKeySizeSwitch = "Switch.Microsoft.IdentityModel.DoNotEnforceMinimumAsymmetricKeySize";
+        private static bool? _doNotEnforceMinimumAsymmetricKeySize;
+        internal static bool DoNotEnforceMinimumAsymmetricKeySize => _doNotEnforceMinimumAsymmetricKeySize ??= (AppContext.TryGetSwitch(DoNotEnforceMinimumAsymmetricKeySizeSwitch, out bool doNotEnforceMinimumAsymmetricKeySize) && doNotEnforceMinimumAsymmetricKeySize);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -140,6 +148,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
+
+            _doNotEnforceMinimumAsymmetricKeySize = null;
+            AppContext.SetSwitch(DoNotEnforceMinimumAsymmetricKeySizeSwitch, false);
 
             AppContext.SetSwitch(EnableCompositeMLDsaDraftSwitch, false);
         }
