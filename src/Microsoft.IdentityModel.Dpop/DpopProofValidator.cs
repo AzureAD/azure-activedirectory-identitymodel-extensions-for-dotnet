@@ -386,7 +386,7 @@ public class DpopProofValidator
                 DpopValidationFailureType.TokenTypeInvalid);
         }
 
-        string alg = proofToken.Alg;
+        var alg = proofToken.Alg;
         if (string.IsNullOrEmpty(alg))
         {
             return new DpopProofValidationError(
@@ -422,7 +422,7 @@ public class DpopProofValidator
                 DpopValidationFailureType.AlgorithmDisallowed);
         }
 
-        if (!proofToken.TryGetHeaderValue("jwk", out object? jwkObj) || jwkObj == null)
+        if (!proofToken.TryGetHeaderValue("jwk", out object jwkObj) || jwkObj == null)
         {
             return new DpopProofClaimValidationError(
                 "jwk",
@@ -452,7 +452,7 @@ public class DpopProofValidator
                 DpopValidationFailureType.JwkInvalid);
         }
 
-        string? jwkRejectReason = ValidateJwkForAlgorithm(alg, jwk, options);
+        string jwkRejectReason = ValidateJwkForAlgorithm(alg, jwk, options);
         if (jwkRejectReason != null)
         {
             return new DpopProofClaimValidationError(
@@ -632,7 +632,7 @@ public class DpopProofValidator
                 DpopValidationFailureType.AthMissing);
         }
 
-        string expectedAth = ComputeAccessTokenHash(accessToken);
+        var expectedAth = ComputeAccessTokenHash(accessToken);
         if (!AreEqualUtf8(athValue, expectedAth))
         {
             return new DpopProofClaimValidationError(
@@ -641,7 +641,7 @@ public class DpopProofValidator
                 DpopValidationFailureType.AthMismatch);
         }
 
-        string thumbprint = ComputeJwkThumbprint(jwk);
+        var thumbprint = ComputeJwkThumbprint(jwk);
         if (!AreEqualUtf8(expectedCnfJkt, thumbprint))
         {
             return new DpopCnfThumbprintMismatchError(
