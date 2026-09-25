@@ -83,6 +83,37 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         }
 
         [Fact]
+        public void CopyConstructor_CreatesIndependentCollections()
+        {
+            // Arrange
+            var original = new ValidationParameters();
+            var originalKey = new SymmetricSecurityKey(new byte[32]);
+            original.SigningKeys.Add(originalKey);
+            original.DecryptionKeys.Add(originalKey);
+            original.ValidIssuers.Add("issuer");
+            original.ValidAudiences.Add("audience");
+            original.ValidAlgorithms.Add("algorithm");
+            original.ValidTypes.Add("type");
+
+            // Act
+            var copy = new CopyConstructibleValidationParameters(original);
+            copy.SigningKeys.Add(new SymmetricSecurityKey(new byte[32]));
+            copy.DecryptionKeys.Add(new SymmetricSecurityKey(new byte[32]));
+            copy.ValidIssuers.Add("copy-issuer");
+            copy.ValidAudiences.Add("copy-audience");
+            copy.ValidAlgorithms.Add("copy-algorithm");
+            copy.ValidTypes.Add("copy-type");
+
+            // Assert
+            Assert.Single(original.SigningKeys);
+            Assert.Single(original.DecryptionKeys);
+            Assert.Single(original.ValidIssuers);
+            Assert.Single(original.ValidAudiences);
+            Assert.Single(original.ValidAlgorithms);
+            Assert.Single(original.ValidTypes);
+        }
+
+        [Fact]
         public void SetValidators_NullValue_ThrowsArgumentNullException()
         {
             var validationParameters = new ValidationParameters();
