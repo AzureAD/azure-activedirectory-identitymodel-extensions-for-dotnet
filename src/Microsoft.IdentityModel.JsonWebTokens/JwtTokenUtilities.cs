@@ -619,11 +619,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!string.IsNullOrEmpty(claimType) && !AppContextSwitches.TryAllStringClaimsAsDateTime && JsonSerializerPrimitives.IsKnownToNotBeDateTime(claimType))
                 return ClaimValueTypes.String;
 
-            if (DateTime.TryParse(str, out DateTime dateTimeValue))
+            if (DateTime.TryParse(str, null, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out _))
             {
-                string dtUniversal = dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture);
-                if (dtUniversal.Equals(str, StringComparison.Ordinal))
-                    return ClaimValueTypes.DateTime;
+                return ClaimValueTypes.DateTime;
             }
 
             return ClaimValueTypes.String;

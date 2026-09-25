@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Json;
@@ -180,6 +181,23 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             Assert.True(string.Equals(dateTimeClaim.ValueType, ClaimValueTypes.DateTime), "dateTimeClaim.Type != ClaimValueTypes.DateTime");
             Assert.True(string.Equals(dateTimeClaim.Value, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture)), "dateTimeClaim.Value != dateTime.ToUniversalTime('o', CultureInfo.InvariantCulture).ToString()");
+        }
+
+        [Fact]
+        public void TestReturnsDateTime_ForIso8601WithOrWithoutTrailingZeros()
+        {
+            var iso8601WithTrailingZeros = "2025-11-26T09:30:45.1234560Z";
+            var iso8601WithoutTrailingZeros = "2025-11-26T09:30:45.123456Z";
+            var jwtpayload = new JwtPayload
+            {
+                { "dateWithTrailingZeros", iso8601WithTrailingZeros },
+                { "dateWithoutTrailingZeros", iso8601WithoutTrailingZeros }
+            };
+
+            var claimWithTrailingZeros = jwtpayload.Claims.First(c => c.Type == "dateWithTrailingZeros");
+            var claimWithoutTrailingZeros = jwtpayload.Claims.First(c => c.Type == "dateWithoutTrailingZeros");
+            Assert.Equal(ClaimValueTypes.DateTime, claimWithTrailingZeros.ValueType);
+            Assert.Equal(ClaimValueTypes.DateTime, claimWithoutTrailingZeros.ValueType);
         }
 
         [Fact]
