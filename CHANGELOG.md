@@ -1,5 +1,28 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+5.7.2
+=====
+
+## Bug Fixes
+
+- Fixed assembly-version generation so 5.7.2 packages no longer retain the legacy `0.0.1.0` placeholder and instead use the SDK-generated `5.7.2.0` assembly identity. See [#3625](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3625).
+- Updated `Microsoft.Rest.ClientRuntime` to patched version 2.3.24 in `Microsoft.IdentityModel.KeyVaultExtensions`, addressing [GHSA-whph-446h-6m9v](https://github.com/advisories/GHSA-whph-446h-6m9v). See [#3634](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3634).
+
+## Build and Test
+
+- Removed the unsupported .NET Core 2.2 target from the Windows test matrix because runtime 2.2.3 is no longer available on hosted build agents. Shipped package target frameworks are unchanged. See [#3622](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3622).
+
+8.23.0
+====
+## New Features
+- Reinstate `Microsoft.IdentityModel.Protocols.WsTrust` as a supported 8.x package, preserving the 6.8 public API while adding current target frameworks, compatibility corrections, parser and serializer fixes, and XML resource limits. See [PR #3547](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3547).
+- Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The 8.x default remains case-insensitive unless callers explicitly opt into case-sensitive comparison. See [PR #3577](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3577).
+- Resolve supported ML-DSA AKP keys from `JsonWebKeySet` and preserve structurally valid public keys for downstream cryptographic extensibility when the current runtime cannot materialize them. See [PR #3597](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3597).
+
+## Bug Fixes
+- Normalize hexadecimal letter casing inside percent-encoded triplets during Signed HTTP Request `p` claim validation. Literal path-letter comparison remains controlled by `UseCaseSensitivePClaimComparison`, and `p` claim creation output is unchanged. See [PR #3579](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3579).
+- Log expected per-key `IDX10650` authentication-tag failures at Informational instead of Error during multi-key JWE decryption. Terminal all-keys-failed results continue to be reported at Error. See [PR #3582](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3582).
+
 9.0.0
 ====
 ## New Features

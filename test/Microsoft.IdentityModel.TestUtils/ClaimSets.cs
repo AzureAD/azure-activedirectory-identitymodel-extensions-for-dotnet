@@ -269,6 +269,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return new Dictionary<string, string> { { "role", "role1" }, { "roles", "roles1" } };
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         public static List<Claim> GetDefaultRoleClaims(JwtSecurityTokenHandler handler)
         {
             var claims = new List<Claim>();
@@ -289,6 +290,7 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 var claim = new Claim(claimType, claimValue, ClaimValueTypes.String, Default.Issuer, Default.Issuer);
                 claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty] = claimTypeIn;
+#pragma warning restore CS0618 // Type or member is obsolete
                 claims.Add(claim);
             }
         }
@@ -321,7 +323,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static Claim NewClaimWithShortType(string claimType, string claimValue, string claimValueType, string issuer, string originalIssuer)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             return new Claim(JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.ContainsKey(ClaimTypes.Country) ? JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[ClaimTypes.Country] : ClaimTypes.Country, claimValue, claimValueType, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         public static IEnumerable<Claim> ActorClaimNotJwt(string issuer, string originalIssuer)
@@ -352,7 +356,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static IEnumerable<Claim> AllInboundShortClaimTypes(string issuer, string originalIssuer, IEnumerable<Claim> extraClaims = null)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             foreach (KeyValuePair<string, string> pair in JwtSecurityTokenHandler.DefaultInboundClaimTypeMap)
+#pragma warning restore CS0618 // Type or member is obsolete
             {
                 yield return new Claim(pair.Key, pair.Value, ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer);
             }
@@ -368,10 +374,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static IEnumerable<Claim> ExpectedInClaimsIdentityUsingAllInboundShortClaimTypes(string issuer, string originalIssuer, IEnumerable<Claim> extraClaims = null)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             foreach (KeyValuePair<string, string> pair in JwtSecurityTokenHandler.DefaultInboundClaimTypeMap)
             {
                 Claim claim = new Claim(pair.Value, pair.Value, ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer);
                 claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, pair.Key));
+#pragma warning restore CS0618 // Type or member is obsolete
                 yield return claim;
             }
 
