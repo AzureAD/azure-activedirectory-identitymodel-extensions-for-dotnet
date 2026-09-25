@@ -29,5 +29,7 @@ namespace Microsoft.IdentityModel.Validators
         public const string IDX40010 = "IDX40010: The SecurityToken must be a 'JsonWebToken' or 'JwtSecurityToken'";
         public const string IDX40011 = "IDX40011: The SecurityToken has multiple instances of the '{0}' claim.";
         public const string IDX40012 = "IDX40012: The cloud instance of the signing key: '{0}', does not match cloud instance from configuration: '{1}'.";
+        public const string IDX40013 = "IDX40013: Cloud instance validation could not be performed. The signing key has a cloud instance name: '{0}', but the configuration does not contain a cloud instance name.";
+        public const string IDX40014 = "IDX40014: Cloud instance validation could not be performed. The signing key was not found in the configuration's JSON Web Key Set, or it does not contain a cloud instance name.";
     }
 }
