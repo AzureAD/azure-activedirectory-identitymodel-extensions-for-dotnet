@@ -362,7 +362,8 @@ public partial class DpopProofValidator
 
                 if (!added)
                 {
-                    return new DpopProofValidationError(
+                    return new DpopProofClaimValidationError(
+                        DpopClaimTypes.Jti,
                         "DPoP proof 'jti' has already been used (replay detected).",
                         DpopValidationFailureType.JtiReplayDetected);
                 }

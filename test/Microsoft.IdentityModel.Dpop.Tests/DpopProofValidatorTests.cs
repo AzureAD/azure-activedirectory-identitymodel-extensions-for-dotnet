@@ -2455,7 +2455,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         }
 
         [Fact]
-        public async Task ValidateInternalAsync_JtiReplay_ReturnsDpopError()
+        public async Task ValidateInternalAsync_JtiReplay_ReturnsClaimError()
         {
             var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
             var options = DefaultOptions();
@@ -2464,7 +2464,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             var result = await ValidateInternalAsync(proof, accessToken, cnfJkt, options);
 
-            AssertTypedDpopError(result, DpopValidationFailureType.JtiReplayDetected);
+            AssertTypedClaimError(result, DpopClaimTypes.Jti, DpopValidationFailureType.JtiReplayDetected);
         }
 
         [Fact]
