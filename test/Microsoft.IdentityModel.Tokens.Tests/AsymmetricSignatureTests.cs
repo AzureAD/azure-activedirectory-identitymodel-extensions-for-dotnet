@@ -81,19 +81,97 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var theoryData = new TheoryData<string, SecurityKey, string, bool, bool, ExpectedException>();
 
-            theoryData.Add("RsaSigningBelowFloor", KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256, true, false, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
-            theoryData.Add("RsaVerifyingBelowFloor", new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024), SecurityAlgorithms.RsaSha256, false, false, ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
-            theoryData.Add("FactoryRsaVerifyingBelowFloor", new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024), SecurityAlgorithms.RsaSha256, false, true, ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
-            theoryData.Add("PssSigningBelowFloor", KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSsaPssSha512, true, false, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
-            theoryData.Add("PssVerifyingBelowFloor", KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSsaPssSha512, false, false, ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
-            theoryData.Add("PssVerifyingAtFloor", new CustomRsaSecurityKey(1040, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_2048), SecurityAlgorithms.RsaSsaPssSha512, false, false, ExpectedException.NoExceptionExpected);
-            theoryData.Add("EcdsaSigningBelowFloor", new ReportedSizeEcdsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa, 128), SecurityAlgorithms.EcdsaSha256, true, false, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
-            theoryData.Add("EcdsaVerifyingBelowFloor", new ReportedSizeEcdsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa, 128), SecurityAlgorithms.EcdsaSha256, false, false, ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
-            theoryData.Add("EcdsaVerifyingAtFloor", KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256, false, false, ExpectedException.NoExceptionExpected);
-            theoryData.Add("JsonWebKeySigningBelowFloor", KeyingMaterial.JsonWebKeyRsa_1024, SecurityAlgorithms.RsaSha256, true, false, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
-            theoryData.Add("RsaSigningAtFloor", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, true, false, ExpectedException.NoExceptionExpected);
-            theoryData.Add("RsaVerifyingAtFloor_1024", KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256, false, false, ExpectedException.NoExceptionExpected);
-            theoryData.Add("RsaVerifyingAboveFloor_2048", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, false, false, ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "RsaSigningBelowFloor",
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                true,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            theoryData.Add(
+                "RsaVerifyingBelowFloor",
+                new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024),
+                SecurityAlgorithms.RsaSha256,
+                false,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
+            theoryData.Add(
+                "FactoryRsaVerifyingBelowFloor",
+                new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024),
+                SecurityAlgorithms.RsaSha256,
+                false,
+                true,
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
+            theoryData.Add(
+                "PssSigningBelowFloor",
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSsaPssSha512,
+                true,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            theoryData.Add(
+                "PssVerifyingBelowFloor",
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSsaPssSha512,
+                false,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
+            theoryData.Add(
+                "PssVerifyingAtFloor",
+                new CustomRsaSecurityKey(1040, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_2048),
+                SecurityAlgorithms.RsaSsaPssSha512,
+                false,
+                false,
+                ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "EcdsaSigningBelowFloor",
+                new ReportedSizeEcdsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa, 128),
+                SecurityAlgorithms.EcdsaSha256,
+                true,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            theoryData.Add(
+                "EcdsaVerifyingBelowFloor",
+                new ReportedSizeEcdsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa, 128),
+                SecurityAlgorithms.EcdsaSha256,
+                false,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
+            theoryData.Add(
+                "EcdsaVerifyingAtFloor",
+                KeyingMaterial.Ecdsa256Key,
+                SecurityAlgorithms.EcdsaSha256,
+                false,
+                false,
+                ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "JsonWebKeySigningBelowFloor",
+                KeyingMaterial.JsonWebKeyRsa_1024,
+                SecurityAlgorithms.RsaSha256,
+                true,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            theoryData.Add(
+                "RsaSigningAtFloor",
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaSha256,
+                true,
+                false,
+                ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "RsaVerifyingAtFloor_1024",
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                false,
+                false,
+                ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "RsaVerifyingAboveFloor_2048",
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaSha256,
+                false,
+                false,
+                ExpectedException.NoExceptionExpected);
 
             return theoryData;
         }
