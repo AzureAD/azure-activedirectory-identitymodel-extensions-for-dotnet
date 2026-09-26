@@ -274,8 +274,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ValidateSubject(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
 
-            if (samlToken.Assertion.Conditions != null)
-                ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
+            ValidateTokenReplay(samlToken.Assertion.Conditions?.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
 
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
