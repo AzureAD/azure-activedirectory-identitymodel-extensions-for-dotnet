@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
+        public static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
             SecurityKey securityKey,
             ValidationParameters validationParameters,
             CallContext callContext)

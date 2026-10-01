@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         /// <param name="cryptoProviderFactory">supplies any required cryptographic operators.</param>
         /// <param name="callContext"> contextual information for diagnostics.</param>
-        internal ValidationError? Verify(
+        public ValidationError? Verify(
             CryptoProviderFactory cryptoProviderFactory,
             CallContext callContext)
         {

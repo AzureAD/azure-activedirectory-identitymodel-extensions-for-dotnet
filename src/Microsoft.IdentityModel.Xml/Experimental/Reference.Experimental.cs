@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
         /// <param name="callContext"> contextual information for diagnostics.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
-        internal ValidationError? Verify(
+        public ValidationError? Verify(
             CryptoProviderFactory cryptoProviderFactory,
 #pragma warning disable CA1801 // Review unused parameters
             CallContext callContext)

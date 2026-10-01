@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             return CreateClaimsIdentity((Saml2SecurityToken)securityToken, validationParameters, issuer);
         }
 
-        internal ClaimsIdentity CreateClaimsIdentity(Saml2SecurityToken samlToken, ValidationParameters validationParameters, string issuer)
+        public ClaimsIdentity CreateClaimsIdentity(Saml2SecurityToken samlToken, ValidationParameters validationParameters, string issuer)
         {
             if (samlToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlToken));

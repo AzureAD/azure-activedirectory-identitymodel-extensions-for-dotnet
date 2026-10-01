@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <param name="callContext"></param>
         /// <returns>A <see cref="ValidationResult{SecurityToken, ValidationError}"/> with the <see cref="JsonWebToken"/> or a <see cref="ValidationError"/>.</returns>
-        internal static ValidationResult<SecurityToken, ValidationError> ReadToken(
+        public static ValidationResult<SecurityToken, ValidationError> ReadToken(
             string token,
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
             CallContext? callContext)

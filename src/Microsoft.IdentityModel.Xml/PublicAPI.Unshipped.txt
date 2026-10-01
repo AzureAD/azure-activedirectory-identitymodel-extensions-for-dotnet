@@ -1,1 +1,4 @@
 static Microsoft.IdentityModel.Xml.XmlSignatureConstants.Attributes.Type.get -> string
+Microsoft.IdentityModel.Xml.Reference.Verify(Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError?
+Microsoft.IdentityModel.Xml.Signature.Verify(Microsoft.IdentityModel.Tokens.SecurityKey key, Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError?
+Microsoft.IdentityModel.Xml.SignedInfo.Verify(Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationError?

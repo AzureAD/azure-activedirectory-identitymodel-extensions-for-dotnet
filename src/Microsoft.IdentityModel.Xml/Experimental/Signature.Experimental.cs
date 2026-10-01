@@ -16,7 +16,14 @@ namespace Microsoft.IdentityModel.Xml
     public partial class Signature : DSigElement
     {
 #nullable enable
-        internal ValidationError? Verify(
+        /// <summary>
+        /// Verifies the signature and referenced digests using the specified key.
+        /// </summary>
+        /// <param name="key">The key used to verify the signature.</param>
+        /// <param name="cryptoProviderFactory">The factory used to create cryptographic operators.</param>
+        /// <param name="callContext">Contextual information for diagnostics.</param>
+        /// <returns>A validation error when verification fails; otherwise, <see langword="null"/>.</returns>
+        public ValidationError? Verify(
             SecurityKey key,
             CryptoProviderFactory cryptoProviderFactory,
 #pragma warning disable CA1801 // Review unused parameters

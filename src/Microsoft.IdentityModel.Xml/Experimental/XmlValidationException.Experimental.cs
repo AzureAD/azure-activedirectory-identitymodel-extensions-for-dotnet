@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Sets the <see cref="ValidationError"/> that caused the exception.
         /// </summary>
-        /// <param name="validationError"></param>
+        /// <param name="validationError">The validation error that caused the exception.</param>
         internal void SetValidationError(ValidationError validationError)
         {
             _validationError = validationError;

@@ -5,3 +5,44 @@ static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.MaxActorChainLe
 ~override Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 ~override Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 ~virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReplaceTokenHeader(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jsonWebToken, string encodedHeader) -> Microsoft.IdentityModel.JsonWebTokens.JsonWebToken
+Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.DecryptToken(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration? configuration, Microsoft.IdentityModel.Tokens.CallContext? callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<string, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
+Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.GetContentEncryptionKeys(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration? configuration, Microsoft.IdentityModel.Tokens.CallContext? callContext) -> (System.Collections.Generic.IList<Microsoft.IdentityModel.Tokens.SecurityKey>?, Microsoft.IdentityModel.Tokens.Experimental.ValidationError?)
+Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateSignature(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration? configuration, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.SecurityKey, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
+static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadToken(string token, Microsoft.IdentityModel.Tokens.CallContext? callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.SecurityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
+~static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.DecryptJwtToken(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jsonWebToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters decryptionParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<string, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateClaimsIdentity(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken? jwtToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters) -> System.Security.Claims.ClaimsIdentity
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateClaimsIdentity(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken? jwtToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, string issuer) -> System.Security.Claims.ClaimsIdentity
+override Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
+override Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationError>>
+Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Alg.get -> string
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Alg.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.AuthenticationTag.get -> string
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.AuthenticationTag.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.AuthenticationTagBytes.get -> byte[]
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.AuthenticationTagBytes.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Ciphertext.get -> string
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Ciphertext.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.CipherTextBytes.get -> byte[]
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.CipherTextBytes.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.DecompressionFunction.get -> System.Func<byte[], string, int, string>
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.DecompressionFunction.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Enc.get -> string
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Enc.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.EncodedHeader.get -> string
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.EncodedHeader.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.EncodedToken.get -> string
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.EncodedToken.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.HeaderAsciiBytes.get -> byte[]
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.HeaderAsciiBytes.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.InitializationVector.get -> string
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.InitializationVector.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.InitializationVectorBytes.get -> byte[]
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.InitializationVectorBytes.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.JwtTokenDecryptionParameters() -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Keys.get -> System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.SecurityKey>
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Keys.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.MaximumDeflateSize.get -> int
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.MaximumDeflateSize.set -> void
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Zip.get -> string
+~Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters.Zip.set -> void
