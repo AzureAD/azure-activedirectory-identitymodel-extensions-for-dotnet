@@ -73,16 +73,16 @@ public class DpopProofValidator
         _ = options ?? throw new ArgumentNullException(nameof(options));
 
         if (string.IsNullOrWhiteSpace(dpopProofJwt))
-            return ToPublicResult(new DpopProofValidationError("DPoP proof is empty.", DpopValidationFailureType.ProofMissing));
+            return DpopValidationResult.Failed("DPoP proof is empty.", DpopValidationFailureType.ProofMissing);
 
         if (dpopProofJwt.Length > options.MaxProofTokenSizeInBytes)
-            return ToPublicResult(new DpopProofValidationError("DPoP proof exceeds the maximum allowed size.", DpopValidationFailureType.ProofExceedsMaxSize));
+            return DpopValidationResult.Failed("DPoP proof exceeds the maximum allowed size.", DpopValidationFailureType.ProofExceedsMaxSize);
 
         if (string.IsNullOrWhiteSpace(accessToken))
-            return ToPublicResult(new DpopProofValidationError("Access token is empty.", DpopValidationFailureType.AccessTokenMissing));
+            return DpopValidationResult.Failed("Access token is empty.", DpopValidationFailureType.AccessTokenMissing);
 
         if (string.IsNullOrWhiteSpace(expectedCnfJkt))
-            return ToPublicResult(new DpopProofValidationError("Expected cnf.jkt is empty.", DpopValidationFailureType.CnfJktMissing));
+            return DpopValidationResult.Failed("Expected cnf.jkt is empty.", DpopValidationFailureType.CnfJktMissing);
 
         if (!requestUri.IsAbsoluteUri)
             throw new ArgumentException("URI must be absolute.", nameof(requestUri));
@@ -97,11 +97,11 @@ public class DpopProofValidator
             && options.JtiReplayCache == null
             && !options.ReplayProtectionHandledExternally)
         {
-            return ToPublicResult(new DpopProofValidationError(
+            return DpopValidationResult.Failed(
                 "DPoP replay protection is not configured. Set DpopValidationOptions.ExpectedNonce or "
                 + "DpopValidationOptions.JtiReplayCache, or set DpopValidationOptions.ReplayProtectionHandledExternally "
                 + "to true if replay protection is enforced by a higher-layer framework.",
-                DpopValidationFailureType.ReplayProtectionNotConfigured));
+                DpopValidationFailureType.ReplayProtectionNotConfigured);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -114,10 +114,7 @@ public class DpopProofValidator
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            return ToPublicResult(new DpopProofValidationError(
-                "DPoP proof validation failed.",
-                DpopValidationFailureType.UnexpectedError,
-                ex));
+            return DpopValidationResult.Failed("DPoP proof validation failed.", DpopValidationFailureType.UnexpectedError, ex);
         }
     }
 
