@@ -26,7 +26,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
+#pragma warning disable CS0618 // Type or member is obsolete
                 JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
                 jwtSecurityTokenHandler.MapInboundClaims = false;
                 jwtSecurityTokenHandler.OutboundClaimTypeMap.Clear();
                 SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor

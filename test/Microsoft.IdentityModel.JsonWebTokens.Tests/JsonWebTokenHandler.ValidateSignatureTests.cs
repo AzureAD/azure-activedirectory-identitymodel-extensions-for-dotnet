@@ -148,10 +148,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_SignatureValidationResult_Success_X5tMatches")
                     {
-                        SigningCredentials = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2,
+                        SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
                         ValidationParameters = new ValidationParameters(),
-                        KeyToAddToValidationParameters = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key,
-                        OperationResult = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key,
+                        KeyToAddToValidationParameters = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                        OperationResult = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData("Valid_IssuerSigningKeyResolverReturnsKeyThatMatches")
                     {
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_NoKeyId_DontTryAllKeys")
                     {
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
-                        ValidationParameters = new ValidationParameters(),
+                        ValidationParameters = new ValidationParameters { TryAllSigningKeys = false },
                         KeyToAddToValidationParameters = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10526:"),
                         OperationResult = new ValidationError(
@@ -194,7 +194,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidateSignatureTheoryData("Invalid_NoKeys")
                     {
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
-                        ValidationParameters = new ValidationParameters(),
+                        ValidationParameters = new ValidationParameters { TryAllSigningKeys = false },
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10527:"),
                         OperationResult = new ValidationError(
                             new MessageDetail(TokenLogMessages.IDX10500),

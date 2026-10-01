@@ -59,12 +59,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (result.ContentEncryptionKeys == null || result.ContentEncryptionKeys.Count == 0)
             {
-                return new ValidationError(
+                ValidationError validationError = new(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
                     ValidationError.GetCurrentStackFrame());
+
+                LogHelper.LogExceptionMessage(validationError.GetException());
+                return validationError;
             }
 
             var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, result.ContentEncryptionKeys);

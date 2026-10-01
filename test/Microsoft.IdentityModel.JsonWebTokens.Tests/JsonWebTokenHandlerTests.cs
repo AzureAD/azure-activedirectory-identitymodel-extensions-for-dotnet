@@ -470,7 +470,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             get
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var tokenHandler = new JwtSecurityTokenHandler
+#pragma warning restore CS0618 // Type or member is obsolete
                 {
                     SetDefaultTimesOnTokenCreation = false
                 };
@@ -594,7 +596,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             get
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var tokenHandler = new JwtSecurityTokenHandler
+#pragma warning restore CS0618 // Type or member is obsolete
                 {
                     SetDefaultTimesOnTokenCreation = false
                 };
@@ -689,7 +693,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             get
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var tokenHandler = new JwtSecurityTokenHandler
+#pragma warning restore CS0618 // Type or member is obsolete
                 {
                     SetDefaultTimesOnTokenCreation = false
                 };
@@ -1301,7 +1307,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             get
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var tokenHandler = new JwtSecurityTokenHandler
+#pragma warning restore CS0618 // Type or member is obsolete
                 {
                     SetDefaultTimesOnTokenCreation = false
                 };
@@ -2830,7 +2838,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEDirect", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
+#pragma warning disable CS0618 // Type or member is obsolete
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
             jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
             var jweCreatedInMemory = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials);
             theoryData.ValidationParameters.ValidateLifetime = false;
@@ -2995,7 +3005,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEKeyWrap", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
+#pragma warning disable CS0618 // Type or member is obsolete
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
             jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
             theoryData.ValidationParameters.ValidateLifetime = false;
             try
@@ -3280,7 +3292,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 RequireExpirationTime = false,
             };
 
+#pragma warning disable CS0618 // Type or member is obsolete
             JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MapInboundClaims = false };
+#pragma warning restore CS0618 // Type or member is obsolete
 
             TokenValidationResult jsonValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
             TokenValidationResult jwtValidationResult = await jwtSecurityTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
@@ -3344,7 +3358,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 RequireExpirationTime = false,
             };
 
+#pragma warning disable CS0618 // Type or member is obsolete
             JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MapInboundClaims = false };
+#pragma warning restore CS0618 // Type or member is obsolete
 
             TokenValidationResult jsonValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
             TokenValidationResult jwtValidationResult = await jwtSecurityTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
@@ -4929,7 +4945,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         public JsonWebTokenHandler JsonWebTokenHandler { get; set; } = new JsonWebTokenHandler();
 
+#pragma warning disable CS0618 // Type or member is obsolete
         public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         public string JwtToken { get; set; }
 

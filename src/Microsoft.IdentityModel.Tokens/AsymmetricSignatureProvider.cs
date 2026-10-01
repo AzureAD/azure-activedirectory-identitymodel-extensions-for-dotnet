@@ -16,6 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
         private DisposableObjectPool<AsymmetricAdapter> _asymmetricAdapterObjectPool;
         private CryptoProviderFactory _cryptoProviderFactory;
         private bool _disposed;
+        private Lazy<bool> _keySizeIsValid;
         private Dictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
         private Dictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
 
@@ -145,9 +146,13 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.MarkAsNonPII(key.KeyId))));
 
             WillCreateSignatures = willCreateSignatures;
+            _keySizeIsValid = new Lazy<bool>(ValidKeySize);
             _asymmetricAdapterObjectPool = new DisposableObjectPool<AsymmetricAdapter>(
                 CreateAsymmetricAdapter,
                 _cryptoProviderFactory.SignatureProviderObjectPoolCacheSize);
+
+            if (!AppContextSwitches.DoNotEnforceMinimumAsymmetricKeySize)
+                ValidateAsymmetricSecurityKeySizeCore(Key, Algorithm, WillCreateSignatures);
         }
 
         /// <summary>
@@ -196,6 +201,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AsymmetricAdapter CreateAsymmetricAdapter()
         {
+            // Ensure derived providers can apply additional key-size validation after construction.
+            _ = _keySizeIsValid.Value;
+
             // ML-DSA and other pure-signing algorithms do not use an external hash.
             if (SupportedAlgorithms.IsSupportedMlDsaAlgorithm(Algorithm))
                 return new AsymmetricAdapter(Key, Algorithm, WillCreateSignatures);
@@ -340,6 +348,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <seealso cref="MinimumAsymmetricKeySizeInBitsForVerifyingMap"/> for minimum verifying sizes.
         /// </remarks>
         public virtual void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
+        {
+            if (!AppContextSwitches.DoNotEnforceMinimumAsymmetricKeySize)
+                ValidateAsymmetricSecurityKeySizeCore(key, algorithm, willCreateSignatures);
+        }
+
+        private void ValidateAsymmetricSecurityKeySizeCore(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));

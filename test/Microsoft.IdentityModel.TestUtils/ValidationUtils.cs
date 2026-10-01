@@ -168,9 +168,13 @@ namespace Microsoft.IdentityModel.TestUtils
             List<SecurityKey>? signingKeys = null,
             TimeSpan? clockSkew = null,
             TimeProvider? timeProvider = null,
-            TokenReplayCache? tokenReplayCache = null)
+            TokenReplayCache? tokenReplayCache = null,
+            bool tryAllSigningKeys = true)
         {
-            ValidationParameters validationParameters = new ValidationParameters();
+            ValidationParameters validationParameters = new ValidationParameters
+            {
+                TryAllSigningKeys = tryAllSigningKeys,
+            };
 
             if (algorithms != null)
                 algorithms.ForEach(validationParameters.ValidAlgorithms.Add);
