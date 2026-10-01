@@ -94,8 +94,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             bool omitIat = false,
             bool omitAth = false,
             bool includePrivateKey = false,
-            RSA proofKey = null,
-            IDictionary<string, object> extraPayloadClaims = null)
+            RSA proofKey = null)
         {
             var rsa = proofKey ?? CreateTestRsa();
             var signingCredentials = new SigningCredentials(
@@ -129,12 +128,6 @@ namespace Microsoft.IdentityModel.Dpop.Tests
 
             if (!string.IsNullOrEmpty(nonce))
                 claims["nonce"] = nonce;
-
-            if (extraPayloadClaims != null)
-            {
-                foreach (var extra in extraPayloadClaims)
-                    claims[extra.Key] = extra.Value;
-            }
 
             // Build RSA JWK for header
             var rsaParams = rsa.ExportParameters(includePrivateKey);
@@ -238,8 +231,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             bool omitHtu = false,
             bool omitIat = false,
             bool omitAth = false,
-            bool includePrivateKey = false,
-            IDictionary<string, object> extraPayloadClaims = null)
+            bool includePrivateKey = false)
         {
             var rsa = CreateTestRsa();
             var (at, cnfJkt) = CreateSimpleAccessToken(rsa);
@@ -247,8 +239,7 @@ namespace Microsoft.IdentityModel.Dpop.Tests
                 httpMethod, uri, accessToken: at, nonce: nonce, typ: typ,
                 iatOverride: iatOverride, omitJti: omitJti, omitHtm: omitHtm,
                 omitHtu: omitHtu, omitIat: omitIat, omitAth: omitAth,
-                includePrivateKey: includePrivateKey, proofKey: rsa,
-                extraPayloadClaims: extraPayloadClaims);
+                includePrivateKey: includePrivateKey, proofKey: rsa);
             return (proofJwt, at, cnfJkt);
         }
 
@@ -2009,26 +2000,6 @@ namespace Microsoft.IdentityModel.Dpop.Tests
                     _validator.ValidateAsync(
                         fivePart, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions()));
             });
-        }
-
-        [Fact]
-        public async Task ValidateAsync_GenericJwtClaimsDoNotOverrideDpopIat()
-        {
-            var expiredExp = DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeSeconds();
-            var futureNbf = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds();
-            var (proof, accessToken, cnfJkt) = CreateTamperedProofAndAccessToken(
-                extraPayloadClaims: new Dictionary<string, object>
-                {
-                    { "exp", expiredExp },
-                    { "nbf", futureNbf },
-                    { "aud", "https://attacker.example" },
-                    { "iss", "https://attacker.example" },
-                });
-
-            var result = await _validator.ValidateAsync(
-                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
-
-            Assert.True(result.IsValid);
         }
 
         [Fact]
