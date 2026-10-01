@@ -262,6 +262,7 @@ static readonly Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidatio
 static readonly Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationFailure.ValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.TokenReplayValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationFailure.ValidationFailed -> Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationFailure!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationFailure.ValidatorThrew -> Microsoft.IdentityModel.Tokens.Experimental.TokenTypeValidationFailure!
+static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.CryptoProviderFactoryDoesNotSupportAlgorithm -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.CryptoProviderReturnedNull -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.KeyWrapFailed -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
 static readonly Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.NullArgument -> Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType!
@@ -389,19 +390,4 @@ Microsoft.IdentityModel.Tokens.Experimental.DefaultTokenTypeValidator
 Microsoft.IdentityModel.Tokens.Experimental.DefaultTokenTypeValidator.DefaultTokenTypeValidator() -> void
 Microsoft.IdentityModel.Tokens.Experimental.DefaultTokenTypeValidator.ValidateTokenType(string? type, Microsoft.IdentityModel.Tokens.SecurityToken? securityToken, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedTokenType, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>
 Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey.ValidatedSignatureKey(System.DateTime? validFrom, System.DateTime? validTo, System.DateTime? validationTime) -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ActorValidationResult.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ClaimsIdentityNoLocking.get -> System.Security.Claims.ClaimsIdentity!
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ClaimsIdentityNoLocking.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedAlgorithm.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedAudience.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedIssuer.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedLifetime.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedSignatureKey.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidatedToken.ValidatedTokenType.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidationError.MessageDetail.get -> Microsoft.IdentityModel.Tokens.Experimental.MessageDetail!
-Microsoft.IdentityModel.Tokens.Experimental.ValidationFailureType.Name.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DecryptionKeyResolver.get -> Microsoft.IdentityModel.Tokens.Experimental.IDecryptionKeyResolver?
-Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.DecryptionKeyResolver.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TimeProvider.get -> System.TimeProvider!
-Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.TimeProvider.set -> void
 static Microsoft.IdentityModel.Tokens.Validators.ValidateSignatureKey(Microsoft.IdentityModel.Tokens.SecurityKey! securityKey, Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> Microsoft.IdentityModel.Tokens.Experimental.ValidationResult<Microsoft.IdentityModel.Tokens.Experimental.ValidatedSignatureKey, Microsoft.IdentityModel.Tokens.Experimental.ValidationError!>

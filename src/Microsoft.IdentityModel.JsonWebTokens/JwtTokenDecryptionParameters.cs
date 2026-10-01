@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// Represents the parameters needed to decrypt a JSON Web Token.
     /// The JwtSecurityTokenHandler uses this as a helper when decrypting a JwtSecurityToken, the JsonWebTokenHandler sets the JsonWebToken property. 
     /// </summary>
-    public class JwtTokenDecryptionParameters
+    internal class JwtTokenDecryptionParameters
     {
         /// <summary>
         /// Gets or sets the ciphertext bytes.

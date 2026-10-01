@@ -20,6 +20,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return CreateClaimsIdentity((SamlSecurityToken)securityToken, validationParameters, issuer);
         }
 
+        /// <summary>
+        /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <param name="samlToken">The <see cref="SamlSecurityToken"/> to use as a <see cref="Claim"/> source.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="issuer">The value to set <see cref="Claim.Issuer"/>.</param>
+        /// <returns>A <see cref="ClaimsIdentity"/> with claims from the saml statements.</returns>
         public ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, ValidationParameters validationParameters, string issuer)
         {
             if (samlToken == null)

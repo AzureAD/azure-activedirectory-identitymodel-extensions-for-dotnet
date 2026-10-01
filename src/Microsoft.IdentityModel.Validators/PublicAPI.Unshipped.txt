@@ -3,4 +3,3 @@ Microsoft.IdentityModel.Validators.AadIssuerValidator.ValidateIssuerAsync(string
 Microsoft.IdentityModel.Validators.AadValidationParametersExtension
 static Microsoft.IdentityModel.Validators.AadValidationParametersExtension.EnableAadSigningKeyIssuerValidation(this Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters) -> void
 static Microsoft.IdentityModel.Validators.AadValidationParametersExtension.EnableEntraIdSigningKeyCloudInstanceValidation(this Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters validationParameters) -> void
-static Microsoft.IdentityModel.Validators.AadValidationParametersExtension.ValidateSigningKeyCloudInstance(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> void

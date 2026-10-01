@@ -107,6 +107,11 @@ namespace Microsoft.IdentityModel.Tokens
             CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
+            if (validationParameters == null)
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
+
             DateTime utcNow = validationParameters.TimeProvider.GetUtcNow().UtcDateTime;
             DateTime? notBeforeUtc = null;
             DateTime? notAfterUtc = null;

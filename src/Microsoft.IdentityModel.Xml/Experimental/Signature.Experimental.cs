@@ -17,13 +17,16 @@ namespace Microsoft.IdentityModel.Xml
     {
 #nullable enable
         /// <summary>
-        /// Verifies the signature and referenced digests using the specified key.
+        /// Verifies the signature over <see cref="SignedInfo"/> and then the reference digests.
         /// </summary>
-        /// <param name="key">The key used to verify the signature.</param>
-        /// <param name="cryptoProviderFactory">The factory used to create cryptographic operators.</param>
-        /// <param name="callContext">Contextual information for diagnostics.</param>
-        /// <returns>A validation error when verification fails; otherwise, <see langword="null"/>.</returns>
-        public ValidationError? Verify(
+        /// <param name="key">the <see cref="SecurityKey"/> to use for cryptographic operations.</param>
+        /// <param name="cryptoProviderFactory">the <see cref="CryptoProviderFactory"/> to obtain cryptographic operators.</param>
+        /// <param name="callContext"> contextual information for diagnostics.</param>
+        /// <returns>
+        /// A <see cref="ValidationResult{TResult, TError}"/> containing <paramref name="key"/> if the signature and all
+        /// reference digests are valid; otherwise, a <see cref="ValidationError"/>.
+        /// </returns>
+        public ValidationResult<SecurityKey, ValidationError> Verify(
             SecurityKey key,
             CryptoProviderFactory cryptoProviderFactory,
 #pragma warning disable CA1801 // Review unused parameters
@@ -49,7 +52,7 @@ namespace Microsoft.IdentityModel.Xml
             if (!cryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
                 return new SignatureValidationError(
                     new MessageDetail(LogMessages.IDX30207, SignedInfo.SignatureMethod, cryptoProviderFactory.GetType()),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    ValidationFailureType.CryptoProviderFactoryDoesNotSupportAlgorithm,
                     ValidationError.GetCurrentStackFrame());
 
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
@@ -79,7 +82,7 @@ namespace Microsoft.IdentityModel.Xml
 
                 if (validationError is null)
                 {
-                    validationError = SignedInfo.Verify(cryptoProviderFactory, callContext);
+                    validationError = SignedInfo.Verify(key, cryptoProviderFactory, callContext).Error;
                     validationError?.AddCurrentStackFrame();
                 }
             }
@@ -92,7 +95,7 @@ namespace Microsoft.IdentityModel.Xml
             if (validationError is not null)
                 return validationError;
 
-            return null; // no error
+            return key;
         }
 #nullable restore
     }
