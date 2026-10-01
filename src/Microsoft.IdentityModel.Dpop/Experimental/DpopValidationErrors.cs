@@ -4,7 +4,6 @@
 using System;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
-#nullable enable
 namespace Microsoft.IdentityModel.Dpop.Experimental;
 
 internal class DpopProofValidationError : ValidationError
@@ -15,7 +14,7 @@ internal class DpopProofValidationError : ValidationError
     internal DpopProofValidationError(
         string message,
         DpopValidationFailureType dpopFailureType,
-        Exception? innerException = null)
+        Exception innerException = null)
         : this(message, dpopFailureType, s_dpopValidationFailed, innerException)
     {
     }
@@ -24,7 +23,7 @@ internal class DpopProofValidationError : ValidationError
         string message,
         DpopValidationFailureType dpopFailureType,
         ValidationFailureType validationFailureType,
-        Exception? innerException)
+        Exception innerException)
         : base(
             new MessageDetail(message),
             validationFailureType,
@@ -48,7 +47,7 @@ internal sealed class DpopProofClaimValidationError : DpopProofValidationError
         string claimName,
         string message,
         DpopValidationFailureType failureType,
-        Exception? innerException = null)
+        Exception innerException = null)
         : base(message, failureType, innerException)
     {
         ClaimName = claimName;
@@ -59,7 +58,7 @@ internal sealed class DpopProofClaimValidationError : DpopProofValidationError
 
 internal sealed class DpopCnfThumbprintMismatchError(
     string message,
-    Exception? innerException = null)
+    Exception innerException = null)
     : DpopProofValidationError(
         message,
         DpopValidationFailureType.CnfJktMismatch,
@@ -69,7 +68,7 @@ internal sealed class DpopCnfThumbprintMismatchError(
 
 internal sealed class DpopNonceRequiredError(
     string message,
-    Exception? innerException = null)
+    Exception innerException = null)
     : DpopProofValidationError(
         message,
         DpopValidationFailureType.NonceRequired,

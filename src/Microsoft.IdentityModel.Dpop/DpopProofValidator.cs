@@ -329,7 +329,6 @@ public class DpopProofValidator
         return Base64UrlEncoder.Encode(thumbprintBytes);
     }
 
-#nullable enable
     private static async Task<ValidationResult<ValidatedDpopProof, ValidationError>> ValidateCoreAsync(
         string dpopProofJwt,
         string httpMethod,
@@ -445,11 +444,11 @@ public class DpopProofValidator
 
         // Verify the proof signature without caching the SignatureProvider.
         CryptoProviderFactory cryptoProviderFactory = signingKey.CryptoProviderFactory ?? CryptoProviderFactory.Default;
-        SignatureProvider? signatureProvider = null;
+        SignatureProvider signatureProvider = null;
         try
         {
             signatureProvider = cryptoProviderFactory.CreateForVerifying(signingKey, alg, cacheProvider: false);
-            if (!VerifyProofSignature(proofToken, signatureProvider!))
+            if (!VerifyProofSignature(proofToken, signatureProvider))
             {
                 return new DpopProofValidationError(
                     "DPoP proof signature validation failed.",
@@ -604,20 +603,15 @@ public class DpopProofValidator
             }
         }
 
-        string? proofNonce = proofToken.TryGetPayloadValue(
-            DpopClaimTypes.Nonce,
-            out string nonce)
-                ? nonce
-                : null;
-
-        return new ValidatedDpopProof(thumbprint, proofNonce);
+        string proofNonceForResult = proofToken.TryGetPayloadValue(DpopClaimTypes.Nonce, out string proofNonce) ? proofNonce : null;
+        return new ValidatedDpopProof(thumbprint, proofNonceForResult);
     }
 
     private static DpopValidationResult ToPublicResult(
         ValidationResult<ValidatedDpopProof, ValidationError> result)
     {
         if (result.Succeeded)
-            return DpopValidationResult.Success(result.Result!.Nonce);
+            return DpopValidationResult.Success(result.Result.Nonce);
 
         return result.Error switch
         {
@@ -638,8 +632,7 @@ public class DpopProofValidator
                 DpopValidationResult.Failed(
                     "DPoP proof validation failed.",
                     DpopValidationFailureType.UnexpectedError,
-                    result.Error!.InnerException),
+                    result.Error.InnerException),
         };
     }
-#nullable restore
 }
