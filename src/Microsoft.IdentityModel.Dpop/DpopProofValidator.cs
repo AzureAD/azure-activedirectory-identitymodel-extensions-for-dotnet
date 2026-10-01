@@ -3,8 +3,6 @@
 
 using System;
 using System.Buffers;
-using System.Collections.Generic;
-using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -335,13 +333,6 @@ public class DpopProofValidator
     }
 
 #nullable enable
-    private const string SignatureProviderReleaseExceptionKey =
-        "Microsoft.IdentityModel.Dpop.SignatureProviderReleaseException";
-
-    private static readonly DpopPassThroughValidators s_passThroughValidators = new();
-    private static readonly ISignatureValidator s_dpopSignatureValidator =
-        new DpopSignatureValidator();
-
     private static async Task<ValidationResult<ValidatedDpopProof, ValidationError>> ValidateCoreAsync(
         string dpopProofJwt,
         string httpMethod,
@@ -455,64 +446,30 @@ public class DpopProofValidator
                 DpopValidationFailureType.JwkInvalid);
         }
 
-        var validationParameters = new ValidationParameters
+        // Verify the proof signature without caching the SignatureProvider.
+        CryptoProviderFactory cryptoProviderFactory = signingKey.CryptoProviderFactory ?? CryptoProviderFactory.Default;
+        SignatureProvider? signatureProvider = null;
+        try
         {
-            AudienceValidator = s_passThroughValidators,
-            IssuerValidatorAsync = s_passThroughValidators,
-            LifetimeValidator = s_passThroughValidators,
-            SignatureValidator = s_dpopSignatureValidator,
-        };
-
-        validationParameters.SigningKeys.Add(signingKey);
-        validationParameters.ValidAlgorithms.Add(alg);
-
-        // Never let the result-based handler enter ValidateJWEAsync. Preserve the current
-        // signature-validation outcome for five-part tokens that pass typ/alg/JWK checks.
-        var callContext = new CallContext();
-        if (proofToken.IsEncrypted)
-        {
-            ValidationResult<SecurityKey, ValidationError> encryptedSignatureResult;
-            try
+            signatureProvider = cryptoProviderFactory.CreateForVerifying(signingKey, alg, cacheProvider: false);
+            if (!VerifyProofSignature(proofToken, signatureProvider!))
             {
-                encryptedSignatureResult = s_dpopSignatureValidator.ValidateSignature(
-                    proofToken,
-                    validationParameters,
-                    configuration: null,
-                    callContext);
+                return new DpopProofValidationError(
+                    "DPoP proof signature validation failed.",
+                    DpopValidationFailureType.SignatureInvalid);
             }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031
-            {
-                encryptedSignatureResult = new SignatureValidationError(
-                    new MessageDetail("DPoP proof signature validation failed."),
-                    SignatureValidationFailure.ValidatorThrew,
-                    ValidationError.GetCurrentStackFrame(),
-                    ex);
-            }
-
-            if (ConsumeSignatureProviderReleaseException(callContext) is ValidationError releaseError)
-                return releaseError;
-
-            if (!encryptedSignatureResult.Succeeded)
-                return encryptedSignatureResult.Error!;
         }
-        else
+        catch (Exception ex)
         {
-            IResultBasedValidation handler = s_tokenHandler;
-
-            ValidationResult<ValidatedToken, ValidationError> tokenResult =
-                await handler.ValidateTokenAsync(
-                    proofToken,
-                    validationParameters,
-                    callContext,
-                    cancellationToken).ConfigureAwait(false);
-
-            if (ConsumeSignatureProviderReleaseException(callContext) is ValidationError releaseError)
-                return releaseError;
-
-            if (!tokenResult.Succeeded)
-                return tokenResult.Error!;
+            return new DpopProofValidationError(
+                "DPoP proof signature validation failed.",
+                DpopValidationFailureType.SignatureInvalid,
+                ex);
+        }
+        finally
+        {
+            if (signatureProvider != null)
+                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
         }
 
         if (!proofToken.TryGetPayloadValue(DpopClaimTypes.Htm, out string htmValue) || string.IsNullOrWhiteSpace(htmValue))
@@ -680,127 +637,12 @@ public class DpopProofValidator
                     error.DpopFailureType,
                     error.InnerException),
 
-            SignatureValidationError error =>
-                DpopValidationResult.Failed(
-                    "DPoP proof signature validation failed.",
-                    DpopValidationFailureType.SignatureInvalid,
-                    error.InnerException),
-
             _ =>
                 DpopValidationResult.Failed(
                     "DPoP proof validation failed.",
                     DpopValidationFailureType.UnexpectedError,
                     result.Error!.InnerException),
         };
-    }
-
-    private sealed class DpopPassThroughValidators :
-        IAudienceValidator,
-        IIssuerValidator,
-        ILifetimeValidator
-    {
-        public ValidationResult<string, ValidationError> ValidateAudience(
-            IList<string> tokenAudiences,
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-            => string.Empty;
-
-        public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
-            string issuer,
-            SecurityToken securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext,
-            CancellationToken cancellationToken)
-            => Task.FromResult<ValidationResult<ValidatedIssuer, ValidationError>>(
-                new ValidatedIssuer(
-                    issuer ?? string.Empty,
-                    IssuerValidationSource.NotValidated));
-
-        public ValidationResult<ValidatedLifetime, ValidationError> ValidateLifetime(
-            DateTime? notBefore,
-            DateTime? expires,
-            SecurityToken? securityToken,
-            ValidationParameters validationParameters,
-            CallContext callContext)
-            => new ValidatedLifetime(notBefore, expires);
-    }
-
-    private sealed class DpopSignatureValidator : ISignatureValidator
-    {
-        public ValidationResult<SecurityKey, ValidationError> ValidateSignature(
-            SecurityToken token,
-            ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
-            CallContext callContext)
-        {
-            JsonWebToken proofToken = (JsonWebToken)token;
-            SecurityKey key = validationParameters.SigningKeys[0];
-            CryptoProviderFactory factory =
-                key.CryptoProviderFactory ?? CryptoProviderFactory.Default;
-
-            SignatureProvider? provider = null;
-            try
-            {
-                provider = factory.CreateForVerifying(
-                    key,
-                    proofToken.Alg,
-                    cacheProvider: false);
-
-                if (VerifyProofSignature(proofToken, provider!))
-                {
-                    proofToken.SigningKey = key;
-                    return key;
-                }
-
-                return new SignatureValidationError(
-                    new MessageDetail("DPoP proof signature validation failed."),
-                    SignatureValidationFailure.ValidationFailed,
-                    ValidationError.GetCurrentStackFrame());
-            }
-            finally
-            {
-                if (provider is not null)
-                {
-                    try
-                    {
-                        factory.ReleaseSignatureProvider(provider);
-                    }
-#pragma warning disable CA1031 // Do not catch general exception types
-                    catch (Exception ex)
-#pragma warning restore CA1031
-                    {
-                        RecordSignatureProviderReleaseException(callContext, ex);
-                    }
-                }
-            }
-        }
-    }
-
-    private static void RecordSignatureProviderReleaseException(CallContext callContext, Exception exception)
-    {
-        callContext.PropertyBag ??= new Dictionary<string, object>();
-        callContext.PropertyBag[SignatureProviderReleaseExceptionKey] = exception;
-    }
-
-    private static ValidationError? ConsumeSignatureProviderReleaseException(CallContext callContext)
-    {
-        if (callContext.PropertyBag is null
-            || !callContext.PropertyBag.TryGetValue(SignatureProviderReleaseExceptionKey, out object? boxed)
-            || boxed is not Exception exception)
-        {
-            return null;
-        }
-
-        callContext.PropertyBag.Remove(SignatureProviderReleaseExceptionKey);
-
-        if (exception is OperationCanceledException)
-            ExceptionDispatchInfo.Capture(exception).Throw();
-
-        return new DpopProofValidationError(
-            "DPoP proof validation failed.",
-            DpopValidationFailureType.UnexpectedError,
-            exception);
     }
 #nullable restore
 }
