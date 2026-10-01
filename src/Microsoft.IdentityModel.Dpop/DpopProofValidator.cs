@@ -67,15 +67,60 @@ public class DpopProofValidator
         DpopValidationOptions options,
         CancellationToken cancellationToken = default)
     {
-        return ToPublicResult(
-            await ValidateInternalAsync(
-                dpopProofJwt,
-                httpMethod,
-                requestUri,
-                accessToken,
-                expectedCnfJkt,
-                options,
-                cancellationToken).ConfigureAwait(false));
+        _ = dpopProofJwt ?? throw new ArgumentNullException(nameof(dpopProofJwt));
+        _ = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
+        _ = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+        _ = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
+        _ = expectedCnfJkt ?? throw new ArgumentNullException(nameof(expectedCnfJkt));
+        _ = options ?? throw new ArgumentNullException(nameof(options));
+
+        if (string.IsNullOrWhiteSpace(dpopProofJwt))
+            return ToPublicResult(new DpopProofValidationError("DPoP proof is empty.", DpopValidationFailureType.ProofMissing));
+
+        if (dpopProofJwt.Length > options.MaxProofTokenSizeInBytes)
+            return ToPublicResult(new DpopProofValidationError("DPoP proof exceeds the maximum allowed size.", DpopValidationFailureType.ProofExceedsMaxSize));
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+            return ToPublicResult(new DpopProofValidationError("Access token is empty.", DpopValidationFailureType.AccessTokenMissing));
+
+        if (string.IsNullOrWhiteSpace(expectedCnfJkt))
+            return ToPublicResult(new DpopProofValidationError("Expected cnf.jkt is empty.", DpopValidationFailureType.CnfJktMissing));
+
+        if (!requestUri.IsAbsoluteUri)
+            throw new ArgumentException("URI must be absolute.", nameof(requestUri));
+
+        // Replay-protection configuration gate (RFC 9449 §4.3).
+        //
+        // IdentityModel exposes two in-process mechanisms — ExpectedNonce and JtiReplayCache —
+        // and treats "both null" as a configuration error unless the caller has explicitly
+        // declared that replay protection is handled at a higher layer. Fail closed here
+        // to prevent a silent loss of §4.3 protection.
+        if (options.ExpectedNonce == null
+            && options.JtiReplayCache == null
+            && !options.ReplayProtectionHandledExternally)
+        {
+            return ToPublicResult(new DpopProofValidationError(
+                "DPoP replay protection is not configured. Set DpopValidationOptions.ExpectedNonce or "
+                + "DpopValidationOptions.JtiReplayCache, or set DpopValidationOptions.ReplayProtectionHandledExternally "
+                + "to true if replay protection is enforced by a higher-layer framework.",
+                DpopValidationFailureType.ReplayProtectionNotConfigured));
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        try
+        {
+            return ToPublicResult(
+                await ValidateCoreAsync(dpopProofJwt, httpMethod, requestUri, accessToken, expectedCnfJkt, options, cancellationToken)
+                    .ConfigureAwait(false));
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return ToPublicResult(new DpopProofValidationError(
+                "DPoP proof validation failed.",
+                DpopValidationFailureType.UnexpectedError,
+                ex));
+        }
     }
 
     /// <summary>
@@ -296,65 +341,6 @@ public class DpopProofValidator
     private static readonly DpopPassThroughValidators s_passThroughValidators = new();
     private static readonly ISignatureValidator s_dpopSignatureValidator =
         new DpopSignatureValidator();
-
-    internal async Task<ValidationResult<ValidatedDpopProof, ValidationError>> ValidateInternalAsync(
-        string dpopProofJwt,
-        string httpMethod,
-        Uri requestUri,
-        string accessToken,
-        string expectedCnfJkt,
-        DpopValidationOptions options,
-        CancellationToken cancellationToken = default)
-    {
-        _ = dpopProofJwt ?? throw new ArgumentNullException(nameof(dpopProofJwt));
-        _ = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
-        _ = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-        _ = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
-        _ = expectedCnfJkt ?? throw new ArgumentNullException(nameof(expectedCnfJkt));
-        _ = options ?? throw new ArgumentNullException(nameof(options));
-
-        if (string.IsNullOrWhiteSpace(dpopProofJwt))
-            return new DpopProofValidationError("DPoP proof is empty.", DpopValidationFailureType.ProofMissing);
-
-        if (dpopProofJwt.Length > options.MaxProofTokenSizeInBytes)
-            return new DpopProofValidationError("DPoP proof exceeds the maximum allowed size.", DpopValidationFailureType.ProofExceedsMaxSize);
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-            return new DpopProofValidationError("Access token is empty.", DpopValidationFailureType.AccessTokenMissing);
-
-        if (string.IsNullOrWhiteSpace(expectedCnfJkt))
-            return new DpopProofValidationError("Expected cnf.jkt is empty.", DpopValidationFailureType.CnfJktMissing);
-
-        if (!requestUri.IsAbsoluteUri)
-            throw new ArgumentException("URI must be absolute.", nameof(requestUri));
-
-        if (options.ExpectedNonce == null
-            && options.JtiReplayCache == null
-            && !options.ReplayProtectionHandledExternally)
-        {
-            return new DpopProofValidationError(
-                "DPoP replay protection is not configured. Set DpopValidationOptions.ExpectedNonce or "
-                + "DpopValidationOptions.JtiReplayCache, or set DpopValidationOptions.ReplayProtectionHandledExternally "
-                + "to true if replay protection is enforced by a higher-layer framework.",
-                DpopValidationFailureType.ReplayProtectionNotConfigured);
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        try
-        {
-            return await ValidateCoreAsync(
-                dpopProofJwt, httpMethod, requestUri, accessToken, expectedCnfJkt, options, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            return new DpopProofValidationError(
-                "DPoP proof validation failed.",
-                DpopValidationFailureType.UnexpectedError,
-                ex);
-        }
-    }
 
     private static async Task<ValidationResult<ValidatedDpopProof, ValidationError>> ValidateCoreAsync(
         string dpopProofJwt,
