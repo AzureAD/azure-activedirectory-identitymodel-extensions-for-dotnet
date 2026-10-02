@@ -112,6 +112,13 @@ namespace Microsoft.IdentityModel.Tokens
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 
+            if (securityKey == null)
+                return new SignatureKeyValidationError(
+                    new MessageDetail(LogMessages.IDX10253, nameof(securityKey)),
+                    SignatureKeyValidationFailure.KeyIsNull,
+                    ValidationError.GetCurrentStackFrame(),
+                    securityKey);
+
             DateTime utcNow = validationParameters.TimeProvider.GetUtcNow().UtcDateTime;
             DateTime? notBeforeUtc = null;
             DateTime? notAfterUtc = null;
