@@ -63,7 +63,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
@@ -104,7 +104,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
@@ -144,7 +144,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
@@ -191,7 +191,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.SignatureProviderCreationFailed },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
@@ -229,7 +229,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.HMAC },
                 { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
@@ -273,7 +273,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.ECDSA },
                 { TelemetryConstants.KeyAlgorithmTag, "ECDSA-P256" }
             });
     }
@@ -316,7 +316,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha384 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.ECDSA },
                 { TelemetryConstants.KeyAlgorithmTag, "ECDSA-P384" }
             });
     }
@@ -359,7 +359,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.EcdsaSha512 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.ECDSA },
                 { TelemetryConstants.KeyAlgorithmTag, "ECDSA-P521" }
             });
     }
@@ -400,7 +400,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.AlgorithmNotSupported },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
@@ -449,7 +449,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.SignatureProviderCreationFailed },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
@@ -489,7 +489,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.SigningKeyNotFound },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "NO-KEY" }
             });
     }
@@ -530,7 +530,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.SigningKeyNotFound },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "NO-KEY" }
             });
     }
@@ -579,7 +579,7 @@ public class SignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.SigningKeyNotFound },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, SecurityAlgorithms.RsaSha256 },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "NO-KEY" }
             });
     }
