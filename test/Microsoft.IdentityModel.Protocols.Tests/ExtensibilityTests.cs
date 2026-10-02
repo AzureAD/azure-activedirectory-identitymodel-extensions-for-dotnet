@@ -92,13 +92,13 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 configManager.RequestRefresh();
                 configuration2 = await configManager.GetConfigurationAsync();
 
-                if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer, CompareContext.Default))
                     await Task.Delay(1000);
                 else
                     break;
             }
 
-            if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+            if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer, CompareContext.Default))
                 context.Diffs.Add($"Expected: {configuration.Issuer}, to be different from: {configuration2.Issuer}");
 
             TestUtilities.AssertFailIfErrors(context);

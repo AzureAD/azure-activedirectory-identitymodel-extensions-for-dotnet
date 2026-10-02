@@ -166,7 +166,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(string.Empty, jwtSecurityToken, validator);
             Assert.False(validationResult.Succeeded);
 
-            IdentityComparer.AreEqual(LogMessages.IDX40003, exception.Message);
+            IdentityComparer.AreEqual(LogMessages.IDX40003, exception.Message, context);
 
             Assert.Throws<ArgumentNullException>(ValidatorConstants.SecurityToken, () => validator.Validate(ValidatorConstants.AadIssuer, null, validationParams));
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await ValidateIssuerAsync(ValidatorConstants.AadIssuer, null, validator));
