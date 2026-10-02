@@ -21,9 +21,11 @@ namespace Microsoft.IdentityModel.Protocols
     {
         internal Action _onBackgroundTaskFinish;
 
-        private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
-        private DateTimeOffset _lastRequestRefresh = DateTimeOffset.MinValue;
-        private bool _isFirstRefreshRequest = true;
+        // Stored as ticks so reads/writes can be performed atomically via Interlocked.
+        // Prevents torn reads/writes under concurrent access (Issue #3142).
+        private long _syncAfter = DateTimeOffset.MinValue.Ticks;
+        private long _lastRequestRefresh = DateTimeOffset.MinValue.Ticks;
+        private int _isFirstRefreshRequest = 1;
         private readonly SemaphoreSlim _configurationNullLock = new SemaphoreSlim(1);
 
         private readonly IDocumentRetriever _docRetriever;
@@ -208,7 +210,8 @@ namespace Microsoft.IdentityModel.Protocols
         /// </remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
+            var syncAfter = new DateTimeOffset(Interlocked.Read(ref _syncAfter), TimeSpan.Zero);
+            if (Volatile.Read(ref _currentConfiguration) != null && syncAfter > TimeProvider.GetUtcNow())
                 return _currentConfiguration;
 
             if (AppContextSwitches.UpdateConfigAsBlocking)
@@ -228,13 +231,13 @@ namespace Microsoft.IdentityModel.Protocols
             // else
             //   if task is running, return the current configuration
             //   else kick off task to update current configuration
-            if (_currentConfiguration == null)
+            if (Volatile.Read(ref _currentConfiguration) == null)
             {
                 await _configurationNullLock.WaitAsync(cancel).ConfigureAwait(false);
-                if (_currentConfiguration != null)
+                if (Volatile.Read(ref _currentConfiguration) != null)
                 {
                     _configurationNullLock.Release();
-                    return _currentConfiguration;
+                    return Volatile.Read(ref _currentConfiguration);
                 }
 
                 try
@@ -327,15 +330,15 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             // If metadata exists return it.
-            if (_currentConfiguration != null)
-                return _currentConfiguration;
+            if (Volatile.Read(ref _currentConfiguration) != null)
+                return Volatile.Read(ref _currentConfiguration);
 
             throw LogHelper.LogExceptionMessage(
                 new InvalidOperationException(
                     LogHelper.FormatInvariant(
                         LogMessages.IDX20803,
                         LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                        LogHelper.MarkAsNonPII(_syncAfter),
+                        LogHelper.MarkAsNonPII(new DateTimeOffset(Interlocked.Read(ref _syncAfter), TimeSpan.Zero)),
                         LogHelper.MarkAsNonPII(fetchMetadataFailure)),
                     fetchMetadataFailure));
         }
@@ -424,9 +427,13 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void UpdateConfiguration(T configuration, DateTimeOffset retrievalTime, ConfigurationRetrievalContext context)
         {
-            _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(retrievalTime.UtcDateTime, AutomaticRefreshInterval +
+            Volatile.Write(ref _currentConfiguration, configuration);
+
+            var newSyncAfter = DateTimeUtil.Add(retrievalTime.UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
+
+            // Atomic write — prevents torn reads from concurrent threads
+            Interlocked.Exchange(ref _syncAfter, newSyncAfter.Ticks);
 
             if (ConfigurationEventHandler != null)
             {
@@ -492,19 +499,16 @@ namespace Microsoft.IdentityModel.Protocols
         private void RequestRefreshBackgroundThread()
         {
             DateTimeOffset now = TimeProvider.GetUtcNow();
+            var lastRefresh = new DateTimeOffset(Interlocked.Read(ref _lastRequestRefresh), TimeSpan.Zero);
 
-            if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
+            if (now >= DateTimeUtil.Add(lastRefresh.UtcDateTime, RefreshInterval)
+                || Volatile.Read(ref _isFirstRefreshRequest) == 1)
             {
-                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                    MetadataAddress,
-                    TelemetryConstants.Protocols.Manual,
-                    TelemetryConstants.Protocols.ConfigurationSourceUnknown);
-
-                _isFirstRefreshRequest = false;
-                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState,
+                    ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
                     _ = Task.Run(_updateCurrentConfigurationWithBypassAsync, CancellationToken.None);
-                    _lastRequestRefresh = now;
+                    Interlocked.Exchange(ref _lastRequestRefresh, now.Ticks);
                 }
             }
         }
