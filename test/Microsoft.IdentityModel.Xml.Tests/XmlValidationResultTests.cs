@@ -1,0 +1,576 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Xml;
+using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
+using Xunit;
+
+namespace Microsoft.IdentityModel.Xml.Tests
+{
+    public class XmlValidationResultTests
+    {
+        [Fact]
+        public void ReferenceVerify_ValidDigest_ReturnsSameReference()
+        {
+            // Arrange
+            Reference reference = Default.Reference;
+            CallContext callContext = new CallContext();
+
+            // Act
+            ValidationResult<Reference, ValidationError> result =
+                reference.Verify(CryptoProviderFactory.Default, callContext);
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Same(reference, result.Result);
+            Assert.Null(result.Error);
+        }
+
+        [Fact]
+        public void ReferenceVerify_NullFactory_ReturnsNullArgument()
+        {
+            // Arrange
+            Reference reference = Default.Reference;
+
+            // Act
+            ValidationResult<Reference, ValidationError> result =
+                reference.Verify(null, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Null(result.Result);
+            Assert.Equal(ValidationFailureType.NullArgument, result.Error.FailureType);
+            Assert.Contains("cryptoProviderFactory", result.Error.Message, StringComparison.Ordinal);
+            Assert.IsType<ArgumentNullException>(result.Error.GetException());
+        }
+
+        [Fact]
+        public void ReferenceVerify_DigestMismatch_ReturnsDigestFailure()
+        {
+            // Arrange
+            Reference reference = Default.Reference;
+            reference.DigestValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 });
+
+            // Act
+            ValidationResult<Reference, ValidationError> result =
+                reference.Verify(CryptoProviderFactory.Default, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.IsType<SignatureValidationError>(result.Error);
+            Assert.Equal(SignatureValidationFailure.ReferenceDigestValidationFailed, result.Error.FailureType);
+            Assert.Contains("IDX30201", result.Error.Message, StringComparison.Ordinal);
+            Assert.IsType<SecurityTokenInvalidSignatureException>(result.Error.GetException());
+        }
+
+        [Fact]
+        public void ReferenceVerify_MalformedBase64_ThrowsAndReleasesHash()
+        {
+            // Arrange
+            Reference reference = Default.Reference;
+            reference.DigestValue = "not-valid-base64!!!";
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory();
+
+            // Act / Assert
+            Assert.Throws<FormatException>(() => reference.Verify(factory, new CallContext()));
+            Assert.Equal(factory.CreateHashAlgorithmCount, factory.ReleaseHashAlgorithmCount);
+            Assert.True(factory.CreateHashAlgorithmCount > 0);
+        }
+
+        [Fact]
+        public void ReferenceVerify_MissingStream_Throws()
+        {
+            // Arrange
+            Reference reference = Default.ReferenceWithNullTokenStream;
+
+            // Act / Assert
+            XmlValidationException exception = Assert.Throws<XmlValidationException>(
+                () => reference.Verify(CryptoProviderFactory.Default, new CallContext()));
+            Assert.Contains("IDX30202", exception.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void ReferenceVerify_UnsupportedDigest_Throws()
+        {
+            // Arrange
+            Reference reference = Default.Reference;
+            reference.DigestMethod = "urn:unsupported-digest";
+
+            // Act / Assert
+            XmlValidationException exception = Assert.Throws<XmlValidationException>(
+                () => reference.Verify(CryptoProviderFactory.Default, new CallContext()));
+            Assert.Contains("IDX30208", exception.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void ReferenceVerify_NullHashProvider_Throws()
+        {
+            // Arrange
+            Reference reference = Default.Reference;
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { ReturnNullHashAlgorithm = true };
+
+            // Act / Assert
+            XmlValidationException exception = Assert.Throws<XmlValidationException>(
+                () => reference.Verify(factory, new CallContext()));
+            Assert.Contains("IDX30209", exception.Message, StringComparison.Ordinal);
+            Assert.Equal(1, factory.CreateHashAlgorithmCount);
+            Assert.Equal(0, factory.ReleaseHashAlgorithmCount);
+        }
+
+        [Fact]
+        public void ReferenceVerify_HashProviderThrows_Propagates()
+        {
+            // Arrange
+            CryptographicException exception = new CryptographicException("hash-failed");
+            Reference reference = Default.Reference;
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashCreationException = exception };
+
+            // Act / Assert
+            Assert.Same(exception, Assert.Throws<CryptographicException>(
+                () => reference.Verify(factory, new CallContext())));
+            Assert.Equal(1, factory.CreateHashAlgorithmCount);
+            Assert.Equal(0, factory.ReleaseHashAlgorithmCount);
+        }
+
+        [Fact]
+        public void ReferenceVerify_HashingThrowsAndReleasesHash()
+        {
+            // Arrange
+            Reference reference = Default.Reference;
+            CryptographicException exception = new CryptographicException("hash-failed");
+            ThrowingHashAlgorithm hashAlgorithm = new ThrowingHashAlgorithm(exception);
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { HashAlgorithmOverride = hashAlgorithm };
+
+            // Act / Assert
+            Assert.Same(exception, Assert.Throws<CryptographicException>(
+                () => reference.Verify(factory, new CallContext())));
+            Assert.Equal(1, factory.CreateHashAlgorithmCount);
+            Assert.Equal(1, factory.ReleaseHashAlgorithmCount);
+            Assert.True(hashAlgorithm.DisposeCalled);
+        }
+
+        [Fact]
+        public void SignedInfoVerify_NullKey_ReturnsNullArgument()
+        {
+            // Arrange
+            SignedInfo signedInfo = new SignedInfo();
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signedInfo.Verify(null, CryptoProviderFactory.Default, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(ValidationFailureType.NullArgument, result.Error.FailureType);
+            Assert.Contains("key", result.Error.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void SignedInfoVerify_NullFactory_ReturnsNullArgument()
+        {
+            // Arrange
+            SignedInfo signedInfo = new SignedInfo();
+            SecurityKey key = Default.AsymmetricSigningKey;
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signedInfo.Verify(key, null, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(ValidationFailureType.NullArgument, result.Error.FailureType);
+            Assert.Contains("cryptoProviderFactory", result.Error.Message, StringComparison.Ordinal);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        public void SignedInfoVerify_ValidReferences_ReturnsExactKey(int referenceCount)
+        {
+            // Arrange
+            SecurityKey key = Default.AsymmetricSigningKey;
+            SignedInfo signedInfo = new SignedInfo();
+            for (int i = 0; i < referenceCount; i++)
+                signedInfo.References.Add(Default.Reference);
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signedInfo.Verify(key, CryptoProviderFactory.Default, new CallContext());
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Same(key, result.Result);
+            Assert.Null(result.Error);
+        }
+
+        [Fact]
+        public void SignedInfoVerify_FirstReferenceFails_DoesNotProcessLaterReferences()
+        {
+            // Arrange
+            SecurityKey key = Default.AsymmetricSigningKey;
+            SignedInfo signedInfo = new SignedInfo();
+            Reference failing = Default.Reference;
+            failing.DigestValue = Convert.ToBase64String(new byte[] { 9, 9, 9, 9 });
+            signedInfo.References.Add(failing);
+            signedInfo.References.Add(Default.ReferenceWithNullTokenStream);
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signedInfo.Verify(key, CryptoProviderFactory.Default, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(SignatureValidationFailure.ReferenceDigestValidationFailed, result.Error.FailureType);
+            Assert.True(result.Error.StackFrames.Count >= 2);
+        }
+
+        [Fact]
+        public void SignedInfoVerify_MiddleReferenceFails_DoesNotProcessLaterReferences()
+        {
+            // Arrange
+            SecurityKey key = Default.AsymmetricSigningKey;
+            SignedInfo signedInfo = new SignedInfo();
+            signedInfo.References.Add(Default.Reference);
+            Reference failing = Default.Reference;
+            failing.DigestValue = Convert.ToBase64String(new byte[] { 9, 9, 9, 9 });
+            signedInfo.References.Add(failing);
+            signedInfo.References.Add(Default.ReferenceWithNullTokenStream);
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signedInfo.Verify(key, CryptoProviderFactory.Default, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(SignatureValidationFailure.ReferenceDigestValidationFailed, result.Error.FailureType);
+            Assert.True(result.Error.StackFrames.Count >= 2);
+        }
+
+        [Fact]
+        public void SignatureVerify_NullKey_ReturnsNullArgument()
+        {
+            // Arrange
+            Signature signature = new Signature();
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(null, CryptoProviderFactory.Default, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(ValidationFailureType.NullArgument, result.Error.FailureType);
+            Assert.Contains("key", result.Error.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void SignatureVerify_NullFactory_ReturnsNullArgument()
+        {
+            // Arrange
+            Signature signature = new Signature();
+            SecurityKey key = Default.AsymmetricSigningKey;
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(key, null, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(ValidationFailureType.NullArgument, result.Error.FailureType);
+            Assert.Contains("cryptoProviderFactory", result.Error.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void SignatureVerify_NullSignedInfo_ReturnsSignedInfoNull()
+        {
+            // Arrange
+            Signature signature = new Signature();
+            SecurityKey key = Default.AsymmetricSigningKey;
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(key, CryptoProviderFactory.Default, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.IsType<SignatureValidationError>(result.Error);
+            Assert.Equal(ValidationFailureType.SignedInfoNull, result.Error.FailureType);
+            Assert.Contains("IDX30212", result.Error.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void SignatureVerify_FactoryRejectsAlgorithm_DoesNotCreateProvider()
+        {
+            // Arrange
+            SecurityKey key = Default.AsymmetricSigningKey;
+            Signature signature = new Signature(new SignedInfo { SignatureMethod = SecurityAlgorithms.RsaSha256Signature });
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { IsAlgorithmSupported = false };
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(key, factory, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(ValidationFailureType.CryptoProviderFactoryDoesNotSupportAlgorithm, result.Error.FailureType);
+            Assert.Contains("IDX30207", result.Error.Message, StringComparison.Ordinal);
+            Assert.IsType<SecurityTokenValidationException>(result.Error.GetException());
+            Assert.IsNotType<SecurityTokenInvalidSignatureException>(result.Error.GetException());
+            Assert.Equal(0, factory.CreateForVerifyingCount);
+        }
+
+        [Fact]
+        public void SignatureVerify_FactoryReturnsNullProvider()
+        {
+            // Arrange
+            SecurityKey key = Default.AsymmetricSigningKey;
+            Signature signature = new Signature(new SignedInfo { SignatureMethod = SecurityAlgorithms.RsaSha256Signature })
+            {
+                SignatureValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
+            };
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { ReturnNullSignatureProvider = true };
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(key, factory, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(ValidationFailureType.CryptoProviderReturnedNull, result.Error.FailureType);
+            Assert.Contains("IDX30203", result.Error.Message, StringComparison.Ordinal);
+            Assert.Equal(1, factory.CreateForVerifyingCount);
+            Assert.Equal(0, factory.ReleaseSignatureProviderCount);
+        }
+
+        [Fact]
+        public void SignatureVerify_InvalidSignatureBytes_DoesNotValidateReferences()
+        {
+            // Arrange
+            (Signature signature, SecurityKey key) = CreateValidSignedSignature();
+            signature.SignatureValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 });
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory();
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(key, factory, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(SignatureValidationFailure.ValidationFailed, result.Error.FailureType);
+            Assert.Contains("IDX10520", result.Error.Message, StringComparison.Ordinal);
+            Assert.Contains("KeyId", result.Error.Message, StringComparison.Ordinal);
+            Assert.IsType<SecurityTokenInvalidSignatureException>(result.Error.GetException());
+            Assert.Equal(0, factory.CreateHashAlgorithmCount);
+            Assert.Equal(1, factory.ReleaseSignatureProviderCount);
+        }
+
+        [Fact]
+        public void SignatureVerify_ValidSignatureTamperedPayload_ReturnsDigestFailure()
+        {
+            // Arrange
+            SigningCredentials credentials = Default.AsymmetricSigningCredentials;
+            string xml = CreateSignedXml(credentials, "issuer", Guid.NewGuid().ToString());
+            xml = xml.Replace("entityID=\"issuer\"", "entityID=\"tampered\"");
+            Signature signature = ReadSignature(xml);
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory();
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(credentials.Key, factory, new CallContext());
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal(SignatureValidationFailure.ReferenceDigestValidationFailed, result.Error.FailureType);
+            Assert.True(result.Error.StackFrames.Count >= 2);
+            Assert.Equal(1, factory.ReleaseSignatureProviderCount);
+        }
+
+        [Fact]
+        public void SignatureVerify_ValidSignatureAndReferences_ReturnsExactKey()
+        {
+            // Arrange
+            (Signature signature, SecurityKey key) = CreateValidSignedSignature();
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(key, CryptoProviderFactory.Default, new CallContext());
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Same(key, result.Result);
+            Assert.Null(result.Error);
+        }
+
+        [Fact]
+        public void SignatureVerify_ReleasesProviderOnSuccess()
+        {
+            // Arrange
+            (Signature signature, SecurityKey key) = CreateValidSignedSignature();
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory();
+
+            // Act
+            ValidationResult<SecurityKey, ValidationError> result =
+                signature.Verify(key, factory, new CallContext());
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Equal(1, factory.CreateForVerifyingCount);
+            Assert.Equal(1, factory.ReleaseSignatureProviderCount);
+        }
+
+        [Fact]
+        public void SignatureVerify_ReleasesProviderWhenVerifyThrows()
+        {
+            // Arrange
+            SecurityKey key = Default.AsymmetricSigningKey;
+            CustomSignatureProvider provider = new CustomSignatureProvider(key, SecurityAlgorithms.RsaSha256Signature)
+            {
+                ThrowOnVerify = new CryptographicException("verify-failed")
+            };
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { SignatureProviderOverride = provider };
+            Signature signature = new Signature(new SignedInfo { SignatureMethod = SecurityAlgorithms.RsaSha256Signature })
+            {
+                SignatureValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
+            };
+
+            // Act / Assert
+            Assert.Throws<CryptographicException>(() => signature.Verify(key, factory, new CallContext()));
+            Assert.Equal(1, factory.ReleaseSignatureProviderCount);
+        }
+
+        [Fact]
+        public void SignatureVerify_DigestComputationFails_ThrowsAndReleasesProvider()
+        {
+            // Arrange
+            SecurityKey key = Default.AsymmetricSigningKey;
+            CustomSignatureProvider provider = new CustomSignatureProvider(key, SecurityAlgorithms.RsaSha256Signature)
+            {
+                VerifyResult = true
+            };
+            TrackingCryptoProviderFactory factory = new TrackingCryptoProviderFactory { SignatureProviderOverride = provider };
+            SignedInfo signedInfo = new SignedInfo { SignatureMethod = SecurityAlgorithms.RsaSha256Signature };
+            signedInfo.References.Add(Default.ReferenceWithNullTokenStream);
+            Signature signature = new Signature(signedInfo)
+            {
+                SignatureValue = Convert.ToBase64String(new byte[] { 1, 2, 3, 4 })
+            };
+
+            // Act / Assert
+            XmlValidationException exception = Assert.Throws<XmlValidationException>(
+                () => signature.Verify(key, factory, new CallContext()));
+            Assert.Contains("IDX30202", exception.Message, StringComparison.Ordinal);
+            Assert.Equal(1, factory.ReleaseSignatureProviderCount);
+        }
+
+        private static (Signature Signature, SecurityKey Key) CreateValidSignedSignature()
+        {
+            SigningCredentials credentials = Default.AsymmetricSigningCredentials;
+            string xml = CreateSignedXml(credentials, "issuer", Guid.NewGuid().ToString());
+            return (ReadSignature(xml), credentials.Key);
+        }
+
+        private static string CreateSignedXml(SigningCredentials credentials, string entityId, string referenceId)
+        {
+            using (MemoryStream buffer = new MemoryStream())
+            {
+                EnvelopedSignatureWriter writer = new EnvelopedSignatureWriter(XmlWriter.Create(buffer), credentials, referenceId);
+                writer.WriteStartElement("EntityDescriptor", "urn:oasis:names:tc:SAML:2.0:metadata");
+                writer.WriteAttributeString("entityID", entityId);
+                writer.WriteEndElement();
+                writer.Flush();
+                return Encoding.UTF8.GetString(buffer.ToArray());
+            }
+        }
+
+        private static Signature ReadSignature(string xml)
+        {
+            EnvelopedSignatureReader reader = new EnvelopedSignatureReader(XmlUtilities.CreateDictionaryReader(xml));
+            while (reader.Read()) { }
+            return reader.Signature;
+        }
+
+        private class TrackingCryptoProviderFactory : CryptoProviderFactory
+        {
+            public int CreateForVerifyingCount { get; private set; }
+            public int ReleaseSignatureProviderCount { get; private set; }
+            public int CreateHashAlgorithmCount { get; private set; }
+            public int ReleaseHashAlgorithmCount { get; private set; }
+            public bool IsAlgorithmSupported { get; set; } = true;
+            public bool ReturnNullSignatureProvider { get; set; }
+            public SignatureProvider SignatureProviderOverride { get; set; }
+            public bool ReturnNullHashAlgorithm { get; set; }
+            public HashAlgorithm HashAlgorithmOverride { get; set; }
+            public Exception HashCreationException { get; set; }
+
+            public override bool IsSupportedAlgorithm(string algorithm, SecurityKey key) => IsAlgorithmSupported;
+
+            public override bool IsSupportedAlgorithm(string algorithm) => true;
+
+            public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
+            {
+                CreateForVerifyingCount++;
+                if (ReturnNullSignatureProvider)
+                    return null;
+                if (SignatureProviderOverride != null)
+                    return SignatureProviderOverride;
+                return base.CreateForVerifying(key, algorithm);
+            }
+
+            public override void ReleaseSignatureProvider(SignatureProvider signatureProvider)
+            {
+                ReleaseSignatureProviderCount++;
+                if (signatureProvider != null && SignatureProviderOverride == null)
+                    base.ReleaseSignatureProvider(signatureProvider);
+            }
+
+            public override HashAlgorithm CreateHashAlgorithm(string algorithm)
+            {
+                CreateHashAlgorithmCount++;
+                if (HashCreationException != null)
+                    throw HashCreationException;
+                if (ReturnNullHashAlgorithm)
+                    return null;
+                if (HashAlgorithmOverride != null)
+                    return HashAlgorithmOverride;
+                return base.CreateHashAlgorithm(algorithm);
+            }
+
+            public override void ReleaseHashAlgorithm(HashAlgorithm hashAlgorithm)
+            {
+                ReleaseHashAlgorithmCount++;
+                if (hashAlgorithm != null)
+                    base.ReleaseHashAlgorithm(hashAlgorithm);
+            }
+        }
+
+        private sealed class ThrowingHashAlgorithm : SHA256
+        {
+            private readonly Exception _exception;
+
+            public ThrowingHashAlgorithm(Exception exception)
+            {
+                _exception = exception;
+            }
+
+            public bool DisposeCalled { get; private set; }
+
+            public override void Initialize() { }
+
+            protected override void HashCore(byte[] array, int ibStart, int cbSize) => throw _exception;
+
+            protected override byte[] HashFinal() => throw _exception;
+
+            protected override void Dispose(bool disposing)
+            {
+                DisposeCalled = true;
+                base.Dispose(disposing);
+            }
+        }
+    }
+}

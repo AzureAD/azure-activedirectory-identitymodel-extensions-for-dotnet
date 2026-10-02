@@ -46,6 +46,11 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
 
+  <!-- Benchmarks intentionally measure the obsolete JwtSecurityTokenHandler against JsonWebTokenHandler. -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
