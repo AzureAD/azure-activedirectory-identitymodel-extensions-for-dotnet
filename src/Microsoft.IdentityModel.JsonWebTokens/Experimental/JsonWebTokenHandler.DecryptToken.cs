@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <returns>An <see cref="ValidationResult{TResult, TError}"/> with ValidationResult.Result containing the clear text or a <see cref="ValidationError"/>.</returns>
-        internal ValidationResult<string, ValidationError> DecryptToken(
+        public ValidationResult<string, ValidationError> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,

@@ -20,7 +20,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return CreateClaimsIdentity((SamlSecurityToken)securityToken, validationParameters, issuer);
         }
 
-        internal ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, ValidationParameters validationParameters, string issuer)
+        /// <summary>
+        /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <param name="samlToken">The <see cref="SamlSecurityToken"/> to use as a <see cref="Claim"/> source.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="issuer">The value to set <see cref="Claim.Issuer"/>.</param>
+        /// <returns>A <see cref="ClaimsIdentity"/> with claims from the saml statements.</returns>
+        public ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, ValidationParameters validationParameters, string issuer)
         {
             if (samlToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlToken));
@@ -48,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="IEnumerable{ClaimsIdentity}"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
         /// <exception cref="SamlSecurityTokenException">if the statement is not a <see cref="SamlSubjectStatement"/>.</exception>
-        internal virtual IEnumerable<ClaimsIdentity> ProcessStatements(SamlSecurityToken samlToken, string issuer, ValidationParameters validationParameters)
+        protected virtual IEnumerable<ClaimsIdentity> ProcessStatements(SamlSecurityToken samlToken, string issuer, ValidationParameters validationParameters)
         {
             if (samlToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlToken));

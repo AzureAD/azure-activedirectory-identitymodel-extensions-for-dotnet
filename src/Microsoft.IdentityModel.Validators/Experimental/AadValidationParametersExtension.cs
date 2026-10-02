@@ -13,13 +13,13 @@ namespace Microsoft.IdentityModel.Validators
     /// <summary>
     /// A generic class for additional validation checks on <see cref="SecurityToken"/> issued by the Microsoft identity platform (AAD).
     /// </summary>
-    internal static class AadValidationParametersExtension
+    public static class AadValidationParametersExtension
     {
         /// <summary>
         /// Enables validation of the cloud instance of the Microsoft Entra ID token signing keys.
         /// </summary>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> that are used to validate the token.</param>
-        internal static void EnableEntraIdSigningKeyCloudInstanceValidation(this ValidationParameters validationParameters)
+        public static void EnableEntraIdSigningKeyCloudInstanceValidation(this ValidationParameters validationParameters)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Validators
         /// Enables the validation of the issuer of the signing keys used by the Microsoft identity platform (AAD) against the issuer of the token.
         /// </summary>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> that are used to validate the token.</param>
-        internal static void EnableAadSigningKeyIssuerValidation(this ValidationParameters validationParameters)
+        public static void EnableAadSigningKeyIssuerValidation(this ValidationParameters validationParameters)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
