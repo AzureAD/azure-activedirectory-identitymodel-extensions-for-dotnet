@@ -1319,6 +1319,51 @@ namespace Microsoft.IdentityModel.Dpop.Tests
             }
         }
 
+        private sealed class ThrowingJtiReplayCache : IJtiReplayCache
+        {
+            public Task<bool> TryAddAsync(string jti, DateTimeOffset expiration, CancellationToken cancellationToken = default)
+                => throw new InvalidOperationException("replay cache failed");
+        }
+
+        private sealed class CancelingJtiReplayCache : IJtiReplayCache
+        {
+            public Task<bool> TryAddAsync(string jti, DateTimeOffset expiration, CancellationToken cancellationToken = default)
+                => throw new OperationCanceledException();
+        }
+
+        private sealed class ThrowingReleaseCryptoProviderFactory : CryptoProviderFactory
+        {
+            private readonly Exception _releaseException;
+
+            public ThrowingReleaseCryptoProviderFactory(Exception releaseException)
+            {
+                _releaseException = releaseException;
+                CacheSignatureProviders = false;
+            }
+
+            public override void ReleaseSignatureProvider(SignatureProvider signatureProvider)
+            {
+                throw _releaseException;
+            }
+        }
+
+        private static async Task WithCryptoProviderFactory(CryptoProviderFactory factory, Func<Task> test)
+        {
+            var original = CryptoProviderFactory.Default;
+            CryptoProviderFactory.Default = factory;
+            try
+            {
+                await test();
+            }
+            finally
+            {
+                CryptoProviderFactory.Default = original;
+            }
+        }
+
+        private static string CreateFivePartAllowedJwsProof(string proof)
+            => proof + "." + Base64UrlEncoder.Encode(new byte[] { 1 }) + "." + Base64UrlEncoder.Encode(new byte[] { 2 });
+
         #endregion
 
         #region FailureType Coverage
@@ -1719,5 +1764,261 @@ namespace Microsoft.IdentityModel.Dpop.Tests
         }
 
         #endregion
+
+        #region Public Parity And Order
+
+        [Fact]
+        public async Task ValidateAsync_EmptyProofAndRelativeUri_ReturnsProofMissing()
+        {
+            var result = await _validator.ValidateAsync(
+                "  ", "GET", new Uri("/relative", UriKind.Relative), "at", "jkt", DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Same(DpopValidationFailureType.ProofMissing, result.Error.FailureType);
+            Assert.Equal(DpopErrorCodes.InvalidToken, result.ErrorCode);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_EmptyAccessTokenAndRelativeUri_ReturnsAccessTokenMissing()
+        {
+            var (proof, _, cnfJkt) = CreateProofAndAccessToken();
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("/relative", UriKind.Relative), " ", cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Same(DpopValidationFailureType.AccessTokenMissing, result.Error.FailureType);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_EmptyCnfJktAndRelativeUri_ReturnsCnfJktMissing()
+        {
+            var (proof, accessToken, _) = CreateProofAndAccessToken();
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("/relative", UriKind.Relative), accessToken, " ", DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Same(DpopValidationFailureType.CnfJktMissing, result.Error.FailureType);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_NeverEmitsInvalidRequest()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+
+            var results = new[]
+            {
+                await _validator.ValidateAsync("", "GET", new Uri("https://example.com"), accessToken, cnfJkt, DefaultOptions()),
+                await _validator.ValidateAsync(proof, "GET", new Uri("https://example.com"), " ", cnfJkt, DefaultOptions()),
+                await _validator.ValidateAsync(proof, "GET", new Uri("https://example.com"), accessToken, " ", DefaultOptions()),
+                await _validator.ValidateAsync("not-a-jwt", "GET", new Uri("https://example.com"), accessToken, cnfJkt, DefaultOptions()),
+            };
+
+            foreach (var result in results)
+            {
+                Assert.False(result.IsValid);
+                Assert.NotEqual(DpopErrorCodes.InvalidRequest, result.ErrorCode);
+            }
+        }
+
+        [Fact]
+        public async Task ValidateAsync_PreCanceled_Throws()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                _validator.ValidateAsync(
+                    proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions(), cts.Token));
+        }
+
+        [Fact]
+        public async Task ValidateAsync_ReplayCacheCanceled_Propagates()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken(nonce: null);
+            var options = DefaultOptions();
+            options.ExpectedNonce = null;
+            options.JtiReplayCache = new CancelingJtiReplayCache();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                _validator.ValidateAsync(
+                    proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options));
+        }
+
+        [Fact]
+        public async Task ValidateAsync_ThrowingReplayCache_ReturnsUnexpectedError()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken(nonce: null);
+            var options = DefaultOptions();
+            options.ExpectedNonce = null;
+            options.JtiReplayCache = new ThrowingJtiReplayCache();
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.False(result.IsValid);
+            Assert.Same(DpopValidationFailureType.UnexpectedError, result.Error.FailureType);
+            Assert.IsType<InvalidOperationException>(result.Error.Exception);
+            Assert.Equal(DpopErrorCodes.InvalidToken, result.ErrorCode);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_MalformedSignature_ReturnsSignatureInvalid()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var parts = proof.Split('.');
+            var tampered = parts[0] + "." + parts[1] + ".!!!not-base64!!!";
+
+            var result = await _validator.ValidateAsync(
+                tampered, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Same(DpopValidationFailureType.SignatureInvalid, result.Error.FailureType);
+            Assert.Equal("DPoP proof signature validation failed.", result.Error.Message);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_JweWithKeyManagementAlg_FailsAlgorithmCheck()
+        {
+            var rsa = CreateTestRsa();
+            var (accessToken, cnfJkt) = CreateSimpleAccessToken(rsa);
+            var encryptingCredentials = new EncryptingCredentials(
+                new RsaSecurityKey(rsa),
+                SecurityAlgorithms.RsaOAEP,
+                SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            var handler = new JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false };
+            var jwe = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                EncryptingCredentials = encryptingCredentials,
+                Claims = new Dictionary<string, object>
+                {
+                    { "htm", "GET" },
+                    { "htu", "https://resource.example.org/api" },
+                    { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
+                    { "jti", Guid.NewGuid().ToString() },
+                },
+                AdditionalHeaderClaims = new Dictionary<string, object>
+                {
+                    { "typ", "dpop+jwt" },
+                },
+            });
+
+            Assert.Equal(5, jwe.Split('.').Length);
+
+            var result = await _validator.ValidateAsync(
+                jwe, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Same(DpopValidationFailureType.AlgorithmDisallowed, result.Error.FailureType);
+            Assert.DoesNotContain("IDX", result.Error.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public async Task ValidateAsync_FivePartTokenWithAllowedJwsAlg_ReturnsSignatureInvalid()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var fivePart = CreateFivePartAllowedJwsProof(proof);
+            Assert.Equal(5, fivePart.Split('.').Length);
+
+            var parsed = new JsonWebToken(fivePart);
+            Assert.True(parsed.IsEncrypted);
+            Assert.True(string.IsNullOrEmpty(parsed.EncodedSignature));
+
+            var result = await _validator.ValidateAsync(
+                fivePart, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
+
+            Assert.False(result.IsValid);
+            Assert.Same(DpopValidationFailureType.SignatureInvalid, result.Error.FailureType);
+            Assert.Equal("DPoP proof signature validation failed.", result.Error.Message);
+            Assert.DoesNotContain("IDX", result.Error.Message ?? string.Empty, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public async Task Validate_Jws_ReleaseThrowsInvalidOperation_ReturnsUnexpectedError()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var factory = new ThrowingReleaseCryptoProviderFactory(new InvalidOperationException("release failed"));
+
+            await WithCryptoProviderFactory(factory, async () =>
+            {
+                var publicResult = await _validator.ValidateAsync(
+                    proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
+
+                Assert.False(publicResult.IsValid);
+                Assert.Same(DpopValidationFailureType.UnexpectedError, publicResult.Error.FailureType);
+                Assert.Equal("DPoP proof validation failed.", publicResult.Error.Message);
+                Assert.IsType<InvalidOperationException>(publicResult.Error.Exception);
+                Assert.Equal(DpopErrorCodes.InvalidToken, publicResult.ErrorCode);
+            });
+        }
+
+        [Fact]
+        public async Task Validate_Jws_ReleaseThrowsOperationCanceled_Propagates()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var factory = new ThrowingReleaseCryptoProviderFactory(new OperationCanceledException());
+
+            await WithCryptoProviderFactory(factory, async () =>
+            {
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                    _validator.ValidateAsync(
+                        proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions()));
+            });
+        }
+
+        [Fact]
+        public async Task Validate_FivePartJwe_ReleaseThrowsInvalidOperation_ReturnsUnexpectedError()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var fivePart = CreateFivePartAllowedJwsProof(proof);
+            var factory = new ThrowingReleaseCryptoProviderFactory(new InvalidOperationException("release failed"));
+
+            await WithCryptoProviderFactory(factory, async () =>
+            {
+                var publicResult = await _validator.ValidateAsync(
+                    fivePart, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions());
+
+                Assert.False(publicResult.IsValid);
+                Assert.Same(DpopValidationFailureType.UnexpectedError, publicResult.Error.FailureType);
+                Assert.Equal("DPoP proof validation failed.", publicResult.Error.Message);
+                Assert.IsType<InvalidOperationException>(publicResult.Error.Exception);
+                Assert.Equal(DpopErrorCodes.InvalidToken, publicResult.ErrorCode);
+            });
+        }
+
+        [Fact]
+        public async Task Validate_FivePartJwe_ReleaseThrowsOperationCanceled_Propagates()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken();
+            var fivePart = CreateFivePartAllowedJwsProof(proof);
+            var factory = new ThrowingReleaseCryptoProviderFactory(new OperationCanceledException());
+
+            await WithCryptoProviderFactory(factory, async () =>
+            {
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                    _validator.ValidateAsync(
+                        fivePart, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, DefaultOptions()));
+            });
+        }
+
+        [Fact]
+        public async Task ValidateAsync_ValidProofWithoutNonce_SuccessNonceIsNull()
+        {
+            var (proof, accessToken, cnfJkt) = CreateProofAndAccessToken(nonce: null);
+            var options = DefaultOptions();
+            options.ExpectedNonce = null;
+            options.JtiReplayCache = new TestJtiReplayCache(replayDetected: false);
+
+            var result = await _validator.ValidateAsync(
+                proof, "GET", new Uri("https://resource.example.org/api"), accessToken, cnfJkt, options);
+
+            Assert.True(result.IsValid);
+            Assert.Null(result.Nonce);
+            Assert.Null(result.Error);
+        }
+
+        #endregion
+
     }
 }
