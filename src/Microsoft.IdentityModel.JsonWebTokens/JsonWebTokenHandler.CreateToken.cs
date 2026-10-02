@@ -266,13 +266,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 finally
                 {
                     if (encodedChars is not null)
-                        ArrayPool<char>.Shared.Return(encodedChars);
+                        ArrayPool<char>.Shared.Return(encodedChars, clearArray: true);
 #if NET6_0_OR_GREATER
                     if (signatureBytes is not null)
-                        ArrayPool<byte>.Shared.Return(signatureBytes);
+                        ArrayPool<byte>.Shared.Return(signatureBytes, clearArray: true);
 #endif
                     if (asciiBytes is not null)
-                        ArrayPool<byte>.Shared.Return(asciiBytes);
+                        ArrayPool<byte>.Shared.Return(asciiBytes, clearArray: true);
 
                     writer?.Dispose();
                 }
@@ -608,16 +608,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 finally
                 {
                     if (encodedChars is not null)
-                        ArrayPool<char>.Shared.Return(encodedChars);
+                        ArrayPool<char>.Shared.Return(encodedChars, clearArray: true);
 #if NET6_0_OR_GREATER
                     if (signatureBytes is not null)
-                        ArrayPool<byte>.Shared.Return(signatureBytes);
+                        ArrayPool<byte>.Shared.Return(signatureBytes, clearArray: true);
 #endif
                     if (asciiBytes is not null)
-                        ArrayPool<byte>.Shared.Return(asciiBytes);
+                        ArrayPool<byte>.Shared.Return(asciiBytes, clearArray: true);
 
                     if (payloadBytes is not null)
-                        ArrayPool<byte>.Shared.Return(payloadBytes);
+                        ArrayPool<byte>.Shared.Return(payloadBytes, clearArray: true);
 
                     writer?.Dispose();
                 }
