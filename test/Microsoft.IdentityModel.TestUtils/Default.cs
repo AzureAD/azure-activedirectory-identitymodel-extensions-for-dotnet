@@ -333,7 +333,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string Jwt(SecurityTokenDescriptor tokenDescriptor)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         public static JsonWebTokens.JsonWebToken JsonWebToken()
@@ -1459,7 +1461,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string UnsignedJwt
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             get => (new JwtSecurityTokenHandler()).CreateEncodedJwt(Issuer, Audience, ClaimsIdentity, null, null, null, null);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         public static TokenValidationParameters JWECompressionTokenValidationParameters
