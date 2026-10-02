@@ -139,6 +139,39 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        TestId = nameof(Default.AsymmetricJws) + "_IssuerSigningKeyResolverUsingConfigurationTakesPriorityOverConfiguration",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKeyResolverUsingConfiguration = (token, securityToken, kid, validationParameters, configuration) => { return new List<SecurityKey>() { KeyingMaterial.X509SecurityKey2 }; }
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503: "),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_IssuerSigningKeyResolverUsingConfigurationTakesPriorityOverIssuerSigningKeyResolver",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKeyResolverUsingConfiguration = (token, securityToken, kid, validationParameters, configuration) => { return new List<SecurityKey>() { KeyingMaterial.X509SecurityKey2 }; },
+                            IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) => { return new List<SecurityKey>() { KeyingMaterial.DefaultX509Key_2048 }; }
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503: "),
+                    },
+                    new JwtTheoryData
+                    {
                         TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigValid_IssuerSigningKeyValidatorReturnsFalse",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
