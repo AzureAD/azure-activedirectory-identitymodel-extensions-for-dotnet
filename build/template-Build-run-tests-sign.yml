@@ -148,6 +148,9 @@ steps:
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
   displayName: 'Post SDL Analysis'
+  inputs:
+    # No SDL FxCop scan runs here; the default loads a missing FxCop.json from the task.
+    FxCop: false
   continueOnError: true
 
 #Sign Wilson 7x task group
