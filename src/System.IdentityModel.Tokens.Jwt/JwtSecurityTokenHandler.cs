@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -23,8 +25,22 @@ namespace System.IdentityModel.Tokens.Jwt
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See: https://datatracker.ietf.org/doc/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515
     /// </summary>
+    /// <remarks>
+    /// This type is obsolete. Use <see cref="JsonWebTokenHandler"/> from the
+    /// <c>Microsoft.IdentityModel.JsonWebTokens</c> package instead. <see cref="JsonWebTokenHandler"/> is faster,
+    /// allocates less, and is the handler that receives new functionality.
+    /// See the migration guide at https://aka.ms/IdentityModel/JwtSecurityTokenHandler-Migration for the behavioral
+    /// differences you need to account for (inbound/outbound claim type mapping defaults, actor claim format,
+    /// and the replacement of the <c>Validate*</c> overridable methods with
+    /// <see cref="TokenValidationParameters"/> delegates).
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete(ObsoleteMessage, false)]
     public class JwtSecurityTokenHandler : SecurityTokenHandler
     {
+        private const string ObsoleteMessage = "'JwtSecurityTokenHandler' is deprecated and will be removed in a future release. " +
+            "Use 'Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler' instead. " +
+            "For more information, see https://aka.ms/IdentityModel/JwtSecurityTokenHandler-Migration";
 
         private delegate bool CertMatcher(X509Certificate2 cert);
         private ISet<string> _inboundClaimFilter;
@@ -1381,7 +1397,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 keys = validationParameters.IssuerSigningKeyResolverUsingConfiguration(token, jwtToken, jwtToken.Header.Kid, validationParameters, configuration);
             }
-            if (validationParameters.IssuerSigningKeyResolver != null)
+            else if (validationParameters.IssuerSigningKeyResolver != null)
             {
                 keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Header.Kid, validationParameters);
             }
@@ -1888,9 +1904,15 @@ namespace System.IdentityModel.Tokens.Jwt
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
-            // keep track of exceptions thrown, keys that were tried
-            var exceptionStrings = new StringBuilder();
-            var keysAttempted = new StringBuilder();
+
+            // Pre-generate a placeholder key used as a fallback when an unwrap call
+            // does not yield a usable key, so that downstream processing follows a
+            // single uniform path regardless of which key was tried.
+            int expectedCekSizeInBytes = GetExpectedCekSizeInBytes(jwtToken.Header.Enc);
+            byte[] fallbackCek = new byte[expectedCekSizeInBytes];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+                rng.GetBytes(fallbackCek);
+
             foreach (var key in keys)
             {
                 try
@@ -1940,15 +1962,41 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 catch (Exception ex)
                 {
-                    exceptionStrings.AppendLine(ex.ToString());
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(ex.ToString());
+
+                    // Use the placeholder key so the downstream code path is the
+                    // same regardless of whether unwrap succeeded.
+                    unwrappedKeys.Add(new SymmetricSecurityKey(fallbackCek));
                 }
-                keysAttempted.AppendLine(key.KeyId);
             }
 
-            if (unwrappedKeys.Count > 0 || exceptionStrings.Length == 0)
-                return unwrappedKeys;
-            else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, LogHelper.MarkAsNonPII(keysAttempted.ToString()), exceptionStrings, jwtToken)));
+            return unwrappedKeys;
+        }
+
+        /// <summary>
+        /// Returns the expected Content Encryption Key (CEK) size in bytes for
+        /// the given content encryption algorithm (JWE "enc" header value).
+        /// </summary>
+        private static int GetExpectedCekSizeInBytes(string encAlgorithm)
+        {
+            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 32;
+            if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 48;
+            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 64;
+
+            if (SecurityAlgorithms.Aes128Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 16;
+            if (SecurityAlgorithms.Aes192Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 24;
+            if (SecurityAlgorithms.Aes256Gcm.Equals(encAlgorithm, StringComparison.Ordinal))
+                return 32;
+
+            // Default for unknown algorithms — use maximum known size (64) so the
+            // fallback key is never too small for any known algorithm.
+            return 64;
         }
 
         private static byte[] GetSymmetricSecurityKey(SecurityKey key)

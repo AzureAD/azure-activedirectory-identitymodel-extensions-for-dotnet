@@ -20,14 +20,17 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
         /// <param name="callContext"> contextual information for diagnostics.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
-        internal ValidationError? Verify(
+        /// <returns>
+        /// A <see cref="ValidationResult{TResult, TError}"/> containing this <see cref="Reference"/> if the digest is valid;
+        /// otherwise, a <see cref="ValidationError"/>.
+        /// </returns>
+        internal ValidationResult<Reference, ValidationError> Verify(
             CryptoProviderFactory cryptoProviderFactory,
 #pragma warning disable CA1801 // Review unused parameters
             CallContext callContext)
 #pragma warning restore CA1801
         {
-            if (cryptoProviderFactory == null)
+            if (cryptoProviderFactory is null)
                 return ValidationError.NullParameter(
                     nameof(cryptoProviderFactory),
                     ValidationError.GetCurrentStackFrame());
@@ -40,7 +43,7 @@ namespace Microsoft.IdentityModel.Xml
                     SignatureValidationFailure.ReferenceDigestValidationFailed,
                     ValidationError.GetCurrentStackFrame());
 
-            return null;
+            return this;
         }
 #nullable restore
     }

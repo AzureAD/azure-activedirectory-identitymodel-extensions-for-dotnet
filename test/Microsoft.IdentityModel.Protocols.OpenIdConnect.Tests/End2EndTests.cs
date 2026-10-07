@@ -26,7 +26,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.AdditionalValidation?.Invoke(configuration);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
                 JwtSecurityToken jwtToken =
                     tokenHandler.CreateJwtSecurityToken(
                         configuration.Issuer,
