@@ -35,7 +35,7 @@
 
   <Target Name="NETStandardCompatError_Microsoft_Extensions_Configuration_net8_0" />
   <Target Name="NETStandardCompatError_Microsoft_Extensions_Configuration_Abstractions_net8_0" />
-  <Target Name="NETStandardCompatError_Microsoft_Extensions_Configuration_Binder_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Configuration_Binder" />
   <Target Name="NETStandardCompatError_Microsoft_Extensions_DependencyInjection_net8_0" />
   <Target Name="NETStandardCompatError_Microsoft_Extensions_DependencyInjection_Abstractions_net8_0" />
   <Target Name="NETStandardCompatError_Microsoft_Extensions_Diagnostics_Abstractions_net8_0" />
