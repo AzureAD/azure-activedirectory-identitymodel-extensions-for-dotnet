@@ -1,4 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project ToolsVersion="Current">
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -38,4 +40,7 @@
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_TimeProvider_Testing_net8_0" />
 </Project>

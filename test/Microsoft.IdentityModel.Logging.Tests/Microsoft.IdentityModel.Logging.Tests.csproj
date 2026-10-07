@@ -1,4 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -33,4 +35,21 @@
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Configuration_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Configuration_Abstractions_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Configuration_Binder_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_DependencyInjection_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_DependencyInjection_Abstractions_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Diagnostics_Abstractions_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Logging_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Logging_Abstractions_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Logging_Configuration_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Options_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Options_ConfigurationExtensions_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_Primitives_net8_0" />
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_TimeProvider_Testing_net8_0" />
+  <Target Name="NETStandardCompatError_System_Diagnostics_DiagnosticSource_net8_0" />
 </Project>
