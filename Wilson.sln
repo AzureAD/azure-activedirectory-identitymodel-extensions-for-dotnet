@@ -46,6 +46,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Pro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols.WsFederation.Tests", "test\Microsoft.IdentityModel.Protocols.WsFederation.Tests\Microsoft.IdentityModel.Protocols.WsFederation.Tests.csproj", "{A769FC73-E1EE-48D7-9C37-AFB2926EAAEF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.Protocols.WsTrust", "src\Microsoft.IdentityModel.Protocols.WsTrust\Microsoft.IdentityModel.Protocols.WsTrust.csproj", "{C0B42CDB-245E-4223-AC94-F196B5F5530F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.Protocols.WsTrust.Tests", "test\Microsoft.IdentityModel.Protocols.WsTrust.Tests\Microsoft.IdentityModel.Protocols.WsTrust.Tests.csproj", "{A1C9B9D0-3085-4A6E-A789-E79F9C19CE00}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols.OpenIdConnect", "src\Microsoft.IdentityModel.Protocols.OpenIdConnect\Microsoft.IdentityModel.Protocols.OpenIdConnect.csproj", "{4B22E54A-CA65-4239-9B92-6F56B44BA079}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests", "test\Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests\Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests.csproj", "{69F54E38-ED15-4CCC-960D-02FEE7CB6A64}"
@@ -239,6 +243,14 @@ Global
 		{38185C55-DF58-4032-BB85-599BC1D92169}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38185C55-DF58-4032-BB85-599BC1D92169}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38185C55-DF58-4032-BB85-599BC1D92169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0B42CDB-245E-4223-AC94-F196B5F5530F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0B42CDB-245E-4223-AC94-F196B5F5530F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0B42CDB-245E-4223-AC94-F196B5F5530F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0B42CDB-245E-4223-AC94-F196B5F5530F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1C9B9D0-3085-4A6E-A789-E79F9C19CE00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1C9B9D0-3085-4A6E-A789-E79F9C19CE00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1C9B9D0-3085-4A6E-A789-E79F9C19CE00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1C9B9D0-3085-4A6E-A789-E79F9C19CE00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -276,6 +288,8 @@ Global
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0} = {2F79F3C4-F4E3-46DD-8B34-8EF403A6F7F5}
 		{38D1BFCB-F8A9-488C-B930-58CA61DC3F08} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{38185C55-DF58-4032-BB85-599BC1D92169} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{C0B42CDB-245E-4223-AC94-F196B5F5530F} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
+		{A1C9B9D0-3085-4A6E-A789-E79F9C19CE00} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F681326-7ED4-45F6-BD1D-1119EA388F42}

@@ -1,0 +1,257 @@
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15000 = "IDX15000: Unknown WS-Trust namespace. Expecting Element: '{0}' to be in one of three namespaces: '{1}', '{2}', '{3}'. Found namespace '{4}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15001 = "IDX15001: Unknown WS-Addressing namespace. Expecting Element: '{0}' to be in one of two namespaces: '{1}', '{2}'. Found namespace '{3}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15011 = "IDX15011: Unable to read XML. Expecting XmlReader to be at ns.element: '{0}.{1}', found: '{2}.{3}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15013 = "IDX15013: Unable to read XML. While reading element '{0}', Required attribute was not found : '{1}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15016 = "IDX15016: Exception thrown while reading '{0}'. See inner exception for more details." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15017 = "IDX15017: Exception thrown while reading '{0}'. Caught exception: '{1}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15022 = "IDX15022: Unable to read XML. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15024 = "IDX15024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15025 = "IDX15025: Unable to read XML. The element nesting depth exceeds the maximum supported depth of '{0}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15026 = "IDX15026: Unable to read XML. The '{0}' resource limit of '{1}' was exceeded." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15101 = "IDX15101: Unable to read OnBehalfOf Element. Unable to read token: '{0}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15407 = "IDX15407: Exception caught while writing: '{0}'. Caught exception: '{1}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15408 = "IDX15408: Unable to write '{0}'. The configured '{1}' does not contain serializable content." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15500 = "IDX15500: Lifetime constructed with expires <= created." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15850 = "IDX15850: '{0}' cannot be less than zero. Was: '{1}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15851 = "IDX15851: '{0}' must be a multiple of 8. Was: '{1}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15852 = "IDX15852: Key size requested: '{0}', must be larger than '{1}' and smaller than '{2}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15853 = "IDX15853: Invalid issuerEntropy size. issuerEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.LogMessages.IDX15854 = "IDX15854: Invalid requestorEntropy size. requestorEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'." -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.WsTrustSerializer.GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffffZ" -> string
+const Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxAttributeCount = 4096 -> int
+const Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxBufferedXmlSize = 4194304 -> int
+const Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxElementCount = 4096 -> int
+const Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.MaxXmlCharacters = 4194304 -> int
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Algorithm = "Algorithm" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Encoding = "Encoding" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Id = "Id" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.MimeType = "MimeType" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Recipient = "Recipient" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Type = "Type" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes.Uri = "URI" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.CarriedKeyName = "CarriedKeyName" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.CipherData = "CipherData" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.CipherReference = "CipherReference" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.CipherValue = "CipherValue" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.DataReference = "DataReference" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.EncryptedData = "EncryptedData" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.EncryptedKey = "EncryptedKey" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.EncryptionMethod = "EncryptionMethod" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.EncryptionProperties = "EncryptionProperties" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.KeyReference = "KeyReference" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.KeySize = "KeySize" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.OaepParams = "OaepParams" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.Recipient = "Recipient" -> string
+const Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements.ReferenceList = "ReferenceList" -> string
+Microsoft.IdentityModel.Protocols.WsAddressing.WsAddressingSerializer
+Microsoft.IdentityModel.Protocols.WsAddressing.WsAddressingSerializer.WsAddressingSerializer() -> void
+Microsoft.IdentityModel.Protocols.WsFed.WsFed12Version
+Microsoft.IdentityModel.Protocols.WsFed.WsFed12Version.WsFed12Version() -> void
+Microsoft.IdentityModel.Protocols.WsFed.WsFedSerializer
+Microsoft.IdentityModel.Protocols.WsFed.WsFedSerializer.WsFedSerializer() -> void
+Microsoft.IdentityModel.Protocols.WsFed.WsFedVersion
+Microsoft.IdentityModel.Protocols.WsFed.WsFedVersion.WsFedVersion() -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.AppliesTo.AppliesTo() -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference.Digest.get -> string
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference.Digest.set -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference.DigestAlgorithm.get -> string
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference.DigestAlgorithm.set -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference.PolicyReference() -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference.PolicyReference(string uri, string digest, string digestAlgorithm) -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference.Uri.get -> string
+Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference.Uri.set -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicy12Version
+Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicy12Version.WsPolicy12Version() -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicy15Version
+Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicy15Version.WsPolicy15Version() -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicySerializer
+Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicySerializer.WsPolicySerializer() -> void
+Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicyVersion
+Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicyVersion.WsPolicyVersion() -> void
+Microsoft.IdentityModel.Protocols.WsSecurity.KeyIdentifier.KeyIdentifier() -> void
+Microsoft.IdentityModel.Protocols.WsSecurity.KeyIdentifier.Value.set -> void
+Microsoft.IdentityModel.Protocols.WsSecurity.SecurityTokenReference.SecurityTokenReference() -> void
+Microsoft.IdentityModel.Protocols.WsSecurity.WsSecurity10Version
+Microsoft.IdentityModel.Protocols.WsSecurity.WsSecurity10Version.WsSecurity10Version() -> void
+Microsoft.IdentityModel.Protocols.WsSecurity.WsSecurity11Version
+Microsoft.IdentityModel.Protocols.WsSecurity.WsSecurity11Version.WsSecurity11Version() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.BinaryExchange
+Microsoft.IdentityModel.Protocols.WsTrust.BinaryExchange.BinaryData.get -> byte[]
+Microsoft.IdentityModel.Protocols.WsTrust.BinaryExchange.BinaryExchange(byte[] binaryData, System.Uri valueType) -> void
+Microsoft.IdentityModel.Protocols.WsTrust.BinaryExchange.BinaryExchange(byte[] binaryData, System.Uri valueType, System.Uri encodingType) -> void
+Microsoft.IdentityModel.Protocols.WsTrust.BinaryExchange.EncodingType.get -> System.Uri
+Microsoft.IdentityModel.Protocols.WsTrust.BinaryExchange.ValueType.get -> System.Uri
+Microsoft.IdentityModel.Protocols.WsTrust.BinarySecret.BinarySecret() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.BinarySecret.Data.set -> void
+Microsoft.IdentityModel.Protocols.WsTrust.Entropy.BinarySecret.set -> void
+Microsoft.IdentityModel.Protocols.WsTrust.Entropy.Entropy() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.ExceptionLogger
+Microsoft.IdentityModel.Protocols.WsTrust.ExceptionLogger.ExceptionLogger() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.LogMessages
+Microsoft.IdentityModel.Protocols.XmlEnc.EncryptedKey.EncryptedKey(System.Xml.XmlElement sourceElement) -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.EncryptedKey.SourceElement.get -> System.Xml.XmlElement
+Microsoft.IdentityModel.Protocols.WsTrust.PshaDerivedKeyGenerator
+Microsoft.IdentityModel.Protocols.WsTrust.PshaDerivedKeyGenerator.ComputeCombinedKey(string algorithm, byte[] label, byte[] nonce, int keySizeInBits, int position) -> byte[]
+Microsoft.IdentityModel.Protocols.WsTrust.PshaDerivedKeyGenerator.PshaDerivedKeyGenerator(byte[] masterKey) -> void
+Microsoft.IdentityModel.Protocols.WsTrust.Renewing
+Microsoft.IdentityModel.Protocols.WsTrust.Renewing.Allow.get -> bool
+Microsoft.IdentityModel.Protocols.WsTrust.Renewing.Allow.set -> void
+Microsoft.IdentityModel.Protocols.WsTrust.Renewing.RenewAfterExpiration.get -> bool
+Microsoft.IdentityModel.Protocols.WsTrust.Renewing.RenewAfterExpiration.set -> void
+Microsoft.IdentityModel.Protocols.WsTrust.Renewing.Renewing() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.RequestedProofToken.RequestedProofToken() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.RequestedProofToken.RequestedProofToken(string computedKeyAlgorithm) -> void
+Microsoft.IdentityModel.Protocols.WsTrust.RequestedSecurityToken.RequestedSecurityToken() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.SecurityTokenElement.SecurityTokenElement(System.Xml.XmlElement sourceElement) -> void
+Microsoft.IdentityModel.Protocols.WsTrust.SecurityTokenElement.SourceElement.get -> System.Xml.XmlElement
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrust13Version
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrust13Version.WsTrust13Version() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrust14Version
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrust14Version.WsTrust14Version() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrustFeb2005Version
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrustFeb2005Version.WsTrustFeb2005Version() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrustMessage.BinaryExchange.get -> Microsoft.IdentityModel.Protocols.WsTrust.BinaryExchange
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrustMessage.BinaryExchange.set -> void
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrustMessage.PolicyReference.get -> Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrustMessage.PolicyReference.set -> void
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrustRequest.RequestType.set -> void
+Microsoft.IdentityModel.Protocols.WsTrust.WsTrustResponse.WsTrustResponse() -> void
+Microsoft.IdentityModel.Protocols.WsTrust.WsUtils
+Microsoft.IdentityModel.Protocols.XmlEnc.EncryptedData
+Microsoft.IdentityModel.Protocols.XmlEnc.EncryptedData.EncryptedData() -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryption11Constants
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryption11Constants.XmlEncryption11Constants() -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryption11DataTypes
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryption11DataTypes.XmlEncryption11DataTypes() -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionAttributes
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionConstants
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionConstants.XmlEncryptionConstants() -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionDataTypes
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionDataTypes.Content.get -> string
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionDataTypes.Content.set -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionDataTypes.Element.get -> string
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionDataTypes.Element.set -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionDataTypes.XmlEncryptionDataTypes() -> void
+Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionElements
+Microsoft.IdentityModel.Xml.XmlAttributeHolder
+Microsoft.IdentityModel.Xml.XmlAttributeHolder.LocalName.get -> string
+Microsoft.IdentityModel.Xml.XmlAttributeHolder.NamespaceUri.get -> string
+Microsoft.IdentityModel.Xml.XmlAttributeHolder.Prefix.get -> string
+Microsoft.IdentityModel.Xml.XmlAttributeHolder.Value.get -> string
+Microsoft.IdentityModel.Xml.XmlAttributeHolder.XmlAttributeHolder() -> void
+Microsoft.IdentityModel.Xml.XmlAttributeHolder.XmlAttributeHolder(string prefix, string localName, string ns, string value) -> void
+static Microsoft.IdentityModel.Protocols.WsAddressing.WsAddressingSerializer.WriteEndpointReference(System.Xml.XmlDictionaryWriter writer, Microsoft.IdentityModel.Protocols.WsSerializationContext serializationContext, Microsoft.IdentityModel.Protocols.WsAddressing.EndpointReference endpointReference) -> void
+static Microsoft.IdentityModel.Protocols.WsFed.WsFedSerializer.WriteAdditionalContext(System.Xml.XmlDictionaryWriter writer, Microsoft.IdentityModel.Protocols.WsSerializationContext serializationContext, Microsoft.IdentityModel.Protocols.WsFed.AdditionalContext additionalContext) -> void
+static Microsoft.IdentityModel.Protocols.WsFed.WsFedSerializer.WriteClaimType(System.Xml.XmlDictionaryWriter writer, Microsoft.IdentityModel.Protocols.WsSerializationContext serializationContext, Microsoft.IdentityModel.Protocols.WsFed.ClaimType claimType) -> void
+static Microsoft.IdentityModel.Protocols.WsFed.WsFedVersion.Fed12 -> Microsoft.IdentityModel.Protocols.WsFed.WsFedVersion
+static Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicySerializer.WriteAppliesTo(System.Xml.XmlDictionaryWriter writer, Microsoft.IdentityModel.Protocols.WsSerializationContext serializationContext, Microsoft.IdentityModel.Protocols.WsPolicy.AppliesTo appliesTo) -> void
+static Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicySerializer.WritePolicyReference(System.Xml.XmlDictionaryWriter writer, Microsoft.IdentityModel.Protocols.WsSerializationContext serializationContext, Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference policyReference) -> void
+static Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicyVersion.Policy12.get -> Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicyVersion
+static Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicyVersion.Policy15.get -> Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicyVersion
+static Microsoft.IdentityModel.Protocols.WsSecurity.WsSecuritySerializer.ReadKeyIdentifier(System.Xml.XmlDictionaryReader reader) -> Microsoft.IdentityModel.Protocols.WsSecurity.KeyIdentifier
+static Microsoft.IdentityModel.Protocols.WsSecurity.WsSecuritySerializer.ReadSecurityTokenReference(System.Xml.XmlDictionaryReader reader) -> Microsoft.IdentityModel.Protocols.WsSecurity.SecurityTokenReference
+static Microsoft.IdentityModel.Protocols.WsSecurity.WsSecuritySerializer.WriteKeyIdentifier(System.Xml.XmlDictionaryWriter writer, Microsoft.IdentityModel.Protocols.WsSecurity.KeyIdentifier keyIdentifier) -> void
+static Microsoft.IdentityModel.Protocols.WsSecurity.WsSecuritySerializer.WriteSecurityTokenReference(System.Xml.XmlDictionaryWriter writer, Microsoft.IdentityModel.Protocols.WsSecurity.SecurityTokenReference securityTokenReference) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.ExceptionLogger.LogWsTrustReadException(string format, params object[] args) -> System.Exception
+static Microsoft.IdentityModel.Protocols.WsTrust.ExceptionLogger.LogWsTrustReadException(string message) -> System.Exception
+static Microsoft.IdentityModel.Protocols.WsTrust.ExceptionLogger.LogWsTrustReadException(string message, System.Exception innerException) -> System.Exception
+static Microsoft.IdentityModel.Protocols.WsTrust.ExceptionLogger.LogWsTrustReadException(System.Exception innerException, string format, params object[] args) -> System.Exception
+static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.CeilingDivide(int dividend, int divisor) -> int
+static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateDerivedKey(string algorithm, byte[] masterKey, byte[] label, byte[] nonce, int derivedKeySizeInBits, int position) -> byte[]
+static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateRandomBytes(byte[] data) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateRandomBytes(int sizeInBits) -> byte[]
+static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.GenerateSymmetricKey(int keySizeInBits, byte[] requestorEntropy, out byte[] issuerEntropy) -> byte[]
+static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.RandomNumberGenerator.get -> System.Security.Cryptography.RandomNumberGenerator
+static Microsoft.IdentityModel.Protocols.WsTrust.Psha1KeyGenerator.ValidateKeySizeInBytes(int keySizeInBits) -> int
+static Microsoft.IdentityModel.Protocols.WsTrust.WsTrustSerializer.CreateXmlElement(System.Xml.XmlReader reader) -> System.Xml.XmlElement
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.AddAttributeCount(int count) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.AddElementCount(int count) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.AddXmlCharacters(int count) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.CheckReaderOnEntry(System.Xml.XmlReader reader) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.CheckReaderOnEntry(System.Xml.XmlReader reader, string element, Microsoft.IdentityModel.Protocols.WsSerializationContext serializationContext) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.CreateBoundedMemoryStream() -> System.IO.MemoryStream
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.EnterReadScope() -> System.IDisposable
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.EnsureElementCount(int elementCount) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadAsXmlElement(System.Xml.XmlReader reader) -> System.Xml.XmlElement
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadAsXmlElement(System.Xml.XmlReader reader, bool countRootElement) -> System.Xml.XmlElement
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadIntElement(System.Xml.XmlDictionaryReader reader) -> int?
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ReadStringElement(System.Xml.XmlDictionaryReader reader) -> string
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.SkipElement(System.Xml.XmlReader reader) -> void
+static Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.ValidateParamsForWritting(System.Xml.XmlWriter writer, Microsoft.IdentityModel.Protocols.WsSerializationContext serializationContext, object obj, string objName) -> void
+static Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionConstants.XmlEnc11.get -> Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryption11Constants
+static Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionDataTypes.XmlEnc11.get -> Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryption11DataTypes
+static Microsoft.IdentityModel.Xml.XmlAttributeHolder.EmptyArray -> Microsoft.IdentityModel.Xml.XmlAttributeHolder[]
+static Microsoft.IdentityModel.Xml.XmlAttributeHolder.GetAttribute(Microsoft.IdentityModel.Xml.XmlAttributeHolder[] attributes, string localName, string ns) -> string
+static Microsoft.IdentityModel.Xml.XmlAttributeHolder.ReadAttributes(System.Xml.XmlDictionaryReader reader) -> Microsoft.IdentityModel.Xml.XmlAttributeHolder[]
+static readonly Microsoft.IdentityModel.Protocols.WsTrust.WsUtils.BoundedReaderQuotas -> System.Xml.XmlDictionaryReaderQuotas
+static readonly Microsoft.IdentityModel.Protocols.XmlEnc.XmlEncryptionConstants.KnownNamespaces -> System.Collections.Generic.IList<string>
+Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader
+Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.DepthLimitingXmlReader(System.Xml.XmlReader inner, int maxDepth) -> void
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.AttributeCount.get -> int
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.BaseURI.get -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Depth.get -> int
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.EOF.get -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.GetAttribute(int i) -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.GetAttribute(string name) -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.GetAttribute(string name, string namespaceURI) -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.IsEmptyElement.get -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.LocalName.get -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.LookupNamespace(string prefix) -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToAttribute(string name) -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToAttribute(string name, string ns) -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToElement() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToFirstAttribute() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.MoveToNextAttribute() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.NamespaceURI.get -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.NameTable.get -> System.Xml.XmlNameTable
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.NodeType.get -> System.Xml.XmlNodeType
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Prefix.get -> string
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Read() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.ReadAttributeValue() -> bool
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.ReadState.get -> System.Xml.ReadState
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.ResolveEntity() -> void
+override Microsoft.IdentityModel.Protocols.WsTrust.DepthLimitingXmlReader.Value.get -> string
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.DynamicallyAccessedMembersAttribute(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes memberTypes) -> void
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.MemberTypes.get -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All = -1 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.Interfaces = 8192 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None = 0 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors = 4 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicEvents = 4096 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields = 64 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods = 16 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicNestedTypes = 256 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties = 1024 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors = 3 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicEvents = 2048 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields = 32 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods = 8 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicNestedTypes = 128 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor = 1 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties = 512 -> System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes
+System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute
+System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Message.get -> string
+System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.RequiresUnreferencedCodeAttribute(string message) -> void
+System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Url.get -> string
+System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Url.set -> void
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category.get -> string
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.CheckId.get -> string
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Justification.get -> string
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Justification.set -> void
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.MessageId.get -> string
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.MessageId.set -> void
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Scope.get -> string
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Scope.set -> void
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target.get -> string
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target.set -> void
+System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.UnconditionalSuppressMessageAttribute(string category, string checkId) -> void
+virtual Microsoft.IdentityModel.Protocols.WsAddressing.WsAddressingSerializer.ReadEndpointReference(System.Xml.XmlDictionaryReader reader) -> Microsoft.IdentityModel.Protocols.WsAddressing.EndpointReference
+virtual Microsoft.IdentityModel.Protocols.WsFed.WsFedSerializer.ReadAdditionalContext(System.Xml.XmlDictionaryReader reader, string namespace) -> Microsoft.IdentityModel.Protocols.WsFed.AdditionalContext
+virtual Microsoft.IdentityModel.Protocols.WsFed.WsFedSerializer.ReadClaimType(System.Xml.XmlDictionaryReader reader, string namespace) -> Microsoft.IdentityModel.Protocols.WsFed.ClaimType
+virtual Microsoft.IdentityModel.Protocols.WsFed.WsFedSerializer.ReadContextItem(System.Xml.XmlDictionaryReader reader, string namespace) -> Microsoft.IdentityModel.Protocols.WsFed.ContextItem
+virtual Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicySerializer.ReadAppliesTo(System.Xml.XmlDictionaryReader reader, string namespace) -> Microsoft.IdentityModel.Protocols.WsPolicy.AppliesTo
+virtual Microsoft.IdentityModel.Protocols.WsPolicy.WsPolicySerializer.ReadPolicyReference(System.Xml.XmlDictionaryReader reader, string namespace) -> Microsoft.IdentityModel.Protocols.WsPolicy.PolicyReference

@@ -12,6 +12,7 @@
       <project name="Microsoft.IdentityModel.Tokens.Saml" />
       <project name="Microsoft.IdentityModel.Protocols" />
       <project name="Microsoft.IdentityModel.Protocols.WsFederation" />
+      <project name="Microsoft.IdentityModel.Protocols.WsTrust" />
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
       <project name="Microsoft.IdentityModel.Protocols.SignedHttpRequest" />
       <project name="Microsoft.IdentityModel.Validators" />
@@ -30,6 +31,7 @@
       <project name="Microsoft.IdentityModel.Tokens.Saml.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Protocols.WsTrust.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Validators.Tests" test="yes" />
