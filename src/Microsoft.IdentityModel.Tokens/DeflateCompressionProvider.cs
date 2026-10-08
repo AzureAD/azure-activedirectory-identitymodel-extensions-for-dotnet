@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
             finally
             {
                 if (chars != null)
-                    ArrayPool<char>.Shared.Return(chars);
+                    ArrayPool<char>.Shared.Return(chars, clearArray: true);
             }
         }
 
