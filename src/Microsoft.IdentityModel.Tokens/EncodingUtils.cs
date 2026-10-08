@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(bytes);
+                ArrayPool<byte>.Shared.Return(bytes, clearArray: true);
             }
         }
 
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(bytes);
+                ArrayPool<byte>.Shared.Return(bytes, clearArray: true);
             }
         }
 
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(bytes);
+                ArrayPool<byte>.Shared.Return(bytes, clearArray: true);
             }
         }
     }
