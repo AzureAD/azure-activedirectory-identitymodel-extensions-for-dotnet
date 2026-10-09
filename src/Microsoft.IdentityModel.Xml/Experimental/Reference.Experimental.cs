@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Xml
         /// A <see cref="ValidationResult{TResult, TError}"/> containing this <see cref="Reference"/> if the digest is valid;
         /// otherwise, a <see cref="ValidationError"/>.
         /// </returns>
-        internal ValidationResult<Reference, ValidationError> Verify(
+        public ValidationResult<Reference, ValidationError> Verify(
             CryptoProviderFactory cryptoProviderFactory,
 #pragma warning disable CA1801 // Review unused parameters
             CallContext callContext)

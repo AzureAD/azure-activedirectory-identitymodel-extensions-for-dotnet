@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Xml
         /// otherwise, the first reference validation error. Success means the reference digests passed for this enclosing
         /// validation attempt, not that this method independently verified the signature.
         /// </returns>
-        internal ValidationResult<SecurityKey, ValidationError> Verify(
+        public ValidationResult<SecurityKey, ValidationError> Verify(
             SecurityKey key,
             CryptoProviderFactory cryptoProviderFactory,
             CallContext callContext)
