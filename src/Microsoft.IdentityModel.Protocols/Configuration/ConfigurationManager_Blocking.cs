@@ -74,8 +74,6 @@ namespace Microsoft.IdentityModel.Protocols
                                 throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
-                        _lastRequestRefresh = TimeProvider.GetUtcNow().UtcDateTime;
-
                         TelemetryForUpdateBlocking(TelemetryConstants.Protocols.ConfigurationSourceRetriever);
 
                         if (_refreshRequested)
@@ -157,12 +155,13 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void RequestRefreshBlocking()
         {
-            DateTime now = TimeProvider.GetUtcNow().UtcDateTime;
+            DateTimeOffset now = TimeProvider.GetUtcNow();
 
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _refreshRequested = true;
                 _syncAfter = now;
+                _lastRequestRefresh = now;
                 _isFirstRefreshRequest = false;
             }
         }
