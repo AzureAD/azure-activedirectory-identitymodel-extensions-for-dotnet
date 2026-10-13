@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading;
@@ -254,7 +255,11 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             try
             {
+                using var listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
                 AadTokenValidationParametersExtension.ValidateSigningKeyCloudInstance(theoryData.SecurityKey, theoryData.OpenIdConnectConfiguration);
+                if (!string.IsNullOrEmpty(theoryData.ExpectedWarningLogCode))
+                    Assert.Contains(theoryData.ExpectedWarningLogCode, listener.TraceBuffer);
+
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -289,19 +294,22 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.Add(new AadSigningKeyTheoryData("NoMatchingKeysInConfiguration")
                 {
                     SecurityKey = KeyingMaterial.JsonWebKeyP256,
-                    OpenIdConnectConfiguration = GetConfigurationMock(configurationCloudInstanceName: Default.CloudInstanceName, siginingKeyCloudInstanceName: "different.com")
+                    OpenIdConnectConfiguration = GetConfigurationMock(configurationCloudInstanceName: Default.CloudInstanceName, siginingKeyCloudInstanceName: "different.com"),
+                    ExpectedWarningLogCode = "IDX40014"
                 });
 
                 theoryData.Add(new AadSigningKeyTheoryData("MissingConfigurationCloudInstanceName")
                 {
                     SecurityKey = KeyingMaterial.JsonWebKeyP384,
                     OpenIdConnectConfiguration = GetConfigurationMock(configurationCloudInstanceName: null, siginingKeyCloudInstanceName: Default.CloudInstanceName),
+                    ExpectedWarningLogCode = "IDX40013"
                 });
 
                 theoryData.Add(new AadSigningKeyTheoryData("MissingSigningKeyCloudInstanceName")
                 {
                     SecurityKey = KeyingMaterial.JsonWebKeyP384,
                     OpenIdConnectConfiguration = GetConfigurationMock(configurationCloudInstanceName: Default.CloudInstanceName, siginingKeyCloudInstanceName: null),
+                    ExpectedWarningLogCode = "IDX40014"
                 });
 
                 theoryData.Add(new AadSigningKeyTheoryData("CloudInstanceNameMatched")
@@ -712,6 +720,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
             public OpenIdConnectConfiguration OpenIdConnectConfiguration { get; set; }
 
             public Action SetupAction { get; set; }
+
+            public string ExpectedWarningLogCode { get; set; }
         }
     }
 }
