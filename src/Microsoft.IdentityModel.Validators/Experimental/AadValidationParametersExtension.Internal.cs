@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -116,13 +117,17 @@ namespace Microsoft.IdentityModel.Validators
             if (configuration is not OpenIdConnectConfiguration openIdConnectConfiguration)
                 return;
 
+            bool warningEnabled = LogHelper.IsEnabled(EventLogLevel.Warning);
+
             JsonWebKey matchedKeyFromConfig = AadTokenValidationParametersExtension.GetJsonWebKeyBySecurityKey(openIdConnectConfiguration, securityKey);
             if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(AadIssuerValidatorConstants.CloudInstanceNameKey, out object value))
             {
                 string signingKeyCloudInstanceName = value as string;
                 if (string.IsNullOrWhiteSpace(signingKeyCloudInstanceName))
                 {
-                    LogHelper.LogWarning(LogMessages.IDX40014);
+                    if (warningEnabled)
+                        LogHelper.LogWarning(LogMessages.IDX40014);
+
                     return;
                 }
 
@@ -131,7 +136,9 @@ namespace Microsoft.IdentityModel.Validators
                     string configurationCloudInstanceName = configurationCloudInstanceNameObjectValue as string;
                     if (string.IsNullOrWhiteSpace(configurationCloudInstanceName))
                     {
-                        LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX40013, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName)));
+                        if (warningEnabled)
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX40013, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName)));
+
                         return;
                     }
 
@@ -150,12 +157,14 @@ namespace Microsoft.IdentityModel.Validators
                 }
                 else
                 {
-                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX40013, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName)));
+                    if (warningEnabled)
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX40013, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName)));
                 }
             }
             else
             {
-                LogHelper.LogWarning(LogMessages.IDX40014);
+                if (warningEnabled)
+                    LogHelper.LogWarning(LogMessages.IDX40014);
             }
         }
 
