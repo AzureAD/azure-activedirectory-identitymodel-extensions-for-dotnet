@@ -34,6 +34,68 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         }
 
         [Fact]
+        public async Task GetDocumentAsyncHonorsCancellation()
+        {
+            // Arrange
+            var release = new TaskCompletionSource<HttpResponseMessage>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            var callback = new Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>(
+                async (_, cancellationToken) =>
+                {
+                    await Task.WhenAny(
+                        Task.Delay(Timeout.Infinite, cancellationToken),
+                        release.Task);
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return await release.Task;
+                });
+
+            using var httpClient = new HttpClient(new DelegateHttpMessageHandler(callback));
+            var documentRetriever = new HttpDocumentRetriever(httpClient);
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+
+            // Act
+            Task<string> retrievalTask = documentRetriever.GetDocumentAsync(
+                "https://localhost",
+                cancellationTokenSource.Token);
+            Task completedTask;
+            try
+            {
+                completedTask = await Task.WhenAny(retrievalTask, Task.Delay(TimeSpan.FromSeconds(5)));
+            }
+            finally
+            {
+                release.TrySetResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(string.Empty)
+                });
+            }
+
+            // Assert
+            Assert.Same(retrievalTask, completedTask);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => retrievalTask);
+        }
+
+        [Fact]
+        public async Task GetDocumentAsyncWrapsTransportTimeout()
+        {
+            // Arrange
+            var callback = new Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>(
+                (_, _) => Task.FromException<HttpResponseMessage>(
+                    new TaskCanceledException("The HTTP transport timed out.")));
+
+            using var httpClient = new HttpClient(new DelegateHttpMessageHandler(callback));
+            var documentRetriever = new HttpDocumentRetriever(httpClient);
+
+            // Act
+            IOException exception = await Assert.ThrowsAsync<IOException>(
+                () => documentRetriever.GetDocumentAsync("https://localhost", CancellationToken.None));
+
+            // Assert
+            Assert.IsType<TaskCanceledException>(exception.InnerException);
+        }
+
+        [Fact]
         public void GetSets()
         {
             HttpDocumentRetriever docRetriever = new HttpDocumentRetriever();
