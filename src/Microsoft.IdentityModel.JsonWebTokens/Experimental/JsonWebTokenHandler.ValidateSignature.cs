@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         TokenLogMessages.IDX10652,
                         LogHelper.MarkAsNonPII(jsonWebToken.Alg),
                         key),
-                    AlgorithmValidationFailure.AlgorithmIsNotSupported,
+                    ValidationFailureType.CryptoProviderFactoryDoesNotSupportAlgorithm,
                     ValidationError.GetCurrentStackFrame());
             }
 
@@ -353,7 +353,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             finally
             {
-                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+                if (signatureProvider is not null)
+                    cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
         }
 

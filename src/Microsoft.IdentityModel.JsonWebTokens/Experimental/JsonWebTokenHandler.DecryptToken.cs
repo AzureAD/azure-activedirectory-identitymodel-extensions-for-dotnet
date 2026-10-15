@@ -4,7 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Security.Cryptography;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
@@ -123,12 +124,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         configurationKeys = configuration.TokenDecryptionKeys.ToList();
 
                     if (keys != null)
-                    {
-                        if (keys is List<SecurityKey> keysList)
-                            keysList.AddRange(configurationKeys);
-                        else
-                            keys = keys.Concat(configurationKeys).ToList();
-                    }
+                        keys = keys.Concat(configurationKeys).ToList();
                     else
                         keys = configurationKeys;
                 }
@@ -143,9 +139,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return (keys, null); // Cannot iterate over null.
 
             var unwrappedKeys = new List<SecurityKey>();
-            // keep track of exceptions thrown, keys that were tried
-            StringBuilder? exceptionStrings = null;
-            StringBuilder? keysAttempted = null;
+
+            // Pre-generate a placeholder key used as a fallback when an unwrap call
+            // does not yield a usable key, so that downstream processing follows a
+            // single uniform path regardless of which key was tried.
+            int expectedCekSizeInBytes = GetExpectedCekSizeInBytes(jwtToken.Enc);
+            byte[] fallbackCek = new byte[expectedCekSizeInBytes];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+                rng.GetBytes(fallbackCek);
+
             for (int i = 0; i < keys.Count; i++)
             {
                 var key = keys[i];
@@ -188,27 +190,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(ex.ToString());
+
+                    // Use the placeholder key so the downstream code path is the
+                    // same regardless of whether unwrap succeeded.
+                    unwrappedKeys.Add(new SymmetricSecurityKey(fallbackCek));
                 }
-
-                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
-            if (unwrappedKeys.Count > 0 || exceptionStrings is null)
-                return (unwrappedKeys, null);
-            else
-            {
-                ValidationError validationError = new(
-                    new MessageDetail(
-                        TokenLogMessages.IDX10618,
-                        LogHelper.MarkAsNonPII(keysAttempted?.ToString() ?? ""),
-                        exceptionStrings?.ToString() ?? "",
-                        LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                    ValidationFailureType.KeyWrapFailed,
-                    ValidationError.GetCurrentStackFrame());
-
-                return (null, validationError);
-            }
+            return (unwrappedKeys, null);
         }
 
         /// <summary>

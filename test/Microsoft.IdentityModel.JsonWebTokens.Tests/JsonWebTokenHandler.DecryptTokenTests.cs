@@ -228,7 +228,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new TokenDecryptingTheoryData("Invalid_AlgorithmMismatch_DecryptionFails")
                     {
-                        ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10618:"),
+                        // Unwrap failures now surface as decryption failures (IDX10603)
+                        // rather than key-wrap exceptions (IDX10618).
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:"),
                         SecurityTokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
@@ -239,11 +241,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             decryptionKeys: [KeyingMaterial.RsaSecurityKey_2048]),
                         OperationResult = new ValidationError(
                             new MessageDetail(
-                                TokenLogMessages.IDX10609,
+                                TokenLogMessages.IDX10603,
                                 LogHelper.MarkAsSecurityArtifact(
                                     new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
                                     JwtTokenUtilities.SafeLogJwtToken)),
-                            ValidationFailureType.KeyWrapFailed,
+                            ValidationFailureType.TokenDecryptionFailed,
                             null),
                     },
                     new TokenDecryptingTheoryData("KeyIdMismatch_TryAllDecryptionKeysTrue_DecryptionSucceeds")

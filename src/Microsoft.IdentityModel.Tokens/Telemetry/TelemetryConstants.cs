@@ -129,6 +129,21 @@ namespace Microsoft.IdentityModel.Telemetry
         }
 
         /// <summary>
+        /// Algorithm family constants for telemetry. Raw algorithm strings are mapped to these
+        /// bounded values to prevent cardinality explosion in metric dimensions.
+        /// </summary>
+        public static class AlgorithmFamilies
+        {
+            public const string RSA = "RSA";
+            public const string RSAPSS = "RSA-PSS";
+            public const string ECDSA = "ECDSA";
+            public const string HMAC = "HMAC";
+            public const string MLDSA = "ML-DSA";
+            public const string None = "none";
+            public const string Other = "other";
+        }
+
+        /// <summary>
         /// Signature validation error constants. Kept limited to prevent cardinality explosion.
         /// </summary>
         public static class SignatureValidationErrors

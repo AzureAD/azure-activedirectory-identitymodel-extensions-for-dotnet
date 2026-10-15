@@ -1,5 +1,17 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+5.7.2
+=====
+
+## Bug Fixes
+
+- Fixed assembly-version generation so 5.7.2 packages no longer retain the legacy `0.0.1.0` placeholder and instead use the SDK-generated `5.7.2.0` assembly identity. See [#3625](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3625).
+- Updated `Microsoft.Rest.ClientRuntime` to patched version 2.3.24 in `Microsoft.IdentityModel.KeyVaultExtensions`, addressing [GHSA-whph-446h-6m9v](https://github.com/advisories/GHSA-whph-446h-6m9v). See [#3634](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3634).
+
+## Build and Test
+
+- Removed the unsupported .NET Core 2.2 target from the Windows test matrix because runtime 2.2.3 is no longer available on hosted build agents. Shipped package target frameworks are unchanged. See [#3622](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3622).
+
 8.23.0
 ====
 ## New Features
@@ -15,6 +27,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ====
 ## New Features
 - Add `SignedHttpRequestValidationParameters.UseCaseSensitivePClaimComparison` to configure Signed HTTP Request `p` claim path comparison per validation. The default is case-sensitive; set the property to `false` for case-insensitive comparison. The previous `Switch.Microsoft.IdentityModel.SignedHttpRequest.UseCaseSensitivePClaimComparison` AppContext key is no longer honored. Applications upgrading from 8.22.0 that set the key to `false` must set this property to `false` instead. See [PR #3569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3569).
+
+## Documentation
+- Correct the `SecurityTokenDescriptor.Audience` and `SecurityTokenDescriptor.Audiences` documentation to describe the actual token creation behavior. The previous text stated that these members are combined with the `aud` claims in `Claims` or `Subject`, which only describes the legacy `JwtSecurityTokenHandler`. `JsonWebTokenHandler` intentionally uses `Audience`/`Audiences` as the only source for `aud` when either is set, so that a token's audiences can be overridden with a smaller subset than the claims it is created from. Applications migrating from `JwtSecurityTokenHandler` that set `aud` in more than one place should consolidate all intended audiences into `Audiences`. See [issue #3535](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3535).
 
 ## Bug Fixes
 - Enforce the minimum asymmetric key sizes configured by `AsymmetricSignatureProvider`. This can introduce new constructor-time failures for applications using undersized keys on modern .NET targets. Applications that need time to rotate legacy keys can temporarily restore the previous behavior by enabling the `Switch.Microsoft.IdentityModel.DoNotEnforceMinimumAsymmetricKeySize` AppContext switch before first use. See [PR #3594](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3594).
