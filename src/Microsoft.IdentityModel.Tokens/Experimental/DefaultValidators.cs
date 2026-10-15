@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental;
 /// <summary>
 /// Default implementation of <see cref="IAlgorithmValidator"/> that uses the static Validators.ValidateAlgorithm method.
 /// </summary>
-internal sealed class DefaultAlgorithmValidator : IAlgorithmValidator
+public sealed class DefaultAlgorithmValidator : IAlgorithmValidator
 {
     /// <inheritdoc/>
     public ValidationResult<string, ValidationError> ValidateAlgorithm(
@@ -28,7 +28,7 @@ internal sealed class DefaultAlgorithmValidator : IAlgorithmValidator
 /// <summary>
 /// Default implementation of <see cref="IAudienceValidator"/> that uses the static Validators.ValidateAudience method.
 /// </summary>
-internal sealed class DefaultAudienceValidator : IAudienceValidator
+public sealed class DefaultAudienceValidator : IAudienceValidator
 {
     /// <inheritdoc/>
     public ValidationResult<string, ValidationError> ValidateAudience(
@@ -44,7 +44,7 @@ internal sealed class DefaultAudienceValidator : IAudienceValidator
 /// <summary>
 /// Default implementation of <see cref="IIssuerValidator"/> that uses the static Validators.ValidateIssuerAsync method.
 /// </summary>
-internal sealed class DefaultIssuerValidator : IIssuerValidator
+public sealed class DefaultIssuerValidator : IIssuerValidator
 {
     /// <inheritdoc/>
     public Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
@@ -61,7 +61,7 @@ internal sealed class DefaultIssuerValidator : IIssuerValidator
 /// <summary>
 /// Default implementation of <see cref="ISignatureKeyValidator"/> that uses the static Validators.ValidateSignatureKey method.
 /// </summary>
-internal sealed class DefaultSignatureKeyValidator : ISignatureKeyValidator
+public sealed class DefaultSignatureKeyValidator : ISignatureKeyValidator
 {
     /// <inheritdoc/>
     public ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
@@ -77,7 +77,7 @@ internal sealed class DefaultSignatureKeyValidator : ISignatureKeyValidator
 /// <summary>
 /// Default implementation of <see cref="ILifetimeValidator"/> that uses the static Validators.ValidateLifetime method.
 /// </summary>
-internal sealed class DefaultLifetimeValidator : ILifetimeValidator
+public sealed class DefaultLifetimeValidator : ILifetimeValidator
 {
     /// <inheritdoc/>
     public ValidationResult<ValidatedLifetime, ValidationError> ValidateLifetime(
@@ -94,7 +94,7 @@ internal sealed class DefaultLifetimeValidator : ILifetimeValidator
 /// <summary>
 /// Default implementation of <see cref="ITokenReplayValidator"/> that uses the static Validators.ValidateTokenReplay method.
 /// </summary>
-internal sealed class DefaultTokenReplayValidator : ITokenReplayValidator
+public sealed class DefaultTokenReplayValidator : ITokenReplayValidator
 {
     /// <inheritdoc/>
     public ValidationResult<DateTime?, ValidationError> ValidateTokenReplay(
@@ -110,7 +110,7 @@ internal sealed class DefaultTokenReplayValidator : ITokenReplayValidator
 /// <summary>
 /// Default implementation of <see cref="ITokenTypeValidator"/> that uses the static Validators.ValidateTokenType method.
 /// </summary>
-internal sealed class DefaultTokenTypeValidator : ITokenTypeValidator
+public sealed class DefaultTokenTypeValidator : ITokenTypeValidator
 {
     /// <inheritdoc/>
     public ValidationResult<ValidatedTokenType, ValidationError> ValidateTokenType(

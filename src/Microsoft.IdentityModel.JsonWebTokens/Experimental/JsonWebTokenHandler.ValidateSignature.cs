@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="configuration">The optional configuration used for validation.</param>
         /// <param name="callContext">The context in which the method is called.</param>
         /// <returns>A <see cref="ValidationResult{SecurityKey, ValidationError}"/> with the <see cref="SecurityKey"/> that signed the tokenif valid or a <see cref="ValidationError"/>.</returns>
-        internal ValidationResult<SecurityKey, ValidationError> ValidateSignature(
+        public ValidationResult<SecurityKey, ValidationError> ValidateSignature(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,

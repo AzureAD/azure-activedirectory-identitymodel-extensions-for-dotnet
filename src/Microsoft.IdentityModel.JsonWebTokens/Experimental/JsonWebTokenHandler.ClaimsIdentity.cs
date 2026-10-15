@@ -20,9 +20,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
-        internal virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken? jwtToken, ValidationParameters validationParameters)
+        protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken? jwtToken, ValidationParameters validationParameters)
         {
-            // TODO: Make protected once ValidationParameters is public.
             _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
             return CreateClaimsIdentityPrivate(jwtToken, validationParameters, GetActualIssuer(jwtToken));
@@ -35,12 +34,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
-        internal virtual ClaimsIdentity CreateClaimsIdentity(
+        protected virtual ClaimsIdentity CreateClaimsIdentity(
             JsonWebToken? jwtToken,
             ValidationParameters validationParameters,
             string issuer)
         {
-            // TODO: Make protected once ValidationParameters is public.
             _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
             if (string.IsNullOrWhiteSpace(issuer))

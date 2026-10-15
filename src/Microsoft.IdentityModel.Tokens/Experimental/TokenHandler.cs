@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>An <see cref="ValidationResult{ValidatedToken, ValidationError}"/> with either a <see cref="ValidatedToken"/>
         /// if the token was validated or a <see cref="ValidationError"/> containing the failure information.</returns>
-        internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>An <see cref="ValidationResult{ValidatedToken, ValidationError}"/> with either a <see cref="ValidatedToken"/>
         /// if the token was validated or a <see cref="ValidationError"/> containing the failure information.</returns>
-        internal virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
+        public virtual Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,

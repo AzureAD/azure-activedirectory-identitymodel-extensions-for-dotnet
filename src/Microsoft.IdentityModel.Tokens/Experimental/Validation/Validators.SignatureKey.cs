@@ -101,12 +101,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
+        public static ValidationResult<ValidatedSignatureKey, ValidationError> ValidateSignatureKey(
             SecurityKey securityKey,
             ValidationParameters validationParameters,
             CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
+            if (validationParameters == null)
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    ValidationError.GetCurrentStackFrame());
+
+            if (securityKey == null)
+                return new SignatureKeyValidationError(
+                    new MessageDetail(LogMessages.IDX10253, nameof(securityKey)),
+                    SignatureKeyValidationFailure.KeyIsNull,
+                    ValidationError.GetCurrentStackFrame(),
+                    securityKey);
+
             DateTime utcNow = validationParameters.TimeProvider.GetUtcNow().UtcDateTime;
             DateTime? notBeforeUtc = null;
             DateTime? notAfterUtc = null;

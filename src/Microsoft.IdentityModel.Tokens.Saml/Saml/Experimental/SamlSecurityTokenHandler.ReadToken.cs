@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="token">A Saml token as a string.</param>
         /// <param name="callContext"></param>
         /// <returns>A <see cref="ValidationResult{SecurityToken, ValidationError}"/> with the <see cref="SamlSecurityToken"/> or a <see cref="ValidationError"/>.</returns>
-        internal virtual ValidationResult<SecurityToken, ValidationError> ReadSamlToken(string token, CallContext callContext)
+        public virtual ValidationResult<SecurityToken, ValidationError> ReadSamlToken(string token, CallContext callContext)
         {
             if (string.IsNullOrEmpty(token))
                 return ValidationError.NullParameter(

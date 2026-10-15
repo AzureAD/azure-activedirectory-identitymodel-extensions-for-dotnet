@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Xml
         /// A <see cref="ValidationResult{TResult, TError}"/> containing <paramref name="key"/> if the signature and all
         /// reference digests are valid; otherwise, a <see cref="ValidationError"/>.
         /// </returns>
-        internal ValidationResult<SecurityKey, ValidationError> Verify(
+        public ValidationResult<SecurityKey, ValidationError> Verify(
             SecurityKey key,
             CryptoProviderFactory cryptoProviderFactory,
 #pragma warning disable CA1801 // Review unused parameters

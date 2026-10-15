@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="validFrom">The date from which the signing key is considered valid.</param>
         /// <param name="validTo">The date until which the signing key is considered valid.</param>
         /// <param name="validationTime">The time the validation occurred.</param>
-        internal ValidatedSignatureKey(DateTime? validFrom, DateTime? validTo, DateTime? validationTime)
+        public ValidatedSignatureKey(DateTime? validFrom, DateTime? validTo, DateTime? validationTime)
         {
             ValidFrom = validFrom;
             ValidTo = validTo;
