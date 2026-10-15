@@ -744,7 +744,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             const int MaxStackallocThreshold = 256;
             Span<byte> output = outputSize <= MaxStackallocThreshold
                 ? stackalloc byte[outputSize]
-                : (rented = ArrayPool<byte>.Shared.Rent(outputSize));
+                : (rented = ArrayPool<byte>.Shared.Rent(outputSize)).AsSpan(0, outputSize);
 
             try
             {

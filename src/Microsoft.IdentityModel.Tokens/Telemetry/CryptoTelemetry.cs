@@ -206,6 +206,37 @@ public static class CryptoTelemetry
     }
 
     /// <summary>
+    /// Maps a raw algorithm string to a known algorithm family or "other" to prevent cardinality explosion.
+    /// </summary>
+    /// <param name="algorithm">The raw algorithm identifier.</param>
+    /// <returns>A bounded algorithm family string.</returns>
+    internal static string GetKnownAlgorithmFamilyOrOther(string algorithm)
+    {
+        if (string.IsNullOrEmpty(algorithm) ||
+            string.Equals(algorithm, SecurityAlgorithms.None, StringComparison.OrdinalIgnoreCase))
+        {
+            return TelemetryConstants.AlgorithmFamilies.None;
+        }
+
+        if (SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm))
+            return TelemetryConstants.AlgorithmFamilies.RSA;
+
+        if (SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm))
+            return TelemetryConstants.AlgorithmFamilies.RSAPSS;
+
+        if (SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm))
+            return TelemetryConstants.AlgorithmFamilies.ECDSA;
+
+        if (SupportedAlgorithms.SymmetricSigningAlgorithms.Contains(algorithm))
+            return TelemetryConstants.AlgorithmFamilies.HMAC;
+
+        if (SupportedAlgorithms.MlDsaSigningAlgorithms.Contains(algorithm))
+            return TelemetryConstants.AlgorithmFamilies.MLDSA;
+
+        return TelemetryConstants.AlgorithmFamilies.Other;
+    }
+
+    /// <summary>
     /// Gets the issuer host for telemetry, returning "other" if not in the tracked issuers allowlist.
     /// </summary>
     /// <param name="issuer">The full issuer URI.</param>
