@@ -60,13 +60,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 jwtToken.InnerToken = tokenValidationResult.SecurityToken as JsonWebToken;
                 jwtToken.Payload = (tokenValidationResult.SecurityToken as JsonWebToken).Payload;
-                return new TokenValidationResult
+                var jweResult = new TokenValidationResult
                 {
                     SecurityToken = jwtToken,
                     ClaimsIdentityNoLocking = tokenValidationResult.ClaimsIdentityNoLocking,
+                    ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
                     IsValid = true,
                     TokenType = tokenValidationResult.TokenType
                 };
+                if (validationParameters.SaveSigninToken)
+                    jweResult.ClaimsIdentity.BootstrapContext = jwtToken.EncodedToken;
+
+                return jweResult;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -746,11 +751,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
-            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer)
+            var result = new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer)
             {
                 IsValid = true,
                 TokenType = tokenType
             };
+            if (validationParameters.SaveSigninToken)
+                result.ClaimsIdentity.BootstrapContext = jsonWebToken.EncodedToken;
+
+            return result;
         }
     }
 }
