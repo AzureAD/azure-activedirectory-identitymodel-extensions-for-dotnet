@@ -23,41 +23,41 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
         // these are used to lazy create
         private Dictionary<string, object> _additionalData;
-        private ICollection<string> _acrValuesSupported;
-        private ICollection<string> _authorizationDetailsTypesSupported;
-        private ICollection<string> _authorizationEncryptionAlgValuesSupported;
-        private ICollection<string> _authorizationEncryptionEncValuesSupported;
-        private ICollection<string> _authorizationSigningAlgValuesSupported;
-        private ICollection<string> _backchannelAuthenticationRequestSigningAlgValuesSupported;
-        private ICollection<string> _backchannelTokenDeliveryModesSupported;
-        private ICollection<string> _claimsSupported;
-        private ICollection<string> _claimsLocalesSupported;
-        private ICollection<string> _claimTypesSupported;
-        private ICollection<string> _codeChallengeMethodsSupported;
-        private ICollection<string> _displayValuesSupported;
-        private ICollection<string> _dPoPSigningAlgValuesSupported;
-        private ICollection<string> _grantTypesSupported;
-        private ICollection<string> _idTokenEncryptionAlgValuesSupported;
-        private ICollection<string> _idTokenEncryptionEncValuesSupported;
-        private ICollection<string> _idTokenSigningAlgValuesSupported;
-        private ICollection<string> _introspectionEndpointAuthMethodsSupported;
-        private ICollection<string> _introspectionEndpointAuthSigningAlgValuesSupported;
-        private ICollection<string> _promptValuesSupported;
-        private ICollection<string> _requestObjectEncryptionAlgValuesSupported;
-        private ICollection<string> _requestObjectEncryptionEncValuesSupported;
-        private ICollection<string> _requestObjectSigningAlgValuesSupported;
-        private ICollection<string> _responseModesSupported;
-        private ICollection<string> _responseTypesSupported;
-        private ICollection<string> _revocationEndpointAuthMethodsSupported;
-        private ICollection<string> _revocationEndpointAuthSigningAlgValuesSupported;
-        private ICollection<string> _scopesSupported;
-        private ICollection<string> _subjectTypesSupported;
-        private ICollection<string> _tokenEndpointAuthMethodsSupported;
-        private ICollection<string> _tokenEndpointAuthSigningAlgValuesSupported;
-        private ICollection<string> _uILocalesSupported;
-        private ICollection<string> _userInfoEndpointEncryptionAlgValuesSupported;
-        private ICollection<string> _userInfoEndpointEncryptionEncValuesSupported;
-        private ICollection<string> _userInfoEndpointSigningAlgValuesSupported;
+        private HashSet<string> _acrValuesSupported;
+        private HashSet<string> _authorizationDetailsTypesSupported;
+        private HashSet<string> _authorizationEncryptionAlgValuesSupported;
+        private HashSet<string> _authorizationEncryptionEncValuesSupported;
+        private HashSet<string> _authorizationSigningAlgValuesSupported;
+        private HashSet<string> _backchannelAuthenticationRequestSigningAlgValuesSupported;
+        private HashSet<string> _backchannelTokenDeliveryModesSupported;
+        private HashSet<string> _claimsSupported;
+        private HashSet<string> _claimsLocalesSupported;
+        private HashSet<string> _claimTypesSupported;
+        private HashSet<string> _codeChallengeMethodsSupported;
+        private HashSet<string> _displayValuesSupported;
+        private HashSet<string> _dPoPSigningAlgValuesSupported;
+        private HashSet<string> _grantTypesSupported;
+        private HashSet<string> _idTokenEncryptionAlgValuesSupported;
+        private HashSet<string> _idTokenEncryptionEncValuesSupported;
+        private HashSet<string> _idTokenSigningAlgValuesSupported;
+        private HashSet<string> _introspectionEndpointAuthMethodsSupported;
+        private HashSet<string> _introspectionEndpointAuthSigningAlgValuesSupported;
+        private HashSet<string> _promptValuesSupported;
+        private HashSet<string> _requestObjectEncryptionAlgValuesSupported;
+        private HashSet<string> _requestObjectEncryptionEncValuesSupported;
+        private HashSet<string> _requestObjectSigningAlgValuesSupported;
+        private HashSet<string> _responseModesSupported;
+        private HashSet<string> _responseTypesSupported;
+        private HashSet<string> _revocationEndpointAuthMethodsSupported;
+        private HashSet<string> _revocationEndpointAuthSigningAlgValuesSupported;
+        private HashSet<string> _scopesSupported;
+        private HashSet<string> _subjectTypesSupported;
+        private HashSet<string> _tokenEndpointAuthMethodsSupported;
+        private HashSet<string> _tokenEndpointAuthSigningAlgValuesSupported;
+        private HashSet<string> _uILocalesSupported;
+        private HashSet<string> _userInfoEndpointEncryptionAlgValuesSupported;
+        private HashSet<string> _userInfoEndpointEncryptionEncValuesSupported;
+        private HashSet<string> _userInfoEndpointSigningAlgValuesSupported;
 
         /// <summary>
         /// Deserializes the json string into an <see cref="OpenIdConnectConfiguration"/> object.
@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.AcrValuesSupported)]
         public ICollection<string> AcrValuesSupported =>
             _acrValuesSupported ??
-            Interlocked.CompareExchange(ref _acrValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _acrValuesSupported, new HashSet<string>(), null) ??
             _acrValuesSupported;
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationDetailsTypesSupported)]
         public ICollection<string> AuthorizationDetailsTypesSupported =>
             _authorizationDetailsTypesSupported ??
-            Interlocked.CompareExchange(ref _authorizationDetailsTypesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _authorizationDetailsTypesSupported, new HashSet<string>(), null) ??
             _authorizationDetailsTypesSupported;
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationEncryptionAlgValuesSupported)]
         public ICollection<string> AuthorizationEncryptionAlgValuesSupported =>
             _authorizationEncryptionAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _authorizationEncryptionAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _authorizationEncryptionAlgValuesSupported, new HashSet<string>(), null) ??
             _authorizationEncryptionAlgValuesSupported;
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationEncryptionEncValuesSupported)]
         public ICollection<string> AuthorizationEncryptionEncValuesSupported =>
             _authorizationEncryptionEncValuesSupported ??
-            Interlocked.CompareExchange(ref _authorizationEncryptionEncValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _authorizationEncryptionEncValuesSupported, new HashSet<string>(), null) ??
             _authorizationEncryptionEncValuesSupported;
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationSigningAlgValuesSupported)]
         public ICollection<string> AuthorizationSigningAlgValuesSupported =>
             _authorizationSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _authorizationSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _authorizationSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _authorizationSigningAlgValuesSupported;
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelAuthenticationRequestSigningAlgValuesSupported)]
         public ICollection<string> BackchannelAuthenticationRequestSigningAlgValuesSupported =>
             _backchannelAuthenticationRequestSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _backchannelAuthenticationRequestSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _backchannelAuthenticationRequestSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _backchannelAuthenticationRequestSigningAlgValuesSupported;
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelTokenDeliveryModesSupported)]
         public ICollection<string> BackchannelTokenDeliveryModesSupported =>
             _backchannelTokenDeliveryModesSupported ??
-            Interlocked.CompareExchange(ref _backchannelTokenDeliveryModesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _backchannelTokenDeliveryModesSupported, new HashSet<string>(), null) ??
             _backchannelTokenDeliveryModesSupported;
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.ClaimsSupported)]
         public ICollection<string> ClaimsSupported =>
             _claimsSupported ??
-            Interlocked.CompareExchange(ref _claimsSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _claimsSupported, new HashSet<string>(), null) ??
             _claimsSupported;
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.ClaimsLocalesSupported)]
         public ICollection<string> ClaimsLocalesSupported =>
             _claimsLocalesSupported ??
-            Interlocked.CompareExchange(ref _claimsLocalesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _claimsLocalesSupported, new HashSet<string>(), null) ??
             _claimsLocalesSupported;
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.ClaimTypesSupported)]
         public ICollection<string> ClaimTypesSupported =>
             _claimTypesSupported ??
-            Interlocked.CompareExchange(ref _claimTypesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _claimTypesSupported, new HashSet<string>(), null) ??
             _claimTypesSupported;
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.CodeChallengeMethodsSupported)]
         public ICollection<string> CodeChallengeMethodsSupported =>
             _codeChallengeMethodsSupported ??
-            Interlocked.CompareExchange(ref _codeChallengeMethodsSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _codeChallengeMethodsSupported, new HashSet<string>(), null) ??
             _codeChallengeMethodsSupported;
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.DisplayValuesSupported)]
         public ICollection<string> DisplayValuesSupported =>
             _displayValuesSupported ??
-            Interlocked.CompareExchange(ref _displayValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _displayValuesSupported, new HashSet<string>(), null) ??
             _displayValuesSupported;
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.DPoPSigningAlgValuesSupported)]
         public ICollection<string> DPoPSigningAlgValuesSupported =>
             _dPoPSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _dPoPSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _dPoPSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _dPoPSigningAlgValuesSupported;
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.GrantTypesSupported)]
         public ICollection<string> GrantTypesSupported =>
             _grantTypesSupported ??
-            Interlocked.CompareExchange(ref _grantTypesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _grantTypesSupported, new HashSet<string>(), null) ??
             _grantTypesSupported;
 
         /// <summary>
@@ -387,7 +387,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.IdTokenEncryptionAlgValuesSupported)]
         public ICollection<string> IdTokenEncryptionAlgValuesSupported =>
             _idTokenEncryptionAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _idTokenEncryptionAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _idTokenEncryptionAlgValuesSupported, new HashSet<string>(), null) ??
             _idTokenEncryptionAlgValuesSupported;
 
         /// <summary>
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.IdTokenEncryptionEncValuesSupported)]
         public ICollection<string> IdTokenEncryptionEncValuesSupported =>
             _idTokenEncryptionEncValuesSupported ??
-            Interlocked.CompareExchange(ref _idTokenEncryptionEncValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _idTokenEncryptionEncValuesSupported, new HashSet<string>(), null) ??
             _idTokenEncryptionEncValuesSupported;
 
         /// <summary>
@@ -405,7 +405,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.IdTokenSigningAlgValuesSupported)]
         public ICollection<string> IdTokenSigningAlgValuesSupported =>
             _idTokenSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _idTokenSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _idTokenSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _idTokenSigningAlgValuesSupported;
 
         /// <summary>
@@ -423,7 +423,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.IntrospectionEndpointAuthMethodsSupported)]
         public ICollection<string> IntrospectionEndpointAuthMethodsSupported =>
             _introspectionEndpointAuthMethodsSupported ??
-            Interlocked.CompareExchange(ref _introspectionEndpointAuthMethodsSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _introspectionEndpointAuthMethodsSupported, new HashSet<string>(), null) ??
             _introspectionEndpointAuthMethodsSupported;
 
         /// <summary>
@@ -432,7 +432,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.IntrospectionEndpointAuthSigningAlgValuesSupported)]
         public ICollection<string> IntrospectionEndpointAuthSigningAlgValuesSupported =>
             _introspectionEndpointAuthSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _introspectionEndpointAuthSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _introspectionEndpointAuthSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _introspectionEndpointAuthSigningAlgValuesSupported;
 
         /// <summary>
@@ -489,7 +489,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.PromptValuesSupported)]
         public ICollection<string> PromptValuesSupported =>
             _promptValuesSupported ??
-            Interlocked.CompareExchange(ref _promptValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _promptValuesSupported, new HashSet<string>(), null) ??
             _promptValuesSupported;
 
         /// <summary>
@@ -516,7 +516,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.RequestObjectEncryptionAlgValuesSupported)]
         public ICollection<string> RequestObjectEncryptionAlgValuesSupported =>
             _requestObjectEncryptionAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _requestObjectEncryptionAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _requestObjectEncryptionAlgValuesSupported, new HashSet<string>(), null) ??
             _requestObjectEncryptionAlgValuesSupported;
 
         /// <summary>
@@ -525,7 +525,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.RequestObjectEncryptionEncValuesSupported)]
         public ICollection<string> RequestObjectEncryptionEncValuesSupported =>
             _requestObjectEncryptionEncValuesSupported ??
-            Interlocked.CompareExchange(ref _requestObjectEncryptionEncValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _requestObjectEncryptionEncValuesSupported, new HashSet<string>(), null) ??
             _requestObjectEncryptionEncValuesSupported;
 
         /// <summary>
@@ -534,7 +534,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.RequestObjectSigningAlgValuesSupported)]
         public ICollection<string> RequestObjectSigningAlgValuesSupported =>
             _requestObjectSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _requestObjectSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _requestObjectSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _requestObjectSigningAlgValuesSupported;
 
         /// <summary>
@@ -579,7 +579,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.ResponseModesSupported)]
         public ICollection<string> ResponseModesSupported =>
             _responseModesSupported ??
-            Interlocked.CompareExchange(ref _responseModesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _responseModesSupported, new HashSet<string>(), null) ??
             _responseModesSupported;
 
         /// <summary>
@@ -588,7 +588,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.ResponseTypesSupported)]
         public ICollection<string> ResponseTypesSupported =>
             _responseTypesSupported ??
-            Interlocked.CompareExchange(ref _responseTypesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _responseTypesSupported, new HashSet<string>(), null) ??
             _responseTypesSupported;
 
         /// <summary>
@@ -606,7 +606,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.RevocationEndpointAuthMethodsSupported)]
         public ICollection<string> RevocationEndpointAuthMethodsSupported =>
             _revocationEndpointAuthMethodsSupported ??
-            Interlocked.CompareExchange(ref _revocationEndpointAuthMethodsSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _revocationEndpointAuthMethodsSupported, new HashSet<string>(), null) ??
             _revocationEndpointAuthMethodsSupported;
 
         /// <summary>
@@ -615,7 +615,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.RevocationEndpointAuthSigningAlgValuesSupported)]
         public ICollection<string> RevocationEndpointAuthSigningAlgValuesSupported =>
             _revocationEndpointAuthSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _revocationEndpointAuthSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _revocationEndpointAuthSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _revocationEndpointAuthSigningAlgValuesSupported;
 
         /// <summary>
@@ -633,14 +633,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.ScopesSupported)]
         public ICollection<string> ScopesSupported =>
             _scopesSupported ??
-            Interlocked.CompareExchange(ref _scopesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _scopesSupported, new HashSet<string>(), null) ??
             _scopesSupported;
 
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
         [JsonIgnore]
-        public override ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
+        public override ICollection<SecurityKey> SigningKeys { get; } = new HashSet<SecurityKey>();
 
         /// <summary>
         /// Gets the collection of 'subject_types_supported'.
@@ -648,7 +648,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.SubjectTypesSupported)]
         public ICollection<string> SubjectTypesSupported =>
             _subjectTypesSupported ??
-            Interlocked.CompareExchange(ref _subjectTypesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _subjectTypesSupported, new HashSet<string>(), null) ??
             _subjectTypesSupported;
 
         /// <summary>
@@ -672,7 +672,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.TokenEndpointAuthMethodsSupported)]
         public ICollection<string> TokenEndpointAuthMethodsSupported =>
             _tokenEndpointAuthMethodsSupported ??
-            Interlocked.CompareExchange(ref _tokenEndpointAuthMethodsSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _tokenEndpointAuthMethodsSupported, new HashSet<string>(), null) ??
             _tokenEndpointAuthMethodsSupported;
 
         /// <summary>
@@ -681,7 +681,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.TokenEndpointAuthSigningAlgValuesSupported)]
         public ICollection<string> TokenEndpointAuthSigningAlgValuesSupported =>
             _tokenEndpointAuthSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _tokenEndpointAuthSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _tokenEndpointAuthSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _tokenEndpointAuthSigningAlgValuesSupported;
 
         /// <summary>
@@ -699,7 +699,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.UILocalesSupported)]
         public ICollection<string> UILocalesSupported =>
             _uILocalesSupported ??
-            Interlocked.CompareExchange(ref _uILocalesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _uILocalesSupported, new HashSet<string>(), null) ??
             _uILocalesSupported;
 
         /// <summary>
@@ -717,7 +717,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.UserInfoEncryptionAlgValuesSupported)]
         public ICollection<string> UserInfoEndpointEncryptionAlgValuesSupported =>
             _userInfoEndpointEncryptionAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _userInfoEndpointEncryptionAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _userInfoEndpointEncryptionAlgValuesSupported, new HashSet<string>(), null) ??
             _userInfoEndpointEncryptionAlgValuesSupported;
 
         /// <summary>
@@ -726,7 +726,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.UserInfoEncryptionEncValuesSupported)]
         public ICollection<string> UserInfoEndpointEncryptionEncValuesSupported =>
             _userInfoEndpointEncryptionEncValuesSupported ??
-            Interlocked.CompareExchange(ref _userInfoEndpointEncryptionEncValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _userInfoEndpointEncryptionEncValuesSupported, new HashSet<string>(), null) ??
             _userInfoEndpointEncryptionEncValuesSupported;
 
         /// <summary>
@@ -735,7 +735,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonPropertyName(OpenIdProviderMetadataNames.UserInfoSigningAlgValuesSupported)]
         public ICollection<string> UserInfoEndpointSigningAlgValuesSupported =>
             _userInfoEndpointSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _userInfoEndpointSigningAlgValuesSupported, new Collection<string>(), null) ??
+            Interlocked.CompareExchange(ref _userInfoEndpointSigningAlgValuesSupported, new HashSet<string>(), null) ??
             _userInfoEndpointSigningAlgValuesSupported;
 
         #region shouldserialize
