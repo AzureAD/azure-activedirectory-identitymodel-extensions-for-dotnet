@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Used to track the type of request for signaling the event handler and for telemetry.
         /// </summary>
-        private bool _refreshRequested;
+        private int _refreshRequested;
 
         private async Task<T> GetConfigurationWithBlockingAsync(CancellationToken cancel)
         {
@@ -29,9 +29,10 @@ namespace Microsoft.IdentityModel.Protocols
 
             try
             {
-                if (_syncAfter <= TimeProvider.GetUtcNow())
+                if (new DateTimeOffset(Interlocked.Read(ref _syncAfter), TimeSpan.Zero) <= TimeProvider.GetUtcNow())
                 {
-                    var retrievalContext = new ConfigurationRetrievalContext { BypassCache = _refreshRequested };
+                    var retrievalContext = new ConfigurationRetrievalContext { BypassCache = Volatile.Read(ref _refreshRequested) == 1 };
+
                     try
                     {
                         // Check if event handler can provide configuration
@@ -46,14 +47,13 @@ namespace Microsoft.IdentityModel.Protocols
                             {
                                 TelemetryForUpdateBlocking(TelemetryConstants.Protocols.ConfigurationSourceHandler);
 
-                                if (_refreshRequested)
-                                    _refreshRequested = false;
+                                Interlocked.Exchange(ref _refreshRequested, 0);
 
                                 UpdateConfiguration(configurationRetrieved.Configuration, configurationRetrieved.RetrievalTime, retrievalContext);
 
                                 _fetchMetadataFailure = null;
 
-                                return _currentConfiguration;
+                                return Volatile.Read(ref _currentConfiguration);
                             }
                         }
 
@@ -74,12 +74,11 @@ namespace Microsoft.IdentityModel.Protocols
                                 throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
-                        _lastRequestRefresh = TimeProvider.GetUtcNow().UtcDateTime;
+                        Interlocked.Exchange(ref _lastRequestRefresh, TimeProvider.GetUtcNow().Ticks);
 
                         TelemetryForUpdateBlocking(TelemetryConstants.Protocols.ConfigurationSourceRetriever);
 
-                        if (_refreshRequested)
-                            _refreshRequested = false;
+                        Interlocked.Exchange(ref _refreshRequested, 0);
 
                         UpdateConfiguration(configuration, TimeProvider.GetUtcNow(), retrievalContext);
 
@@ -89,20 +88,21 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         _fetchMetadataFailure = ex;
 
-                        if (_currentConfiguration == null)
+                        if (Volatile.Read(ref _currentConfiguration) == null)
                         {
                             if (_bootstrapRefreshInterval < RefreshInterval)
                             {
                                 // Adopt exponential backoff for bootstrap refresh interval with a decorrelated jitter if it is not longer than the refresh interval.
                                 TimeSpan _bootstrapRefreshIntervalWithJitter = TimeSpan.FromSeconds(new Random().Next((int)_bootstrapRefreshInterval.TotalSeconds));
                                 _bootstrapRefreshInterval += _bootstrapRefreshInterval;
-                                _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, _bootstrapRefreshIntervalWithJitter);
+
+                                Interlocked.Exchange(ref _syncAfter, DateTimeUtil.Add(TimeProvider.GetUtcNow().UtcDateTime, _bootstrapRefreshIntervalWithJitter).Ticks);
                             }
                             else
                             {
-                                _syncAfter = DateTimeUtil.Add(
-                                    TimeProvider.GetUtcNow().UtcDateTime,
-                                    AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                                Interlocked.Exchange(ref _syncAfter,
+                                    DateTimeUtil.Add(TimeProvider.GetUtcNow().UtcDateTime,
+                                        AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval).Ticks);
                             }
 
                             TelemetryClient.IncrementConfigurationRefreshRequestCounter(
@@ -113,13 +113,13 @@ namespace Microsoft.IdentityModel.Protocols
 
                             throw LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
-                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_syncAfter), LogHelper.MarkAsNonPII(ex)), ex));
+                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(new DateTimeOffset(Interlocked.Read(ref _syncAfter), TimeSpan.Zero)), LogHelper.MarkAsNonPII(ex)), ex));
                         }
                         else
                         {
-                            _syncAfter = DateTimeUtil.Add(
-                                TimeProvider.GetUtcNow().UtcDateTime,
-                                AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                            Interlocked.Exchange(ref _syncAfter,
+                                DateTimeUtil.Add(TimeProvider.GetUtcNow().UtcDateTime,
+                                    AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval).Ticks);
 
                             var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
 
@@ -137,15 +137,15 @@ namespace Microsoft.IdentityModel.Protocols
                 }
 
                 // Stale metadata is better than no metadata
-                if (_currentConfiguration != null)
-                    return _currentConfiguration;
+                if (Volatile.Read(ref _currentConfiguration) != null)
+                    return Volatile.Read(ref _currentConfiguration);
                 else
                     throw LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX20803,
                                 LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                LogHelper.MarkAsNonPII(_syncAfter),
+                                LogHelper.MarkAsNonPII(new DateTimeOffset(Interlocked.Read(ref _syncAfter), TimeSpan.Zero)),
                                 LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
                             _fetchMetadataFailure));
             }
@@ -157,13 +157,14 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void RequestRefreshBlocking()
         {
-            DateTime now = TimeProvider.GetUtcNow().UtcDateTime;
+            DateTimeOffset now = TimeProvider.GetUtcNow();
+            var lastRefresh = new DateTimeOffset(Interlocked.Read(ref _lastRequestRefresh), TimeSpan.Zero);
 
-            if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
+            if (now >= DateTimeUtil.Add(lastRefresh.UtcDateTime, RefreshInterval) || Volatile.Read(ref _isFirstRefreshRequest) == 1)
             {
-                _refreshRequested = true;
-                _syncAfter = now;
-                _isFirstRefreshRequest = false;
+                Interlocked.Exchange(ref _refreshRequested, 1);
+                Interlocked.Exchange(ref _syncAfter, now.Ticks);
+                Interlocked.Exchange(ref _isFirstRefreshRequest, 0);
             }
         }
 
@@ -171,10 +172,10 @@ namespace Microsoft.IdentityModel.Protocols
         {
             string updateMode;
 
-            if (_currentConfiguration is null)
+            if (Volatile.Read(ref _currentConfiguration) is null)
                 updateMode = TelemetryConstants.Protocols.FirstRefresh;
             else
-                updateMode = _refreshRequested ? TelemetryConstants.Protocols.Manual : TelemetryConstants.Protocols.Automatic;
+                updateMode = Volatile.Read(ref _refreshRequested) == 1 ? TelemetryConstants.Protocols.Manual : TelemetryConstants.Protocols.Automatic;
 
             try
             {
