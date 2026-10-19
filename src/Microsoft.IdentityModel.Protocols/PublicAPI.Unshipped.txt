@@ -1,3 +1,4 @@
+Microsoft.IdentityModel.Protocols.HttpRequestData.SetLazyClientCertificates(System.Action<System.Security.Cryptography.X509Certificates.X509Certificate2Collection> lazyClientCertificates) -> void
 Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>
 Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.Configuration.get -> T
 Microsoft.IdentityModel.Protocols.Configuration.ConfigurationEventHandlerResult<T>.ConfigurationEventHandlerResult(T configuration, System.DateTimeOffset retrievalTime) -> void
