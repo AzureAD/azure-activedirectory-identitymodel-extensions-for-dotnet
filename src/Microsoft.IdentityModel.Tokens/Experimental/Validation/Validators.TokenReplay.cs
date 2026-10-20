@@ -19,12 +19,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
+        /// <param name="replayCacheIdentity">An authenticated identity used only by the built-in replay validator.</param>
         internal static ValidationResult<DateTime?, ValidationError> ValidateTokenReplayInternal(
             DateTime? expires,
             string securityToken,
             ValidationParameters validationParameters,
 #pragma warning disable CA1801 // Review unused parameters
-            CallContext callContext)
+            CallContext callContext,
+            string? replayCacheIdentity = null)
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (validationParameters == null)
@@ -37,7 +39,8 @@ namespace Microsoft.IdentityModel.Tokens
                 ValidationResult<DateTime?, ValidationError> result =
                     validationParameters.TokenReplayValidator.ValidateTokenReplay(
                         expires,
-                        securityToken,
+                        validationParameters.TokenReplayValidator is DefaultTokenReplayValidator && replayCacheIdentity is not null
+                            ? replayCacheIdentity : securityToken,
                         validationParameters,
                         callContext);
 
@@ -66,6 +69,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
+        /// <remarks>This direct API uses the supplied string unchanged even when
+        /// UseTokenReplayCacheIdentity is enabled; only format-aware handler validation derives identities.</remarks>
         public static ValidationResult<DateTime?, ValidationError> ValidateTokenReplay(
             DateTime? expires,
             string securityToken,

@@ -136,6 +136,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                 }
 
+                if (validationParameters.UseTokenReplayCacheIdentity && tokenValidationResult.IsValid)
+                {
+                    var validatedToken = (JsonWebToken)tokenValidationResult.SecurityToken;
+                    DateTime? expires = validatedToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? validatedToken.ValidTo : null;
+                    Validators.ValidateTokenReplay(expires, validatedToken.EncodedToken, validationParameters,
+                        validationParameters.ValidateTokenReplay && validationParameters.TokenReplayCache != null &&
+                        validationParameters.TokenReplayValidator == null
+                            ? TokenReplayCacheIdentity.CreateJwt(validatedToken.EncodedToken) : null);
+                }
+
                 return tokenValidationResult;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -729,7 +739,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             Validators.ValidateAudience(jsonWebToken.Audiences, jsonWebToken, validationParameters);
             string issuer = await Validators.ValidateIssuerAsync(jsonWebToken.Issuer, jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
 
-            Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
+            if (!validationParameters.UseTokenReplayCacheIdentity)
+                Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
                 // Infinite recursion should not occur here, as the JsonWebToken passed into this method is (1) constructed from a string

@@ -91,6 +91,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
+            UseTokenReplayCacheIdentity = other.UseTokenReplayCacheIdentity;
             TransformBeforeSignatureValidation = other.TransformBeforeSignatureValidation;
             TryAllDecryptionKeys = other.TryAllDecryptionKeys;
             TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
@@ -730,6 +731,22 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         [DefaultValue(false)]
         public bool ValidateTokenReplay { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether built-in token handlers use a signature-independent, versioned
+        /// SHA-256 identity as the opaque <see cref="ITokenReplayCache"/> key after successful validation.
+        /// The default is <c>false</c>, preserving legacy token-string cache inputs.
+        /// </summary>
+        /// <remarks>
+        /// Enable <see cref="ValidateTokenReplay"/> and configure <see cref="TokenReplayCache"/> as well.
+        /// Leaving this option disabled does not prevent replay using alternate valid signatures.
+        /// Custom replay validators and handler overrides retain their original token arguments and
+        /// remain responsible for replay protection. Direct <see cref="Validators.ValidateTokenReplay(DateTime?, string, TokenValidationParameters)"/>
+        /// calls have no format context and continue to use the supplied string unchanged.
+        /// Existing raw-token entries do not match identity keys; coordinate cache migration across instances.
+        /// </remarks>
+        [DefaultValue(false)]
+        public bool UseTokenReplayCacheIdentity { get; set; }
 
         /// <summary>
         /// Gets or sets the valid algorithms for cryptographic operations.

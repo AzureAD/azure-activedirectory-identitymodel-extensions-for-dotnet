@@ -258,15 +258,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!issuerResult.Succeeded)
                 return issuerResult.Error!.AddCurrentStackFrame();
 
-            ValidationResult<DateTime?, ValidationError>? tokenReplayResult =
-                Validators.ValidateTokenReplayInternal(
-                    expires,
-                    jsonWebToken.EncodedToken,
-                    validationParameters,
-                    callContext);
-
-            if (!tokenReplayResult.Value.Succeeded)
-                return tokenReplayResult.Value.Error!.AddCurrentStackFrame();
+            if (!validationParameters.UseTokenReplayCacheIdentity)
+            {
+                var tokenReplayResult = Validators.ValidateTokenReplayInternal(
+                    expires, jsonWebToken.EncodedToken, validationParameters, callContext);
+                if (!tokenReplayResult.Succeeded)
+                    return tokenReplayResult.Error!.AddCurrentStackFrame();
+            }
 
             ValidationResult<ValidatedTokenType, ValidationError> tokenTypeResult =
                 Validators.ValidateTokenTypeInternal(
@@ -333,6 +331,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 if (!actorResult.Value.Succeeded)
                     return actorResult.Value.Error!.AddCurrentStackFrame();
+            }
+
+            if (validationParameters.UseTokenReplayCacheIdentity)
+            {
+                var tokenReplayResult = Validators.ValidateTokenReplayInternal(
+                    expires, jsonWebToken.EncodedToken, validationParameters, callContext,
+                    TokenReplayCacheIdentity.CreateJwt(jsonWebToken.EncodedToken));
+                if (!tokenReplayResult.Succeeded)
+                    return tokenReplayResult.Error!.AddCurrentStackFrame();
             }
 
             return new ValidatedToken(jsonWebToken, this, validationParameters)
