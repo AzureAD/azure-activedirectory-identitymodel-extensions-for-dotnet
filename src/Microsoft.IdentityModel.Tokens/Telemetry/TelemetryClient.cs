@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Telemetry
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
-                { TelemetryConstants.AlgorithmTag, algorithm },
+                { TelemetryConstants.AlgorithmTag, CryptoTelemetry.GetKnownAlgorithmFamilyOrOther(algorithm) },
                 { TelemetryConstants.KeyAlgorithmTag, CryptoTelemetry.GetKeyAlgorithmId(key) },
                 { TelemetryConstants.IssuerTag, CryptoTelemetry.GetTrackedIssuerOrOther(issuer) },
                 { TelemetryConstants.ErrorTag, errorType }

@@ -17,15 +17,38 @@ namespace Microsoft.IdentityModel.Tokens
         private List<string> _audiences;
 
         /// <summary>
-        /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
-        /// <see cref="Claims"/> or <see cref="Subject"/> when creating a token.
+        /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> when creating a token.
         /// </summary>
+        /// <remarks>
+        /// When <see cref="Audience"/> and/or <see cref="Audiences"/> is set, <c>JsonWebTokenHandler</c>
+        /// uses them as the only source for the token's 'aud' claim and ignores any "Aud" claims in <see cref="Claims"/> or <see cref="Subject"/>.
+        /// This allows the audiences of a token to be overridden with a smaller subset than the claims it is created from.
+        /// When neither is set, the 'aud' claim is taken from <see cref="Claims"/> if present, otherwise from <see cref="Subject"/>.
+        /// <para>
+        /// The legacy <c>JwtSecurityTokenHandler</c> instead combines <see cref="Audience"/> and <see cref="Audiences"/> with the "Aud"
+        /// claims found in <see cref="Claims"/> or <see cref="Subject"/>. Applications migrating to
+        /// <c>JsonWebTokenHandler</c> that set "Aud" claims in more than one place should
+        /// consolidate all intended audiences into <see cref="Audiences"/>.
+        /// </para>
+        /// </remarks>
         public string Audience { get; set; }
 
         /// <summary>
-        /// Gets the list audiences to include in the token's 'Aud' claim. Will be combined with <see cref="Audiences"/> and any
-        /// "Aud" claims in <see cref="Claims"/> or <see cref="Subject"/> when creating a token.
+        /// Gets the list audiences to include in the token's 'Aud' claim. Will be combined with <see cref="Audience"/> when creating a token.
         /// </summary>
+        /// <remarks>
+        /// When <see cref="Audiences"/> and/or <see cref="Audience"/> is set, <c>JsonWebTokenHandler</c>
+        /// uses them as the only source for the token's 'aud' claim and ignores any "Aud" claims in <see cref="Claims"/> or <see cref="Subject"/>.
+        /// This allows the audiences of a token to be overridden with a smaller subset than the claims it is created from.
+        /// When neither is set, the 'aud' claim is taken from <see cref="Claims"/> if present, otherwise from <see cref="Subject"/>.
+        /// Duplicate values are not removed; each entry is written to the token as provided.
+        /// <para>
+        /// The legacy <c>JwtSecurityTokenHandler</c> instead combines <see cref="Audiences"/> and <see cref="Audience"/> with the "Aud"
+        /// claims found in <see cref="Claims"/> or <see cref="Subject"/>. Applications migrating to
+        /// <c>JsonWebTokenHandler</c> that set "Aud" claims in more than one place should
+        /// consolidate all intended audiences into <see cref="Audiences"/>.
+        /// </para>
+        /// </remarks>
         public IList<string> Audiences => _audiences ?? Interlocked.CompareExchange(ref _audiences, [], null) ?? _audiences;
 
         /// <summary>
