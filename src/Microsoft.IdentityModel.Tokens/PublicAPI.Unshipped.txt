@@ -366,7 +366,3 @@ Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.get ->
 Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CacheCustomProviders.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.get -> bool
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.IgnoreCaseWhenValidatingAudience.set -> void
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.UseTokenReplayCacheIdentity.get -> bool
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.UseTokenReplayCacheIdentity.set -> void
-Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.UseTokenReplayCacheIdentity.get -> bool
-Microsoft.IdentityModel.Tokens.Experimental.ValidationParameters.UseTokenReplayCacheIdentity.set -> void

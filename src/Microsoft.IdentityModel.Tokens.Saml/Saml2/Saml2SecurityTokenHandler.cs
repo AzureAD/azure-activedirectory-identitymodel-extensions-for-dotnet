@@ -274,7 +274,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ValidateSubject(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
 
-            if (!validationParameters.UseTokenReplayCacheIdentity && samlToken.Assertion.Conditions != null)
+            if (samlToken.Assertion.Conditions != null)
                 ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
 
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
@@ -288,11 +288,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     TokenLogMessages.IDX10241,
                     LogHelper.MarkAsUnsafeSecurityArtifact(token, t => t.ToString()));
 
-            var principal = new ClaimsPrincipal(identity);
-            if (validationParameters.UseTokenReplayCacheIdentity)
-                ValidateTokenReplay(samlToken.Assertion.Conditions?.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
-
-            return principal;
+            return new ClaimsPrincipal(identity);
         }
 
         /// <summary>
@@ -356,17 +352,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <remarks>By default no validation is performed. Validation requires that <see cref="TokenValidationParameters.TokenReplayCache"/> has been set.</remarks>
         protected virtual void ValidateTokenReplay(DateTime? expirationTime, string securityToken, TokenValidationParameters validationParameters)
         {
-            string identity = null;
-            if (validationParameters != null && validationParameters.UseTokenReplayCacheIdentity && validationParameters.ValidateTokenReplay &&
-                validationParameters.TokenReplayCache != null && validationParameters.TokenReplayValidator == null)
-            {
-                // Preserve the original protected/callback argument; only the built-in cache
-                // path uses these already-authenticated assertion fields.
-                Saml2SecurityToken samlToken = ReadSaml2Token(securityToken);
-                identity = TokenReplayCacheIdentity.CreateSaml("SAML2", samlToken.Issuer, samlToken.Assertion.Id.Value);
-            }
-
-            Validators.ValidateTokenReplay(expirationTime, securityToken, validationParameters, identity);
+            Validators.ValidateTokenReplay(expirationTime, securityToken, validationParameters);
         }
 
         /// <summary>

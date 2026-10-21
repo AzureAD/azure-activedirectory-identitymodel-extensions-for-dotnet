@@ -63,7 +63,6 @@ The scenarios supported by IdentityModel extensions for .NET are described in [S
 - [Microsoft Entra ID with ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/azure-active-directory/?view=aspnetcore-2.1)
 - [Developing ASP.NET Apps with Microsoft Entra ID](https://docs.microsoft.com/en-us/aspnet/identity/overview/getting-started/developing-aspnet-apps-with-windows-azure-active-directory)
 - [Validating tokens](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/ValidatingTokens)
-- [Opt-in replay cache identities and deployment considerations](docs/token-replay-cache-identity.md)
 - more generally, the library's [Wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki)
 - the [reference documentation](https://learn.microsoft.com/dotnet/api/microsoft.identitymodel.jsonwebtokens.jsonwebtokenhandler?view=msal-web-dotnet-latest)
 

@@ -101,7 +101,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             _decryptionKeys = other.DecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
-            UseTokenReplayCacheIdentity = other.UseTokenReplayCacheIdentity;
             TokenTypeValidator = other.TokenTypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateWithLKG = other.ValidateWithLKG;
@@ -117,20 +116,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         public ValidationParameters()
         {
         }
-
-        /// <summary>
-        /// Gets or sets whether built-in token handlers use a signature-independent, versioned
-        /// SHA-256 identity as the opaque <see cref="ITokenReplayCache"/> key after successful validation.
-        /// The default is <c>false</c>, preserving legacy token-string cache inputs.
-        /// </summary>
-        /// <remarks>
-        /// Requires <see cref="TokenReplayCache"/>. Leaving this disabled permits replay using alternate
-        /// valid signatures. Custom replay validators retain original token arguments and own replay
-        /// protection. Direct Validators.ValidateTokenReplay calls use the supplied string unchanged.
-        /// Coordinate cache migration across instances: legacy entries do not match identity keys.
-        /// </remarks>
-        [DefaultValue(false)]
-        public bool UseTokenReplayCacheIdentity { get; set; }
 
         /// <summary>
         /// Gets or sets <see cref="ValidationParameters"/>.
