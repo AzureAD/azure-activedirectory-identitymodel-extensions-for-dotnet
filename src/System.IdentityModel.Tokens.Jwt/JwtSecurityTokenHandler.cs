@@ -1030,13 +1030,6 @@ namespace System.IdentityModel.Tokens.Jwt
                     }
                 }
 
-                if (validationParameters.UseTokenReplayCacheIdentity)
-                {
-                    var validatedJwt = (JwtSecurityToken)signatureValidatedToken;
-                    DateTime? expires = validatedJwt.Payload.Expiration == null ? null : validatedJwt.ValidTo;
-                    ValidateTokenReplay(expires, validatedJwt.RawData, validationParameters);
-                }
-
                 return claimsPrincipal;
             }
             catch (Exception ex)
@@ -1156,8 +1149,7 @@ namespace System.IdentityModel.Tokens.Jwt
             string issuer = configuration == null ? ValidateIssuer(jwtToken.Issuer, jwtToken, validationParameters) :
                 Validators.ValidateIssuer(jwtToken.Issuer, jwtToken, validationParameters, configuration);
 
-            if (!validationParameters.UseTokenReplayCacheIdentity)
-                ValidateTokenReplay(expires, jwtToken.RawData, validationParameters);
+            ValidateTokenReplay(expires, jwtToken.RawData, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwtToken.Actor))
             {
                 ValidateToken(jwtToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters, out _);
@@ -1758,11 +1750,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         protected virtual void ValidateTokenReplay(DateTime? expires, string securityToken, TokenValidationParameters validationParameters)
         {
-            string identity = validationParameters != null && validationParameters.UseTokenReplayCacheIdentity &&
-                validationParameters.ValidateTokenReplay && validationParameters.TokenReplayCache != null &&
-                validationParameters.TokenReplayValidator == null
-                    ? TokenReplayCacheIdentity.CreateJwt(securityToken) : null;
-            Validators.ValidateTokenReplay(expires, securityToken, validationParameters, identity);
+            Validators.ValidateTokenReplay(expires, securityToken, validationParameters);
         }
 
         /// <summary>

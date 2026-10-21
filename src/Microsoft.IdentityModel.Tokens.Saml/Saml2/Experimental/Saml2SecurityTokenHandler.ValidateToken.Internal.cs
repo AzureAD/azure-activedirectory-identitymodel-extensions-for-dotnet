@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -137,14 +138,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (!issuerResult.Succeeded)
                 return issuerResult.Error!.AddCurrentStackFrame();
 
-            if (!validationParameters.UseTokenReplayCacheIdentity)
-            {
-                var tokenReplayResult = Validators.ValidateTokenReplayInternal(
-                    samlToken.Assertion!.Conditions?.NotOnOrAfter,
-                    samlToken.Assertion.CanonicalString!, validationParameters, callContext);
-                if (!tokenReplayResult.Succeeded)
-                    return tokenReplayResult.Error!.AddCurrentStackFrame();
-            }
+            ValidationResult<DateTime?, ValidationError>? tokenReplayResult = Validators.ValidateTokenReplayInternal(
+                        samlToken.Assertion!.Conditions?.NotOnOrAfter,
+                        samlToken.Assertion!.CanonicalString!,
+                        validationParameters,
+                        callContext);
+
+            if (!tokenReplayResult.Value.Succeeded)
+                return tokenReplayResult.Value.Error!.AddCurrentStackFrame();
 
             ValidationResult<string, ValidationError> algorithmResult =
                 Validators.ValidateAlgorithmInternal(
@@ -193,16 +194,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (!signingKeyResult.Succeeded)
                 return signingKeyResult.Error!.AddCurrentStackFrame();
-
-            if (validationParameters.UseTokenReplayCacheIdentity)
-            {
-                var tokenReplayResult = Validators.ValidateTokenReplayInternal(
-                    samlToken.Assertion!.Conditions?.NotOnOrAfter,
-                    samlToken.Assertion.CanonicalString!, validationParameters, callContext,
-                    TokenReplayCacheIdentity.CreateSaml("SAML2", samlToken.Issuer, samlToken.Assertion.Id.Value));
-                if (!tokenReplayResult.Succeeded)
-                    return tokenReplayResult.Error!.AddCurrentStackFrame();
-            }
 
             return new ValidatedToken(samlToken, this, validationParameters)
             {

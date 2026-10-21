@@ -1165,18 +1165,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         protected virtual void ValidateTokenReplay(DateTime? expiration, string token, TokenValidationParameters validationParameters)
         {
-            string identity = null;
-            if (validationParameters != null && validationParameters.UseTokenReplayCacheIdentity && validationParameters.ValidateTokenReplay &&
-                validationParameters.TokenReplayCache != null && validationParameters.TokenReplayValidator == null)
-            {
-                // This protected contract carries the original string, including for overrides.
-                // Recover only the identity fields using this handler's serializer. The caller
-                // has already authenticated the assertion and completed validation.
-                SamlSecurityToken samlToken = ReadSamlToken(token);
-                identity = TokenReplayCacheIdentity.CreateSaml("SAML1", samlToken.Issuer, samlToken.Assertion.AssertionId);
-            }
-
-            Validators.ValidateTokenReplay(expiration, token, validationParameters, identity);
+            Validators.ValidateTokenReplay(expiration, token, validationParameters);
         }
 
         /// <summary>
@@ -1286,8 +1275,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ValidateConditions(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
 
-            if (!validationParameters.UseTokenReplayCacheIdentity && samlToken.Assertion.Conditions != null)
-                ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
+            ValidateTokenReplay(samlToken.Assertion.Conditions?.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
 
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
@@ -1302,11 +1290,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     TokenLogMessages.IDX10241,
                     LogHelper.MarkAsUnsafeSecurityArtifact(token, t => t.ToString()));
 
-            var principal = new ClaimsPrincipal(identities);
-            if (validationParameters.UseTokenReplayCacheIdentity)
-                ValidateTokenReplay(samlToken.Assertion.Conditions?.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
-
-            return principal;
+            return new ClaimsPrincipal(identities);
         }
 
         /// <summary>

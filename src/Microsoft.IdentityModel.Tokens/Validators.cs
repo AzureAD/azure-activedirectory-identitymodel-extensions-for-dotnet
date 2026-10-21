@@ -602,15 +602,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenNoExpirationException">If <see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
         /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
         /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="TokenValidationParameters.TokenReplayCache"/>.</exception>
-        /// <remarks>This direct API uses the supplied string unchanged, even when UseTokenReplayCacheIdentity
-        /// is enabled. Only format-aware token handler validation derives authenticated cache identities.</remarks>
         public static void ValidateTokenReplay(DateTime? expirationTime, string securityToken, TokenValidationParameters validationParameters)
-        {
-            // Direct callers have no authenticated token-format context. Preserve their input contract.
-            ValidateTokenReplay(expirationTime, securityToken, validationParameters, null);
-        }
-
-        internal static void ValidateTokenReplay(DateTime? expirationTime, string securityToken, TokenValidationParameters validationParameters, string replayCacheIdentity)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
                 throw LogHelper.LogArgumentNullException(nameof(securityToken));
@@ -654,8 +646,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(ex);
                 }
 
-                string cacheKey = replayCacheIdentity ?? securityToken;
-                if (validationParameters.TokenReplayCache.TryFind(cacheKey))
+                if (validationParameters.TokenReplayCache.TryFind(securityToken))
                 {
                     SecurityTokenReplayDetectedException ex = new SecurityTokenReplayDetectedException(LogHelper.FormatInvariant(LogMessages.IDX10228, securityToken));
 
@@ -665,7 +656,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(ex);
                 }
 
-                if (!validationParameters.TokenReplayCache.TryAdd(cacheKey, expirationTime.Value))
+                if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
                 {
                     SecurityTokenReplayAddFailedException ex = new SecurityTokenReplayAddFailedException(LogHelper.FormatInvariant(LogMessages.IDX10229, securityToken));
 

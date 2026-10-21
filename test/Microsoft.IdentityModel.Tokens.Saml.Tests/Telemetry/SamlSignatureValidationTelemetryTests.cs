@@ -60,7 +60,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, Default.AsymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
@@ -108,7 +108,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
@@ -148,7 +148,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, Default.AsymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
@@ -196,7 +196,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.SignatureVerificationFailed },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }
@@ -236,7 +236,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.HMAC },
                 { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
@@ -276,7 +276,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, Default.SymmetricSigningCredentials.Algorithm },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.HMAC },
                 { TelemetryConstants.KeyAlgorithmTag, "SYM-256" }
             });
     }
@@ -316,7 +316,7 @@ public class SamlSignatureValidationTelemetryTests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.ErrorTag, TelemetryConstants.SignatureValidationErrors.None },
                 { TelemetryConstants.IssuerTag, ExpectedIssuer },
-                { TelemetryConstants.AlgorithmTag, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm },
+                { TelemetryConstants.AlgorithmTag, TelemetryConstants.AlgorithmFamilies.RSA },
                 { TelemetryConstants.KeyAlgorithmTag, "RSA-2048" }
             });
     }

@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IgnoreCaseWhenValidatingAudience = other.IgnoreCaseWhenValidatingAudience;
             SignatureKeyResolver = other.SignatureKeyResolver;
-            _signingKeys = other.SigningKeys;
+            _signingKeys = new List<SecurityKey>(other.SigningKeys);
             SignatureKeyValidator = other.SignatureKeyValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
             LifetimeValidator = other.LifetimeValidator;
@@ -98,17 +98,16 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             TryAllDecryptionKeys = other.TryAllDecryptionKeys;
             TryAllSigningKeys = other.TryAllSigningKeys;
             DecryptionKeyResolver = other.DecryptionKeyResolver;
-            _decryptionKeys = other.DecryptionKeys;
+            _decryptionKeys = new List<SecurityKey>(other.DecryptionKeys);
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
-            UseTokenReplayCacheIdentity = other.UseTokenReplayCacheIdentity;
             TokenTypeValidator = other.TokenTypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateWithLKG = other.ValidateWithLKG;
-            _validIssuers = other.ValidIssuers;
-            _validAudiences = other.ValidAudiences;
-            _validAlgorithms = other.ValidAlgorithms;
-            _validTokenTypes = other.ValidTypes;
+            _validIssuers = new List<string>(other.ValidIssuers);
+            _validAudiences = new List<string>(other.ValidAudiences);
+            _validAlgorithms = new List<string>(other.ValidAlgorithms);
+            _validTokenTypes = new List<string>(other.ValidTypes);
         }
 
         /// <summary>
@@ -117,20 +116,6 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         public ValidationParameters()
         {
         }
-
-        /// <summary>
-        /// Gets or sets whether built-in token handlers use a signature-independent, versioned
-        /// SHA-256 identity as the opaque <see cref="ITokenReplayCache"/> key after successful validation.
-        /// The default is <c>false</c>, preserving legacy token-string cache inputs.
-        /// </summary>
-        /// <remarks>
-        /// Requires <see cref="TokenReplayCache"/>. Leaving this disabled permits replay using alternate
-        /// valid signatures. Custom replay validators retain original token arguments and own replay
-        /// protection. Direct Validators.ValidateTokenReplay calls use the supplied string unchanged.
-        /// Coordinate cache migration across instances: legacy entries do not match identity keys.
-        /// </remarks>
-        [DefaultValue(false)]
-        public bool UseTokenReplayCacheIdentity { get; set; }
 
         /// <summary>
         /// Gets or sets <see cref="ValidationParameters"/>.

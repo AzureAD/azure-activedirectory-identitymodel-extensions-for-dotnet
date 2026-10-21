@@ -343,6 +343,72 @@ public class CryptoTelemetryTests
         }
     }
 
+    [Theory]
+    [InlineData(SecurityAlgorithms.RsaSha256, "RSA")]
+    [InlineData(SecurityAlgorithms.RsaSha384, "RSA")]
+    [InlineData(SecurityAlgorithms.RsaSha512, "RSA")]
+    [InlineData(SecurityAlgorithms.RsaSha256Signature, "RSA")]
+    [InlineData(SecurityAlgorithms.RsaSha384Signature, "RSA")]
+    [InlineData(SecurityAlgorithms.RsaSha512Signature, "RSA")]
+    [InlineData(SecurityAlgorithms.RsaSsaPssSha256, "RSA-PSS")]
+    [InlineData(SecurityAlgorithms.RsaSsaPssSha384, "RSA-PSS")]
+    [InlineData(SecurityAlgorithms.RsaSsaPssSha512, "RSA-PSS")]
+    [InlineData(SecurityAlgorithms.RsaSsaPssSha256Signature, "RSA-PSS")]
+    [InlineData(SecurityAlgorithms.RsaSsaPssSha384Signature, "RSA-PSS")]
+    [InlineData(SecurityAlgorithms.RsaSsaPssSha512Signature, "RSA-PSS")]
+    [InlineData(SecurityAlgorithms.EcdsaSha256, "ECDSA")]
+    [InlineData(SecurityAlgorithms.EcdsaSha384, "ECDSA")]
+    [InlineData(SecurityAlgorithms.EcdsaSha512, "ECDSA")]
+    [InlineData(SecurityAlgorithms.EcdsaSha256Signature, "ECDSA")]
+    [InlineData(SecurityAlgorithms.EcdsaSha384Signature, "ECDSA")]
+    [InlineData(SecurityAlgorithms.EcdsaSha512Signature, "ECDSA")]
+    [InlineData(SecurityAlgorithms.HmacSha256, "HMAC")]
+    [InlineData(SecurityAlgorithms.HmacSha384, "HMAC")]
+    [InlineData(SecurityAlgorithms.HmacSha512, "HMAC")]
+    [InlineData(SecurityAlgorithms.HmacSha256Signature, "HMAC")]
+    [InlineData(SecurityAlgorithms.HmacSha384Signature, "HMAC")]
+    [InlineData(SecurityAlgorithms.HmacSha512Signature, "HMAC")]
+    [InlineData(SecurityAlgorithms.MlDsa44, "ML-DSA")]
+    [InlineData(SecurityAlgorithms.MlDsa65, "ML-DSA")]
+    [InlineData(SecurityAlgorithms.MlDsa87, "ML-DSA")]
+    public void GetKnownAlgorithmFamilyOrOther_KnownAlgorithms_ReturnsCorrectFamily(string algorithm, string expectedFamily)
+    {
+        // Act
+        var result = CryptoTelemetry.GetKnownAlgorithmFamilyOrOther(algorithm);
+
+        // Assert
+        Assert.Equal(expectedFamily, result);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("none")]
+    [InlineData("NONE")]
+    public void GetKnownAlgorithmFamilyOrOther_NoAlgorithm_ReturnsNone(string algorithm)
+    {
+        // Act
+        var result = CryptoTelemetry.GetKnownAlgorithmFamilyOrOther(algorithm);
+
+        // Assert
+        Assert.Equal("none", result);
+    }
+
+    [Theory]
+    [InlineData("CUSTOM-ALG")]
+    [InlineData("RS-CUSTOM")]
+    [InlineData("ML-DSA-CUSTOM")]
+    [InlineData("http://example.com/custom-rsa-sha256")]
+    [InlineData(" ")]
+    public void GetKnownAlgorithmFamilyOrOther_UnknownAlgorithm_ReturnsOther(string algorithm)
+    {
+        // Act
+        var result = CryptoTelemetry.GetKnownAlgorithmFamilyOrOther(algorithm);
+
+        // Assert
+        Assert.Equal("other", result);
+    }
+
     /// <summary>
     /// Custom security key for testing unknown key type scenario
     /// </summary>
