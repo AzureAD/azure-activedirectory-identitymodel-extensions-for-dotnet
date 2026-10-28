@@ -142,6 +142,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public CnfDecryptionKeysResolverAsync CnfDecryptionKeysResolverAsync { get; set; }
 
         /// <summary>
+        /// Gets or sets the result-based resolver used by the experimental validation overload.
+        /// </summary>
+        public ICnfDecryptionKeysResolver CnfDecryptionKeysResolver { get; set; }
+
+        /// <summary>
         /// Default value for the <see cref="SignedHttpRequestLifetime"/>.
         /// </summary>
         public static readonly TimeSpan DefaultSignedHttpRequestLifetime = TimeSpan.FromMinutes(5);
@@ -158,14 +163,29 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public NonceValidatorAsync NonceValidatorAsync { get; set; }
 
         /// <summary>
+        /// Gets or sets the result-based nonce validator used by the experimental validation overload.
+        /// </summary>
+        public INonceValidator NonceValidator { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="PopKeyResolverAsync"/> delegate.
         /// </summary>
         public PopKeyResolverAsync PopKeyResolverAsync { get; set; }
 
         /// <summary>
+        /// Gets or sets the result-based PoP key resolver used by the experimental validation overload.
+        /// </summary>
+        public IPopKeyResolver PopKeyResolver { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="PopKeyResolverFromKeyIdAsync"/> delegate.
         /// </summary>
         public PopKeyResolverFromKeyIdAsync PopKeyResolverFromKeyIdAsync { get; set; }
+
+        /// <summary>
+        /// Gets or sets the result-based key ID resolver used by the experimental validation overload.
+        /// </summary>
+        public IPopKeyResolverFromKeyId PopKeyResolverFromKeyId { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether TLS is required when obtaining a JWK set using the 'jku' claim.
@@ -198,9 +218,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public ReplayValidatorAsync ReplayValidatorAsync { get; set; }
 
         /// <summary>
+        /// Gets or sets the result-based replay validator used by the experimental validation overload.
+        /// </summary>
+        public IReplayValidator ReplayValidator { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="SignatureValidatorAsync"/> delegate.
         /// </summary>
         public SignatureValidatorAsync SignatureValidatorAsync { get; set; }
+
+        /// <summary>
+        /// Gets or sets the result-based signature validator used by the experimental validation overload.
+        /// </summary>
+        public ISignedHttpRequestSignatureValidator SignatureValidator { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="TokenHandler"/> to AccessToken inside the SignedHttpRequest.
