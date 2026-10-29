@@ -952,30 +952,33 @@ namespace Microsoft.IdentityModel.Validators.Tests
         [InlineData(ProtocolVersion.V2, ProtocolVersion.V2)]
         public async Task Validate_CanFetchMetadataWithoutConfigurationProvider(ProtocolVersion authorityVersion, ProtocolVersion tokenVersion)
         {
+            const string tenantId = "d8d14ca6-f1fa-41c1-ae95-0db6258ec0a0";
+            const string tseAuthority = ValidatorConstants.AadInstance + "/" + tenantId;
+
             var tokenIssuerProvider = (ProtocolVersion version) =>
             {
                 if (version == ProtocolVersion.V11)
-                    return ValidatorConstants.AadIssuerV11PPE;
+                    return tseAuthority + "/v1.1";
 
                 if (version == ProtocolVersion.V2)
-                    return ValidatorConstants.AadIssuerPPE;
+                    return tseAuthority + "/v2.0";
 
-                return ValidatorConstants.V1IssuerPPE;
+                return "https://sts.windows.net/" + tenantId + "/";
             };
 
             var authorityUrlProvider = (ProtocolVersion version) =>
             {
                 if (version == ProtocolVersion.V11)
-                    return ValidatorConstants.AuthorityCommonTenantWithV11PPE;
+                    return tseAuthority + "/v1.1";
 
                 if (version == ProtocolVersion.V2)
-                    return ValidatorConstants.AuthorityCommonTenantWithV2PPE;
+                    return tseAuthority + "/v2.0";
 
-                return ValidatorConstants.AuthorityV1PPE;
+                return tseAuthority;
             };
 
             var context = new CompareContext();
-            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
+            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, tenantId);
 
             var issuer = tokenIssuerProvider(tokenVersion);
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
