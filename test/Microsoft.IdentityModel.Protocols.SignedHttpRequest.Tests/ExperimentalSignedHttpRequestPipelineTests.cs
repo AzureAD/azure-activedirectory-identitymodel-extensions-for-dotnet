@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         private static Task<ValidationResult<ValidatedSignedHttpRequest, ValidationError>> Validate(
-            Context context, CancellationToken cancellation = default, ValidationParameters parameters = null)
+            Context context, ValidationParameters parameters = null, CancellationToken cancellation = default)
             => new SignedHttpRequestHandler().ValidateSignedHttpRequestAsync(context, parameters ?? Parameters(), cancellation);
 
         private static SignedHttpRequestValidationError Error(ValidationResult<ValidatedSignedHttpRequest, ValidationError> result,
@@ -156,14 +156,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var policy = AllClaims();
             policy.TokenHandler = handler;
             // Act
-            var result = await Validate(CreateContext(Payload(at), policy, callContext: callContext), cancellation.Token, parameters);
+            var result = await Validate(CreateContext(Payload(at), policy, callContext: callContext), parameters, cancellation.Token);
             // Assert
             Assert.True(result.Succeeded, result.Error?.Message);
             Assert.Same(validated.Result, result.Result.AccessTokenValidationResult);
             Assert.Equal(1, calls);
         }
 
-        [Theory, MemberData(nameof(InvalidOuterTokenTheoryData))]
+        [Theory, MemberData(nameof(InvalidOuterTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task InvalidOuterTokenIsRejectedBeforeAccessTokenValidation(ExperimentalPipelineTheoryData theoryData)
         {
             // Arrange
@@ -379,7 +379,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Theory]
-        [MemberData(nameof(CallbackCases))]
+        [MemberData(nameof(CallbackCases), DisableDiscoveryEnumeration = true)]
         public async Task CallbackResultsArePropagatedOrClassifiedAndRequestedCancellationEscapes(ExperimentalCallbackTheoryData theoryData)
         {
             // Arrange
@@ -394,12 +394,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             // Act / Assert
             if (outcome == CallbackOutcome.Cancel || outcome == CallbackOutcome.CancelThenReturn)
             {
-                var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Validate(context, cancellation.Token, fixture.Parameters));
+                var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Validate(context, fixture.Parameters, cancellation.Token));
                 Assert.Equal(cancellation.Token, exception.CancellationToken);
             }
             else
             {
-                var result = await Validate(context, cancellation.Token, fixture.Parameters);
+                var result = await Validate(context, fixture.Parameters, cancellation.Token);
                 if (outcome == CallbackOutcome.Success)
                 {
                     Assert.True(result.Succeeded, result.Error?.Message);
@@ -457,7 +457,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             // Assert
             var error = Error(result, rejectNonce ? SignedHttpRequestValidationFailure.Nonce : SignedHttpRequestValidationFailure.Replay,
                 rejectNonce ? "nonce" : null);
-            Assert.Equal(rejectNonce ? new[] { "nonce" } : new[] { "nonce", "replay" }, order);
+            Assert.Equal(rejectNonce ? ["nonce"] : ["nonce", "replay"], order);
             Assert.Equal(rejectNonce ? typeof(SignedHttpRequestInvalidNonceClaimException) : typeof(SignedHttpRequestValidationException), error.GetException().GetType());
         }
 
@@ -471,11 +471,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var policy = AllClaims();
             policy.TokenHandler = handler.Object;
             // Act / Assert
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Validate(CreateContext(policy: policy), cancellation.Token));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Validate(CreateContext(policy: policy), cancellation: cancellation.Token));
             handler.VerifyNoOtherCalls();
         }
 
-        [Theory, MemberData(nameof(DefaultConfirmationTheoryData))]
+        [Theory, MemberData(nameof(DefaultConfirmationTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task DefaultConfirmationRejectsMissingMalformedOrNonAsymmetricKeys(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -484,7 +484,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             AssertPipelineOutcome(result, theoryData);
         }
 
-        [Theory, MemberData(nameof(KidThumbprintTheoryData))]
+        [Theory, MemberData(nameof(KidThumbprintTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task KidThumbprintReferenceMatchesOuterKeyAndGuardsRecursion(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -497,7 +497,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(EncryptedConfirmationTheoryData))]
+        [Theory, MemberData(nameof(EncryptedConfirmationTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task EncryptedConfirmationDecryptsRawSymmetricJwkOnly(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -528,7 +528,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(JkuTheoryData))]
+        [Theory, MemberData(nameof(JkuTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task JkuUsesOnlyAllowedHostsAndSelectsKeyWithoutNetwork(ExperimentalJkuTheoryData theoryData)
         {
             // Arrange
@@ -558,7 +558,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 Assert.Equal(SignedHttpRequestTestUtils.CnfJwk.JsonWebKey.ComputeJwkThumbprint(), result.Result.ValidatedToken.SigningKey.ComputeJwkThumbprint());
         }
 
-        [Theory, MemberData(nameof(SignatureProviderTheoryData))]
+        [Theory, MemberData(nameof(SignatureProviderTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task SignatureVerificationReleasesProviderOnSuccessFailureAndException(ExperimentalSignatureTheoryData theoryData)
         {
             // Arrange: return a unique key so no shared fixture crypto factory is mutated.
@@ -701,7 +701,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 Error(result, SignedHttpRequestValidationFailure.Claim, "p");
         }
 
-        [Theory, MemberData(nameof(InvalidTimestampTheoryData))]
+        [Theory, MemberData(nameof(InvalidTimestampTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task TimestampRejectsInvalidShapeAndHonorsZeroLifetime(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -710,7 +710,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             AssertPipelineOutcome(result, theoryData);
         }
 
-        [Theory, MemberData(nameof(MissingBindingInputTheoryData))]
+        [Theory, MemberData(nameof(MissingBindingInputTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task MissingHttpBindingInputsReturnErrorsRatherThanThrowing(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -729,7 +729,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Assert.IsType<ArgumentNullException>(result.Error.GetException());
         }
 
-        [Theory, MemberData(nameof(AccessTokenFailureTheoryData))]
+        [Theory, MemberData(nameof(AccessTokenFailureTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task RealAccessTokenValidationFailuresAreNestedInAtError(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -802,7 +802,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 result.Result.ValidatedToken.SigningKey.ComputeJwkThumbprint());
         }
 
-        [Theory, MemberData(nameof(LegacyPathBindingTheoryData))]
+        [Theory, MemberData(nameof(LegacyPathBindingTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ValidatePClaimPreservesLegacyEncodingBoundaries(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -813,7 +813,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 Assert.Equal(theoryData.TokenPayload["p"].Value<string>(), result.Result.ValidatedToken.GetPayloadValue<string>("p"));
         }
 
-        [Theory, MemberData(nameof(LegacyHashBindingTheoryData))]
+        [Theory, MemberData(nameof(LegacyHashBindingTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ValidateHashClaimsPreservesLegacyCanonicalization(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -827,7 +827,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(OptionalClaimListTheoryData))]
+        [Theory, MemberData(nameof(OptionalClaimListTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ValidatePresentClaimsIgnoresNullOrUnknownClaimList(ExperimentalPipelineTheoryData theoryData)
         {
             // Act
@@ -855,7 +855,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             policy.PopKeyResolver = resolver.Object;
 
             // Act
-            var result = await Validate(context, cancellation.Token);
+            var result = await Validate(context, cancellation: cancellation.Token);
 
             // Assert
             Assert.True(result.Succeeded, result.Error?.Message);
@@ -865,7 +865,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             resolver.VerifyNoOtherCalls();
         }
 
-        [Theory, MemberData(nameof(DecryptionKeyListTheoryData))]
+        [Theory, MemberData(nameof(DecryptionKeyListTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task CnfDecryptionKeysResolverOverridesConfiguredKeys(ExperimentalDecryptionKeysTheoryData theoryData)
         {
             // Arrange
@@ -979,7 +979,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Assert.True(result.Succeeded, result.Error?.Message);
             Assert.Same(seenToken, result.Result.ValidatedToken);
             Assert.Same(signatureKey, result.Result.ValidatedToken.SigningKey);
-            Assert.Equal(new[] { "pop", "signature", "nonce" }, order);
+            Assert.Equal(["pop", "signature", "nonce"], order);
             pop.Verify(x => x.ResolvePopKeyAsync(It.IsAny<SecurityToken>(), It.IsAny<SecurityToken>(), context, CancellationToken.None), Times.Once);
             signature.Verify(x => x.ValidateSignatureAsync(popKey, It.IsAny<SecurityToken>(), context, CancellationToken.None), Times.Once);
             nonce.Verify(x => x.ValidateNonceAsync(popKey, It.IsAny<SecurityToken>(), context, CancellationToken.None), Times.Once);

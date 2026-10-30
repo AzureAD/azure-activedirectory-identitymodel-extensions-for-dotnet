@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             CreateB = true
         };
 
-        [Theory, MemberData(nameof(ExperimentalRoundtripTheoryDataSet))]
+        [Theory, MemberData(nameof(ExperimentalRoundtripTheoryDataSet), DisableDiscoveryEnumeration = true)]
         public async Task RoundtripsCreatedSignedHttpRequest(ExperimentalRoundtripTheoryData theoryData)
         {
             // Arrange: same descriptor/handler/fixture flow as SignedHttpRequestE2ETests.Roundtrips.
@@ -84,7 +84,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         {
             get
             {
+#if NET472_OR_GREATER || NET
                 var ecCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256);
+#endif
                 var x509 = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
                 var x5cCnf = new JObject
                 {
@@ -109,6 +111,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         AccessToken = AccessToken(encrypt: true), SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials
                     },
+#if NET472_OR_GREATER || NET
                     new ExperimentalRoundtripTheoryData("ValidJwkEcdsa")
                     {
                         AccessToken = AccessToken(SignedHttpRequestTestUtils.DefaultCnfJwkEcdsa), SigningCredentials = ecCredentials
@@ -117,6 +120,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         AccessToken = AccessToken(SignedHttpRequestTestUtils.DefaultCnfJwkEcdsaThumbprint), SigningCredentials = ecCredentials
                     },
+#endif
                     new ExperimentalRoundtripTheoryData("ValidX5cThumbprint")
                     {
                         AccessToken = AccessToken(new JObject { ["kid"] = Base64UrlEncoder.Encode(x509.ComputeJwkThumbprint()) }),
@@ -151,6 +155,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 };
             }
         }
+
+        private static List<string> NonceList = ["nonce1", "nonce2", "nonce1"];
 
         [Fact]
         public async Task SignedHttpRequestReplayValidationRejectsPreviouslyAcceptedNonce()
@@ -192,7 +198,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Assert.Equal("nonce1", first.Result.ValidatedToken.GetPayloadValue<string>("nonce"));
             Assert.Equal("nonce2", second.Result.ValidatedToken.GetPayloadValue<string>("nonce"));
             Assert.IsType<SignedHttpRequestValidationException>(Error(duplicate, SignedHttpRequestValidationFailure.Replay).GetException());
-            Assert.Equal(new[] { "nonce1", "nonce2", "nonce1" }, observed);
+            Assert.Equal(NonceList, observed);
             Assert.Equal(2, cache.Count);
             Assert.Contains("nonce1", cache);
             Assert.Contains("nonce2", cache);
