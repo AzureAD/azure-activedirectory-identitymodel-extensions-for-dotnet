@@ -2,9 +2,9 @@
 
 ## Branch Structure
 
-* **dev**: The dev working branch of master, which is 6.x
-* **dev5x**: The dev working branch of master for 5.x
-* **rel/version**: Release tracking branch for each new release
+* **dev**: The dev working branch of main, which is 8.x
+* **dev[version]x**: Development branches for specific major versions. We currently have `dev3x`, `dev4x`, `dev5x`, `dev6x`, `dev7x`, and `dev8x`.
+* **rel/[version]**: Release tracking branch for each new release. [version] will hold the release version number of Identity Model.
 
 If you want to track a branch for a specific release, use the [tag branches](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/tags).
 
