@@ -2,7 +2,7 @@
 
 ## Branch Structure
 
-* **dev**: The dev working branch of main, which is 8.x
+* **dev**: The dev working branch of main, which is 9.x
 * **dev[version]x**: Development branches for specific major versions. We currently have `dev3x`, `dev4x`, `dev5x`, `dev6x`, `dev7x`, and `dev8x`.
 * **rel/[version]**: Release tracking branch for each new release. [version] will hold the release version number of Identity Model.
 
