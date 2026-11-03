@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+Unreleased (8.x)
+====
+## Bug Fixes
+- Restore enforcement of the minimum asymmetric key sizes configured by `AsymmetricSignatureProvider`. Applications using undersized legacy keys may see new constructor-time failures. To allow time for key rotation, set the `Switch.Microsoft.IdentityModel.DoNotEnforceMinimumAsymmetricKeySize` AppContext switch before first use to temporarily retain the previous behavior. Backport of [PR #3594](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3594).
+
 8.15.0
 ====
 ## New Features
