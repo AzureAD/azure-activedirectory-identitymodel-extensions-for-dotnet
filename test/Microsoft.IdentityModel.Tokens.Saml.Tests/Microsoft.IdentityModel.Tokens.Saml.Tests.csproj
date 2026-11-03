@@ -1,4 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -32,4 +34,7 @@
     </None>
   </ItemGroup>
 
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <Target Name="NETStandardCompatError_Microsoft_Extensions_TimeProvider_Testing_net8_0" />
 </Project>
