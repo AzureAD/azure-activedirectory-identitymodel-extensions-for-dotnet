@@ -14,6 +14,79 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     public class EventBasedLRUCacheTests
     {
         [Fact]
+        public void CompactionYieldsToRetirementProcessingDuringWrites()
+        {
+            // Arrange
+            var cache = new EventBasedLRUCache<int, object>(10, compactIntervalInSeconds: -1);
+            using (var processed = new ManualResetEventSlim())
+            {
+                int keepWriting = 1;
+                int nextKey = 100;
+                cache.OnItemMovedToCompactedList = _ =>
+                {
+                    if (Volatile.Read(ref keepWriting) == 1)
+                        cache.SetValue(Interlocked.Increment(ref nextKey), new object());
+                };
+                cache.OnItemRemovedFromCompactedList = _ =>
+                {
+                    Volatile.Write(ref keepWriting, 0);
+                    processed.Set();
+                };
+                try
+                {
+                    // Act
+                    for (int i = 0; i < 11; i++)
+                        cache.SetValue(i, new object());
+
+                    // Assert
+                    Assert.True(processed.Wait(TimeSpan.FromSeconds(5)));
+                }
+                finally
+                {
+                    Volatile.Write(ref keepWriting, 0);
+                    cache.StopEventQueueTask();
+                    Assert.True(SpinWait.SpinUntil(() => cache.TaskCount == 0, TimeSpan.FromSeconds(5)));
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void InsertOnlyPublicationPreservesUpsertAndComparer(bool maintainLRU)
+        {
+            // Arrange
+            var cache = new EventBasedLRUCache<string, object>(100, comparer: StringComparer.OrdinalIgnoreCase, maintainLRU: maintainLRU);
+            var first = new object();
+            var replacement = new object();
+            int removals = 0;
+            cache.OnItemMovedToCompactedList = _ => removals++;
+            try
+            {
+                Assert.True(cache.TryAdd("key", first));
+
+                // Act
+                Assert.False(cache.TryAdd("KEY", replacement));
+                Assert.True(cache.TryGetValue("KEY", out object found));
+                Assert.Same(first, found);
+                cache.SetValue("KEY", replacement);
+
+                // Assert
+                Assert.Equal(1, cache.MapCount);
+                Assert.True(cache.TryGetValue("key", out found));
+                Assert.Same(replacement, found);
+                Assert.False(cache.TryRemove("KEY", first));
+                Assert.True(cache.TryRemove("key", replacement));
+                Assert.Equal(1, removals);
+                Assert.False(cache.Contains("key"));
+            }
+            finally
+            {
+                cache.StopEventQueueTask();
+            }
+        }
+
+        [Fact]
         public void Contains()
         {
             TestUtilities.WriteHeader($"{this}.Contains");
