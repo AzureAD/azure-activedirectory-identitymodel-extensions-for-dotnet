@@ -48,5 +48,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23036 = "IDX23036: Signed http request nonce validation failed. Exceptions caught: '{0}'.";
         public const string IDX23037 = "IDX23037: Resolving a PoP key from the 'jku' claim is not allowed. To allow it, set AllowResolvingPopKeyFromJku property on SignedHttpRequestValidationParameters to true and provide a list of trusted domains via AllowedDomainsForJkuRetrieval.";
         public const string IDX23038 = "IDX23038: Resolving a PoP key from the 'jku' claim is not allowed as '{0}' is not present in the list of allowed domains for 'jku' retrieval: '{1}'. If '{0}' belongs to a trusted domain, add it to AllowedDomainsForJkuRetrieval property on SignedHttpRequestValidationParameters.";
+        public const string IDX23039 = "IDX23039: Result-based Signed HTTP Request validation failed at stage '{0}'.";
+        public const string IDX23040 = "IDX23040: The '{0}' callback threw during Signed HTTP Request validation.";
+        public const string IDX23041 = "IDX23041: The '{0}' callback returned an uninitialized result or a null success value.";
+        public const string IDX23042 = "IDX23042: The '{0}' claim has an invalid structure or value.";
+        public const string IDX23043 = "IDX23043: The signed HTTP request must be a signed JWS.";
+        public const string IDX23044 = "IDX23044: The signed HTTP request exceeds the maximum size of '{0}' characters.";
     }
 }
