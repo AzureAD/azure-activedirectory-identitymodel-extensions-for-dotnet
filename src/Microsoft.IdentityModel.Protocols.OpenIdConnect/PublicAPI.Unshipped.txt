@@ -1,0 +1,2 @@
+const Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectClientAssertionTypes.JwtBearer = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer" -> string
+Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectClientAssertionTypes
