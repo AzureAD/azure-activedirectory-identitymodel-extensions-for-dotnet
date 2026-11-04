@@ -21,9 +21,9 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         private bool _refreshRequested;
 
-        private async Task<T> GetConfigurationWithBlockingAsync(CancellationToken cancel)
+        private async Task<T> GetConfigurationWithBlockingAsync()
         {
-            await _refreshLock.WaitAsync(cancel).ConfigureAwait(false);
+            await _refreshLock.WaitAsync(CancellationToken.None).ConfigureAwait(false);
 
             long startTimestamp = TimeProvider.GetTimestamp();
 
@@ -39,7 +39,9 @@ namespace Microsoft.IdentityModel.Protocols
                         if (ConfigurationEventHandler != null)
                         {
                             ConfigurationEventHandlerResult<T> configurationRetrieved =
-                                await HandleBeforeRetrieveAsync(retrievalContext, cancel).ConfigureAwait(false);
+                                await HandleBeforeRetrieveAsync(
+                                    retrievalContext,
+                                    CancellationToken.None).ConfigureAwait(false);
 
                             // replicate the behavior of successful retrieval from endpoint
                             if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
@@ -57,9 +59,12 @@ namespace Microsoft.IdentityModel.Protocols
                             }
                         }
 
-                        // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
-                        // The transport should have it's own timeouts, etc..
-                        var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
+                        // This fetch populates shared state and must outlive any individual caller.
+                        // Callers apply cancellation while awaiting the shared task.
+                        var configuration = await _configRetriever.GetConfigurationAsync(
+                            MetadataAddress,
+                            _docRetriever,
+                            CancellationToken.None).ConfigureAwait(false);
 
                         var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                         TelemetryClient.LogConfigurationRetrievalDuration(

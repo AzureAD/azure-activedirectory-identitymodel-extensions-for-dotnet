@@ -174,6 +174,127 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.MinimumRefreshInterval, new TimeSpan(0, 0, 0, 1));
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task CallerCancellationDoesNotCancelSharedInitialRetrieval(bool blocking)
+        {
+            // Arrange
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, blocking);
+            var configurationRetriever = new CancelableConfigurationRetriever();
+            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "https://example.com/.well-known/openid-configuration",
+                configurationRetriever,
+                new FileDocumentRetriever());
+            using var cancellationTokenSource = new CancellationTokenSource();
+
+            // Act
+            Task<OpenIdConnectConfiguration> canceledCallerTask =
+                configurationManager.GetConfigurationAsync(cancellationTokenSource.Token);
+            Assert.Equal(1, configurationRetriever.CallCount);
+            cancellationTokenSource.Cancel();
+
+            try
+            {
+                Task completedTask = await Task.WhenAny(
+                    canceledCallerTask,
+                    Task.Delay(TimeSpan.FromSeconds(5)));
+
+                Assert.Same(canceledCallerTask, completedTask);
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => canceledCallerTask);
+
+                Task<OpenIdConnectConfiguration> secondCallerTask =
+                    configurationManager.GetConfigurationAsync(CancellationToken.None);
+
+                Assert.Equal(1, configurationRetriever.CallCount);
+
+                configurationRetriever.Release();
+                OpenIdConnectConfiguration configuration = await secondCallerTask;
+
+                // Assert
+                Assert.NotNull(configuration);
+                Assert.Equal(1, configurationRetriever.CallCount);
+                Assert.False(configurationRetriever.CancellationCanBeCanceled);
+            }
+            finally
+            {
+                configurationRetriever.Release();
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task OriginatingCallerCancellationDoesNotDisruptConcurrentSharedAwaiter(bool blocking)
+        {
+            // Arrange
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, blocking);
+            var configurationRetriever = new CancelableConfigurationRetriever();
+            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "https://example.com/.well-known/openid-configuration",
+                configurationRetriever,
+                new FileDocumentRetriever());
+            using var cancellationTokenSource = new CancellationTokenSource();
+
+            // Act - the originating caller kicks off (but does not own) the shared fetch.
+            Task<OpenIdConnectConfiguration> originatingCallerTask =
+                configurationManager.GetConfigurationAsync(cancellationTokenSource.Token);
+            Assert.Equal(1, configurationRetriever.CallCount);
+
+            // A second caller joins the SAME in-flight fetch before any cancellation occurs.
+            Task<OpenIdConnectConfiguration> concurrentCallerTask =
+                configurationManager.GetConfigurationAsync(CancellationToken.None);
+            Assert.Equal(1, configurationRetriever.CallCount);
+
+            // The originator cancels while the shared fetch is still running.
+            cancellationTokenSource.Cancel();
+
+            try
+            {
+                Task completedTask = await Task.WhenAny(
+                    originatingCallerTask,
+                    Task.Delay(TimeSpan.FromSeconds(5)));
+
+                // The originator returns promptly, observing only its own cancellation...
+                Assert.Same(originatingCallerTask, completedTask);
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => originatingCallerTask);
+
+                // ...while the concurrent co-awaiter is unaffected and still awaiting the shared fetch.
+                Assert.False(concurrentCallerTask.IsCompleted);
+                Assert.Equal(1, configurationRetriever.CallCount);
+
+                // Completing the shared fetch serves the surviving co-awaiter with the shared result.
+                configurationRetriever.Release();
+                OpenIdConnectConfiguration configuration = await concurrentCallerTask;
+
+                // Assert
+                Assert.NotNull(configuration);
+                Assert.Equal(1, configurationRetriever.CallCount);
+                Assert.False(configurationRetriever.CancellationCanBeCanceled);
+            }
+            finally
+            {
+                configurationRetriever.Release();
+            }
+        }
+
+        [Fact]
+        public async Task InitialConfigurationTransportTimeoutIsHandledAsRetrievalFailure()
+        {
+            // Arrange
+            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "https://example.com/.well-known/openid-configuration",
+                new TransportTimeoutConfigurationRetriever(),
+                new FileDocumentRetriever());
+
+            // Act
+            InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => configurationManager.GetConfigurationAsync(CancellationToken.None));
+
+            // Assert
+            Assert.IsType<TaskCanceledException>(exception.InnerException);
+        }
+
         [Fact]
         public async Task FetchMetadataFailureTest()
         {
@@ -1090,6 +1211,50 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             return false;
+        }
+
+        private sealed class CancelableConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
+        {
+            private readonly TaskCompletionSource<object> _release =
+                new(TaskCreationOptions.RunContinuationsAsynchronously);
+            private int _callCount;
+
+            public bool CancellationCanBeCanceled { get; private set; }
+
+            public int CallCount => Volatile.Read(ref _callCount);
+
+            public async Task<OpenIdConnectConfiguration> GetConfigurationAsync(
+                string address,
+                IDocumentRetriever retriever,
+                CancellationToken cancel)
+            {
+                Interlocked.Increment(ref _callCount);
+                CancellationCanBeCanceled = cancel.CanBeCanceled;
+
+                await Task.WhenAny(
+                    Task.Delay(Timeout.Infinite, cancel),
+                    _release.Task);
+
+                cancel.ThrowIfCancellationRequested();
+                return new OpenIdConnectConfiguration();
+            }
+
+            public void Release()
+            {
+                _release.TrySetResult(null);
+            }
+        }
+
+        private sealed class TransportTimeoutConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
+        {
+            public Task<OpenIdConnectConfiguration> GetConfigurationAsync(
+                string address,
+                IDocumentRetriever retriever,
+                CancellationToken cancel)
+            {
+                return Task.FromException<OpenIdConnectConfiguration>(
+                    new TaskCanceledException("The HTTP transport timed out."));
+            }
         }
 
         public static TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>> ValidateOpenIdConnectConfigurationTestCases
