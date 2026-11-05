@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// A class which contains useful methods related to processing of SignedHttpRequest protocol.
     /// </summary>
-    public static class SignedHttpRequestUtilities
+    public static partial class SignedHttpRequestUtilities
     {
         /// <summary>
         /// Creates a "jwk" claim from a JsonWebKey representation of an asymmetric public key.
