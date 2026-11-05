@@ -37,5 +37,5 @@
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
-  <Target Name="NETStandardCompatError_Microsoft_Extensions_TimeProvider_Testing_net8_0" />
+  <Import Project="..\..\build\targetFrameworkSupportWarnings.targets" />
 </Project>
