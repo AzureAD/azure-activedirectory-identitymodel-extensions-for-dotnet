@@ -48,5 +48,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23036 = "IDX23036: Signed http request nonce validation failed. Exceptions caught: '{0}'.";
         public const string IDX23037 = "IDX23037: Resolving a PoP key from the 'jku' claim is not allowed. To allow it, set AllowResolvingPopKeyFromJku property on SignedHttpRequestValidationParameters to true and provide a list of trusted domains via AllowedDomainsForJkuRetrieval.";
         public const string IDX23038 = "IDX23038: Resolving a PoP key from the 'jku' claim is not allowed as '{0}' is not present in the list of allowed domains for 'jku' retrieval: '{1}'. If '{0}' belongs to a trusted domain, add it to AllowedDomainsForJkuRetrieval property on SignedHttpRequestValidationParameters.";
+        public const string IDX23039 = "IDX23039: Signed http request validation failed. Exception caught: '{0}'.";
+        public const string IDX23040 = "IDX23040: Unable to resolve a PoP key. Exception caught: '{0}'.";
+        public const string IDX23041 = "IDX23041: Signed http request expiration time is outside the supported DateTime range. Timestamp: '{0}', lifetime: '{1}'.";
     }
 }

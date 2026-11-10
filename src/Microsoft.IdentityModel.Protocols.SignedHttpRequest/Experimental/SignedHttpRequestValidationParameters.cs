@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Experimental
         /// "abc.fabrikam.com"
         /// </remarks>
         public ICollection<string> AllowedDomainsForJkuRetrieval => _allowedDomainsForJkuRetrieval ??
-            Interlocked.CompareExchange(ref _allowedDomainsForJkuRetrieval, new List<string>(), null) ?? _allowedDomainsForJkuRetrieval;
+            Interlocked.CompareExchange(ref _allowedDomainsForJkuRetrieval, [], null) ?? _allowedDomainsForJkuRetrieval;
 
         /// <summary>
         /// Gets or sets the claims to validate if present.
@@ -125,11 +125,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Experimental
         /// <remarks>
         /// Validation will only occur if <see cref="ValidatePresentClaims"/> is set to <c>true</c>.
         /// </remarks>
-        public IEnumerable<string> ClaimsToValidateWhenPresent { get; set; } = new List<string>
-        {
+        public IEnumerable<string> ClaimsToValidateWhenPresent { get; set; } =
+        [
             SignedHttpRequestClaimTypes.M,
             SignedHttpRequestClaimTypes.P
-        };
+        ];
 
         /// <summary>
         /// Gets or sets a collection of <see cref="SecurityKey"/> used for the 'cnf' claim decryption.
