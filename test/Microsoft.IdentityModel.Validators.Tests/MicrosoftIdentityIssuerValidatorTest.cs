@@ -989,10 +989,10 @@ namespace Microsoft.IdentityModel.Validators.Tests
             {
                 var requestPath = request.RequestUri?.AbsolutePath ?? string.Empty;
                 var metadataIssuer = requestPath.IndexOf("/v1.1/", StringComparison.Ordinal) >= 0
-                    ? ValidatorConstants.AadIssuerV11PPE
+                    ? tseAuthority + "/v1.1"
                     : requestPath.IndexOf("/v2.0/", StringComparison.Ordinal) >= 0
-                        ? ValidatorConstants.AadIssuerPPE
-                        : ValidatorConstants.V1IssuerPPE;
+                        ? tseAuthority + "/v2.0"
+                        : "https://sts.windows.net/" + tenantId + "/";
 
                 return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(
                     $"{{\"issuer\":\"{metadataIssuer}\"}}"));
