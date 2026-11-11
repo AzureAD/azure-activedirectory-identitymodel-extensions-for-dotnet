@@ -25,10 +25,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
         private readonly HttpClient _httpClient;
 
         private const string OpenIdConfigurationPath = "/.well-known/openid-configuration";
-        private const string DiscoveryPathMarker = "/discovery/";
-        private const string KeysPathMarker = "/keys";
         private const string UnexpectedUrlMessagePrefix = "Unexpected URL in offline test: ";
-        private const string PlaceholderJwksUri = "https://example.com/discovery/keys";
 
         public MicrosoftIdentityIssuerValidatorTest()
         {
@@ -989,29 +986,19 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
 
             var authority = authorityUrlProvider(authorityVersion);
-
-            // Keep metadata retrieval and tenant substitution real without calling the live PPE endpoint.
-            string issuerTemplate = issuer.Replace(ValidatorConstants.TenantIdAsGuid, AadIssuerValidator.TenantIdTemplate);
-            string metadataJson = OpenIdConnectConfiguration.Write(
-                new OpenIdConnectConfiguration { Issuer = issuerTemplate, JwksUri = PlaceholderJwksUri });
-            string jwksJson = KeyingMaterial.AADJWKS;
-
-            var handler = new DelegateHttpMessageHandler((request, ct) =>
+            using var httpClient = new HttpClient(new DelegateHttpMessageHandler((request, _) =>
             {
-                string url = request.RequestUri.AbsoluteUri;
+                var requestPath = request.RequestUri?.AbsolutePath ?? string.Empty;
+                var metadataIssuer = requestPath.IndexOf("/v1.1/", StringComparison.Ordinal) >= 0
+                    ? ValidatorConstants.AadIssuerV11PPE
+                    : requestPath.IndexOf("/v2.0/", StringComparison.Ordinal) >= 0
+                        ? ValidatorConstants.AadIssuerPPE
+                        : ValidatorConstants.V1IssuerPPE;
 
-                if (url.EndsWith(OpenIdConfigurationPath, StringComparison.OrdinalIgnoreCase))
-                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(metadataJson));
-
-                if (url.IndexOf(DiscoveryPathMarker, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    url.EndsWith(KeysPathMarker, StringComparison.OrdinalIgnoreCase))
-                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(jwksJson));
-
-                throw new InvalidOperationException(UnexpectedUrlMessagePrefix + url);
-            });
-
-            using var mockHttpClient = new HttpClient(handler);
-            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, mockHttpClient);
+                return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(
+                    $"{{\"issuer\":\"{metadataIssuer}\"}}"));
+            }));
+            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient);
 
             ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(issuer, jwtSecurityToken, validator);
             var actualIssuer = validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters());
