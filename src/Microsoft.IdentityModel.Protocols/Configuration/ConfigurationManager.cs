@@ -25,11 +25,13 @@ namespace Microsoft.IdentityModel.Protocols
         private DateTimeOffset _lastRequestRefresh = DateTimeOffset.MinValue;
         private bool _isFirstRefreshRequest = true;
         private readonly SemaphoreSlim _configurationNullLock = new SemaphoreSlim(1);
+        private readonly object _configurationTaskLock = new object();
 
         private readonly IDocumentRetriever _docRetriever;
         private readonly IConfigurationRetriever<T> _configRetriever;
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
+        private Task<T> _configurationTask;
 
         // Tracks the most recent fetch failure for the blocking path. Promoted from a local in
         // GetConfigurationWithBlockingAsync so the original exception (e.g. an IOException carrying
@@ -188,6 +190,10 @@ namespace Microsoft.IdentityModel.Protocols
         /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
         /// <remarks>
         /// <para>
+        /// Cancellation stops this caller from waiting for configuration. It does not cancel an in-progress
+        /// retrieval because the retrieved configuration is shared by all callers.
+        /// </para>
+        /// <para>
         /// If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/>
         /// then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.
         /// By default, this method blocks until the configuration is retrieved the first time. After the configuration was retrieved once,
@@ -211,13 +217,61 @@ namespace Microsoft.IdentityModel.Protocols
             if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
                 return _currentConfiguration;
 
-            if (AppContextSwitches.UpdateConfigAsBlocking)
-                return await GetConfigurationWithBlockingAsync(cancel).ConfigureAwait(false);
-            else
-                return await GetConfigurationNonBlockingAsync(cancel).ConfigureAwait(false);
+            Task<T> configurationTask;
+            lock (_configurationTaskLock)
+            {
+                if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
+                    return _currentConfiguration;
+
+                if (_configurationTask == null || _configurationTask.IsCompleted)
+                {
+                    _configurationTask = AppContextSwitches.UpdateConfigAsBlocking
+                        ? GetConfigurationWithBlockingAsync()
+                        : GetConfigurationNonBlockingAsync();
+
+                    _ = _configurationTask.ContinueWith(
+                        static task => _ = task.Exception,
+                        CancellationToken.None,
+                        TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                        TaskScheduler.Default);
+                }
+
+                configurationTask = _configurationTask;
+            }
+
+            return await WaitForConfigurationAsync(configurationTask, cancel).ConfigureAwait(false);
         }
 
-        private async Task<T> GetConfigurationNonBlockingAsync(CancellationToken cancel)
+        // VSTHRD003: WaitForConfigurationAsync intentionally awaits the shared, coalesced
+        // _configurationTask that was started by another caller. This is by design — the fetch is
+        // shared across all callers — and every await uses ConfigureAwait(false), so the deadlock
+        // scenario the analyzer guards against does not apply.
+#pragma warning disable VSTHRD003 // Avoid awaiting foreign Tasks
+        private static async Task<T> WaitForConfigurationAsync(
+            Task<T> configurationTask,
+            CancellationToken cancellationToken)
+        {
+            if (!cancellationToken.CanBeCanceled || configurationTask.IsCompleted)
+                return await configurationTask.ConfigureAwait(false);
+
+            var cancellationCompletion = new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            using (cancellationToken.Register(
+                state => ((TaskCompletionSource<bool>)state).TrySetResult(true),
+                cancellationCompletion))
+            {
+                await Task.WhenAny(configurationTask, cancellationCompletion.Task).ConfigureAwait(false);
+            }
+
+            if (configurationTask.IsCompleted)
+                return await configurationTask.ConfigureAwait(false);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            return await configurationTask.ConfigureAwait(false);
+        }
+#pragma warning restore VSTHRD003 // Avoid awaiting foreign Tasks
+
+        private async Task<T> GetConfigurationNonBlockingAsync()
         {
             Exception fetchMetadataFailure = null;
 
@@ -230,7 +284,7 @@ namespace Microsoft.IdentityModel.Protocols
             //   else kick off task to update current configuration
             if (_currentConfiguration == null)
             {
-                await _configurationNullLock.WaitAsync(cancel).ConfigureAwait(false);
+                await _configurationNullLock.WaitAsync(CancellationToken.None).ConfigureAwait(false);
                 if (_currentConfiguration != null)
                 {
                     _configurationNullLock.Release();
@@ -245,7 +299,9 @@ namespace Microsoft.IdentityModel.Protocols
                     // If provided configuration is valid, skip regular retriaval process and update current configuration.
                     if (ConfigurationEventHandler != null)
                     {
-                        var configurationRetrieved = await HandleBeforeRetrieveAsync(retrievalContext, cancel).ConfigureAwait(false);
+                        var configurationRetrieved = await HandleBeforeRetrieveAsync(
+                            retrievalContext,
+                            CancellationToken.None).ConfigureAwait(false);
 
                         // replicate the behavior of successful retrieval from endpoint
                         if (configurationRetrieved != null && configurationRetrieved.Configuration != null)
@@ -260,8 +316,8 @@ namespace Microsoft.IdentityModel.Protocols
                         }
                     }
 
-                    // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
-                    // The transport should have its own timeouts, etc.
+                    // This fetch populates shared state and must outlive any individual caller.
+                    // Callers apply cancellation while awaiting the shared task.
                     T configuration = await _configRetriever.GetConfigurationAsync(
                         MetadataAddress,
                         _docRetriever,
