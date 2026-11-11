@@ -30,9 +30,18 @@ public partial class SignedHttpRequestHandler
         if (signedHttpRequestValidationContext is null)
             return ValidationError.NullParameter(nameof(signedHttpRequestValidationContext), ValidationError.GetCurrentStackFrame());
 
+        if (signedHttpRequestValidationContext.SignedHttpRequest.Length > _jwtTokenHandler.MaximumTokenSizeInBytes)
+            return new ValidationError(
+                new MessageDetail(
+                    Tokens.LogMessages.IDX10209,
+                    LogHelper.MarkAsNonPII(signedHttpRequestValidationContext.SignedHttpRequest.Length),
+                    LogHelper.MarkAsNonPII(_jwtTokenHandler.MaximumTokenSizeInBytes)),
+                ValidationFailureType.SecurityTokenTooLarge,
+                ValidationError.GetCurrentStackFrame());
+
         ValidationResult<SecurityToken, ValidationError> result = JsonWebTokenHandler.ReadToken(signedHttpRequestValidationContext.SignedHttpRequest, signedHttpRequestValidationContext.CallContext);
         if (!result.Succeeded)
-            return result.Error!.AddCurrentStackFrame();
+            return result.Error.AddCurrentStackFrame();
 
         return (JsonWebToken)result.Result!;
     }
@@ -527,7 +536,17 @@ public partial class SignedHttpRequestHandler
         if (string.IsNullOrEmpty(accessToken))
             return ValidationError.NullParameter(nameof(accessToken), ValidationError.GetCurrentStackFrame());
 
-        return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.TokenHandler.ValidateTokenAsync(accessToken, signedHttpRequestValidationContext.AccessTokenValidationParameters, signedHttpRequestValidationContext.CallContext, cancellationToken).ConfigureAwait(false);
+        TokenHandler tokenHandler = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.TokenHandler;
+        if (tokenHandler is not IResultBasedValidation resultBasedValidation)
+            return new SignedHttpRequestValidationError(
+                new MessageDetail(
+                    Tokens.LogMessages.IDX10267,
+                    LogHelper.MarkAsNonPII(nameof(IResultBasedValidation.ValidateTokenAsync)),
+                    LogHelper.MarkAsNonPII(tokenHandler.GetType().FullName)),
+                SignedHttpRequestValidationFailure.ValidationFailed,
+                ValidationError.GetCurrentStackFrame());
+
+        return await resultBasedValidation.ValidateTokenAsync(accessToken, signedHttpRequestValidationContext.AccessTokenValidationParameters, signedHttpRequestValidationContext.CallContext, cancellationToken).ConfigureAwait(false);
     }
 
 
@@ -719,7 +738,7 @@ public partial class SignedHttpRequestHandler
         {
             return new Cnf(cnf);
         }
-        catch (JsonException ex)
+        catch (Exception ex)
         {
             return new SignedHttpRequestValidationError(
                 new MessageDetail(LogMessages.IDX23003, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf)),
@@ -805,20 +824,11 @@ public partial class SignedHttpRequestHandler
         if (string.IsNullOrEmpty(jwe))
             return ValidationError.NullParameter(nameof(jwe), ValidationError.GetCurrentStackFrame());
 
-        JsonWebKey jwk;
-        try
-        {
-            jwk = await SignedHttpRequestUtilities.DecryptSymmetricPopKeyAsync(_jwtTokenHandler, jwe, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            return new SignedHttpRequestValidationError(
-                new MessageDetail(LogMessages.IDX23040, ex),
-                SignedHttpRequestValidationFailure.InvalidPopKey,
-                ValidationError.GetCurrentStackFrame(),
-                ex);
-        }
+        ValidationResult<JsonWebKey, ValidationError> result = await SignedHttpRequestUtilities.DecryptSymmetricPopKeyAsync(_jwtTokenHandler, jwe, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+        if (!result.Succeeded)
+            return result.Error.AddCurrentStackFrame();
 
+        JsonWebKey jwk = result.Result;
         if (JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jwk, out _))
             return jwk;
 

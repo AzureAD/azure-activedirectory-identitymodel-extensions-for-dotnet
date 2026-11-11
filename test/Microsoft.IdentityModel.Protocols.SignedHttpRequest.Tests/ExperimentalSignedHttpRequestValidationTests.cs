@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using ExperimentalContext = Microsoft.IdentityModel.Protocols.SignedHttpRequest.Experimental.SignedHttpRequestValidationContext;
@@ -338,6 +339,33 @@ public class ExperimentalSignedHttpRequestValidationTests
     }
 
     [Fact]
+    public async Task ValidateAccessTokenReturnsErrorForHandlerWithoutResultBasedValidation()
+    {
+        // Arrange
+        var handler = new SignedHttpRequestHandler();
+        var tokenHandler = new Mock<TokenHandler>(MockBehavior.Strict);
+        var context = new ExperimentalContext(
+            SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
+            new HttpRequestData(),
+            new ValidationParameters());
+        context.SignedHttpRequestValidationParameters.TokenHandler = tokenHandler.Object;
+
+        // Act
+        var result = await handler.ValidateAccessTokenAsync(
+            SignedHttpRequestTestUtils.DefaultEncodedAccessToken, context, CancellationToken.None);
+
+        // Assert
+        ValidationError error = GetError(result);
+        Assert.Equal(Experimental.SignedHttpRequestValidationFailure.ValidationFailed, error.FailureType);
+        Assert.IsType<SignedHttpRequestValidationException>(error.GetException());
+        Assert.Contains("IDX10267", error.Message);
+        Assert.Contains(nameof(IResultBasedValidation.ValidateTokenAsync), error.Message);
+        Assert.Contains(tokenHandler.Object.GetType().FullName, error.Message);
+        Assert.NotEmpty(error.StackFrames);
+        tokenHandler.VerifyNoOtherCalls();
+    }
+
+    [Fact]
     public async Task ResolvePopKeyPropagatesNullAccessTokenError()
     {
         // Arrange
@@ -373,6 +401,38 @@ public class ExperimentalSignedHttpRequestValidationTests
         ValidationError error = GetError(result);
         Assert.Contains("IDX23003", error.Message);
         Assert.IsType<SignedHttpRequestInvalidAtClaimException>(error.GetException());
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0)]
+    [InlineData(1)]
+    public void ReadSignedHttpRequestHonorsMaximumTokenSize(int sizeOffset)
+    {
+        // Arrange
+        var handler = new SignedHttpRequestHandler();
+        int maximumTokenSize = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+        string request = CreateToken("{}").PadRight(maximumTokenSize + sizeOffset, 'a');
+        var context = new ExperimentalContext(request, new HttpRequestData(), new ValidationParameters());
+
+        // Act
+        var result = handler.ReadSignedHttpRequest(context);
+
+        // Assert
+        if (sizeOffset <= 0)
+        {
+            Assert.True(result.Succeeded, result.Error?.Message);
+            Assert.Equal(request, result.Result.EncodedToken);
+        }
+        else
+        {
+            ValidationError error = GetError(result);
+            Assert.Equal(ValidationFailureType.SecurityTokenTooLarge, error.FailureType);
+            Assert.Contains("IDX10209", error.Message);
+            Assert.IsType<SecurityTokenValidationException>(error.GetException());
+            Assert.Null(error.InnerException);
+            Assert.NotEmpty(error.StackFrames);
+        }
     }
 
     [Fact]
@@ -415,7 +475,6 @@ public class ExperimentalSignedHttpRequestValidationTests
     [InlineData("UnsupportedCnf", "IDX23014", typeof(SignedHttpRequestInvalidCnfClaimException))]
     [InlineData("SymmetricJwk", "IDX23015", typeof(SignedHttpRequestInvalidPopKeyException))]
     [InlineData("InvalidJwk", "IDX23016", typeof(SignedHttpRequestInvalidPopKeyException))]
-    [InlineData("InvalidJwe", "IDX23040", typeof(SignedHttpRequestInvalidPopKeyException))]
     [InlineData("JkuDisabled", "IDX23037", typeof(SignedHttpRequestInvalidPopKeyException))]
     [InlineData("JkuDisallowed", "IDX23038", typeof(SignedHttpRequestInvalidPopKeyException))]
     [InlineData("NonHttpsJku", "IDX23006", typeof(SignedHttpRequestInvalidPopKeyException))]
@@ -435,7 +494,6 @@ public class ExperimentalSignedHttpRequestValidationTests
             "UnsupportedCnf" => GetError(await handler.ResolvePopKeyFromCnfClaimAsync(new Cnf(), null, null, context, CancellationToken.None)),
             "SymmetricJwk" => GetError(handler.ResolvePopKeyFromJwk(new JsonWebKey(SignedHttpRequestTestUtils.DefaultJwe.ToString()), context)),
             "InvalidJwk" => GetError(handler.ResolvePopKeyFromJwk(new JsonWebKey { Kty = "unsupported" }, context)),
-            "InvalidJwe" => GetError(await handler.ResolvePopKeyFromJweAsync("not-a-jwe", context, CancellationToken.None)),
             "JkuDisabled" or "JkuDisallowed" => GetError(await handler.ResolvePopKeyFromJkuAsync("https://contoso.com/keys", new Cnf(), context, CancellationToken.None)),
             "NonHttpsJku" => GetError(await handler.GetPopKeysFromJkuAsync("http://contoso.com/keys", context, CancellationToken.None)),
             "MissingKid" => GetError(await handler.ResolvePopKeyFromKeyIdentifierAsync("missing", null, null, context, CancellationToken.None)),
@@ -447,6 +505,132 @@ public class ExperimentalSignedHttpRequestValidationTests
         Assert.Contains(diagnostic, error.Message);
         Assert.IsType(exceptionType, error.GetException());
         Assert.NotEmpty(error.StackFrames);
+    }
+
+    [Theory]
+    [InlineData("Handler", "jwtTokenHandler")]
+    [InlineData("Context", "signedHttpRequestValidationContext")]
+    [InlineData("NullJwe", "jwe")]
+    [InlineData("EmptyJwe", "jwe")]
+    public async Task DecryptSymmetricPopKeyNullArgumentsReturnErrors(string scenario, string parameterName)
+    {
+        // Arrange
+        var context = new ExperimentalContext("request", new HttpRequestData(), new ValidationParameters());
+        var handler = new JsonWebTokenHandler();
+        string jwe = SignedHttpRequestTestUtils.DefaultCnfJwe[ConfirmationClaimTypes.Jwe].ToString();
+
+        // Act
+        var result = await SignedHttpRequestUtilities.DecryptSymmetricPopKeyAsync(
+            scenario == "Handler" ? null : handler,
+            scenario == "NullJwe" ? null : scenario == "EmptyJwe" ? string.Empty : jwe,
+            scenario == "Context" ? null : context,
+            CancellationToken.None);
+
+        // Assert
+        ValidationError error = GetError(result);
+        Assert.Equal(ValidationFailureType.NullArgument, error.FailureType);
+        Assert.Contains(parameterName, error.Message);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task DecryptSymmetricPopKeyReturnsKey(bool useResolver)
+    {
+        // Arrange
+        var context = new ExperimentalContext("request", new HttpRequestData(), new ValidationParameters());
+        string jwe = SignedHttpRequestTestUtils.DefaultCnfJwe[ConfirmationClaimTypes.Jwe].ToString();
+        var keys = new[] { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key };
+        using var cancellationSource = new CancellationTokenSource();
+        bool resolverCalled = false;
+        if (useResolver)
+            context.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync = (token, cancellationToken) =>
+            {
+                Assert.Equal(jwe, Assert.IsType<JsonWebToken>(token).EncodedToken);
+                Assert.Equal(cancellationSource.Token, cancellationToken);
+                resolverCalled = true;
+                return Task.FromResult<IEnumerable<SecurityKey>>(keys);
+            };
+        else
+            context.SignedHttpRequestValidationParameters.CnfDecryptionKeys = keys;
+
+        // Act
+        var result = await SignedHttpRequestUtilities.DecryptSymmetricPopKeyAsync(new JsonWebTokenHandler(), jwe, context, cancellationSource.Token);
+
+        // Assert
+        Assert.True(result.Succeeded, result.Error?.Message);
+        Assert.Equal(useResolver, resolverCalled);
+        Assert.Equal(JsonWebAlgorithmsKeyTypes.Octet, result.Result.Kty);
+        Assert.Equal(KeyingMaterial.DefaultSymmetricKeyBytes_256, Base64UrlEncoder.DecodeBytes(result.Result.K));
+    }
+
+    [Theory]
+    [InlineData("Malformed", "IDX14107")]
+    [InlineData("NullKeys", "IDX23017")]
+    [InlineData("EmptyKeys", "IDX23017")]
+    [InlineData("WrongKey", "IDX10603")]
+    [InlineData("InvalidJson", "IDX23018")]
+    [InlineData("ResolverThrows", "IDX23018")]
+    [InlineData("ResolverCanceled", "IDX23018")]
+    [InlineData("EnumerationThrows", "IDX23018")]
+    public async Task DecryptSymmetricPopKeyFailuresReturnErrors(string scenario, string diagnostic)
+    {
+        // Arrange
+        var context = new ExperimentalContext("request", new HttpRequestData(), new ValidationParameters());
+        string jwe = scenario == "Malformed" ? "not-a-jwe" :
+            SignedHttpRequestTestUtils.EncryptToken(scenario == "InvalidJson" ? "not-json" : SignedHttpRequestTestUtils.DefaultJwe.ToString());
+        var exception = scenario == "ResolverCanceled"
+            ? (Exception)new OperationCanceledException("Resolver canceled.")
+            : new InvalidOperationException("Key resolution failed.");
+        context.SignedHttpRequestValidationParameters.CnfDecryptionKeys = new[] { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key };
+        switch (scenario)
+        {
+            case "NullKeys":
+                context.SignedHttpRequestValidationParameters.CnfDecryptionKeys = null;
+                break;
+            case "EmptyKeys":
+                context.SignedHttpRequestValidationParameters.CnfDecryptionKeys = Array.Empty<SecurityKey>();
+                break;
+            case "WrongKey":
+                context.SignedHttpRequestValidationParameters.CnfDecryptionKeys = new[] { new SymmetricSecurityKey(new byte[32]) };
+                break;
+            case "ResolverThrows":
+            case "ResolverCanceled":
+                context.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync = (_, _) =>
+                    Task.FromException<IEnumerable<SecurityKey>>(exception);
+                break;
+            case "EnumerationThrows":
+                context.SignedHttpRequestValidationParameters.CnfDecryptionKeys =
+                    new[] { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key }.Select<SecurityKey, SecurityKey>(_ => throw exception);
+                break;
+        }
+
+        // Act
+        var result = await SignedHttpRequestUtilities.DecryptSymmetricPopKeyAsync(new JsonWebTokenHandler(), jwe, context, CancellationToken.None);
+
+        // Assert
+        ValidationError error = GetError(result);
+        Assert.Contains(diagnostic, error.Message);
+        Assert.NotEmpty(error.StackFrames);
+        if (scenario == "WrongKey")
+        {
+            Assert.Equal(ValidationFailureType.TokenDecryptionFailed, error.FailureType);
+            Assert.IsType<SecurityTokenDecryptionFailedException>(error.GetException());
+        }
+        else if (scenario != "Malformed")
+        {
+            Assert.IsType<SignedHttpRequestInvalidPopKeyException>(error.GetException());
+        }
+
+        if (scenario is "ResolverThrows" or "ResolverCanceled" or "EnumerationThrows")
+            Assert.Same(exception, error.InnerException);
+
+        if (scenario == "Malformed")
+        {
+            var resolutionResult = await new SignedHttpRequestHandler().ResolvePopKeyFromJweAsync(jwe, context, CancellationToken.None);
+            Assert.Equal(error.FailureType, GetError(resolutionResult).FailureType);
+            Assert.Equal(error.Message, resolutionResult.Error.Message);
+        }
     }
 
     [Theory]

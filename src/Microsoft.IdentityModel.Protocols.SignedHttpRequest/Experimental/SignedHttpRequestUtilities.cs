@@ -120,47 +120,68 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 #nullable restore
 
-        internal static async Task<JsonWebKey> DecryptSymmetricPopKeyAsync(JsonWebTokenHandler jwtTokenHandler, string jwe, Experimental.SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal static async Task<ValidationResult<JsonWebKey, ValidationError>> DecryptSymmetricPopKeyAsync(JsonWebTokenHandler jwtTokenHandler, string jwe, Experimental.SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
+            if (jwtTokenHandler is null)
+                return ValidationError.NullParameter(nameof(jwtTokenHandler), ValidationError.GetCurrentStackFrame());
+
             if (string.IsNullOrEmpty(jwe))
-                throw LogHelper.LogArgumentNullException(nameof(jwe));
+                return ValidationError.NullParameter(nameof(jwe), ValidationError.GetCurrentStackFrame());
 
-            var jweJwt = jwtTokenHandler.ReadJsonWebToken(jwe);
+            if (signedHttpRequestValidationContext is null)
+                return ValidationError.NullParameter(nameof(signedHttpRequestValidationContext), ValidationError.GetCurrentStackFrame());
 
-            IEnumerable<SecurityKey> decryptionKeys;
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync != null)
-                decryptionKeys = await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync(jweJwt, cancellationToken).ConfigureAwait(false);
-            else
-                decryptionKeys = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeys;
+            ValidationResult<SecurityToken, ValidationError> readResult = JsonWebTokenHandler.ReadToken(jwe, signedHttpRequestValidationContext.CallContext);
+            if (!readResult.Succeeded)
+                return readResult.Error.AddCurrentStackFrame();
 
-            if (decryptionKeys == null || !decryptionKeys.Any())
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23017)));
-
-            var tokenDecryptionParameters = new ValidationParameters()
-            {
-                IssuerValidatorAsync = new NoOpIssuerValidator(),
-                LifetimeValidator = new NoOpLifetimeValidator(),
-                AudienceValidator = new NoOpAudienceValidator(),
-                SignatureKeyValidator = new NoOpSignatureKeyValidator()
-            };
-            foreach (SecurityKey decryptionKey in decryptionKeys)
-                tokenDecryptionParameters.DecryptionKeys.Add(decryptionKey);
+            var jweJwt = (JsonWebToken)readResult.Result;
+            string decryptionKeyIds = string.Empty;
 
             try
             {
-                ValidationResult<string, ValidationError> result = jwtTokenHandler.DecryptToken(jweJwt, tokenDecryptionParameters, null, null);
+                IEnumerable<SecurityKey> resolvedKeys;
+                if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync != null)
+                    resolvedKeys = await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync(jweJwt, cancellationToken).ConfigureAwait(false);
+                else
+                    resolvedKeys = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeys;
+
+                List<SecurityKey> decryptionKeys = resolvedKeys?.ToList();
+                if (decryptionKeys is null || decryptionKeys.Count == 0)
+                    return new Experimental.SignedHttpRequestValidationError(
+                        new MessageDetail(LogMessages.IDX23017),
+                        Experimental.SignedHttpRequestValidationFailure.InvalidPopKey,
+                        ValidationError.GetCurrentStackFrame());
+
+                decryptionKeyIds = string.Join(", ", decryptionKeys.Select(x => x?.KeyId ?? "Null"));
+                var tokenDecryptionParameters = new ValidationParameters()
+                {
+                    IssuerValidatorAsync = new NoOpIssuerValidator(),
+                    LifetimeValidator = new NoOpLifetimeValidator(),
+                    AudienceValidator = new NoOpAudienceValidator(),
+                    SignatureKeyValidator = new NoOpSignatureKeyValidator()
+                };
+                foreach (SecurityKey decryptionKey in decryptionKeys)
+                    tokenDecryptionParameters.DecryptionKeys.Add(decryptionKey);
+
+                ValidationResult<string, ValidationError> result = jwtTokenHandler.DecryptToken(jweJwt, tokenDecryptionParameters, null, signedHttpRequestValidationContext.CallContext);
                 if (!result.Succeeded)
-                    throw result.Error.InnerException;
+                    return result.Error.AddCurrentStackFrame();
+
                 return new JsonWebKey(result.Result);
             }
+#pragma warning disable CA1031 // Translate exceptions from resolvers, key enumeration, cryptography and JSON parsing into validation errors.
             catch (Exception e)
+#pragma warning restore CA1031
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(
-                    LogHelper.FormatInvariant(
+                return new Experimental.SignedHttpRequestValidationError(
+                    new MessageDetail(
                         LogMessages.IDX23018,
-                        LogHelper.MarkAsNonPII(string.Join(", ", decryptionKeys.Select(x => x?.KeyId ?? "Null"))),
+                        LogHelper.MarkAsNonPII(decryptionKeyIds),
                         e),
-                    e));
+                    Experimental.SignedHttpRequestValidationFailure.InvalidPopKey,
+                    ValidationError.GetCurrentStackFrame(),
+                    e);
             }
         }
     }
