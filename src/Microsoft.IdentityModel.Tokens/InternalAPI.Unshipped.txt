@@ -1,0 +1,4 @@
+*REMOVED*Microsoft.IdentityModel.Tokens.IssuerValidatorAsync
+*REMOVED*Microsoft.IdentityModel.Tokens.TokenValidationParameters.IssuerValidatorAsync.get -> Microsoft.IdentityModel.Tokens.IssuerValidatorAsync
+*REMOVED*Microsoft.IdentityModel.Tokens.TokenValidationParameters.IssuerValidatorAsync.set -> void
+*REMOVED*virtual Microsoft.IdentityModel.Tokens.IssuerValidatorAsync.Invoke(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Threading.Tasks.ValueTask<string>

@@ -2,7 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -51,6 +56,87 @@ namespace Microsoft.IdentityModel.Validators.Tests
             // Should return the same instance for the same authority when provider is null
             var validator3 = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient, null);
             Assert.Same(validator1, validator3);
+        }
+
+        [Theory]
+        [InlineData(ValidatorConstants.AuthorityCommonTenantWithV2, ValidatorConstants.AadIssuer, ValidatorConstants.AadIssuerV2CommonAuthority, true)]
+        [InlineData(ValidatorConstants.AuthorityCommonTenantWithV2, ValidatorConstants.V1Issuer, ValidatorConstants.AadIssuerV1CommonAuthority, true)]
+        [InlineData(ValidatorConstants.AuthorityV1, ValidatorConstants.AadIssuer, ValidatorConstants.AadIssuerV2CommonAuthority, true)]
+        [InlineData(ValidatorConstants.AuthorityCommonTenantWithV2, ValidatorConstants.AadIssuerPPE, ValidatorConstants.AadIssuerV2CommonAuthority, false)]
+        public async Task ValidateTokenAsync_WithDelayedIssuerMetadata_DoesNotBlock(
+            string authority, string issuer, string metadataIssuer, bool expectedIsValid)
+        {
+            // Arrange
+            var configuration = new TaskCompletionSource<BaseConfiguration>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var configurationManager = new DelayedConfigurationManager(configuration.Task);
+            var issuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, null, _ => configurationManager);
+            var handler = new JsonWebTokenHandler();
+            string token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = issuer,
+                Audience = Default.Audience,
+                Claims = new Dictionary<string, object> { { ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid } },
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2
+            });
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidAudience = Default.Audience,
+                IssuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                IssuerValidatorAsync = issuerValidator.ValidateAsync,
+                IssuerValidator = (_, _, _) => throw new InvalidOperationException("The synchronous issuer validator must not run."),
+                IssuerValidatorUsingConfiguration = (_, _, _, _) => throw new InvalidOperationException("The synchronous issuer validator must not run.")
+            };
+
+            // Act
+            // A worker and a finally-released gate keep a blocking regression from hanging the test.
+            Task<Task<TokenValidationResult>[]> invocation = Task.Run(() =>
+            {
+                var validations = new Task<TokenValidationResult>[8];
+                for (int i = 0; i < validations.Length; i++)
+                    validations[i] = handler.ValidateTokenAsync(token, validationParameters.Clone());
+
+                return validations;
+            });
+
+            try
+            {
+                Task completed = await Task.WhenAny(invocation, Task.Delay(TimeSpan.FromSeconds(10)));
+
+                // Assert
+                Assert.Same(invocation, completed);
+                foreach (Task<TokenValidationResult> validation in await invocation)
+                    Assert.False(validation.IsCompleted);
+            }
+            finally
+            {
+                configuration.TrySetResult(new OpenIdConnectConfiguration { Issuer = metadataIssuer });
+                await Task.WhenAll(await invocation);
+            }
+
+            foreach (TokenValidationResult result in await Task.WhenAll(await invocation))
+            {
+                Assert.Equal(expectedIsValid, result.IsValid);
+                if (!expectedIsValid)
+                    Assert.IsType<SecurityTokenInvalidIssuerException>(result.Exception);
+            }
+        }
+
+        [Fact]
+        public async Task ValidateAsync_MetadataRetrievalFailure_PreservesException()
+        {
+            // Arrange
+            var metadataException = new HttpRequestException("Metadata is unavailable.");
+            var configurationManager = new DelayedConfigurationManager(Task.FromException<BaseConfiguration>(metadataException));
+            var issuerValidator = AadIssuerValidator.GetAadIssuerValidator(
+                ValidatorConstants.AuthorityCommonTenantWithV2, null, _ => configurationManager);
+            var token = new JsonWebToken("{}", $"{{\"iss\":\"{ValidatorConstants.AadIssuer}\",\"tid\":\"{ValidatorConstants.TenantIdAsGuid}\"}}");
+
+            // Act
+            SecurityTokenInvalidIssuerException exception = await Assert.ThrowsAsync<SecurityTokenInvalidIssuerException>(
+                async () => await issuerValidator.ValidateAsync(token.Issuer, token, new TokenValidationParameters()));
+
+            // Assert
+            Assert.Same(metadataException, exception.InnerException);
         }
 
         public static TheoryData<AadIssuerValidatorTheoryData> AadIssuerValidationTestCases()
@@ -140,6 +226,23 @@ namespace Microsoft.IdentityModel.Validators.Tests
             };
 
             return theoryData;
+        }
+
+        private class DelayedConfigurationManager : BaseConfigurationManager
+        {
+            private readonly Task<BaseConfiguration> _configuration;
+
+            public DelayedConfigurationManager(Task<BaseConfiguration> configuration)
+            {
+                _configuration = configuration;
+            }
+
+            public override Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancellationToken)
+            {
+                return _configuration;
+            }
+
+            public override void RequestRefresh() { }
         }
 
         private class MockBaseConfigurationManager : BaseConfigurationManager
