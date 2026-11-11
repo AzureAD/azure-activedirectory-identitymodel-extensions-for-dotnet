@@ -985,7 +985,19 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
 
             var authority = authorityUrlProvider(authorityVersion);
-            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient);
+            using var httpClient = new HttpClient(new DelegateHttpMessageHandler((request, _) =>
+            {
+                var requestPath = request.RequestUri?.AbsolutePath ?? string.Empty;
+                var metadataIssuer = requestPath.IndexOf("/v1.1/", StringComparison.Ordinal) >= 0
+                    ? ValidatorConstants.AadIssuerV11PPE
+                    : requestPath.IndexOf("/v2.0/", StringComparison.Ordinal) >= 0
+                        ? ValidatorConstants.AadIssuerPPE
+                        : ValidatorConstants.V1IssuerPPE;
+
+                return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(
+                    $"{{\"issuer\":\"{metadataIssuer}\"}}"));
+            }));
+            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient);
 
             ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(issuer, jwtSecurityToken, validator);
             var actualIssuer = validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters());
