@@ -372,20 +372,22 @@ namespace Microsoft.IdentityModel.Tokens
         /// This means that no default 'issuer' validation will occur.
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
         /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
-        /// priority. 
+        /// priority. <see cref="IssuerValidatorAsync"/> takes precedence over both delegates.
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the issuer of the token.
+        /// Gets or sets a delegate that will be used to asynchronously validate the issuer of the token.
         /// </summary>
         /// <remarks>
         /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
         /// This means that no default 'issuer' validation will occur.
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
         /// IssuerValidatorAsync takes precedence over <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/>.
+        /// The asynchronous validation path in <c>Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler</c>
+        /// awaits this delegate. Synchronous token-validation paths block until the asynchronous operation completes.
         /// </remarks>
-        internal IssuerValidatorAsync IssuerValidatorAsync { get; set; }
+        public IssuerValidatorAsync IssuerValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
@@ -396,7 +398,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
         /// This delegate should be used if properties from the configuration retrieved from the authority are necessary to validate the issuer.
         /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
-        /// priority.
+        /// priority. <see cref="IssuerValidatorAsync"/> takes precedence over both delegates.
         /// </remarks>
         public IssuerValidatorUsingConfiguration IssuerValidatorUsingConfiguration { get; set; }
 
