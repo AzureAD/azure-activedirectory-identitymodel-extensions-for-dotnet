@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -147,18 +148,30 @@ namespace Microsoft.IdentityModel.Validators
             if (configuration is not OpenIdConnectConfiguration openIdConnectConfiguration)
                 return;
 
+            bool warningEnabled = LogHelper.IsEnabled(EventLogLevel.Warning);
+
             JsonWebKey matchedKeyFromConfig = GetJsonWebKeyBySecurityKey(openIdConnectConfiguration, securityKey);
             if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(AadIssuerValidatorConstants.CloudInstanceNameKey, out object value))
             {
                 string signingKeyCloudInstanceName = value as string;
                 if (string.IsNullOrWhiteSpace(signingKeyCloudInstanceName))
+                {
+                    if (warningEnabled)
+                        LogHelper.LogWarning(LogMessages.IDX40014);
+
                     return;
+                }
 
                 if (openIdConnectConfiguration.AdditionalData.TryGetValue(AadIssuerValidatorConstants.CloudInstanceNameKey, out object configurationCloudInstanceNameObjectValue))
                 {
                     string configurationCloudInstanceName = configurationCloudInstanceNameObjectValue as string;
                     if (string.IsNullOrWhiteSpace(configurationCloudInstanceName))
+                    {
+                        if (warningEnabled)
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX40013, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName)));
+
                         return;
+                    }
 
                     if (!string.Equals(signingKeyCloudInstanceName, configurationCloudInstanceName, StringComparison.Ordinal))
                         throw LogHelper.LogExceptionMessage(
@@ -169,6 +182,16 @@ namespace Microsoft.IdentityModel.Validators
                                 SigningKey = securityKey,
                             });
                 }
+                else
+                {
+                    if (warningEnabled)
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX40013, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName)));
+                }
+            }
+            else
+            {
+                if (warningEnabled)
+                    LogHelper.LogWarning(LogMessages.IDX40014);
             }
         }
 

@@ -52,6 +52,90 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory]
+        [InlineData("signing", 3)]
+        [InlineData(null, 3)]
+        [InlineData("encryption", 0)]
+        [InlineData("", 0)]
+        [InlineData(" ", 0)]
+        [InlineData("unknown", 0)]
+        [InlineData("Signing", 0)]
+        public void ReadMetadataKeyUse(string keyUse, int expectedSigningKeyCount)
+        {
+            // Arrange
+            var useAttribute = keyUse is null ? string.Empty : $"use=\"{keyUse}\"";
+            var metadata = ReferenceMetadata.AADCommonMetadata.Replace("use=\"signing\"", useAttribute);
+            using var reader = XmlReader.Create(new StringReader(metadata));
+
+            // Act
+            var configuration = new WsFederationMetadataSerializer().ReadMetadata(reader);
+
+            // Assert
+            Assert.Equal(expectedSigningKeyCount, configuration.KeyInfos.Count);
+            Assert.Equal(expectedSigningKeyCount, configuration.SigningKeys.Count);
+            if (expectedSigningKeyCount != 0)
+            {
+                foreach (var expectedKey in ReferenceMetadata.MetadataSigningKeys)
+                    Assert.Contains(configuration.SigningKeys, key => key.KeyId == expectedKey.KeyId);
+            }
+
+            Assert.Equal(ReferenceMetadata.IssuerForCommon, configuration.Issuer);
+            Assert.Equal(ReferenceMetadata.TokenEndpointForCommon, configuration.TokenEndpoint);
+            Assert.Equal(ReferenceMetadata.ActiveTokenEndpointForCommon, configuration.ActiveTokenEndpoint);
+            Assert.True(reader.EOF);
+        }
+
+        [Theory]
+        [InlineData(0, false)]
+        [InlineData(1, false)]
+        [InlineData(2, false)]
+        [InlineData(0, true)]
+        public void ReadMetadataMixedKeyUses(int encryptionKeyIndex, bool sharedCertificate)
+        {
+            // Arrange
+            var document = new XmlDocument();
+            document.LoadXml(ReferenceMetadata.AADCommonMetadata);
+            var signature = document.GetElementsByTagName(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace)[0];
+            document.DocumentElement.RemoveChild(signature);
+
+            var keyDescriptors = document.GetElementsByTagName(WsFederationConstants.Elements.KeyDescriptor, WsFederationConstants.MetadataNamespace);
+            var encryptionKeyDescriptor = (XmlElement)keyDescriptors[encryptionKeyIndex];
+            encryptionKeyDescriptor.SetAttribute(WsFederationConstants.Attributes.Use, "encryption");
+            if (sharedCertificate)
+                encryptionKeyDescriptor.GetElementsByTagName(XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace)[0].InnerText = ReferenceMetadata.X509CertificateData2;
+
+            var encryptionMethod = document.CreateElement("EncryptionMethod", WsFederationConstants.MetadataNamespace);
+            encryptionMethod.SetAttribute("Algorithm", SecurityAlgorithms.RsaOAEP);
+            encryptionKeyDescriptor.AppendChild(encryptionMethod);
+
+            var signingCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
+            var builder = new StringBuilder();
+            using (var writer = new EnvelopedSignatureWriter(XmlWriter.Create(builder), signingCredentials, document.DocumentElement.GetAttribute("ID")))
+            {
+                document.WriteTo(writer);
+                writer.Flush();
+            }
+
+            using var reader = XmlReader.Create(new StringReader(builder.ToString()));
+            var expectedKeys = ReferenceMetadata.MetadataSigningKeys;
+            expectedKeys.RemoveAt(encryptionKeyIndex);
+
+            // Act
+            var configuration = new WsFederationMetadataSerializer().ReadMetadata(reader);
+
+            // Assert
+            Assert.Equal(2, configuration.KeyInfos.Count);
+            Assert.Collection(configuration.SigningKeys,
+                key => Assert.Equal(expectedKeys[0].KeyId, key.KeyId),
+                key => Assert.Equal(expectedKeys[1].KeyId, key.KeyId));
+            Assert.Equal(ReferenceMetadata.IssuerForCommon, configuration.Issuer);
+            Assert.Equal(ReferenceMetadata.TokenEndpointForCommon, configuration.TokenEndpoint);
+            Assert.Equal(ReferenceMetadata.ActiveTokenEndpointForCommon, configuration.ActiveTokenEndpoint);
+            Assert.True(reader.EOF);
+            configuration.Signature.Verify(signingCredentials.Key, signingCredentials.Key.CryptoProviderFactory);
+        }
+
+
         public static TheoryData<WsFederationMetadataTheoryData> ReadMetadataTheoryData
         {
             get

@@ -41,6 +41,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         /// <param name="reader"><see cref="XmlReader"/> used to read metadata</param>
         /// <returns><see cref="WsFederationConfiguration"/></returns>
+        /// <remarks>
+        /// Only key descriptors with <c>use="signing"</c> or no <c>use</c> attribute
+        /// are included in the configuration's signing keys.
+        /// </remarks>
         /// <exception cref="XmlReadException">if error occurs when reading metadata</exception>
         public WsFederationConfiguration ReadMetadata(XmlReader reader)
         {
@@ -176,7 +180,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             while (reader.IsStartElement())
             {
                 if (reader.IsStartElement(Elements.KeyDescriptor, MetadataNamespace))
+                {
+                    string? keyUse = reader.GetAttribute(Attributes.Use);
+                    if (keyUse is not null && !string.Equals(keyUse, KeyUse.Signing, StringComparison.Ordinal))
+                    {
+                        reader.Skip();
+                        continue;
+                    }
+
                     roleDescriptor.KeyInfos.Add(ReadKeyDescriptorForSigning(reader));
+                }
                 else if (reader.IsStartElement(Elements.PassiveRequestorEndpoint, Namespace))
                     roleDescriptor.TokenEndpoint = ReadPassiveRequestorEndpoint(reader);
                 else if (reader.IsStartElement(Elements.SecurityTokenServiceEndpoint, Namespace))
