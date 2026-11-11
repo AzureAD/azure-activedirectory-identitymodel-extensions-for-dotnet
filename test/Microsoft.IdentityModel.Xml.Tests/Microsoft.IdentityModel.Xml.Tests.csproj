@@ -1,4 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -33,4 +35,7 @@
     </None>
   </ItemGroup>
 
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <Import Project="..\..\build\targetFrameworkSupportWarnings.targets" />
 </Project>
