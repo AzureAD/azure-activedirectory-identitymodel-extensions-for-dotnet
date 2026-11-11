@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
@@ -34,6 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal delegate bool ShouldRemove(TValue Value);
 
         private readonly int _capacity;
+        private readonly IEqualityComparer<TKey> _comparer;
         private List<LRUCacheItem<TKey, TValue>> _compactedItems = new List<LRUCacheItem<TKey, TValue>>();
         // The percentage of the cache to be removed when _maxCapacityPercentage is reached.
         private readonly double _compactionPercentage = .20;
@@ -96,6 +98,8 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal ShouldRemove OnShouldRemoveFromCompactedList { get; set; }
 
+        internal bool TrackCompactedItems { get; set; } = true;
+
         internal long EventQueueTaskIdleTimeoutInSeconds
         {
             get => _eventQueueTaskIdleTimeoutInSeconds;
@@ -129,7 +133,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _options = options;
-            _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
+            _comparer = comparer ?? EqualityComparer<TKey>.Default;
+            _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(_comparer);
             _removeExpiredValuesIntervalInSeconds = removeExpiredValuesIntervalInSeconds;
             _removeExpiredValues = removeExpiredValues;
             _compactIntervalInSeconds = compactIntervalInSeconds;
@@ -353,20 +358,26 @@ namespace Microsoft.IdentityModel.Tokens
         {
             try
             {
-                int newCacheSize = CalculateNewCacheSize();
-                while (_map.Count > newCacheSize && _doubleLinkedList.Count > 0)
+                int count = _map.Count;
+                int remainingAttempts = count - CalculateNewCacheSize(count);
+                while (remainingAttempts-- > 0 && _doubleLinkedList.Count > 0)
                 {
                     LinkedListNode<LRUCacheItem<TKey, TValue>> node = _doubleLinkedList.Last;
-                    if (_map.TryRemove(node.Value.Key, out LRUCacheItem<TKey, TValue> cacheItem))
+                    if (TryRemoveCacheItem(node.Value))
+                    {
+                        LRUCacheItem<TKey, TValue> cacheItem = node.Value;
                         OnItemMovedToCompactedList?.Invoke(cacheItem.Value);
+                        if (TrackCompactedItems)
+                            _compactedItems.Add(cacheItem);
+                    }
 
-                    _compactedItems.Add(cacheItem);
                     _doubleLinkedList.RemoveLast();
                 }
             }
             finally
             {
                 _compactValuesState = ActionNotQueued;
+                QueueCompactionIfNeeded(_map.Count);
             }
         }
 
@@ -378,25 +389,33 @@ namespace Microsoft.IdentityModel.Tokens
         {
             try
             {
-                int newCacheSize = CalculateNewCacheSize();
-                while (_map.Count > newCacheSize)
+                // Snapshot a work budget rather than chasing concurrent writers with Count on every eviction.
+                int count = _map.Count;
+                int remainingAttempts = count - CalculateNewCacheSize(count);
+                while (remainingAttempts-- > 0)
                 {
                     // Since all items could have been removed by the public TryRemove() method, leaving the map empty, we need to check if a default value is returned.
                     // Remove the item from the map only if the returned item is NOT default value.
                     KeyValuePair<TKey, LRUCacheItem<TKey, TValue>> item = _map.FirstOrDefault();
                     if (!item.Equals(default))
                     {
-                        if (_map.TryRemove(item.Key, out LRUCacheItem<TKey, TValue> cacheItem))
+                        if (TryRemoveCacheItem(item.Value))
                         {
-                            OnItemMovedToCompactedList?.Invoke(cacheItem.Value);
-                            _compactedItems.Add(cacheItem);
+                            OnItemMovedToCompactedList?.Invoke(item.Value.Value);
+                            if (TrackCompactedItems)
+                                _compactedItems.Add(item.Value);
                         }
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
             }
             finally
             {
                 _compactValuesState = ActionNotQueued;
+                QueueCompactionIfNeeded(_map.Count);
             }
         }
 
@@ -407,8 +426,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The new target cache size after compaction.</returns>
         protected int CalculateNewCacheSize()
         {
+            return CalculateNewCacheSize(_map.Count);
+        }
+
+        private int CalculateNewCacheSize(int count)
+        {
             // use the smaller of _map.Count and _capacity
-            int currentCount = Math.Min(_map.Count, _capacity);
+            int currentCount = Math.Min(count, _capacity);
 
             // use the _capacity for the newCacheSize calculation in the case where the cache is experiencing overflow
             return currentCount - (int)(currentCount * _compactionPercentage);
@@ -455,34 +479,16 @@ namespace Microsoft.IdentityModel.Tokens
                     var localThis = this;
                     AddActionToEventQueue(() =>
                     {
-                        localThis._doubleLinkedList.Remove(localCacheItem);
-                        localThis._doubleLinkedList.AddFirst(localCacheItem);
+                        localThis.MoveToFront(localCacheItem);
                     });
                 }
             }
             else
             {
-                // if cache is at _maxCapacityPercentage, trim it by _compactionPercentage
-                if ((double)_map.Count / _capacity >= _maxCapacityPercentage)
-                {
-                    if (Interlocked.CompareExchange(ref _compactValuesState, ActionQueuedOrRunning, ActionNotQueued) == ActionNotQueued)
-                    {
-                        if (_maintainLRU)
-                            AddActionToEventQueue(CompactLRU);
-                        else
-                            AddActionToEventQueue(Compact);
-
-                        if (DateTime.UtcNow >= _timeForNextCompaction)
-                        {
-                            if (Interlocked.CompareExchange(ref _processCompactedValuesState, ActionQueuedOrRunning, ActionNotQueued) == ActionNotQueued)
-                            {
-                                _eventQueue.Enqueue(ProcessCompactedValues);
-                            }
-                        }
-                    }
-                }
+                QueueCompactionIfNeeded(_map.Count);
 
                 var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
+                _map[key] = newCacheItem;
 
                 // add the new node to the _doubleLinkedList if _maintainLRU == true
                 if (_maintainLRU)
@@ -491,16 +497,67 @@ namespace Microsoft.IdentityModel.Tokens
                     var localThis = this;
                     AddActionToEventQueue(() =>
                     {
-                        // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
-                        localThis._doubleLinkedList.Remove(localNewCacheItem);
-                        localThis._doubleLinkedList.AddFirst(localNewCacheItem);
+                        localThis.MoveToFront(localNewCacheItem);
                     });
                 }
-
-                _map[key] = newCacheItem;
             }
 
             return true;
+        }
+
+        internal bool TryAdd(TKey key, TValue value)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (value == null)
+                throw LogHelper.LogArgumentNullException(nameof(value));
+
+            var cacheItem = new LRUCacheItem<TKey, TValue>(key, value, DateTime.MaxValue);
+            if (!_map.TryAdd(key, cacheItem))
+                return false;
+
+            if (_maintainLRU)
+                AddActionToEventQueue(() => MoveToFront(cacheItem));
+
+            QueueCompactionIfNeeded(_map.Count - 1);
+            return true;
+        }
+
+        private void QueueCompactionIfNeeded(int count)
+        {
+            if (_shouldStopImmediately || (double)count / _capacity < _maxCapacityPercentage)
+                return;
+
+            if (Interlocked.CompareExchange(ref _compactValuesState, ActionQueuedOrRunning, ActionNotQueued) == ActionNotQueued)
+            {
+                if (_maintainLRU)
+                    AddActionToEventQueue(CompactLRU);
+                else
+                    AddActionToEventQueue(Compact);
+
+                if (TrackCompactedItems && DateTime.UtcNow >= _timeForNextCompaction &&
+                    Interlocked.CompareExchange(ref _processCompactedValuesState, ActionQueuedOrRunning, ActionNotQueued) == ActionNotQueued)
+                    _eventQueue.Enqueue(ProcessCompactedValues);
+            }
+        }
+
+        private void MoveToFront(LRUCacheItem<TKey, TValue> cacheItem)
+        {
+            if (!_map.TryGetValue(cacheItem.Key, out var current) || !ReferenceEquals(current, cacheItem))
+                return;
+
+            LinkedListNode<LRUCacheItem<TKey, TValue>> node = _doubleLinkedList.First;
+            while (node != null)
+            {
+                LinkedListNode<LRUCacheItem<TKey, TValue>> next = node.Next;
+                if (_comparer.Equals(node.Value.Key, cacheItem.Key))
+                    _doubleLinkedList.Remove(node);
+
+                node = next;
+            }
+
+            _doubleLinkedList.AddFirst(cacheItem);
         }
 
         /// <summary>
@@ -569,8 +626,7 @@ namespace Microsoft.IdentityModel.Tokens
                 var localThis = this;
                 AddActionToEventQueue(() =>
                 {
-                    localThis._doubleLinkedList.Remove(localCacheItem);
-                    localThis._doubleLinkedList.AddFirst(localCacheItem);
+                    localThis.MoveToFront(localCacheItem);
                 });
             }
 
@@ -578,9 +634,28 @@ namespace Microsoft.IdentityModel.Tokens
             return cacheItem != null;
         }
 
-        // These Try methods are not thread safe and they rely on the SignatureProviders to have logic to dispose of important objects.
-        // A better design would be to have TryRemove move the SignatureProvider to the compacted list.
-        // This would need a new action in LRUCache, AddItemToCompactedList.
+        private bool TryRemoveCacheItem(LRUCacheItem<TKey, TValue> cacheItem)
+        {
+            return ((ICollection<KeyValuePair<TKey, LRUCacheItem<TKey, TValue>>>)_map).Remove(
+                new KeyValuePair<TKey, LRUCacheItem<TKey, TValue>>(cacheItem.Key, cacheItem));
+        }
+
+        internal bool TryRemove(TKey key, TValue expectedValue)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!_map.TryGetValue(key, out var cacheItem) ||
+                !ReferenceEquals(cacheItem.Value, expectedValue) ||
+                !TryRemoveCacheItem(cacheItem))
+                return false;
+
+            if (_maintainLRU)
+                AddActionToEventQueue(() => _doubleLinkedList.Remove(cacheItem));
+
+            OnItemMovedToCompactedList?.Invoke(cacheItem.Value);
+            return true;
+        }
 
         /// Removes a particular key from the cache.
         public bool TryRemove(TKey key)
@@ -689,10 +764,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         public override bool Equals(object obj)
         {
-            LRUCacheItem<TKey, TValue> item = obj as LRUCacheItem<TKey, TValue>;
-            return item != null && Key.Equals(item.Key);
+            return ReferenceEquals(this, obj);
         }
 
-        public override int GetHashCode() => 990326508 + EqualityComparer<TKey>.Default.GetHashCode(Key);
+        public override int GetHashCode() => RuntimeHelpers.GetHashCode(this);
     }
 }

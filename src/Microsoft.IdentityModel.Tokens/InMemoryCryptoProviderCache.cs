@@ -45,9 +45,8 @@ namespace Microsoft.IdentityModel.Tokens
                 options,
                 comparer: StringComparer.Ordinal)
             {
-                OnItemMovedToCompactedList = SetCryptoProviderCacheToNull,
-                OnItemRemovedFromCompactedList = DisposeSignatureProvider,
-                OnShouldRemoveFromCompactedList = IsCacheNullAndRefCountZero
+                OnItemMovedToCompactedList = RetireSignatureProvider,
+                TrackCompactedItems = false
             };
 
             _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(
@@ -55,27 +54,16 @@ namespace Microsoft.IdentityModel.Tokens
                 options,
                 comparer: StringComparer.Ordinal)
             {
-                OnItemMovedToCompactedList = SetCryptoProviderCacheToNull,
-                OnItemRemovedFromCompactedList = DisposeSignatureProvider,
-                OnShouldRemoveFromCompactedList = IsCacheNullAndRefCountZero
+                OnItemMovedToCompactedList = RetireSignatureProvider,
+                TrackCompactedItems = false
             };
         }
 
         internal CryptoProviderFactory CryptoProviderFactory { get; set; }
 
-        private static void DisposeSignatureProvider(SignatureProvider signatureProvider)
+        private static void RetireSignatureProvider(SignatureProvider signatureProvider)
         {
-            signatureProvider.Dispose();
-        }
-
-        private void SetCryptoProviderCacheToNull(SignatureProvider signatureProvider)
-        {
-            signatureProvider.CryptoProviderCache = null;
-        }
-
-        private static bool IsCacheNullAndRefCountZero(SignatureProvider signatureProvider)
-        {
-            return signatureProvider.CryptoProviderCache == null && signatureProvider.RefCount == 0;
+            signatureProvider.Retire();
         }
 
         /// <summary>
@@ -143,15 +131,21 @@ namespace Microsoft.IdentityModel.Tokens
             else
                 signatureProviderCache = _verifyingSignatureProviders;
 
-            // The cache does NOT already have a crypto provider associated with this key.
-            if (!signatureProviderCache.Contains(cacheKey))
-            {
-                signatureProviderCache.SetValue(cacheKey, signatureProvider);
-                signatureProvider.CryptoProviderCache = this;
-                return true;
-            }
+            // Establish ownership before publication so eviction cannot be undone by the publishing thread.
+            if (!signatureProvider.TrySetCache(this))
+                return false;
 
-            return false;
+            bool added = false;
+            try
+            {
+                added = signatureProviderCache.TryAdd(cacheKey, signatureProvider);
+                return added;
+            }
+            finally
+            {
+                if (!added)
+                    signatureProvider.RemoveCacheOwnership(this);
+            }
         }
 
         /// <summary>
@@ -210,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return signatureProviderCache.TryRemove(cacheKey);
+                return signatureProviderCache.TryRemove(cacheKey, signatureProvider);
             }
             catch (Exception ex)
             {

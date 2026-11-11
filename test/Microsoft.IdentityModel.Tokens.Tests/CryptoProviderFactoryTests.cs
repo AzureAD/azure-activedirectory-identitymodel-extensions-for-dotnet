@@ -920,8 +920,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             cryptoProviderFactory.ReleaseSignatureProvider(signing);
 
-            if (GetSignatureProviderIsDisposedByReflect(signing))
-                context.AddDiff($"{nameof(signing)} should not have been disposed");
+            if (!GetSignatureProviderIsDisposedByReflect(signing))
+                context.AddDiff($"{nameof(signing)} should have been disposed after removal and the last release");
 
             TestUtilities.AssertFailIfErrors(context);
         }
