@@ -985,9 +985,9 @@ namespace Microsoft.IdentityModel.Validators.Tests
             using var httpClient = new HttpClient(new DelegateHttpMessageHandler((request, _) =>
             {
                 var requestPath = request.RequestUri?.AbsolutePath ?? string.Empty;
-                var metadataIssuer = requestPath.Contains("/v1.1/", StringComparison.Ordinal)
+                var metadataIssuer = requestPath.IndexOf("/v1.1/", StringComparison.Ordinal) >= 0
                     ? ValidatorConstants.AadIssuerV11PPE
-                    : requestPath.Contains("/v2.0/", StringComparison.Ordinal)
+                    : requestPath.IndexOf("/v2.0/", StringComparison.Ordinal) >= 0
                         ? ValidatorConstants.AadIssuerPPE
                         : ValidatorConstants.V1IssuerPPE;
 
