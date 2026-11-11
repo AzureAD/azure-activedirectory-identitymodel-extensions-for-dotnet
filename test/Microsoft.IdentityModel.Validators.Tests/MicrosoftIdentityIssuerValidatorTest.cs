@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading;
@@ -22,6 +23,12 @@ namespace Microsoft.IdentityModel.Validators.Tests
     public class MicrosoftIdentityIssuerValidatorTest
     {
         private readonly HttpClient _httpClient;
+
+        private const string OpenIdConfigurationPath = "/.well-known/openid-configuration";
+        private const string DiscoveryPathMarker = "/discovery/";
+        private const string KeysPathMarker = "/keys";
+        private const string UnexpectedUrlMessagePrefix = "Unexpected URL in offline test: ";
+        private const string PlaceholderJwksUri = "https://example.com/discovery/keys";
 
         public MicrosoftIdentityIssuerValidatorTest()
         {
@@ -982,7 +989,29 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
 
             var authority = authorityUrlProvider(authorityVersion);
-            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient);
+
+            // Keep metadata retrieval and tenant substitution real without calling the live PPE endpoint.
+            string issuerTemplate = issuer.Replace(ValidatorConstants.TenantIdAsGuid, AadIssuerValidator.TenantIdTemplate);
+            string metadataJson = OpenIdConnectConfiguration.Write(
+                new OpenIdConnectConfiguration { Issuer = issuerTemplate, JwksUri = PlaceholderJwksUri });
+            string jwksJson = KeyingMaterial.AADJWKS;
+
+            var handler = new DelegateHttpMessageHandler((request, ct) =>
+            {
+                string url = request.RequestUri.AbsoluteUri;
+
+                if (url.EndsWith(OpenIdConfigurationPath, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(metadataJson));
+
+                if (url.IndexOf(DiscoveryPathMarker, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    url.EndsWith(KeysPathMarker, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(jwksJson));
+
+                throw new InvalidOperationException(UnexpectedUrlMessagePrefix + url);
+            });
+
+            using var mockHttpClient = new HttpClient(handler);
+            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, mockHttpClient);
 
             ValidationResult<ValidatedIssuer, IssuerValidationError> validationResult = await ValidateIssuerAsync(issuer, jwtSecurityToken, validator);
             var actualIssuer = validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters());
@@ -990,6 +1019,43 @@ namespace Microsoft.IdentityModel.Validators.Tests
             Assert.True(validationResult.Succeeded);
             IdentityComparer.AreEqual(issuer, validationResult.Result.Issuer, context);
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void Validate_WithoutConfigurationProvider_MetadataFetchForbidden_ThrowsIDX40001()
+        {
+            var context = new CompareContext();
+            var issuer = ValidatorConstants.AadIssuerPPE;
+            var authority = ValidatorConstants.AuthorityCommonTenantWithV2PPE;
+
+            var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
+            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
+            var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
+
+            // Retain deterministic coverage of the metadata-fetch failure that previously depended on PPE.
+            var handler = new DelegateHttpMessageHandler((request, ct) =>
+            {
+                string url = request.RequestUri.AbsoluteUri;
+
+                if (url.EndsWith(OpenIdConfigurationPath, StringComparison.OrdinalIgnoreCase))
+                    return Task.FromResult(HttpResponseMessageUtils.CreateHttpResponseMessage(string.Empty, HttpStatusCode.Forbidden));
+
+                throw new InvalidOperationException(UnexpectedUrlMessagePrefix + url);
+            });
+
+            using var mockHttpClient = new HttpClient(handler);
+            var validator = AadIssuerValidator.GetAadIssuerValidator(authority, mockHttpClient);
+
+            var expectedErrorMessage = string.Format(
+                CultureInfo.InvariantCulture,
+                LogMessages.IDX40001,
+                issuer);
+
+            var exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() =>
+                validator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters()));
+
+            IdentityComparer.AreEqual(expectedErrorMessage, exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
