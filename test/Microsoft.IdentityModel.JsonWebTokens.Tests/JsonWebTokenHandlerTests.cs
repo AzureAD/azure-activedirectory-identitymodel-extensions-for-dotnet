@@ -3901,6 +3901,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public async Task ValidateJWSWithConfigAsync_SignatureValidatorReturnsSameTokenAcrossClockBoundary()
+        {
+            // Arrange
+            var theoryData = ValidateJwsWithConfigTheoryData.Cast<object[]>()
+                .Select(data => Assert.IsType<JwtTheoryData>(data[0]))
+                .Single(data => data.TestId == nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigSigningKeysInvalid_SignatureValidatorReturnsValidToken");
+            var handler = new JsonWebTokenHandler();
+            var context = new CompareContext();
+
+            // Act
+            var validationResult = await handler.ValidateTokenAsync(handler.ReadJsonWebToken(theoryData.Token), theoryData.ValidationParameters);
+            await Task.Delay(TimeSpan.FromSeconds(1.1));
+            var rawTokenValidationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters);
+
+            // Assert
+            Assert.True(validationResult.IsValid);
+            Assert.True(rawTokenValidationResult.IsValid);
+            IdentityComparer.AreEqual(validationResult, rawTokenValidationResult, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<JwtTheoryData> ValidateJwsWithConfigTheoryData
         {
             get
@@ -3911,6 +3933,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
+                var signatureValidatedToken = Default.AsymmetricJwt;
                 theoryData.Add(new JwtTheoryData
                 {
                     TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigSigningKeysInvalid_SignatureValidatorReturnsValidToken",
@@ -3923,7 +3946,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidateIssuer = true,
                         ValidateAudience = false,
                         ValidateLifetime = false,
-                        SignatureValidatorUsingConfiguration = (token, validationParameters, configuration) => { return new JsonWebToken(Default.AsymmetricJwt) { SigningKey = KeyingMaterial.DefaultX509Key_2048 }; },
+                        SignatureValidatorUsingConfiguration = (token, validationParameters, configuration) => { return new JsonWebToken(signatureValidatedToken) { SigningKey = KeyingMaterial.DefaultX509Key_2048 }; },
                     },
                 });
 
