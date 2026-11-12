@@ -47,6 +47,210 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory, MemberData(nameof(ConstructorKeySizeTheoryData), DisableDiscoveryEnumeration = true)]
+        [ResetAppContextSwitches]
+        public void ConstructorEnforcesAsymmetricKeySizeFloor(
+            string testId,
+            SecurityKey key,
+            string algorithm,
+            bool willCreateSignatures,
+            bool useFactory,
+            ExpectedException expectedException)
+        {
+            var context = new CompareContext(testId);
+            TestUtilities.WriteHeader($"{this}.ConstructorEnforcesAsymmetricKeySizeFloor - {testId}");
+
+            try
+            {
+                if (useFactory)
+                    CryptoProviderFactory.Default.CreateForVerifying(key, algorithm);
+                else
+                    new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+
+                expectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<string, SecurityKey, string, bool, bool, ExpectedException> ConstructorKeySizeTheoryData()
+        {
+            var theoryData = new TheoryData<string, SecurityKey, string, bool, bool, ExpectedException>();
+
+            theoryData.Add(
+                "RsaSigningBelowFloor",
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                true,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            theoryData.Add(
+                "RsaVerifyingBelowFloor",
+                new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024),
+                SecurityAlgorithms.RsaSha256,
+                false,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
+            theoryData.Add(
+                "FactoryRsaVerifyingBelowFloor",
+                new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024),
+                SecurityAlgorithms.RsaSha256,
+                false,
+                true,
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
+            theoryData.Add(
+                "PssSigningBelowFloor",
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSsaPssSha512,
+                true,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            theoryData.Add(
+                "PssVerifyingBelowFloor",
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSsaPssSha512,
+                false,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
+            theoryData.Add(
+                "PssVerifyingAtFloor",
+                new CustomRsaSecurityKey(1040, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_2048),
+                SecurityAlgorithms.RsaSsaPssSha512,
+                false,
+                false,
+                ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "EcdsaSigningBelowFloor",
+                new ReportedSizeEcdsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa, 128),
+                SecurityAlgorithms.EcdsaSha256,
+                true,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            theoryData.Add(
+                "EcdsaVerifyingBelowFloor",
+                new ReportedSizeEcdsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa, 128),
+                SecurityAlgorithms.EcdsaSha256,
+                false,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
+            theoryData.Add(
+                "EcdsaVerifyingAtFloor",
+                KeyingMaterial.Ecdsa256Key,
+                SecurityAlgorithms.EcdsaSha256,
+                false,
+                false,
+                ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "JsonWebKeySigningBelowFloor",
+                KeyingMaterial.JsonWebKeyRsa_1024,
+                SecurityAlgorithms.RsaSha256,
+                true,
+                false,
+                ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            theoryData.Add(
+                "RsaSigningAtFloor",
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaSha256,
+                true,
+                false,
+                ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "RsaVerifyingAtFloor_1024",
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                false,
+                false,
+                ExpectedException.NoExceptionExpected);
+            theoryData.Add(
+                "RsaVerifyingAboveFloor_2048",
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaSha256,
+                false,
+                false,
+                ExpectedException.NoExceptionExpected);
+
+            return theoryData;
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void AppContextSwitchDisablesMinimumAsymmetricKeySizeEnforcement()
+        {
+            AppContext.SetSwitch(AppContextSwitches.DoNotEnforceMinimumAsymmetricKeySizeSwitch, true);
+
+            var provider = new AsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            Assert.NotEmpty(provider.Sign(Guid.NewGuid().ToByteArray()));
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void AppContextSwitchDoesNotDisableDerivedKeySizeValidation()
+        {
+            AppContext.SetSwitch(AppContextSwitches.DoNotEnforceMinimumAsymmetricKeySizeSwitch, true);
+
+            var provider = new RejectingAsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_1024,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+        }
+
+        [Fact]
+        [ResetAppContextSwitches]
+        public void VirtualKeySizeValidationRunsBeforeFirstOperation()
+        {
+            var provider = new RejectingAsymmetricSignatureProvider(
+                KeyingMaterial.RsaSecurityKey_2048,
+                SecurityAlgorithms.RsaSha256,
+                true);
+
+            Assert.Equal(0, provider.ValidationCallCount);
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+            Assert.Throws<InvalidOperationException>(() => provider.Sign(Guid.NewGuid().ToByteArray()));
+            Assert.Equal(1, provider.ValidationCallCount);
+        }
+
+        private sealed class ReportedSizeEcdsaSecurityKey : ECDsaSecurityKey
+        {
+            private readonly int _keySize;
+
+            public ReportedSizeEcdsaSecurityKey(ECDsa ecdsa, int keySize)
+                : base(ecdsa)
+            {
+                _keySize = keySize;
+            }
+
+            public override int KeySize => _keySize;
+        }
+
+        private sealed class RejectingAsymmetricSignatureProvider : AsymmetricSignatureProvider
+        {
+            public RejectingAsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
+                : base(key, algorithm, willCreateSignatures)
+            {
+            }
+
+            public int ValidationCallCount { get; private set; }
+
+            public override void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
+            {
+                ValidationCallCount++;
+                base.ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
+                throw new InvalidOperationException("Custom key-size validation rejected the operation.");
+            }
+        }
+
         [Theory, MemberData(nameof(SignVerifyTheoryData), DisableDiscoveryEnumeration = true)]
         public void SignVerify(SignatureProviderTheoryData theoryData)
         {
