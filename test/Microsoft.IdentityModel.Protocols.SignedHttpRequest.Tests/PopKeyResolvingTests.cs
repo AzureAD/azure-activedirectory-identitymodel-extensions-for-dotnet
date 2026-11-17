@@ -616,7 +616,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandler();
-                _ = handler.GetCnfClaimValue(null, theoryData.ValidatedAccessToken, null);
+                _ = handler.GetCnfClaimValue(null, theoryData.ValidatedAccessToken, (SignedHttpRequestValidationContext)null);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
