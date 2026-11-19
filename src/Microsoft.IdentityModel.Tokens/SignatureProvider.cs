@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -17,6 +18,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// see: <see cref="AddRef"/>, <see cref="RefCount"/>, <see cref="Release"/>
         /// </summary>
         private int _referenceCount;
+        private int _disposeClaimed;
+        private CryptoProviderCache _cryptoProviderCache;
+        private const int Retired = int.MinValue;
+        private const int ReferenceCountMask = int.MaxValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SignatureProvider"/> class used to create and verify signatures.
@@ -34,7 +39,19 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal int AddRef()
         {
-            return Interlocked.Increment(ref _referenceCount);
+            return TryAddRef() ? RefCount : 0;
+        }
+
+        internal bool TryAddRef()
+        {
+            int state;
+            while ((state = Volatile.Read(ref _referenceCount)) >= 0 && state < ReferenceCountMask)
+            {
+                if (Interlocked.CompareExchange(ref _referenceCount, state + 1, state) == state)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -51,7 +68,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="CryptoProviderCache"/> that is associated with this <see cref="SignatureProvider"/>
         /// </summary>
-        public CryptoProviderCache CryptoProviderCache { get; set; }
+        public CryptoProviderCache CryptoProviderCache
+        {
+            get => Volatile.Read(ref _cryptoProviderCache);
+            set => Volatile.Write(ref _cryptoProviderCache, value);
+        }
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
@@ -80,14 +101,80 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal virtual int ObjectPoolSize => 0;
 
-        internal int RefCount => _referenceCount;
+        internal int RefCount => Volatile.Read(ref _referenceCount) & ReferenceCountMask;
 
         internal int Release()
         {
-            if (_referenceCount > 0)
-                Interlocked.Decrement(ref _referenceCount);
+            int state;
+            while (((state = Volatile.Read(ref _referenceCount)) & ReferenceCountMask) > 0)
+            {
+                if (Interlocked.CompareExchange(ref _referenceCount, state - 1, state) == state)
+                {
+                    DisposeIfRetiredAndUnused();
+                    return (state - 1) & ReferenceCountMask;
+                }
+            }
 
-            return _referenceCount;
+            return 0;
+        }
+
+        internal bool TrySetCache(CryptoProviderCache cache)
+        {
+            if (Interlocked.CompareExchange(ref _cryptoProviderCache, cache, null) != null)
+                return false;
+
+            // Check after claiming ownership so a stale pre-retirement observation cannot admit the provider.
+            if (Volatile.Read(ref _referenceCount) < 0)
+            {
+                Interlocked.CompareExchange(ref _cryptoProviderCache, null, cache);
+                return false;
+            }
+
+            IsCached = true;
+            return true;
+        }
+
+        internal void RemoveCacheOwnership(CryptoProviderCache cache)
+        {
+            if (ReferenceEquals(Volatile.Read(ref _cryptoProviderCache), cache))
+            {
+                // Reset the unpublished flag before another cache can claim ownership.
+                IsCached = false;
+                Interlocked.CompareExchange(ref _cryptoProviderCache, null, cache);
+            }
+        }
+
+        internal void Retire()
+        {
+            // Retirement and acquisition share one atomic state, so a last release cannot race a new borrower.
+            int state;
+            do
+            {
+                state = Volatile.Read(ref _referenceCount);
+            }
+            while (Interlocked.CompareExchange(ref _referenceCount, state | Retired, state) != state);
+
+            CryptoProviderCache = null;
+            DisposeIfRetiredAndUnused();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Custom disposal failures must not block other providers or escape final release.")]
+        private void DisposeIfRetiredAndUnused()
+        {
+            if (Volatile.Read(ref _referenceCount) != Retired ||
+                Interlocked.CompareExchange(ref _disposeClaimed, 1, 0) != 0)
+                return;
+
+            try
+            {
+                Dispose();
+            }
+            catch (Exception ex)
+            {
+                // A custom provider must not prevent retirement of other providers, or be disposed twice after throwing.
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10726, ex));
+            }
         }
 
         /// <summary>
