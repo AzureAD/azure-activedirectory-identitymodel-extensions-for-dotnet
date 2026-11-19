@@ -43,6 +43,8 @@ namespace Microsoft.IdentityModel.Tokens
         // if true, then items will be maintained in a LRU fashion, moving to front of list when accessed in the cache.
         private readonly bool _maintainLRU;
         private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
+        // ConcurrentDictionary<TK,TV>.get_Count() takes a lock where performance is a concern, so we maintain a separate count updated by atomic for size calculation.
+        private int _mapSize;
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
         private readonly int _compactIntervalInSeconds;
@@ -130,6 +132,7 @@ namespace Microsoft.IdentityModel.Tokens
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _options = options;
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
+            _mapSize = 0;
             _removeExpiredValuesIntervalInSeconds = removeExpiredValuesIntervalInSeconds;
             _removeExpiredValues = removeExpiredValues;
             _compactIntervalInSeconds = compactIntervalInSeconds;
@@ -261,7 +264,10 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         _doubleLinkedList.Remove(node);
                         if (_map.TryRemove(node.Value.Key, out LRUCacheItem<TKey, TValue> cacheItem))
+                        {
+                            Interlocked.Decrement(ref _mapSize);
                             OnItemExpired?.Invoke(cacheItem.Value);
+                        }
                     }
 
                     node = nextNode;
@@ -295,7 +301,10 @@ namespace Microsoft.IdentityModel.Tokens
                     if (node.Value.ExpirationTime < DateTime.UtcNow)
                     {
                         if (_map.TryRemove(node.Value.Key, out var cacheItem))
+                        {
+                            Interlocked.Decrement(ref _mapSize);
                             OnItemExpired?.Invoke(cacheItem.Value);
+                        }
                     }
                 }
             }
@@ -354,11 +363,14 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 int newCacheSize = CalculateNewCacheSize();
-                while (_map.Count > newCacheSize && _doubleLinkedList.Count > 0)
+                while (_mapSize > newCacheSize && _doubleLinkedList.Count > 0)
                 {
                     LinkedListNode<LRUCacheItem<TKey, TValue>> node = _doubleLinkedList.Last;
                     if (_map.TryRemove(node.Value.Key, out LRUCacheItem<TKey, TValue> cacheItem))
+                    {
+                        Interlocked.Decrement(ref _mapSize);
                         OnItemMovedToCompactedList?.Invoke(cacheItem.Value);
+                    }
 
                     _compactedItems.Add(cacheItem);
                     _doubleLinkedList.RemoveLast();
@@ -379,7 +391,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 int newCacheSize = CalculateNewCacheSize();
-                while (_map.Count > newCacheSize)
+                while (_mapSize > newCacheSize)
                 {
                     // Since all items could have been removed by the public TryRemove() method, leaving the map empty, we need to check if a default value is returned.
                     // Remove the item from the map only if the returned item is NOT default value.
@@ -388,6 +400,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (_map.TryRemove(item.Key, out LRUCacheItem<TKey, TValue> cacheItem))
                         {
+                            Interlocked.Decrement(ref _mapSize);
                             OnItemMovedToCompactedList?.Invoke(cacheItem.Value);
                             _compactedItems.Add(cacheItem);
                         }
@@ -408,7 +421,7 @@ namespace Microsoft.IdentityModel.Tokens
         protected int CalculateNewCacheSize()
         {
             // use the smaller of _map.Count and _capacity
-            int currentCount = Math.Min(_map.Count, _capacity);
+            int currentCount = Math.Min(_mapSize, _capacity);
 
             // use the _capacity for the newCacheSize calculation in the case where the cache is experiencing overflow
             return currentCount - (int)(currentCount * _compactionPercentage);
@@ -463,7 +476,7 @@ namespace Microsoft.IdentityModel.Tokens
             else
             {
                 // if cache is at _maxCapacityPercentage, trim it by _compactionPercentage
-                if ((double)_map.Count / _capacity >= _maxCapacityPercentage)
+                if ((double)_mapSize / _capacity >= _maxCapacityPercentage)
                 {
                     if (Interlocked.CompareExchange(ref _compactValuesState, ActionQueuedOrRunning, ActionNotQueued) == ActionNotQueued)
                     {
@@ -498,6 +511,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
 
                 _map[key] = newCacheItem;
+                Interlocked.Increment(ref _mapSize);
             }
 
             return true;
@@ -592,6 +606,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             OnItemMovedToCompactedList?.Invoke(cacheItem.Value);
+            Interlocked.Decrement(ref _mapSize);
+
             return true;
         }
 
@@ -616,6 +632,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             value = cacheItem.Value;
             OnItemMovedToCompactedList?.Invoke(cacheItem.Value);
+            Interlocked.Decrement(ref _mapSize);
 
             return true;
         }
@@ -636,7 +653,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        internal long MapCount => _map.Count;
+        internal long MapCount => _mapSize;
 
         /// <summary>
         /// FOR TESTING ONLY.
