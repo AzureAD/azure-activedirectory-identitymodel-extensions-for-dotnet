@@ -62,6 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         /// <param name="issuer">The issuer to validate.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="configuration">The configuration selected for this validation attempt, or <c>null</c> if none is available.</param>
         /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A <see cref="ValidationResult{TResult, TError}"/> that contains the results of validating the issuer.</returns>
@@ -70,6 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
+            BaseConfiguration? configuration,
             CallContext callContext,
             CancellationToken cancellationToken);
     }

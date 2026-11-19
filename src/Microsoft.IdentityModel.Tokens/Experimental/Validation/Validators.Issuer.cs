@@ -32,6 +32,41 @@ namespace Microsoft.IdentityModel.Tokens
             CallContext callContext,
             CancellationToken cancellationToken)
         {
+            try
+            {
+                BaseConfiguration? configuration = null;
+                if (!string.IsNullOrWhiteSpace(issuer) &&
+                    validationParameters?.IssuerValidatorAsync is DefaultIssuerValidator &&
+                    validationParameters.ConfigurationManager is not null)
+                    configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
+
+                return await ValidateIssuerInternalAsync(
+                    issuer, securityToken, validationParameters, configuration, callContext, cancellationToken).ConfigureAwait(false);
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new IssuerValidationError(
+                    new MessageDetail(LogMessages.IDX10269),
+                    IssuerValidationFailure.ValidatorThrew,
+                    ValidationError.GetCurrentStackFrame(),
+                    issuer,
+                    ex);
+            }
+        }
+
+        /// <summary>
+        /// Validates an issuer using the configuration selected for this validation attempt.
+        /// </summary>
+        internal static async Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerInternalAsync(
+            string issuer,
+            SecurityToken securityToken,
+            ValidationParameters? validationParameters,
+            BaseConfiguration? configuration,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
             if (validationParameters == null)
                 return new IssuerValidationError(
                     MessageDetail.NullParameter(nameof(validationParameters)),
@@ -47,6 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
                         issuer,
                         securityToken,
                         validationParameters,
+                        configuration,
                         callContext,
                         cancellationToken).ConfigureAwait(false);
 
@@ -87,6 +123,44 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // Review unused parameters
             CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(issuer) || validationParameters is null)
+                return ValidateIssuer(issuer, validationParameters, null);
+
+            BaseConfiguration? configuration = null;
+            if (validationParameters.ConfigurationManager is not null)
+                configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
+
+            return ValidateIssuer(issuer, validationParameters, configuration);
+        }
+
+        /// <summary>
+        /// Determines if an issuer is valid using the configuration selected for this validation attempt.
+        /// </summary>
+        /// <param name="issuer">The issuer to validate.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+        /// <param name="validationParameters">The parameters to use for validation.</param>
+        /// <param name="configuration">The selected configuration, or <c>null</c> if none is available. Configuration is not retrieved from the configuration manager.</param>
+        /// <param name="callContext">The context for this validation call.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>The validated issuer or an issuer validation error.</returns>
+        public static Task<ValidationResult<ValidatedIssuer, ValidationError>> ValidateIssuerAsync(
+            string? issuer,
+#pragma warning disable CA1801 // Review unused parameters
+            SecurityToken? securityToken,
+            ValidationParameters validationParameters,
+            BaseConfiguration? configuration,
+            CallContext? callContext,
+            CancellationToken cancellationToken)
+#pragma warning restore CA1801 // Review unused parameters
+        {
+            return Task.FromResult(ValidateIssuer(issuer, validationParameters, configuration));
+        }
+
+        private static ValidationResult<ValidatedIssuer, ValidationError> ValidateIssuer(
+            string? issuer,
+            ValidationParameters? validationParameters,
+            BaseConfiguration? configuration)
+        {
             if (string.IsNullOrWhiteSpace(issuer))
             {
                 return new IssuerValidationError(
@@ -104,10 +178,6 @@ namespace Microsoft.IdentityModel.Tokens
                     ValidationError.GetCurrentStackFrame(),
                     issuer,
                     null);
-
-            BaseConfiguration? configuration = null;
-            if (validationParameters.ConfigurationManager != null)
-                configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
 
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))

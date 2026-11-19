@@ -51,10 +51,11 @@ internal sealed class DefaultIssuerValidator : IIssuerValidator
         string issuer,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
+        BaseConfiguration? configuration,
         CallContext callContext,
         CancellationToken cancellationToken)
     {
-        return Validators.ValidateIssuerAsync(issuer, securityToken, validationParameters, callContext, cancellationToken);
+        return Validators.ValidateIssuerAsync(issuer, securityToken, validationParameters, configuration, callContext, cancellationToken);
     }
 }
 
