@@ -16,6 +16,64 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JweUsingEcdhEsTests
     {
+        [Theory]
+        [InlineData(SecurityAlgorithms.EcdhEsA128kw, SecurityAlgorithms.Aes128CbcHmacSha256, 32)]
+        [InlineData(SecurityAlgorithms.EcdhEsA128kw, SecurityAlgorithms.Aes192CbcHmacSha384, 48)]
+        [InlineData(SecurityAlgorithms.EcdhEsA128kw, SecurityAlgorithms.Aes256CbcHmacSha512, 64)]
+        [InlineData(SecurityAlgorithms.EcdhEsA192kw, SecurityAlgorithms.Aes128CbcHmacSha256, 32)]
+        [InlineData(SecurityAlgorithms.EcdhEsA192kw, SecurityAlgorithms.Aes192CbcHmacSha384, 48)]
+        [InlineData(SecurityAlgorithms.EcdhEsA192kw, SecurityAlgorithms.Aes256CbcHmacSha512, 64)]
+        [InlineData(SecurityAlgorithms.EcdhEsA256kw, SecurityAlgorithms.Aes128CbcHmacSha256, 32)]
+        [InlineData(SecurityAlgorithms.EcdhEsA256kw, SecurityAlgorithms.Aes192CbcHmacSha384, 48)]
+        [InlineData(SecurityAlgorithms.EcdhEsA256kw, SecurityAlgorithms.Aes256CbcHmacSha512, 64)]
+        public async Task CreateJweEcdhEsCekSizeTests(string alg, string enc, int expectedCekSizeInBytes)
+        {
+            // Arrange
+            var theoryData = EcdhEsCurveP256EncA128KW();
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Subject = Default.ClaimsIdentity,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                EncryptingCredentials = new EncryptingCredentials(
+                    theoryData.EncryptingCredentials.Key, alg, enc)
+                {
+                    KeyExchangePublicKey = theoryData.PublicKeyReceiver
+                },
+                AdditionalHeaderClaims = theoryData.AdditionalHeaderParams,
+                Audience = Default.Audience,
+                Issuer = Default.Issuer
+            };
+            var jsonHandler = new JsonWebTokenHandler();
+#pragma warning disable CS0618 // Type or member is obsolete
+            var jwtHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
+            var receiver = new EcdhKeyExchangeProvider(
+                theoryData.TokenValidationParameters.TokenDecryptionKey,
+                theoryData.PublicKeySender, alg, enc);
+            var kek = receiver.GenerateKdf(theoryData.ApuSender, theoryData.ApvSender);
+            using var unwrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProviderForUnwrap(
+                kek, receiver.GetEncryptionAlgorithm());
+
+            // Act
+            string[] tokens =
+            {
+                jsonHandler.CreateToken(descriptor),
+                jwtHandler.CreateEncodedJwt(descriptor)
+            };
+
+            // Assert
+            foreach (string token in tokens)
+            {
+                byte[] cek = unwrapProvider.UnwrapKey(Base64UrlEncoder.DecodeBytes(token.Split('.')[1]));
+                Assert.Equal(expectedCekSizeInBytes, cek.Length);
+
+                var jsonResult = await jsonHandler.ValidateTokenAsync(token, theoryData.TokenValidationParameters);
+                var jwtResult = await jwtHandler.ValidateTokenAsync(token, theoryData.TokenValidationParameters);
+                Assert.True(jsonResult.IsValid, jsonResult.Exception?.ToString());
+                Assert.True(jwtResult.IsValid, jwtResult.Exception?.ToString());
+            }
+        }
+
         [Theory, MemberData(nameof(CreateEcdhEsTestcases), DisableDiscoveryEnumeration = true)]
         public async Task CreateJweEcdhEsTests(CreateEcdhEsTheoryData theoryData)
         {

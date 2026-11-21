@@ -436,17 +436,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
                 kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
 
-                // only 128, 384 and 512 AesKeyWrap for CEK algorithm
-                if (SecurityAlgorithms.Aes128KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
+                // RFC 7516, section 5.1, step 2 requires the CEK length to match the content encryption algorithm.
+                if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
                     securityKey = new SymmetricSecurityKey(GenerateKeyBytes(256));
-                else if (SecurityAlgorithms.Aes192KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
+                else if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
                     securityKey = new SymmetricSecurityKey(GenerateKeyBytes(384));
-                else if (SecurityAlgorithms.Aes256KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
+                else if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
                     securityKey = new SymmetricSecurityKey(GenerateKeyBytes(512));
                 else
                     throw LogHelper.LogExceptionMessage(
-                        new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128KW), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192KW), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256KW), LogHelper.MarkAsNonPII(kwProvider.Algorithm))));
-
+                        new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128CbcHmacSha256), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192CbcHmacSha384), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256CbcHmacSha512), LogHelper.MarkAsNonPII(encryptingCredentials.Enc))));
                 wrappedKey = kwProvider.WrapKey(((SymmetricSecurityKey)securityKey).Key);
             }
 #endif
