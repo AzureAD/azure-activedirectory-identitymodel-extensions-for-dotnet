@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.TokenValidation.Tests
@@ -71,6 +74,147 @@ namespace Microsoft.IdentityModel.Tokens.TokenValidation.Tests
         public static TheoryData<ValidateTokenTheoryData> ValidAudienceTestCases()
         {
             return TestCaseProvider.GenerateValidAudienceTestCases(new Saml2SecurityTestingTokenHandler());
+        }
+
+        [Theory]
+        [InlineData(true, false, false)]
+        [InlineData(false, true, false)]
+        [InlineData(true, true, false)]
+        [InlineData(false, false, false)]
+        [InlineData(true, false, true)]
+        [InlineData(false, true, true)]
+        [InlineData(true, true, true)]
+        [InlineData(false, false, true)]
+        public async Task AudienceRestrictions(bool matchesFirst, bool matchesSecond, bool reverseRestrictions)
+        {
+            // Arrange
+            var handler = new Saml2SecurityTestingTokenHandler();
+            Saml2SecurityToken token = CreateAudienceRestrictionsToken(handler, reverseRestrictions);
+            ValidationParameters parameters = ValidationUtils.CreateValidationParameters(audiences: ["urn:audience:unmatched"]);
+            if (matchesFirst)
+                parameters.ValidAudiences.Add("urn:audience:first");
+            if (matchesSecond)
+                parameters.ValidAudiences.Add("urn:audience:second");
+
+            parameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
+            parameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
+
+            // Act
+            var result = await handler.ValidateTokenAsync(token, parameters, new CallContext(), default);
+
+            // Assert
+            Assert.Equal(matchesFirst && matchesSecond, result.Succeeded);
+            if (result.Succeeded)
+                Assert.Equal(reverseRestrictions ? "urn:audience:second" : "urn:audience:first", result.Result!.ValidatedAudience);
+            else
+            {
+                Assert.IsType<AudienceValidationError>(result.Error);
+                Assert.Equal(AudienceValidationFailure.AudienceDidNotMatch, result.Error!.FailureType);
+            }
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        public async Task AudienceRestrictions_CustomValidator(int failingRestriction)
+        {
+            // Arrange
+            var handler = new Saml2SecurityTestingTokenHandler();
+            Saml2SecurityToken token = CreateAudienceRestrictionsToken(handler);
+            ValidationParameters parameters = ValidationUtils.CreateValidationParameters();
+            parameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
+            parameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
+            var expectedError = new AudienceValidationError(
+                new MessageDetail("Audience restriction validation failed."),
+                AudienceValidationFailure.AudienceDidNotMatch,
+                ValidationError.GetCurrentStackFrame(),
+                null,
+                parameters.ValidAudiences);
+            List<IList<string>> validatedRestrictions = [];
+            parameters.AudienceValidator = (audiences, _, _, _) =>
+            {
+                validatedRestrictions.Add(audiences);
+                if (validatedRestrictions.Count == failingRestriction)
+                    return expectedError;
+
+                return audiences[0];
+            };
+
+            // Act
+            var result = await handler.ValidateTokenAsync(token, parameters, new CallContext(), default);
+
+            // Assert
+            Assert.Equal(failingRestriction == 0, result.Succeeded);
+            Assert.Equal(failingRestriction == 1 ? 1 : 2, validatedRestrictions.Count);
+            Assert.Equal(new[] { "urn:audience:first:alternative", "urn:audience:first" }, validatedRestrictions[0]);
+            if (validatedRestrictions.Count == 2)
+                Assert.Equal(new[] { "urn:audience:second", "urn:audience:second:alternative" }, validatedRestrictions[1]);
+
+            if (result.Succeeded)
+                Assert.Equal("urn:audience:first:alternative", result.Result!.ValidatedAudience);
+            else
+                Assert.Same(expectedError, result.Error);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public async Task AudienceRestrictions_Empty(bool hasConditions, bool hasEmptyRestriction)
+        {
+            // Arrange
+            var handler = new Saml2SecurityTestingTokenHandler();
+            Saml2SecurityToken token = CreateAudienceRestrictionsToken(handler);
+            token.Assertion.Conditions.AudienceRestrictions.Clear();
+            if (hasEmptyRestriction)
+                token.Assertion.Conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction([]));
+            if (!hasConditions)
+                token.Assertion.Conditions = null;
+
+            ValidationParameters parameters = ValidationUtils.CreateValidationParameters();
+            parameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
+            parameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
+            parameters.SignatureKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
+
+            // Act
+            var result = await handler.ValidateTokenAsync(token, parameters, new CallContext(), default);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.IsType<AudienceValidationError>(result.Error);
+            Assert.Equal(AudienceValidationFailure.NoAudienceInToken, result.Error!.FailureType);
+
+            int validatorCalls = 0;
+            parameters.AudienceValidator = (audiences, _, _, _) =>
+            {
+                validatorCalls++;
+                Assert.Empty(audiences);
+                return "accepted";
+            };
+            result = await handler.ValidateTokenAsync(token, parameters, new CallContext(), default);
+
+            Assert.True(result.Succeeded);
+            Assert.Equal(1, validatorCalls);
+            Assert.Equal("accepted", result.Result!.ValidatedAudience);
+        }
+
+        private static Saml2SecurityToken CreateAudienceRestrictionsToken(
+            Saml2SecurityTestingTokenHandler handler,
+            bool reverseRestrictions = false)
+        {
+            SecurityTokenDescriptor descriptor = Default.SecurityTokenDescriptor(Default.AsymmetricSigningCredentials);
+            descriptor.Subject = Default.ClaimsIdentityLongNames;
+            var token = (Saml2SecurityToken)handler.CreateToken(descriptor);
+            var firstRestriction = new Saml2AudienceRestriction(
+                ["urn:audience:first:alternative", "urn:audience:first"]);
+            var secondRestriction = new Saml2AudienceRestriction(
+                ["urn:audience:second", "urn:audience:second:alternative"]);
+            token.Assertion.Conditions.AudienceRestrictions.Clear();
+            token.Assertion.Conditions.AudienceRestrictions.Add(reverseRestrictions ? secondRestriction : firstRestriction);
+            token.Assertion.Conditions.AudienceRestrictions.Add(reverseRestrictions ? firstRestriction : secondRestriction);
+
+            return token;
         }
         #endregion
 
