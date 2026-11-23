@@ -95,26 +95,38 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (!lifetimeResult.Succeeded)
                 return lifetimeResult.Error!.AddCurrentStackFrame();
 
-            List<string> audiences = [];
+            ValidationResult<string, ValidationError>? audienceResult = null;
             if (samlToken.Assertion?.Conditions?.Conditions is not null)
             {
                 foreach (var condition in samlToken.Assertion.Conditions.Conditions)
                     if (condition is SamlAudienceRestrictionCondition audienceRestriction)
                     {
+                        List<string> audiences = [];
                         foreach (Uri audience in audienceRestriction.Audiences)
                             audiences.Add(audience.OriginalString);
+
+                        ValidationResult<string, ValidationError> restrictionResult =
+                            Validators.ValidateAudienceInternal(
+                                audiences,
+                                samlToken,
+                                validationParameters,
+                                callContext);
+
+                        if (!restrictionResult.Succeeded)
+                            return restrictionResult.Error!.AddCurrentStackFrame();
+
+                        audienceResult ??= restrictionResult;
                     }
             }
 
-            ValidationResult<string, ValidationError> audienceResult =
-                Validators.ValidateAudienceInternal(
-                    audiences,
-                    samlToken,
-                    validationParameters,
-                    callContext);
+            audienceResult ??= Validators.ValidateAudienceInternal(
+                [],
+                samlToken,
+                validationParameters,
+                callContext);
 
-            if (!audienceResult.Succeeded)
-                return audienceResult.Error!.AddCurrentStackFrame();
+            if (!audienceResult.Value.Succeeded)
+                return audienceResult.Value.Error!.AddCurrentStackFrame();
 
             ValidationResult<ValidatedIssuer, ValidationError> issuerResult =
                 await Validators.ValidateIssuerInternalAsync(
@@ -188,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             return new ValidatedToken(samlToken, this, validationParameters)
             {
-                ValidatedAudience = audienceResult.Result,
+                ValidatedAudience = audienceResult.Value.Result,
                 ValidatedAlgorithm = algorithmResult.Result,
                 ValidatedLifetime = lifetimeResult.Result,
                 ValidatedIssuer = issuerResult.Result,
