@@ -16,6 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JweUsingEcdhEsTests
     {
+        // CBC-HMAC CEK length must follow enc, regardless of the key-wrap algorithm.
         [Theory]
         [InlineData(SecurityAlgorithms.EcdhEsA128kw, SecurityAlgorithms.Aes128CbcHmacSha256, 32)]
         [InlineData(SecurityAlgorithms.EcdhEsA128kw, SecurityAlgorithms.Aes192CbcHmacSha384, 48)]
@@ -73,6 +74,106 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.True(jwtResult.IsValid, jwtResult.Exception?.ToString());
             }
         }
+
+#if NET8_0_OR_GREATER
+        // The CBC sizing fix must preserve previously working custom AES-GCM encryption.
+        [Fact]
+        public async Task CreateJweEcdhEsWithCustomAesGcmProvider_PreservesExistingBehavior()
+        {
+            // Arrange
+            const string alg = SecurityAlgorithms.EcdhEsA128kw;
+            const string enc = SecurityAlgorithms.Aes256Gcm;
+            var theoryData = EcdhEsCurveP256EncA128KW();
+            var encryptingCredentials = new EncryptingCredentials(
+                theoryData.EncryptingCredentials.Key, alg, enc)
+            {
+                KeyExchangePublicKey = theoryData.PublicKeyReceiver
+            };
+            encryptingCredentials.CryptoProviderFactory = new CryptoProviderFactory
+            {
+                CustomCryptoProvider = new AesGcmTestCryptoProvider()
+            };
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Subject = Default.ClaimsIdentity,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                EncryptingCredentials = encryptingCredentials,
+                AdditionalHeaderClaims = theoryData.AdditionalHeaderParams,
+                Audience = Default.Audience,
+                Issuer = Default.Issuer
+            };
+            var jsonHandler = new JsonWebTokenHandler();
+#pragma warning disable CS0618 // Type or member is obsolete
+            var jwtHandler = new JwtSecurityTokenHandler();
+#pragma warning restore CS0618 // Type or member is obsolete
+            var receiver = new EcdhKeyExchangeProvider(
+                theoryData.TokenValidationParameters.TokenDecryptionKey,
+                theoryData.PublicKeySender, alg, enc);
+            var kek = receiver.GenerateKdf(theoryData.ApuSender, theoryData.ApvSender);
+            using var unwrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProviderForUnwrap(
+                kek, receiver.GetEncryptionAlgorithm());
+
+            // Act
+            string[] tokens =
+            {
+                jsonHandler.CreateToken(descriptor),
+                jwtHandler.CreateEncodedJwt(descriptor)
+            };
+
+            // Assert
+            foreach (string token in tokens)
+            {
+                byte[] cek = unwrapProvider.UnwrapKey(Base64UrlEncoder.DecodeBytes(token.Split('.')[1]));
+                Assert.Equal(32, cek.Length);
+
+                var jsonResult = await jsonHandler.ValidateTokenAsync(token, theoryData.TokenValidationParameters);
+                var jwtResult = await jwtHandler.ValidateTokenAsync(token, theoryData.TokenValidationParameters);
+                Assert.True(jsonResult.IsValid, jsonResult.Exception?.ToString());
+                Assert.True(jwtResult.IsValid, jwtResult.Exception?.ToString());
+            }
+
+            encryptingCredentials.CryptoProviderFactory = CryptoProviderFactory.Default;
+            var exception = Assert.Throws<SecurityTokenEncryptionFailedException>(() => jsonHandler.CreateToken(descriptor));
+            Assert.Contains("IDX10715", exception.ToString());
+        }
+
+        private class AesGcmTestCryptoProvider : ICryptoProvider
+        {
+            public bool IsSupportedAlgorithm(string algorithm, params object[] args)
+            {
+                return SecurityAlgorithms.Aes128Gcm.Equals(algorithm, StringComparison.Ordinal)
+                    || SecurityAlgorithms.Aes192Gcm.Equals(algorithm, StringComparison.Ordinal)
+                    || SecurityAlgorithms.Aes256Gcm.Equals(algorithm, StringComparison.Ordinal);
+            }
+
+            public object Create(string algorithm, params object[] args)
+            {
+                return new AesGcmTestEncryptionProvider((SecurityKey)args[0], algorithm);
+            }
+
+            public void Release(object cryptoInstance)
+            {
+            }
+        }
+
+        private class AesGcmTestEncryptionProvider : AuthenticatedEncryptionProvider
+        {
+            public AesGcmTestEncryptionProvider(SecurityKey key, string algorithm)
+                : base(key, algorithm)
+            {
+            }
+
+            public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
+            {
+                byte[] iv = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
+                byte[] ciphertext = new byte[plaintext.Length];
+                byte[] tag = new byte[16];
+                using var aesGcm = new System.Security.Cryptography.AesGcm(((SymmetricSecurityKey)Key).Key, tag.Length);
+                aesGcm.Encrypt(iv, plaintext, ciphertext, tag, authenticatedData);
+                return new AuthenticatedEncryptionResult(Key, ciphertext, iv, tag);
+            }
+        }
+#endif
 
         [Theory, MemberData(nameof(CreateEcdhEsTestcases), DisableDiscoveryEnumeration = true)]
         public async Task CreateJweEcdhEsTests(CreateEcdhEsTheoryData theoryData)
