@@ -622,9 +622,9 @@ namespace Microsoft.IdentityModel.Tokens
                             algorithm,
                             providerType,
                             willCreateSignatures,
-                            out SignatureProvider cachedProvider))
+                            out SignatureProvider cachedProvider)
+                        && cachedProvider.TryAddRef())
                     {
-                        cachedProvider.AddRef();
                         return cachedProvider;
                     }
                 }
@@ -646,8 +646,8 @@ namespace Microsoft.IdentityModel.Tokens
                     string providerType = signatureProvider.GetType().ToString();
                     _customProviderTypeCache.TryAdd(cacheTypeKey, providerType);
 
-                    if (ShouldCacheSignatureProvider(signatureProvider))
-                        signatureProvider.IsCached = CryptoProviderCache.TryAdd(signatureProvider);
+                    if (ShouldCacheSignatureProvider(signatureProvider) && CryptoProviderCache.TryAdd(signatureProvider))
+                        signatureProvider.IsCached = true;
                 }
 
                 return signatureProvider;
@@ -723,9 +723,9 @@ namespace Microsoft.IdentityModel.Tokens
                     algorithm,
                     typeofSignatureProvider,
                     willCreateSignatures,
-                    out signatureProvider))
+                    out signatureProvider)
+                    && signatureProvider.TryAddRef())
                 {
-                    signatureProvider.AddRef();
                     return signatureProvider;
                 }
 
@@ -750,7 +750,8 @@ namespace Microsoft.IdentityModel.Tokens
                     // This will result in sometimes (rarely) creating a SignatureProvider that is never cached.
                     // The alternative is to use a lock after the call to TryGetSignatureProvider, and then check again: { TryGet, lock, TryGet }.
                     // This will result in excessive locking for different keys, which is common in POP scenarios.
-                    signatureProvider.IsCached = CryptoProviderCache.TryAdd(signatureProvider);
+                    if (CryptoProviderCache.TryAdd(signatureProvider))
+                        signatureProvider.IsCached = true;
             }
             else
             {
