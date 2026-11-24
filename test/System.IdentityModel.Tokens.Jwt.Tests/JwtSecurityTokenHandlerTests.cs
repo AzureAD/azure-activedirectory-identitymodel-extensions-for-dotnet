@@ -2226,6 +2226,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        // RFC 7518 §3.3: RSA JWS algorithms require ≥ 2048-bit keys; verifying a
+                        // 1024-bit key must fail (IDX10631 wrapped by signature-key-not-found).
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(substringExpected: "IDX10631:"),
                         TestId = "Asymmetric_1024",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "ALLParts"),
                         ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.X509SecurityKey_1024, null)
