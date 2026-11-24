@@ -206,6 +206,17 @@ new OpenIdConnectMessageTheoryData("EmptyJsonStringEmptyJobj")
         }
 
         [Fact]
+        public void ClientAssertionTypeJwtBearer()
+        {
+            OpenIdConnectMessage message = new OpenIdConnectMessage
+            {
+                ClientAssertionType = OpenIdConnectClientAssertionTypes.JwtBearer
+            };
+
+            Assert.Equal("urn:ietf:params:oauth:client-assertion-type:jwt-bearer", message.ClientAssertionType);
+        }
+
+        [Fact]
         public void GetSets()
         {
             OpenIdConnectMessage message = new OpenIdConnectMessage();
