@@ -57,24 +57,24 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext("ConstructorEnforcesAsymmetricKeySizeFloor");
             TestUtilities.WriteHeader($"{this}.ConstructorEnforcesAsymmetricKeySizeFloor");
 
-            // Signing floor for RS256 is 2048 bits: a 1024-bit key must be rejected (IDX10630).
+            // Signing floor for RS256 is 2048 bits (RFC 7518 §3.3): a 1024-bit key must be rejected (IDX10630).
             RunCase(
                 context,
                 "SigningBelowFloor_1024",
                 ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
                 () => new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256, true));
 
-            // Verifying floor for RS256 is 1024 bits: a key reporting 512 bits must be rejected (IDX10631).
+            // Verifying floor for RS256 is 2048 bits (RFC 7518 §3.3): a 1024-bit key must be rejected (IDX10631).
             RunCase(
                 context,
-                "VerifyingBelowFloor_512",
+                "VerifyingBelowFloor_1024",
                 ExpectedException.ArgumentOutOfRangeException("IDX10631:"),
                 () => new AsymmetricSignatureProvider(
-                    new CustomRsaSecurityKey(512, PrivateKeyStatus.Exists, KeyingMaterial.RsaParameters_1024),
+                    KeyingMaterial.RsaSecurityKey_1024_Public,
                     SecurityAlgorithms.RsaSha256,
                     false));
 
-            // Signing floor for PS512 is 1040 bits.
+            // Signing floor for PS512 is 2048 bits (RFC 7518 §3.3).
             RunCase(
                 context,
                 "RsaPssSigningBelowFloor_1024",
@@ -509,6 +509,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new AsymmetricSignatureProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10631:"),
                     SecurityKey = KeyingMaterial.RsaSecurityKey_1024_Public,
                     TestId = nameof(KeyingMaterial.RsaSecurityKey_1024_Public),
                     WillCreateSignatures = false
@@ -524,6 +525,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new AsymmetricSignatureProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10631:"),
                     SecurityKey = KeyingMaterial.JsonWebKeyRsa_1024_Public,
                     TestId = nameof(KeyingMaterial.JsonWebKeyRsa_1024_Public),
                     WillCreateSignatures = false

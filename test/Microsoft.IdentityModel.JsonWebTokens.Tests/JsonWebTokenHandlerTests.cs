@@ -3766,6 +3766,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateLifetime = false,
                         }
                     },
+                    // RFC 7518 §3.3 / issue #3498: JsonWebTokenHandler must reject sub-2048-bit RSA keys.
+                    new JwtTheoryData("AsymmetricJws_Rsa1024_RejectedPerRfc7518")
+                    {
+                        Token = EncodedJwts.Asymmetric_1024,
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10631:"),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = KeyingMaterial.X509SecurityKey_1024,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
                     new JwtTheoryData("AsymmetricJws_RequireSignedTokens")
                     {
                         Token = Default.AsymmetricJws,
