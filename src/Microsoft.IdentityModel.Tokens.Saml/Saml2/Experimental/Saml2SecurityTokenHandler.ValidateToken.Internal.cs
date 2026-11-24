@@ -88,44 +88,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (!lifetimeResult.Succeeded)
                 return lifetimeResult.Error!.AddCurrentStackFrame();
 
-            List<string> audiences = [];
+            ValidationResult<string, ValidationError>? audienceResult = null;
             if (samlToken.Assertion?.Conditions is not null)
             {
-
                 foreach (var audienceRestriction in samlToken.Assertion!.Conditions.AudienceRestrictions)
                 {
-                    // AudienceRestriction.Audiences is a List<string> but returned as ICollection<string>
-                    // no conversion occurs, ToList() is never called but we have to account for the possibility.
-                    if (audienceRestriction.Audiences is not List<string> audiencesAsList)
-                    {
-                        if (audiences == null)
-                            audiences = [.. audienceRestriction.Audiences];
-                        else
-                            foreach (string audience in audienceRestriction.Audiences)
-                                audiences.Add(audience);
-                    }
-                    else
-                    {
-                        if (audiences == null)
-                        {
-                            audiences = audiencesAsList;
-                        }
-                        else
-                            foreach (string audience in audienceRestriction.Audiences)
-                                audiences.Add(audience);
-                    }
+                    List<string> audiences = audienceRestriction.Audiences as List<string>
+                        ?? [.. audienceRestriction.Audiences];
+
+                    audienceResult = Validators.ValidateAudienceInternal(
+                        audiences,
+                        samlToken,
+                        validationParameters,
+                        callContext);
+
+                    if (!audienceResult.Value.Succeeded)
+                        return audienceResult.Value.Error!.AddCurrentStackFrame();
                 }
             }
 
-            ValidationResult<string, ValidationError> audienceResult =
-                Validators.ValidateAudienceInternal(
-                    audiences,
+            audienceResult ??= Validators.ValidateAudienceInternal(
+                    [],
                     samlToken,
                     validationParameters,
                     callContext);
 
-            if (!audienceResult.Succeeded)
-                return audienceResult.Error!.AddCurrentStackFrame();
+            if (!audienceResult.Value.Succeeded)
+                return audienceResult.Value.Error!.AddCurrentStackFrame();
 
             ValidationResult<ValidatedIssuer, ValidationError> issuerResult =
                 await Validators.ValidateIssuerInternalAsync(
@@ -197,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             return new ValidatedToken(samlToken, this, validationParameters)
             {
-                ValidatedAudience = audienceResult.Result,
+                ValidatedAudience = audienceResult.Value.Result,
                 ValidatedAlgorithm = algorithmResult.Result,
                 ValidatedLifetime = lifetimeResult.Result,
                 ValidatedIssuer = issuerResult.Result,

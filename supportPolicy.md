@@ -33,6 +33,10 @@ The support policy can be summarized by three key rules:
 2. **Deprecation of Older Versions on New Major Release:** When a new major version of the library is released (e.g., 8.0.0), all previous minor/patch versions of the previous major (e.g., 7.0.0 up to 7.7.0) are immediately considered deprecated, only the last patch release of the previous major (e.g., 7.7.1) remains supported during the 180-day overlap or LTS period as described above. Earlier patches in that branch will no longer receive updates. For example, once 8.0.0 is released, the entire 7.x series before 7.7.1 is deprecated. Developers should move to 7.7.1 (the final 7.x release) or upgrade to 8.x for continued support.
 3. **Security Fixes Only in Supported Versions:** Security fixes and critical bug fixes will be provided only for the supported versions – namely, the latest patch of the latest major, and in some cases the latest patch of the previous major during the overlap window. Older majors (and any old patch versions) will not receive security updates once they are out of support. This means if a vulnerability is discovered, the team will issue a fix in the current supported release (and possibly the last release of the previous major if still within 180-day/LTS overlap), but will not back-port fixes to earlier, deprecated patch versions. In practice, organizations must upgrade to the supported version to get the fix. (For example, a security advisory might instruct users to update to 7.7.1 or 8.x to resolve an issue, as older 7.x builds would not be patched.)
 
+## Experimental APIs
+
+Experimental APIs, including APIs in namespaces containing Experimental, are not production-ready and are not intended for use in production applications.
+
 ## Appendix
 
 Do not use versions 7.0.0 - 7.4.0 due to a critical bug in JSON deserialization - see [the wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Critical-issues-affecting-version-7.0.0%E2%80%907.4.0) for details. The affected versions were marked as having a severe bug on nuget.org

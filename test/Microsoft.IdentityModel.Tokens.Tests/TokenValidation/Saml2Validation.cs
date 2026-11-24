@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Experimental;
+using Microsoft.IdentityModel.Tokens.Saml2;
+using Moq;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.TokenValidation.Tests
@@ -71,6 +75,103 @@ namespace Microsoft.IdentityModel.Tokens.TokenValidation.Tests
         public static TheoryData<ValidateTokenTheoryData> ValidAudienceTestCases()
         {
             return TestCaseProvider.GenerateValidAudienceTestCases(new Saml2SecurityTestingTokenHandler());
+        }
+
+        [Theory]
+        [InlineData(true, false, false)]
+        [InlineData(false, true, false)]
+        [InlineData(true, true, false)]
+        [InlineData(false, false, false)]
+        [InlineData(true, false, true)]
+        [InlineData(false, true, true)]
+        [InlineData(true, true, true)]
+        [InlineData(false, false, true)]
+        public async Task AudienceRestrictions(bool firstMatches, bool secondMatches, bool reverseOrder)
+        {
+            // Arrange
+            const string firstAudience = "https://example.com/first";
+            const string secondAudience = "https://example.com/second";
+            List<string> firstAudiences =
+                ["https://example.com/first-alternative", firstMatches ? firstAudience : "https://example.com/first-other"];
+            List<string> secondAudiences =
+                ["https://example.com/second-alternative", secondMatches ? secondAudience : "https://example.com/second-other"];
+
+            if (reverseOrder)
+                (firstAudiences, secondAudiences) = (secondAudiences, firstAudiences);
+
+            var handler = new Saml2SecurityTokenHandler();
+            var token = (Saml2SecurityToken)handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Audience = Default.Audience,
+                Issuer = Default.Issuer,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Subject = Default.ClaimsIdentityLongNames
+            });
+            token.Assertion.Conditions.AudienceRestrictions.Clear();
+            token.Assertion.Conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction(firstAudiences));
+            token.Assertion.Conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction(secondAudiences));
+            string serializedToken = handler.WriteToken(token);
+
+            var validationParameters = ValidationUtils.CreateValidationParameters(audiences: [firstAudience, secondAudience]);
+            List<List<string>> validatedRestrictions = [];
+            var audienceValidator = new Mock<IAudienceValidator>();
+            audienceValidator.Setup(validator => validator.ValidateAudience(
+                It.IsAny<IList<string>>(), It.IsAny<SecurityToken>(), validationParameters, It.IsAny<CallContext>()))
+                .Returns((IList<string> audiences, SecurityToken? securityToken, ValidationParameters parameters, CallContext callContext) =>
+                {
+                    validatedRestrictions.Add([.. audiences]);
+                    return Validators.ValidateAudience(audiences, securityToken, parameters, callContext);
+                });
+            validationParameters.AudienceValidator = audienceValidator.Object;
+
+            // Act
+            var result = await ((IResultBasedValidation)handler).ValidateTokenAsync(
+                serializedToken, validationParameters, new CallContext());
+            var matureResult = await handler.ValidateTokenAsync(
+                serializedToken, ValidationUtils.CreateTokenValidationParameters(audiences: [firstAudience, secondAudience]));
+
+            // Assert
+            Assert.Equal(firstMatches && secondMatches, result.Succeeded);
+            Assert.Equal(firstMatches && secondMatches, matureResult.IsValid);
+            if (!result.Succeeded)
+                Assert.IsType<AudienceValidationError>(result.Error);
+
+            int expectedCalls = (reverseOrder ? secondMatches : firstMatches) ? 2 : 1;
+            Assert.Equal(expectedCalls, validatedRestrictions.Count);
+            Assert.Equal(firstAudiences, validatedRestrictions[0]);
+            if (expectedCalls == 2)
+                Assert.Equal(secondAudiences, validatedRestrictions[1]);
+        }
+
+        [Fact]
+        public async Task NoAudienceRestrictionsUsesCustomValidator()
+        {
+            // Arrange
+            var handler = new Saml2SecurityTokenHandler();
+            var token = (Saml2SecurityToken)handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Subject = Default.ClaimsIdentityLongNames
+            });
+            string serializedToken = handler.WriteToken(token);
+            var validationParameters = ValidationUtils.CreateValidationParameters();
+            var audienceValidator = new Mock<IAudienceValidator>();
+            audienceValidator.Setup(validator => validator.ValidateAudience(
+                It.Is<IList<string>>(audiences => audiences.Count == 0),
+                It.IsAny<SecurityToken>(), validationParameters, It.IsAny<CallContext>()))
+                .Returns(new ValidationResult<string, ValidationError>(Default.Audience));
+            validationParameters.AudienceValidator = audienceValidator.Object;
+
+            // Act
+            var result = await ((IResultBasedValidation)handler).ValidateTokenAsync(
+                serializedToken, validationParameters, new CallContext());
+
+            // Assert
+            Assert.True(result.Succeeded);
+            audienceValidator.Verify(validator => validator.ValidateAudience(
+                It.Is<IList<string>>(audiences => audiences.Count == 0),
+                It.IsAny<SecurityToken>(), validationParameters, It.IsAny<CallContext>()), Times.Once);
         }
         #endregion
 
