@@ -52,6 +52,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 string issuer,
                 SecurityToken securityToken,
                 ValidationParameters validationParameters,
+                BaseConfiguration? configuration,
                 CallContext callContext,
                 CancellationToken cancellationToken)
             {

@@ -252,6 +252,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     jsonWebToken.Issuer,
                     jsonWebToken,
                     validationParameters,
+                    configuration,
                     callContext,
                     cancellationToken).ConfigureAwait(false);
 
