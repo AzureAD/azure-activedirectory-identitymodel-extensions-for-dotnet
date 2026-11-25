@@ -436,8 +436,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
                 kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
 
-                // only 128, 384 and 512 AesKeyWrap for CEK algorithm
-                if (SecurityAlgorithms.Aes128KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
+                // Size the CEK from enc for AES-CBC-HMAC; preserve key-wrap-based sizing for other enc values.
+                if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
+                    securityKey = new SymmetricSecurityKey(GenerateKeyBytes(256));
+                else if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
+                    securityKey = new SymmetricSecurityKey(GenerateKeyBytes(384));
+                else if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
+                    securityKey = new SymmetricSecurityKey(GenerateKeyBytes(512));
+                else if (SecurityAlgorithms.Aes128KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
                     securityKey = new SymmetricSecurityKey(GenerateKeyBytes(256));
                 else if (SecurityAlgorithms.Aes192KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
                     securityKey = new SymmetricSecurityKey(GenerateKeyBytes(384));
